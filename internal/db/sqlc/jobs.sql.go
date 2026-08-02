@@ -80,11 +80,11 @@ RETURNING id
 type EnqueueJobParams struct {
 	Kind    string      `json:"kind"`
 	Payload []byte      `json:"payload"`
-	Column3 interface{} `json:"column_3"`
+	RunAt   interface{} `json:"run_at"`
 }
 
 func (q *Queries) EnqueueJob(ctx context.Context, arg EnqueueJobParams) (int64, error) {
-	row := q.db.QueryRow(ctx, enqueueJob, arg.Kind, arg.Payload, arg.Column3)
+	row := q.db.QueryRow(ctx, enqueueJob, arg.Kind, arg.Payload, arg.RunAt)
 	var id int64
 	err := row.Scan(&id)
 	return id, err

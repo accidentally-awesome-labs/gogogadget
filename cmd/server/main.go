@@ -17,6 +17,9 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/jobs"
+	"github.com/gogogadget/gogogadget/internal/mail"
 	"github.com/gogogadget/gogogadget/internal/web"
 	contentfs "github.com/gogogadget/gogogadget/content"
 )
@@ -65,6 +68,20 @@ func run() error {
 	}
 
 	srv := web.NewServer(cfg, log, pool, version, blog, docs)
+
+	// Mail: Resend when configured, DevSender (log + tmp/emails/) otherwise.
+	var sender mail.Sender
+	if cfg.ResendConfigured() {
+		sender = mail.NewResendSender(cfg.ResendAPIKey, cfg.EmailFrom)
+		log.Info("mail: resend", "from", cfg.EmailFrom)
+	} else {
+		sender = mail.NewDevSender(log, "tmp/emails")
+		log.Info("mail: dev sender (tmp/emails)")
+	}
+
+	// Background jobs worker (SKIP LOCKED claim; stops on shutdown signal).
+	worker := jobs.NewWorker(sqlc.New(pool), sender, log)
+	go worker.Run(ctx)
 
 	httpSrv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Port),

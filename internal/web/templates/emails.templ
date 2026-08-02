@@ -1,0 +1,101 @@
+package templates
+
+// EmailLayout is an inline-styled table shell (email clients strip <style>).
+templ EmailLayout(content templ.Component) {
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:24px 0;">
+		<tr>
+			<td align="center">
+				<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;padding:32px;font-family:system-ui,-apple-system,sans-serif;color:#0f172a;">
+					<tr>
+						<td>
+							<div style="font-weight:700;font-size:18px;color:#4f46e5;margin-bottom:24px;">⚡ GoGoGadget</div>
+							@content
+							<p style="color:#94a3b8;font-size:12px;margin-top:32px;">You are receiving this because you have a GoGoGadget account.</p>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+}
+
+templ WelcomeEmailHTML(appURL, name string) {
+	@EmailLayout(WelcomeEmailBody(appURL, name))
+}
+
+templ WelcomeEmailBody(appURL, name string) {
+	<h1 style="font-size:22px;margin:0 0 12px;">Welcome aboard{ greetingName(name) }!</h1>
+	<p style="margin:0 0 12px;line-height:1.6;">Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.</p>
+	<p style="margin:0;"><a href={ appURL + "/app" } style="color:#4f46e5;">Open your dashboard →</a></p>
+}
+
+templ PaymentFailedEmailHTML(appURL string) {
+	@EmailLayout(PaymentFailedEmailBody(appURL))
+}
+
+templ PaymentFailedEmailBody(appURL string) {
+	<h1 style="font-size:22px;margin:0 0 12px;">Your payment failed</h1>
+	<p style="margin:0 0 12px;line-height:1.6;">We couldn't charge your card on file. Your plan stays active while we retry — update your payment method to avoid interruption.</p>
+	<p style="margin:0;"><a href={ appURL + "/app/settings/billing" } style="color:#4f46e5;">Update payment method →</a></p>
+}
+
+templ SubscriptionCanceledEmailHTML(appURL, periodEnd string) {
+	@EmailLayout(SubscriptionCanceledEmailBody(appURL, periodEnd))
+}
+
+templ SubscriptionCanceledEmailBody(appURL, periodEnd string) {
+	<h1 style="font-size:22px;margin:0 0 12px;">Your subscription is canceled</h1>
+	<p style="margin:0 0 12px;line-height:1.6;">Your plan remains active until <strong>{ periodEnd }</strong>. After that you drop to the free plan — your projects stay, within free limits.</p>
+	<p style="margin:0;"><a href={ appURL + "/app/settings/billing" } style="color:#4f46e5;">Reactivate anytime →</a></p>
+}
+
+templ TrialEndingEmailHTML(appURL, trialEnd string) {
+	@EmailLayout(TrialEndingEmailBody(appURL, trialEnd))
+}
+
+templ TrialEndingEmailBody(appURL, trialEnd string) {
+	<h1 style="font-size:22px;margin:0 0 12px;">Your trial ends soon</h1>
+	<p style="margin:0 0 12px;line-height:1.6;">Your trial ends on <strong>{ trialEnd }</strong>. Add a payment method now to keep your plan without interruption.</p>
+	<p style="margin:0;"><a href={ appURL + "/app/settings/billing" } style="color:#4f46e5;">Review billing →</a></p>
+}
+
+func greetingName(name string) string {
+	if name == "" {
+		return ""
+	}
+	return ", " + name
+}
+
+// Plain-text counterparts (separate component per email kind).
+
+templ WelcomeEmailText(appURL, name string) {
+	Welcome aboard{ greetingName(name) }!
+
+	Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.
+
+Open your dashboard: { appURL }/app
+}
+
+templ PaymentFailedEmailText(appURL string) {
+	Your payment failed
+
+	We couldn't charge your card on file. Your plan stays active while we retry — update your payment method to avoid interruption.
+
+Update payment method: { appURL }/app/settings/billing
+}
+
+templ SubscriptionCanceledEmailText(appURL, periodEnd string) {
+	Your subscription is canceled
+
+	Your plan remains active until { periodEnd }. After that you drop to the free plan — your projects stay, within free limits.
+
+Reactivate anytime: { appURL }/app/settings/billing
+}
+
+templ TrialEndingEmailText(appURL, trialEnd string) {
+	Your trial ends soon
+
+	Your trial ends on { trialEnd }. Add a payment method now to keep your plan without interruption.
+
+Review billing: { appURL }/app/settings/billing
+}

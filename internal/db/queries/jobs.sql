@@ -1,6 +1,6 @@
 -- name: EnqueueJob :one
 INSERT INTO jobs (kind, payload, run_at)
-VALUES ($1, $2, COALESCE($3, now()))
+VALUES ($1, $2, COALESCE(sqlc.arg(run_at), now()))
 RETURNING id;
 
 -- Claim with a 5-minute visibility timeout: a crashed worker's job reappears
