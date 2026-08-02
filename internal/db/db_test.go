@@ -2,48 +2,26 @@ package db_test
 
 import (
 	"context"
-	"os"
 	"testing"
-	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// testPool migrates up against TEST_DATABASE_URL (default gogogadget_test) and
-// skips when Postgres is unreachable. CI provides the database.
-func testPool(t *testing.T) (*pgxpool.Pool, *sqlc.Queries) {
-	t.Helper()
-	dsn := os.Getenv("TEST_DATABASE_URL")
-	if dsn == "" {
-		dsn = "postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable"
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	pool, err := db.Open(ctx, dsn)
-	if err != nil {
-		t.Skipf("TEST_DATABASE_URL unreachable: %v", err)
-	}
-	require.NoError(t, db.Migrate(ctx, pool))
-	t.Cleanup(pool.Close)
-	return pool, sqlc.New(pool)
-}
-
 func TestMigrateUpDown(t *testing.T) {
-	pool, _ := testPool(t)
+	pool, _ := testdb.Open(t, "dbmig")
 	ctx := context.Background()
 	require.NoError(t, db.MigrateDown(ctx, pool))
-	require.NoError(t, db.Migrate(ctx, pool)) // back up for other tests
+	require.NoError(t, db.Migrate(ctx, pool))
 }
 
 func TestRoundtripEveryTable(t *testing.T) {
-	_, q := testPool(t)
+	_, q := testdb.Open(t, "db")
 	ctx := context.Background()
 
 	// users

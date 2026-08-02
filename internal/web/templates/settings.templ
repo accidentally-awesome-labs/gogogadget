@@ -1,0 +1,117 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/db/sqlc"
+
+// SelectOrg is rendered when the user has memberships but no active org in
+// their session claims. DevMode buttons use the dev cookie switcher; production
+// buttons call Clerk.setActive via clerk-js.
+templ SelectOrg(orgs []sqlc.Org, devMode bool) {
+	<section class="max-w-md mx-auto px-4 py-24">
+		<h1 class="text-2xl font-bold text-center">Choose an organization</h1>
+		<p class="mt-2 text-center text-fg-muted text-sm">You're a member of { len(orgs) } organization(s). Pick one to continue.</p>
+		<div class="mt-8 space-y-3" x-data="selectOrg">
+			for _, o := range orgs {
+				if devMode {
+					<a href={ "/dev/switch-org?org=" + o.ClerkOrgID } class="card flex items-center gap-3 hover:border-brand-500 w-full" data-testid="select-org-button">
+						<span class="font-semibold">{ o.Name }</span>
+						<span class="text-sm text-fg-muted ml-auto">{ o.Slug }</span>
+					</a>
+				} else {
+					<button type="button" @click={ "choose('" + o.ClerkOrgID + "')" } class="card flex items-center gap-3 hover:border-brand-500 w-full text-left" data-testid="select-org-button">
+						<span class="font-semibold">{ o.Name }</span>
+						<span class="text-sm text-fg-muted ml-auto">{ o.Slug }</span>
+					</button>
+				}
+			}
+		</div>
+	</section>
+}
+
+templ Disabled() {
+	<section class="max-w-md mx-auto px-4 py-24 text-center">
+		<h1 class="text-2xl font-bold">Account disabled</h1>
+		<p class="mt-4 text-fg-muted">Your account has been disabled by an administrator. Contact your organization admin if you believe this is a mistake.</p>
+	</section>
+}
+
+templ SettingsTabs(active string) {
+	<nav class="flex gap-1 border-b border-border mb-8" hx-boost="true">
+		for _, item := range []struct{ Label, Href string }{
+			{"Account", "/app/settings/account"},
+			{"Organization", "/app/settings/org"},
+		} {
+			<a
+				href={ templ.SafeURL(item.Href) }
+				aria-current={ navCurrent(Page{Path: active}, item.Href) }
+				class="px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-fg-muted hover:text-fg aria-[current=page]:border-brand-600 aria-[current=page]:text-fg"
+			>{ item.Label }</a>
+		}
+	</nav>
+}
+
+templ SettingsAccount(user sqlc.User, portalURL string) {
+	@SettingsTabs("/app/settings/account")
+	<h1 class="text-2xl font-bold mb-6">Account settings</h1>
+	<div class="card max-w-lg">
+		<dl class="space-y-4 text-sm">
+			<div>
+				<dt class="text-fg-muted">Name</dt>
+				<dd class="font-medium">{ user.Name }</dd>
+			</div>
+			<div>
+				<dt class="text-fg-muted">Email</dt>
+				<dd class="font-medium">{ string(user.Email) }</dd>
+			</div>
+			<div>
+				<dt class="text-fg-muted">Member since</dt>
+				<dd class="font-medium">{ user.CreatedAt.Time.Format("January 2, 2006") }</dd>
+			</div>
+		</dl>
+		<p class="mt-6 text-sm text-fg-muted">
+			Profile, password, social connections, and two-factor authentication are managed by Clerk.
+			if portalURL != "" {
+				<a href={ templ.SafeURL(portalURL + "/user-profile") } class="link">Manage your account →</a>
+			}
+		</p>
+	</div>
+}
+
+templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, portalURL string) {
+	@SettingsTabs("/app/settings/org")
+	<h1 class="text-2xl font-bold mb-6">Organization settings</h1>
+	<div class="card mb-6 max-w-lg">
+		<dl class="space-y-4 text-sm">
+			<div>
+				<dt class="text-fg-muted">Name</dt>
+				<dd class="font-medium">{ org.Name }</dd>
+			</div>
+			<div>
+				<dt class="text-fg-muted">Slug</dt>
+				<dd class="font-medium">{ org.Slug }</dd>
+			</div>
+		</dl>
+		<p class="mt-6 text-sm text-fg-muted">
+			Invitations and roles are managed by Clerk.
+			if portalURL != "" {
+				<a href={ templ.SafeURL(portalURL + "/organization-profile") } class="link">Manage organization →</a>
+			}
+		</p>
+	</div>
+	<h2 class="text-lg font-semibold mb-3">Members</h2>
+	<div class="card !p-0 overflow-hidden">
+		<table class="table">
+			<thead>
+				<tr><th>Member</th><th>Email</th><th>Role</th></tr>
+			</thead>
+			<tbody>
+				for _, m := range members {
+					<tr>
+						<td class="font-medium">{ m.Name }</td>
+						<td>{ string(m.Email) }</td>
+						<td><span class="badge bg-surface-raised text-fg-muted">{ m.Role }</span></td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}

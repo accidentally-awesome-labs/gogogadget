@@ -13,15 +13,16 @@ import (
 	"syscall"
 	"time"
 
+	contentfs "github.com/gogogadget/gogogadget/content"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/jobs"
 	"github.com/gogogadget/gogogadget/internal/mail"
 	"github.com/gogogadget/gogogadget/internal/web"
-	contentfs "github.com/gogogadget/gogogadget/content"
 )
 
 // version is stamped at build time: -ldflags "-X main.version=$VERSION".
@@ -67,7 +68,29 @@ func run() error {
 		return fmt.Errorf("load docs: %w", err)
 	}
 
-	srv := web.NewServer(cfg, log, pool, version, blog, docs)
+	// Identity: FakeVerifier powers zero-account dev/e2e; ClerkVerifier is the
+	// only production path. Both satisfy the same seam.
+	var verifier identity.Verifier
+	var fetcher identity.UserFetcher
+	switch {
+	case cfg.DevAuthBypass:
+		verifier = identity.FakeVerifier{}
+		fetcher = identity.DevUserFetcher{}
+		log.Warn("DEV_AUTH_BYPASS enabled — synthetic e2e: tokens accepted")
+	case cfg.ClerkConfigured():
+		verifier = identity.NewClerkVerifier(cfg.ClerkSecretKey)
+		fetcher = identity.NewClerkUserFetcher(cfg.ClerkSecretKey)
+	default:
+		log.Warn("clerk not configured — /app routes will 503")
+	}
+
+	q := sqlc.New(pool)
+	srv := web.NewServer(web.Deps{
+		Config: cfg, Log: log, DB: pool, Queries: q, Version: version,
+		Blog: blog, Docs: docs,
+		Verifier: verifier, Fetcher: fetcher,
+		Billing: nil, // Polar client lands in the billing step
+	})
 
 	// Mail: Resend when configured, DevSender (log + tmp/emails/) otherwise.
 	var sender mail.Sender

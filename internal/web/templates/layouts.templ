@@ -29,7 +29,7 @@ templ headScripts(page Page) {
 		// Load-bearing: clerk-js owns the ~60s __session JWT refresh cycle.
 		// Removing it expires auth ~60s after login. See /docs/authentication.
 		<meta name="clerk-publishable-key" content={ page.ClerkPublishableKey }/>
-		<script defer src="/static/vendor/clerk.browser.js"></script>
+		<script defer src="/static/vendor/clerk.browser.js" data-clerk-publishable-key={ page.ClerkPublishableKey }></script>
 	}
 }
 

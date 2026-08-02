@@ -25,7 +25,10 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 		mutate(&cfg)
 	}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return NewServer(cfg, log, nil, "test", &content.Blog{}, &content.Docs{})
+	return NewServer(Deps{
+		Config: cfg, Log: log, Version: "test",
+		Blog: &content.Blog{}, Docs: &content.Docs{},
+	})
 }
 
 func TestSecureHeadersCSP(t *testing.T) {

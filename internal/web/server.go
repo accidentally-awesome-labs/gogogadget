@@ -8,8 +8,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,21 +20,47 @@ type Server struct {
 	cfg     config.Config
 	log     *slog.Logger
 	db      *pgxpool.Pool
+	q       *sqlc.Queries
 	version string
 	blog    *content.Blog
 	docs    *content.Docs
-	mux     *http.ServeMux
+
+	verifier      identity.Verifier
+	fetcher       identity.UserFetcher
+	billingClient billing.Client // nil when Polar is unconfigured
+
+	mux *http.ServeMux
 }
 
-func NewServer(cfg config.Config, log *slog.Logger, db *pgxpool.Pool, version string, blog *content.Blog, docs *content.Docs) *Server {
+// Deps is the server wiring bag: every external service enters here, behind
+// its seam interface.
+type Deps struct {
+	Config  config.Config
+	Log     *slog.Logger
+	DB      *pgxpool.Pool
+	Queries *sqlc.Queries
+	Version string
+	Blog    *content.Blog
+	Docs    *content.Docs
+
+	Verifier identity.Verifier
+	Fetcher  identity.UserFetcher
+	Billing  billing.Client
+}
+
+func NewServer(d Deps) *Server {
 	s := &Server{
-		cfg:     cfg,
-		log:     log,
-		db:      db,
-		version: version,
-		blog:    blog,
-		docs:    docs,
-		mux:     http.NewServeMux(),
+		cfg:           d.Config,
+		log:           d.Log,
+		db:            d.DB,
+		q:             d.Queries,
+		version:       d.Version,
+		blog:          d.Blog,
+		docs:          d.Docs,
+		verifier:      d.Verifier,
+		fetcher:       d.Fetcher,
+		billingClient: d.Billing,
+		mux:           http.NewServeMux(),
 	}
 	s.routes()
 	return s
@@ -43,7 +72,7 @@ func NewServer(cfg config.Config, log *slog.Logger, db *pgxpool.Pool, version st
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
-	// sessionLoad (Clerk claims, optional) is inserted HERE by the identity step.
+	h = s.sessionLoad(h) // Clerk claims, optional; absent cookie → unauthenticated
 	h = s.secureHeaders(h)
 	h = s.rateLimit(h)
 	h = s.accessLog(h)

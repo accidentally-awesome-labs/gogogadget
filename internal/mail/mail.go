@@ -142,4 +142,3 @@ func TrialEndingMessage(appURL, to, trialEnd string) (Message, error) {
 	}
 	return Message{To: to, Subject: "Your trial ends soon", HTML: html, Text: text}, nil
 }
-

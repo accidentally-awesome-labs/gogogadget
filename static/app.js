@@ -68,6 +68,18 @@ document.addEventListener("alpine:init", function () {
     };
   });
 
+  // SelectOrg page: switch the active org via clerk-js, then reload.
+  Alpine.data("selectOrg", function () {
+    return {
+      choose: function (orgId) {
+        if (!window.Clerk) return;
+        window.Clerk.setActive({ organization: orgId }).then(function () {
+          window.location.assign("/app");
+        });
+      },
+    };
+  });
+
   // Toast root: htmx HX-Trigger {"toast": {...}} dispatches a bubbling "toast"
   // event; we render and auto-dismiss.
   Alpine.data("toastRoot", function () {
@@ -85,5 +97,22 @@ document.addEventListener("alpine:init", function () {
         });
       },
     };
+  });
+});
+
+// --- Clerk bootstrap (load-bearing) ---
+// clerk-js owns the __session JWT refresh cycle (~60s tokens). Without this,
+// auth expires ~60s after login. The publishable key arrives via a meta tag;
+// e2e/test envs leave it empty and skip clerk-js entirely.
+window.addEventListener("DOMContentLoaded", function () {
+  var meta = document.querySelector('meta[name="clerk-publishable-key"]');
+  if (!meta || !window.Clerk) return;
+  window.Clerk.load().then(function () {
+    var clerk = window.Clerk;
+    if (!clerk.user) return;
+    var ub = document.getElementById("user-button");
+    if (ub) clerk.mountUserButton(ub);
+    var os = document.getElementById("org-switcher");
+    if (os) clerk.mountOrganizationSwitcher(os);
   });
 });

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,21 +20,10 @@ import (
 
 func testSetup(t *testing.T) (*pgxpool.Pool, *sqlc.Queries) {
 	t.Helper()
-	dsn := os.Getenv("TEST_DATABASE_URL")
-	if dsn == "" {
-		dsn = "postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable"
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	pool, err := db.Open(ctx, dsn)
-	if err != nil {
-		t.Skipf("TEST_DATABASE_URL unreachable: %v", err)
-	}
-	require.NoError(t, db.Migrate(ctx, pool))
-	_, err = pool.Exec(context.Background(), "DELETE FROM jobs")
+	pool, q := testdb.Open(t, "jobs")
+	_, err := pool.Exec(context.Background(), "DELETE FROM jobs")
 	require.NoError(t, err)
-	t.Cleanup(pool.Close)
-	return pool, sqlc.New(pool)
+	return pool, q
 }
 
 func testWorker(q *sqlc.Queries, dir string) *Worker {
