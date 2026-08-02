@@ -44,6 +44,12 @@ type AdminOrgsData struct {
 	Orgs []sqlc.ListOrgsWithStatsRow
 }
 
+type APITokensData struct {
+	Tokens   []sqlc.ApiToken
+	NewToken string // plaintext, shown ONCE right after creation
+	NameErr  string
+}
+
 type BillingData struct {
 	Plan         billing.Plan
 	Sub          *sqlc.Subscription

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	form "github.com/go-playground/form/v4"
+	"github.com/gogogadget/gogogadget/internal/api"
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
@@ -108,18 +109,6 @@ type projectFormInput struct {
 	Name string `form:"name"`
 }
 
-func validateProjectName(name string) (string, string) {
-	name = strings.TrimSpace(name)
-	switch {
-	case name == "":
-		return name, "Name is required."
-	case len(name) > 80:
-		return name, "Name must be 80 characters or fewer."
-	default:
-		return name, ""
-	}
-}
-
 // renderProjectFormError re-renders the form fragment with 422.
 func (s *Server) renderProjectFormError(w http.ResponseWriter, r *http.Request, d templates.ProjectFormData, edit bool) {
 	w.WriteHeader(http.StatusUnprocessableEntity)
@@ -143,7 +132,7 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		s.renderProjectFormError(w, r, templates.ProjectFormData{Plan: plan}, false)
 		return
 	}
-	name, nameErr := validateProjectName(input.Name)
+	name, nameErr := api.ValidateProjectName(input.Name)
 	d := templates.ProjectFormData{Name: name, NameErr: nameErr, Plan: plan}
 	if nameErr != "" {
 		s.renderProjectFormError(w, r, d, false)
@@ -220,7 +209,7 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		s.renderProjectFormError(w, r, templates.ProjectFormData{ID: project.ID, Plan: identity.PlanFrom(ctx)}, true)
 		return
 	}
-	name, nameErr := validateProjectName(input.Name)
+	name, nameErr := api.ValidateProjectName(input.Name)
 	if nameErr != "" {
 		s.renderProjectFormError(w, r, templates.ProjectFormData{ID: project.ID, Name: name, NameErr: nameErr, Plan: identity.PlanFrom(ctx)}, true)
 		return

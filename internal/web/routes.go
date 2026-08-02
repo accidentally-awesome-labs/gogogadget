@@ -1,6 +1,10 @@
 package web
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/gogogadget/gogogadget/internal/api"
+)
 
 func (s *Server) routes() {
 	s.mux.HandleFunc("GET /healthz", s.handleHealthz)
@@ -53,6 +57,9 @@ func (s *Server) routes() {
 	appMux.HandleFunc("GET /app/settings/billing/fragment", s.handleSettingsBillingFragment)
 	appMux.HandleFunc("POST /app/billing/checkout", s.handleBillingCheckout)
 	appMux.HandleFunc("POST /app/billing/portal", s.handleBillingPortal)
+	appMux.HandleFunc("GET /app/settings/api", s.handleSettingsAPI)
+	appMux.HandleFunc("POST /app/settings/api/tokens", s.handleAPITokenCreate)
+	appMux.HandleFunc("DELETE /app/settings/api/tokens/{id}", s.handleAPITokenRevoke)
 	appMux.HandleFunc("GET /app/activity", s.handleActivity)
 	s.mux.Handle("/app", s.appChain(appMux))
 	s.mux.Handle("/app/", s.appChain(appMux))
@@ -65,6 +72,16 @@ func (s *Server) routes() {
 	adminMux.HandleFunc("GET /admin/orgs", s.handleAdminOrgs)
 	s.mux.Handle("/admin", s.adminChain(adminMux))
 	s.mux.Handle("/admin/", s.adminChain(adminMux))
+
+	// Public JSON API: cookieless Bearer auth (CSRF-exempt in the chain).
+	apiMW := &api.Middleware{Q: s.q}
+	apiProjects := &api.Projects{Q: s.q}
+	s.mux.Handle("GET /api/v1/projects", apiMW.RequireAPIToken("read", http.HandlerFunc(apiProjects.ListProjects)))
+	s.mux.Handle("POST /api/v1/projects", apiMW.RequireAPIToken("write", http.HandlerFunc(apiProjects.CreateProject)))
+	// Unknown /api/ routes get the JSON 404, never the HTML one.
+	s.mux.Handle("/api/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		api.WriteError(w, http.StatusNotFound, "not_found", "Unknown API route.")
+	}))
 
 	// Catch-all 404 (least-specific pattern matches last; method-less so it
 	// can't conflict with the /app and /admin subtrees).

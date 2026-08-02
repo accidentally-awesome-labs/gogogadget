@@ -1,0 +1,90 @@
+package templates
+
+import "fmt"
+
+templ SettingsAPI(d APITokensData) {
+	@SettingsTabs("/app/settings/api")
+	<h1 class="text-2xl font-bold mb-6">API tokens</h1>
+
+	<div id="api-tokens-container">
+		@APITokensSection(d)
+	</div>
+}
+
+templ APITokensSection(d APITokensData) {
+	if d.NewToken != "" {
+		<div class="card mb-6 max-w-lg border-green-500" data-testid="api-token-reveal">
+			<h2 class="font-semibold text-green-700 dark:text-green-300">Token created — copy it now</h2>
+			<p class="text-sm text-fg-muted mt-1">This is the only time the plaintext is shown.</p>
+			<div class="mt-3 flex items-center gap-2" x-data="clipboard">
+				<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ d.NewToken }</code>
+				<button type="button" @click={ "copy('" + d.NewToken + "')" } class="btn-ghost !px-2 text-xs">
+					<span x-show="!copied">Copy</span>
+					<span x-show="copied" x-cloak>Copied!</span>
+				</button>
+			</div>
+		</div>
+	}
+
+	<div class="card max-w-lg mb-6">
+		<h2 class="font-semibold mb-3">Create a token</h2>
+		if d.NameErr != "" {
+			<div class="alert-error mb-3" role="alert">{ d.NameErr }</div>
+		}
+		<form hx-post="/app/settings/api/tokens" hx-target="#api-tokens-container" hx-swap="innerHTML" hx-disabled-elt="this" class="flex gap-3 items-end">
+			<div class="flex-1">
+				<label for="name" class="label">Name</label>
+				<input id="name" name="name" type="text" class="input" placeholder="CI deploys" required/>
+			</div>
+			<div>
+				<label for="scope" class="label">Scope</label>
+				<select id="scope" name="scope" class="input">
+					<option value="read">read</option>
+					<option value="write">write</option>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary">Create</button>
+		</form>
+	</div>
+
+	<div class="card !p-0 overflow-hidden max-w-3xl">
+		<table class="table">
+			<thead>
+				<tr><th>Name</th><th>Scope</th><th>Last used</th><th>Created</th><th class="text-right"></th></tr>
+			</thead>
+			<tbody>
+				if len(d.Tokens) == 0 {
+					<tr><td colspan="5" class="text-center text-fg-muted py-6">No tokens yet.</td></tr>
+				}
+				for _, t := range d.Tokens {
+					<tr>
+						<td class="font-medium">{ t.Name }</td>
+						<td><span class="badge bg-surface-raised text-fg-muted">{ t.Scope }</span></td>
+						<td class="text-fg-muted">
+							if t.LastUsedAt.Valid {
+								{ t.LastUsedAt.Time.Format("Jan 2, 2006") }
+							} else {
+								never
+							}
+						</td>
+						<td class="text-fg-muted">{ t.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+						<td class="text-right">
+							if t.RevokedAt.Valid {
+								<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">revoked</span>
+							} else {
+								<button
+									type="button"
+									hx-delete={ fmt.Sprintf("/app/settings/api/tokens/%d", t.ID) }
+									hx-confirm="Revoke this token? API calls with it will start failing."
+									hx-target="closest tr"
+									hx-swap="outerHTML"
+									class="btn-danger !px-2 !py-1 text-xs"
+								>Revoke</button>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
