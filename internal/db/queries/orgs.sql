@@ -18,9 +18,15 @@ WHERE m.clerk_user_id = $1
 ORDER BY o.name;
 
 -- name: ListOrgsWithStats :many
+-- Plan badge mirrors billing.Entitled: paid key only while the subscription
+-- confers access (active/trialing/past_due, or canceled before period end).
 SELECT o.*,
   (SELECT count(*) FROM org_members m WHERE m.clerk_org_id = o.clerk_org_id) AS member_count,
-  COALESCE(s.product_key, 'free') AS product_key
+  CASE
+    WHEN s.status IN ('active', 'trialing', 'past_due') THEN s.product_key
+    WHEN s.status = 'canceled' AND s.current_period_end > now() THEN s.product_key
+    ELSE 'free'
+  END AS product_key
 FROM orgs o
 LEFT JOIN subscriptions s ON s.clerk_org_id = o.clerk_org_id
 ORDER BY o.created_at DESC
