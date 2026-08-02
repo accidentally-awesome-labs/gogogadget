@@ -3,7 +3,7 @@ package templates
 import "github.com/gogogadget/gogogadget/internal/billing"
 
 templ Badge(text, kind string) {
-	<span data-testid="plan-badge" class={ "badge", "bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300" }>{ text }</span>
+	<span class={ "badge", "bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300" }>{ text }</span>
 }
 
 // PlanCard renders one plan on the pricing page and in upgrade CTAs.

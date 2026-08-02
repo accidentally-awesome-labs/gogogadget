@@ -28,6 +28,10 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
 	s.mux.HandleFunc("GET /robots.txt", s.handleRobots)
 
+	// Docs (in-app, versioned with the code).
+	s.mux.HandleFunc("GET /docs", s.handleDocsIndex)
+	s.mux.HandleFunc("GET /docs/{slug}", s.handleDocsPage)
+
 	// Auth redirects (public) → Clerk hosted Account Portal.
 	s.mux.HandleFunc("GET /login", s.handleLogin)
 	s.mux.HandleFunc("GET /signup", s.handleSignup)

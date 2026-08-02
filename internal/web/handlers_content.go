@@ -48,9 +48,12 @@ func (s *Server) handleSitemap(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	fmt.Fprint(w, `<?xml version="1.0" encoding="UTF-8"?>`+"\n")
 	fmt.Fprint(w, `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`)
-	urls := []string{"/", "/pricing", "/terms", "/privacy", "/blog"}
+	urls := []string{"/", "/pricing", "/terms", "/privacy", "/blog", "/docs"}
 	for _, p := range s.blog.Posts {
 		urls = append(urls, "/blog/"+p.Slug)
+	}
+	for _, d := range s.docs.Pages {
+		urls = append(urls, "/docs/"+d.Slug)
 	}
 	for _, u := range urls {
 		fmt.Fprintf(w, "<url><loc>%s%s</loc></url>", s.cfg.AppURL, u)

@@ -88,8 +88,8 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 func (s *Server) requireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !s.authEnabled() {
-			s.renderStatus(w, r, http.StatusServiceUnavailable, "Auth not configured",
-				"Set the CLERK_* environment variables (or DEV_AUTH_BYPASS for local dev) — see /docs/authentication.")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			s.Render(w, r, Page{Title: "Auth", Layout: templates.LayoutPublic}, templates.NotConfigured("Auth", "authentication"))
 			return
 		}
 		if identity.UserFrom(r.Context()) == nil {

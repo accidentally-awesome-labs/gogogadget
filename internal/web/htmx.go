@@ -76,11 +76,21 @@ func Redirect(w http.ResponseWriter, r *http.Request, url string) {
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
-// Toast queues a client toast via HX-Trigger; the listener lives in
-// static/app.js (toastRoot).
+// Toast queues a client toast via HX-Trigger for NON-navigating responses
+// (fragment swaps, row deletes). The listener lives in static/app.js.
 func Toast(w http.ResponseWriter, typ, message string) {
-	payload, _ := json.Marshal(map[string]map[string]string{
-		"toast": {"type": typ, "message": message},
+	setToast(w, typ, message, false)
+}
+
+// FlashToast toasts across an HX-Redirect (full browser navigation): the
+// client stores it in sessionStorage and shows it after the page loads.
+func FlashToast(w http.ResponseWriter, typ, message string) {
+	setToast(w, typ, message, true)
+}
+
+func setToast(w http.ResponseWriter, typ, message string, flash bool) {
+	payload, _ := json.Marshal(map[string]map[string]any{
+		"toast": {"type": typ, "message": message, "flash": flash},
 	})
 	w.Header().Set("HX-Trigger", string(payload))
 }

@@ -3,6 +3,7 @@ package web
 import (
 	"io/fs"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -60,14 +61,21 @@ func (s *Server) serveStatic() http.Handler {
 		} else {
 			w.Header().Set("Cache-Control", "public, max-age=3600")
 		}
-		r.URL.Path = p
-		// Defeat FileServer's redirect for directory index.
+		// Clone before rewriting so accessLog sees the original path.
+		r2 := r.Clone(r.Context())
+		r2.URL = cloneURL(r.URL)
+		r2.URL.Path = p
 		if p == "" || strings.HasSuffix(p, "/") {
 			s.handleNotFound(w, r)
 			return
 		}
-		fileServer.ServeHTTP(w, r)
+		fileServer.ServeHTTP(w, r2)
 	})
+}
+
+func cloneURL(u *url.URL) *url.URL {
+	v := *u
+	return &v
 }
 
 // faviconRedirect keeps legacy /favicon.ico requests on the SVG mark.

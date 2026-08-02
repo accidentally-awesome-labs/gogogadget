@@ -102,7 +102,7 @@
     @apply divide-y divide-border;
   }
   .link {
-    @apply text-brand-600 underline-offset-4 hover:underline;
+    @apply text-brand-600 underline underline-offset-4 hover:no-underline;
   }
   .dark .link {
     @apply text-brand-400;
@@ -139,7 +139,7 @@
   .prose h2 { @apply text-2xl font-bold mt-10 mb-3; }
   .prose h3 { @apply text-xl font-semibold mt-8 mb-3; }
   .prose p { @apply my-4; }
-  .prose a { @apply text-brand-600 underline-offset-4 hover:underline dark:text-brand-400; }
+  .prose a { @apply text-brand-600 underline underline-offset-4 dark:text-brand-400; }
   .prose ul { @apply list-disc pl-6 my-4 space-y-1; }
   .prose ol { @apply list-decimal pl-6 my-4 space-y-1; }
   .prose li > ul, .prose li > ol { @apply my-1; }

@@ -145,7 +145,51 @@ templ AdminLayout(page Page, content templ.Component) {
 	@AppLayout(page, content)
 }
 
-// DocsLayout wraps documentation pages (sidebar lands with the docs step).
+// DocsLayout wraps documentation pages: PublicLayout chrome with a docs
+// sidebar (sections ordered by weight) and prev/next footer.
 templ DocsLayout(page Page, content templ.Component) {
-	@PublicLayout(page, content)
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			@headMeta(page)
+			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
+			<link rel="manifest" href="/static/site.webmanifest"/>
+			<link rel="stylesheet" href="/static/app.css"/>
+			@headScripts(page)
+		</head>
+		<body class="bg-surface text-fg antialiased" hx-headers={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
+			@skipLink()
+			@Nav(page)
+			<div class="max-w-6xl mx-auto px-4 py-8 flex gap-10">
+				<aside class="hidden md:block w-56 shrink-0">
+					<nav class="sticky top-24 space-y-6 text-sm" hx-boost="true">
+						if page.Docs != nil {
+							for _, section := range page.Docs.Sections {
+								<div>
+									<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ section.Name }</p>
+									<ul class="space-y-1">
+										for _, doc := range section.Pages {
+											<li>
+												<a
+													href={ "/docs/" + doc.Slug }
+													aria-current={ navCurrent(Page{Path: "/docs/" + doc.Slug}, "/docs/" + page.DocSlug) }
+													class="block rounded-lg px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised aria-[current=page]:text-brand-600 dark:aria-[current=page]:text-brand-400 dark:aria-[current=page]:text-brand-400 aria-[current=page]:font-semibold"
+												>{ doc.Title }</a>
+											</li>
+										}
+									</ul>
+								</div>
+							}
+						}
+					</nav>
+				</aside>
+				<main id="content" class="min-w-0 flex-1 pb-16">
+					@content
+				</main>
+			</div>
+			@toastRoot()
+		</body>
+	</html>
 }

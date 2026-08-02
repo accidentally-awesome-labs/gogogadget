@@ -10,6 +10,22 @@
   }
 })();
 
+// --- htmx config ---
+// htmx 2.x does not swap on 4xx/5xx by default. Our conventions rely on two
+// exception statuses: 422 (re-rendered form fragments) and 503 (not-configured
+// fragments). htmx loads deferred after this file, so configure on
+// DOMContentLoaded when the htmx global exists.
+window.addEventListener("DOMContentLoaded", function () {
+  if (!window.htmx) return;
+  window.htmx.config.responseHandling = [
+    { code: "204", swap: false },
+    { code: "[23]..", swap: true },
+    { code: "422", swap: true }, // validation fragments
+    { code: "503", swap: true }, // not-configured fragments
+    { code: "[45]..", swap: false, error: true },
+  ];
+});
+
 // --- Alpine CSP components (registered before Alpine boots) ---
 document.addEventListener("alpine:init", function () {
   Alpine.data("themeToggle", function () {
@@ -92,19 +108,36 @@ document.addEventListener("alpine:init", function () {
   });
 
   // Toast root: htmx HX-Trigger {"toast": {...}} dispatches a bubbling "toast"
-  // event; we render and auto-dismiss.
+  // event. flash:true toasts persist to sessionStorage and render after the
+  // HX-Redirect navigation that follows; plain toasts render immediately.
   Alpine.data("toastRoot", function () {
     return {
       toasts: [],
+      push: function (type, message) {
+        var self = this;
+        var t = { id: Date.now() + Math.random(), type: type || "info", message: message || "" };
+        this.toasts.push(t);
+        setTimeout(function () {
+          self.toasts = self.toasts.filter(function (x) { return x.id !== t.id; });
+        }, 5000);
+      },
       init: function () {
         var self = this;
+        var pending = sessionStorage.getItem("gg_flash");
+        if (pending) {
+          sessionStorage.removeItem("gg_flash");
+          try {
+            var d = JSON.parse(pending);
+            self.push(d.type, d.message);
+          } catch (e) {}
+        }
         document.addEventListener("toast", function (e) {
           var d = e.detail || {};
-          var t = { id: Date.now() + Math.random(), type: d.type || "info", message: d.message || "" };
-          self.toasts.push(t);
-          setTimeout(function () {
-            self.toasts = self.toasts.filter(function (x) { return x.id !== t.id; });
-          }, 5000);
+          if (d.flash) {
+            sessionStorage.setItem("gg_flash", JSON.stringify({ type: d.type, message: d.message }));
+          } else {
+            self.push(d.type, d.message);
+          }
         });
       },
     };

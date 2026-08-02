@@ -160,7 +160,7 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
 	s.analytics.Capture(user.ClerkUserID, "project_created", map[string]any{"org_id": org.ClerkOrgID, "project_id": project.ID})
-	Toast(w, "success", "Project created")
+	FlashToast(w, "success", "Project created")
 	HXRedirect(w, "/app/projects")
 }
 
@@ -221,7 +221,7 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "name": name})
-	Toast(w, "success", "Project updated")
+	FlashToast(w, "success", "Project updated")
 	HXRedirect(w, "/app/projects")
 }
 
@@ -239,7 +239,7 @@ func (s *Server) handleProjectArchive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "status": "archived"})
-	Toast(w, "success", "Project archived")
+	FlashToast(w, "success", "Project archived")
 	HXRedirect(w, "/app/projects")
 }
 

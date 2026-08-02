@@ -1,0 +1,32 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/content"
+)
+
+// DocsPage renders one documentation page with prev/next footer and the
+// edit-on-GitHub link.
+templ DocsPage(docs *content.Docs, slug string) {
+	for i, p := range docs.Pages {
+		if p.Slug == slug {
+			<article class="prose max-w-none" data-testid="docs-page">
+				@templ.Raw(p.Body)
+			</article>
+
+			<div class="mt-6 text-sm">
+				<a href={ "https://github.com/gogogadget/gogogadget/edit/main/content/docs/" + p.Slug + ".md" } class="link">Edit this page →</a>
+			</div>
+
+			<nav class="mt-10 pt-6 border-t border-border flex justify-between text-sm">
+				if i > 0 {
+					<a href={ "/docs/" + docs.Pages[i-1].Slug } class="link">← { docs.Pages[i-1].Title }</a>
+				} else {
+					<span></span>
+				}
+				if i < len(docs.Pages)-1 {
+					<a href={ "/docs/" + docs.Pages[i+1].Slug } class="link">{ docs.Pages[i+1].Title } →</a>
+				}
+			</nav>
+		}
+	}
+}

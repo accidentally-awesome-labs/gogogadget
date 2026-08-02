@@ -233,7 +233,7 @@ func TestBillingNotConfigured503(t *testing.T) {
 
 	code, _, body := postForm(t, s, "/app/billing/checkout", url.Values{"plan": {"pro"}}, sessionCookie("user_nc", "org_nc", "org:admin"))
 	assert.Equal(t, http.StatusServiceUnavailable, code)
-	assert.Contains(t, body, "Billing is not configured")
+	assert.Contains(t, body, "Billing not configured")
 	assert.Contains(t, body, "/docs/billing")
 }
 

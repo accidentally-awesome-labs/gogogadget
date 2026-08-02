@@ -86,6 +86,7 @@ templ ProjectForm(d ProjectFormData) {
 			hx-post={ fmt.Sprintf("/app/projects/%d", d.ID) }
 		}
 		hx-disabled-elt="this"
+		novalidate
 		class="card max-w-lg space-y-4"
 	>
 		@FormField("name", "Name", "text", d.Name, d.NameErr, "Launch checklist", true)

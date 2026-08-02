@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 )
 
@@ -35,6 +36,10 @@ type Page struct {
 	Org  *sqlc.Org
 	Plan billing.Plan
 	Sub  *sqlc.Subscription
+
+	// Docs navigation context (set by the docs handlers).
+	Docs    *content.Docs
+	DocSlug string
 
 	// Now is the render clock (frozen under APP_ENV=test via TEST_NOW) so
 	// rendered dates never rot visual baselines.

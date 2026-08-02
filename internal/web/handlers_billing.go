@@ -70,7 +70,7 @@ func (s *Server) handleBillingPortal(w http.ResponseWriter, r *http.Request) {
 func (s *Server) renderBillingNotConfigured(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusServiceUnavailable)
 	s.Render(w, r, Page{Title: "Billing", Layout: templates.LayoutApp},
-		templates.BillingError("Billing is not configured — set the POLAR_* environment variables. See /docs/billing."))
+		templates.NotConfigured("Billing", "billing"))
 }
 
 // GET /app/settings/billing

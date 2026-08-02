@@ -29,7 +29,7 @@ func NotFound() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"max-w-3xl mx-auto px-4 py-24 text-center\"><h1 class=\"text-6xl font-extrabold text-brand-600\">404</h1><p class=\"mt-4 text-lg text-fg-muted\">That page doesn't exist.</p><a href=\"/\" class=\"btn btn-primary mt-8\">Back to home</a></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<section class=\"max-w-3xl mx-auto px-4 py-24 text-center\"><h1 class=\"text-6xl font-extrabold text-brand-600 dark:text-brand-400\">404</h1><p class=\"mt-4 text-lg text-fg-muted\">That page doesn't exist.</p><a href=\"/\" class=\"btn btn-primary mt-8\">Back to home</a></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -58,7 +58,7 @@ func ServerError(detail string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<section class=\"max-w-3xl mx-auto px-4 py-24\"><h1 class=\"text-6xl font-extrabold text-brand-600 text-center\">500</h1><p class=\"mt-4 text-lg text-fg-muted text-center\">Something went wrong on our side.</p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<section class=\"max-w-3xl mx-auto px-4 py-24\"><h1 class=\"text-6xl font-extrabold text-brand-600 dark:text-brand-400 text-center\">500</h1><p class=\"mt-4 text-lg text-fg-muted text-center\">Something went wrong on our side.</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -110,14 +110,14 @@ func StatusPage(title, detail string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<section class=\"max-w-3xl mx-auto px-4 py-24 text-center\"><h1 class=\"text-4xl font-extrabold text-brand-600\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<section class=\"max-w-3xl mx-auto px-4 py-24 text-center\"><h1 class=\"text-4xl font-extrabold text-brand-600 dark:text-brand-400\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/errors.templ`, Line: 24, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/errors.templ`, Line: 24, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {

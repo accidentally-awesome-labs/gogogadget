@@ -36,7 +36,7 @@ func logo() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<a href=\"/\" class=\"flex items-center gap-2 font-bold text-lg\"><svg class=\"w-7 h-7 text-brand-600\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M13 2 4.5 13.5H11L9.5 22 19 9.5h-6.5L13 2z\"></path></svg> GoGoGadget</a>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<a href=\"/\" class=\"flex items-center gap-2 font-bold text-lg\"><svg class=\"w-7 h-7 text-brand-600 dark:text-brand-400\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M13 2 4.5 13.5H11L9.5 22 19 9.5h-6.5L13 2z\"></path></svg> GoGoGadget</a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

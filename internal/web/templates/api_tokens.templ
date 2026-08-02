@@ -31,7 +31,7 @@ templ APITokensSection(d APITokensData) {
 		if d.NameErr != "" {
 			<div class="alert-error mb-3" role="alert">{ d.NameErr }</div>
 		}
-		<form hx-post="/app/settings/api/tokens" hx-target="#api-tokens-container" hx-swap="innerHTML" hx-disabled-elt="this" class="flex gap-3 items-end">
+		<form hx-post="/app/settings/api/tokens" hx-target="#api-tokens-container" hx-swap="innerHTML" hx-disabled-elt="this" novalidate class="flex gap-3 items-end">
 			<div class="flex-1">
 				<label for="name" class="label">Name</label>
 				<input id="name" name="name" type="text" class="input" placeholder="CI deploys" required/>

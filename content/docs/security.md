@@ -1,0 +1,148 @@
+---
+title: Security
+description: CSP, CSRF, rate limiting, webhook verification, token hashing, and the XSS rules.
+section: Guides
+weight: 17
+---
+
+The security posture is a small set of **enforced defaults**, not a checklist.
+Most of it lives in one middleware chain (`internal/web/middleware.go`), so
+auditing one file audits the request path.
+
+## Content-Security-Policy
+
+Every response carries this policy, assembled from config in `secureHeaders`:
+
+| Directive | Value | Why |
+|---|---|---|
+| `default-src` | `'self'` | Nothing loads cross-origin unless explicitly allowed |
+| `script-src` | `'self'` | No third-party JavaScript, ever |
+| `style-src` | `'self' 'unsafe-inline'` | Tailwind is a built file; inline *styles* (not scripts) are allowed |
+| `img-src` | `'self' data: https://img.clerk.com` | Clerk avatars |
+| `font-src` | `'self'` | Vendored Inter |
+| `connect-src` | `'self' <CLERK_FRONTEND_API_URL>` | clerk-js keeps the ~60s `__session` JWT fresh against the Frontend API |
+| `frame-ancestors` | `'none'` | Clickjacking |
+| `base-uri` | `'self'` | Base-tag injection |
+| `form-action` | `'self'` | Forms can only post back here |
+
+### Why `script-src 'self'` is possible
+
+- **Zero inline JavaScript.** Dark-mode init, Alpine components, the toast
+  listener — all live in `static/app.js`. Not one inline `<script>` body
+  exists in a template.
+- **Alpine runs the CSP build** (`@alpinejs/csp`) with every component
+  registered as `Alpine.data` in `app.js` — no inline `x-data` expressions
+  for the browser to evaluate.
+- **htmx and clerk-js are vendored** into `static/vendor/`, sha256-pinned by
+  `scripts/vendor-frontend.sh`.
+- **PostHog loads through the same-origin `/ingest` proxy**, so its SDK is a
+  self-hosted script as far as the browser knows. See
+  [Observability](/docs/observability).
+
+### Extending `connect-src`
+
+When clerk-js (or anything else) reports a blocked source in the browser
+console, first check `CLERK_FRONTEND_API_URL` — most "blocked Clerk source"
+reports are a misconfigured origin, not a missing directive. If the source is
+legitimate, add **exactly that reported origin** to the matching directive in
+`secureHeaders` (`connect-src` for fetches, `frame-src` for frames) with an
+inline note saying why. Never widen `script-src`.
+
+## The rest of the header set
+
+`X-Content-Type-Options: nosniff`, `Referrer-Policy:
+strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, and
+`Permissions-Policy: camera=(), microphone=(), geolocation=(),
+interest-cohort=()` on every response. HSTS (`max-age=63072000;
+includeSubDomains`) is sent **in production only** — over dev HTTP it would
+poison `localhost` for every other app you run.
+
+## CSRF
+
+nosurf guards every unsafe method. The token reaches htmx via `hx-headers` on
+`<body>`; failures render 403 (with the exact `nosurf.Reason` shown outside
+production).
+
+- **Cookie names differ by environment on purpose.** Production:
+  `__Host-csrf` (Secure, HttpOnly, SameSite=Lax, Path=/). Development:
+  `csrf_token`, non-Secure. A `__Host-`-prefixed cookie without `Secure` is
+  **rejected by Safari**, which would silently break non-localhost dev — that
+  is why the dev name exists.
+- **nosurf v1.2 enforces same-origin** (CVE-2025-46721) and assumes HTTPS by
+  default. Over plaintext dev HTTP every POST would 403, so `SetIsTLSFunc`
+  decides per request: direct TLS, or `X-Forwarded-Proto: https` from the
+  fly.io edge.
+- **Exempt paths:** `/webhooks/*` (signature-verified), `/api/*` (cookieless
+  Bearer — no cookie, nothing to forge), `/ingest/*`, `/static/*`,
+  `/healthz`, `/readyz`.
+
+## Rate limiting
+
+Per-IP token bucket (`x/time/rate`): **100 req/min, burst 200**, on everything
+except `/static/*`, `/healthz`, `/ingest/*`. Over-limit requests get 429 with
+`Retry-After: 1`. The client IP is `Fly-Client-IP` when present (set by the
+fly edge, not spoofable by clients there) and `RemoteAddr` otherwise — behind
+any other proxy, the header story is yours to fix. Entries idle longer than
+10 minutes are swept so the map cannot grow forever.
+
+This limiter is **single-node by design**. `fly scale count > 1` is the
+documented trigger to swap it for a shared store (e.g. Upstash); the swap
+point is the `rateLimit` middleware and nothing else.
+
+## Webhook verification: two header families
+
+Clerk and Polar both sign deliveries, but with **different header families**,
+so one verification library cannot cover both:
+
+| Provider | Headers | Library | Endpoint |
+|---|---|---|---|
+| Clerk (via Svix) | `svix-id`, `svix-timestamp`, `svix-signature` | `github.com/svix/svix-webhooks/go` | `POST /webhooks/clerk` |
+| Polar | `webhook-id`, `webhook-timestamp`, `webhook-signature` | `github.com/standard-webhooks/standard-webhooks/libraries/go` | `POST /webhooks/polar` |
+
+Reach for one library for both and you reject 100% of the other provider's
+real traffic. Test fixtures (`signSvix`, `signStandard`) mirror the real
+header names exactly.
+
+Beyond signatures, the `webhook_events` table deduplicates by message id
+(`INSERT … ON CONFLICT DO NOTHING RETURNING id` — `pgx.ErrNoRows` means a
+replay: stop, return 200). Signature failure → 400; a DB error → 500 so the
+provider retries.
+
+## API tokens
+
+Tokens are `ggg_` plus 32 random bytes (base64url). The database stores only
+the **SHA-256 hex** — a leaked dump yields nothing usable, and the plaintext
+is shown exactly once at creation. Verification hashes the presented token
+and looks it up; `revoked_at` and `expires_at` are enforced on every request;
+scope `write` satisfies `read`. The API is cookieless Bearer auth, which is
+why it is CSRF-exempt. See [API](/docs/api).
+
+## XSS rules
+
+- **templ auto-escapes everything.** User-controlled content never goes
+  through `templ.Raw` — no exceptions.
+- **goldmark renders markdown with default options** (GFM on): raw HTML in
+  content stays escaped. Never enable `html.WithUnsafe`.
+- Error pages include panic/validation detail only outside production; in
+  production they render generic copy and report to Sentry.
+
+## Request bodies
+
+Every route is capped by `http.MaxBytesReader` at **10 MB** — a memory-
+exhaustion vector closed by default, not per-handler.
+
+## Dependency policy
+
+Every dependency is load-bearing and listed in the manifest
+(see [Architecture](/docs/architecture)); a new dependency needs a
+justification, not just an `import`. Codegen tools are pinned as `go tool`
+directives in `go.mod`; the Tailwind binary and all vendored frontend assets
+are sha256-pinned in their fetch scripts. CI runs `go tool govulncheck ./...`
+— known-vulnerable dependencies do not merge.
+
+## The dev backdoor cannot ship
+
+`DEV_AUTH_BYPASS=true` enables synthetic `e2e:` session tokens for local and
+e2e runs. Combined with `APP_ENV=production` it is a **hard boot error** —
+the escape hatch physically cannot reach production. See
+[Authentication](/docs/authentication).

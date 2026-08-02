@@ -12,8 +12,8 @@ import (
 // GET /login → Clerk hosted sign-in (or the dev login in bypass mode).
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if !s.authEnabled() {
-		s.renderStatus(w, r, http.StatusServiceUnavailable, "Auth not configured",
-			"Set the CLERK_* environment variables (or DEV_AUTH_BYPASS for local dev) — see /docs/authentication.")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		s.Render(w, r, Page{Title: "Auth", Layout: templates.LayoutPublic}, templates.NotConfigured("Auth", "authentication"))
 		return
 	}
 	if s.cfg.DevAuthBypass && !s.cfg.ClerkConfigured() {
@@ -26,8 +26,8 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 // GET /signup → Clerk hosted sign-up.
 func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 	if !s.authEnabled() {
-		s.renderStatus(w, r, http.StatusServiceUnavailable, "Auth not configured",
-			"Set the CLERK_* environment variables (or DEV_AUTH_BYPASS for local dev) — see /docs/authentication.")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		s.Render(w, r, Page{Title: "Auth", Layout: templates.LayoutPublic}, templates.NotConfigured("Auth", "authentication"))
 		return
 	}
 	if s.cfg.DevAuthBypass && !s.cfg.ClerkConfigured() {

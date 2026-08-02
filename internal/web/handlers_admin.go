@@ -103,9 +103,9 @@ func (s *Server) handleAdminUserDisable(w http.ResponseWriter, r *http.Request) 
 	}
 	audit.Log(ctx, s.q, "", admin.ClerkUserID, action, map[string]any{"target": id, "email": string(user.Email)})
 	if disabledAt.Valid {
-		Toast(w, "success", string(user.Email)+" disabled")
+		FlashToast(w, "success", string(user.Email)+" disabled")
 	} else {
-		Toast(w, "success", string(user.Email)+" re-enabled")
+		FlashToast(w, "success", string(user.Email)+" re-enabled")
 	}
 	HXRedirect(w, "/admin/users")
 }

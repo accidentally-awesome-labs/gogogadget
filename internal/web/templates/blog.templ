@@ -14,7 +14,7 @@ templ BlogIndex(posts []content.Post) {
 			for _, p := range posts {
 				<article>
 					<h2 class="text-2xl font-bold">
-						<a href={ "/blog/" + p.Slug } class="hover:text-brand-600">{ p.Title }</a>
+						<a href={ "/blog/" + p.Slug } class="hover:text-brand-600 dark:text-brand-400">{ p.Title }</a>
 					</h2>
 					<p class="text-sm text-fg-muted mt-1">
 						<time datetime={ p.Date.Format("2006-01-02") }>{ p.Date.Format("January 2, 2006") }</time>

@@ -67,6 +67,16 @@ templ BillingError(msg string) {
 	<div class="alert-error max-w-lg" role="alert">{ msg }</div>
 }
 
+// NotConfigured is the 503 fragment for an unconfigured service; it always
+// links the matching docs page.
+templ NotConfigured(feature, docsSlug string) {
+	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
+		<h1 class="text-4xl font-extrabold text-brand-600 dark:text-brand-400">{ feature } not configured</h1>
+		<p class="mt-4 text-fg-muted">This service isn't set up yet — the app degrades instead of crashing.</p>
+		<a href={ "/docs/" + docsSlug } class="btn btn-primary mt-8">Setup guide →</a>
+	</section>
+}
+
 templ SettingsBilling(d BillingData) {
 	@SettingsTabs("/app/settings/billing")
 	<h1 class="text-2xl font-bold mb-6">Billing</h1>
@@ -96,7 +106,7 @@ templ SettingsBilling(d BillingData) {
 						<button type="submit" class="btn btn-primary w-full">Upgrade to { p.Name }</button>
 					</form>
 				} else if p.Key == d.Plan.Key {
-					<span class="btn-ghost w-full opacity-50">Current plan</span>
+					<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">Current plan</span>
 				}
 			}
 		}
