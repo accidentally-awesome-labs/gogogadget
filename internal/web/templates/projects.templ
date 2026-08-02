@@ -1,0 +1,113 @@
+package templates
+
+import "fmt"
+
+templ ProjectsPage(d ProjectListData) {
+	<div class="flex items-center justify-between mb-6">
+		<h1 class="text-2xl font-bold">Projects</h1>
+		<a href="/app/projects/new" class="btn btn-primary">New project</a>
+	</div>
+
+	if d.Plan.MaxProjects > 0 {
+		<div class="card mb-4 text-sm" data-testid="usage-meter">
+			{ fmt.Sprint(d.Count) } / { fmt.Sprint(d.Plan.MaxProjects) } projects used on { d.Plan.Name }
+		</div>
+	}
+
+	<input
+		type="search" name="q" value={ d.Query } placeholder="Search projects…"
+		class="input max-w-sm mb-4"
+		hx-get="/app/projects" hx-trigger="input changed delay:300ms, search"
+		hx-target="#table-container" hx-push-url="true" hx-include="this"
+		aria-label="Search projects"
+	/>
+	@ProjectsTable(d)
+}
+
+templ ProjectsTable(d ProjectListData) {
+	<div id="table-container">
+		if len(d.Projects) == 0 {
+			@EmptyState("No projects", "Create your first project to get going.") {
+				<a href="/app/projects/new" class="btn btn-primary">New project</a>
+			}
+		} else {
+			<div class="card !p-0 overflow-hidden">
+				<table class="table">
+					<thead>
+						<tr><th>Name</th><th>Created</th><th class="text-right">Actions</th></tr>
+					</thead>
+					<tbody>
+						for _, p := range d.Projects {
+							<tr data-testid="project-row">
+								<td class="font-medium">{ p.Name }</td>
+								<td class="text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+								<td class="text-right">
+									<div class="flex justify-end gap-2">
+										<a href={ templ.SafeURL(fmt.Sprintf("/app/projects/%d/edit", p.ID)) } class="btn-ghost !px-2 !py-1 text-xs">Edit</a>
+										<button
+											type="button"
+											hx-post={ fmt.Sprintf("/app/projects/%d/archive", p.ID) }
+											class="btn-ghost !px-2 !py-1 text-xs"
+										>Archive</button>
+										<button
+											type="button"
+											hx-delete={ fmt.Sprintf("/app/projects/%d", p.ID) }
+											hx-confirm="Delete this project? This cannot be undone."
+											hx-target="closest tr"
+											hx-swap="outerHTML"
+											class="btn-danger !px-2 !py-1 text-xs"
+										>Delete</button>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			@Pagination(d.Page, d.TotalPages, "/app/projects?q="+d.Query)
+		}
+	</div>
+}
+
+templ ProjectForm(d ProjectFormData) {
+	if d.LimitHit {
+		<div class="alert-error mb-4" data-testid="plan-limit">
+			You've reached the { d.Plan.Name } plan limit of { fmt.Sprint(d.Plan.MaxProjects) } projects.
+			<a href="/app/settings/billing" class="link font-semibold">Upgrade to create more →</a>
+		</div>
+	}
+	if d.NameErr != "" {
+		<div class="alert-error mb-4" role="alert">Please fix the error below.</div>
+	}
+	<form
+		if d.ID == 0 {
+			hx-post="/app/projects"
+		} else {
+			hx-post={ fmt.Sprintf("/app/projects/%d", d.ID) }
+		}
+		hx-disabled-elt="this"
+		class="card max-w-lg space-y-4"
+	>
+		@FormField("name", "Name", "text", d.Name, d.NameErr, "Launch checklist", true)
+		<div class="flex gap-3">
+			<button type="submit" class="btn btn-primary">
+				if d.ID == 0 {
+					Create project
+				} else {
+					Save changes
+				}
+			</button>
+			<a href="/app/projects" class="btn btn-ghost">Cancel</a>
+		</div>
+	</form>
+}
+
+templ ProjectNewPage(d ProjectFormData) {
+	<h1 class="text-2xl font-bold mb-6">New project</h1>
+	@ProjectForm(d)
+}
+
+templ ProjectEditPage(d ProjectFormData) {
+	<h1 class="text-2xl font-bold mb-6">Edit project</h1>
+	@ProjectForm(d)
+}

@@ -238,7 +238,11 @@ func (s *Server) secureHeaders(next http.Handler) http.Handler {
 func (s *Server) csrf(next http.Handler) http.Handler {
 	ns := nosurf.New(next)
 	ns.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.renderStatus(w, r, http.StatusForbidden, "Forbidden", "Your session expired or the form token was invalid. Go back and try again.")
+		detail := "Your session expired or the form token was invalid. Go back and try again."
+		if !s.cfg.Production() {
+			detail += " (reason: " + nosurf.Reason(r).Error() + ")"
+		}
+		s.renderStatus(w, r, http.StatusForbidden, "Forbidden", detail)
 	}))
 	ns.SetBaseCookie(http.Cookie{
 		Name:     csrfCookieName(s.cfg.Production()),
@@ -246,6 +250,12 @@ func (s *Server) csrf(next http.Handler) http.Handler {
 		Secure:   s.cfg.Production(),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+	})
+	// nosurf v1.2 enforces same-origin (CVE-2025-46721) and assumes HTTPS by
+	// default; over plaintext dev HTTP every form POST would 403. Determine
+	// TLS per request: direct TLS, or the edge's X-Forwarded-Proto (fly.io).
+	ns.SetIsTLSFunc(func(r *http.Request) bool {
+		return r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
 	})
 	ns.ExemptRegexps(
 		`^/webhooks/.*`,

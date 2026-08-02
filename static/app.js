@@ -68,6 +68,17 @@ document.addEventListener("alpine:init", function () {
     };
   });
 
+  // Dismissible dashboard checklist (persisted per browser).
+  Alpine.data("checklist", function () {
+    return {
+      dismissed: localStorage.getItem("gg_checklist_dismissed") === "1",
+      dismiss: function () {
+        this.dismissed = true;
+        localStorage.setItem("gg_checklist_dismissed", "1");
+      },
+    };
+  });
+
   // SelectOrg page: switch the active org via clerk-js, then reload.
   Alpine.data("selectOrg", function () {
     return {

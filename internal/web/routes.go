@@ -38,6 +38,14 @@ func (s *Server) routes() {
 
 	// Guarded app group: RequireAuth → RequireNotDisabled → RequireOrg → LoadPlan.
 	appMux := http.NewServeMux()
+	appMux.HandleFunc("GET /app", s.handleDashboard)
+	appMux.HandleFunc("GET /app/projects", s.handleProjects)
+	appMux.HandleFunc("GET /app/projects/new", s.handleProjectNew)
+	appMux.HandleFunc("POST /app/projects", s.handleProjectCreate)
+	appMux.HandleFunc("GET /app/projects/{id}/edit", s.handleProjectEdit)
+	appMux.HandleFunc("POST /app/projects/{id}", s.handleProjectUpdate)
+	appMux.HandleFunc("POST /app/projects/{id}/archive", s.handleProjectArchive)
+	appMux.HandleFunc("DELETE /app/projects/{id}", s.handleProjectDelete)
 	appMux.HandleFunc("GET /app/settings/account", s.handleSettingsAccount)
 	appMux.HandleFunc("GET /app/settings/org", s.handleSettingsOrg)
 	appMux.HandleFunc("GET /app/activity", s.handleActivity)

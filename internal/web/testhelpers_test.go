@@ -90,6 +90,11 @@ func serve(t *testing.T, s *Server, method, target string, body []byte, headers 
 		rdr = strings.NewReader(string(body))
 	}
 	req := httptest.NewRequest(method, target, rdr)
+	if method != http.MethodGet && req.Header.Get("Origin") == "" {
+		// Browsers always send Origin on mutating requests; nosurf v1.2
+		// enforces same-origin via Sec-Fetch-Site/Origin/Referer.
+		req.Header.Set("Origin", "http://"+req.Host)
+	}
 	for k, vs := range headers {
 		for _, v := range vs {
 			req.Header.Add(k, v)
