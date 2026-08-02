@@ -7,16 +7,156 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const countUsers = `-- name: CountUsers :one
+SELECT count(*) FROM users
+WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
+`
+
+func (q *Queries) CountUsers(ctx context.Context, dollar_1 string) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers, dollar_1)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countUsersSince = `-- name: CountUsersSince :one
+SELECT count(*) FROM users WHERE created_at >= $1
+`
+
+func (q *Queries) CountUsersSince(ctx context.Context, createdAt pgtype.Timestamptz) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsersSince, createdAt)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE clerk_user_id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, clerkUserID string) error {
+	_, err := q.db.Exec(ctx, deleteUser, clerkUserID)
+	return err
+}
 
 const getUserByClerkID = `-- name: GetUserByClerkID :one
 
 SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at FROM users WHERE clerk_user_id = $1
 `
 
-// Queries for the users mirror table. (Full set lands with the identity step.)
+// users mirror table (identity is Clerk; these rows are a local query cache)
 func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByClerkID, clerkUserID)
+	var i User
+	err := row.Scan(
+		&i.ClerkUserID,
+		&i.Email,
+		&i.Name,
+		&i.AvatarUrl,
+		&i.IsAdmin,
+		&i.DisabledAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at FROM users
+WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListUsersParams struct {
+	Column1 string `json:"column_1"`
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ClerkUserID,
+			&i.Email,
+			&i.Name,
+			&i.AvatarUrl,
+			&i.IsAdmin,
+			&i.DisabledAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setUserAdminByEmail = `-- name: SetUserAdminByEmail :exec
+UPDATE users SET is_admin = $2, updated_at = now() WHERE email = $1
+`
+
+type SetUserAdminByEmailParams struct {
+	Email   string `json:"email"`
+	IsAdmin bool   `json:"is_admin"`
+}
+
+func (q *Queries) SetUserAdminByEmail(ctx context.Context, arg SetUserAdminByEmailParams) error {
+	_, err := q.db.Exec(ctx, setUserAdminByEmail, arg.Email, arg.IsAdmin)
+	return err
+}
+
+const setUserDisabled = `-- name: SetUserDisabled :exec
+UPDATE users SET disabled_at = $2, updated_at = now() WHERE clerk_user_id = $1
+`
+
+type SetUserDisabledParams struct {
+	ClerkUserID string             `json:"clerk_user_id"`
+	DisabledAt  pgtype.Timestamptz `json:"disabled_at"`
+}
+
+func (q *Queries) SetUserDisabled(ctx context.Context, arg SetUserDisabledParams) error {
+	_, err := q.db.Exec(ctx, setUserDisabled, arg.ClerkUserID, arg.DisabledAt)
+	return err
+}
+
+const upsertUser = `-- name: UpsertUser :one
+INSERT INTO users (clerk_user_id, email, name, avatar_url)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (clerk_user_id) DO UPDATE
+SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = now()
+RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at
+`
+
+type UpsertUserParams struct {
+	ClerkUserID string `json:"clerk_user_id"`
+	Email       string `json:"email"`
+	Name        string `json:"name"`
+	AvatarUrl   string `json:"avatar_url"`
+}
+
+func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, upsertUser,
+		arg.ClerkUserID,
+		arg.Email,
+		arg.Name,
+		arg.AvatarUrl,
+	)
 	var i User
 	err := row.Scan(
 		&i.ClerkUserID,
