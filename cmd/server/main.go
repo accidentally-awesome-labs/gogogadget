@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/web"
@@ -36,6 +37,8 @@ func run() error {
 
 	log := newLogger(cfg)
 	log.Info("starting", "env", cfg.Env, "version", version, "port", cfg.Port)
+
+	billing.SetPolarProductIDs(cfg.PolarProductPro, cfg.PolarProductTeam)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

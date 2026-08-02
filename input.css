@@ -1,1 +1,132 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "InterVariable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Brand scale (indigo) — buyers rebrand in this one block. */
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+  --color-brand-950: #1e1b4b;
+
+  /* Semantic tokens — templates use ONLY these + component classes. */
+  --color-surface: #ffffff;
+  --color-surface-raised: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-fg: #0f172a;
+  --color-fg-muted: #475569;
+}
+
+@layer base {
+  .dark {
+    --color-surface: #0b1120;
+    --color-surface-raised: #111a2e;
+    --color-border: #1e293b;
+    --color-fg: #e2e8f0;
+    --color-fg-muted: #94a3b8;
+  }
+
+  @font-face {
+    font-family: "InterVariable";
+    src: url("/static/fonts/inter-var.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  [x-cloak] {
+    display: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .btn, .btn-primary, .btn-ghost, .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
+      transition-colors duration-150 cursor-pointer
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
+      disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-500;
+  }
+  .btn-ghost {
+    @apply border border-border text-fg hover:bg-surface-raised;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-500;
+  }
+  .input {
+    @apply block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg
+      placeholder:text-fg-muted outline-none
+      focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30
+      disabled:opacity-50;
+  }
+  .label {
+    @apply block text-sm font-medium text-fg mb-1;
+  }
+  .card {
+    @apply rounded-xl border border-border bg-surface p-6 shadow-sm;
+  }
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .table {
+    @apply min-w-full divide-y divide-border text-sm;
+  }
+  .table thead {
+    @apply text-left text-xs uppercase tracking-wide text-fg-muted;
+  }
+  .table th {
+    @apply px-4 py-3 font-medium;
+  }
+  .table td {
+    @apply px-4 py-3;
+  }
+  .table tbody {
+    @apply divide-y divide-border;
+  }
+  .link {
+    @apply text-brand-600 underline-offset-4 hover:underline;
+  }
+  .dark .link {
+    @apply text-brand-400;
+  }
+  .alert-success {
+    @apply rounded-lg border border-green-200 bg-green-50 text-green-800 p-3 text-sm;
+  }
+  .dark .alert-success {
+    @apply border-green-900 bg-green-950 text-green-200;
+  }
+  .alert-error {
+    @apply rounded-lg border border-red-200 bg-red-50 text-red-800 p-3 text-sm;
+  }
+  .dark .alert-error {
+    @apply border-red-900 bg-red-950 text-red-200;
+  }
+
+  /* htmx busy indicator: shown while any hx-get is in flight */
+  .htmx-indicator {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    opacity: 1;
+  }
+}

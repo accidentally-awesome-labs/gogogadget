@@ -33,9 +33,18 @@ func NewServer(cfg config.Config, log *slog.Logger, db *pgxpool.Pool, version st
 }
 
 // Handler applies the global middleware stack. The order is load-bearing —
-// see docs/architecture.
+// see docs/architecture: recover → requestID → accessLog → rateLimit →
+// secureHeaders → sessionLoad (identity step) → csrf → routes.
 func (s *Server) Handler() http.Handler {
-	return maxBytes(s.mux, 10<<20) // 10 MB request cap on every route
+	h := http.Handler(s.mux)
+	h = s.csrf(h)
+	// sessionLoad (Clerk claims, optional) is inserted HERE by the identity step.
+	h = s.secureHeaders(h)
+	h = s.rateLimit(h)
+	h = s.accessLog(h)
+	h = s.requestID(h)
+	h = s.recover(h)
+	return maxBytes(h, 10<<20) // 10 MB request cap on every route
 }
 
 func maxBytes(next http.Handler, n int64) http.Handler {

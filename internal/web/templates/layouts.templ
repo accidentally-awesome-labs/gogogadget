@@ -1,0 +1,114 @@
+package templates
+
+import "fmt"
+
+// headMeta renders title, description, and OG/Twitter tags.
+templ headMeta(page Page) {
+	<title>{ page.Title } — GoGoGadget</title>
+	if page.Description != "" {
+		<meta name="description" content={ page.Description }/>
+	}
+	<meta property="og:type" content="website"/>
+	<meta property="og:title" content={ page.Title + " — GoGoGadget" }/>
+	if page.Description != "" {
+		<meta property="og:description" content={ page.Description }/>
+	}
+	<meta property="og:url" content={ page.AppURL + page.Path }/>
+	<meta property="og:image" content={ page.AppURL + "/static/og.png" }/>
+	<meta name="twitter:card" content="summary_large_image"/>
+}
+
+// headScripts loads vendored JS. app.js is NOT deferred so dark-mode init runs
+// pre-paint; everything else defers. No inline scripts anywhere (CSP).
+templ headScripts(page Page) {
+	<script src="/static/app.js"></script>
+	<script defer src="/static/vendor/htmx.min.js"></script>
+	<script defer src="/static/vendor/alpine-focus.min.js"></script>
+	<script defer src="/static/vendor/alpine-csp.min.js"></script>
+	if page.ClerkPublishableKey != "" {
+		// Load-bearing: clerk-js owns the ~60s __session JWT refresh cycle.
+		// Removing it expires auth ~60s after login. See /docs/authentication.
+		<meta name="clerk-publishable-key" content={ page.ClerkPublishableKey }/>
+		<script defer src="/static/vendor/clerk.browser.js"></script>
+	}
+}
+
+templ skipLink() {
+	<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-lg">Skip to content</a>
+}
+
+templ toastRoot() {
+	<div x-data="toastRoot" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2" role="status" aria-live="polite">
+		<template x-for="t in toasts" :key="t.id">
+			<div
+				data-testid="toast"
+				class="card px-4 py-3 text-sm shadow-lg border-l-4"
+				:class="t.type === 'success' ? 'border-l-green-500' : (t.type === 'error' ? 'border-l-red-500' : 'border-l-brand-500')"
+				x-text="t.message"
+			></div>
+		</template>
+	</div>
+}
+
+// PublicLayout wraps marketing/content pages.
+templ PublicLayout(page Page, content templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			@headMeta(page)
+			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
+			<link rel="manifest" href="/static/site.webmanifest"/>
+			<link rel="stylesheet" href="/static/app.css"/>
+			@headScripts(page)
+		</head>
+		<body class="bg-surface text-fg antialiased" hx-headers={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
+			@skipLink()
+			@Nav(page)
+			<main id="content">
+				@content
+			</main>
+			@Footer()
+			@toastRoot()
+		</body>
+	</html>
+}
+
+// AppLayout is the authenticated shell (sidebar + topbar + toast root).
+templ AppLayout(page Page, content templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			@headMeta(page)
+			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
+			<link rel="stylesheet" href="/static/app.css"/>
+			@headScripts(page)
+		</head>
+		<body class="bg-surface text-fg antialiased" hx-headers={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
+			@skipLink()
+			<div class="flex min-h-screen">
+				@Sidebar(page)
+				<div class="flex-1 flex flex-col min-w-0">
+					@Topbar(page)
+					<main id="content" class="flex-1 p-6 max-w-6xl w-full mx-auto">
+						@content
+					</main>
+				</div>
+			</div>
+			@toastRoot()
+		</body>
+	</html>
+}
+
+// AdminLayout is AppLayout plus the admin nav section.
+templ AdminLayout(page Page, content templ.Component) {
+	@AppLayout(page, content)
+}
+
+// DocsLayout wraps documentation pages (sidebar lands with the docs step).
+templ DocsLayout(page Page, content templ.Component) {
+	@PublicLayout(page, content)
+}

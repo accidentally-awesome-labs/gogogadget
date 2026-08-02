@@ -1,0 +1,37 @@
+package templates
+
+// Sidebar is the app-shell navigation. The Clerk OrganizationSwitcher mounts
+// at #org-switcher when clerk-js is configured (identity step).
+templ Sidebar(page Page) {
+	<aside class="hidden md:flex w-60 shrink-0 flex-col border-r border-border bg-surface-raised p-4 gap-6">
+		@logo()
+		<div id="org-switcher" class="min-h-8"></div>
+		<nav class="flex flex-col gap-1 text-sm" hx-boost="true">
+			for _, item := range []struct{ Label, Href string }{
+				{"Dashboard", "/app"},
+				{"Projects", "/app/projects"},
+				{"Activity", "/app/activity"},
+				{"Settings", "/app/settings/account"},
+			} {
+				<a
+					href={ templ.SafeURL(item.Href) }
+					aria-current={ navCurrent(page, item.Href) }
+					class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
+				>{ item.Label }</a>
+			}
+		</nav>
+	</aside>
+}
+
+// Topbar carries the mobile nav + Clerk UserButton mount point.
+templ Topbar(page Page) {
+	<div class="border-b border-border bg-surface px-4 h-14 flex items-center justify-between">
+		<div class="md:hidden">
+			@logo()
+		</div>
+		<div class="ml-auto flex items-center gap-3">
+			@themeToggle()
+			<div id="user-button" class="min-h-8 min-w-8"></div>
+		</div>
+	</div>
+}
