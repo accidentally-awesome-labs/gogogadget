@@ -152,7 +152,7 @@ func (s *Server) requireOrg(next http.Handler) http.Handler {
 	})
 }
 
-// loadPlan sets ctxPlan after requireOrg.
+// loadPlan sets ctxSub + ctxPlan after requireOrg.
 func (s *Server) loadPlan(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		org := identity.OrgFrom(r.Context())
@@ -160,8 +160,16 @@ func (s *Server) loadPlan(next http.Handler) http.Handler {
 			s.renderError(w, r, "loadPlan without requireOrg")
 			return
 		}
-		plan := billing.CurrentPlan(r.Context(), s.q, org.ClerkOrgID, s.cfg.Now())
-		next.ServeHTTP(w, r.WithContext(identity.WithPlan(r.Context(), plan)))
+		ctx := r.Context()
+		sub, err := s.q.GetSubscriptionByOrg(ctx, org.ClerkOrgID)
+		if err == nil {
+			ctx = identity.WithSub(ctx, &sub)
+		} else if !errors.Is(err, pgx.ErrNoRows) {
+			s.renderError(w, r, err.Error())
+			return
+		}
+		plan := billing.CurrentPlan(ctx, s.q, org.ClerkOrgID, s.cfg.Now())
+		next.ServeHTTP(w, r.WithContext(identity.WithPlan(ctx, plan)))
 	})
 }
 

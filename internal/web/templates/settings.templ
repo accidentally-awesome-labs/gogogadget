@@ -39,6 +39,7 @@ templ SettingsTabs(active string) {
 		for _, item := range []struct{ Label, Href string }{
 			{"Account", "/app/settings/account"},
 			{"Organization", "/app/settings/org"},
+			{"Billing", "/app/settings/billing"},
 		} {
 			<a
 				href={ templ.SafeURL(item.Href) }

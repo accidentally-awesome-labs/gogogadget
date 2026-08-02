@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/justinas/nosurf"
 )
@@ -30,6 +31,11 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.ClerkPublishableKey = s.cfg.ClerkPublishableKey
 	page.ClerkFrontendAPIURL = s.cfg.ClerkFrontendAPIURL
 	page.Now = s.cfg.Now
+	// Layout identity context, when the guard chain populated it.
+	page.User = identity.UserFrom(r.Context())
+	page.Org = identity.OrgFrom(r.Context())
+	page.Plan = identity.PlanFrom(r.Context())
+	page.Sub = identity.SubFrom(r.Context())
 
 	component := content
 	if !(IsHX(r) && !IsBoosted(r)) {

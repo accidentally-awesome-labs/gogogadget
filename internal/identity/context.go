@@ -15,6 +15,7 @@ const (
 	ctxClaims ctxKey = "claims" // session claims
 	ctxOrg    ctxKey = "org"    // local orgs row for the active org
 	ctxPlan   ctxKey = "plan"   // billing.Plan, set by LoadPlan after RequireOrg
+	ctxSub    ctxKey = "sub"    // *sqlc.Subscription (nil = free), set by LoadPlan
 )
 
 func WithUser(ctx context.Context, u *sqlc.User) context.Context {
@@ -28,6 +29,9 @@ func WithOrg(ctx context.Context, o *sqlc.Org) context.Context {
 }
 func WithPlan(ctx context.Context, p billing.Plan) context.Context {
 	return context.WithValue(ctx, ctxPlan, p)
+}
+func WithSub(ctx context.Context, s *sqlc.Subscription) context.Context {
+	return context.WithValue(ctx, ctxSub, s)
 }
 
 func UserFrom(ctx context.Context) *sqlc.User {
@@ -51,4 +55,10 @@ func PlanFrom(ctx context.Context) billing.Plan {
 		return billing.PlanByKey("free")
 	}
 	return p
+}
+
+// SubFrom returns the org's subscription row, or nil on the free plan.
+func SubFrom(ctx context.Context) *sqlc.Subscription {
+	s, _ := ctx.Value(ctxSub).(*sqlc.Subscription)
+	return s
 }

@@ -84,12 +84,20 @@ func run() error {
 		log.Warn("clerk not configured — /app routes will 503")
 	}
 
+	var polarClient billing.Client
+	if cfg.PolarConfigured() {
+		polarClient = billing.NewPolarClient(cfg.PolarAccessToken, cfg.PolarServer)
+		log.Info("billing: polar", "server", cfg.PolarServer)
+	} else {
+		log.Warn("polar not configured — billing routes will 503")
+	}
+
 	q := sqlc.New(pool)
 	srv := web.NewServer(web.Deps{
 		Config: cfg, Log: log, DB: pool, Queries: q, Version: version,
 		Blog: blog, Docs: docs,
 		Verifier: verifier, Fetcher: fetcher,
-		Billing: nil, // Polar client lands in the billing step
+		Billing: polarClient,
 	})
 
 	// Mail: Resend when configured, DevSender (log + tmp/emails/) otherwise.

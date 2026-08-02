@@ -1,6 +1,11 @@
 package templates
 
-import "time"
+import (
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+)
 
 // Layout names for Page.Layout.
 const (
@@ -24,6 +29,12 @@ type Page struct {
 	PostHogKey          string
 	ClerkPublishableKey string
 	ClerkFrontendAPIURL string
+
+	// Identity/billing context (populated by the render path from ctx).
+	User *sqlc.User
+	Org  *sqlc.Org
+	Plan billing.Plan
+	Sub  *sqlc.Subscription
 
 	// Now is the render clock (frozen under APP_ENV=test via TEST_NOW) so
 	// rendered dates never rot visual baselines.

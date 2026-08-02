@@ -1,0 +1,110 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+)
+
+func planRank(key string) int {
+	switch key {
+	case "pro":
+		return 1
+	case "team":
+		return 2
+	default:
+		return 0
+	}
+}
+
+func statusBadge(status string) string {
+	switch status {
+	case "active", "trialing":
+		return "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+	case "past_due":
+		return "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+	case "canceled":
+		return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+	default:
+		return "bg-surface-raised text-fg-muted"
+	}
+}
+
+// BillingCard is the current-plan card (polled fragment after checkout).
+templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
+	<div id="billing-card" class="card mb-6 max-w-lg"
+		if processing {
+			hx-get="/app/settings/billing/fragment" hx-trigger="every 2s" hx-swap="outerHTML"
+		}
+	>
+		if processing {
+			<p class="font-semibold">Processing your subscription…</p>
+			<p class="text-sm text-fg-muted mt-1">Confirming with the payment provider — this takes a few seconds.</p>
+		} else {
+			<div class="flex items-center justify-between">
+				<h2 class="text-lg font-semibold">{ plan.Name } plan</h2>
+				if sub != nil {
+					<span class={ "badge", statusBadge(sub.Status) } data-testid="plan-badge">{ sub.Status }</span>
+				} else {
+					<span class="badge bg-surface-raised text-fg-muted" data-testid="plan-badge">free</span>
+				}
+			</div>
+			if sub != nil && sub.CurrentPeriodEnd.Valid {
+				<p class="text-sm text-fg-muted mt-2">
+					if sub.CancelAtPeriodEnd {
+						Your plan ends on { sub.CurrentPeriodEnd.Time.Format("January 2, 2006") }.
+					} else {
+						Current period ends { sub.CurrentPeriodEnd.Time.Format("January 2, 2006") }.
+					}
+				</p>
+			}
+		}
+	</div>
+}
+
+templ BillingError(msg string) {
+	<div class="alert-error max-w-lg" role="alert">{ msg }</div>
+}
+
+templ SettingsBilling(d BillingData) {
+	@SettingsTabs("/app/settings/billing")
+	<h1 class="text-2xl font-bold mb-6">Billing</h1>
+
+	if d.Success && !d.Processing {
+		<div class="alert-success mb-4 max-w-lg" role="status">Your subscription is active. Welcome aboard!</div>
+	}
+
+	@BillingCard(d.Plan, d.Sub, d.Processing)
+
+	if d.Plan.MaxProjects > 0 {
+		<div class="card mb-6 max-w-lg" data-testid="usage-meter">
+			<h2 class="text-sm font-semibold mb-2">Usage</h2>
+			<p class="text-sm text-fg-muted">{ fmt.Sprint(d.ProjectCount) } / { fmt.Sprint(d.Plan.MaxProjects) } projects used</p>
+			<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
+				<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.ProjectCount*100/int64(max(d.Plan.MaxProjects, 1)))) }></div>
+			</div>
+		</div>
+	}
+
+	<div class="grid sm:grid-cols-3 gap-4 max-w-4xl">
+		for _, p := range d.Plans {
+			@PlanCard(p, p.Key == d.Plan.Key) {
+				if planRank(p.Key) > planRank(d.Plan.Key) {
+					<form hx-post="/app/billing/checkout" hx-disabled-elt="this">
+						<input type="hidden" name="plan" value={ p.Key }/>
+						<button type="submit" class="btn btn-primary w-full">Upgrade to { p.Name }</button>
+					</form>
+				} else if p.Key == d.Plan.Key {
+					<span class="btn-ghost w-full opacity-50">Current plan</span>
+				}
+			}
+		}
+	</div>
+
+	if d.Sub != nil {
+		<form hx-post="/app/billing/portal" hx-disabled-elt="this" class="mt-6">
+			<button type="submit" class="btn btn-ghost" data-testid="manage-subscription">Manage subscription →</button>
+		</form>
+	}
+}

@@ -35,6 +35,7 @@ func (s *Server) routes() {
 
 	// Webhooks are CSRF-exempt in the chain and signature-verified here.
 	s.mux.HandleFunc("POST /webhooks/clerk", s.handleClerkWebhook)
+	s.mux.HandleFunc("POST /webhooks/polar", s.handlePolarWebhook)
 
 	// Guarded app group: RequireAuth → RequireNotDisabled → RequireOrg → LoadPlan.
 	appMux := http.NewServeMux()
@@ -48,6 +49,10 @@ func (s *Server) routes() {
 	appMux.HandleFunc("DELETE /app/projects/{id}", s.handleProjectDelete)
 	appMux.HandleFunc("GET /app/settings/account", s.handleSettingsAccount)
 	appMux.HandleFunc("GET /app/settings/org", s.handleSettingsOrg)
+	appMux.HandleFunc("GET /app/settings/billing", s.handleSettingsBilling)
+	appMux.HandleFunc("GET /app/settings/billing/fragment", s.handleSettingsBillingFragment)
+	appMux.HandleFunc("POST /app/billing/checkout", s.handleBillingCheckout)
+	appMux.HandleFunc("POST /app/billing/portal", s.handleBillingPortal)
 	appMux.HandleFunc("GET /app/activity", s.handleActivity)
 	s.mux.Handle("/app", s.appChain(appMux))
 	s.mux.Handle("/app/", s.appChain(appMux))

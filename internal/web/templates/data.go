@@ -24,6 +24,15 @@ type ProjectListData struct {
 	Count      int64
 }
 
+type BillingData struct {
+	Plan         billing.Plan
+	Sub          *sqlc.Subscription
+	ProjectCount int64
+	Plans        []billing.Plan
+	Processing   bool // checkout redirect beat the webhook
+	Success      bool
+}
+
 type ProjectFormData struct {
 	ID       int64 // 0 = new
 	Name     string

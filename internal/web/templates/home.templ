@@ -109,15 +109,23 @@ templ Home(plans []billing.Plan) {
 	</section>
 }
 
-templ Pricing(plans []billing.Plan) {
+templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
 	<section class="max-w-6xl mx-auto px-4 py-16">
 		<h1 class="text-4xl font-extrabold text-center">Pricing</h1>
 		<p class="mt-4 text-center text-fg-muted">Start free. Upgrade when you outgrow it. Cancel anytime.</p>
 		<div class="mt-12 grid md:grid-cols-3 gap-6">
 			for _, p := range plans {
-				@PlanCard(p, false) {
-					// Static until the billing step wires checkout: anon → /signup.
-					<a href="/signup" class="btn btn-primary w-full">Choose { p.Name }</a>
+				@PlanCard(p, authed && p.Key == currentPlanKey) {
+					if !authed {
+						<a href="/signup" class="btn btn-primary w-full">Choose { p.Name }</a>
+					} else if p.Key == currentPlanKey {
+						<span class="btn-ghost w-full opacity-50">Current plan</span>
+					} else if p.PolarProductID != "" {
+						<form hx-post="/app/billing/checkout" hx-disabled-elt="this">
+							<input type="hidden" name="plan" value={ p.Key }/>
+							<button type="submit" class="btn btn-primary w-full">Upgrade to { p.Name }</button>
+						</form>
+					}
 				}
 			}
 		</div>

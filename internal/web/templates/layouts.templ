@@ -93,6 +93,7 @@ templ AppLayout(page Page, content templ.Component) {
 				@Sidebar(page)
 				<div class="flex-1 flex flex-col min-w-0">
 					@Topbar(page)
+					@billingBanner(page)
 					<main id="content" class="flex-1 p-6 max-w-6xl w-full mx-auto">
 						@content
 					</main>
@@ -101,6 +102,20 @@ templ AppLayout(page Page, content templ.Component) {
 			@toastRoot()
 		</body>
 	</html>
+}
+
+// billingBanner is the persistent past_due / ending-plan nudge in the shell.
+templ billingBanner(page Page) {
+	if page.Sub != nil && page.Sub.Status == "past_due" {
+		<div class="bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-b border-amber-200 dark:border-amber-900 px-4 py-2 text-sm" role="alert">
+			Your payment is failing — <a href="/app/settings/billing" class="font-semibold underline">update your card</a> to keep your plan.
+		</div>
+	}
+	if page.Sub != nil && page.Sub.Status == "canceled" && page.Sub.CurrentPeriodEnd.Valid && page.Sub.CurrentPeriodEnd.Time.After(page.NowOrDefault()) {
+		<div class="bg-brand-50 text-brand-800 dark:bg-brand-950 dark:text-brand-200 border-b border-brand-200 dark:border-brand-900 px-4 py-2 text-sm" role="status">
+			Your plan ends on { page.Sub.CurrentPeriodEnd.Time.Format("January 2, 2006") } — <a href="/app/settings/billing" class="font-semibold underline">manage billing</a>.
+		</div>
+	}
 }
 
 // AdminLayout is AppLayout plus the admin nav section.
