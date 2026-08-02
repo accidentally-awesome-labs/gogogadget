@@ -31,6 +31,12 @@ templ headScripts(page Page) {
 		<meta name="clerk-publishable-key" content={ page.ClerkPublishableKey }/>
 		<script defer src="/static/vendor/clerk.browser.js" data-clerk-publishable-key={ page.ClerkPublishableKey }></script>
 	}
+	if page.PostHogKey != "" {
+		// PostHog loads through the /ingest proxy so CSP stays script-src 'self'.
+		<meta name="ph-key" content={ page.PostHogKey }/>
+		<script defer src="/ingest/static/array.js"></script>
+		<script defer src="/static/analytics.js"></script>
+	}
 }
 
 templ skipLink() {
@@ -48,6 +54,20 @@ templ toastRoot() {
 			></div>
 		</template>
 	</div>
+}
+
+// phConsent is the analytics consent banner (rendered only when PostHog is
+// configured). posthog.init runs only after acceptance — see static/analytics.js.
+templ phConsent(page Page) {
+	if page.PostHogKey != "" {
+		<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-50 card max-w-sm text-sm" role="dialog" aria-label="Analytics consent">
+			<p>We use privacy-respecting product analytics (self-proxied PostHog) to improve GoGoGadget.</p>
+			<div class="flex gap-2 mt-3">
+				<button type="button" @click="accept" class="btn btn-primary !py-1 text-xs">Accept</button>
+				<button type="button" @click="decline" class="btn-ghost !py-1 text-xs">Decline</button>
+			</div>
+		</div>
+	}
 }
 
 // PublicLayout wraps marketing/content pages.
@@ -71,6 +91,7 @@ templ PublicLayout(page Page, content templ.Component) {
 			</main>
 			@Footer()
 			@toastRoot()
+			@phConsent(page)
 		</body>
 	</html>
 }
@@ -100,6 +121,7 @@ templ AppLayout(page Page, content templ.Component) {
 				</div>
 			</div>
 			@toastRoot()
+			@phConsent(page)
 		</body>
 	</html>
 }

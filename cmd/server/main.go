@@ -14,6 +14,8 @@ import (
 	"time"
 
 	contentfs "github.com/gogogadget/gogogadget/content"
+	"github.com/getsentry/sentry-go"
+	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
@@ -92,12 +94,31 @@ func run() error {
 		log.Warn("polar not configured — billing routes will 503")
 	}
 
+	// Observability: both env-gated.
+	if cfg.SentryEnabled() {
+		if err := sentry.Init(sentry.ClientOptions{Dsn: cfg.SentryDSN, Environment: cfg.Env}); err != nil {
+			return fmt.Errorf("sentry init: %w", err)
+		}
+		defer sentry.Flush(2 * time.Second)
+		log.Info("sentry: enabled")
+	}
+	var capturer analytics.Capturer = analytics.NoopCapturer{}
+	if cfg.PostHogEnabled() {
+		ph, err := analytics.NewPostHog(cfg.PostHogAPIKey, cfg.PostHogHost)
+		if err != nil {
+			return fmt.Errorf("posthog init: %w", err)
+		}
+		defer ph.Close()
+		capturer = ph
+		log.Info("posthog: enabled")
+	}
+
 	q := sqlc.New(pool)
 	srv := web.NewServer(web.Deps{
 		Config: cfg, Log: log, DB: pool, Queries: q, Version: version,
 		Blog: blog, Docs: docs,
 		Verifier: verifier, Fetcher: fetcher,
-		Billing: polarClient,
+		Billing: polarClient, Analytics: capturer,
 	})
 
 	// Mail: Resend when configured, DevSender (log + tmp/emails/) otherwise.
@@ -112,6 +133,11 @@ func run() error {
 
 	// Background jobs worker (SKIP LOCKED claim; stops on shutdown signal).
 	worker := jobs.NewWorker(sqlc.New(pool), sender, log)
+	if cfg.SentryEnabled() {
+		worker.OnDeadLetter = func(kind string, err error) {
+			sentry.CaptureException(fmt.Errorf("job %s dead-lettered: %w", kind, err))
+		}
+	}
 	go worker.Run(ctx)
 
 	httpSrv := &http.Server{

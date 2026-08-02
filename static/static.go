@@ -4,5 +4,5 @@ package static
 
 import "embed"
 
-//go:embed app.css app.js favicon.svg site.webmanifest og.png vendor fonts
+//go:embed app.css app.js analytics.js favicon.svg site.webmanifest og.png vendor fonts
 var FS embed.FS

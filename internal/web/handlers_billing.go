@@ -193,6 +193,8 @@ func (s *Server) productPlans() map[string]string {
 	return m
 }
 
-// captureEvent is the analytics hook for the billing processor; nil until
-// the observability step wires PostHog.
-func (s *Server) captureEvent(userID, event string, props map[string]any) {}
+// captureEvent is the analytics hook for the billing processor; the
+// NoopCapturer makes it a no-op until PostHog is configured.
+func (s *Server) captureEvent(userID, event string, props map[string]any) {
+	s.analytics.Capture(userID, event, props)
+}

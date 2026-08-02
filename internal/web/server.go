@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
@@ -28,6 +29,7 @@ type Server struct {
 	verifier      identity.Verifier
 	fetcher       identity.UserFetcher
 	billingClient billing.Client // nil when Polar is unconfigured
+	analytics     analytics.Capturer
 
 	mux *http.ServeMux
 }
@@ -43,9 +45,10 @@ type Deps struct {
 	Blog    *content.Blog
 	Docs    *content.Docs
 
-	Verifier identity.Verifier
-	Fetcher  identity.UserFetcher
-	Billing  billing.Client
+	Verifier  identity.Verifier
+	Fetcher   identity.UserFetcher
+	Billing   billing.Client
+	Analytics analytics.Capturer
 }
 
 func NewServer(d Deps) *Server {
@@ -60,7 +63,11 @@ func NewServer(d Deps) *Server {
 		verifier:      d.Verifier,
 		fetcher:       d.Fetcher,
 		billingClient: d.Billing,
+		analytics:     analytics.NoopCapturer{},
 		mux:           http.NewServeMux(),
+	}
+	if d.Analytics != nil {
+		s.analytics = d.Analytics
 	}
 	s.routes()
 	return s

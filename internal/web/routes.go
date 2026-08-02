@@ -2,7 +2,9 @@ package web
 
 import (
 	"net/http"
+	"net/http/pprof"
 
+	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/api"
 )
 
@@ -82,6 +84,25 @@ func (s *Server) routes() {
 	s.mux.Handle("/api/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		api.WriteError(w, http.StatusNotFound, "not_found", "Unknown API route.")
 	}))
+
+	// PostHog reverse proxy (registered only when configured; CSRF- and
+	// rate-limit-exempt in the chain).
+	if s.cfg.PostHogEnabled() {
+		if proxy, err := analytics.IngestProxy(s.cfg.PostHogHost); err == nil {
+			s.mux.Handle("/ingest/", proxy)
+		} else {
+			s.log.Error("posthog proxy", "error", err)
+		}
+	}
+
+	// pprof outside production only (zero-config profiling).
+	if !s.cfg.Production() {
+		s.mux.HandleFunc("GET /debug/pprof/", pprof.Index)
+		s.mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
+		s.mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
+		s.mux.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
+		s.mux.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
+	}
 
 	// Catch-all 404 (least-specific pattern matches last; method-less so it
 	// can't conflict with the /app and /admin subtrees).

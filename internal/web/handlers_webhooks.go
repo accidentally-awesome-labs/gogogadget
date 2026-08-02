@@ -99,6 +99,7 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 			if err := jobs.EnqueueEmail(ctx, s.q, jobs.KindWelcome, msg, "", time.Time{}); err != nil {
 				return err
 			}
+			s.analytics.Capture(id, "user_signed_up", map[string]any{"email": profile.Email})
 		}
 		return nil
 

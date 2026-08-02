@@ -159,6 +159,7 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
+	s.analytics.Capture(user.ClerkUserID, "project_created", map[string]any{"org_id": org.ClerkOrgID, "project_id": project.ID})
 	Toast(w, "success", "Project created")
 	HXRedirect(w, "/app/projects")
 }

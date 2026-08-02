@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/justinas/nosurf"
 	"golang.org/x/time/rate"
 )
@@ -44,8 +45,17 @@ func (s *Server) recover(next http.Handler) http.Handler {
 	})
 }
 
-// capturePanic reports to Sentry when enabled; wired in the observability step.
-func (s *Server) capturePanic(r *http.Request, rec any) {}
+// capturePanic reports to Sentry when enabled.
+func (s *Server) capturePanic(r *http.Request, rec any) {
+	if !s.cfg.SentryEnabled() {
+		return
+	}
+	sentry.WithScope(func(scope *sentry.Scope) {
+		scope.SetTag("path", r.URL.Path)
+		scope.SetContext("request", sentry.Context{"id": requestIDFrom(r.Context())})
+		sentry.CaptureException(fmt.Errorf("panic: %v", rec))
+	})
+}
 
 type ctxKeyRequestID struct{}
 

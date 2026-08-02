@@ -13,10 +13,12 @@ tool (
 require (
 	github.com/a-h/templ v0.3.1020
 	github.com/clerk/clerk-sdk-go/v2 v2.7.0
+	github.com/getsentry/sentry-go v0.48.0
 	github.com/go-playground/form/v4 v4.3.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/justinas/nosurf v1.2.0
 	github.com/polarsource/polar-go v0.16.0
+	github.com/posthog/posthog-go v1.22.0
 	github.com/pressly/goose/v3 v3.27.3
 	github.com/resendlabs/resend-go v1.7.0
 	github.com/standard-webhooks/standard-webhooks/libraries v0.0.1
@@ -58,6 +60,7 @@ require (
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
 	github.com/go-sql-driver/mysql v1.10.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/gohugoio/hashstructure v0.6.0 // indirect
 	github.com/gohugoio/hugo v0.164.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
@@ -65,6 +68,7 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/cel-go v0.28.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
