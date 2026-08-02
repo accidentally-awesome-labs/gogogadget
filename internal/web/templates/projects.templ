@@ -70,37 +70,41 @@ templ ProjectsTable(d ProjectListData) {
 }
 
 templ ProjectForm(d ProjectFormData) {
-	if d.LimitHit {
-		<div class="alert-error mb-4" data-testid="plan-limit">
-			You've reached the { d.Plan.Name } plan limit of { fmt.Sprint(d.Plan.MaxProjects) } projects.
-			<a href="/app/settings/billing" class="link font-semibold">Upgrade to create more →</a>
-		</div>
-	}
-	if d.NameErr != "" {
-		<div class="alert-error mb-4" role="alert">Please fix the error below.</div>
-	}
-	<form
-		if d.ID == 0 {
-			hx-post="/app/projects"
-		} else {
-			hx-post={ fmt.Sprintf("/app/projects/%d", d.ID) }
+	<div id="project-form">
+		if d.LimitHit {
+			<div class="alert-error mb-4" data-testid="plan-limit">
+				You've reached the { d.Plan.Name } plan limit of { fmt.Sprint(d.Plan.MaxProjects) } projects.
+				<a href="/app/settings/billing" class="link font-semibold">Upgrade to create more →</a>
+			</div>
 		}
-		hx-disabled-elt="this"
-		novalidate
-		class="card max-w-lg space-y-4"
-	>
-		@FormField("name", "Name", "text", d.Name, d.NameErr, "Launch checklist", true)
-		<div class="flex gap-3">
-			<button type="submit" class="btn btn-primary">
-				if d.ID == 0 {
-					Create project
-				} else {
-					Save changes
-				}
-			</button>
-			<a href="/app/projects" class="btn btn-ghost">Cancel</a>
-		</div>
-	</form>
+		if d.NameErr != "" {
+			<div class="alert-error mb-4" role="alert">Please fix the error below.</div>
+		}
+		<form
+			if d.ID == 0 {
+				hx-post="/app/projects"
+			} else {
+				hx-post={ fmt.Sprintf("/app/projects/%d", d.ID) }
+			}
+			hx-target="#project-form"
+			hx-swap="innerHTML"
+			hx-disabled-elt="this"
+			novalidate
+			class="card max-w-lg space-y-4"
+		>
+			@FormField("name", "Name", "text", d.Name, d.NameErr, "Launch checklist", true)
+			<div class="flex gap-3">
+				<button type="submit" class="btn btn-primary">
+					if d.ID == 0 {
+						Create project
+					} else {
+						Save changes
+					}
+				</button>
+				<a href="/app/projects" class="btn btn-ghost">Cancel</a>
+			</div>
+		</form>
+	</div>
 }
 
 templ ProjectNewPage(d ProjectFormData) {

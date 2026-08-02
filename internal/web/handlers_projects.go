@@ -109,10 +109,15 @@ type projectFormInput struct {
 	Name string `form:"name"`
 }
 
-// renderProjectFormError re-renders the form fragment with 422.
+// renderProjectFormError re-renders the form with 422: the fragment for
+// htmx (swapped into #project-form), the full page otherwise.
 func (s *Server) renderProjectFormError(w http.ResponseWriter, r *http.Request, d templates.ProjectFormData, edit bool) {
 	w.WriteHeader(http.StatusUnprocessableEntity)
 	page := Page{Title: "Project", Layout: templates.LayoutApp}
+	if IsHX(r) && !IsBoosted(r) {
+		s.Render(w, r, page, templates.ProjectForm(d))
+		return
+	}
 	if edit {
 		s.Render(w, r, page, templates.ProjectEditPage(d))
 		return
