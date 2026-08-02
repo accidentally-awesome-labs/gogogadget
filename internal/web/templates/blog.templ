@@ -1,0 +1,45 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/content"
+)
+
+templ BlogIndex(posts []content.Post) {
+	<section class="max-w-3xl mx-auto px-4 py-16">
+		<h1 class="text-4xl font-extrabold">Blog</h1>
+		<div class="mt-10 space-y-8">
+			if len(posts) == 0 {
+				<p class="text-fg-muted">No posts yet.</p>
+			}
+			for _, p := range posts {
+				<article>
+					<h2 class="text-2xl font-bold">
+						<a href={ "/blog/" + p.Slug } class="hover:text-brand-600">{ p.Title }</a>
+					</h2>
+					<p class="text-sm text-fg-muted mt-1">
+						<time datetime={ p.Date.Format("2006-01-02") }>{ p.Date.Format("January 2, 2006") }</time>
+						if p.Author != "" {
+							{ " · " + p.Author }
+						}
+					</p>
+					<p class="mt-2 text-fg-muted">{ p.Description }</p>
+				</article>
+			}
+		</div>
+	</section>
+}
+
+templ BlogPost(post content.Post) {
+	<article class="max-w-3xl mx-auto px-4 py-16">
+		<h1 class="text-4xl font-extrabold">{ post.Title }</h1>
+		<p class="text-sm text-fg-muted mt-2">
+			<time datetime={ post.Date.Format("2006-01-02") }>{ post.Date.Format("January 2, 2006") }</time>
+			if post.Author != "" {
+				{ " · " + post.Author }
+			}
+		</p>
+		<div class="prose mt-8">
+			@templ.Raw(post.Body)
+		</div>
+	</article>
+}

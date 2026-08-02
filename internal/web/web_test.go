@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,7 +25,7 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 		mutate(&cfg)
 	}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return NewServer(cfg, log, nil, "test")
+	return NewServer(cfg, log, nil, "test", &content.Blog{}, &content.Docs{})
 }
 
 func TestSecureHeadersCSP(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,15 +18,19 @@ type Server struct {
 	log     *slog.Logger
 	db      *pgxpool.Pool
 	version string
+	blog    *content.Blog
+	docs    *content.Docs
 	mux     *http.ServeMux
 }
 
-func NewServer(cfg config.Config, log *slog.Logger, db *pgxpool.Pool, version string) *Server {
+func NewServer(cfg config.Config, log *slog.Logger, db *pgxpool.Pool, version string, blog *content.Blog, docs *content.Docs) *Server {
 	s := &Server{
 		cfg:     cfg,
 		log:     log,
 		db:      db,
 		version: version,
+		blog:    blog,
+		docs:    docs,
 		mux:     http.NewServeMux(),
 	}
 	s.routes()

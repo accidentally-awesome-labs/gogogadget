@@ -15,8 +15,10 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/web"
+	contentfs "github.com/gogogadget/gogogadget/content"
 )
 
 // version is stamped at build time: -ldflags "-X main.version=$VERSION".
@@ -53,7 +55,16 @@ func run() error {
 		return fmt.Errorf("migrate database: %w", err)
 	}
 
-	srv := web.NewServer(cfg, log, pool, version)
+	blog, err := content.LoadBlog(contentfs.FS, cfg.Production())
+	if err != nil {
+		return fmt.Errorf("load blog: %w", err)
+	}
+	docs, err := content.LoadDocs(contentfs.FS, cfg.Production())
+	if err != nil {
+		return fmt.Errorf("load docs: %w", err)
+	}
+
+	srv := web.NewServer(cfg, log, pool, version, blog, docs)
 
 	httpSrv := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Port),

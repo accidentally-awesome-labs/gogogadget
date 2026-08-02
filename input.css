@@ -129,4 +129,26 @@
   .htmx-request.htmx-indicator {
     opacity: 1;
   }
+
+  /* .prose styles rendered markdown (blog + docs). No typography plugin —
+     keeps the standalone toolchain JS-free. */
+  .prose {
+    @apply text-fg leading-7;
+  }
+  .prose h1 { @apply text-3xl font-bold mt-10 mb-4; }
+  .prose h2 { @apply text-2xl font-bold mt-10 mb-3; }
+  .prose h3 { @apply text-xl font-semibold mt-8 mb-3; }
+  .prose p { @apply my-4; }
+  .prose a { @apply text-brand-600 underline-offset-4 hover:underline dark:text-brand-400; }
+  .prose ul { @apply list-disc pl-6 my-4 space-y-1; }
+  .prose ol { @apply list-decimal pl-6 my-4 space-y-1; }
+  .prose li > ul, .prose li > ol { @apply my-1; }
+  .prose blockquote { @apply border-l-4 border-border pl-4 my-4 text-fg-muted italic; }
+  .prose code { @apply rounded bg-surface-raised px-1.5 py-0.5 text-sm border border-border; }
+  .prose pre { @apply rounded-xl border border-border bg-surface shadow-sm overflow-x-auto text-sm my-4 !p-4; }
+  .prose pre code { @apply bg-transparent border-0 p-0; }
+  .prose table { @apply min-w-full divide-y divide-border text-sm my-4; }
+  .prose hr { @apply border-border my-8; }
+  .prose img { @apply rounded-xl my-4; }
+  .prose strong { @apply font-semibold; }
 }
