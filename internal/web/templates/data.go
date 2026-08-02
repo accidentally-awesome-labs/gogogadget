@@ -24,6 +24,26 @@ type ProjectListData struct {
 	Count      int64
 }
 
+type AdminHomeData struct {
+	TotalUsers    int64
+	TotalOrgs     int64
+	ActiveSubs    int64
+	MRR           int
+	RecentSignups []sqlc.User
+	Now           time.Time
+}
+
+type AdminUsersData struct {
+	Users      []sqlc.User
+	Query      string
+	Page       int
+	TotalPages int
+}
+
+type AdminOrgsData struct {
+	Orgs []sqlc.ListOrgsWithStatsRow
+}
+
 type BillingData struct {
 	Plan         billing.Plan
 	Sub          *sqlc.Subscription

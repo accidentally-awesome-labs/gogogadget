@@ -4,6 +4,8 @@
 // project creation, and shown as usage limits.
 package billing
 
+import "github.com/gogogadget/gogogadget/internal/db/sqlc"
+
 type Plan struct {
 	Key, Name, PriceDisplay string
 	PriceUSDMonthly         int
@@ -22,6 +24,16 @@ var Plans = []Plan{
 		Features: []string{"Unlimited projects", "10 team members", "Priority support"}},
 	{Key: "team", Name: "Team", PriceDisplay: "$50/mo", PriceUSDMonthly: 50, MaxProjects: -1, MaxMembers: -1,
 		Features: []string{"Unlimited everything", "Unlimited members", "SSO via Clerk"}},
+}
+
+// MRR sums monthly recurring revenue in USD over revenue subscriptions
+// (active, trialing, past_due), priced from the plan truth.
+func MRR(rows []sqlc.ListRevenueSubscriptionsRow) int {
+	total := 0
+	for _, r := range rows {
+		total += PlanByKey(r.ProductKey).PriceUSDMonthly * int(r.N)
+	}
+	return total
 }
 
 // PlanByKey looks up a plan; unknown keys fall back to free.

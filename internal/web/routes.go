@@ -57,6 +57,15 @@ func (s *Server) routes() {
 	s.mux.Handle("/app", s.appChain(appMux))
 	s.mux.Handle("/app/", s.appChain(appMux))
 
+	// Admin group: appChain + RequireAdmin.
+	adminMux := http.NewServeMux()
+	adminMux.HandleFunc("GET /admin", s.handleAdminHome)
+	adminMux.HandleFunc("GET /admin/users", s.handleAdminUsers)
+	adminMux.HandleFunc("POST /admin/users/{id}/disable", s.handleAdminUserDisable)
+	adminMux.HandleFunc("GET /admin/orgs", s.handleAdminOrgs)
+	s.mux.Handle("/admin", s.adminChain(adminMux))
+	s.mux.Handle("/admin/", s.adminChain(adminMux))
+
 	// Catch-all 404 (least-specific pattern matches last; method-less so it
 	// can't conflict with the /app and /admin subtrees).
 	s.mux.HandleFunc("/{rest...}", s.handleNotFound)

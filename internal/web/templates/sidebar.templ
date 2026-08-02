@@ -1,7 +1,8 @@
 package templates
 
 // Sidebar is the app-shell navigation. The Clerk OrganizationSwitcher mounts
-// at #org-switcher when clerk-js is configured (identity step).
+// at #org-switcher when clerk-js is configured (identity step). Site admins
+// also get the admin section.
 templ Sidebar(page Page) {
 	<aside class="hidden md:flex w-60 shrink-0 flex-col border-r border-border bg-surface-raised p-4 gap-6">
 		@logo()
@@ -20,6 +21,24 @@ templ Sidebar(page Page) {
 				>{ item.Label }</a>
 			}
 		</nav>
+		if page.User != nil && page.User.IsAdmin {
+			<div>
+				<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">Admin</p>
+				<nav class="flex flex-col gap-1 text-sm" hx-boost="true">
+					for _, item := range []struct{ Label, Href string }{
+						{"Overview", "/admin"},
+						{"Users", "/admin/users"},
+						{"Organizations", "/admin/orgs"},
+					} {
+						<a
+							href={ templ.SafeURL(item.Href) }
+							aria-current={ navCurrent(page, item.Href) }
+							class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
+						>{ item.Label }</a>
+					}
+				</nav>
+			</div>
+		}
 	</aside>
 }
 

@@ -1,0 +1,121 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+)
+
+templ AdminHome(d AdminHomeData) {
+	<h1 class="text-2xl font-bold mb-6">Admin</h1>
+	<div class="grid sm:grid-cols-4 gap-4">
+		@StatCard("Total users", fmt.Sprint(d.TotalUsers), "")
+		@StatCard("Total orgs", fmt.Sprint(d.TotalOrgs), "")
+		@StatCard("Active subscriptions", fmt.Sprint(d.ActiveSubs), "")
+		@StatCard("MRR", fmt.Sprintf("$%d", d.MRR), "across active + trialing + past_due")
+	</div>
+
+	<h2 class="text-lg font-semibold mt-10 mb-3">Signups, last 30 days</h2>
+	<div class="card !p-0 overflow-hidden">
+		if len(d.RecentSignups) == 0 {
+			<p class="p-6 text-sm text-fg-muted">No signups yet.</p>
+		} else {
+			<table class="table">
+				<tbody>
+					for _, u := range d.RecentSignups {
+						<tr>
+							<td class="font-medium">{ string(u.Email) }</td>
+							<td>{ u.Name }</td>
+							<td class="text-right text-fg-muted"><span data-testid="relative-time">{ RelTime(d.Now, u.CreatedAt.Time) }</span></td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+}
+
+templ AdminUsersPage(d AdminUsersData) {
+	<h1 class="text-2xl font-bold mb-6">Users</h1>
+	<input
+		type="search" name="q" value={ d.Query } placeholder="Search by email…"
+		class="input max-w-sm mb-4"
+		hx-get="/admin/users" hx-trigger="input changed delay:300ms, search"
+		hx-target="#table-container" hx-push-url="true" hx-include="this"
+		aria-label="Search users"
+	/>
+	@AdminUsersTable(d)
+}
+
+templ AdminUsersTable(d AdminUsersData) {
+	<div id="table-container">
+		<div class="card !p-0 overflow-hidden">
+			<table class="table">
+				<thead>
+					<tr><th>Email</th><th>Name</th><th>Joined</th><th>Status</th><th class="text-right">Actions</th></tr>
+				</thead>
+				<tbody>
+					for _, u := range d.Users {
+						<tr>
+							<td class="font-medium">{ string(u.Email) }</td>
+							<td>{ u.Name }</td>
+							<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+							<td>
+								if u.DisabledAt.Valid {
+									<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">disabled</span>
+								} else {
+									<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">active</span>
+								}
+							</td>
+							<td class="text-right">
+								<button
+									type="button"
+									hx-post={ "/admin/users/" + u.ClerkUserID + "/disable" }
+									hx-confirm={ disableConfirm(u) }
+									class="btn-ghost !px-2 !py-1 text-xs"
+									data-testid="admin-disable-toggle"
+								>
+									if u.DisabledAt.Valid {
+										Enable
+									} else {
+										Disable
+									}
+								</button>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		@Pagination(d.Page, d.TotalPages, "/admin/users?q="+d.Query)
+	</div>
+}
+
+func disableConfirm(u sqlc.User) string {
+	if u.DisabledAt.Valid {
+		return "Re-enable " + string(u.Email) + "?"
+	}
+	return "Disable " + string(u.Email) + "? They will lose access immediately."
+}
+
+templ AdminOrgsPage(d AdminOrgsData) {
+	<h1 class="text-2xl font-bold mb-6">Organizations</h1>
+	<div class="card !p-0 overflow-hidden">
+		<table class="table">
+			<thead>
+				<tr><th>Name</th><th>Slug</th><th>Members</th><th>Plan</th><th>Created</th></tr>
+			</thead>
+			<tbody>
+				for _, o := range d.Orgs {
+					<tr>
+						<td class="font-medium">{ o.Name }</td>
+						<td class="text-fg-muted">{ o.Slug }</td>
+						<td>{ fmt.Sprint(o.MemberCount) }</td>
+						<td><span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300" data-testid="plan-badge">{ o.ProductKey }</span></td>
+						<td class="text-fg-muted">{ o.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}
