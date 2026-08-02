@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/jobs"
@@ -143,14 +144,31 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		}
 		// Role is stored raw: no CHECK constraint, so buyer-added custom roles
 		// never wedge membership webhooks.
-		return s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID, Role: role})
+		existing, merr := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID})
+		if merr != nil && !errors.Is(merr, pgx.ErrNoRows) {
+			return merr
+		}
+		if err := s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID, Role: role}); err != nil {
+			return err
+		}
+		switch {
+		case errors.Is(merr, pgx.ErrNoRows) && evt.Type == "organizationMembership.created":
+			audit.Log(ctx, s.q, orgID, userID, "member.joined", map[string]any{"role": role})
+		case merr == nil && existing.Role != role:
+			audit.Log(ctx, s.q, orgID, userID, "member.role_changed", map[string]any{"from": existing.Role, "to": role})
+		}
+		return nil
 
 	case "organizationMembership.deleted":
 		orgID, userID, _, err := identity.ParseMembershipData(evt.Data)
 		if err != nil {
 			return err
 		}
-		return s.q.DeleteMembership(ctx, sqlc.DeleteMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID})
+		if err := s.q.DeleteMembership(ctx, sqlc.DeleteMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID}); err != nil {
+			return err
+		}
+		audit.Log(ctx, s.q, orgID, userID, "member.left", nil)
+		return nil
 
 	default:
 		s.log.Info("clerk webhook: unhandled event (ignored)", "type", evt.Type)

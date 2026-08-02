@@ -40,6 +40,7 @@ func (s *Server) routes() {
 	appMux := http.NewServeMux()
 	appMux.HandleFunc("GET /app/settings/account", s.handleSettingsAccount)
 	appMux.HandleFunc("GET /app/settings/org", s.handleSettingsOrg)
+	appMux.HandleFunc("GET /app/activity", s.handleActivity)
 	s.mux.Handle("/app", s.appChain(appMux))
 	s.mux.Handle("/app/", s.appChain(appMux))
 

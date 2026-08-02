@@ -1,0 +1,105 @@
+package templates
+
+import (
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+)
+
+// Pagination renders hx-get pager links targeting #table-container.
+templ Pagination(page, totalPages int, baseURL string) {
+	if totalPages > 1 {
+		<nav class="flex items-center justify-between mt-4 text-sm" aria-label="Pagination">
+			if page > 1 {
+				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page-1)) }
+					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page-1) }
+					hx-target="#table-container" hx-push-url="true"
+					class="btn-ghost">← Previous</a>
+			} else {
+				<span></span>
+			}
+			<span class="text-fg-muted">Page { page } of { totalPages }</span>
+			if page < totalPages {
+				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page+1)) }
+					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page+1) }
+					hx-target="#table-container" hx-push-url="true"
+					class="btn-ghost">Next →</a>
+			} else {
+				<span></span>
+			}
+		</nav>
+	}
+}
+
+// RelTime renders a relative timestamp (masked in visual tests).
+func RelTime(now, t time.Time) string {
+	d := now.Sub(t)
+	switch {
+	case d < time.Minute:
+		return "just now"
+	case d < time.Hour:
+		return fmt.Sprintf("%d minutes ago", int(d.Minutes()))
+	case d < 24*time.Hour:
+		return fmt.Sprintf("%d hours ago", int(d.Hours()))
+	case d < 30*24*time.Hour:
+		return fmt.Sprintf("%d days ago", int(d.Hours()/24))
+	default:
+		return t.Format("Jan 2, 2006")
+	}
+}
+
+func prettyMetadata(raw []byte) string {
+	var v any
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return string(raw)
+	}
+	pretty, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return string(raw)
+	}
+	return string(pretty)
+}
+
+templ ActivityTable(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPages int) {
+	<div id="table-container">
+		if len(rows) == 0 {
+			@EmptyState("No activity yet", "Actions across your organization will appear here.") {
+			}
+		} else {
+			<div class="card !p-0 overflow-hidden">
+				<table class="table">
+					<thead>
+						<tr><th>Actor</th><th>Action</th><th>When</th><th>Details</th></tr>
+					</thead>
+					<tbody>
+						for _, row := range rows {
+							<tr>
+								<td>{ row.ActorEmail }</td>
+								<td><span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">{ row.Action }</span></td>
+								<td>
+									<span data-testid="relative-time" title={ row.CreatedAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.CreatedAt.Time) }</span>
+								</td>
+								<td>
+									if len(row.Metadata) > 2 {
+										<details>
+											<summary class="cursor-pointer text-fg-muted">metadata</summary>
+											<pre class="text-xs mt-1 overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
+										</details>
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			@Pagination(page, totalPages, "/app/activity")
+		}
+	</div>
+}
+
+templ ActivityPage(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPages int) {
+	<h1 class="text-2xl font-bold mb-6">Activity</h1>
+	@ActivityTable(rows, now, page, totalPages)
+}
