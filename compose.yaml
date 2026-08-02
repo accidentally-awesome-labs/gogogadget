@@ -17,5 +17,17 @@ services:
       timeout: 3s
       retries: 20
 
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/gogogadget?sslmode=disable
+      APP_URL: ${APP_URL:-http://localhost:8080}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
