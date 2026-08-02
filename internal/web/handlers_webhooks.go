@@ -23,24 +23,29 @@ import (
 // headers instead — the two header families are why one verification lib
 // cannot cover both providers.)
 func (s *Server) handleClerkWebhook(w http.ResponseWriter, r *http.Request) {
-	if s.cfg.ClerkWebhookSecret == "" {
-		http.Error(w, "clerk webhooks not configured", http.StatusServiceUnavailable)
-		return
-	}
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "read body", http.StatusBadRequest)
 		return
 	}
-	wh, err := svix.NewWebhook(s.cfg.ClerkWebhookSecret)
-	if err != nil {
-		s.log.Error("clerk webhook init", "error", err)
-		http.Error(w, "webhook config", http.StatusInternalServerError)
-		return
-	}
-	if err := wh.Verify(payload, r.Header); err != nil {
-		http.Error(w, "invalid signature", http.StatusBadRequest)
-		return
+	if s.cfg.ClerkWebhookSecret == "" {
+		// DEV_AUTH_BYPASS already trusts synthetic session tokens; unsigned
+		// webhook fixtures are the same class (never possible in production).
+		if !s.cfg.DevAuthBypass {
+			http.Error(w, "clerk webhooks not configured", http.StatusServiceUnavailable)
+			return
+		}
+	} else {
+		wh, err := svix.NewWebhook(s.cfg.ClerkWebhookSecret)
+		if err != nil {
+			s.log.Error("clerk webhook init", "error", err)
+			http.Error(w, "webhook config", http.StatusInternalServerError)
+			return
+		}
+		if err := wh.Verify(payload, r.Header); err != nil {
+			http.Error(w, "invalid signature", http.StatusBadRequest)
+			return
+		}
 	}
 
 	msgID := r.Header.Get("svix-id")
