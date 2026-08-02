@@ -156,7 +156,11 @@ func TestRedirect(t *testing.T) {
 func TestToast(t *testing.T) {
 	rec := httptest.NewRecorder()
 	Toast(rec, "success", "Saved")
-	assert.JSONEq(t, `{"toast":{"type":"success","message":"Saved"}}`, rec.Header().Get("HX-Trigger"))
+	assert.JSONEq(t, `{"toast":{"type":"success","message":"Saved","flash":false}}`, rec.Header().Get("HX-Trigger"))
+
+	rec = httptest.NewRecorder()
+	FlashToast(rec, "success", "Saved")
+	assert.JSONEq(t, `{"toast":{"type":"success","message":"Saved","flash":true}}`, rec.Header().Get("HX-Trigger"))
 }
 
 func TestNotFoundStyled(t *testing.T) {
