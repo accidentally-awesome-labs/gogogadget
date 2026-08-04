@@ -217,6 +217,9 @@ func (s *Server) secureHeaders(next http.Handler) http.Handler {
 	csp := strings.Join([]string{
 		"default-src 'self'",
 		"script-src 'self'",
+		// clerk-js v5 runs its session handshake inside blob: Web Workers —
+		// without this, auth loops forever (reported by clerk-js at integration).
+		"worker-src 'self' blob:",
 		"style-src 'self' 'unsafe-inline'",
 		"img-src 'self' data: https://img.clerk.com",
 		"font-src 'self'",
