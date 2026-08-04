@@ -76,8 +76,29 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 		ctx = identity.WithUser(ctx, &user)
 		ctx = identity.WithClaims(ctx, claims)
 		if claims.OrgID != "" {
-			if org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID); oerr == nil {
+			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)
+			switch {
+			case oerr == nil:
 				ctx = identity.WithOrg(ctx, &org)
+			case errors.Is(oerr, pgx.ErrNoRows):
+				// Webhook lag/failure self-heal: claims carry org_id/slug/role,
+				// enough to seed the mirror. The organization.created webhook
+				// corrects the name on arrival (UpsertOrg overwrites).
+				org, oerr = s.q.UpsertOrg(ctx, sqlc.UpsertOrgParams{
+					ClerkOrgID: claims.OrgID, Name: claims.OrgSlug, Slug: claims.OrgSlug,
+				})
+				if oerr == nil {
+					if err := s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{
+						ClerkOrgID: claims.OrgID, ClerkUserID: claims.UserID, Role: claims.OrgRole,
+					}); err != nil {
+						s.log.Warn("lazy membership sync", "error", err)
+					}
+					ctx = identity.WithOrg(ctx, &org)
+				} else {
+					s.log.Error("lazy org sync", "error", oerr)
+				}
+			default:
+				s.log.Error("identity load org", "error", oerr)
 			}
 		}
 		next.ServeHTTP(w, r.WithContext(ctx))

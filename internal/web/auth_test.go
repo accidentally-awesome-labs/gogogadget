@@ -137,6 +137,29 @@ func TestLoadPlanDefaultsFree(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 }
 
+func TestLazyOrgSync(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedUser(t, s, "user_lazy", "lazy@example.com", "Lazy")
+	// No org row, no membership: claims alone must seed the mirror.
+	code, _, body := serve(t, s, "GET", "/app", nil, nil, sessionCookie("user_lazy", "org_lazy", "org:admin"))
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, "Dashboard")
+
+	org, err := s.q.GetOrgByClerkID(t.Context(), "org_lazy")
+	require.NoError(t, err)
+	assert.Equal(t, "org_lazy", org.Slug)
+	m, err := s.q.GetMembership(t.Context(), sqlc.GetMembershipParams{ClerkOrgID: "org_lazy", ClerkUserID: "user_lazy"})
+	require.NoError(t, err)
+	assert.Equal(t, "org:admin", m.Role)
+
+	// A later organization.created webhook corrects the placeholder name.
+	payload := []byte(`{"type": "organization.created", "data": {"id": "org_lazy", "name": "Real Name", "slug": "org_lazy"}}`)
+	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, signSvix(t, testWebhookSecret, "msg_lazy1", payload))
+	require.Equal(t, http.StatusOK, code)
+	org, _ = s.q.GetOrgByClerkID(t.Context(), "org_lazy")
+	assert.Equal(t, "Real Name", org.Name)
+}
+
 func TestLoginRedirectRoutes(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.DevAuthBypass = false
