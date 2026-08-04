@@ -20,7 +20,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dev/login", http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, s.cfg.ClerkPortalURL+"/sign-in?redirect_url="+s.cfg.AppURL+"/app", http.StatusSeeOther)
+	http.Redirect(w, r, s.cfg.ClerkPortalURL+"/sign-in?redirect_url="+s.cfg.AppURL+"/?after-auth=1", http.StatusSeeOther)
 }
 
 // GET /signup → Clerk hosted sign-up.
@@ -34,7 +34,7 @@ func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dev/login", http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, s.cfg.ClerkPortalURL+"/sign-up?redirect_url="+s.cfg.AppURL+"/app", http.StatusSeeOther)
+	http.Redirect(w, r, s.cfg.ClerkPortalURL+"/sign-up?redirect_url="+s.cfg.AppURL+"/?after-auth=1", http.StatusSeeOther)
 }
 
 // GET /logout → Clerk hosted sign-out (dev: clear the cookie).

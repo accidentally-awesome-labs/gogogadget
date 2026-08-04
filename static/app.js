@@ -153,6 +153,14 @@ window.addEventListener("DOMContentLoaded", function () {
   if (!meta || !window.Clerk) return;
   window.Clerk.load().then(function () {
     var clerk = window.Clerk;
+    // after-auth: the hosted portal redirected back to "/" so this page could
+    // render and complete the dev handshake; with a session in place, forward
+    // to the app. (Pointing redirect_url at /app would loop: /app 303s
+    // without rendering, so clerk-js never gets to run.)
+    if (clerk.session && new URLSearchParams(window.location.search).has("after-auth")) {
+      window.location.replace("/app");
+      return;
+    }
     if (!clerk.user) return;
     var ub = document.getElementById("user-button");
     if (ub) clerk.mountUserButton(ub);

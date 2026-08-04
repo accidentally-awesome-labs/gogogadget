@@ -144,7 +144,7 @@ func TestLoginRedirectRoutes(t *testing.T) {
 	})
 	code, hdr, _ := serve(t, s, "GET", "/login", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Equal(t, "https://accounts.example.test/sign-in?redirect_url=http://localhost:18080/app", hdr.Get("Location"))
+	assert.Equal(t, "https://accounts.example.test/sign-in?redirect_url=http://localhost:18080/?after-auth=1", hdr.Get("Location"))
 
 	code, hdr, _ = serve(t, s, "GET", "/signup", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
