@@ -14,19 +14,31 @@ mirrors profile data locally. This page covers the session lifecycle, the
 
 ## The hosted-portal model
 
-Three routes in the app redirect to Clerk-hosted pages, with `redirect_url`
-pointing back:
+GoGoGadget sends sign-in and sign-up through a public callback page so
+clerk-js can establish the local session before a protected route runs:
 
 | App route | Portal destination |
 |---|---|
-| `GET /login` | `{CLERK_PORTAL_URL}/sign-in?redirect_url={APP_URL}/app` |
-| `GET /signup` | `{CLERK_PORTAL_URL}/sign-up?redirect_url={APP_URL}/app` |
+| `GET /login` | `{CLERK_PORTAL_URL}/sign-in?redirect_url={APP_URL}/?after-auth=1` |
+| `GET /signup` | `{CLERK_PORTAL_URL}/sign-up?redirect_url={APP_URL}/?after-auth=1` |
 | `GET /logout` | `{CLERK_PORTAL_URL}/sign-out?redirect_url={APP_URL}/` |
 
+The callback renders the public page, lets clerk-js finish its development
+handshake, then replaces the location with `/app`. Redirecting straight to
+`/app` creates a loop when Clerk still needs a rendered page to establish the
+local `__session` cookie.
+
+Clerk invitation emails do not necessarily carry a per-invitation
+`redirect_url`. In **Clerk Dashboard → Account Portal → Redirects**, set both
+fallback sign-in and sign-up URLs to `{APP_URL}/?after-auth=1`. Without these
+fallbacks, an invitee can finish joining successfully but land on Clerk's
+`/default-redirect` page.
+
 Profile management, password changes, 2FA enrollment, and org management live
-at `{CLERK_PORTAL_URL}/user-profile` and `/organization-profile` — the
-settings pages link out to them. Enabling Google OAuth or TOTP 2FA is Clerk
-dashboard configuration, not code.
+at `{CLERK_PORTAL_URL}/user` and `/organization`. The settings pages link to
+those current Account Portal routes with a `redirect_url` back to the page the
+user left. Enabling Google OAuth or TOTP 2FA is Clerk dashboard configuration,
+not code.
 
 ## The `__session` lifecycle — and why clerk-js is load-bearing
 
@@ -37,11 +49,32 @@ initialized in `static/app.js`, keeps it fresh:
 1. The layout emits `<meta name="clerk-publishable-key" content="…">` when
    `CLERK_PUBLISHABLE_KEY` is set.
 2. On `DOMContentLoaded`, `static/app.js` reads the meta tag, calls
-   `window.Clerk.load()`, and clerk-js begins refreshing the JWT against the
-   Clerk Frontend API in the background (that origin is in the CSP
+   `window.Clerk.load()` once, and clerk-js begins refreshing the JWT against
+   the Clerk Frontend API in the background (that origin is in the CSP
    `connect-src` — see [Security](/docs/security)).
-3. clerk-js also mounts the prebuilt `UserButton` at `#user-button` and the
-   `OrganizationSwitcher` at `#org-switcher`.
+3. The bootstrap mounts the prebuilt `UserButton` at `#user-button` and the
+   `OrganizationSwitcher` at `#org-switcher` — **once per page load**.
+4. **App navigation swaps only `#content`.** clerk-js mounts React components
+   into those two roots *and* renders their dropdown menus as **portals
+   appended directly to `<body>`** — siblings of the mount roots, not children.
+   That makes the shell untouchable: no per-element attribute can protect a
+   sibling, so any swap or morph of `<body>` deletes the portals and the
+   dropdowns go dead (`hx-preserve` is worse still — it *stashes* the element
+   and restores it, which detaches clerk's listeners; and `hx-morph-skip` only
+   covers the root, not the portal). Alpine bindings in the shell break the
+   same way. So app nav links use `hx-boost="true" hx-target="#content"
+   hx-select="#content" hx-swap="outerHTML transition:true show:top"`: `<body>`'s other children — the
+   mount roots, the portals, the shell's Alpine components — are never in the
+   swap at all. Clerk mounts once per full page load and stays mounted: no
+   remount, no flash, dropdowns keep working. The trade-off is that the
+   persistent sidebar's server-rendered `aria-current` would go stale, so
+   `static/app.js` re-syncs it from `data-nav-match` after each swap. htmx also
+   owns in-page interactions (pagination, search, form validation) inside
+   `#content`.
+5. Server-rendered `:empty` fallbacks keep the controls' shape and identity
+   visible during the unavoidable first Clerk paint after a page load.
+6. A failed `Clerk.load()` is logged, released, and retried once (self-driven,
+   so it cannot race the rejection) instead of caching a rejected promise.
 
 **Removing clerk-js means auth expires about a minute after login.** It is
 vendored — not loaded from a CDN — so `script-src 'self'` stays intact. Test

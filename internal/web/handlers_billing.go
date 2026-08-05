@@ -127,7 +127,7 @@ func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "read body", http.StatusBadRequest)
 		return
 	}
-	wh, err := standardwebhooks.NewWebhook(s.cfg.PolarWebhookSecret)
+	wh, err := standardwebhooks.NewWebhookRaw([]byte(s.cfg.PolarWebhookSecret))
 	if err != nil {
 		s.log.Error("polar webhook init", "error", err)
 		http.Error(w, "webhook config", http.StatusInternalServerError)

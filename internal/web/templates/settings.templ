@@ -35,7 +35,7 @@ templ Disabled() {
 }
 
 templ SettingsTabs(active string) {
-	<nav class="flex gap-1 border-b border-border mb-8" hx-boost="true">
+	<nav class="flex gap-1 border-b border-border mb-8">
 		for _, item := range []struct{ Label, Href string }{
 			{"Account", "/app/settings/account"},
 			{"Organization", "/app/settings/org"},
@@ -43,6 +43,10 @@ templ SettingsTabs(active string) {
 		} {
 			<a
 				href={ templ.SafeURL(item.Href) }
+				hx-boost="true"
+				hx-target={ NavTarget }
+				hx-select={ NavTarget }
+				hx-swap={ NavSwap }
 				aria-current={ navCurrent(Page{Path: active}, item.Href) }
 				class="px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-fg-muted hover:text-fg aria-[current=page]:border-brand-600 aria-[current=page]:text-fg"
 			>{ item.Label }</a>
@@ -50,7 +54,7 @@ templ SettingsTabs(active string) {
 	</nav>
 }
 
-templ SettingsAccount(user sqlc.User, portalURL string) {
+templ SettingsAccount(user sqlc.User, accountPortalURL string) {
 	@SettingsTabs("/app/settings/account")
 	<h1 class="text-2xl font-bold mb-6">Account settings</h1>
 	<div class="card max-w-lg">
@@ -70,14 +74,14 @@ templ SettingsAccount(user sqlc.User, portalURL string) {
 		</dl>
 		<p class="mt-6 text-sm text-fg-muted">
 			Profile, password, social connections, and two-factor authentication are managed by Clerk.
-			if portalURL != "" {
-				<a href={ templ.SafeURL(portalURL + "/user-profile") } class="link">Manage your account →</a>
+			if accountPortalURL != "" {
+				<a href={ accountPortalURL } class="link">Manage your account →</a>
 			}
 		</p>
 	</div>
 }
 
-templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, portalURL string) {
+templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string) {
 	@SettingsTabs("/app/settings/org")
 	<h1 class="text-2xl font-bold mb-6">Organization settings</h1>
 	<div class="card mb-6 max-w-lg">
@@ -93,8 +97,8 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, portalURL st
 		</dl>
 		<p class="mt-6 text-sm text-fg-muted">
 			Invitations and roles are managed by Clerk.
-			if portalURL != "" {
-				<a href={ templ.SafeURL(portalURL + "/organization-profile") } class="link">Manage organization →</a>
+			if organizationPortalURL != "" {
+				<a href={ organizationPortalURL } class="link">Manage organization →</a>
 			}
 		</p>
 	</div>

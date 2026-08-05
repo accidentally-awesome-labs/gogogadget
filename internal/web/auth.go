@@ -160,12 +160,20 @@ func (s *Server) requireOrg(next http.Handler) http.Handler {
 				Redirect(w, r, target)
 				return
 			}
+			if IsHX(r) {
+				HXRedirect(w, r.URL.RequestURI())
+				return
+			}
 			s.Render(w, r, Page{Title: "Choose an organization", Layout: templates.LayoutPublic},
 				templates.SelectOrg(orgs, s.cfg.DevAuthBypass && !s.cfg.ClerkConfigured()))
 			return
 		}
 		if identity.OrgFrom(r.Context()) == nil {
 			// Claims carry an org the mirror hasn't synced yet (webhook in flight).
+			if IsHX(r) {
+				HXRedirect(w, r.URL.RequestURI())
+				return
+			}
 			s.renderStatus(w, r, http.StatusServiceUnavailable, "Organization sync in progress", "Your organization is being set up — refresh to retry.")
 			return
 		}

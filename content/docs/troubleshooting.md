@@ -10,9 +10,13 @@ vibes.
 
 ## 403 on every form POST (CSRF)
 
-- **Stale token.** The CSRF token rides in `body hx-headers` and the cookie
-  rotates. Re-render the page (full reload) and submit again. If you cached
-  or hard-coded a token anywhere: don't.
+- **Stale token.** The CSRF token rides in `body hx-headers:inherited` and the
+  cookie rotates. Re-render the page (full reload) and submit again. If you
+  cached or hard-coded a token anywhere: don't.
+- **You dropped the `:inherited` suffix.** htmx 4 inheritance is explicit: a
+  plain `hx-headers` on `<body>` applies to `<body>` only, so every nested form
+  posts with no token and 403s. Symptom: the request shows no `X-CSRF-Token`
+  header at all. See [Security](/docs/security).
 - **Cross-origin request without an `Origin` header.** nosurf v1.2 enforces
   same-origin (CVE-2025-46721). Hand-rolled `curl`/script POSTs that omit
   `Origin` fail — send `Origin: http://localhost:8080`, or use the
@@ -99,6 +103,45 @@ background. If auth expires a minute after login, clerk-js isn't running:
 
 In e2e/dev bypass mode this is expected — `FakeVerifier` tokens don't
 expire, and clerk-js is intentionally absent.
+
+## Layout chrome from the previous page is still on screen
+
+A navigation swaps `#content` and nothing else, so **every page reachable by a
+boosted link must render identical chrome around it**. When it doesn't, whatever
+differs is left behind (a docs table of contents stranded on `/pricing`) or
+never arrives (a missing footer).
+
+Fix the layout, not the link: move the differing markup **inside** `#content`.
+That is why `PublicLayout` and `DocsLayout` share one `publicShell` and the docs
+sidebar lives in `docsBody`. `TestPublicAndDocsLayoutsShareChrome` diffs
+everything outside `#content` between the two layouts, so this fails the build
+rather than reaching a browser.
+
+## A dropdown or theme toggle stops working after navigating
+
+Something swapped the shell. clerk-js renders its menus as portals appended
+directly to `<body>` — siblings of its mount roots, so no per-element attribute
+can protect them — and Alpine bindings in the shell break the same way. Any swap
+or morph of `<body>` kills both.
+
+Check that the nav link targets `#content` (`hx-target`/`hx-select`) and that no
+response widened it via `HX-Retarget`. `hx-preserve` is not the fix: it stashes
+the element and restores it, which is what detaches the listeners in the first
+place. See [Frontend](/docs/frontend).
+
+## A navigation lands mid-page instead of at the top
+
+`hx-swap` is missing `show:top`. htmx defaults only boosted **forms** to
+scrolling, never links, so a boosted link keeps the previous scroll offset.
+`templates.NavSwap` carries it for every nav link. (`scroll:window:top` reads
+like the same thing but is a no-op in 4.0.0-beta6.)
+
+## Clicking an in-page anchor flashes the wrong section
+
+The link got boosted. htmx fetches the page, repaints `#content` at the top of
+the document, and only then scrolls to the fragment. Links whose `href` contains
+a `#` must stay unboosted (`isAnchorLink` in `nav.templ`) — the browser then
+scrolls natively with no request at all.
 
 ## 429s during load tests
 

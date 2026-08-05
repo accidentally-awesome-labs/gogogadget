@@ -2,9 +2,15 @@ package templates
 
 import "fmt"
 
+// pageTitle is the one place the document title is composed, so a fragment
+// swap and a full page load can never disagree.
+templ pageTitle(page Page) {
+	<title>{ page.Title } — GoGoGadget</title>
+}
+
 // headMeta renders title, description, and OG/Twitter tags.
 templ headMeta(page Page) {
-	<title>{ page.Title } — GoGoGadget</title>
+	@pageTitle(page)
 	if page.Description != "" {
 		<meta name="description" content={ page.Description }/>
 	}
@@ -20,7 +26,16 @@ templ headMeta(page Page) {
 
 // headScripts loads vendored JS. app.js is NOT deferred so dark-mode init runs
 // pre-paint; everything else defers. No inline scripts anywhere (CSP).
+//
+// htmx reads its config from this meta tag at init — before any of our JS could
+// run — which is why it lives here and not in app.js:
+//   - includeIndicatorCSS: htmx would otherwise inject a <style> element for
+//     .htmx-indicator. We own those rules in input.css, so decline the inject
+//     and keep one source of truth (and one less inline style under CSP).
+//   - transitions: opted in per-swap on navigation instead of globally, so
+//     table search, row deletes and polls stay instant.
 templ headScripts(page Page) {
+	<meta name="htmx-config" content='{"includeIndicatorCSS":false}'/>
 	<script src="/static/app.js"></script>
 	<script defer src="/static/vendor/htmx.min.js"></script>
 	<script defer src="/static/vendor/alpine-focus.min.js"></script>
@@ -70,8 +85,13 @@ templ phConsent(page Page) {
 	}
 }
 
-// PublicLayout wraps marketing/content pages.
-templ PublicLayout(page Page, content templ.Component) {
+// publicShell is the chrome shared by every unauthenticated page. Public and
+// docs pages MUST render byte-identical chrome, because navigation between them
+// swaps only #content: anything layout-specific left outside the swap target
+// would survive into a page that never asked for it (a docs table of contents
+// stranded on the pricing page) or go missing from one that did (no footer).
+// So the rule is: if it differs between pages, it belongs inside #content.
+templ publicShell(page Page, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -83,10 +103,10 @@ templ PublicLayout(page Page, content templ.Component) {
 			<link rel="stylesheet" href="/static/app.css"/>
 			@headScripts(page)
 		</head>
-		<body class="bg-surface text-fg antialiased" hx-headers={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
+		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
 			@Nav(page)
-			<main id="content">
+			<main id="content" hx-history-elt="true">
 				@content
 			</main>
 			@Footer()
@@ -94,6 +114,11 @@ templ PublicLayout(page Page, content templ.Component) {
 			@phConsent(page)
 		</body>
 	</html>
+}
+
+// PublicLayout wraps marketing/content pages.
+templ PublicLayout(page Page, content templ.Component) {
+	@publicShell(page, content)
 }
 
 // AppLayout is the authenticated shell (sidebar + topbar + toast root).
@@ -108,14 +133,14 @@ templ AppLayout(page Page, content templ.Component) {
 			<link rel="stylesheet" href="/static/app.css"/>
 			@headScripts(page)
 		</head>
-		<body class="bg-surface text-fg antialiased" hx-headers={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
+		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
 			<div class="flex min-h-screen">
 				@Sidebar(page)
 				<div class="flex-1 flex flex-col min-w-0">
 					@Topbar(page)
 					@billingBanner(page)
-					<main id="content" class="flex-1 p-6 max-w-6xl w-full mx-auto">
+					<main id="content" hx-history-elt="true" class="flex-1 p-6 max-w-6xl w-full mx-auto">
 						@content
 					</main>
 				</div>
@@ -145,51 +170,43 @@ templ AdminLayout(page Page, content templ.Component) {
 	@AppLayout(page, content)
 }
 
-// DocsLayout wraps documentation pages: PublicLayout chrome with a docs
-// sidebar (sections ordered by weight) and prev/next footer.
+// DocsLayout wraps documentation pages: the shared public chrome, with the docs
+// table of contents INSIDE #content so it arrives and leaves with the page
+// rather than stranding itself on the next one.
 templ DocsLayout(page Page, content templ.Component) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			@headMeta(page)
-			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
-			<link rel="manifest" href="/static/site.webmanifest"/>
-			<link rel="stylesheet" href="/static/app.css"/>
-			@headScripts(page)
-		</head>
-		<body class="bg-surface text-fg antialiased" hx-headers={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
-			@skipLink()
-			@Nav(page)
-			<div class="max-w-6xl mx-auto px-4 py-8 flex gap-10">
-				<aside class="hidden md:block w-56 shrink-0">
-					<nav class="sticky top-24 space-y-6 text-sm" hx-boost="true">
-						if page.Docs != nil {
-							for _, section := range page.Docs.Sections {
-								<div>
-									<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ section.Name }</p>
-									<ul class="space-y-1">
-										for _, doc := range section.Pages {
-											<li>
-												<a
-													href={ "/docs/" + doc.Slug }
-													aria-current={ navCurrent(Page{Path: "/docs/" + doc.Slug}, "/docs/" + page.DocSlug) }
-													class="block rounded-lg px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised aria-[current=page]:text-brand-600 dark:aria-[current=page]:text-brand-400 dark:aria-[current=page]:text-brand-400 aria-[current=page]:font-semibold"
-												>{ doc.Title }</a>
-											</li>
-										}
-									</ul>
-								</div>
-							}
-						}
-					</nav>
-				</aside>
-				<main id="content" class="min-w-0 flex-1 pb-16">
-					@content
-				</main>
-			</div>
-			@toastRoot()
-		</body>
-	</html>
+	@publicShell(page, docsBody(page, content))
+}
+
+templ docsBody(page Page, content templ.Component) {
+	<div class="max-w-6xl mx-auto px-4 py-8 flex gap-10">
+		<aside class="hidden md:block w-56 shrink-0">
+			<nav class="sticky top-24 space-y-6 text-sm" aria-label="Documentation">
+				if page.Docs != nil {
+					for _, section := range page.Docs.Sections {
+						<div>
+							<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ section.Name }</p>
+							<ul class="space-y-1">
+								for _, doc := range section.Pages {
+									<li>
+										<a
+											href={ "/docs/" + doc.Slug }
+											hx-boost="true"
+											hx-target={ NavTarget }
+											hx-select={ NavTarget }
+											hx-swap={ NavSwap }
+											aria-current={ navCurrent(page, "/docs/" + doc.Slug) }
+											class="block rounded-lg px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised aria-[current=page]:text-brand-600 dark:aria-[current=page]:text-brand-400 dark:aria-[current=page]:text-brand-400 aria-[current=page]:font-semibold"
+										>{ doc.Title }</a>
+									</li>
+								}
+							</ul>
+						</div>
+					}
+				}
+			</nav>
+		</aside>
+		<div class="min-w-0 flex-1 pb-16">
+			@content
+		</div>
+	</div>
 }

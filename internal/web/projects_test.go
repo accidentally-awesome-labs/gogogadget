@@ -36,6 +36,23 @@ func postForm(t *testing.T, s *Server, target string, form url.Values, cookies .
 	return serve(t, s, "POST", target, []byte(form.Encode()), h, all...)
 }
 
+func TestProjectsHistoryRestoreRendersCompletePage(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_history", "org_history", "org:admin")
+	headers := http.Header{
+		"HX-Request":                 {"true"},
+		"HX-History-Restore-Request": {"true"},
+	}
+
+	code, _, body := serve(t, s, "GET", "/app/projects", nil, headers,
+		sessionCookie("user_history", "org_history", "org:admin"))
+
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `<html lang="en">`)
+	assert.Contains(t, body, `>Projects</h1>`)
+	assert.Contains(t, body, `placeholder="Search projects…"`)
+}
+
 func TestProjectCrossOrg404(t *testing.T) {
 	s := integrationServer(t, nil)
 	ctx := t.Context()
@@ -115,11 +132,17 @@ func TestProjectCreateSearchArchiveDelete(t *testing.T) {
 		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE clerk_org_id = 'org_c1'")
 	})
 
-	// Create → HX-Redirect + toast.
+	// Create → soft navigation (HX-Location scoped to #content, so the shell and
+	// its mounted clerk-js widgets are never reloaded) + a live toast.
 	code, hdr, _ := postForm(t, s, "/app/projects", url.Values{"name": {"Launch checklist"}}, cookie)
 	assert.Equal(t, http.StatusOK, code)
-	assert.Equal(t, "/app/projects", hdr.Get("HX-Redirect"))
+	assert.Empty(t, hdr.Get("HX-Redirect"), "an in-app destination must not force a full page load")
+	assert.JSONEq(t,
+		`{"path":"/app/projects","target":"#content","select":"#content","swap":"outerHTML transition:true show:top"}`,
+		hdr.Get("HX-Location"))
 	assert.Contains(t, hdr.Get("HX-Trigger"), "Project created")
+	// Not a flash: nothing reloads, so the toast must fire immediately.
+	assert.Contains(t, hdr.Get("HX-Trigger"), `"flash":false`)
 
 	// Audit row written.
 	var n int

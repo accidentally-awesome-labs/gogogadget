@@ -2,6 +2,18 @@ package templates
 
 import "github.com/gogogadget/gogogadget/internal/billing"
 
+// Spinner is htmx's request indicator. htmx adds the htmx-request class to the
+// element that issued the request (and to anything named by hx-indicator) for
+// the duration of the request; the .htmx-indicator rules in input.css fade this
+// in while that class is present. Drop it inside a submit button and the
+// button's own request drives it — no wiring needed.
+templ Spinner() {
+	<svg class="htmx-indicator w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+		<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"></circle>
+		<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+	</svg>
+}
+
 templ Badge(text, kind string) {
 	<span class={ "badge", "bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300" }>{ text }</span>
 }

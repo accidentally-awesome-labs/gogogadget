@@ -18,10 +18,10 @@ fetch() { # name url dest sha256
 
 mkdir -p static/vendor static/fonts
 
-fetch "htmx@2.0.4" \
-  "https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" \
+fetch "htmx.org@4.0.0-beta6" \
+  "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0-beta6/dist/htmx.min.js" \
   "static/vendor/htmx.min.js" \
-  "e209dda5c8235479f3166defc7750e1dbcd5a5c1808b7792fc2e6733768fb447"
+  "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25"
 
 fetch "@alpinejs/csp@3.15.12" \
   "https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.15.12/dist/cdn.min.js" \

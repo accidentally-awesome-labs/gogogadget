@@ -8,7 +8,7 @@ the plumbing. One static binary; no node anywhere in production.
 
 ```
 Browser ──▶ Go (net/http) ──▶ Postgres
-              │  templ + HTMX + Alpine (CSP build)
+              │  templ + htmx 4 + Alpine (CSP build)
               │  ├─ Clerk    (auth, orgs, 2FA — hosted portal + mirror sync)
               │  ├─ Polar.sh (billing, merchant of record)
               │  ├─ Resend   (email; DevSender locally → tmp/emails/)
@@ -22,6 +22,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Auth & teams (Clerk)** — social OAuth, 2FA, orgs, roles, invitations, all hosted; local mirror synced via webhooks for fast queries.
 - **Billing (Polar.sh)** — checkout, customer portal, webhook sync, entitlements, dunning + trial emails, merchant-of-record tax.
 - **App shell** — dashboard, projects CRUD (the canonical example), activity feed, settings (account/org/billing/API).
+- **Frontend (htmx 4)** — boosted navigation scoped to one content box with View Transitions, morph swaps that keep table rows' DOM nodes, and server-driven `HX-Location` navigation that never rebuilds the shell (so third-party widgets never flash). No bundler, no hydration.
 - **Admin** — users/orgs/MRR stats, user search + disable, plan badges.
 - **Public API** — org-scoped Bearer tokens (`ggg_…`), `/api/v1/projects`, JSON error shape.
 - **Content** — markdown blog + RSS + sitemap + OG; 20-page docs section rendered in-app (`/docs`).
@@ -52,7 +53,7 @@ Fill in `.env` (every key is documented in `.env.example` and
 
 | Service | Keys | What you get |
 |---|---|---|
-| Clerk | `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `CLERK_WEBHOOK_SECRET`, `CLERK_PORTAL_URL` | Hosted sign-in/up, OAuth, 2FA, org invitations. Point the webhook at `/webhooks/clerk`. |
+| Clerk | `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `CLERK_WEBHOOK_SECRET`, `CLERK_PORTAL_URL` | Hosted sign-in/up, OAuth, 2FA, org invitations. Point the webhook at `/webhooks/clerk`; in **Account Portal → Redirects**, set both fallback sign-in and sign-up URLs to `{APP_URL}/?after-auth=1`. |
 | Polar.sh | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_PRODUCT_PRO`, `POLAR_PRODUCT_TEAM` | Checkout + portal for Pro/Team. `polar listen http://localhost:8080/webhooks/polar` locally. |
 | Resend | `RESEND_API_KEY`, `EMAIL_FROM` | Real email delivery (otherwise DevSender writes `tmp/emails/`). |
 | PostHog | `POSTHOG_API_KEY`, `POSTHOG_HOST` | Analytics via the consent-gated `/ingest` proxy. |

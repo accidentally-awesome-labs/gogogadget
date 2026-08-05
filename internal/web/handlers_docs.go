@@ -13,7 +13,7 @@ func (s *Server) handleDocsIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	target := "/docs/" + s.docs.Pages[0].Slug
-	Redirect(w, r, target)
+	Navigate(w, r, target)
 }
 
 // GET /docs/{slug}

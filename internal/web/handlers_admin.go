@@ -72,7 +72,7 @@ func (s *Server) handleAdminUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	d := templates.AdminUsersData{Users: users, Query: q, Page: page, TotalPages: totalPages}
 	pageData := Page{Title: "Users", Layout: templates.LayoutAdmin}
-	if IsHX(r) && !IsBoosted(r) {
+	if wantsFragment(r) {
 		s.Render(w, r, pageData, templates.AdminUsersTable(d))
 		return
 	}
@@ -103,11 +103,11 @@ func (s *Server) handleAdminUserDisable(w http.ResponseWriter, r *http.Request) 
 	}
 	audit.Log(ctx, s.q, "", admin.ClerkUserID, action, map[string]any{"target": id, "email": string(user.Email)})
 	if disabledAt.Valid {
-		FlashToast(w, "success", string(user.Email)+" disabled")
+		Toast(w, "success", string(user.Email)+" disabled")
 	} else {
-		FlashToast(w, "success", string(user.Email)+" re-enabled")
+		Toast(w, "success", string(user.Email)+" re-enabled")
 	}
-	HXRedirect(w, "/admin/users")
+	Navigate(w, r, "/admin/users")
 }
 
 // GET /admin/orgs — member counts + plan badges.

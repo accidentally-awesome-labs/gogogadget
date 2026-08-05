@@ -1,7 +1,12 @@
 package templates
 
-func navCurrent(page Page, href string) string {
-	if page.Path == href {
+import "strings"
+
+func navCurrent(page Page, match string) string {
+	if page.Path == match {
+		return "page"
+	}
+	if match != "/app" && match != "/admin" && strings.HasPrefix(page.Path, strings.TrimSuffix(match, "/")+"/") {
 		return "page"
 	}
 	return ""
@@ -27,6 +32,13 @@ templ themeToggle() {
 	</button>
 }
 
+// isAnchorLink reports an in-page target. Boosting these is worse than leaving
+// them alone: htmx would fetch the page, swap #content (repainting at the top of
+// the document) and only then scroll to the fragment — a visible flash of the
+// wrong section. Unboosted, the browser scrolls natively with no request at all
+// when the page is already loaded, and lands on the fragment when it is not.
+func isAnchorLink(href string) bool { return strings.Contains(href, "#") }
+
 templ navLinks(page Page) {
 	for _, item := range []struct{ Label, Href string }{
 		{"Features", "/#features"},
@@ -34,13 +46,23 @@ templ navLinks(page Page) {
 		{"Blog", "/blog"},
 		{"Docs", "/docs"},
 	} {
-		<a href={ templ.SafeURL(item.Href) } class="text-sm font-medium text-fg-muted hover:text-fg" aria-current={ navCurrent(page, item.Href) }>{ item.Label }</a>
+		<a
+			href={ templ.SafeURL(item.Href) }
+			if !isAnchorLink(item.Href) {
+				hx-boost="true"
+				hx-target={ NavTarget }
+				hx-select={ NavTarget }
+				hx-swap={ NavSwap }
+			}
+			class="text-sm font-medium text-fg-muted hover:text-fg"
+			aria-current={ navCurrent(page, item.Href) }
+		>{ item.Label }</a>
 	}
 }
 
 templ Nav(page Page) {
 	<header class="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-40">
-		<nav class="max-w-6xl mx-auto flex items-center justify-between px-4 h-16" hx-boost="true" x-data="mobileNav">
+		<nav class="max-w-6xl mx-auto flex items-center justify-between px-4 h-16" x-data="mobileNav">
 			@logo()
 			<div class="hidden md:flex items-center gap-6">
 				@navLinks(page)

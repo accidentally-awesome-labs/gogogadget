@@ -80,6 +80,20 @@ Assertion discipline, by convention:
 - shell scripts run `set -euo pipefail`, so a failed step inside a pipe fails
   the run.
 
+Some specs defend htmx invariants that no unit test can reach, because they only
+exist in a live browser. Each was written by breaking the behaviour first and
+watching the test fail:
+
+| Spec | Invariant |
+|---|---|
+| `auth.spec.ts` | a navigation swaps only `#content`: a node appended to `<body>` (where clerk-js portals live) and the widget mount roots survive; Back/Forward re-fetch does not nest a page inside `#content` |
+| `projects.spec.ts` | a mutation soft-navigates — the JS context and body-level nodes survive, so nothing re-mounts; `innerMorph` keeps a surviving row's DOM node (`isConnected` on a held handle) |
+| `public.spec.ts` | the docs table of contents arrives and leaves with the page; an in-page anchor fires **zero** requests; a navigation lands at the top |
+
+A regression test that passes against the broken implementation is decoration.
+When one of these fails, read it as a design report: the chrome diverged, the
+swap widened, or a link got boosted that shouldn't be.
+
 Run the suite with `make e2e` (interactive mode: `make e2e-ui`).
 
 ## Visual

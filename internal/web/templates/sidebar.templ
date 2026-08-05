@@ -6,17 +6,27 @@ package templates
 templ Sidebar(page Page) {
 	<aside class="hidden md:flex w-60 shrink-0 flex-col border-r border-border bg-surface-raised p-4 gap-6">
 		@logo()
-		<div id="org-switcher" class="min-h-8"></div>
-		<nav class="flex flex-col gap-1 text-sm" hx-boost="true">
-			for _, item := range []struct{ Label, Href string }{
-				{"Dashboard", "/app"},
-				{"Projects", "/app/projects"},
-				{"Activity", "/app/activity"},
-				{"Settings", "/app/settings/account"},
+		<div
+			id="org-switcher"
+			class={ templ.KV("clerk-org-slot", page.ClerkPublishableKey != ""), "min-h-8" }
+			data-clerk-placeholder={ clerkOrgPlaceholder(page.Org) }
+		></div>
+		<nav class="flex flex-col gap-1 text-sm">
+			for _, item := range []struct{ Label, Href, Match string }{
+				{"Dashboard", "/app", "/app"},
+				{"Projects", "/app/projects", "/app/projects"},
+				{"Activity", "/app/activity", "/app/activity"},
+				{"Settings", "/app/settings/account", "/app/settings"},
 			} {
 				<a
 					href={ templ.SafeURL(item.Href) }
-					aria-current={ navCurrent(page, item.Href) }
+					hx-boost="true"
+					hx-target={ NavTarget }
+					hx-select={ NavTarget }
+					hx-swap={ NavSwap }
+					data-app-nav
+					data-nav-match={ item.Match }
+					aria-current={ navCurrent(page, item.Match) }
 					class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
 				>{ item.Label }</a>
 			}
@@ -24,15 +34,21 @@ templ Sidebar(page Page) {
 		if page.User != nil && page.User.IsAdmin {
 			<div>
 				<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">Admin</p>
-				<nav class="flex flex-col gap-1 text-sm" hx-boost="true">
-					for _, item := range []struct{ Label, Href string }{
-						{"Overview", "/admin"},
-						{"Users", "/admin/users"},
-						{"Organizations", "/admin/orgs"},
+				<nav class="flex flex-col gap-1 text-sm">
+					for _, item := range []struct{ Label, Href, Match string }{
+						{"Overview", "/admin", "/admin"},
+						{"Users", "/admin/users", "/admin/users"},
+						{"Organizations", "/admin/orgs", "/admin/orgs"},
 					} {
 						<a
 							href={ templ.SafeURL(item.Href) }
-							aria-current={ navCurrent(page, item.Href) }
+							hx-boost="true"
+							hx-target={ NavTarget }
+							hx-select={ NavTarget }
+							hx-swap={ NavSwap }
+							data-app-nav
+							data-nav-match={ item.Match }
+							aria-current={ navCurrent(page, item.Match) }
 							class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
 						>{ item.Label }</a>
 					}
@@ -50,7 +66,11 @@ templ Topbar(page Page) {
 		</div>
 		<div class="ml-auto flex items-center gap-3">
 			@themeToggle()
-			<div id="user-button" class="min-h-8 min-w-8"></div>
+			<div
+				id="user-button"
+				class={ templ.KV("clerk-user-slot", page.ClerkPublishableKey != ""), "min-h-8 min-w-8" }
+				data-clerk-placeholder={ clerkUserPlaceholder(page.User) }
+			></div>
 		</div>
 	</div>
 }

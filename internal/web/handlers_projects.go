@@ -92,7 +92,7 @@ func (s *Server) handleProjects(w http.ResponseWriter, r *http.Request) {
 		Plan: identity.PlanFrom(ctx), Count: count,
 	}
 	pageData := Page{Title: "Projects", Layout: templates.LayoutApp}
-	if IsHX(r) && !IsBoosted(r) {
+	if wantsFragment(r) {
 		s.Render(w, r, pageData, templates.ProjectsTable(d))
 		return
 	}
@@ -114,7 +114,7 @@ type projectFormInput struct {
 func (s *Server) renderProjectFormError(w http.ResponseWriter, r *http.Request, d templates.ProjectFormData, edit bool) {
 	w.WriteHeader(http.StatusUnprocessableEntity)
 	page := Page{Title: "Project", Layout: templates.LayoutApp}
-	if IsHX(r) && !IsBoosted(r) {
+	if wantsFragment(r) {
 		s.Render(w, r, page, templates.ProjectForm(d))
 		return
 	}
@@ -165,8 +165,8 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
 	s.analytics.Capture(user.ClerkUserID, "project_created", map[string]any{"org_id": org.ClerkOrgID, "project_id": project.ID})
-	FlashToast(w, "success", "Project created")
-	HXRedirect(w, "/app/projects")
+	Toast(w, "success", "Project created")
+	Navigate(w, r, "/app/projects")
 }
 
 // projectForOrg loads the project or 404s — cross-org ids get 404, never 403
@@ -226,8 +226,8 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "name": name})
-	FlashToast(w, "success", "Project updated")
-	HXRedirect(w, "/app/projects")
+	Toast(w, "success", "Project updated")
+	Navigate(w, r, "/app/projects")
 }
 
 // POST /app/projects/{id}/archive
@@ -244,8 +244,8 @@ func (s *Server) handleProjectArchive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "status": "archived"})
-	FlashToast(w, "success", "Project archived")
-	HXRedirect(w, "/app/projects")
+	Toast(w, "success", "Project archived")
+	Navigate(w, r, "/app/projects")
 }
 
 // DELETE /app/projects/{id} — row swap: 200 empty, htmx removes the tr.

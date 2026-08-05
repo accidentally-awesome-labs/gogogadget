@@ -44,12 +44,20 @@ own handlers reads the raw string from the mirror or from
 ## Invitations
 
 Invitations are **Clerk-hosted**: members are invited from the Account
-Portal's organization profile, which Settings → Organization links to
-(`{CLERK_PORTAL_URL}/organization-profile`). There is no invitations table or
-acceptance flow in the app — when the invitee accepts, Clerk fires
-`organizationMembership.created` and the row appears in the mirror. The
-member-count limit shown on the billing page is display-only for the same
-reason.
+Portal's organization page, which Settings → Organization links to
+(`{CLERK_PORTAL_URL}/organization?redirect_url=…`). There is no invitations
+table or acceptance flow in the app. Sending an invitation only creates a
+pending Clerk invitation. After the invitee accepts and authenticates, Clerk
+fires `user.created` (for a new user) and
+`organizationMembership.created`. The membership then appears in the local
+mirror.
+
+Configure both Account Portal fallback redirects as
+`{APP_URL}/?after-auth=1`, as described in
+[Authentication](/docs/authentication). Otherwise acceptance still succeeds,
+but the invitee lands on Clerk's `/default-redirect` page. The member-count
+limit shown on the billing page is display-only because invitation UX remains
+Clerk-hosted.
 
 ## Switching orgs
 
@@ -61,9 +69,10 @@ JWT (`org_id`, `org_role`, `org_slug`). Two surfaces change it:
   rotates the JWT's org claim and all data re-scopes on the next request.
 - **The SelectOrg page** — rendered by `RequireOrg` when the session has no
   active org but the user has at least one membership. In production each
-  button calls `Clerk.setActive({ organization })` via the `selectOrg` Alpine
-  component in `static/app.js`, then navigates to `/app`. In dev-bypass mode
-  the buttons hit `GET /dev/switch-org?org=X` instead, which rewrites the
+  button waits for the shared Clerk load, calls
+  `Clerk.setActive({ organization })` via the `selectOrg` Alpine component,
+  and then navigates to `/app`; failures surface an error toast. In dev-bypass
+  mode the buttons hit `GET /dev/switch-org?org=X` instead, which rewrites the
   synthetic `e2e:` cookie with the membership's role from the mirror.
 
 A user with **zero** memberships is redirected to Clerk's hosted

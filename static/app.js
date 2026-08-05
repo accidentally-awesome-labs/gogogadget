@@ -10,21 +10,44 @@
   }
 })();
 
-// --- htmx config ---
-// htmx 2.x does not swap on 4xx/5xx by default. Our conventions rely on two
-// exception statuses: 422 (re-rendered form fragments) and 503 (not-configured
-// fragments). htmx loads deferred after this file, so configure on
-// DOMContentLoaded when the htmx global exists.
-window.addEventListener("DOMContentLoaded", function () {
-  if (!window.htmx) return;
-  window.htmx.config.responseHandling = [
-    { code: "204", swap: false },
-    { code: "[23]..", swap: true },
-    { code: "422", swap: true }, // validation fragments
-    { code: "503", swap: true }, // not-configured fragments
-    { code: "[45]..", swap: false, error: true },
-  ];
-});
+// --- htmx notes (config lives in the <meta name="htmx-config"> tag) ---
+// Attribute inheritance is EXPLICIT in htmx 4: the only inherited attribute
+// this app needs is the body's CSRF header, declared as hx-headers:inherited,
+// so no implicitInheritance compatibility shim is required.
+// noSwap stays at the htmx 4 default ([204, 304]) on purpose: our 422 (form
+// validation) and 503 (not-configured) fragments MUST swap, and every other
+// error response renders a page whose #content is a valid swap target.
+
+// --- App nav state ---
+// Navigation swaps ONLY #content, so the sidebar/topbar shell is never touched
+// (that is what keeps clerk-js's body-level dropdown portals and the Alpine
+// components in the shell alive). The trade-off is that server-rendered
+// aria-current in the persistent sidebar would go stale, so sync it client-side
+// using the longest matching data-nav-match prefix.
+function syncAppNavigation() {
+  var path = window.location.pathname;
+  var links = Array.prototype.slice.call(document.querySelectorAll("[data-app-nav]"));
+  var current = null;
+  var bestLength = -1;
+  links.forEach(function (link) {
+    var match = link.dataset.navMatch || new URL(link.href, window.location.href).pathname;
+    var isMatch = path === match || path.indexOf(match.replace(/\/$/, "") + "/") === 0;
+    if (isMatch && match.length > bestLength) {
+      current = link;
+      bestLength = match.length;
+    }
+  });
+  links.forEach(function (link) {
+    if (link === current) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+window.addEventListener("DOMContentLoaded", syncAppNavigation);
+document.addEventListener("htmx:after:settle", syncAppNavigation);
 
 // --- Alpine CSP components (registered before Alpine boots) ---
 document.addEventListener("alpine:init", function () {
@@ -100,8 +123,27 @@ document.addEventListener("alpine:init", function () {
     return {
       choose: function (orgId) {
         if (!window.Clerk) return;
-        window.Clerk.setActive({ organization: orgId }).then(function () {
-          window.location.assign("/app");
+
+        var showFailure = function (error) {
+          if (error) console.error("Clerk organization switch failed", error);
+          document.dispatchEvent(new CustomEvent("toast", {
+            detail: { type: "error", message: "Unable to switch organizations. Please try again." },
+          }));
+        };
+
+        mountClerkWidgets();
+        if (!clerkLoadPromise) {
+          showFailure();
+          return;
+        }
+        clerkLoadPromise.then(function (loaded) {
+          if (!loaded) {
+            showFailure();
+            return;
+          }
+          window.Clerk.setActive({ organization: orgId })
+            .then(function () { window.location.assign("/app"); })
+            .catch(showFailure);
         });
       },
     };
@@ -148,10 +190,42 @@ document.addEventListener("alpine:init", function () {
 // clerk-js owns the __session JWT refresh cycle (~60s tokens). Without this,
 // auth expires ~60s after login. The publishable key arrives via a meta tag;
 // e2e/test envs leave it empty and skip clerk-js entirely.
-window.addEventListener("DOMContentLoaded", function () {
+var clerkLoadPromise;
+var mountedUserButton;
+var mountedOrganizationSwitcher;
+var clerkRetriedLoad = false;
+// clerk-js mounts React components (UserButton, OrganizationSwitcher) into these
+// roots AND renders their dropdown menus as portals appended directly to
+// <body>. Those portals are siblings of the mount roots, not children, so no
+// per-element attribute can protect them: any swap or morph of <body> deletes
+// them and the dropdowns go dead. Alpine bindings in the shell break the same
+// way. Therefore navigation swaps ONLY #content and never touches <body>'s
+// other children — the mount roots, the portals, and the shell's Alpine
+// components all survive untouched. Clerk mounts once per full page load.
+
+function mountClerkWidgets() {
   var meta = document.querySelector('meta[name="clerk-publishable-key"]');
   if (!meta || !window.Clerk) return;
-  window.Clerk.load().then(function () {
+
+  if (!clerkLoadPromise) {
+    clerkLoadPromise = window.Clerk.load()
+      .then(function () { return true; })
+      .catch(function (error) {
+        clerkLoadPromise = undefined;
+        console.error("Clerk failed to load", error);
+        // Retry a transient failure exactly once, self-driven: waiting on the
+        // next htmx event would race the rejection and re-await the same
+        // already-failed promise instead of starting a fresh attempt.
+        if (!clerkRetriedLoad) {
+          clerkRetriedLoad = true;
+          setTimeout(mountClerkWidgets, 0);
+        }
+        return false;
+      });
+  }
+  clerkLoadPromise.then(function (loaded) {
+    if (!loaded) return;
+
     var clerk = window.Clerk;
     // after-auth: the hosted portal redirected back to "/" so this page could
     // render and complete the dev handshake; with a session in place, forward
@@ -161,10 +235,32 @@ window.addEventListener("DOMContentLoaded", function () {
       window.location.replace("/app");
       return;
     }
+
+    var userButton = document.getElementById("user-button");
+    var organizationSwitcher = document.getElementById("org-switcher");
     if (!clerk.user) return;
-    var ub = document.getElementById("user-button");
-    if (ub) clerk.mountUserButton(ub);
-    var os = document.getElementById("org-switcher");
-    if (os) clerk.mountOrganizationSwitcher(os);
+
+    // Mount once per page load; several lifecycle hooks call this on a fresh
+    // document, so the guard below prevents a double mount.
+    if (userButton && !mountedUserButton) {
+      userButton.replaceChildren();
+      clerk.mountUserButton(userButton);
+      mountedUserButton = userButton;
+    }
+    if (organizationSwitcher && !mountedOrganizationSwitcher) {
+      organizationSwitcher.replaceChildren();
+      clerk.mountOrganizationSwitcher(organizationSwitcher);
+      mountedOrganizationSwitcher = organizationSwitcher;
+    }
   });
-});
+}
+
+// Mount once per full page load. Navigation only swaps #content, so the mounted
+// widgets are never disturbed and must NOT be re-mounted. mountClerkWidgets is
+// idempotent (it no-ops while a mount is live), so the htmx hooks below only
+// ever RETRY a mount that never succeeded — e.g. after a transient
+// Clerk.load() rejection. htmx 4 renamed the 2.x load event to
+// htmx:after:init; htmx.onLoad() listens on htmx:after:process, used here.
+window.addEventListener("DOMContentLoaded", mountClerkWidgets);
+document.addEventListener("htmx:after:process", mountClerkWidgets);
+document.addEventListener("htmx:after:settle", mountClerkWidgets);

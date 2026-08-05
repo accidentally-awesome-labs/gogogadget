@@ -35,7 +35,7 @@ func statusBadge(status string) string {
 templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
 	<div id="billing-card" class="card mb-6 max-w-lg"
 		if processing {
-			hx-get="/app/settings/billing/fragment" hx-trigger="every 2s" hx-swap="outerHTML"
+			hx-get="/app/settings/billing/fragment" hx-trigger="every 2s" hx-swap="outerMorph"
 		}
 	>
 		if processing {
@@ -101,9 +101,12 @@ templ SettingsBilling(d BillingData) {
 		for _, p := range d.Plans {
 			@PlanCard(p, p.Key == d.Plan.Key) {
 				if planRank(p.Key) > planRank(d.Plan.Key) {
-					<form hx-post="/app/billing/checkout" hx-disabled-elt="this">
+					<form hx-post="/app/billing/checkout" hx-disable="this">
 						<input type="hidden" name="plan" value={ p.Key }/>
-						<button type="submit" class="btn btn-primary w-full">Upgrade to { p.Name }</button>
+						<button type="submit" class="btn btn-primary w-full inline-flex items-center justify-center gap-2">
+							@Spinner()
+							Upgrade to { p.Name }
+						</button>
 					</form>
 				} else if p.Key == d.Plan.Key {
 					<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">Current plan</span>
@@ -113,8 +116,11 @@ templ SettingsBilling(d BillingData) {
 	</div>
 
 	if d.Sub != nil {
-		<form hx-post="/app/billing/portal" hx-disabled-elt="this" class="mt-6">
-			<button type="submit" class="btn btn-ghost" data-testid="manage-subscription">Manage subscription →</button>
+		<form hx-post="/app/billing/portal" hx-disable="this" class="mt-6">
+			<button type="submit" class="btn btn-ghost inline-flex items-center gap-2" data-testid="manage-subscription">
+				@Spinner()
+				Manage subscription →
+			</button>
 		</form>
 	}
 }

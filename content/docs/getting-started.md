@@ -22,7 +22,7 @@ Open http://localhost:8080.
 - `make setup` checks your Go and Docker versions, runs `go mod download`,
   downloads the pinned Tailwind standalone binary to `bin/tailwindcss`
   (`scripts/setup-tools.sh`, sha256-verified), vendors the frontend assets
-  (htmx, Alpine.js CSP build, clerk-js, Inter — `scripts/vendor-frontend.sh`,
+  (htmx 4, Alpine.js CSP build, clerk-js, Inter — `scripts/vendor-frontend.sh`,
   sha256-verified), and copies `.env.example` to `.env`.
 - `docker compose up -d db` starts Postgres 16 (with a healthcheck) on port
   5432. Port already taken? Set `DB_PORT` in `.env` — see

@@ -23,7 +23,7 @@ Every dependency is load-bearing; there are no duplicates and no ornamentation.
 |---|---|---|
 | Language | Go 1.26 | — |
 | Templates | templ (type-safe, compiled) | String-concatenated HTML |
-| Interactivity | HTMX + Alpine.js (CSP build) | A virtual DOM, a bundler, hydration |
+| Interactivity | htmx 4 + Alpine.js (CSP build) | A virtual DOM, a bundler, hydration |
 | Styling | Tailwind CSS v4 (standalone binary, no node) | A JS toolchain |
 | Database | Postgres 16 + sqlc + goose | An ORM, runtime query magic |
 | Auth, users, orgs, 2FA | Clerk (hosted Account Portal) | Password storage, OAuth flows, TOTP, invitations UI |

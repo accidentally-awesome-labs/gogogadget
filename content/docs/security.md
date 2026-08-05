@@ -59,9 +59,16 @@ poison `localhost` for every other app you run.
 
 ## CSRF
 
-nosurf guards every unsafe method. The token reaches htmx via `hx-headers` on
-`<body>`; failures render 403 (with the exact `nosurf.Reason` shown outside
-production).
+nosurf guards every unsafe method. The token reaches htmx via
+`hx-headers:inherited` on `<body>`; failures render 403 (with the exact
+`nosurf.Reason` shown outside production).
+
+The `:inherited` suffix is load-bearing. Attribute inheritance is **explicit** in
+htmx 4: a plain `hx-headers` on `<body>` applies to `<body>` alone, so every
+nested form would post without the token and 403. This is the only inherited
+attribute in the codebase — there is no `implicitInheritance` compatibility
+shim — and `TestProjectCreateSearchArchiveDelete` posts a real form through the
+CSRF middleware to keep it that way.
 
 - **Cookie names differ by environment on purpose.** Production:
   `__Host-csrf` (Secure, HttpOnly, SameSite=Lax, Path=/). Development:

@@ -14,13 +14,20 @@ templ ProjectsPage(d ProjectListData) {
 		</div>
 	}
 
-	<input
-		type="search" name="q" value={ d.Query } placeholder="Search projects…"
-		class="input max-w-sm mb-4"
-		hx-get="/app/projects" hx-trigger="input changed delay:300ms, search"
-		hx-target="#table-container" hx-push-url="true" hx-include="this"
-		aria-label="Search projects"
-	/>
+	<div class="flex items-center gap-2 mb-4">
+		<input
+			type="search" name="q" value={ d.Query } placeholder="Search projects…"
+			class="input max-w-sm"
+			hx-get="/app/projects" hx-trigger="input changed delay:300ms, search"
+			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
+			hx-sync="this:replace"
+			hx-indicator="#projects-search-indicator"
+			aria-label="Search projects"
+		/>
+		<span id="projects-search-indicator" class="text-fg-muted">
+			@Spinner()
+		</span>
+	</div>
 	@ProjectsTable(d)
 }
 
@@ -38,7 +45,7 @@ templ ProjectsTable(d ProjectListData) {
 					</thead>
 					<tbody>
 						for _, p := range d.Projects {
-							<tr data-testid="project-row">
+							<tr id={ fmt.Sprintf("project-%d", p.ID) } data-testid="project-row">
 								<td class="font-medium">{ p.Name }</td>
 								<td class="text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 								<td class="text-right">
@@ -88,13 +95,14 @@ templ ProjectForm(d ProjectFormData) {
 			}
 			hx-target="#project-form"
 			hx-swap="innerHTML"
-			hx-disabled-elt="this"
+			hx-disable="this"
 			novalidate
 			class="card max-w-lg space-y-4"
 		>
 			@FormField("name", "Name", "text", d.Name, d.NameErr, "Launch checklist", true)
 			<div class="flex gap-3">
-				<button type="submit" class="btn btn-primary">
+				<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
+					@Spinner()
 					if d.ID == 0 {
 						Create project
 					} else {

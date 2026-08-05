@@ -56,6 +56,21 @@
 }
 
 @layer components {
+  /* Keep Clerk controls visually stable while clerk-js mounts. The live
+     elements are preserved across HTMX swaps, so these fallbacks only appear
+     during the initial page load or a genuine remount. */
+  .clerk-org-slot:empty::before {
+    content: attr(data-clerk-placeholder);
+    line-height: 2rem;
+    @apply block h-8 w-full overflow-hidden whitespace-nowrap rounded-lg border border-border
+      bg-surface px-3 text-sm font-medium text-fg-muted;
+  }
+  .clerk-user-slot:empty::before {
+    content: attr(data-clerk-placeholder);
+    line-height: 2rem;
+    @apply block h-8 w-8 rounded-full border border-border bg-surface-raised
+      text-center text-xs font-semibold text-fg-muted;
+  }
   .btn, .btn-primary, .btn-ghost, .btn-danger {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
       transition-colors duration-150 cursor-pointer
@@ -120,7 +135,10 @@
     @apply border-red-900 bg-red-950 text-red-200;
   }
 
-  /* htmx busy indicator: shown while any hx-get is in flight */
+  /* htmx request indicator. htmx adds .htmx-request to the element that issued
+     the request and to anything its hx-indicator names; these rules fade the
+     Spinner component in for that window. We own them here rather than letting
+     htmx inject its own <style> — see the htmx-config meta tag in layouts.templ. */
   .htmx-indicator {
     opacity: 0;
     transition: opacity 150ms ease;
@@ -151,4 +169,18 @@
   .prose hr { @apply border-border my-8; }
   .prose img { @apply rounded-xl my-4; }
   .prose strong { @apply font-semibold; }
+}
+
+/* Navigation swaps opt into the View Transitions API (hx-swap="… transition:true"),
+   which the browser drives with its own cross-fade. Honour a reduced-motion
+   preference by cutting the animation but keeping the swap. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  .htmx-indicator {
+    transition: none;
+  }
 }

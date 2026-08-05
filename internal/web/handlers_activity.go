@@ -40,7 +40,7 @@ func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fragment for htmx pagination; full page otherwise (the fragment rule).
-	if IsHX(r) && !IsBoosted(r) {
+	if wantsFragment(r) {
 		s.Render(w, r, Page{Title: "Activity", Layout: templates.LayoutApp},
 			templates.ActivityTable(rows, s.cfg.Now(), page, totalPages))
 		return

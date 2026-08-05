@@ -121,7 +121,7 @@ templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
 					} else if p.Key == currentPlanKey {
 						<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">Current plan</span>
 					} else if p.PolarProductID != "" {
-						<form hx-post="/app/billing/checkout" hx-disabled-elt="this">
+						<form hx-post="/app/billing/checkout" hx-disable="this">
 							<input type="hidden" name="plan" value={ p.Key }/>
 							<button type="submit" class="btn btn-primary w-full">Upgrade to { p.Name }</button>
 						</form>

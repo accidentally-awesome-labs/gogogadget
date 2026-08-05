@@ -38,8 +38,14 @@ active org). `DEV_AUTH_BYPASS` is boot-refused when `APP_ENV=production`.
 
 ## Conventions (verbatim, load-bearing)
 
-- **Fragment rule**: bare fragment iff `HX-Request` present AND `HX-Boosted` absent; boosted navs and plain requests get the full layout.
-- **htmx statuses**: 422 = re-rendered form fragment (htmx configured to swap 422/503 in `static/app.js`); mutations → `HX-Redirect` (+ flash toast) or re-rendered list + `HX-Trigger` toast; row deletes `hx-delete` + `hx-confirm` + `closest tr` + `outerHTML` + 200 empty; forms carry `novalidate` + `hx-disabled-elt="this"`.
+- **Runtime is htmx 4** (`static/vendor/htmx.min.js`, sha256-pinned in `scripts/vendor-frontend.sh`). Attribute inheritance is EXPLICIT (`hx-headers:inherited` on `<body>` for CSRF); config lives in the `<meta name="htmx-config">` tag, not JS.
+- **Fragment rule** (`wantsFragment` in `internal/web/htmx.go`, in order): history-restore → full page; `HX-Target` is `#content` → full page (replacing the content box IS a navigation); else `HX-Request-Type: full`→page / `partial`→fragment; no such header (pre-4.0) → fragment unless `HX-Boosted`.
+- **Navigation swaps ONLY `#content`** (`hx-boost` + `hx-target/hx-select="#content"` + `hx-swap="outerHTML transition:true show:top"`). The shell must never be a swap target — clerk-js portals live on `<body>`. `ContentTarget` is the single constant.
+- **Chrome rule**: pages reachable by a boosted link MUST render identical chrome around `#content`; anything layout-specific goes INSIDE it (docs TOC lives in `docsBody`, not the shell). `PublicLayout`/`DocsLayout` share `publicShell`; `AdminLayout` *is* `AppLayout`. Guarded by `TestPublicAndDocsLayoutsShareChrome`.
+- **Anchor links (`#…`) are never boosted** (`isAnchorLink` in `nav.templ`) — boosting repaints `#content` at the top before scrolling, flashing the wrong section.
+- **Redirects**: `Navigate(w, r, url)` = soft, in-app (`HX-Location` scoped to `#content`, no reload, clerk stays mounted) — pair with `Toast`. `Redirect(w, r, url)` = hard (`HX-Redirect`/303) for another origin or an auth/layout change — pair with `FlashToast`.
+- **htmx statuses**: 422 = re-rendered form fragment (htmx 4's `noSwap` default `[204,304]` already swaps 422/503); row deletes `hx-delete` + `hx-confirm` + `closest tr` + `outerHTML` + 200 empty; forms carry `novalidate` + `hx-disable="this"` (htmx 4's rename of `hx-disabled-elt`) + a `Spinner()`.
+- **Swap methods**: `innerMorph` for table search/pagination and `outerMorph` for the billing poll — morph matches by `id`, so table rows carry stable ids. Search inputs add `hx-sync="this:replace"` + `hx-indicator`.
 - **XSS rule**: templ auto-escapes; user-controlled content NEVER goes through `templ.Raw`. goldmark without `html.WithUnsafe`.
 - **Modularity seams**: handlers never import SDKs — `identity.Verifier`, `billing.Client`, `mail.Sender`, `analytics.Capturer`. Swapping a provider = replacing one file.
 - **No new dependencies** without a manifest entry (see README stack table).

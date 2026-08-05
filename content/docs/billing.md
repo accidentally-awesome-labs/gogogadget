@@ -32,14 +32,27 @@ plan has no Polar product and can never be checked out.
 
 ## Polar sandbox setup
 
-1. Create a Polar account and a **sandbox** organization.
-2. Create two products (Pro, Team) and copy their IDs into
-   `POLAR_PRODUCT_PRO` / `POLAR_PRODUCT_TEAM`; copy the access token into
-   `POLAR_ACCESS_TOKEN`. `POLAR_SERVER` defaults to `sandbox`.
-3. Add a webhook endpoint pointing at `/webhooks/polar` and set
-   `POLAR_WEBHOOK_SECRET`.
-4. For local delivery run the CLI: `polar listen
-   http://localhost:8080/webhooks/polar`.
+1. Create a Polar account and select the **sandbox** environment at
+   [sandbox.polar.sh](https://sandbox.polar.sh). Sandbox and production data,
+   access tokens, and webhook secrets are separate.
+2. Create two monthly recurring products: Pro at $20 and Team at $50. Copy
+   their IDs into `POLAR_PRODUCT_PRO` / `POLAR_PRODUCT_TEAM`.
+3. In Organization Settings → Developers, create an Organization Access Token
+   with `checkouts:write`, `customer_sessions:write`, and
+   `subscriptions:write`; set it as `POLAR_ACCESS_TOKEN`.
+   `POLAR_SERVER` defaults to `sandbox`.
+4. For local webhook delivery, run `polar login`, then:
+
+   ```sh
+   polar listen http://localhost:8080/webhooks/polar
+   ```
+
+   Select the sandbox organization and copy the listener's generated
+   **Secret** into `POLAR_WEBHOOK_SECRET`. A Dashboard webhook endpoint uses a
+   different secret and is not needed while the local listener is running.
+5. For a deployed app, create a Polar Dashboard webhook endpoint at
+   `https://your-domain.com/webhooks/polar`, subscribe to all
+   `subscription.*` events, and use that endpoint's secret instead.
 
 With no `POLAR_ACCESS_TOKEN`, billing routes render a 503 "not configured"
 fragment and everything else keeps working.
@@ -51,7 +64,8 @@ fragment and everything else keeps working.
 `CustomerExternalID=<clerk_org_id>`, and metadata `clerk_org_id` — both are
 how the webhook later resolves the org. An unknown or product-less plan gets
 a 422 fragment. `POST /app/billing/portal` creates a customer-portal session
-the same way. Both redirect (303, or `HX-Redirect` for HTMX).
+the same way. Both redirect out to another origin, so both use the hard form
+(`303`, or `HX-Redirect` for HTMX) rather than a soft in-app navigation.
 
 **The webhook races the redirect.** The customer returns to
 `/app/settings/billing?success=1` possibly *before* Polar's webhook lands, so
@@ -60,7 +74,7 @@ subscription row is missing or still `incomplete`, the plan card renders in a
 "Processing your subscription…" state with:
 
 ```html
-hx-get="/app/settings/billing/fragment" hx-trigger="every 2s" hx-swap="outerHTML"
+hx-get="/app/settings/billing/fragment" hx-trigger="every 2s" hx-swap="outerMorph"
 ```
 
 The fragment endpoint re-renders the card every 2 seconds; once the webhook

@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -88,11 +89,23 @@ func (s *Server) clearSessionCookie(w http.ResponseWriter) {
 	})
 }
 
+func clerkAccountPortalLink(baseURL, page, redirectURL string) string {
+	if baseURL == "" {
+		return ""
+	}
+	return baseURL + page + "?redirect_url=" + url.QueryEscape(redirectURL)
+}
+
 // GET /app/settings/account
 func (s *Server) handleSettingsAccount(w http.ResponseWriter, r *http.Request) {
 	user := identity.UserFrom(r.Context())
+	accountURL := clerkAccountPortalLink(
+		s.cfg.ClerkPortalURL,
+		"/user",
+		s.cfg.AppURL+r.URL.Path,
+	)
 	s.Render(w, r, Page{Title: "Account settings", Layout: templates.LayoutApp},
-		templates.SettingsAccount(*user, s.cfg.ClerkPortalURL))
+		templates.SettingsAccount(*user, accountURL))
 }
 
 // GET /app/settings/org
@@ -103,6 +116,11 @@ func (s *Server) handleSettingsOrg(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
+	organizationURL := clerkAccountPortalLink(
+		s.cfg.ClerkPortalURL,
+		"/organization",
+		s.cfg.AppURL+r.URL.Path,
+	)
 	s.Render(w, r, Page{Title: "Organization settings", Layout: templates.LayoutApp},
-		templates.SettingsOrg(*org, members, s.cfg.ClerkPortalURL))
+		templates.SettingsOrg(*org, members, organizationURL))
 }

@@ -267,7 +267,7 @@ func Pricing(plans []billing.Plan, authed bool, currentPlanKey string) templ.Com
 						return templ_7745c5c3_Err
 					}
 				} else if p.PolarProductID != "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<form hx-post=\"/app/billing/checkout\" hx-disabled-elt=\"this\"><input type=\"hidden\" name=\"plan\" value=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<form hx-post=\"/app/billing/checkout\" hx-disable=\"this\"><input type=\"hidden\" name=\"plan\" value=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}

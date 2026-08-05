@@ -1,7 +1,9 @@
 package templates
 
 import (
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/content"
@@ -14,6 +16,25 @@ const (
 	LayoutApp    = "app"
 	LayoutAdmin  = "admin"
 	LayoutDocs   = "docs"
+)
+
+// Navigation contract, shared by every nav link and by the server's Navigate
+// helper (web.ContentTarget / web.NavSwap alias these).
+//
+// NavTarget is the only element a navigation may swap: the shell around it
+// hosts clerk-js's mounted widgets and their body-level dropdown portals, which
+// do not survive being replaced. Every page reachable by a boosted link must
+// therefore render identical chrome around it — see publicShell.
+//
+// NavSwap replaces that box, lets the browser's View Transitions API cross-fade
+// the change, and brings the top of the new content into view the way a real
+// page load would. Transitions are opted in per-swap rather than via
+// htmx.config.transitions so in-page updates stay instant. The scroll is
+// explicit because htmx only defaults boosted *forms* to show:top — a boosted
+// link otherwise keeps the previous scroll offset and lands you mid-page.
+const (
+	NavTarget = "#content"
+	NavSwap   = "outerHTML transition:true show:top"
 )
 
 // Page is the per-request view model every layout receives. Fields are added
@@ -52,4 +73,25 @@ func (p Page) NowOrDefault() time.Time {
 		return p.Now()
 	}
 	return time.Now()
+}
+
+func avatarInitial(name string) string {
+	for _, r := range strings.TrimSpace(name) {
+		return string(unicode.ToUpper(r))
+	}
+	return "?"
+}
+
+func clerkOrgPlaceholder(org *sqlc.Org) string {
+	if org == nil {
+		return "Organization"
+	}
+	return org.Name
+}
+
+func clerkUserPlaceholder(user *sqlc.User) string {
+	if user == nil {
+		return "?"
+	}
+	return avatarInitial(user.Name)
 }

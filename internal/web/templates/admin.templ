@@ -37,13 +37,20 @@ templ AdminHome(d AdminHomeData) {
 
 templ AdminUsersPage(d AdminUsersData) {
 	<h1 class="text-2xl font-bold mb-6">Users</h1>
-	<input
-		type="search" name="q" value={ d.Query } placeholder="Search by email…"
-		class="input max-w-sm mb-4"
-		hx-get="/admin/users" hx-trigger="input changed delay:300ms, search"
-		hx-target="#table-container" hx-push-url="true" hx-include="this"
-		aria-label="Search users"
-	/>
+	<div class="flex items-center gap-2 mb-4">
+		<input
+			type="search" name="q" value={ d.Query } placeholder="Search by email…"
+			class="input max-w-sm"
+			hx-get="/admin/users" hx-trigger="input changed delay:300ms, search"
+			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
+			hx-sync="this:replace"
+			hx-indicator="#admin-search-indicator"
+			aria-label="Search users"
+		/>
+		<span id="admin-search-indicator" class="text-fg-muted">
+			@Spinner()
+		</span>
+	</div>
 	@AdminUsersTable(d)
 }
 
@@ -56,7 +63,7 @@ templ AdminUsersTable(d AdminUsersData) {
 				</thead>
 				<tbody>
 					for _, u := range d.Users {
-						<tr>
+						<tr id={ "user-" + u.ClerkUserID }>
 							<td class="font-medium">{ string(u.Email) }</td>
 							<td>{ u.Name }</td>
 							<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>

@@ -25,17 +25,23 @@ The canonical example is `projects`; copy its shape exactly.
 3. **Regenerate** — `make generate`. sqlc emits typed methods into
    `internal/db/sqlc/` (never edit generated files).
 4. **Templates** — `internal/web/templates/widgets.templ`: List/New/Edit
-   pages plus a row fragment. Add `data-testid` hooks to every element a test
-   will assert on. Follow the HTMX rules in [Frontend](/docs/frontend).
+   pages plus a row fragment. Give each row a stable `id` (`widget-42`) so
+   morph swaps can patch it in place, and add `data-testid` hooks to every
+   element a test will assert on. Follow the htmx rules in
+   [Frontend](/docs/frontend).
 5. **Handlers** — `internal/web/handlers_widgets.go`. Validation failure →
-   422 + re-rendered form fragment; success → `HXRedirect` or list fragment +
-   `Toast`; row delete → 200 empty with `hx-target="closest tr"`.
+   422 + re-rendered form fragment; success → `Navigate` (soft, in-app) plus
+   `Toast`, or a re-rendered list fragment + `Toast`; row delete → 200 empty
+   with `hx-target="closest tr"`. Reach for `Redirect`/`HXRedirect` only when
+   the destination is another origin or the whole document must be rebuilt.
 6. **Audit** — `audit.Log(ctx, s.q, orgID, userID, "widget.created", …)` on
    every mutation; it appears on `/app/activity` for free.
 7. **Routes** — register on `appMux` in `internal/web/routes.go` (the
    `RequireAuth → RequireNotDisabled → RequireOrg → LoadPlan` chain already
    applies).
 8. **Nav** — add the sidebar entry in `internal/web/templates/sidebar.templ`.
+   Boosted links swap only `#content`, so the page must render the same chrome
+   as its neighbours; anything layout-specific belongs inside `#content`.
 9. **Tests** — `internal/web/widgets_test.go`: cross-org access → 404;
    plan-limit branch → 422 if the resource is plan-limited. Handler behavior
    belongs at the integration layer; see [Testing](/docs/testing).

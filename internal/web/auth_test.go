@@ -55,6 +55,80 @@ func TestRequireAuthAcceptsValidSession(t *testing.T) {
 	assert.Contains(t, body, "a1@example.com")
 }
 
+func TestAppShellRendersClerkMountsAndContentScopedNav(t *testing.T) {
+	s := integrationServer(t, func(d *Deps) {
+		d.Config.ClerkPublishableKey = "pk_test_fixture"
+	})
+	seedMembership(t, s, "user_shell", "org_shell", "org:admin")
+	cookie := sessionCookie("user_shell", "org_shell", "org:admin")
+
+	code, _, body := serve(t, s, "GET", "/app", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `id="org-switcher" class="clerk-org-slot min-h-8"`)
+	assert.Contains(t, body, `data-clerk-placeholder="org_shell Org"`)
+	assert.Contains(t, body, `id="user-button" class="clerk-user-slot min-h-8 min-w-8"`)
+	assert.Contains(t, body, `data-clerk-placeholder="U"`)
+	assert.NotContains(t, body, " else data-clerk-placeholder")
+	// Nav swaps ONLY #content. clerk-js renders its dropdown menus as portals
+	// appended directly to <body>, so any swap/morph of <body> deletes them and
+	// the dropdowns die; Alpine bindings in the shell break the same way. The
+	// shell must therefore never be a swap target.
+	assert.Contains(t, body, `hx-boost="true"`)
+	assert.Contains(t, body, `hx-target="#content"`)
+	assert.Contains(t, body, `hx-select="#content"`)
+	// htmx 4 drives the swap through the View Transitions API.
+	assert.Contains(t, body, `hx-swap="outerHTML transition:true show:top"`)
+	assert.NotContains(t, body, `hx-target="body"`)
+	assert.NotContains(t, body, "hx-morph-skip")
+	// hx-preserve quarantines the element (stash + restore), which is what
+	// detached clerk's listeners originally.
+	assert.NotContains(t, body, "hx-preserve")
+	// hx-history was removed in htmx 4; hx-history-elt keeps a Back-navigation
+	// re-fetch scoped to #content instead of <body>.
+	assert.NotContains(t, body, `hx-history="`)
+	assert.Contains(t, body, `<main id="content" hx-history-elt="true"`)
+
+	s.cfg.ClerkPublishableKey = ""
+	code, _, body = serve(t, s, "GET", "/app", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `id="org-switcher" class="min-h-8"`)
+	assert.Contains(t, body, `id="user-button" class="min-h-8 min-w-8"`)
+	assert.NotContains(t, body, "clerk-org-slot")
+	assert.NotContains(t, body, "clerk-user-slot")
+}
+
+func TestSettingsUseCurrentClerkAccountPortalLinks(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_portal", "org_portal", "org:admin")
+	cookie := sessionCookie("user_portal", "org_portal", "org:admin")
+
+	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `href="https://accounts.example.test/user?redirect_url=http%3A%2F%2Flocalhost%3A18080%2Fapp%2Fsettings%2Faccount"`)
+
+	code, _, body = serve(t, s, "GET", "/app/settings/org", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `href="https://accounts.example.test/organization?redirect_url=http%3A%2F%2Flocalhost%3A18080%2Fapp%2Fsettings%2Forg"`)
+	assert.Contains(t, body, `aria-current="page"`)
+	assert.Contains(t, body, `hx-select="#content"`)
+}
+
+func TestSettingsHideClerkLinksWhenAccountPortalIsUnconfigured(t *testing.T) {
+	s := integrationServer(t, func(d *Deps) {
+		d.Config.ClerkPortalURL = ""
+	})
+	seedMembership(t, s, "user_no_portal", "org_no_portal", "org:admin")
+	cookie := sessionCookie("user_no_portal", "org_no_portal", "org:admin")
+
+	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, "Manage your account")
+
+	code, _, body = serve(t, s, "GET", "/app/settings/org", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, "Manage organization")
+}
+
 func TestRequireAuth503WhenUnconfigured(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.DevAuthBypass = false
@@ -93,11 +167,41 @@ func TestRequireOrgSelectsOrCreates(t *testing.T) {
 	assert.Contains(t, body, "Choose an organization")
 	assert.Contains(t, body, "m1 Org")
 
+	// Boosted navigation leaves the app shell before showing SelectOrg.
+	hx := http.Header{"HX-Request": {"true"}, "HX-Boosted": {"true"}}
+	code, hdr, body := serve(t, s, "GET", "/app/settings/account", nil, hx, sessionCookie("user_m1", "", ""))
+	assert.Equal(t, http.StatusOK, code)
+	assert.Equal(t, "/app/settings/account", hdr.Get("HX-Redirect"))
+	assert.Empty(t, body)
+
 	// Zero memberships → redirect to the portal's create-organization.
 	seedUser(t, s, "user_m2", "m2@example.com", "M Two")
-	code, hdr, _ := serve(t, s, "GET", "/app/settings/account", nil, nil, sessionCookie("user_m2", "", ""))
+	code, hdr, _ = serve(t, s, "GET", "/app/settings/account", nil, nil, sessionCookie("user_m2", "", ""))
 	assert.Equal(t, http.StatusSeeOther, code)
 	assert.Equal(t, "https://accounts.example.test/create-organization?redirect_url=http://localhost:18080/app", hdr.Get("Location"))
+
+	code, hdr, _ = serve(t, s, "GET", "/app/settings/account", nil, hx, sessionCookie("user_m2", "", ""))
+	assert.Equal(t, http.StatusOK, code)
+	assert.Equal(t, "https://accounts.example.test/create-organization?redirect_url=http://localhost:18080/app", hdr.Get("HX-Redirect"))
+}
+
+func TestRequireOrgRedirectsBoostedSyncInterstitial(t *testing.T) {
+	s := integrationServer(t, nil)
+	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+	req := httptest.NewRequest("GET", "/app", nil)
+	req.Header.Set("HX-Request", "true")
+	req.Header.Set("HX-Boosted", "true")
+	ctx := identity.WithClaims(req.Context(), &identity.Claims{UserID: "user_sync", OrgID: "org_sync"})
+	ctx = identity.WithUser(ctx, &sqlc.User{ClerkUserID: "user_sync"})
+	rec := httptest.NewRecorder()
+
+	s.requireOrg(next).ServeHTTP(rec, req.WithContext(ctx))
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "/app", rec.Header().Get("HX-Redirect"))
+	assert.Empty(t, rec.Body.String())
 }
 
 func TestRequireAdmin(t *testing.T) {

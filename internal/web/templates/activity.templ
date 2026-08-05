@@ -15,7 +15,7 @@ templ Pagination(page, totalPages int, baseURL string) {
 			if page > 1 {
 				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page-1)) }
 					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page-1) }
-					hx-target="#table-container" hx-push-url="true"
+					hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
 					class="btn-ghost">← Previous</a>
 			} else {
 				<span></span>
@@ -24,7 +24,7 @@ templ Pagination(page, totalPages int, baseURL string) {
 			if page < totalPages {
 				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page+1)) }
 					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page+1) }
-					hx-target="#table-container" hx-push-url="true"
+					hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
 					class="btn-ghost">Next →</a>
 			} else {
 				<span></span>
@@ -75,7 +75,7 @@ templ ActivityTable(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPag
 					</thead>
 					<tbody>
 						for _, row := range rows {
-							<tr>
+							<tr id={ fmt.Sprintf("audit-%d", row.ID) }>
 								<td>{ row.ActorEmail }</td>
 								<td><span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">{ row.Action }</span></td>
 								<td>
