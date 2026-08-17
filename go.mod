@@ -12,6 +12,9 @@ tool (
 
 require (
 	github.com/a-h/templ v0.3.1020
+	github.com/aws/aws-sdk-go-v2/config v1.32.37
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.36
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2
 	github.com/clerk/clerk-sdk-go/v2 v2.7.0
 	github.com/getsentry/sentry-go v0.48.0
 	github.com/go-playground/form/v4 v4.3.0
@@ -21,7 +24,7 @@ require (
 	github.com/pressly/goose/v3 v3.27.3
 	github.com/resendlabs/resend-go v1.7.0
 	github.com/standard-webhooks/standard-webhooks/libraries v0.0.1
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	github.com/svix/svix-webhooks v1.99.1
 	github.com/yuin/goldmark v1.8.5
 	golang.org/x/text v0.40.0
@@ -41,8 +44,6 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.43.6 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.18 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.32.37 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.36 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.37 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.37 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.37 // indirect
@@ -51,7 +52,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.30 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.37 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.38 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signin v1.5.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.33.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.38.6 // indirect
@@ -113,7 +113,6 @@ require (
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20260418072757-ce92298d1124 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/procfs v0.21.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
