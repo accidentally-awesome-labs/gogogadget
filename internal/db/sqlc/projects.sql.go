@@ -37,7 +37,8 @@ func (q *Queries) CountProjectsByOrg(ctx context.Context, clerkOrgID string) (in
 
 const countProjectsByOrgSearch = `-- name: CountProjectsByOrgSearch :one
 SELECT count(*) FROM projects
-WHERE clerk_org_id = $1 AND status = 'active' AND ($2::text = '' OR name ILIKE '%' || $2 || '%')
+WHERE clerk_org_id = $1 AND status = 'active'
+  AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%')
 `
 
 type CountProjectsByOrgSearchParams struct {
@@ -55,7 +56,7 @@ func (q *Queries) CountProjectsByOrgSearch(ctx context.Context, arg CountProject
 const createProject = `-- name: CreateProject :one
 INSERT INTO projects (clerk_org_id, name)
 VALUES ($1, $2)
-RETURNING id, clerk_org_id, name, status, created_at, updated_at
+RETURNING id, clerk_org_id, name, status, created_at, updated_at, search_tsv
 `
 
 type CreateProjectParams struct {
@@ -73,6 +74,7 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SearchTsv,
 	)
 	return i, err
 }
@@ -92,7 +94,7 @@ func (q *Queries) DeleteProject(ctx context.Context, arg DeleteProjectParams) er
 }
 
 const getProjectByID = `-- name: GetProjectByID :one
-SELECT id, clerk_org_id, name, status, created_at, updated_at FROM projects WHERE id = $1 AND clerk_org_id = $2
+SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects WHERE id = $1 AND clerk_org_id = $2
 `
 
 type GetProjectByIDParams struct {
@@ -110,14 +112,52 @@ func (q *Queries) GetProjectByID(ctx context.Context, arg GetProjectByIDParams) 
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SearchTsv,
 	)
 	return i, err
 }
 
-const listProjectsByOrg = `-- name: ListProjectsByOrg :many
-SELECT id, clerk_org_id, name, status, created_at, updated_at FROM projects
-WHERE clerk_org_id = $1 AND status = 'active' AND ($2::text = '' OR name ILIKE '%' || $2 || '%')
+const listAllProjectsByOrg = `-- name: ListAllProjectsByOrg :many
+SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects
+WHERE clerk_org_id = $1 AND status = 'active'
 ORDER BY created_at DESC
+`
+
+// Full list for CSV export (no pagination).
+func (q *Queries) ListAllProjectsByOrg(ctx context.Context, clerkOrgID string) ([]Project, error) {
+	rows, err := q.db.Query(ctx, listAllProjectsByOrg, clerkOrgID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Project
+	for rows.Next() {
+		var i Project
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClerkOrgID,
+			&i.Name,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SearchTsv,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProjectsByOrg = `-- name: ListProjectsByOrg :many
+SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects
+WHERE clerk_org_id = $1 AND status = 'active'
+  AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%')
+ORDER BY CASE WHEN $2::text = '' THEN 0 ELSE COALESCE(ts_rank(search_tsv, websearch_to_tsquery('simple', $2)), 0) END DESC,
+         created_at DESC
 LIMIT $3 OFFSET $4
 `
 
@@ -128,6 +168,9 @@ type ListProjectsByOrgParams struct {
 	Offset     int32  `json:"offset"`
 }
 
+// Postgres FTS (websearch syntax: quotes, OR, -negation) with an ILIKE
+// fallback so partial/short tokens still match; ranked when the FTS query
+// scores, else newest first.
 func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgParams) ([]Project, error) {
 	rows, err := q.db.Query(ctx, listProjectsByOrg,
 		arg.ClerkOrgID,
@@ -149,6 +192,7 @@ func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgPa
 			&i.Status,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SearchTsv,
 		); err != nil {
 			return nil, err
 		}
@@ -163,7 +207,7 @@ func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgPa
 const updateProject = `-- name: UpdateProject :one
 UPDATE projects SET name = $3, updated_at = now()
 WHERE id = $1 AND clerk_org_id = $2
-RETURNING id, clerk_org_id, name, status, created_at, updated_at
+RETURNING id, clerk_org_id, name, status, created_at, updated_at, search_tsv
 `
 
 type UpdateProjectParams struct {
@@ -182,6 +226,7 @@ func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) (P
 		&i.Status,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SearchTsv,
 	)
 	return i, err
 }

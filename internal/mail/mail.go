@@ -13,8 +13,10 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/resendlabs/resend-go"
+	"golang.org/x/text/language"
 )
 
 type Message struct {
@@ -86,59 +88,65 @@ func sanitizeFilename(s string) string {
 
 // --- Message builders: render the templ components to strings at enqueue
 // time, so job payloads carry rendered bodies and workers never touch templates.
+// locale picks the catalog (zero value = English); bodies and subjects are
+// localized through i18n.T on the render context.
 
-func renderHTML(c templ.Component) (string, error) {
+func renderHTML(ctx context.Context, c templ.Component) (string, error) {
 	var b strings.Builder
-	if err := c.Render(context.Background(), &b); err != nil {
+	if err := c.Render(ctx, &b); err != nil {
 		return "", err
 	}
 	return b.String(), nil
 }
 
-func WelcomeMessage(appURL, to, name string) (Message, error) {
-	html, err := renderHTML(templates.WelcomeEmailHTML(appURL, name))
+func WelcomeMessage(locale language.Tag, appURL, to, name string) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.WelcomeEmailHTML(appURL, name))
 	if err != nil {
 		return Message{}, err
 	}
-	text, err := renderHTML(templates.WelcomeEmailText(appURL, name))
+	text, err := renderHTML(ctx, templates.WelcomeEmailText(appURL, name))
 	if err != nil {
 		return Message{}, err
 	}
-	return Message{To: to, Subject: "Welcome to GoGoGadget", HTML: html, Text: text}, nil
+	return Message{To: to, Subject: i18n.T(ctx, "email.welcome.subject"), HTML: html, Text: text}, nil
 }
 
-func PaymentFailedMessage(appURL, to string) (Message, error) {
-	html, err := renderHTML(templates.PaymentFailedEmailHTML(appURL))
+func PaymentFailedMessage(locale language.Tag, appURL, to string) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.PaymentFailedEmailHTML(appURL))
 	if err != nil {
 		return Message{}, err
 	}
-	text, err := renderHTML(templates.PaymentFailedEmailText(appURL))
+	text, err := renderHTML(ctx, templates.PaymentFailedEmailText(appURL))
 	if err != nil {
 		return Message{}, err
 	}
-	return Message{To: to, Subject: "Your payment failed", HTML: html, Text: text}, nil
+	return Message{To: to, Subject: i18n.T(ctx, "email.payment_failed.subject"), HTML: html, Text: text}, nil
 }
 
-func SubscriptionCanceledMessage(appURL, to, periodEnd string) (Message, error) {
-	html, err := renderHTML(templates.SubscriptionCanceledEmailHTML(appURL, periodEnd))
+func SubscriptionCanceledMessage(locale language.Tag, appURL, to, periodEnd string) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.SubscriptionCanceledEmailHTML(appURL, periodEnd))
 	if err != nil {
 		return Message{}, err
 	}
-	text, err := renderHTML(templates.SubscriptionCanceledEmailText(appURL, periodEnd))
+	text, err := renderHTML(ctx, templates.SubscriptionCanceledEmailText(appURL, periodEnd))
 	if err != nil {
 		return Message{}, err
 	}
-	return Message{To: to, Subject: "Your subscription is canceled", HTML: html, Text: text}, nil
+	return Message{To: to, Subject: i18n.T(ctx, "email.canceled.subject"), HTML: html, Text: text}, nil
 }
 
-func TrialEndingMessage(appURL, to, trialEnd string) (Message, error) {
-	html, err := renderHTML(templates.TrialEndingEmailHTML(appURL, trialEnd))
+func TrialEndingMessage(locale language.Tag, appURL, to, trialEnd string) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.TrialEndingEmailHTML(appURL, trialEnd))
 	if err != nil {
 		return Message{}, err
 	}
-	text, err := renderHTML(templates.TrialEndingEmailText(appURL, trialEnd))
+	text, err := renderHTML(ctx, templates.TrialEndingEmailText(appURL, trialEnd))
 	if err != nil {
 		return Message{}, err
 	}
-	return Message{To: to, Subject: "Your trial ends soon", HTML: html, Text: text}, nil
+	return Message{To: to, Subject: i18n.T(ctx, "email.trial_ending.subject"), HTML: html, Text: text}, nil
 }

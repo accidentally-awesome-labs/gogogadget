@@ -13,7 +13,12 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/flags"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/llm"
+	"github.com/gogogadget/gogogadget/internal/observability"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -25,11 +30,14 @@ type Server struct {
 	version string
 	blog    *content.Blog
 	docs    *content.Docs
-
 	verifier      identity.Verifier
 	fetcher       identity.UserFetcher
 	billingClient billing.Client // nil when Polar is unconfigured
 	analytics     analytics.Capturer
+	store         storage.Store  // DevStore by default; R2 when configured
+	llm           llm.Completer // nil when unconfigured → 503
+	flags         flags.Evaluator
+	reporter      observability.Reporter
 
 	mux *http.ServeMux
 }
@@ -49,6 +57,10 @@ type Deps struct {
 	Fetcher   identity.UserFetcher
 	Billing   billing.Client
 	Analytics analytics.Capturer
+	Storage   storage.Store // nil → DevStore(tmp/uploads)
+	LLM       llm.Completer // nil → AI routes 503 not_configured
+	Flags     flags.Evaluator // nil → DB-backed evaluator (30s cache)
+	Reporter  observability.Reporter // nil → NoopReporter
 }
 
 func NewServer(d Deps) *Server {
@@ -64,7 +76,20 @@ func NewServer(d Deps) *Server {
 		fetcher:       d.Fetcher,
 		billingClient: d.Billing,
 		analytics:     analytics.NoopCapturer{},
+		store:         d.Storage,
+		llm:           d.LLM,
+		flags:         d.Flags,
+		reporter:      d.Reporter,
 		mux:           http.NewServeMux(),
+	}
+	if s.store == nil {
+		s.store = storage.NewDevStore("tmp/uploads")
+	}
+	if s.flags == nil {
+		s.flags = flags.NewDBEvaluator(s.q, 30*time.Second)
+	}
+	if s.reporter == nil {
+		s.reporter = observability.NoopReporter{}
 	}
 	if d.Analytics != nil {
 		s.analytics = d.Analytics
@@ -74,14 +99,15 @@ func NewServer(d Deps) *Server {
 }
 
 // Handler applies the global middleware stack. The order is load-bearing —
-// see docs/architecture: recover → requestID → accessLog → rateLimit →
-// secureHeaders → sessionLoad (identity step) → csrf → routes.
+// see docs/architecture: recover → requestID → accessLog → i18n.Detect →
+// rateLimit → secureHeaders → sessionLoad (identity step) → csrf → routes.
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
 	h = s.sessionLoad(h) // Clerk claims, optional; absent cookie → unauthenticated
 	h = s.secureHeaders(h)
 	h = s.rateLimit(h)
+	h = i18n.Detect(h) // locale resolution: ?lang= → cookie → Accept-Language
 	h = s.accessLog(h)
 	h = s.requestID(h)
 	h = s.recover(h)

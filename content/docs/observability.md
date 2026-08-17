@@ -2,7 +2,7 @@
 title: Observability
 description: Structured logs, request ids, Sentry, PostHog behind a consent gate, and pprof.
 section: Guides
-weight: 18
+weight: 24
 ---
 
 Everything is **env-gated**: with no keys set you get structured logs and
@@ -39,8 +39,10 @@ gives you their exact failure.
 
 ## Sentry (env-gated)
 
-Set `SENTRY_DSN` and `sentry.Init` runs with `Environment = APP_ENV`. Two
-capture points:
+Set `SENTRY_DSN` and `sentry.Init` runs with `Environment = APP_ENV`. All
+reporting goes through the `observability.Reporter` seam
+(`internal/observability` — the only internal package importing sentry-go;
+`NoopReporter` when unconfigured). Two capture points:
 
 - **Panics.** The `recover` middleware captures the exception with the
   request path as a tag and the request id as context, then renders the 500

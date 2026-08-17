@@ -1,0 +1,152 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+// WebhooksPage is the settings tab: secret reveal (once) + create form +
+// endpoints table + delivery log.
+templ WebhooksPage(d WebhooksData) {
+	@SettingsTabs("/app/settings/webhooks")
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "webhooks.title") }</h1>
+
+	<div id="webhooks-container">
+		@WebhooksSection(d)
+	</div>
+}
+
+templ WebhooksSection(d WebhooksData) {
+	if d.NewSecret != "" {
+		<div class="card mb-6 max-w-lg border-green-500" data-testid="webhook-secret-reveal">
+			<h2 class="font-semibold text-green-700 dark:text-green-300">{ i18n.T(ctx, "webhooks.secret_title") }</h2>
+			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "webhooks.secret_note") }</p>
+			<div class="mt-3 flex items-center gap-2" x-data="clipboard">
+				<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ d.NewSecret }</code>
+				<button type="button" @click={ "copy('" + d.NewSecret + "')" } class="btn-ghost !px-2 text-xs">
+					<span x-show="!copied">{ i18n.T(ctx, "api.copy") }</span>
+					<span x-show="copied" x-cloak>{ i18n.T(ctx, "api.copied") }</span>
+				</button>
+			</div>
+		</div>
+	}
+
+	<div class="card max-w-lg mb-6">
+		<h2 class="font-semibold mb-3">{ i18n.T(ctx, "webhooks.create_title") }</h2>
+		if d.URLErr != "" {
+			<div class="alert-error mb-3" role="alert">{ d.URLErr }</div>
+		}
+		<form hx-post="/app/settings/webhooks/endpoints" hx-target="#webhooks-container" hx-swap="innerHTML" hx-disable="this" novalidate class="space-y-3">
+			<div>
+				<label for="url" class="label">{ i18n.T(ctx, "webhooks.url_label") }</label>
+				<input id="url" name="url" type="url" class="input" placeholder="https://example.com/hooks/gogogadget" required data-testid="webhook-url"/>
+			</div>
+			<div>
+				<label for="description" class="label">{ i18n.T(ctx, "webhooks.description_label") }</label>
+				<input id="description" name="description" type="text" class="input" placeholder={ i18n.T(ctx, "webhooks.description_placeholder") }/>
+			</div>
+			<fieldset>
+				<legend class="label">{ i18n.T(ctx, "webhooks.events_label") }</legend>
+				<p class="text-xs text-fg-muted mb-2">{ i18n.T(ctx, "webhooks.events_hint") }</p>
+				for _, et := range d.EventTypes {
+					<label class="flex items-center gap-2 text-sm py-0.5">
+						<input type="checkbox" name="event_types" value={ et } class="rounded"/>
+						<code class="text-xs">{ et }</code>
+					</label>
+				}
+			</fieldset>
+			<button type="submit" class="btn btn-primary inline-flex items-center gap-2" data-testid="webhook-create">
+				@Spinner()
+				{ i18n.T(ctx, "webhooks.create") }
+			</button>
+		</form>
+	</div>
+
+	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "webhooks.endpoints_heading") }</h2>
+	<div class="card !p-0 overflow-hidden max-w-3xl mb-6">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>{ i18n.T(ctx, "webhooks.col_url") }</th>
+					<th>{ i18n.T(ctx, "webhooks.col_events") }</th>
+					<th>{ i18n.T(ctx, "webhooks.col_status") }</th>
+					<th class="text-right"></th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(d.Endpoints) == 0 {
+					<tr><td colspan="4" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "webhooks.endpoints_empty") }</td></tr>
+				}
+				for _, ep := range d.Endpoints {
+					<tr data-testid="webhook-endpoint-row">
+						<td class="font-medium max-w-0 truncate">{ ep.Url }</td>
+						<td class="text-fg-muted text-xs">
+							if len(ep.EventTypes) == 0 {
+								{ i18n.T(ctx, "webhooks.all_events") }
+							} else {
+								{ fmt.Sprint(len(ep.EventTypes)) }
+							}
+						</td>
+						<td>
+							if ep.DisabledAt.Valid {
+								<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">{ i18n.T(ctx, "webhooks.disabled") }</span>
+							} else {
+								<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "webhooks.enabled") }</span>
+							}
+						</td>
+						<td class="text-right">
+							if ep.DisabledAt.Valid {
+								<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/enable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.enable") }</button>
+							} else {
+								<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/disable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.disable") }</button>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "webhooks.deliveries_heading") }</h2>
+	<div class="card !p-0 overflow-hidden max-w-3xl">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>{ i18n.T(ctx, "webhooks.col_event") }</th>
+					<th>{ i18n.T(ctx, "webhooks.col_endpoint") }</th>
+					<th>{ i18n.T(ctx, "webhooks.col_status") }</th>
+					<th>{ i18n.T(ctx, "webhooks.col_attempts") }</th>
+					<th>{ i18n.T(ctx, "webhooks.col_when") }</th>
+					<th class="text-right"></th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(d.Deliveries) == 0 {
+					<tr><td colspan="6" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "webhooks.deliveries_empty") }</td></tr>
+				}
+				for _, del := range d.Deliveries {
+					<tr data-testid="webhook-delivery-row">
+						<td><code class="text-xs">{ del.EventType }</code></td>
+						<td class="text-fg-muted text-xs max-w-0 truncate">{ del.EndpointUrl }</td>
+						<td><span class="badge bg-surface-raised text-fg-muted">{ del.Status }</span></td>
+						<td class="text-fg-muted">{ fmt.Sprint(del.Attempts) }</td>
+						<td class="text-fg-muted">{ del.CreatedAt.Time.Format("Jan 2, 15:04") }</td>
+						<td class="text-right">
+							if del.Status != "pending" {
+								<button
+									type="button"
+									hx-post={ fmt.Sprintf("/app/settings/webhooks/deliveries/%d/replay", del.ID) }
+									hx-target="#webhooks-container"
+									hx-swap="innerHTML"
+									class="btn-ghost !px-2 !py-1 text-xs"
+									data-testid="webhook-replay"
+								>{ i18n.T(ctx, "webhooks.replay") }</button>
+							}
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+}

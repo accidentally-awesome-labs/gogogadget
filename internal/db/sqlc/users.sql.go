@@ -45,7 +45,7 @@ func (q *Queries) DeleteUser(ctx context.Context, clerkUserID string) error {
 
 const getUserByClerkID = `-- name: GetUserByClerkID :one
 
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at FROM users WHERE clerk_user_id = $1
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale FROM users WHERE clerk_user_id = $1
 `
 
 // users mirror table (identity is Clerk; these rows are a local query cache)
@@ -61,12 +61,13 @@ func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (Use
 		&i.DisabledAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Locale,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at FROM users
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale FROM users
 WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -96,6 +97,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.DisabledAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Locale,
 		); err != nil {
 			return nil, err
 		}
@@ -140,7 +142,7 @@ INSERT INTO users (clerk_user_id, email, name, avatar_url)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (clerk_user_id) DO UPDATE
 SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = now()
-RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at
+RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale
 `
 
 type UpsertUserParams struct {
@@ -167,6 +169,7 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, e
 		&i.DisabledAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Locale,
 	)
 	return i, err
 }

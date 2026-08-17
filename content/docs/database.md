@@ -91,6 +91,34 @@ make db-reset   # compose down -v, up -d db, then cmd/seed -reset: drop/create
 `cmd/seed -reset` is also what the e2e harness uses to build its database
 (see [Testing](/docs/testing)).
 
+## Search
+
+Full-text search is **Postgres**, not a vendor: a generated `tsvector` column
+plus a GIN index. `projects.search_tsv` is the canonical pattern:
+
+```sql
+ALTER TABLE projects ADD COLUMN search_tsv tsvector
+  GENERATED ALWAYS AS (to_tsvector('simple', name)) STORED;
+CREATE INDEX projects_search_idx ON projects USING GIN (search_tsv);
+```
+
+The `simple` dictionary is deliberate: user data may be any language, and no
+wrong stemming beats wrong stemming. Queries combine FTS with an ILIKE
+fallback so partial tokens (`check` → checklist) still match, and rank when
+the FTS query scores:
+
+```sql
+WHERE ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%')
+ORDER BY CASE WHEN $2::text = '' THEN 0
+              ELSE COALESCE(ts_rank(search_tsv, websearch_to_tsquery('simple', $2)), 0) END DESC,
+         created_at DESC
+```
+
+`websearch_to_tsquery` gives users Google-ish syntax for free (quotes,
+`OR`, `-negation`). Postgres FTS is the documented answer until real scale;
+swapping later means replacing one query file, not a pipeline.
+
+
 ## Test databases
 
 Integration tests use `internal/db/testdb`, which gives **every package its

@@ -1,6 +1,9 @@
 package templates
 
-import "github.com/gogogadget/gogogadget/internal/billing"
+import (
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
 
 // Spinner is htmx's request indicator. htmx adds the htmx-request class to the
 // element that issued the request (and to anything named by hx-indicator) for
@@ -24,7 +27,7 @@ templ PlanCard(plan billing.Plan, current bool) {
 		<div class="flex items-center justify-between">
 			<h3 class="text-lg font-semibold">{ plan.Name }</h3>
 			if current {
-				@Badge("Current plan", "brand")
+			@Badge(i18n.T(ctx, "common.current_plan"), "brand")
 			}
 		</div>
 		<div class="text-3xl font-bold">{ plan.PriceDisplay }</div>

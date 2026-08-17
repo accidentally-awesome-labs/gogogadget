@@ -1,0 +1,106 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+// FilesPage is the list page: header + upload form + quota meter + table.
+templ FilesPage(d FilesData) {
+	<div class="flex items-center justify-between mb-6">
+		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "files.title") }</h1>
+		<form hx-post="/app/files" hx-encoding="multipart/form-data" hx-target="#table-container" hx-swap="outerHTML" hx-disable="this" class="flex items-center gap-2">
+			<input type="file" name="file" required class="input max-w-xs" aria-label={ i18n.T(ctx, "files.choose") } data-testid="file-input"/>
+			<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
+				@Spinner()
+				{ i18n.T(ctx, "files.upload") }
+			</button>
+		</form>
+	</div>
+
+	@FilesQuota(d)
+	@FilesTable(d)
+}
+
+// FilesQuota shows the storage meter (like the projects usage meter).
+templ FilesQuota(d FilesData) {
+	if d.Plan.MaxStorageMB > 0 {
+		<div class="card mb-4 text-sm" data-testid="storage-meter">
+			{ i18n.T(ctx, "files.quota", usedMB(d.UsedBytes), fmt.Sprint(d.Plan.MaxStorageMB), d.Plan.Name) }
+		</div>
+	}
+}
+
+// FilesTable is the list + row-delete target. The wrapper id matches the
+// Pagination component's hx-target so pager links morph the same box.
+templ FilesTable(d FilesData) {
+	<div id="table-container">
+		if d.LimitHit {
+			<div class="alert-error mb-4" data-testid="storage-limit">
+				{ i18n.T(ctx, "files.limit_hit", fmt.Sprint(d.Plan.MaxStorageMB)) }
+				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
+			</div>
+		}
+		if len(d.Files) == 0 {
+			@EmptyState(i18n.T(ctx, "files.empty_title"), i18n.T(ctx, "files.empty_body"))
+		} else {
+			<div class="card !p-0 overflow-hidden">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>{ i18n.T(ctx, "files.col_name") }</th>
+							<th>{ i18n.T(ctx, "files.col_size") }</th>
+							<th>{ i18n.T(ctx, "files.col_uploaded") }</th>
+							<th class="text-right">{ i18n.T(ctx, "projects.col_actions") }</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, f := range d.Files {
+							<tr id={ fmt.Sprintf("file-%d", f.ID) } data-testid="file-row">
+								<td class="font-medium">{ f.Filename }</td>
+								<td class="text-fg-muted">{ humanBytes(f.SizeBytes) }</td>
+								<td class="text-fg-muted">{ f.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+								<td class="text-right">
+									<div class="flex justify-end gap-2">
+										<a
+											href={ templ.SafeURL(fmt.Sprintf("/app/files/%d", f.ID)) }
+											class="btn-ghost !px-2 !py-1 text-xs"
+											download
+										>{ i18n.T(ctx, "files.download") }</a>
+										<button
+											type="button"
+											hx-delete={ fmt.Sprintf("/app/files/%d", f.ID) }
+											hx-confirm={ i18n.T(ctx, "files.delete_confirm") }
+											hx-target="closest tr"
+											hx-swap="outerHTML"
+											class="btn-danger !px-2 !py-1 text-xs"
+										>{ i18n.T(ctx, "projects.delete") }</button>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			@Pagination(d.Page, d.TotalPages, "/app/files")
+		}
+	</div>
+}
+
+func usedMB(bytes int64) string {
+	return fmt.Sprintf("%.1f", float64(bytes)/(1024*1024))
+}
+
+// humanBytes renders 1.2 KB / 3.4 MB style sizes.
+func humanBytes(b int64) string {
+	const kb, mb = 1024, 1024*1024
+	switch {
+	case b >= mb:
+		return fmt.Sprintf("%.1f MB", float64(b)/mb)
+	case b >= kb:
+		return fmt.Sprintf("%.1f KB", float64(b)/kb)
+	default:
+		return fmt.Sprintf("%d B", b)
+	}
+}

@@ -1,12 +1,24 @@
 -- name: ListProjectsByOrg :many
+-- Postgres FTS (websearch syntax: quotes, OR, -negation) with an ILIKE
+-- fallback so partial/short tokens still match; ranked when the FTS query
+-- scores, else newest first.
 SELECT * FROM projects
-WHERE clerk_org_id = $1 AND status = 'active' AND ($2::text = '' OR name ILIKE '%' || $2 || '%')
-ORDER BY created_at DESC
+WHERE clerk_org_id = $1 AND status = 'active'
+  AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%')
+ORDER BY CASE WHEN $2::text = '' THEN 0 ELSE COALESCE(ts_rank(search_tsv, websearch_to_tsquery('simple', $2)), 0) END DESC,
+         created_at DESC
 LIMIT $3 OFFSET $4;
 
 -- name: CountProjectsByOrgSearch :one
 SELECT count(*) FROM projects
-WHERE clerk_org_id = $1 AND status = 'active' AND ($2::text = '' OR name ILIKE '%' || $2 || '%');
+WHERE clerk_org_id = $1 AND status = 'active'
+  AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%');
+
+-- name: ListAllProjectsByOrg :many
+-- Full list for CSV export (no pagination).
+SELECT * FROM projects
+WHERE clerk_org_id = $1 AND status = 'active'
+ORDER BY created_at DESC;
 
 -- name: CountProjectsByOrg :one
 SELECT count(*) FROM projects WHERE clerk_org_id = $1 AND status = 'active';

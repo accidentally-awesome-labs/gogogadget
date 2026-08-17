@@ -2,6 +2,7 @@ package templates
 
 import (
 	"github.com/gogogadget/gogogadget/internal/content"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 // DocsPage renders one documentation page with prev/next footer and the
@@ -14,7 +15,7 @@ templ DocsPage(docs *content.Docs, slug string) {
 			</article>
 
 			<div class="mt-6 text-sm">
-				<a href={ "https://github.com/gogogadget/gogogadget/edit/main/content/docs/" + p.Slug + ".md" } class="link">Edit this page →</a>
+			<a href={ "https://github.com/gogogadget/gogogadget/edit/main/content/docs/" + p.Slug + ".md" } class="link">{ i18n.T(ctx, "docs.edit_page") }</a>
 			</div>
 
 			<nav class="mt-10 pt-6 border-t border-border flex justify-between text-sm">

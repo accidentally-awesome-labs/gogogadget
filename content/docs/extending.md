@@ -2,7 +2,7 @@
 title: Extending GoGoGadget
 description: The recipe hub — add resources, plans, emails, jobs, webhooks, endpoints, or swap a provider.
 section: Guides
-weight: 19
+weight: 25
 ---
 
 Every common change follows the same shape: edit the **source of truth**
@@ -104,9 +104,25 @@ moment the plan exists. See [Billing](/docs/billing).
    timeout, and dead-lettering at `max_attempts` come free. See
    [Background jobs](/docs/background-jobs).
 
-## Add a webhook event
+## Add search to a resource
 
-Unknown events are already ACKed (200 + log), so this is purely additive.
+1. Generated column + GIN index in a migration:
+   `search_tsv tsvector GENERATED ALWAYS AS (to_tsvector('simple', <cols>)) STORED`.
+2. Rewrite the list query with the FTS + ILIKE-fallback predicate and the
+   `ts_rank` ordering — copy `ListProjectsByOrg` in
+   `internal/db/queries/projects.sql` (see [Database](/docs/database)).
+3. `make generate`, then a db round-trip test (exact word, websearch
+   multi-word, partial token, ranking).
+
+## Schedule recurring work1. Add a job kind + dispatch case (see "Add a job kind" above). Scheduled
+   payloads arrive wrapped in `jobs.SchedulePayload` — unwrap `.Payload`.
+2. Insert a row via `schedules.Create` (seeds: `internal/db/testdata/`), or
+   straight SQL. `clerk_org_id NULL` = system-wide; `every_seconds >= 60`.
+3. The worker's scheduler pass claims due rows every poll cycle — no daemon
+   to configure. See [Background jobs](/docs/background-jobs) for the
+   missed-tick semantics.
+
+## Add a webhook eventUnknown events are already ACKed (200 + log), so this is purely additive.
 
 - **Clerk** — add a parser for the payload shape in
   `internal/identity/sync.go`, then a `case` in `processClerkEvent`
@@ -130,9 +146,9 @@ See [Authentication](/docs/authentication).
 ## Swap the billing provider
 
 1. New file `internal/billing/<provider>.go` implementing `billing.Client`
-   (`CreateCheckout`, `CreatePortalSession`, `RevokeSubscription`) —
-   `internal/billing/polar.go` is the template. This is the only SDK-touching
-   file.
+   (`CreateCheckout`, `CreatePortalSession`, `RevokeSubscription`,
+   `IngestUsage`) — `internal/billing/polar.go` is the template (raw
+   `net/http`, no provider SDK). This is the only provider-touching file.
 2. Replace verification + payload parsing in the webhook handler
    (`internal/web/handlers_billing.go`) and the `SubscriptionPayload` mapping
    in `internal/billing/webhook.go`. Keep the event→action table semantics —
@@ -208,3 +224,23 @@ The Clerk webhook then only needs `user.*` events.
 4. Cross-link freely, but only to real slugs — the content package has a
    link-check test that fails the build on dead `/docs/...` links. See
    [Content](/docs/content).
+
+## Add an export
+
+The CSV export dogfoods three batteries: a **job** (`export.projects_csv` —
+enqueue from the handler, not a schedule), the **storage** seam (DevStore
+works zero-account), and a **notification** carrying the download link. The
+shape, from `internal/jobs/export_csv.go`:
+
+1. Add the job kind + payload (`{OrgID, UserID}`) and dispatch case.
+2. Render with `encoding/csv`, then `storage.Put("exports/{org}/name-<ts>.csv")`
+   → `InsertFile` row (it appears on `/app/files`) →
+   `notify.Send(org, userID, "export.ready", …, "/app/files/{id}")`.
+3. The handler enqueues + toasts "Export started"; the worker completes
+   async. See [File storage](/docs/storage) for the seam.
+
+## Add a locale1. Copy `internal/i18n/catalog_es.go` → `catalog_<lang>.go` and translate
+   every key (Spanish quality is the floor, not the ceiling).
+2. Add the tag to the matcher list and an entry (code + native label) to
+   `Locales` in `internal/i18n/i18n.go` — the switcher picks it up
+   automatically. See [Internationalization](/docs/i18n).

@@ -1,24 +1,26 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 templ AdminHome(d AdminHomeData) {
-	<h1 class="text-2xl font-bold mb-6">Admin</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.title") }</h1>
 	<div class="grid sm:grid-cols-4 gap-4">
-		@StatCard("Total users", fmt.Sprint(d.TotalUsers), "")
-		@StatCard("Total orgs", fmt.Sprint(d.TotalOrgs), "")
-		@StatCard("Active subscriptions", fmt.Sprint(d.ActiveSubs), "")
-		@StatCard("MRR", fmt.Sprintf("$%d", d.MRR), "across active + trialing + past_due")
+		@StatCard(i18n.T(ctx, "admin.stats.total_users"), fmt.Sprint(d.TotalUsers), "")
+		@StatCard(i18n.T(ctx, "admin.stats.total_orgs"), fmt.Sprint(d.TotalOrgs), "")
+		@StatCard(i18n.T(ctx, "admin.stats.active_subs"), fmt.Sprint(d.ActiveSubs), "")
+		@StatCard(i18n.T(ctx, "admin.stats.mrr"), fmt.Sprintf("$%d", d.MRR), i18n.T(ctx, "admin.stats.mrr_hint"))
 	</div>
 
-	<h2 class="text-lg font-semibold mt-10 mb-3">Signups, last 30 days</h2>
+	<h2 class="text-lg font-semibold mt-10 mb-3">{ i18n.T(ctx, "admin.signups_heading") }</h2>
 	<div class="card !p-0 overflow-hidden">
 		if len(d.RecentSignups) == 0 {
-			<p class="p-6 text-sm text-fg-muted">No signups yet.</p>
+			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "admin.signups_empty") }</p>
 		} else {
 			<table class="table">
 				<tbody>
@@ -36,16 +38,16 @@ templ AdminHome(d AdminHomeData) {
 }
 
 templ AdminUsersPage(d AdminUsersData) {
-	<h1 class="text-2xl font-bold mb-6">Users</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.users.title") }</h1>
 	<div class="flex items-center gap-2 mb-4">
 		<input
-			type="search" name="q" value={ d.Query } placeholder="Search by email…"
+			type="search" name="q" value={ d.Query } placeholder={ i18n.T(ctx, "admin.users.search_placeholder") }
 			class="input max-w-sm"
 			hx-get="/admin/users" hx-trigger="input changed delay:300ms, search"
 			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
 			hx-sync="this:replace"
 			hx-indicator="#admin-search-indicator"
-			aria-label="Search users"
+			aria-label={ i18n.T(ctx, "admin.users.search_aria") }
 		/>
 		<span id="admin-search-indicator" class="text-fg-muted">
 			@Spinner()
@@ -59,7 +61,7 @@ templ AdminUsersTable(d AdminUsersData) {
 		<div class="card !p-0 overflow-hidden">
 			<table class="table">
 				<thead>
-					<tr><th>Email</th><th>Name</th><th>Joined</th><th>Status</th><th class="text-right">Actions</th></tr>
+					<tr><th>{ i18n.T(ctx, "admin.users.col_email") }</th><th>{ i18n.T(ctx, "admin.users.col_name") }</th><th>{ i18n.T(ctx, "admin.users.col_joined") }</th><th>{ i18n.T(ctx, "admin.users.col_status") }</th><th class="text-right">{ i18n.T(ctx, "admin.users.col_actions") }</th></tr>
 				</thead>
 				<tbody>
 					for _, u := range d.Users {
@@ -69,25 +71,35 @@ templ AdminUsersTable(d AdminUsersData) {
 							<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 							<td>
 								if u.DisabledAt.Valid {
-									<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">disabled</span>
+									<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">{ i18n.T(ctx, "admin.users.status_disabled") }</span>
 								} else {
-									<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">active</span>
+									<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "admin.users.status_active") }</span>
 								}
 							</td>
 							<td class="text-right">
-								<button
-									type="button"
-									hx-post={ "/admin/users/" + u.ClerkUserID + "/disable" }
-									hx-confirm={ disableConfirm(u) }
-									class="btn-ghost !px-2 !py-1 text-xs"
-									data-testid="admin-disable-toggle"
-								>
-									if u.DisabledAt.Valid {
-										Enable
-									} else {
-										Disable
+								<div class="flex justify-end gap-2">
+									if !u.DisabledAt.Valid {
+										<button
+											type="button"
+											hx-post={ "/admin/users/" + u.ClerkUserID + "/impersonate" }
+											class="btn-ghost !px-2 !py-1 text-xs"
+											data-testid="admin-impersonate"
+										>{ i18n.T(ctx, "admin.users.impersonate") }</button>
 									}
-								</button>
+									<button
+										type="button"
+										hx-post={ "/admin/users/" + u.ClerkUserID + "/disable" }
+										hx-confirm={ disableConfirm(ctx, u) }
+										class="btn-ghost !px-2 !py-1 text-xs"
+										data-testid="admin-disable-toggle"
+									>
+									if u.DisabledAt.Valid {
+										{ i18n.T(ctx, "admin.users.enable") }
+									} else {
+										{ i18n.T(ctx, "admin.users.disable") }
+									}
+									</button>
+								</div>
 							</td>
 						</tr>
 					}
@@ -98,19 +110,19 @@ templ AdminUsersTable(d AdminUsersData) {
 	</div>
 }
 
-func disableConfirm(u sqlc.User) string {
+func disableConfirm(ctx context.Context, u sqlc.User) string {
 	if u.DisabledAt.Valid {
-		return "Re-enable " + string(u.Email) + "?"
+		return i18n.T(ctx, "admin.users.confirm_enable", string(u.Email))
 	}
-	return "Disable " + string(u.Email) + "? They will lose access immediately."
+	return i18n.T(ctx, "admin.users.confirm_disable", string(u.Email))
 }
 
 templ AdminOrgsPage(d AdminOrgsData) {
-	<h1 class="text-2xl font-bold mb-6">Organizations</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.orgs.title") }</h1>
 	<div class="card !p-0 overflow-hidden">
 		<table class="table">
 			<thead>
-				<tr><th>Name</th><th>Slug</th><th>Members</th><th>Plan</th><th>Created</th></tr>
+				<tr><th>{ i18n.T(ctx, "admin.orgs.col_name") }</th><th>{ i18n.T(ctx, "admin.orgs.col_slug") }</th><th>{ i18n.T(ctx, "admin.orgs.col_members") }</th><th>{ i18n.T(ctx, "admin.orgs.col_plan") }</th><th>{ i18n.T(ctx, "admin.orgs.col_created") }</th></tr>
 			</thead>
 			<tbody>
 				for _, o := range d.Orgs {

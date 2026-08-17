@@ -37,6 +37,14 @@ production the process environment is the only source.
 | `POSTHOG_API_KEY` | | | Empty → disabled: no client script, no `/ingest` proxy, server capture no-ops |
 | `POSTHOG_HOST` | | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
 | `SENTRY_DSN` | | | Empty → disabled |
+| `STORAGE_R2_ACCOUNT_ID` | | | With the three below, enables R2 file storage; any missing → DevStore (`tmp/uploads/`) |
+| `STORAGE_R2_ACCESS_KEY_ID` | | | R2 API token (Object Read & Write) |
+| `STORAGE_R2_SECRET_ACCESS_KEY` | | | |
+| `STORAGE_R2_BUCKET` | | | Bucket name |
+| `STORAGE_R2_ENDPOINT` | | R2 default for the account | Override for AWS S3 / MinIO |
+| `LLM_API_KEY` | | | With `LLM_MODEL`, enables `/api/v1/ai/chat`; empty → 503 `not_configured` |
+| `LLM_BASE_URL` | | `https://api.openai.com/v1` | Any OpenAI-compatible API |
+| `LLM_MODEL` | | | Forced server-side (callers cannot pick) |
 | `TEST_NOW` | | | RFC3339. Freezes the render clock — honored **only** when `APP_ENV=test` (visual-test determinism) |
 | `DEV_AUTH_BYPASS` | | `false` | Enables synthetic `e2e:` session tokens. `true` + `APP_ENV=production` is a hard boot error |
 | `LOG_LEVEL` | | `debug` in development, `info` otherwise | `debug` \| `info` \| `warn` \| `error` |

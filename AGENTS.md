@@ -11,13 +11,22 @@ is the deep reference and updates in the same change as any behavior edit.
 - `internal/db` — pgx pool, embedded goose migrations (`migrations/`), sqlc queries (`queries/` → `sqlc/`), `testdata/` seeds, `testdb/` per-package test DBs.
 - `internal/web` — HTTP surface: middleware chain, HTMX helpers, handlers, templ templates (`templates/`).
 - `internal/identity` — `Verifier` seam (Clerk is the ONLY SDK file), context keys, guards data, Clerk webhook sync parsers, `UserFetcher`.
-- `internal/billing` — plan truth (`plans.go`), `Client` seam, Polar client, webhook state machine, `Entitled`/`CurrentPlan`.
-- `internal/jobs` — Postgres worker (SKIP LOCKED, 5-min visibility timeout, 2^n backoff, dead-letter).
+- `internal/billing` — plan truth (`plans.go`), `Client` seam, Polar client (raw net/http — the archived SDK is gone), webhook state machine, `Entitled`/`CurrentPlan`.
+- `internal/jobs` — Postgres worker (SKIP LOCKED, 5-min visibility timeout, 2^n backoff, dead-letter) + the scheduler pass (recurring `schedules`) + webhook delivery + usage flush + CSV export.
 - `internal/mail` — `Sender` seam (Resend / DevSender→tmp/emails), templ email renderers.
 - `internal/audit` — fire-and-forget audit log.
 - `internal/content` — embedded markdown (blog + docs), goldmark, RSS.
 - `internal/analytics` — PostHog `Capturer` seam + `/ingest` proxy.
 - `internal/api` — Bearer token auth + `/api/v1` JSON (second transport, same rules).
+- `internal/i18n` — locale detection middleware, `T()` lookup, en+es catalogs.
+- `internal/storage` — `Store` seam (R2 / DevStore→tmp/uploads); R2 file is the ONLY aws-sdk import.
+- `internal/notify` — fire-and-forget in-app notifications.
+- `internal/webhooks` — outbound webhook emit + secret minting (deliveries run in jobs).
+- `internal/usage` — fire-and-forget metering; flushed to Polar by `usage.flush`.
+- `internal/llm` — `Completer` seam (OpenAI-compatible net/http client).
+- `internal/flags` — DB-backed feature flags (30s cache, FNV bucketing, per-org overrides).
+- `internal/schedules` — builder-facing recurring-work helper.
+- `internal/observability` — `Reporter` seam (SentryReporter / NoopReporter); the ONLY internal sentry-go import.
 - `static/` — built CSS (generated), `app.js` (all client logic), vendored JS/fonts. `content/` — markdown. `e2e/` — Playwright (node lives ONLY here).
 
 ## Golden commands
@@ -54,8 +63,11 @@ active org). `DEV_AUTH_BYPASS` is boot-refused when `APP_ENV=production`.
 - **Generated files are NEVER edited**: `*_templ.go`, `internal/db/sqlc/`, `static/app.css`. Edit sources, run `make generate`.
 - **Design system**: semantic tokens + component classes (`.btn`, `.input`, `.card`, `.badge`, `.table`, `.link`, `.alert-*`, `.prose`) — no ad-hoc hex colors or pixel values in templates; rebrand via `@theme` in `input.css`.
 - **No inline scripts** anywhere (CSP `script-src 'self'`); client logic lives in `static/app.js` as `Alpine.data` components.
-- **Middleware order is load-bearing**: recover → requestID → accessLog → rateLimit → secureHeaders → sessionLoad → csrf → route groups (appChain: RequireAuth → RequireNotDisabled → RequireOrg → LoadPlan → [RequireAdmin]; /api: RequireAPIToken).
-- **Webhook header families**: Clerk = `svix-*` (svix lib), Polar = `webhook-*` (standard-webhooks lib). Fixtures mirror real names.
+- **Middleware order is load-bearing**: recover → requestID → accessLog → i18n.Detect → rateLimit → secureHeaders → sessionLoad → csrf → route groups (appChain: RequireAuth → RequireNotDisabled → RequireOrg → LoadPlan → [RequireAdmin]; /api: RequireAPIToken).
+- **UI strings go through `i18n.T(ctx, "area.key")`** in templates — catalogs in `internal/i18n/catalog_*.go`, en+es; content markdown and handler-side strings (titles, toasts) stay English (documented in `/docs/i18n`).
+- **Webhook header families**: Clerk = `svix-*` (svix lib), Polar = `webhook-*` (standard-webhooks lib). Fixtures mirror real names. Outbound customer webhooks also sign with the standard-webhooks lib (`webhook-id`/`webhook-timestamp`/`webhook-signature`); the SSRF guard is double-checked (URL validate + dial-time IP allowlist) and https-only in every environment.
+- **Fire-and-forget quartet**: `audit.Log`, `notify.Send`, `webhooks.Emit`, `usage.Record` — errors are logged, never returned; a notification/webhook/meter hiccup must never fail the caller.
+- **SSE notes**: the notifications stream disables the 30s WriteTimeout per-response via `http.NewResponseController(w).SetWriteDeadline(time.Time{})` — that only works because middleware `statusWriter` implements `Unwrap()`; keep it. The `sse-connect` div lives in the shell so boosted nav never kills the stream; badge fragment swaps target the bubble, not the shell.
 
 ## Test-layer decision rule
 

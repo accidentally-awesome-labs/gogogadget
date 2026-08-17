@@ -23,7 +23,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/jobs"
+	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/observability"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/gogogadget/gogogadget/internal/web"
 )
 
@@ -94,13 +97,41 @@ func run() error {
 		log.Warn("polar not configured — billing routes will 503")
 	}
 
-	// Observability: both env-gated.
+	// Storage: R2 when configured; DevStore (tmp/uploads) otherwise.
+	var fileStore storage.Store
+	if cfg.StorageConfigured() {
+		r2, err := storage.NewR2Store(ctx, cfg.StorageR2AccountID, cfg.StorageR2AccessKeyID, cfg.StorageR2SecretAccessKey, cfg.StorageR2Bucket, cfg.StorageR2Endpoint)
+		if err != nil {
+			return fmt.Errorf("r2 storage init: %w", err)
+		}
+		fileStore = r2
+		log.Info("storage: r2", "bucket", cfg.StorageR2Bucket)
+	} else {
+		fileStore = storage.NewDevStore("tmp/uploads")
+		log.Info("storage: dev store (tmp/uploads)")
+	}
+
+	// LLM: any OpenAI-compatible API; unconfigured → AI routes 503.
+	var completer llm.Completer
+	if cfg.LLMConfigured() {
+		completer = llm.NewOpenAICompat(cfg.LLMBaseURL, cfg.LLMAPIKey, cfg.LLMModel)
+		log.Info("llm: openai-compatible", "model", cfg.LLMModel, "base", cfg.LLMBaseURL)
+	} else {
+		log.Warn("llm not configured — AI routes will 503")
+	}
+
+	// Observability: both env-gated. The reporter seam wraps Sentry when a DSN
+	// is set; Noop otherwise.
 	if cfg.SentryEnabled() {
 		if err := sentry.Init(sentry.ClientOptions{Dsn: cfg.SentryDSN, Environment: cfg.Env}); err != nil {
 			return fmt.Errorf("sentry init: %w", err)
 		}
 		defer sentry.Flush(2 * time.Second)
 		log.Info("sentry: enabled")
+	}
+	var reporter observability.Reporter = observability.NoopReporter{}
+	if cfg.SentryEnabled() {
+		reporter = observability.NewSentryReporter()
 	}
 	var capturer analytics.Capturer = analytics.NoopCapturer{}
 	if cfg.PostHogEnabled() {
@@ -119,6 +150,9 @@ func run() error {
 		Blog: blog, Docs: docs,
 		Verifier: verifier, Fetcher: fetcher,
 		Billing: polarClient, Analytics: capturer,
+		Storage: fileStore,
+		LLM:     completer,
+		Reporter: reporter,
 	})
 
 	// Mail: Resend when configured, DevSender (log + tmp/emails/) otherwise.
@@ -133,9 +167,11 @@ func run() error {
 
 	// Background jobs worker (SKIP LOCKED claim; stops on shutdown signal).
 	worker := jobs.NewWorker(sqlc.New(pool), sender, log)
+	worker.Billing = polarClient // nil-safe: usage.flush no-ops when unconfigured
+	worker.Storage = fileStore   // export jobs write through the same seam
 	if cfg.SentryEnabled() {
 		worker.OnDeadLetter = func(kind string, err error) {
-			sentry.CaptureException(fmt.Errorf("job %s dead-lettered: %w", kind, err))
+			reporter.Capture(fmt.Errorf("job %s dead-lettered: %w", kind, err))
 		}
 	}
 	go worker.Run(ctx)

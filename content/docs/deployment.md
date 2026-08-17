@@ -2,7 +2,7 @@
 title: Deployment
 description: One static binary, the Dockerfile, compose, fly.io, Neon, and the scaling caveats.
 section: Guides
-weight: 16
+weight: 22
 ---
 
 The whole app ships as **one static binary**: templates, static assets,

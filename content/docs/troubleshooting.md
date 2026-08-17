@@ -2,7 +2,7 @@
 title: Troubleshooting
 description: The failures you will actually meet — CSRF 403s, webhook 400s, 503s, and stale baselines.
 section: Guides
-weight: 20
+weight: 26
 ---
 
 Every failure here has a mechanical cause. Check the exact symptom, not the

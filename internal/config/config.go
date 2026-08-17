@@ -41,6 +41,16 @@ type Config struct {
 
 	SentryDSN string
 
+	StorageR2AccountID       string
+	StorageR2AccessKeyID     string
+	StorageR2SecretAccessKey string
+	StorageR2Bucket          string
+	StorageR2Endpoint        string // override for AWS S3/MinIO compat; empty = R2 default
+
+	LLMAPIKey  string
+	LLMBaseURL string // default https://api.openai.com/v1
+	LLMModel   string
+
 	// TEST_NOW (RFC3339) freezes the render clock; honored only when Env == test.
 	testNow       time.Time
 	hasTestNow    bool
@@ -76,13 +86,19 @@ func Load() (Config, error) {
 		PolarProductTeam:   getenv("POLAR_PRODUCT_TEAM", ""),
 		PolarServer:        getenv("POLAR_SERVER", "sandbox"),
 
-		ResendAPIKey: getenv("RESEND_API_KEY", ""),
-		EmailFrom:    getenv("EMAIL_FROM", "GoGoGadget <hello@example.com>"),
-
 		PostHogAPIKey: getenv("POSTHOG_API_KEY", ""),
 		PostHogHost:   getenv("POSTHOG_HOST", "https://us.i.posthog.com"),
 
-		SentryDSN: getenv("SENTRY_DSN", ""),
+		StorageR2AccountID:       getenv("STORAGE_R2_ACCOUNT_ID", ""),
+		StorageR2AccessKeyID:     getenv("STORAGE_R2_ACCESS_KEY_ID", ""),
+		StorageR2SecretAccessKey: getenv("STORAGE_R2_SECRET_ACCESS_KEY", ""),
+		StorageR2Bucket:          getenv("STORAGE_R2_BUCKET", ""),
+		StorageR2Endpoint:        strings.TrimRight(getenv("STORAGE_R2_ENDPOINT", ""), "/"),
+
+		LLMAPIKey:  getenv("LLM_API_KEY", ""),
+		LLMBaseURL: strings.TrimRight(getenv("LLM_BASE_URL", "https://api.openai.com/v1"), "/"),
+		LLMModel:   getenv("LLM_MODEL", ""),
+		SentryDSN:                getenv("SENTRY_DSN", ""),
 	}
 
 	cfg.Port = 8080
@@ -164,6 +180,20 @@ func (c Config) PolarConfigured() bool  { return c.PolarAccessToken != "" }
 func (c Config) PostHogEnabled() bool   { return c.PostHogAPIKey != "" }
 func (c Config) SentryEnabled() bool    { return c.SentryDSN != "" }
 func (c Config) ResendConfigured() bool { return c.ResendAPIKey != "" }
+
+// StorageConfigured reports whether R2 (or S3-compatible) credentials are
+// present. Unconfigured → DevStore (tmp/uploads), so a fresh clone needs zero
+// accounts.
+func (c Config) StorageConfigured() bool {
+	return c.StorageR2AccountID != "" && c.StorageR2AccessKeyID != "" &&
+		c.StorageR2SecretAccessKey != "" && c.StorageR2Bucket != ""
+}
+
+// LLMConfigured reports whether an OpenAI-compatible backend is set. Empty →
+// the AI route renders a 503 not-configured (same degrade as billing).
+func (c Config) LLMConfigured() bool {
+	return c.LLMAPIKey != "" && c.LLMModel != ""
+}
 
 // Now returns the render clock: frozen at TEST_NOW under APP_ENV=test,
 // wall-clock otherwise. All rendered dates/times derive from this so visual

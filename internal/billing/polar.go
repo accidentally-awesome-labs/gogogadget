@@ -1,63 +1,146 @@
 package billing
 
 import (
+	"bytes"
 	"context"
-	"errors"
-
-	polargo "github.com/polarsource/polar-go"
-	"github.com/polarsource/polar-go/models/components"
-	"github.com/polarsource/polar-go/models/operations"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"time"
 )
 
-// PolarClient implements Client with the official Polar SDK. Every
-// Speakeasy-generated, pointer-heavy call shape stays confined to this file.
+// polarServers maps the POLAR_SERVER config value to a base URL. Values pinned
+// from the Polar API (2026-04) OpenAPI servers block; docs win over guesses.
+var polarServers = map[string]string{
+	"production": "https://api.polar.sh",
+	"sandbox":    "https://sandbox-api.polar.sh",
+}
+
+const polarAPIVersion = "2026-04"
+
+// PolarClient implements Client over the Polar REST API with plain net/http
+// (the former polarsource/polar-go SDK is archived upstream; raw HTTP is the
+// recommended migration). Every request/response shape stays confined to this
+// file.
 type PolarClient struct {
-	sdk *polargo.Polar
+	baseURL string
+	token   string
+	http    *http.Client
 }
 
 func NewPolarClient(accessToken, server string) *PolarClient {
-	if server != "sandbox" && server != "production" {
-		server = "sandbox"
+	base, ok := polarServers[server]
+	if !ok {
+		base = polarServers["sandbox"]
 	}
-	return &PolarClient{sdk: polargo.New(polargo.WithSecurity(accessToken), polargo.WithServer(server))}
+	return &PolarClient{
+		baseURL: base,
+		token:   accessToken,
+		http:    &http.Client{Timeout: 20 * time.Second},
+	}
+}
+
+func (c *PolarClient) do(ctx context.Context, method, path string, body any, out any) error {
+	var rd io.Reader
+	if body != nil {
+		b, err := json.Marshal(body)
+		if err != nil {
+			return fmt.Errorf("polar: encode request: %w", err)
+		}
+		rd = bytes.NewReader(b)
+	}
+	req, err := http.NewRequestWithContext(ctx, method, c.baseURL+path, rd)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("Polar-Version", polarAPIVersion)
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		b, _ := io.ReadAll(io.LimitReader(resp.Body, 500))
+		return fmt.Errorf("polar: %s %s: %d: %s", method, path, resp.StatusCode, strings.TrimSpace(string(b)))
+	}
+	if out != nil {
+		return json.NewDecoder(resp.Body).Decode(out)
+	}
+	return nil
 }
 
 func (c *PolarClient) CreateCheckout(ctx context.Context, p CheckoutParams) (string, error) {
-	metadata := map[string]components.CheckoutCreateMetadata{}
-	for k, v := range p.Metadata {
-		metadata[k] = components.CreateCheckoutCreateMetadataStr(v)
+	body := map[string]any{
+		"products": []string{p.ProductID},
 	}
-	res, err := c.sdk.Checkouts.Create(ctx, components.CheckoutCreate{
-		Products:           []string{p.ProductID},
-		SuccessURL:         &p.SuccessURL,
-		ExternalCustomerID: &p.CustomerExternalID,
-		Metadata:           metadata,
-	})
-	if err != nil {
+	if p.SuccessURL != "" {
+		body["success_url"] = p.SuccessURL
+	}
+	if p.CustomerExternalID != "" {
+		body["external_customer_id"] = p.CustomerExternalID
+	}
+	if len(p.Metadata) > 0 {
+		body["metadata"] = p.Metadata
+	}
+	var out struct {
+		URL string `json:"url"`
+	}
+	if err := c.do(ctx, http.MethodPost, "/v1/checkouts/", body, &out); err != nil {
 		return "", err
 	}
-	if res.Checkout == nil || res.Checkout.URL == "" {
-		return "", errors.New("polar: checkout returned no URL")
+	if out.URL == "" {
+		return "", fmt.Errorf("polar: checkout returned no URL")
 	}
-	return res.Checkout.URL, nil
+	return out.URL, nil
 }
 
 func (c *PolarClient) CreatePortalSession(ctx context.Context, customerExternalID string) (string, error) {
-	res, err := c.sdk.CustomerSessions.Create(ctx,
-		operations.CreateCustomerSessionsCreateCustomerSessionCreateCustomerSessionCustomerExternalIDCreate(
-			components.CustomerSessionCustomerExternalIDCreate{ExternalCustomerID: customerExternalID},
-		),
-	)
-	if err != nil {
+	body := map[string]any{"external_customer_id": customerExternalID}
+	var out struct {
+		CustomerPortalURL string `json:"customer_portal_url"`
+	}
+	if err := c.do(ctx, http.MethodPost, "/v1/customer-sessions/", body, &out); err != nil {
 		return "", err
 	}
-	if res.CustomerSession == nil || res.CustomerSession.CustomerPortalURL == "" {
-		return "", errors.New("polar: portal session returned no URL")
+	if out.CustomerPortalURL == "" {
+		return "", fmt.Errorf("polar: portal session returned no URL")
 	}
-	return res.CustomerSession.CustomerPortalURL, nil
+	return out.CustomerPortalURL, nil
 }
 
 func (c *PolarClient) RevokeSubscription(ctx context.Context, polarSubscriptionID string) error {
-	_, err := c.sdk.Subscriptions.Revoke(ctx, polarSubscriptionID)
-	return err
+	// Polar 2026-04: revoke is DELETE /v1/subscriptions/{id}.
+	return c.do(ctx, http.MethodDelete, "/v1/subscriptions/"+polarSubscriptionID, nil, nil)
+}
+
+func (c *PolarClient) IngestUsage(ctx context.Context, customerExternalID string, events []UsageEvent) error {
+	if len(events) == 0 {
+		return nil
+	}
+	items := make([]map[string]any, 0, len(events))
+	for _, e := range events {
+		md := map[string]any{}
+		for k, v := range e.Metadata {
+			md[k] = v
+		}
+		if e.Value != 1 {
+			md["value"] = e.Value
+		}
+		item := map[string]any{
+			"name":                 e.Name,
+			"external_customer_id": customerExternalID,
+			"metadata":             md,
+		}
+		if e.ExternalID != "" {
+			item["external_id"] = e.ExternalID
+		}
+		items = append(items, item)
+	}
+	return c.do(ctx, http.MethodPost, "/v1/events/ingest", map[string]any{"events": items}, nil)
 }

@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"context"
 	"strings"
 	"time"
 	"unicode"
@@ -8,6 +9,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 )
 
 // Layout names for Page.Layout.
@@ -58,6 +60,9 @@ type Page struct {
 	Plan billing.Plan
 	Sub  *sqlc.Subscription
 
+	// Impersonator is non-nil while an admin "views as" this user (banner).
+	Impersonator *identity.Impersonator
+
 	// Docs navigation context (set by the docs handlers).
 	Docs    *content.Docs
 	DocSlug string
@@ -80,6 +85,20 @@ func avatarInitial(name string) string {
 		return string(unicode.ToUpper(r))
 	}
 	return "?"
+}
+
+type ctxWebhooksEnabled struct{}
+
+// WithWebhooksEnabled carries the webhooks feature gate into templates
+// (SettingsTabs hides the tab when off). Set by the settings handlers.
+func WithWebhooksEnabled(ctx context.Context, on bool) context.Context {
+	return context.WithValue(ctx, ctxWebhooksEnabled{}, on)
+}
+
+// WebhooksEnabled reads the gate from ctx; default true (present = shown).
+func WebhooksEnabled(ctx context.Context) bool {
+	on, ok := ctx.Value(ctxWebhooksEnabled{}).(bool)
+	return !ok || on
 }
 
 func clerkOrgPlaceholder(org *sqlc.Org) string {

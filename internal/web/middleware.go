@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/justinas/nosurf"
 	"golang.org/x/time/rate"
 )
@@ -26,14 +25,14 @@ import (
 
 // recover converts panics into the 500 page. Outside production it includes
 // the panic detail + stack (agent- and human-actionable); production renders a
-// generic page (and reports to Sentry once observability is wired).
+// generic page (and reports through the observability reporter seam).
 func (s *Server) recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
 				stack := debug.Stack()
 				s.log.Error("panic recovered", "error", rec, "path", r.URL.Path, "request_id", requestIDFrom(r.Context()))
-				s.capturePanic(r, rec) // no-op until Sentry is configured
+				s.capturePanic(r, rec)
 				detail := ""
 				if !s.cfg.Production() {
 					detail = fmt.Sprintf("%v\n\n%s", rec, stack)
@@ -45,16 +44,10 @@ func (s *Server) recover(next http.Handler) http.Handler {
 	})
 }
 
-// capturePanic reports to Sentry when enabled.
+// capturePanic reports through the observability seam (NoopReporter when
+// Sentry is unconfigured).
 func (s *Server) capturePanic(r *http.Request, rec any) {
-	if !s.cfg.SentryEnabled() {
-		return
-	}
-	sentry.WithScope(func(scope *sentry.Scope) {
-		scope.SetTag("path", r.URL.Path)
-		scope.SetContext("request", sentry.Context{"id": requestIDFrom(r.Context())})
-		sentry.CaptureException(fmt.Errorf("panic: %v", rec))
-	})
+	s.reporter.CaptureRequest(r, fmt.Errorf("panic: %v", rec))
 }
 
 type ctxKeyRequestID struct{}
@@ -126,6 +119,10 @@ func (w *statusWriter) Flush() {
 		f.Flush()
 	}
 }
+
+// Unwrap lets http.NewResponseController reach the real writer — SSE handlers
+// need it for SetWriteDeadline(…{}) without dropping the status capture.
+func (w *statusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 
 // rateLimit sheds load per client IP: 100 req/min, burst 200, on everything
 // except /static/*, /healthz, /ingest/*.

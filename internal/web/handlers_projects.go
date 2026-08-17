@@ -12,7 +12,9 @@ import (
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/jobs"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
+	"github.com/gogogadget/gogogadget/internal/webhooks"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -164,9 +166,27 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
+	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.created", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.ClerkOrgID})
 	s.analytics.Capture(user.ClerkUserID, "project_created", map[string]any{"org_id": org.ClerkOrgID, "project_id": project.ID})
 	Toast(w, "success", "Project created")
 	Navigate(w, r, "/app/projects")
+}
+
+// POST /app/projects/export — enqueue the CSV export job; the notification
+// carries the download link when it completes.
+func (s *Server) handleProjectsExport(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	user := identity.UserFrom(ctx)
+	if err := jobs.Enqueue(ctx, s.q, jobs.KindExportProjectsCSV, jobs.ExportProjectsPayload{
+		OrgID: org.ClerkOrgID, UserID: user.ClerkUserID,
+	}); err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "projects.exported", nil)
+	Toast(w, "success", "Export started — you'll get a notification when it's ready")
+	w.WriteHeader(http.StatusOK)
 }
 
 // projectForOrg loads the project or 404s — cross-org ids get 404, never 403
@@ -226,6 +246,7 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "name": name})
+	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.updated", map[string]any{"id": project.ID, "name": name, "status": project.Status, "org_id": org.ClerkOrgID})
 	Toast(w, "success", "Project updated")
 	Navigate(w, r, "/app/projects")
 }
@@ -244,6 +265,7 @@ func (s *Server) handleProjectArchive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "status": "archived"})
+	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.archived", map[string]any{"id": project.ID, "name": project.Name, "status": "archived", "org_id": org.ClerkOrgID})
 	Toast(w, "success", "Project archived")
 	Navigate(w, r, "/app/projects")
 }
@@ -262,6 +284,7 @@ func (s *Server) handleProjectDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name})
+	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.ClerkOrgID})
 	Toast(w, "success", "Project deleted")
 	w.WriteHeader(http.StatusOK)
 }

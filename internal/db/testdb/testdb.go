@@ -45,8 +45,20 @@ func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 	defer conn.Close(ctx)
 
 	q := `"` + strings.ReplaceAll(dbName, `"`, `""`) + `"`
-	if _, err := conn.Exec(ctx, `DROP DATABASE IF EXISTS `+q+` WITH (FORCE)`); err != nil {
-		t.Fatalf("drop %s: %v", dbName, err)
+	// DROP races the previous test's pool teardown: pool.Close() closes
+	// sockets client-side, and the server backend can lag a few ms behind.
+	// Retrying on 42501 is the boring fix; a real permission failure fails
+	// all attempts and still surfaces.
+	var dropErr error
+	for attempt := range 5 {
+		_, dropErr = conn.Exec(ctx, `DROP DATABASE IF EXISTS `+q+` WITH (FORCE)`)
+		if dropErr == nil {
+			break
+		}
+		if attempt == 4 {
+			t.Fatalf("drop %s: %v", dbName, dropErr)
+		}
+		time.Sleep(200 * time.Millisecond)
 	}
 	if _, err := conn.Exec(ctx, `CREATE DATABASE `+q); err != nil {
 		t.Fatalf("create %s: %v", dbName, err)

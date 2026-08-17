@@ -1,6 +1,10 @@
 package templates
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
 
 // pageTitle is the one place the document title is composed, so a fragment
 // swap and a full page load can never disagree.
@@ -55,7 +59,7 @@ templ headScripts(page Page) {
 }
 
 templ skipLink() {
-	<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-lg">Skip to content</a>
+	<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-lg">{ i18n.T(ctx, "layout.skip_content") }</a>
 }
 
 templ toastRoot() {
@@ -75,11 +79,11 @@ templ toastRoot() {
 // configured). posthog.init runs only after acceptance — see static/analytics.js.
 templ phConsent(page Page) {
 	if page.PostHogKey != "" {
-		<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-50 card max-w-sm text-sm" role="dialog" aria-label="Analytics consent">
-			<p>We use privacy-respecting product analytics (self-proxied PostHog) to improve GoGoGadget.</p>
+		<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-50 card max-w-sm text-sm" role="dialog" aria-label={ i18n.T(ctx, "a11y.analytics_consent") }>
+			<p>{ i18n.T(ctx, "layout.analytics_consent_body") }</p>
 			<div class="flex gap-2 mt-3">
-				<button type="button" @click="accept" class="btn btn-primary !py-1 text-xs">Accept</button>
-				<button type="button" @click="decline" class="btn-ghost !py-1 text-xs">Decline</button>
+				<button type="button" @click="accept" class="btn btn-primary !py-1 text-xs">{ i18n.T(ctx, "layout.analytics_accept") }</button>
+				<button type="button" @click="decline" class="btn-ghost !py-1 text-xs">{ i18n.T(ctx, "layout.analytics_decline") }</button>
 			</div>
 		</div>
 	}
@@ -93,7 +97,7 @@ templ phConsent(page Page) {
 // So the rule is: if it differs between pages, it belongs inside #content.
 templ publicShell(page Page, content templ.Component) {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html lang={ i18n.Tag(ctx).String() }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -109,7 +113,7 @@ templ publicShell(page Page, content templ.Component) {
 			<main id="content" hx-history-elt="true">
 				@content
 			</main>
-			@Footer()
+			@Footer(page.Path)
 			@toastRoot()
 			@phConsent(page)
 		</body>
@@ -124,7 +128,7 @@ templ PublicLayout(page Page, content templ.Component) {
 // AppLayout is the authenticated shell (sidebar + topbar + toast root).
 templ AppLayout(page Page, content templ.Component) {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html lang={ i18n.Tag(ctx).String() }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -132,9 +136,19 @@ templ AppLayout(page Page, content templ.Component) {
 			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
 			<link rel="stylesheet" href="/static/app.css"/>
 			@headScripts(page)
+			// htmx SSE extension — app shell only (public pages have no stream).
+			<script defer src="/static/vendor/sse.min.js"></script>
 		</head>
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
+			if page.Impersonator != nil {
+				<div class="bg-amber-500 text-amber-950 px-4 py-2 text-sm flex items-center justify-center gap-3" role="alert" data-testid="impersonation-banner">
+					<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
+					<form hx-post="/app/impersonation/exit" hx-disable="this">
+						<button type="submit" class="font-semibold underline" data-testid="impersonation-exit">{ i18n.T(ctx, "impersonation.exit") }</button>
+					</form>
+				</div>
+			}
 			<div class="flex min-h-screen">
 				@Sidebar(page)
 				<div class="flex-1 flex flex-col min-w-0">
@@ -155,12 +169,12 @@ templ AppLayout(page Page, content templ.Component) {
 templ billingBanner(page Page) {
 	if page.Sub != nil && page.Sub.Status == "past_due" {
 		<div class="bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-b border-amber-200 dark:border-amber-900 px-4 py-2 text-sm" role="alert">
-			Your payment is failing — <a href="/app/settings/billing" class="font-semibold underline">update your card</a> to keep your plan.
+			{ i18n.T(ctx, "layout.banner_past_due_prefix") } <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_past_due_link") }</a> { i18n.T(ctx, "layout.banner_past_due_suffix") }
 		</div>
 	}
 	if page.Sub != nil && page.Sub.Status == "canceled" && page.Sub.CurrentPeriodEnd.Valid && page.Sub.CurrentPeriodEnd.Time.After(page.NowOrDefault()) {
 		<div class="bg-brand-50 text-brand-800 dark:bg-brand-950 dark:text-brand-200 border-b border-brand-200 dark:border-brand-900 px-4 py-2 text-sm" role="status">
-			Your plan ends on { page.Sub.CurrentPeriodEnd.Time.Format("January 2, 2006") } — <a href="/app/settings/billing" class="font-semibold underline">manage billing</a>.
+			{ i18n.T(ctx, "layout.banner_ending_prefix") } { page.Sub.CurrentPeriodEnd.Time.Format("January 2, 2006") } — <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_ending_link") }</a>.
 		</div>
 	}
 }
@@ -180,7 +194,7 @@ templ DocsLayout(page Page, content templ.Component) {
 templ docsBody(page Page, content templ.Component) {
 	<div class="max-w-6xl mx-auto px-4 py-8 flex gap-10">
 		<aside class="hidden md:block w-56 shrink-0">
-			<nav class="sticky top-24 space-y-6 text-sm" aria-label="Documentation">
+			<nav class="sticky top-24 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
 				if page.Docs != nil {
 					for _, section := range page.Docs.Sections {
 						<div>

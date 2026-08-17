@@ -10,6 +10,13 @@ VAT are Polar's problem, not yours), a single Go file as the plan truth, and
 a webhook-driven subscription mirror. The freemium model has **no route-level
 paywall**: enforcement is per-action limits plus persistent banners.
 
+`PolarClient` (`internal/billing/polar.go`) talks to the Polar REST API
+(version `2026-04`) with raw `net/http` behind the `billing.Client` seam —
+the former `polarsource/polar-go` SDK is archived upstream. Besides checkout,
+portal, and revoke, the seam exposes `IngestUsage`, which pushes metered
+usage events to Polar (`POST /v1/events/ingest`) — see
+[Background jobs](/docs/background-jobs) for the flush schedule.
+
 ## plans.go is the single source of truth
 
 `internal/billing/plans.go` defines every plan exactly once — the pricing
@@ -152,11 +159,38 @@ portal; `subscription.active` on recovery clears the state. Trials get one
 the send if the subscription is no longer `trialing` by then — see
 [Background jobs](/docs/background-jobs).
 
+## Usage-based billing
+
+Metered usage rides the same seam: `usage.Record` writes local
+`usage_events` rows (fire-and-forget), and the seeded `usage-flush` schedule
+(every 300s) drives the `usage.flush` job, which claims batches, groups by
+org, and calls `billing.Client.IngestUsage` → Polar's `POST
+/v1/events/ingest`. The flush is **idempotent**: Polar dedups on
+`external_id`, and every event is sent as `ue-<usage_events.id>`. A failed
+ingest returns the batch to the pool; at-least-once retries are safe. No
+`POLAR_ACCESS_TOKEN` → the job no-ops and events stay local (they flush when
+Polar is configured later).
+
+**Polar dashboard setup** (sandbox or production):
+
+1. Meters → create meter `ai_tokens` with aggregation **sum of metadata
+   `_llm.total_tokens`** (or **count of events** for per-call billing).
+2. Edit the Pro/Team products → add a **metered price** on that meter.
+3. Nothing in Go: `IngestUsage` carries the customer via
+   `external_customer_id = clerk_org_id`, and the `_llm` metadata key is
+   Polar's structured usage convention (`_llm.model`,
+   `_llm.prompt_tokens`, `_llm.completion_tokens`, …).
+
+In-app caps are plan truth (`Plan.Meters`, monthly) and render as meters on
+the billing page; the AI endpoint enforces them with 402 `plan_limit` — see
+[AI](/docs/ai).
+
 ## Testing without Polar
 
 `billing.MockClient` implements the same `billing.Client` interface
-(`CreateCheckout`, `CreatePortalSession`, `RevokeSubscription`) with canned
-URLs and recorded calls — no HTTP mocking of the SDK. Webhook tests use
+(`CreateCheckout`, `CreatePortalSession`, `RevokeSubscription`,
+`IngestUsage`) with canned URLs and recorded calls — no HTTP mocking of the
+provider. Webhook tests use
 signed fixtures via `signStandard`, which emits the real `webhook-*` header
 family: replay the same `webhook-id` → 200 with no duplicate row and no
 second email; transition coverage includes resubscribe-after-cancel,

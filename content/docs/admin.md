@@ -35,6 +35,21 @@ the Disabled page with `403`. Re-enabling is the same button.
 
 ## Impersonation
 
-There is no in-app impersonation UI — use the Clerk dashboard's
-**Impersonate user** feature. It is zero application code, and the audit
-trail stays in Clerk. See [Authentication](/docs/authentication).
+**Impersonate** on `/admin/users` starts an in-app "view as" session: a
+2-hour `impersonation_sessions` row + an opaque `ggg_imp` cookie, then a
+redirect into the target's app view with an amber **Viewing as** banner
+outside `#content` (it survives boosted navigation). Session semantics:
+
+- `sessionLoad` applies the override **after** the real JWT verify and mirror
+  upsert — impersonation never bypasses Clerk; the admin's own session must
+  stay valid.
+- Downstream guards are unchanged: `/admin` correctly **403s** while
+  impersonating (the target is not a site admin), and `loadPlan` resolves the
+  target org's plan.
+- Validation is live: an ended/expired session, a demoted admin, or a
+  missing membership clears the cookie on the next request.
+- Both transitions are audited (`impersonation.start` / `.stop`), and the
+  exit button ends the session, clears the cookie, and hard-redirects to
+  `/admin`.
+- Disabled targets and org-less targets are rejected (422); the org is the
+  optional `org` form field, else the target's first membership.

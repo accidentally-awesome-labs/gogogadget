@@ -75,8 +75,7 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 
 		ctx = identity.WithUser(ctx, &user)
 		ctx = identity.WithClaims(ctx, claims)
-		if claims.OrgID != "" {
-			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)
+		if claims.OrgID != "" {			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)
 			switch {
 			case oerr == nil:
 				ctx = identity.WithOrg(ctx, &org)
@@ -101,6 +100,10 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 				s.log.Error("identity load org", "error", oerr)
 			}
 		}
+		// Impersonation override: AFTER the real JWT verify + mirror upsert.
+		// Never bypasses Clerk — an expired/absent admin session means this
+		// code is never even reached.
+		ctx = s.applyImpersonation(w, r, ctx)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

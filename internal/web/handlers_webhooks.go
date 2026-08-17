@@ -12,8 +12,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/jobs"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/jackc/pgx/v5"
 	svix "github.com/svix/svix-webhooks/go"
 )
@@ -86,9 +88,10 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		if err != nil {
 			return err
 		}
-		if _, err := s.q.UpsertUser(ctx, sqlc.UpsertUserParams{
+		user, err := s.q.UpsertUser(ctx, sqlc.UpsertUserParams{
 			ClerkUserID: id, Email: profile.Email, Name: profile.Name, AvatarUrl: profile.AvatarURL,
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 		if s.cfg.AdminEmail != "" && strings.EqualFold(profile.Email, s.cfg.AdminEmail) {
@@ -97,7 +100,7 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 			}
 		}
 		if evt.Type == "user.created" {
-			msg, err := mail.WelcomeMessage(s.cfg.AppURL, profile.Email, profile.Name)
+			msg, err := mail.WelcomeMessage(i18n.ParseOrDefault(user.Locale), s.cfg.AppURL, profile.Email, profile.Name)
 			if err != nil {
 				return err
 			}
@@ -160,6 +163,8 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		switch {
 		case errors.Is(merr, pgx.ErrNoRows) && evt.Type == "organizationMembership.created":
 			audit.Log(ctx, s.q, orgID, userID, "member.joined", map[string]any{"role": role})
+			notify.Send(ctx, s.q, orgID, userID, "welcome", "Welcome to GoGoGadget",
+				"Create your first project, invite your team, and upgrade when you outgrow the free plan.", "/app")
 		case merr == nil && existing.Role != role:
 			audit.Log(ctx, s.q, orgID, userID, "member.role_changed", map[string]any{"from": existing.Role, "to": role})
 		}

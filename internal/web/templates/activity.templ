@@ -6,26 +6,27 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 // Pagination renders hx-get pager links targeting #table-container.
 templ Pagination(page, totalPages int, baseURL string) {
 	if totalPages > 1 {
-		<nav class="flex items-center justify-between mt-4 text-sm" aria-label="Pagination">
+		<nav class="flex items-center justify-between mt-4 text-sm" aria-label={ i18n.T(ctx, "activity.pagination_aria") }>
 			if page > 1 {
 				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page-1)) }
 					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page-1) }
 					hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
-					class="btn-ghost">← Previous</a>
+					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_prev") }</a>
 			} else {
 				<span></span>
 			}
-			<span class="text-fg-muted">Page { page } of { totalPages }</span>
+			<span class="text-fg-muted">{ i18n.T(ctx, "activity.pagination_page_of", page, totalPages) }</span>
 			if page < totalPages {
 				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page+1)) }
 					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page+1) }
 					hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
-					class="btn-ghost">Next →</a>
+					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_next") }</a>
 			} else {
 				<span></span>
 			}
@@ -65,13 +66,13 @@ func prettyMetadata(raw []byte) string {
 templ ActivityTable(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPages int) {
 	<div id="table-container">
 		if len(rows) == 0 {
-			@EmptyState("No activity yet", "Actions across your organization will appear here.") {
+			@EmptyState(i18n.T(ctx, "activity.empty_title"), i18n.T(ctx, "activity.empty_body")) {
 			}
 		} else {
 			<div class="card !p-0 overflow-hidden">
 				<table class="table">
 					<thead>
-						<tr><th>Actor</th><th>Action</th><th>When</th><th>Details</th></tr>
+						<tr><th>{ i18n.T(ctx, "activity.col_actor") }</th><th>{ i18n.T(ctx, "activity.col_action") }</th><th>{ i18n.T(ctx, "activity.col_when") }</th><th>{ i18n.T(ctx, "activity.col_details") }</th></tr>
 					</thead>
 					<tbody>
 						for _, row := range rows {
@@ -84,7 +85,7 @@ templ ActivityTable(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPag
 								<td>
 									if len(row.Metadata) > 2 {
 										<details>
-											<summary class="cursor-pointer text-fg-muted">metadata</summary>
+											<summary class="cursor-pointer text-fg-muted">{ i18n.T(ctx, "activity.metadata") }</summary>
 											<pre class="text-xs mt-1 overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
 										</details>
 									}
@@ -100,6 +101,6 @@ templ ActivityTable(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPag
 }
 
 templ ActivityPage(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPages int) {
-	<h1 class="text-2xl font-bold mb-6">Activity</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "activity.title") }</h1>
 	@ActivityTable(rows, now, page, totalPages)
 }

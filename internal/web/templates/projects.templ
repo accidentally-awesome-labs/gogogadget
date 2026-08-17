@@ -1,28 +1,35 @@
 package templates
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
 
 templ ProjectsPage(d ProjectListData) {
 	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">Projects</h1>
-		<a href="/app/projects/new" class="btn btn-primary">New project</a>
+		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "projects.title") }</h1>
+		<div class="flex items-center gap-2">
+			<button type="button" hx-post="/app/projects/export" hx-swap="none" class="btn btn-ghost" data-testid="projects-export">{ i18n.T(ctx, "projects.export") }</button>
+			<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
+		</div>
 	</div>
 
 	if d.Plan.MaxProjects > 0 {
 		<div class="card mb-4 text-sm" data-testid="usage-meter">
-			{ fmt.Sprint(d.Count) } / { fmt.Sprint(d.Plan.MaxProjects) } projects used on { d.Plan.Name }
+			{ i18n.T(ctx, "projects.usage", fmt.Sprint(d.Count), fmt.Sprint(d.Plan.MaxProjects), d.Plan.Name) }
 		</div>
 	}
 
 	<div class="flex items-center gap-2 mb-4">
 		<input
-			type="search" name="q" value={ d.Query } placeholder="Search projects…"
+			type="search" name="q" value={ d.Query } placeholder={ i18n.T(ctx, "projects.search_placeholder") }
 			class="input max-w-sm"
 			hx-get="/app/projects" hx-trigger="input changed delay:300ms, search"
 			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
 			hx-sync="this:replace"
 			hx-indicator="#projects-search-indicator"
-			aria-label="Search projects"
+			aria-label={ i18n.T(ctx, "projects.search_label") }
 		/>
 		<span id="projects-search-indicator" class="text-fg-muted">
 			@Spinner()
@@ -34,14 +41,14 @@ templ ProjectsPage(d ProjectListData) {
 templ ProjectsTable(d ProjectListData) {
 	<div id="table-container">
 		if len(d.Projects) == 0 {
-			@EmptyState("No projects", "Create your first project to get going.") {
-				<a href="/app/projects/new" class="btn btn-primary">New project</a>
+			@EmptyState(i18n.T(ctx, "projects.empty_title"), i18n.T(ctx, "projects.empty_body")) {
+				<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
 			}
 		} else {
 			<div class="card !p-0 overflow-hidden">
 				<table class="table">
 					<thead>
-						<tr><th>Name</th><th>Created</th><th class="text-right">Actions</th></tr>
+						<tr><th>{ i18n.T(ctx, "projects.col_name") }</th><th>{ i18n.T(ctx, "projects.col_created") }</th><th class="text-right">{ i18n.T(ctx, "projects.col_actions") }</th></tr>
 					</thead>
 					<tbody>
 						for _, p := range d.Projects {
@@ -50,20 +57,20 @@ templ ProjectsTable(d ProjectListData) {
 								<td class="text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 								<td class="text-right">
 									<div class="flex justify-end gap-2">
-										<a href={ templ.SafeURL(fmt.Sprintf("/app/projects/%d/edit", p.ID)) } class="btn-ghost !px-2 !py-1 text-xs">Edit</a>
+										<a href={ templ.SafeURL(fmt.Sprintf("/app/projects/%d/edit", p.ID)) } class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "projects.edit") }</a>
 										<button
 											type="button"
 											hx-post={ fmt.Sprintf("/app/projects/%d/archive", p.ID) }
 											class="btn-ghost !px-2 !py-1 text-xs"
-										>Archive</button>
+										>{ i18n.T(ctx, "projects.archive") }</button>
 										<button
 											type="button"
 											hx-delete={ fmt.Sprintf("/app/projects/%d", p.ID) }
-											hx-confirm="Delete this project? This cannot be undone."
+											hx-confirm={ i18n.T(ctx, "projects.delete_confirm") }
 											hx-target="closest tr"
 											hx-swap="outerHTML"
 											class="btn-danger !px-2 !py-1 text-xs"
-										>Delete</button>
+										>{ i18n.T(ctx, "projects.delete") }</button>
 									</div>
 								</td>
 							</tr>
@@ -80,12 +87,12 @@ templ ProjectForm(d ProjectFormData) {
 	<div id="project-form">
 		if d.LimitHit {
 			<div class="alert-error mb-4" data-testid="plan-limit">
-				You've reached the { d.Plan.Name } plan limit of { fmt.Sprint(d.Plan.MaxProjects) } projects.
-				<a href="/app/settings/billing" class="link font-semibold">Upgrade to create more →</a>
+				{ i18n.T(ctx, "projects.limit_hit", d.Plan.Name, fmt.Sprint(d.Plan.MaxProjects)) }
+				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
 			</div>
 		}
 		if d.NameErr != "" {
-			<div class="alert-error mb-4" role="alert">Please fix the error below.</div>
+			<div class="alert-error mb-4" role="alert">{ i18n.T(ctx, "projects.fix_error") }</div>
 		}
 		<form
 			if d.ID == 0 {
@@ -99,28 +106,28 @@ templ ProjectForm(d ProjectFormData) {
 			novalidate
 			class="card max-w-lg space-y-4"
 		>
-			@FormField("name", "Name", "text", d.Name, d.NameErr, "Launch checklist", true)
+			@FormField("name", i18n.T(ctx, "projects.field_name"), "text", d.Name, d.NameErr, i18n.T(ctx, "projects.field_placeholder"), true)
 			<div class="flex gap-3">
 				<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
 					@Spinner()
 					if d.ID == 0 {
-						Create project
+						{ i18n.T(ctx, "projects.create") }
 					} else {
-						Save changes
+						{ i18n.T(ctx, "projects.save") }
 					}
 				</button>
-				<a href="/app/projects" class="btn btn-ghost">Cancel</a>
+				<a href="/app/projects" class="btn btn-ghost">{ i18n.T(ctx, "projects.cancel") }</a>
 			</div>
 		</form>
 	</div>
 }
 
 templ ProjectNewPage(d ProjectFormData) {
-	<h1 class="text-2xl font-bold mb-6">New project</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "projects.new") }</h1>
 	@ProjectForm(d)
 }
 
 templ ProjectEditPage(d ProjectFormData) {
-	<h1 class="text-2xl font-bold mb-6">Edit project</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "projects.edit_heading") }</h1>
 	@ProjectForm(d)
 }

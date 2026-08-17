@@ -1,0 +1,59 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+// AdminFlagsPage is the feature-flag table: key, description, enabled,
+// rollout — with per-row toggle and rollout form.
+templ AdminFlagsPage(flags []sqlc.FeatureFlag) {
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "flags.title") }</h1>
+	<div class="card !p-0 overflow-hidden max-w-3xl">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>{ i18n.T(ctx, "flags.col_key") }</th>
+					<th>{ i18n.T(ctx, "flags.col_description") }</th>
+					<th>{ i18n.T(ctx, "flags.col_enabled") }</th>
+					<th>{ i18n.T(ctx, "flags.col_rollout") }</th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(flags) == 0 {
+					<tr><td colspan="4" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "flags.empty") }</td></tr>
+				}
+				for _, f := range flags {
+					<tr data-testid="flag-row">
+						<td><code class="text-xs font-medium">{ f.Key }</code></td>
+						<td class="text-fg-muted text-xs">{ f.Description }</td>
+						<td>
+							<form hx-post={ fmt.Sprintf("/admin/flags/%s/toggle", f.Key) } hx-disable="this" class="inline">
+								<button type="submit" class={
+									"badge cursor-pointer",
+									templ.KV("bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300", f.Enabled),
+									templ.KV("bg-surface-raised text-fg-muted", !f.Enabled),
+								} data-testid={ "flag-toggle-" + f.Key }>
+									if f.Enabled {
+										{ i18n.T(ctx, "flags.on") }
+									} else {
+										{ i18n.T(ctx, "flags.off") }
+									}
+								</button>
+							</form>
+						</td>
+						<td>
+							<form hx-post={ fmt.Sprintf("/admin/flags/%s/rollout", f.Key) } hx-disable="this" class="flex items-center gap-2">
+								<input type="number" name="rollout" value={ fmt.Sprint(f.Rollout) } min="0" max="100" class="input !w-20 !py-1 text-xs" data-testid={ "flag-rollout-" + f.Key }/>
+								<button type="submit" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "flags.set") }</button>
+							</form>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	<p class="text-xs text-fg-muted mt-3">{ i18n.T(ctx, "flags.hint") }</p>
+}

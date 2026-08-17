@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"log/slog"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -147,4 +149,71 @@ func TestTrialEndingGuardSkipsNonTrialing(t *testing.T) {
 	matches, err := filepath.Glob(filepath.Join(dir, "*.html"))
 	require.NoError(t, err)
 	assert.Empty(t, matches)
+}
+
+func TestSchedulerClaimsDueAndEnqueues(t *testing.T) {
+	pool, q := testSetup(t)
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, "DELETE FROM schedules")
+	require.NoError(t, err)
+	w := testWorker(q, t.TempDir())
+
+	// Due now.
+	due, err := q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
+		Name: "digest-due", Kind: KindEmailDigest, Payload: []byte(`{}`),
+		EverySeconds: 300, NextRunAt: pgtype.Timestamptz{Time: time.Now().Add(-time.Second), Valid: true},
+	})
+	require.NoError(t, err)
+	// Not due yet.
+	_, err = q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
+		Name: "digest-later", Kind: KindEmailDigest, Payload: []byte(`{}`),
+		EverySeconds: 300, NextRunAt: pgtype.Timestamptz{Time: time.Now().Add(time.Hour), Valid: true},
+	})
+	require.NoError(t, err)
+	// Disabled schedule due now — must NOT be claimed.
+	_, err = q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
+		Name: "digest-off", Kind: KindEmailDigest, Payload: []byte(`{}`),
+		EverySeconds: 300, NextRunAt: pgtype.Timestamptz{Time: time.Now().Add(-time.Second), Valid: true},
+	})
+	require.NoError(t, err)
+	off, err := pool.Exec(ctx, "UPDATE schedules SET enabled = FALSE WHERE name = 'digest-off'")
+	require.NoError(t, err)
+	_ = off
+
+	require.NoError(t, w.schedulerPass(ctx))
+
+	// The due schedule enqueued exactly one wrapped job.
+	rows, err := pool.Query(ctx, "SELECT payload FROM jobs WHERE kind = $1", KindEmailDigest)
+	require.NoError(t, err)
+	var payloads []json.RawMessage
+	for rows.Next() {
+		var p json.RawMessage
+		require.NoError(t, rows.Scan(&p))
+		payloads = append(payloads, p)
+	}
+	rows.Close()
+	require.Len(t, payloads, 1)
+	var sp SchedulePayload
+	require.NoError(t, json.Unmarshal(payloads[0], &sp))
+	assert.Equal(t, due.ID, sp.ScheduleID)
+	assert.JSONEq(t, `{}`, string(sp.Payload))
+
+	// next_run_at advanced by the interval (missed ticks skipped by design).
+	var next time.Time
+	require.NoError(t, pool.QueryRow(ctx, "SELECT next_run_at FROM schedules WHERE id = $1", due.ID).Scan(&next))
+	assert.True(t, next.After(time.Now().Add(299*time.Second)), "advanced to now + interval")
+	assert.True(t, next.Before(time.Now().Add(301*time.Second)))
+
+	// The not-due and disabled rows were untouched.
+	var lastNull bool
+	require.NoError(t, pool.QueryRow(ctx, "SELECT last_run_at IS NULL FROM schedules WHERE name = 'digest-later'").Scan(&lastNull))
+	assert.True(t, lastNull)
+	require.NoError(t, pool.QueryRow(ctx, "SELECT last_run_at IS NULL FROM schedules WHERE name = 'digest-off'").Scan(&lastNull))
+	assert.True(t, lastNull, "disabled schedule never claims")
+
+	// Second pass with nothing due enqueues nothing new.
+	require.NoError(t, w.schedulerPass(ctx))
+	var n int
+	require.NoError(t, pool.QueryRow(ctx, "SELECT count(*) FROM jobs WHERE kind = $1", KindEmailDigest).Scan(&n))
+	assert.Equal(t, 1, n)
 }

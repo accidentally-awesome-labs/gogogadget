@@ -1,6 +1,10 @@
 package templates
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
 
 func navCurrent(page Page, match string) string {
 	if page.Path == match {
@@ -22,7 +26,7 @@ templ logo() {
 }
 
 templ themeToggle() {
-	<button type="button" x-data="themeToggle" @click="toggle" class="btn-ghost btn !px-2" aria-label="Toggle dark mode" data-testid="theme-toggle">
+	<button type="button" x-data="themeToggle" @click="toggle" class="btn-ghost btn !px-2" aria-label={ i18n.T(ctx, "a11y.theme") } data-testid="theme-toggle">
 		<svg x-show="!dark" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 			<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
 		</svg>
@@ -41,10 +45,10 @@ func isAnchorLink(href string) bool { return strings.Contains(href, "#") }
 
 templ navLinks(page Page) {
 	for _, item := range []struct{ Label, Href string }{
-		{"Features", "/#features"},
-		{"Pricing", "/pricing"},
-		{"Blog", "/blog"},
-		{"Docs", "/docs"},
+		{i18n.T(ctx, "nav.features"), "/#features"},
+		{i18n.T(ctx, "nav.pricing"), "/pricing"},
+		{i18n.T(ctx, "nav.blog"), "/blog"},
+		{i18n.T(ctx, "nav.docs"), "/docs"},
 	} {
 		<a
 			href={ templ.SafeURL(item.Href) }
@@ -69,12 +73,12 @@ templ Nav(page Page) {
 			</div>
 			<div class="hidden md:flex items-center gap-3">
 				@themeToggle()
-				<a href="/login" class="text-sm font-medium text-fg-muted hover:text-fg">Sign in</a>
-				<a href="/signup" class="btn btn-primary">Get started</a>
+				<a href="/login" class="text-sm font-medium text-fg-muted hover:text-fg">{ i18n.T(ctx, "nav.sign_in") }</a>
+				<a href="/signup" class="btn btn-primary">{ i18n.T(ctx, "nav.get_started") }</a>
 			</div>
 			<div class="flex md:hidden items-center gap-2">
 				@themeToggle()
-				<button type="button" @click="toggle" class="btn-ghost btn !px-2" aria-label="Open menu" :aria-expanded="open.toString()">
+				<button type="button" @click="toggle" class="btn-ghost btn !px-2" aria-label={ i18n.T(ctx, "a11y.menu") } :aria-expanded="open.toString()">
 					<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 						<path d="M4 6h16M4 12h16M4 18h16"></path>
 					</svg>
@@ -82,24 +86,24 @@ templ Nav(page Page) {
 			</div>
 			<div x-show="open" x-cloak @click.outside="close" class="absolute top-16 left-0 right-0 bg-surface border-b border-border p-4 flex flex-col gap-4 md:hidden">
 				@navLinks(page)
-				<a href="/login" class="text-sm font-medium text-fg-muted">Sign in</a>
-				<a href="/signup" class="btn btn-primary">Get started</a>
+				<a href="/login" class="text-sm font-medium text-fg-muted">{ i18n.T(ctx, "nav.sign_in") }</a>
+				<a href="/signup" class="btn btn-primary">{ i18n.T(ctx, "nav.get_started") }</a>
 			</div>
 		</nav>
 	</header>
 }
 
-templ Footer() {
+templ Footer(path string) {
 	<footer class="border-t border-border mt-24">
 		<div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
 			for _, col := range []struct {
 				Title string
 				Links []struct{ Label, Href string }
 			}{
-				{"Product", []struct{ Label, Href string }{{"Features", "/#features"}, {"Pricing", "/pricing"}, {"Docs", "/docs"}}},
-				{"Company", []struct{ Label, Href string }{{"Blog", "/blog"}, {"About", "/#about"}}},
-				{"Resources", []struct{ Label, Href string }{{"Getting started", "/docs/getting-started"}, {"API", "/docs/api"}, {"RSS", "/rss.xml"}}},
-				{"Legal", []struct{ Label, Href string }{{"Terms", "/terms"}, {"Privacy", "/privacy"}}},
+				{i18n.T(ctx, "footer.product"), []struct{ Label, Href string }{{i18n.T(ctx, "footer.features"), "/#features"}, {i18n.T(ctx, "footer.pricing"), "/pricing"}, {i18n.T(ctx, "footer.docs"), "/docs"}}},
+				{i18n.T(ctx, "footer.company"), []struct{ Label, Href string }{{i18n.T(ctx, "footer.blog"), "/blog"}, {i18n.T(ctx, "footer.about"), "/#about"}}},
+				{i18n.T(ctx, "footer.resources"), []struct{ Label, Href string }{{i18n.T(ctx, "footer.getting_started"), "/docs/getting-started"}, {i18n.T(ctx, "footer.api"), "/docs/api"}, {i18n.T(ctx, "footer.rss"), "/rss.xml"}}},
+				{i18n.T(ctx, "footer.legal"), []struct{ Label, Href string }{{i18n.T(ctx, "footer.terms"), "/terms"}, {i18n.T(ctx, "footer.privacy"), "/privacy"}}},
 			} {
 				<div>
 					<h3 class="font-semibold mb-3">{ col.Title }</h3>
@@ -111,6 +115,9 @@ templ Footer() {
 				</div>
 			}
 		</div>
-		<div class="border-t border-border py-6 text-center text-sm text-fg-muted">© 2026 GoGoGadget. MIT licensed.</div>
+		<div class="border-t border-border py-6 flex items-center justify-center gap-4 text-sm text-fg-muted">
+			<span>{ i18n.T(ctx, "footer.copyright", 2026) }</span>
+			@LocaleSwitcher(path)
+		</div>
 	</footer>
 }

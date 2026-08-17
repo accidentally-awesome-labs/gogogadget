@@ -1,0 +1,50 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+func localeItemClass(current bool) string {
+	if current {
+		return "w-full text-left rounded-lg px-3 py-1.5 text-sm hover:bg-surface font-semibold text-fg"
+	}
+	return "w-full text-left rounded-lg px-3 py-1.5 text-sm hover:bg-surface text-fg-muted"
+}
+
+func localeAriaCurrent(current bool) string {
+	if current {
+		return "true"
+	}
+	return ""
+}
+
+// LocaleSwitcher is the language dropdown (public footer + app sidebar).
+// Each option is a tiny hx-post form to /set-locale: the CSRF token rides the
+// body-inherited X-CSRF-Token header, the response is a HARD redirect (locale
+// changes the shell, which boosted navigation never re-renders), and returnTo
+// brings the user back to the page they were on. Plain <details> — no JS,
+// CSP-safe.
+templ LocaleSwitcher(path string) {
+	<details class="relative">
+		<summary class="flex items-center gap-1 cursor-pointer list-none text-sm text-fg-muted hover:text-fg select-none" data-testid="locale-switcher">
+			<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+				<circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+			</svg>
+			{ i18n.T(ctx, "i18n.language") }
+		</summary>
+		<div class="absolute left-0 mt-2 w-36 card !p-2 flex flex-col gap-1 z-50">
+			for _, l := range i18n.Locales {
+				<form hx-post="/set-locale" hx-swap="none">
+					<input type="hidden" name="lang" value={ l.Code }/>
+					<input type="hidden" name="returnTo" value={ path }/>
+					<button
+						type="submit"
+						class={ localeItemClass(i18n.Tag(ctx) == l.Tag) }
+						aria-current={ localeAriaCurrent(i18n.Tag(ctx) == l.Tag) }
+						data-testid={ "locale-option-" + l.Code }
+					>{ l.Label }</button>
+				</form>
+			}
+		</div>
+	</details>
+}

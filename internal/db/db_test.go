@@ -121,3 +121,46 @@ func TestRoundtripEveryTable(t *testing.T) {
 	_, err = q.GetAPITokenByHash(ctx, "hash_rt1")
 	require.ErrorIs(t, err, pgx.ErrNoRows, "revoked token must not authenticate")
 }
+
+func TestProjectSearchFTS(t *testing.T) {
+	_, q := testdb.Open(t, "dbsearch")
+	ctx := context.Background()
+
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: "org_s", Name: "S", Slug: "s", ImageUrl: ""})
+	require.NoError(t, err)
+	seed := []string{"Quarterly planning", "Launch checklist", "Quarterly revenue report", "Onboarding docs"}
+	for _, name := range seed {
+		_, err := q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_s", Name: name})
+		require.NoError(t, err)
+	}
+
+	list := func(query string) []sqlc.Project {
+		rows, err := q.ListProjectsByOrg(ctx, sqlc.ListProjectsByOrgParams{ClerkOrgID: "org_s", Column2: query, Limit: 50, Offset: 0})
+		require.NoError(t, err)
+		return rows
+	}
+
+	// Exact word: FTS matches both "Quarterly" rows, ranked.
+	rows := list("Quarterly")
+	require.Len(t, rows, 2)
+
+	// Multi-word websearch syntax: both tokens must match.
+	rows = list("Quarterly report")
+	require.Len(t, rows, 1)
+	assert.Equal(t, "Quarterly revenue report", rows[0].Name)
+
+	// Partial token falls back to ILIKE (FTS alone would miss "check" inside
+	// no words — ILIKE catches "checklist").
+	rows = list("check")
+	require.Len(t, rows, 1)
+	assert.Equal(t, "Launch checklist", rows[0].Name)
+
+	// Empty query returns all, newest first.
+	rows = list("")
+	assert.Len(t, rows, 4)
+
+	// Count matches the same predicate.
+	n, err := q.CountProjectsByOrgSearch(ctx, sqlc.CountProjectsByOrgSearchParams{ClerkOrgID: "org_s", Column2: "Quarterly"})
+	require.NoError(t, err)
+	assert.Equal(t, int64(2), n)
+}

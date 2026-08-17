@@ -51,18 +51,44 @@ type APITokensData struct {
 }
 
 type BillingData struct {
-	Plan         billing.Plan
-	Sub          *sqlc.Subscription
-	ProjectCount int64
-	Plans        []billing.Plan
-	Processing   bool // checkout redirect beat the webhook
-	Success      bool
+	Plan             billing.Plan
+	Sub              *sqlc.Subscription
+	ProjectCount     int64
+	UsedStorageBytes int64
+	MeterUsage       map[string]int64 // meter key → current-month usage
+	Plans            []billing.Plan
+	Processing       bool // checkout redirect beat the webhook
+	Success          bool
 }
-
 type ProjectFormData struct {
 	ID       int64 // 0 = new
 	Name     string
 	NameErr  string
 	LimitHit bool
 	Plan     billing.Plan
+}
+
+type FilesData struct {
+	Files      []sqlc.File
+	Page       int
+	TotalPages int
+	Plan       billing.Plan
+	UsedBytes  int64
+	LimitHit   bool // last upload rejected for quota; re-render with CTA
+	MaxMB      int  // the rejected upload's size, for the message
+}
+
+type NotificationsData struct {
+	Items      []sqlc.Notification
+	Page       int
+	TotalPages int
+	Unread     int64
+}
+
+type WebhooksData struct {
+	Endpoints  []sqlc.WebhookEndpoint
+	Deliveries []sqlc.ListDeliveriesByOrgRow
+	EventTypes []string // checkbox catalog
+	NewSecret  string   // plaintext, shown ONCE right after endpoint creation
+	URLErr     string
 }

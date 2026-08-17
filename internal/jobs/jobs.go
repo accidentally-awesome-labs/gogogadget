@@ -9,10 +9,13 @@ import (
 	"errors"
 	"log/slog"
 	"math/rand/v2"
+	"net/http"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -23,7 +26,24 @@ const (
 	KindPaymentFailed        = "email.payment_failed"
 	KindSubscriptionCanceled = "email.subscription_canceled"
 	KindTrialEnding          = "email.trial_ending"
+	KindEmailDigest          = "email.digest" // seeded example — no-ops until a builder replaces it
+	KindUsageFlush           = "usage.flush"  // usage metering (see internal/usage)
+	KindWebhookDeliver       = "webhook.deliver"
+	KindExportProjectsCSV    = "export.projects_csv"
 )
+
+// ExportProjectsPayload is the handler-enqueued CSV export contract.
+type ExportProjectsPayload struct {
+	OrgID  string `json:"org_id"`
+	UserID string `json:"user_id"`
+}
+
+// SchedulePayload wraps every schedule-enqueued job: the scheduler pass
+// writes it, and dispatch cases that accept scheduled work unwrap .Payload.
+type SchedulePayload struct {
+	ScheduleID int64           `json:"schedule_id"`
+	Payload    json.RawMessage `json:"payload"`
+}
 
 // EmailPayload is the job payload contract for all email kinds: rendered
 // bodies at enqueue time, so workers never touch templates.
@@ -70,10 +90,20 @@ type Worker struct {
 	poll   time.Duration
 	// OnDeadLetter reports exhausted jobs (wired to Sentry when enabled).
 	OnDeadLetter func(kind string, err error)
+	// Webhook delivery policy hooks — strict by default; tests swap these.
+	WebhookGuard     func(ctx context.Context, rawURL string) error
+	WebhookTransport *http.Transport
+	// Billing is the usage-flush target: nil (unconfigured) → flush no-ops
+	// and events stay local. Set in cmd/server when Polar is configured.
+	Billing billing.Client
+	// Storage is the export target; set in cmd/server. Nil → export fails
+	// loudly (the handler should not enqueue without it).
+	Storage storage.Store
 }
 
 func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
-	return &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second}
+	return &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second,
+		WebhookGuard: guardWebhookURL, WebhookTransport: guardedTransport()}
 }
 
 // Run polls until ctx is done; a daily janitor pass deletes finished jobs
@@ -93,6 +123,9 @@ func (w *Worker) Run(ctx context.Context) {
 		n, err := w.drain(ctx)
 		if err != nil {
 			w.log.Error("job worker", "error", err)
+		}
+		if err := w.schedulerPass(ctx); err != nil {
+			w.log.Error("schedule pass", "error", err)
 		}
 		if n == 0 {
 			w.sleep(ctx, w.jittered())
@@ -166,8 +199,39 @@ func (w *Worker) ProcessOne(ctx context.Context) (bool, error) {
 	return true, w.q.CompleteJob(ctx, job.ID)
 }
 
+// schedulerPass claims due schedules (next_run_at advanced in the same
+// statement — missed ticks are skipped by design) and enqueues their kind
+// with the wrapped payload. Runs every poll cycle.
+func (w *Worker) schedulerPass(ctx context.Context) error {
+	due, err := w.q.ClaimDueSchedules(ctx)
+	if err != nil {
+		return err
+	}
+	for _, s := range due {
+		if err := Enqueue(ctx, w.q, s.Kind, SchedulePayload{ScheduleID: s.ID, Payload: s.Payload}); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 	switch job.Kind {
+	case KindEmailDigest:
+		// Placeholder for builders: scheduled example job; no-ops politely
+		// with a log when the payload carries nothing to digest.
+		var sp SchedulePayload
+		if err := json.Unmarshal(job.Payload, &sp); err != nil {
+			return err
+		}
+		w.log.Info("email.digest: placeholder — nothing to send", "schedule_id", sp.ScheduleID)
+		return nil
+	case KindUsageFlush:
+		return w.flushUsage(ctx, job)
+	case KindWebhookDeliver:
+		return w.deliverWebhook(ctx, job)
+	case KindExportProjectsCSV:
+		return w.exportProjectsCSV(ctx, job)
 	case KindWelcome, KindPaymentFailed, KindSubscriptionCanceled, KindTrialEnding:
 		var p EmailPayload
 		if err := json.Unmarshal(job.Payload, &p); err != nil {

@@ -1,17 +1,19 @@
 package templates
 
+import "github.com/gogogadget/gogogadget/internal/i18n"
+
 templ LegalTerms() {
 	<article class="max-w-3xl mx-auto px-4 py-16 prose">
-		<h1>Terms of Service</h1>
-		<p>Placeholder terms. Replace with counsel-reviewed copy before launch.</p>
-		<p>GoGoGadget is provided "as is", without warranty of any kind. By using the service you agree to use it lawfully and not abuse the platform.</p>
+		<h1>{ i18n.T(ctx, "legal.terms.title") }</h1>
+		<p>{ i18n.T(ctx, "legal.terms.placeholder") }</p>
+		<p>{ i18n.T(ctx, "legal.terms.body") }</p>
 	</article>
 }
 
 templ LegalPrivacy() {
 	<article class="max-w-3xl mx-auto px-4 py-16 prose">
-		<h1>Privacy Policy</h1>
-		<p>Placeholder privacy policy. Replace with counsel-reviewed copy before launch.</p>
-		<p>Account data is stored with Clerk; payment data with Polar (merchant of record); analytics, when enabled, with PostHog behind an explicit consent gate.</p>
+		<h1>{ i18n.T(ctx, "legal.privacy.title") }</h1>
+		<p>{ i18n.T(ctx, "legal.privacy.placeholder") }</p>
+		<p>{ i18n.T(ctx, "legal.privacy.body") }</p>
 	</article>
 }

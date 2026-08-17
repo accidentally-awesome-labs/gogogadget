@@ -5,6 +5,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 func planRank(key string) int {
@@ -39,23 +40,23 @@ templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
 		}
 	>
 		if processing {
-			<p class="font-semibold">Processing your subscription…</p>
-			<p class="text-sm text-fg-muted mt-1">Confirming with the payment provider — this takes a few seconds.</p>
+			<p class="font-semibold">{ i18n.T(ctx, "billing.processing_title") }</p>
+			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "billing.processing_sub") }</p>
 		} else {
 			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-semibold">{ plan.Name } plan</h2>
+				<h2 class="text-lg font-semibold">{ i18n.T(ctx, "billing.plan_heading", plan.Name) }</h2>
 				if sub != nil {
 					<span class={ "badge", statusBadge(sub.Status) } data-testid="plan-badge">{ sub.Status }</span>
 				} else {
-					<span class="badge bg-surface-raised text-fg-muted" data-testid="plan-badge">free</span>
+					<span class="badge bg-surface-raised text-fg-muted" data-testid="plan-badge">{ i18n.T(ctx, "billing.plan_free") }</span>
 				}
 			</div>
 			if sub != nil && sub.CurrentPeriodEnd.Valid {
 				<p class="text-sm text-fg-muted mt-2">
 					if sub.CancelAtPeriodEnd {
-						Your plan ends on { sub.CurrentPeriodEnd.Time.Format("January 2, 2006") }.
+						{ i18n.T(ctx, "billing.ends_on", sub.CurrentPeriodEnd.Time.Format("January 2, 2006")) }
 					} else {
-						Current period ends { sub.CurrentPeriodEnd.Time.Format("January 2, 2006") }.
+						{ i18n.T(ctx, "billing.period_ends", sub.CurrentPeriodEnd.Time.Format("January 2, 2006")) }
 					}
 				</p>
 			}
@@ -71,30 +72,52 @@ templ BillingError(msg string) {
 // links the matching docs page.
 templ NotConfigured(feature, docsSlug string) {
 	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
-		<h1 class="text-4xl font-extrabold text-brand-600 dark:text-brand-400">{ feature } not configured</h1>
-		<p class="mt-4 text-fg-muted">This service isn't set up yet — the app degrades instead of crashing.</p>
-		<a href={ "/docs/" + docsSlug } class="btn btn-primary mt-8">Setup guide →</a>
+		<h1 class="text-4xl font-extrabold text-brand-600 dark:text-brand-400">{ i18n.T(ctx, "billing.not_configured", feature) }</h1>
+		<p class="mt-4 text-fg-muted">{ i18n.T(ctx, "billing.not_configured_body") }</p>
+		<a href={ "/docs/" + docsSlug } class="btn btn-primary mt-8">{ i18n.T(ctx, "billing.setup_guide") }</a>
 	</section>
 }
 
 templ SettingsBilling(d BillingData) {
 	@SettingsTabs("/app/settings/billing")
-	<h1 class="text-2xl font-bold mb-6">Billing</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "billing.title") }</h1>
 
 	if d.Success && !d.Processing {
-		<div class="alert-success mb-4 max-w-lg" role="status">Your subscription is active. Welcome aboard!</div>
+		<div class="alert-success mb-4 max-w-lg" role="status">{ i18n.T(ctx, "billing.welcome") }</div>
 	}
 
 	@BillingCard(d.Plan, d.Sub, d.Processing)
 
 	if d.Plan.MaxProjects > 0 {
 		<div class="card mb-6 max-w-lg" data-testid="usage-meter">
-			<h2 class="text-sm font-semibold mb-2">Usage</h2>
-			<p class="text-sm text-fg-muted">{ fmt.Sprint(d.ProjectCount) } / { fmt.Sprint(d.Plan.MaxProjects) } projects used</p>
+			<h2 class="text-sm font-semibold mb-2">{ i18n.T(ctx, "billing.usage") }</h2>
+			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "billing.projects_used", fmt.Sprint(d.ProjectCount), fmt.Sprint(d.Plan.MaxProjects)) }</p>
 			<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
 				<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.ProjectCount*100/int64(max(d.Plan.MaxProjects, 1)))) }></div>
 			</div>
 		</div>
+	}
+
+	if d.Plan.MaxStorageMB > 0 {
+		<div class="card mb-6 max-w-lg" data-testid="storage-meter">
+			<h2 class="text-sm font-semibold mb-2">{ i18n.T(ctx, "billing.storage") }</h2>
+			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "billing.storage_used", usedMB(d.UsedStorageBytes), fmt.Sprint(d.Plan.MaxStorageMB)) }</p>
+			<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
+				<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.UsedStorageBytes*100/(int64(d.Plan.MaxStorageMB)*1024*1024))) }></div>
+			</div>
+		</div>
+	}
+
+	for _, m := range d.Plan.Meters {
+		if m.LimitPerMonth > 0 {
+			<div class="card mb-6 max-w-lg" data-testid={ "meter-" + m.Key }>
+				<h2 class="text-sm font-semibold mb-2">{ m.Label }</h2>
+				<p class="text-sm text-fg-muted">{ i18n.T(ctx, "billing.meter_used", fmt.Sprint(d.MeterUsage[m.Key]), fmt.Sprint(m.LimitPerMonth)) }</p>
+				<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
+					<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.MeterUsage[m.Key]*100/max(m.LimitPerMonth, 1))) }></div>
+				</div>
+			</div>
+		}
 	}
 
 	<div class="grid sm:grid-cols-3 gap-4 max-w-4xl">
@@ -105,11 +128,11 @@ templ SettingsBilling(d BillingData) {
 						<input type="hidden" name="plan" value={ p.Key }/>
 						<button type="submit" class="btn btn-primary w-full inline-flex items-center justify-center gap-2">
 							@Spinner()
-							Upgrade to { p.Name }
+							{ i18n.T(ctx, "billing.upgrade_to", p.Name) }
 						</button>
 					</form>
 				} else if p.Key == d.Plan.Key {
-					<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">Current plan</span>
+					<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "billing.current_plan") }</span>
 				}
 			}
 		}
@@ -119,7 +142,7 @@ templ SettingsBilling(d BillingData) {
 		<form hx-post="/app/billing/portal" hx-disable="this" class="mt-6">
 			<button type="submit" class="btn btn-ghost inline-flex items-center gap-2" data-testid="manage-subscription">
 				@Spinner()
-				Manage subscription →
+				{ i18n.T(ctx, "billing.manage") }
 			</button>
 		</form>
 	}

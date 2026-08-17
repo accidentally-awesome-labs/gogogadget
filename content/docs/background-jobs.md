@@ -91,6 +91,39 @@ a customer who converted in the meantime never gets "your trial ends soon".
 Skips are logged and complete the job normally; they are not failures and
 don't consume retries.
 
+## Recurring schedules
+
+One-off jobs cover most work; **recurring** work lives in the `schedules`
+table and the same worker's scheduler pass, which runs each poll cycle.
+There is no cron daemon: `ClaimDueSchedules` atomically flips a due row to
+`last_run_at = now(), next_run_at = now() + interval` (with `FOR UPDATE SKIP
+LOCKED`, so many workers may share it) and returns it; the pass then enqueues
+the schedule's `kind` with the wrapped payload:
+
+```go
+jobs.SchedulePayload{ScheduleID: s.ID, Payload: s.Payload}
+```
+
+Dispatch cases that accept scheduled work unwrap `.Payload`. **Missed ticks
+are skipped by design** — a schedule that was down for an hour fires once and
+advances from *now*, never catch-up storms. `every_seconds >= 60` is a table
+CHECK.
+
+Seeded for the dev database: `usage-flush` (`usage.flush`, every 300s — feeds
+the metering job) and `weekly-digest` (`email.digest`, disabled — the
+placeholder dispatch case logs and completes; builders replace it).
+
+Create schedules from seeds, admin tooling, or your own code with the
+`schedules` helper:
+
+```go
+schedules.Create(ctx, q, schedules.Schedule{
+    Name: "nightly-rollup", Kind: "metrics.rollup",
+    Payload: map[string]any{"granularity": "day"},
+    EverySeconds: 86400, // ClerkOrgID empty = system-wide
+})
+```
+
 ## Adding a job kind
 
 1. Add a `Kind<Name> = "<domain>.<action>"` constant in

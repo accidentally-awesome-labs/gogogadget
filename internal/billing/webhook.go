@@ -9,6 +9,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -122,6 +123,9 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 			if err := p.Emails.EnqueuePaymentFailed(ctx, ownerEmail, orgID); err != nil {
 				return err
 			}
+			// Org admins also get an in-app notification (billing page link).
+			notify.SendOrg(ctx, p.Q, orgID, "payment_failed", "Payment failed",
+				"We couldn't charge your card — your plan stays active while we retry.", "/app/settings/billing")
 		}
 		if sub.Status != prevStatus {
 			audit.Log(ctx, p.Q, orgID, "", "subscription.updated", map[string]any{"from": prevStatus, "to": sub.Status})

@@ -29,6 +29,41 @@ type AuditLog struct {
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
+type FeatureFlag struct {
+	Key         string             `json:"key"`
+	Description string             `json:"description"`
+	Enabled     bool               `json:"enabled"`
+	Rollout     int32              `json:"rollout"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type File struct {
+	ID             int64              `json:"id"`
+	ClerkOrgID     string             `json:"clerk_org_id"`
+	UploaderUserID string             `json:"uploader_user_id"`
+	Filename       string             `json:"filename"`
+	ContentType    string             `json:"content_type"`
+	SizeBytes      int64              `json:"size_bytes"`
+	StorageKey     string             `json:"storage_key"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
+type FlagOverride struct {
+	FlagKey    string `json:"flag_key"`
+	ClerkOrgID string `json:"clerk_org_id"`
+	Enabled    bool   `json:"enabled"`
+}
+
+type ImpersonationSession struct {
+	ID           string             `json:"id"`
+	AdminUserID  string             `json:"admin_user_id"`
+	TargetUserID string             `json:"target_user_id"`
+	TargetOrgID  string             `json:"target_org_id"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	EndedAt      pgtype.Timestamptz `json:"ended_at"`
+}
+
 type Job struct {
 	ID          int64              `json:"id"`
 	Kind        string             `json:"kind"`
@@ -38,6 +73,18 @@ type Job struct {
 	MaxAttempts int32              `json:"max_attempts"`
 	LastError   pgtype.Text        `json:"last_error"`
 	DoneAt      pgtype.Timestamptz `json:"done_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type Notification struct {
+	ID          int64              `json:"id"`
+	ClerkOrgID  string             `json:"clerk_org_id"`
+	ClerkUserID string             `json:"clerk_user_id"`
+	Kind        string             `json:"kind"`
+	Title       string             `json:"title"`
+	Body        string             `json:"body"`
+	Url         string             `json:"url"`
+	ReadAt      pgtype.Timestamptz `json:"read_at"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
@@ -64,6 +111,21 @@ type Project struct {
 	Status     string             `json:"status"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	SearchTsv  interface{}        `json:"search_tsv"`
+}
+
+type Schedule struct {
+	ID           int64              `json:"id"`
+	Name         string             `json:"name"`
+	Kind         string             `json:"kind"`
+	Payload      []byte             `json:"payload"`
+	ClerkOrgID   pgtype.Text        `json:"clerk_org_id"`
+	EverySeconds int32              `json:"every_seconds"`
+	NextRunAt    pgtype.Timestamptz `json:"next_run_at"`
+	LastRunAt    pgtype.Timestamptz `json:"last_run_at"`
+	Enabled      bool               `json:"enabled"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Subscription struct {
@@ -79,12 +141,51 @@ type Subscription struct {
 	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
 }
 
+type UsageEvent struct {
+	ID         int64              `json:"id"`
+	ClerkOrgID string             `json:"clerk_org_id"`
+	Name       string             `json:"name"`
+	Value      int64              `json:"value"`
+	Metadata   []byte             `json:"metadata"`
+	ExternalID string             `json:"external_id"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	FlushedAt  pgtype.Timestamptz `json:"flushed_at"`
+}
+
 type User struct {
 	ClerkUserID string             `json:"clerk_user_id"`
 	Email       string             `json:"email"`
 	Name        string             `json:"name"`
 	AvatarUrl   string             `json:"avatar_url"`
 	IsAdmin     bool               `json:"is_admin"`
+	DisabledAt  pgtype.Timestamptz `json:"disabled_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	Locale      string             `json:"locale"`
+}
+
+type WebhookDelivery struct {
+	ID                 int64              `json:"id"`
+	EndpointID         int64              `json:"endpoint_id"`
+	ClerkOrgID         string             `json:"clerk_org_id"`
+	EventType          string             `json:"event_type"`
+	Payload            []byte             `json:"payload"`
+	Status             string             `json:"status"`
+	Attempts           int32              `json:"attempts"`
+	LastResponseStatus pgtype.Int4        `json:"last_response_status"`
+	LastError          string             `json:"last_error"`
+	DeliveredAt        pgtype.Timestamptz `json:"delivered_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+}
+
+type WebhookEndpoint struct {
+	ID          int64              `json:"id"`
+	ClerkOrgID  string             `json:"clerk_org_id"`
+	CreatedBy   string             `json:"created_by"`
+	Url         string             `json:"url"`
+	Secret      string             `json:"secret"`
+	EventTypes  []string           `json:"event_types"`
+	Description string             `json:"description"`
 	DisabledAt  pgtype.Timestamptz `json:"disabled_at"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`

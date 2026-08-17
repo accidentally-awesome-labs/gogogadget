@@ -1,14 +1,19 @@
 package templates
 
-import "github.com/gogogadget/gogogadget/internal/db/sqlc"
+import (
+	"context"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
 
 // SelectOrg is rendered when the user has memberships but no active org in
 // their session claims. DevMode buttons use the dev cookie switcher; production
 // buttons call Clerk.setActive via clerk-js.
 templ SelectOrg(orgs []sqlc.Org, devMode bool) {
 	<section class="max-w-md mx-auto px-4 py-24">
-		<h1 class="text-2xl font-bold text-center">Choose an organization</h1>
-		<p class="mt-2 text-center text-fg-muted text-sm">You're a member of { len(orgs) } organization(s). Pick one to continue.</p>
+		<h1 class="text-2xl font-bold text-center">{ i18n.T(ctx, "settings.select_org_title") }</h1>
+		<p class="mt-2 text-center text-fg-muted text-sm">{ i18n.T(ctx, "settings.select_org_sub", len(orgs)) }</p>
 		<div class="mt-8 space-y-3" x-data="selectOrg">
 			for _, o := range orgs {
 				if devMode {
@@ -29,18 +34,14 @@ templ SelectOrg(orgs []sqlc.Org, devMode bool) {
 
 templ Disabled() {
 	<section class="max-w-md mx-auto px-4 py-24 text-center">
-		<h1 class="text-2xl font-bold">Account disabled</h1>
-		<p class="mt-4 text-fg-muted">Your account has been disabled by an administrator. Contact your organization admin if you believe this is a mistake.</p>
+		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "settings.disabled_title") }</h1>
+		<p class="mt-4 text-fg-muted">{ i18n.T(ctx, "settings.disabled_body") }</p>
 	</section>
 }
 
 templ SettingsTabs(active string) {
 	<nav class="flex gap-1 border-b border-border mb-8">
-		for _, item := range []struct{ Label, Href string }{
-			{"Account", "/app/settings/account"},
-			{"Organization", "/app/settings/org"},
-			{"Billing", "/app/settings/billing"},
-		} {
+		for _, item := range settingsTabs(ctx) {
 			<a
 				href={ templ.SafeURL(item.Href) }
 				hx-boost="true"
@@ -54,28 +55,43 @@ templ SettingsTabs(active string) {
 	</nav>
 }
 
+// settingsTabs assembles the tab list; the Webhooks tab obeys its feature
+// flag (WithWebhooksEnabled on the request context).
+func settingsTabs(ctx context.Context) []struct{ Label, Href string } {
+	items := []struct{ Label, Href string }{
+		{i18n.T(ctx, "settings.tab_account"), "/app/settings/account"},
+		{i18n.T(ctx, "settings.tab_org"), "/app/settings/org"},
+		{i18n.T(ctx, "settings.tab_billing"), "/app/settings/billing"},
+		{i18n.T(ctx, "settings.tab_api"), "/app/settings/api"},
+	}
+	if WebhooksEnabled(ctx) {
+		items = append(items, struct{ Label, Href string }{i18n.T(ctx, "settings.tab_webhooks"), "/app/settings/webhooks"})
+	}
+	return items
+}
+
 templ SettingsAccount(user sqlc.User, accountPortalURL string) {
 	@SettingsTabs("/app/settings/account")
-	<h1 class="text-2xl font-bold mb-6">Account settings</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "settings.account_title") }</h1>
 	<div class="card max-w-lg">
 		<dl class="space-y-4 text-sm">
 			<div>
-				<dt class="text-fg-muted">Name</dt>
+				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.account_name") }</dt>
 				<dd class="font-medium">{ user.Name }</dd>
 			</div>
 			<div>
-				<dt class="text-fg-muted">Email</dt>
+				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.account_email") }</dt>
 				<dd class="font-medium">{ string(user.Email) }</dd>
 			</div>
 			<div>
-				<dt class="text-fg-muted">Member since</dt>
+				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.account_member_since") }</dt>
 				<dd class="font-medium">{ user.CreatedAt.Time.Format("January 2, 2006") }</dd>
 			</div>
 		</dl>
 		<p class="mt-6 text-sm text-fg-muted">
-			Profile, password, social connections, and two-factor authentication are managed by Clerk.
+			{ i18n.T(ctx, "settings.account_clerk_managed") }
 			if accountPortalURL != "" {
-				<a href={ accountPortalURL } class="link">Manage your account →</a>
+				<a href={ accountPortalURL } class="link">{ i18n.T(ctx, "settings.account_manage_link") }</a>
 			}
 		</p>
 	</div>
@@ -83,30 +99,30 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string) {
 
 templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string) {
 	@SettingsTabs("/app/settings/org")
-	<h1 class="text-2xl font-bold mb-6">Organization settings</h1>
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "settings.org_title") }</h1>
 	<div class="card mb-6 max-w-lg">
 		<dl class="space-y-4 text-sm">
 			<div>
-				<dt class="text-fg-muted">Name</dt>
+				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.org_name") }</dt>
 				<dd class="font-medium">{ org.Name }</dd>
 			</div>
 			<div>
-				<dt class="text-fg-muted">Slug</dt>
+				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.org_slug") }</dt>
 				<dd class="font-medium">{ org.Slug }</dd>
 			</div>
 		</dl>
 		<p class="mt-6 text-sm text-fg-muted">
-			Invitations and roles are managed by Clerk.
+			{ i18n.T(ctx, "settings.org_clerk_managed") }
 			if organizationPortalURL != "" {
-				<a href={ organizationPortalURL } class="link">Manage organization →</a>
+				<a href={ organizationPortalURL } class="link">{ i18n.T(ctx, "settings.org_manage_link") }</a>
 			}
 		</p>
 	</div>
-	<h2 class="text-lg font-semibold mb-3">Members</h2>
+	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "settings.org_members_heading") }</h2>
 	<div class="card !p-0 overflow-hidden">
 		<table class="table">
 			<thead>
-				<tr><th>Member</th><th>Email</th><th>Role</th></tr>
+				<tr><th>{ i18n.T(ctx, "settings.org_col_member") }</th><th>{ i18n.T(ctx, "settings.org_col_email") }</th><th>{ i18n.T(ctx, "settings.org_col_role") }</th></tr>
 			</thead>
 			<tbody>
 				for _, m := range members {

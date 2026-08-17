@@ -62,3 +62,26 @@ func SubFrom(ctx context.Context) *sqlc.Subscription {
 	s, _ := ctx.Value(ctxSub).(*sqlc.Subscription)
 	return s
 }
+
+// Impersonator carries the active admin-impersonation session (ctx value set
+// by sessionLoad's override, AFTER the real JWT verify).
+type Impersonator struct {
+	AdminUserID string
+	SessionID   string
+}
+
+type ctxImpersonatorKey struct{}
+
+// WithImpersonator marks the request as impersonated.
+func WithImpersonator(ctx context.Context, imp Impersonator) context.Context {
+	return context.WithValue(ctx, ctxImpersonatorKey{}, imp)
+}
+
+// ImpersonatorFrom returns the active impersonation session, or nil.
+func ImpersonatorFrom(ctx context.Context) *Impersonator {
+	imp, ok := ctx.Value(ctxImpersonatorKey{}).(Impersonator)
+	if !ok {
+		return nil
+	}
+	return &imp
+}

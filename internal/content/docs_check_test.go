@@ -39,11 +39,11 @@ func TestDocsInternalLinksResolve(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// TestDocsShipsTwentyPages guards the docs inventory and sidebar ordering.
-func TestDocsShipsTwentyPages(t *testing.T) {
+// TestDocsInventory guards the docs inventory count and sidebar ordering.
+func TestDocsInventory(t *testing.T) {
 	docs, err := LoadDocs(contentfs.FS, true)
 	require.NoError(t, err)
-	require.Len(t, docs.Pages, 20, "the docs section ships exactly 20 pages")
+	require.Len(t, docs.Pages, 26, "the docs section ships exactly 24 pages")
 
 	// Weights strictly increase; sections are in order.
 	lastWeight := 0
@@ -56,7 +56,7 @@ func TestDocsShipsTwentyPages(t *testing.T) {
 	}
 	assert.Equal(t, 2, sectionSeen["Start"])
 	assert.Equal(t, 3, sectionSeen["Core"])
-	assert.Equal(t, 9, sectionSeen["Features"])
+	assert.Equal(t, 15, sectionSeen["Features"])
 	assert.Equal(t, 6, sectionSeen["Guides"])
 	require.Len(t, docs.Sections, 4)
 	for i, name := range wantSections {

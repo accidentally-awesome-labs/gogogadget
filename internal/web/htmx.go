@@ -107,6 +107,13 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.Org = identity.OrgFrom(r.Context())
 	page.Plan = identity.PlanFrom(r.Context())
 	page.Sub = identity.SubFrom(r.Context())
+	page.Impersonator = identity.ImpersonatorFrom(r.Context())
+
+	// Feature gates flow into templates via the request context (SettingsTabs
+	// hides the Webhooks tab when its flag is off for this org).
+	if page.Org != nil && s.flags != nil {
+		r = r.WithContext(templates.WithWebhooksEnabled(r.Context(), s.flags.Enabled(r.Context(), page.Org.ClerkOrgID, "webhooks")))
+	}
 
 	component := content
 	if !wantsFragment(r) {

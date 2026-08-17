@@ -7,6 +7,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/jobs"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"golang.org/x/text/language"
 )
 
 // emailSink implements billing.EmailSink: renders the templ email pair and
@@ -16,7 +17,8 @@ type emailSink struct {
 }
 
 func (e emailSink) EnqueueTrialEnding(ctx context.Context, to string, trialEnd time.Time, orgID string) error {
-	msg, err := mail.TrialEndingMessage(e.s.cfg.AppURL, to, trialEnd.Format("January 2, 2006"))
+	// Billing emails stay English this round (documented in /docs/i18n).
+	msg, err := mail.TrialEndingMessage(language.English, e.s.cfg.AppURL, to, trialEnd.Format("January 2, 2006"))
 	if err != nil {
 		return err
 	}
@@ -25,7 +27,7 @@ func (e emailSink) EnqueueTrialEnding(ctx context.Context, to string, trialEnd t
 }
 
 func (e emailSink) EnqueuePaymentFailed(ctx context.Context, to string, orgID string) error {
-	msg, err := mail.PaymentFailedMessage(e.s.cfg.AppURL, to)
+	msg, err := mail.PaymentFailedMessage(language.English, e.s.cfg.AppURL, to)
 	if err != nil {
 		return err
 	}
@@ -37,7 +39,7 @@ func (e emailSink) EnqueueSubscriptionCanceled(ctx context.Context, to string, p
 	if !periodEnd.IsZero() {
 		periodEndStr = periodEnd.Format("January 2, 2006")
 	}
-	msg, err := mail.SubscriptionCanceledMessage(e.s.cfg.AppURL, to, periodEndStr)
+	msg, err := mail.SubscriptionCanceledMessage(language.English, e.s.cfg.AppURL, to, periodEndStr)
 	if err != nil {
 		return err
 	}

@@ -43,6 +43,10 @@ func (s *Server) routes() {
 		s.mux.HandleFunc("GET /dev/switch-org", s.handleDevSwitchOrg)
 	}
 
+	// Locale switch (public; NOT CSRF-exempt — switcher forms carry the token
+	// via the body-inherited X-CSRF-Token header).
+	s.mux.HandleFunc("POST /set-locale", s.handleSetLocale)
+
 	// Webhooks are CSRF-exempt in the chain and signature-verified here.
 	s.mux.HandleFunc("POST /webhooks/clerk", s.handleClerkWebhook)
 	s.mux.HandleFunc("POST /webhooks/polar", s.handlePolarWebhook)
@@ -51,12 +55,18 @@ func (s *Server) routes() {
 	appMux := http.NewServeMux()
 	appMux.HandleFunc("GET /app", s.handleDashboard)
 	appMux.HandleFunc("GET /app/projects", s.handleProjects)
+	appMux.HandleFunc("POST /app/projects/export", s.handleProjectsExport)
 	appMux.HandleFunc("GET /app/projects/new", s.handleProjectNew)
 	appMux.HandleFunc("POST /app/projects", s.handleProjectCreate)
 	appMux.HandleFunc("GET /app/projects/{id}/edit", s.handleProjectEdit)
 	appMux.HandleFunc("POST /app/projects/{id}", s.handleProjectUpdate)
 	appMux.HandleFunc("POST /app/projects/{id}/archive", s.handleProjectArchive)
 	appMux.HandleFunc("DELETE /app/projects/{id}", s.handleProjectDelete)
+	appMux.HandleFunc("GET /app/files", s.handleFiles)
+	appMux.HandleFunc("POST /app/files", s.handleFileUpload)
+	appMux.HandleFunc("GET /app/files/{id}", s.handleFileDownload)
+	appMux.HandleFunc("DELETE /app/files/{id}", s.handleFileDelete)
+
 	appMux.HandleFunc("GET /app/settings/account", s.handleSettingsAccount)
 	appMux.HandleFunc("GET /app/settings/org", s.handleSettingsOrg)
 	appMux.HandleFunc("GET /app/settings/billing", s.handleSettingsBilling)
@@ -66,7 +76,18 @@ func (s *Server) routes() {
 	appMux.HandleFunc("GET /app/settings/api", s.handleSettingsAPI)
 	appMux.HandleFunc("POST /app/settings/api/tokens", s.handleAPITokenCreate)
 	appMux.HandleFunc("DELETE /app/settings/api/tokens/{id}", s.handleAPITokenRevoke)
+	appMux.HandleFunc("GET /app/settings/webhooks", s.handleSettingsWebhooks)
+	appMux.HandleFunc("POST /app/settings/webhooks/endpoints", s.handleWebhookEndpointCreate)
+	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/disable", s.handleWebhookEndpointToggle)
+	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/enable", s.handleWebhookEndpointToggle)
+	appMux.HandleFunc("POST /app/settings/webhooks/deliveries/{id}/replay", s.handleWebhookDeliveryReplay)
 	appMux.HandleFunc("GET /app/activity", s.handleActivity)
+	appMux.HandleFunc("POST /app/impersonation/exit", s.handleImpersonationExit)
+	appMux.HandleFunc("GET /app/notifications", s.handleNotifications)
+	appMux.HandleFunc("GET /app/notifications/badge", s.handleNotificationsBadge)
+	appMux.HandleFunc("GET /app/notifications/stream", s.handleNotificationsStream)
+	appMux.HandleFunc("POST /app/notifications/{id}/read", s.handleNotificationRead)
+	appMux.HandleFunc("POST /app/notifications/read-all", s.handleNotificationsReadAll)
 	s.mux.Handle("/app", s.appChain(appMux))
 	s.mux.Handle("/app/", s.appChain(appMux))
 
@@ -75,7 +96,11 @@ func (s *Server) routes() {
 	adminMux.HandleFunc("GET /admin", s.handleAdminHome)
 	adminMux.HandleFunc("GET /admin/users", s.handleAdminUsers)
 	adminMux.HandleFunc("POST /admin/users/{id}/disable", s.handleAdminUserDisable)
+	adminMux.HandleFunc("POST /admin/users/{id}/impersonate", s.handleAdminImpersonate)
 	adminMux.HandleFunc("GET /admin/orgs", s.handleAdminOrgs)
+	adminMux.HandleFunc("GET /admin/flags", s.handleAdminFlags)
+	adminMux.HandleFunc("POST /admin/flags/{key}/toggle", s.handleAdminFlagToggle)
+	adminMux.HandleFunc("POST /admin/flags/{key}/rollout", s.handleAdminFlagRollout)
 	s.mux.Handle("/admin", s.adminChain(adminMux))
 	s.mux.Handle("/admin/", s.adminChain(adminMux))
 
@@ -84,6 +109,8 @@ func (s *Server) routes() {
 	apiProjects := &api.Projects{Q: s.q}
 	s.mux.Handle("GET /api/v1/projects", apiMW.RequireAPIToken("read", http.HandlerFunc(apiProjects.ListProjects)))
 	s.mux.Handle("POST /api/v1/projects", apiMW.RequireAPIToken("write", http.HandlerFunc(apiProjects.CreateProject)))
+	apiAI := &api.AI{Q: s.q, LLM: s.llm}
+	s.mux.Handle("POST /api/v1/ai/chat", apiMW.RequireAPIToken("write", http.HandlerFunc(apiAI.Chat)))
 	// Unknown /api/ routes get the JSON 404, never the HTML one.
 	s.mux.Handle("/api/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		api.WriteError(w, http.StatusNotFound, "not_found", "Unknown API route.")
