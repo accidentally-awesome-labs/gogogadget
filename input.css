@@ -1,4 +1,9 @@
-@import "tailwindcss";
+/* Templates are the ONLY class source — auto-detection would otherwise scan
+   gitignored local artifacts (e2e/test-results HTML) and poison committed
+   app.css with phantom utilities (CI regenerates from a clean checkout). */
+@import "tailwindcss" source(none);
+
+@source "internal/web/templates";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
