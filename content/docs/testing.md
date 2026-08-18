@@ -125,3 +125,33 @@ gate — a hard threshold punishes you for deleting sample code.
 
 See [Database](/docs/database) for `TEST_DATABASE_URL` mechanics and
 [Frontend](/docs/frontend) for the `data-testid` contract.
+
+## Seam contract suites
+
+Every provider seam has an in-package `contract_test.go`: an unexported
+`run<Seam>Contract(t, factory)` table suite that every implementation runs —
+the real client (against an `httptest` fake of the provider's wire format)
+and the mocks/no-ops. A mock that drifts from the real contract fails the
+same suite the real client runs. Faked today: Polar (billing), Resend (mail,
+via the SDK's exported `BaseURL`), Clerk JWKS (identity, custom JWKS URL +
+locally generated RSA key), Sentry (global hub + httptest DSN), PostHog
+(analytics, `NewWithConfig` endpoint), R2 (storage, stateful fake endpoint),
+and the OpenAI-compatible LLM client. No unfakeable impl remains; the
+compile-time-assertion fallback the pattern allows was needed nowhere.
+
+## Fuzz
+
+Two trust-boundary parsers fuzz for 15s each via `make fuzz` (CI-only; the
+`check` gate stays fast by decision): `FuzzFakeVerifier` (session-token
+parsing — never panics, claims round-trip) and `FuzzSanitizeFilename` (dev
+email filenames — output can never contain `/`, `\`, `..`, or NUL).
+
+## CI shape
+
+`test` runs `go test -race -cover ./...` plus `make fuzz`; a `smoke` job
+boots the built server against the CI Postgres and drives
+`scripts/smoke.sh`; a `docker` job builds the image to catch Dockerfile
+drift. Deliberately absent: golangci-lint (vet + govulncheck cover the repo's
+risk surface; new tools need a manifest entry), coverage thresholds (the
+number is noise without a target), and visual baselines (the Linux-pinned
+container flow is local `make visual-update` only).

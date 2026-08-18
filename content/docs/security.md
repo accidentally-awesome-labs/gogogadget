@@ -153,3 +153,34 @@ are sha256-pinned in their fetch scripts. CI runs `go tool govulncheck ./...`
 e2e runs. Combined with `APP_ENV=production` it is a **hard boot error** —
 the escape hatch physically cannot reach production. See
 [Authentication](/docs/authentication).
+
+## Data export and account deletion (GDPR self-serve)
+
+`/app/settings/account` exposes both rights directly to the user:
+
+- **Export** (`GET /app/settings/account/export`) downloads everything the
+  platform holds about the account as one JSON document: profile, memberships
+  (org, role, since), the last 10,000 notification rows, and the user's audit
+  trail. The export itself writes an `account.exported` audit row.
+- **Deletion** (`POST /app/settings/account/delete`) requires typing the
+  account email (case-insensitive; `users.email` is CITEXT). Guards, in
+  order: never while an impersonation session is active (403); never when the
+  user is the sole admin of a multi-member org (422 naming the org — transfer
+  admin first). Deletion order: Clerk first via the `identity.Deleter` seam
+  (a failed upstream delete aborts with nothing local removed), then
+  impersonation session rows (they carry NO cascade FK), then every org where
+  the user is the only member (cascading subscriptions, projects, files rows,
+  API tokens, and flag overrides), then the user row (cascading memberships,
+  notifications, and preferences).
+
+Two deliberate survivors: **audit rows are retained** (`audit_log` has no
+foreign keys by design — the audit trail outlives the entities it records;
+retention is currently unbounded, see the roadmap), and **R2 objects** remain
+in the bucket (the DB rows pointing at them are gone; a lifecycle rule on the
+bucket is the platform owner's call).
+
+Dev-bypass caveat: under `DEV_AUTH_BYPASS` the `users` row is a local mirror
+that `sessionLoad` lazily re-upserts on the next authenticated request — a
+dev "deleted" user can reappear by simply requesting again with the same
+synthetic cookie. Production deletes the Clerk user, which kills the session
+JWT upstream.

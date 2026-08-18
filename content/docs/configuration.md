@@ -36,6 +36,7 @@ production the process environment is the only source.
 | `EMAIL_FROM` | | `GoGoGadget <hello@example.com>` | |
 | `POSTHOG_API_KEY` | | | Empty → disabled: no client script, no `/ingest` proxy, server capture no-ops |
 | `POSTHOG_HOST` | | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
+| `MAINTENANCE_MODE` | | | `true` → 503 for everything except `/healthz`, `/readyz`, `/static/`, `/favicon.ico`; JSON 503 under `/api/` |
 | `SENTRY_DSN` | | | Empty → disabled |
 | `STORAGE_R2_ACCOUNT_ID` | | | With the three below, enables R2 file storage; any missing → DevStore (`tmp/uploads/`) |
 | `STORAGE_R2_ACCESS_KEY_ID` | | | R2 API token (Object Read & Write) |

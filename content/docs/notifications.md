@@ -71,3 +71,14 @@ htmx version, drop `sse-connect` and give the badge
 are **user-scoped** — user A cannot mark B's rows, ever. A 90-day janitor
 query (`DeleteOldReadNotifications`) is available for the worker's janitor
 pass.
+
+## Preferences
+
+`GET/POST /app/settings/notifications` lets each user mute individual kinds.
+The catalog is `notify.Kinds` — `welcome`, `payment_failed`, `export.ready`,
+`webhook.failed` — every kind the product emits. Absent preference rows mean
+**default-on**; an explicit `in_app = false` row mutes that one kind for that
+one user (a `notification_preferences` row, per-user per-kind). `SendOrg`
+fan-out honors per-member preferences, so a broadcast reaches everyone except
+the people who muted it. A preference-lookup hiccup logs and sends — the
+failure mode is an extra notification, never a silently dropped one.

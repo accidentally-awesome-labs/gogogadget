@@ -53,3 +53,24 @@ outside `#content` (it survives boosted navigation). Session semantics:
   `/admin`.
 - Disabled targets and org-less targets are rejected (422); the org is the
   optional `org` form field, else the target's first membership.
+
+## Audit, jobs, and announcements viewers
+
+- `/admin/audit` — the platform-wide audit trail (every org, every actor),
+  filterable by action or org id, paginated 20/page. The org-scoped
+  `/app/activity` page remains the member view of the same table.
+- `/admin/jobs` — the Postgres queue at a glance. The `status` column is a
+  projection: `pending` (never claimed), `retrying` (claimed under the 5-min
+  visibility lease **or** waiting out exponential backoff — deliberately
+  indistinguishable, the lease IS a retry in effect), `running`, `done`, and
+  `dead` (attempts exhausted). Dead rows offer a **Requeue** button:
+  `done_at`/`attempts`/`last_error` reset and the job is claimable
+  immediately; requeueing a non-dead row is a guarded no-op.
+- `/admin/announcements` — create (inactive by default), activate, deactivate,
+  delete platform banners. At most one banner is active at a time — the
+  `announcements_one_active` partial unique index enforces it, and activating
+  one deactivates the rest. The active banner renders under the app topbar
+  (kind-colored: info = brand, warning = amber, critical = red) with an
+  optional link; each visitor can dismiss it per-browser. Admin mutations
+  invalidate a 30s server-side cache, so activation takes effect on the next
+  render.

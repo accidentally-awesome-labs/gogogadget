@@ -45,7 +45,8 @@ request
       └─ requestID   16-byte hex id, exposed as X-Request-Id
          └─ accessLog   one slog line per request (5xx at ERROR)
             └─ i18n.Detect   locale: ?lang= → ggg_lang cookie → Accept-Language → en
-               └─ rateLimit   100 req/min per IP, burst 200 (single-node, in-process)
+               └─ maintenanceMode   MAINTENANCE_MODE=true → 503 page (JSON under /api/); probes + /static/ exempt
+                  └─ rateLimit   100 req/min per IP, burst 200 (single-node, in-process)
                   └─ secureHeaders   strict CSP, nosniff, frame/permission policies, HSTS in prod
                   └─ sessionLoad   verify Clerk __session cookie (optional; absent → unauthenticated)
                      └─ csrf (nosurf)   exempt: /webhooks/* /api/* /ingest/* /healthz /readyz /static/*

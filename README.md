@@ -34,11 +34,16 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Admin impersonation** — audited "view as" sessions with a 2-hour expiry, banner, and safe mid-session invalidation.
 - **Search** — Postgres FTS (generated tsvector + GIN) with an ILIKE fallback; no vendor.
 - **Frontend (htmx 4)** — boosted navigation scoped to one content box with View Transitions, morph swaps that keep table rows' DOM nodes, and server-driven `HX-Location` navigation that never rebuilds the shell (so third-party widgets never flash). No bundler, no hydration.
-- **Admin** — users/orgs/MRR stats, user search + disable, plan badges.
+- **Admin** — users/orgs/MRR stats, user search + disable, plan badges, platform-wide audit-log viewer (`/admin/audit`), jobs viewer with dead-letter requeue (`/admin/jobs`), and announcement banner CRUD (`/admin/announcements`).
+- **Announcement banner** — one-active-at-a-time platform announcements (info/warning/critical) rendered in the app shell, dismissible per user, 30s-cached.
+- **Notification preferences** — per-user, per-kind in-app mutes at `/app/settings/notifications`; default-on, absent row means send.
+- **GDPR self-serve** — one-click JSON data export and email-confirmed account deletion with org-cascade safety checks at `/app/settings/account`.
+- **Maintenance mode** — `MAINTENANCE_MODE=true` serves a dedicated 503 page (JSON for `/api/`) while `/healthz`/`/readyz` stay live; dedicated 403 page for non-admins.
+- **Mobile nav** — hamburger drawer in the app topbar; the sidebar nav is shared, not duplicated.
 - **Public API** — org-scoped Bearer tokens (`ggg_…`), `/api/v1/projects`, JSON error shape.
 - **Content** — markdown blog + RSS + sitemap + OG; 26-page docs section rendered in-app (`/docs`).
 - **Platform** — Postgres job queue, audit log, rate limiting, strict CSP, CSRF, structured logs, Sentry + PostHog hooks, `/healthz` + `/readyz`.
-- **Testing** — unit + integration (per-package test DBs) + Playwright e2e + docker-pinned visual baselines + a11y (axe).
+- **Testing** — unit + integration (per-package test DBs) + seam contract suites + fuzz tests for trust-boundary parsers + race detector + Playwright e2e + docker-pinned visual baselines + a11y (axe) + smoke and docker-build CI jobs.
 
 ## Quick start
 
