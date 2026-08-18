@@ -1,0 +1,74 @@
+package templates
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+// Admin audit viewer — platform-wide, mirrors the org activity page.
+
+templ AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string, page, totalPages int) {
+	<div id="table-container">
+		if len(rows) == 0 {
+			@EmptyState(i18n.T(ctx, "admin.audit.title"), i18n.T(ctx, "admin.audit.empty")) {
+			}
+		} else {
+			<div class="card !p-0 overflow-hidden" data-testid="audit-table">
+				<table class="table">
+					<thead>
+						<tr><th>{ i18n.T(ctx, "activity.col_when") }</th><th>{ i18n.T(ctx, "activity.col_actor") }</th><th>{ i18n.T(ctx, "admin.audit.col_org") }</th><th>{ i18n.T(ctx, "activity.col_action") }</th><th>{ i18n.T(ctx, "activity.col_details") }</th></tr>
+					</thead>
+					<tbody>
+						for _, row := range rows {
+							<tr id={ fmt.Sprintf("audit-row-%d", row.ID) }>
+								<td>
+									<span data-testid="relative-time" title={ row.CreatedAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.CreatedAt.Time) }</span>
+								</td>
+								<td>
+									if row.ActorEmail != "" {
+										{ row.ActorEmail }
+									} else {
+										<span class="text-fg-muted">{ row.ClerkUserID.String }</span>
+									}
+								</td>
+								<td class="text-fg-muted">{ row.ClerkOrgID.String }</td>
+								<td><span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">{ row.Action }</span></td>
+								<td>
+									if len(row.Metadata) > 2 {
+										<details>
+											<summary class="cursor-pointer text-fg-muted">{ i18n.T(ctx, "activity.metadata") }</summary>
+											<pre class="text-xs mt-1 overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
+										</details>
+									}
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			@Pagination(page, totalPages, "/admin/audit?q="+filter)
+		}
+	</div>
+}
+
+templ AdminAuditPage(rows []sqlc.ListAuditAllRow, now time.Time, filter string, page, totalPages int) {
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.audit.title") }</h1>
+	<div class="flex items-center gap-2 mb-4">
+		<input
+			type="search" name="q" value={ filter } placeholder={ i18n.T(ctx, "admin.audit.search_placeholder") }
+			class="input max-w-sm"
+			hx-get="/admin/audit" hx-trigger="input changed delay:300ms, search"
+			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
+			hx-sync="this:replace"
+			hx-indicator="#admin-audit-search-indicator"
+			aria-label={ i18n.T(ctx, "admin.audit.search_aria") }
+		/>
+		<span id="admin-audit-search-indicator" class="text-fg-muted">
+			@Spinner()
+		</span>
+	</div>
+	@AdminAuditTable(rows, now, filter, page, totalPages)
+}

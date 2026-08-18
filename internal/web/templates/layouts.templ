@@ -153,6 +153,7 @@ templ AppLayout(page Page, content templ.Component) {
 				@Sidebar(page)
 				<div class="flex-1 flex flex-col min-w-0">
 					@Topbar(page)
+					@announcementBanner(page)
 					@billingBanner(page)
 					<main id="content" hx-history-elt="true" class="flex-1 p-6 max-w-6xl w-full mx-auto">
 						@content
@@ -165,6 +166,42 @@ templ AppLayout(page Page, content templ.Component) {
 	</html>
 }
 
+// announcementBanner is the platform-wide admin-authored banner. One active
+// row at a time; dismissal is per-browser per-announcement (id-keyed
+// localStorage, checklist pattern). kind: info=brand, warning=amber,
+// critical=red (state colors).
+templ announcementBanner(page Page) {
+	if page.Announcement != nil {
+		<div
+			x-data="dismissible"
+			data-key={ "ggg_ann_" + fmt.Sprint(page.Announcement.ID) }
+			x-show="!hidden"
+			class={ "px-4 py-2 text-sm border-b", announcementKindClass(page.Announcement.Kind) }
+			role="alert"
+			data-testid="announcement-banner"
+		>
+			<div class="flex items-center gap-3 max-w-6xl mx-auto">
+				<span class="flex-1">{ page.Announcement.Message }
+					if page.Announcement.Url != "" {
+						<a href={ templ.SafeURL(page.Announcement.Url) } class="font-semibold underline ml-1" rel="noopener">{ i18n.T(ctx, "announcement.link") }</a>
+					}
+				</span>
+				<button type="button" @click="dismiss()" class="shrink-0 font-semibold" aria-label={ i18n.T(ctx, "announcement.dismiss") }>×</button>
+			</div>
+		</div>
+	}
+}
+
+func announcementKindClass(kind string) string {
+	switch kind {
+	case "warning":
+		return "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-amber-200 dark:border-amber-900"
+	case "critical":
+		return "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-200 dark:border-red-900"
+	default: // info
+		return "bg-brand-50 text-brand-800 dark:bg-brand-950 dark:text-brand-200 border-brand-200 dark:border-brand-900"
+	}
+}
 // billingBanner is the persistent past_due / ending-plan nudge in the shell.
 templ billingBanner(page Page) {
 	if page.Sub != nil && page.Sub.Status == "past_due" {

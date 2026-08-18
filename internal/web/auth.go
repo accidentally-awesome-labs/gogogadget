@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/jackc/pgx/v5"
@@ -75,7 +76,8 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 
 		ctx = identity.WithUser(ctx, &user)
 		ctx = identity.WithClaims(ctx, claims)
-		if claims.OrgID != "" {			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)
+		if claims.OrgID != "" {
+			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)
 			switch {
 			case oerr == nil:
 				ctx = identity.WithOrg(ctx, &org)
@@ -210,7 +212,9 @@ func (s *Server) requireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u := identity.UserFrom(r.Context())
 		if u == nil || !u.IsAdmin {
-			s.renderStatus(w, r, http.StatusForbidden, "Forbidden", "This area is restricted to site administrators.")
+			ctx := r.Context()
+			w.WriteHeader(http.StatusForbidden)
+			s.Render(w, r, Page{Title: i18n.T(ctx, "errors.forbidden"), Layout: templates.LayoutApp}, templates.Forbidden())
 			return
 		}
 		next.ServeHTTP(w, r)

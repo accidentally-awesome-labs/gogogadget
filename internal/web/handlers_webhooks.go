@@ -11,8 +11,8 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/jobs"
 	"github.com/gogogadget/gogogadget/internal/mail"
 	"github.com/gogogadget/gogogadget/internal/notify"

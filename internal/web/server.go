@@ -4,8 +4,10 @@ package web
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
@@ -19,22 +21,29 @@ import (
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Server struct {
-	cfg     config.Config
-	log     *slog.Logger
-	db      *pgxpool.Pool
-	q       *sqlc.Queries
-	version string
-	blog    *content.Blog
-	docs    *content.Docs
+	cfg config.Config
+	log *slog.Logger
+	db  *pgxpool.Pool
+	// Active-announcement cache: one banner at a time, 30s TTL, refreshed
+	// eagerly by invalidateAnnouncementCache() on every admin mutation.
+	annMu         sync.Mutex
+	ann           *sqlc.Announcement
+	annExpires    time.Time
+	q             *sqlc.Queries
+	version       string
+	blog          *content.Blog
+	docs          *content.Docs
 	verifier      identity.Verifier
 	fetcher       identity.UserFetcher
-	billingClient billing.Client // nil when Polar is unconfigured
+	deleter       identity.Deleter // nil → local-only account deletion
+	billingClient billing.Client   // nil when Polar is unconfigured
 	analytics     analytics.Capturer
-	store         storage.Store  // DevStore by default; R2 when configured
+	store         storage.Store // DevStore by default; R2 when configured
 	llm           llm.Completer // nil when unconfigured → 503
 	flags         flags.Evaluator
 	reporter      observability.Reporter
@@ -53,14 +62,15 @@ type Deps struct {
 	Blog    *content.Blog
 	Docs    *content.Docs
 
-	Verifier  identity.Verifier
-	Fetcher   identity.UserFetcher
-	Billing   billing.Client
-	Analytics analytics.Capturer
-	Storage   storage.Store // nil → DevStore(tmp/uploads)
-	LLM       llm.Completer // nil → AI routes 503 not_configured
-	Flags     flags.Evaluator // nil → DB-backed evaluator (30s cache)
-	Reporter  observability.Reporter // nil → NoopReporter
+	Verifier        identity.Verifier
+	Fetcher         identity.UserFetcher
+	IdentityDeleter identity.Deleter // nil → local-only deletion; DevDeleter under bypass
+	Billing         billing.Client
+	Analytics       analytics.Capturer
+	Storage         storage.Store          // nil → DevStore(tmp/uploads)
+	LLM             llm.Completer          // nil → AI routes 503 not_configured
+	Flags           flags.Evaluator        // nil → DB-backed evaluator (30s cache)
+	Reporter        observability.Reporter // nil → NoopReporter
 }
 
 func NewServer(d Deps) *Server {
@@ -74,6 +84,7 @@ func NewServer(d Deps) *Server {
 		docs:          d.Docs,
 		verifier:      d.Verifier,
 		fetcher:       d.Fetcher,
+		deleter:       d.IdentityDeleter,
 		billingClient: d.Billing,
 		analytics:     analytics.NoopCapturer{},
 		store:         d.Storage,
@@ -98,16 +109,50 @@ func NewServer(d Deps) *Server {
 	return s
 }
 
+// currentAnnouncement returns the active platform announcement, cached for
+// 30s (DBEvaluator pattern). On a lookup error it keeps the last cached
+// value — a hiccup must never blank (or duplicate) the banner; the TTL is
+// left expired so the next request retries immediately.
+func (s *Server) currentAnnouncement(ctx context.Context) *sqlc.Announcement {
+	s.annMu.Lock()
+	defer s.annMu.Unlock()
+	if time.Now().Before(s.annExpires) {
+		return s.ann
+	}
+	row, err := s.q.GetActiveAnnouncement(ctx)
+	switch {
+	case err == nil:
+		s.ann = &row
+	case errors.Is(err, pgx.ErrNoRows):
+		s.ann = nil
+	default:
+		s.log.Error("announcement lookup failed", "error", err)
+		return s.ann // stale-if-error; expires stays in the past → retry next request
+	}
+	s.annExpires = time.Now().Add(30 * time.Second)
+	return s.ann
+}
+
+// invalidateAnnouncementCache makes the next render re-read the active row
+// (called after every admin announcement mutation).
+func (s *Server) invalidateAnnouncementCache() {
+	s.annMu.Lock()
+	defer s.annMu.Unlock()
+	s.annExpires = time.Time{}
+}
+
 // Handler applies the global middleware stack. The order is load-bearing —
 // see docs/architecture: recover → requestID → accessLog → i18n.Detect →
-// rateLimit → secureHeaders → sessionLoad (identity step) → csrf → routes.
+// maintenanceMode → rateLimit → secureHeaders → sessionLoad (identity step) →
+// csrf → routes.
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
 	h = s.sessionLoad(h) // Clerk claims, optional; absent cookie → unauthenticated
 	h = s.secureHeaders(h)
 	h = s.rateLimit(h)
-	h = i18n.Detect(h) // locale resolution: ?lang= → cookie → Accept-Language
+	h = s.maintenanceMode(h) // 503 everything (except probes/static) when on
+	h = i18n.Detect(h)       // locale resolution: ?lang= → cookie → Accept-Language
 	h = s.accessLog(h)
 	h = s.requestID(h)
 	h = s.recover(h)

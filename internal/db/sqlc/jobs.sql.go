@@ -53,6 +53,18 @@ func (q *Queries) CompleteJob(ctx context.Context, id int64) error {
 	return err
 }
 
+const countJobs = `-- name: CountJobs :one
+SELECT count(*) FROM jobs
+WHERE ($1::text = '' OR kind ILIKE '%' || $1 || '%')
+`
+
+func (q *Queries) CountJobs(ctx context.Context, filter string) (int64, error) {
+	row := q.db.QueryRow(ctx, countJobs, filter)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deadLetterJob = `-- name: DeadLetterJob :exec
 UPDATE jobs SET done_at = now(), last_error = 'exhausted' WHERE id = $1
 `
@@ -103,5 +115,85 @@ type FailJobParams struct {
 // Exponential backoff: 2^attempts minutes.
 func (q *Queries) FailJob(ctx context.Context, arg FailJobParams) error {
 	_, err := q.db.Exec(ctx, failJob, arg.ID, arg.LastError)
+	return err
+}
+
+const listJobs = `-- name: ListJobs :many
+SELECT id, kind, payload, run_at, attempts, max_attempts, last_error, done_at, created_at, CASE
+  WHEN done_at IS NULL AND attempts = 0 THEN 'pending'
+  WHEN done_at IS NULL AND run_at > now() THEN 'retrying'
+  WHEN done_at IS NULL THEN 'running'
+  WHEN last_error = 'exhausted' THEN 'dead'
+  ELSE 'done'
+END AS status
+FROM jobs
+WHERE ($1::text = '' OR kind ILIKE '%' || $1 || '%')
+ORDER BY created_at DESC
+LIMIT $3 OFFSET $2
+`
+
+type ListJobsParams struct {
+	Filter string `json:"filter"`
+	Off    int32  `json:"off"`
+	Lim    int32  `json:"lim"`
+}
+
+type ListJobsRow struct {
+	ID          int64              `json:"id"`
+	Kind        string             `json:"kind"`
+	Payload     []byte             `json:"payload"`
+	RunAt       pgtype.Timestamptz `json:"run_at"`
+	Attempts    int32              `json:"attempts"`
+	MaxAttempts int32              `json:"max_attempts"`
+	LastError   pgtype.Text        `json:"last_error"`
+	DoneAt      pgtype.Timestamptz `json:"done_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	Status      string             `json:"status"`
+}
+
+// Admin jobs viewer. A claimed job and a backoff-retry job both read
+// 'retrying': the 5-min visibility lease is indistinguishable from backoff
+// by design.
+func (q *Queries) ListJobs(ctx context.Context, arg ListJobsParams) ([]ListJobsRow, error) {
+	rows, err := q.db.Query(ctx, listJobs, arg.Filter, arg.Off, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListJobsRow
+	for rows.Next() {
+		var i ListJobsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kind,
+			&i.Payload,
+			&i.RunAt,
+			&i.Attempts,
+			&i.MaxAttempts,
+			&i.LastError,
+			&i.DoneAt,
+			&i.CreatedAt,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const requeueDeadJob = `-- name: RequeueDeadJob :exec
+UPDATE jobs SET done_at = NULL, attempts = 0, last_error = NULL, run_at = now()
+WHERE id = $1 AND done_at IS NOT NULL AND last_error = 'exhausted'
+`
+
+// Dead-letter requeue: resets the row so ClaimJob picks it up immediately.
+// The guard clause makes a double-requeue a no-op instead of reviving a job
+// that already ran again.
+func (q *Queries) RequeueDeadJob(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, requeueDeadJob, id)
 	return err
 }

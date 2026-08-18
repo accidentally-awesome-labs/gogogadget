@@ -10,3 +10,8 @@ SELECT * FROM impersonation_sessions WHERE id = $1;
 
 -- name: EndImpersonationSession :exec
 UPDATE impersonation_sessions SET ended_at = now() WHERE id = $1;
+
+-- Account deletion: both FK columns reference users(clerk_user_id) with NO
+-- cascade, so the rows must go before the user row does.
+-- name: DeleteImpersonationSessionsForUser :exec
+DELETE FROM impersonation_sessions WHERE target_user_id = $1 OR admin_user_id = $1;

@@ -12,16 +12,50 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/api"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/justinas/nosurf"
 	"golang.org/x/time/rate"
 )
 
 // Middleware chain (outermost → innermost), assembled in Handler:
 //
-//	recover → requestID → accessLog → rateLimit → secureHeaders → sessionLoad → csrf → routes
+//	recover → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
 //
 // The order is load-bearing. sessionLoad lands in the identity step, between
-// secureHeaders and csrf.
+// secureHeaders and csrf. maintenanceMode sits inside i18n.Detect (the 503
+// page needs the locale) but outside rateLimit (shed load before the limiter
+// churns).
+//
+// maintenanceMode returns 503 for everything when MAINTENANCE_MODE is on,
+// except /healthz, /readyz, /static/, and /favicon.ico (probes + CSS must
+// live). /api/ paths get the JSON error shape; pages get the Maintenance
+// page. Runs before sessionLoad — no session is available by design.
+func (s *Server) maintenanceMode(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !s.cfg.MaintenanceMode {
+			next.ServeHTTP(w, r)
+			return
+		}
+		p := r.URL.Path
+		switch p {
+		case "/healthz", "/readyz", "/favicon.ico":
+			next.ServeHTTP(w, r)
+			return
+		}
+		if strings.HasPrefix(p, "/static/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if strings.HasPrefix(p, "/api/") {
+			api.WriteError(w, http.StatusServiceUnavailable, "maintenance", "Service under maintenance.")
+			return
+		}
+		w.WriteHeader(http.StatusServiceUnavailable)
+		s.Render(w, r, Page{Title: i18n.T(r.Context(), "errors.maintenance"), Layout: templates.LayoutPublic}, templates.Maintenance())
+	})
+}
 
 // recover converts panics into the 500 page. Outside production it includes
 // the panic detail + stack (agent- and human-actionable); production renders a

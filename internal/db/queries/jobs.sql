@@ -31,3 +31,30 @@ UPDATE jobs SET done_at = now(), last_error = 'exhausted' WHERE id = $1;
 
 -- name: DeleteOldJobs :exec
 DELETE FROM jobs WHERE done_at IS NOT NULL AND done_at < now() - interval '7 days';
+
+-- Admin jobs viewer. A claimed job and a backoff-retry job both read
+-- 'retrying': the 5-min visibility lease is indistinguishable from backoff
+-- by design.
+-- name: ListJobs :many
+SELECT *, CASE
+  WHEN done_at IS NULL AND attempts = 0 THEN 'pending'
+  WHEN done_at IS NULL AND run_at > now() THEN 'retrying'
+  WHEN done_at IS NULL THEN 'running'
+  WHEN last_error = 'exhausted' THEN 'dead'
+  ELSE 'done'
+END AS status
+FROM jobs
+WHERE (sqlc.arg(filter)::text = '' OR kind ILIKE '%' || sqlc.arg(filter) || '%')
+ORDER BY created_at DESC
+LIMIT sqlc.arg(lim) OFFSET sqlc.arg(off);
+
+-- name: CountJobs :one
+SELECT count(*) FROM jobs
+WHERE (sqlc.arg(filter)::text = '' OR kind ILIKE '%' || sqlc.arg(filter) || '%');
+
+-- Dead-letter requeue: resets the row so ClaimJob picks it up immediately.
+-- The guard clause makes a double-requeue a no-op instead of reviving a job
+-- that already ran again.
+-- name: RequeueDeadJob :exec
+UPDATE jobs SET done_at = NULL, attempts = 0, last_error = NULL, run_at = now()
+WHERE id = $1 AND done_at IS NOT NULL AND last_error = 'exhausted';

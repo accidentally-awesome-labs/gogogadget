@@ -67,10 +67,12 @@ func settingsTabs(ctx context.Context) []struct{ Label, Href string } {
 	if WebhooksEnabled(ctx) {
 		items = append(items, struct{ Label, Href string }{i18n.T(ctx, "settings.tab_webhooks"), "/app/settings/webhooks"})
 	}
+	// Notification preferences are always available (not flag-gated).
+	items = append(items, struct{ Label, Href string }{i18n.T(ctx, "settings.tab_notifications"), "/app/settings/notifications"})
 	return items
 }
 
-templ SettingsAccount(user sqlc.User, accountPortalURL string) {
+templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string) {
 	@SettingsTabs("/app/settings/account")
 	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "settings.account_title") }</h1>
 	<div class="card max-w-lg">
@@ -94,6 +96,41 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string) {
 				<a href={ accountPortalURL } class="link">{ i18n.T(ctx, "settings.account_manage_link") }</a>
 			}
 		</p>
+	</div>
+
+	<div class="card max-w-lg mt-6">
+		<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.data_title") }</h2>
+		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.data_body") }</p>
+		<a href="/app/settings/account/export" class="btn mt-4" data-testid="export-data">{ i18n.T(ctx, "settings.data_export") }</a>
+	</div>
+
+	<div id="danger-zone">
+		@SettingsDangerZone(user, dangerErr)
+	</div>
+}
+
+// SettingsDangerZone is the account-deletion card. Extracted so the 422
+// re-render (email mismatch, sole-admin blocker) swaps exactly this card.
+templ SettingsDangerZone(user sqlc.User, dangerErr string) {
+	<div class="card max-w-lg mt-6 border-red-200 dark:border-red-900">
+		<h2 class="text-lg font-semibold text-red-700 dark:text-red-400">{ i18n.T(ctx, "settings.danger_title") }</h2>
+		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.danger_body") }</p>
+		<form hx-post="/app/settings/account/delete" hx-target="#danger-zone" hx-swap="outerHTML" novalidate hx-disable="this" class="mt-4 space-y-3">
+			if dangerErr != "" {
+				<div class="alert-error" role="alert" data-testid="delete-account-error">{ dangerErr }</div>
+			}
+			<div>
+				<label class="block text-sm font-medium mb-1" for="confirm_email">{ i18n.T(ctx, "settings.danger_confirm_label") }</label>
+				<input id="confirm_email" type="email" name="confirm_email" class="input" autocomplete="email" />
+			</div>
+			<div class="flex items-center gap-3">
+				<button type="submit" class="btn btn-danger" data-testid="delete-account"
+					hx-confirm={ i18n.T(ctx, "settings.danger_confirm_prompt") }>
+					{ i18n.T(ctx, "settings.danger_delete") }
+				</button>
+				@Spinner()
+			</div>
+		</form>
 	</div>
 }
 

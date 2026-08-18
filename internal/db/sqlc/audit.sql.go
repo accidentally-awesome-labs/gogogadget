@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countAuditAll = `-- name: CountAuditAll :one
+SELECT count(*) FROM audit_log a
+WHERE ($1::text = '' OR a.action ILIKE '%' || $1 || '%' OR a.clerk_org_id ILIKE '%' || $1 || '%')
+`
+
+func (q *Queries) CountAuditAll(ctx context.Context, filter string) (int64, error) {
+	row := q.db.QueryRow(ctx, countAuditAll, filter)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countAuditByOrg = `-- name: CountAuditByOrg :one
 SELECT count(*) FROM audit_log WHERE clerk_org_id = $1
 `
@@ -47,6 +59,60 @@ func (q *Queries) InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) 
 	return id, err
 }
 
+const listAuditAll = `-- name: ListAuditAll :many
+SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
+FROM audit_log a
+LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
+WHERE ($1::text = '' OR a.action ILIKE '%' || $1 || '%' OR a.clerk_org_id ILIKE '%' || $1 || '%')
+ORDER BY a.created_at DESC
+LIMIT $3 OFFSET $2
+`
+
+type ListAuditAllParams struct {
+	Filter string `json:"filter"`
+	Off    int32  `json:"off"`
+	Lim    int32  `json:"lim"`
+}
+
+type ListAuditAllRow struct {
+	ID          int64              `json:"id"`
+	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
+	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
+	Action      string             `json:"action"`
+	Metadata    []byte             `json:"metadata"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ActorEmail  string             `json:"actor_email"`
+}
+
+// Platform-wide audit viewer (admin). Empty filter matches everything.
+func (q *Queries) ListAuditAll(ctx context.Context, arg ListAuditAllParams) ([]ListAuditAllRow, error) {
+	rows, err := q.db.Query(ctx, listAuditAll, arg.Filter, arg.Off, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAuditAllRow
+	for rows.Next() {
+		var i ListAuditAllRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClerkOrgID,
+			&i.ClerkUserID,
+			&i.Action,
+			&i.Metadata,
+			&i.CreatedAt,
+			&i.ActorEmail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listAuditByOrg = `-- name: ListAuditByOrg :many
 SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
 FROM audit_log a
@@ -81,6 +147,59 @@ func (q *Queries) ListAuditByOrg(ctx context.Context, arg ListAuditByOrgParams) 
 	var items []ListAuditByOrgRow
 	for rows.Next() {
 		var i ListAuditByOrgRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClerkOrgID,
+			&i.ClerkUserID,
+			&i.Action,
+			&i.Metadata,
+			&i.CreatedAt,
+			&i.ActorEmail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAuditByUser = `-- name: ListAuditByUser :many
+SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
+FROM audit_log a
+LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
+WHERE a.clerk_user_id = $1
+ORDER BY a.created_at DESC
+LIMIT $2
+`
+
+type ListAuditByUserParams struct {
+	UserID pgtype.Text `json:"user_id"`
+	Lim    int32       `json:"lim"`
+}
+
+type ListAuditByUserRow struct {
+	ID          int64              `json:"id"`
+	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
+	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
+	Action      string             `json:"action"`
+	Metadata    []byte             `json:"metadata"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ActorEmail  string             `json:"actor_email"`
+}
+
+// GDPR export: everything one user ever did, across orgs.
+func (q *Queries) ListAuditByUser(ctx context.Context, arg ListAuditByUserParams) ([]ListAuditByUserRow, error) {
+	rows, err := q.db.Query(ctx, listAuditByUser, arg.UserID, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAuditByUserRow
+	for rows.Next() {
+		var i ListAuditByUserRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ClerkOrgID,

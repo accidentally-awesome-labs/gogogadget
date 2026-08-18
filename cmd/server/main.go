@@ -77,14 +77,17 @@ func run() error {
 	// only production path. Both satisfy the same seam.
 	var verifier identity.Verifier
 	var fetcher identity.UserFetcher
+	var deleter identity.Deleter // nil = local-only account deletion
 	switch {
 	case cfg.DevAuthBypass:
 		verifier = identity.FakeVerifier{}
 		fetcher = identity.DevUserFetcher{}
+		deleter = identity.DevDeleter{}
 		log.Warn("DEV_AUTH_BYPASS enabled — synthetic e2e: tokens accepted")
 	case cfg.ClerkConfigured():
 		verifier = identity.NewClerkVerifier(cfg.ClerkSecretKey)
 		fetcher = identity.NewClerkUserFetcher(cfg.ClerkSecretKey)
+		deleter = identity.NewClerkDeleter(cfg.ClerkSecretKey)
 	default:
 		log.Warn("clerk not configured — /app routes will 503")
 	}
@@ -148,7 +151,7 @@ func run() error {
 	srv := web.NewServer(web.Deps{
 		Config: cfg, Log: log, DB: pool, Queries: q, Version: version,
 		Blog: blog, Docs: docs,
-		Verifier: verifier, Fetcher: fetcher,
+		Verifier: verifier, Fetcher: fetcher, IdentityDeleter: deleter,
 		Billing: polarClient, Analytics: capturer,
 		Storage: fileStore,
 		LLM:     completer,

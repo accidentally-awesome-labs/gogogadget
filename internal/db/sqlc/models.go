@@ -8,6 +8,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Announcement struct {
+	ID        int64              `json:"id"`
+	Kind      string             `json:"kind"`
+	Message   string             `json:"message"`
+	Url       string             `json:"url"`
+	Active    bool               `json:"active"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
 type ApiToken struct {
 	ID         int64              `json:"id"`
 	ClerkOrgID string             `json:"clerk_org_id"`
@@ -86,6 +96,14 @@ type Notification struct {
 	Url         string             `json:"url"`
 	ReadAt      pgtype.Timestamptz `json:"read_at"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type NotificationPreference struct {
+	ClerkUserID string             `json:"clerk_user_id"`
+	Kind        string             `json:"kind"`
+	InApp       bool               `json:"in_app"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Org struct {

@@ -16,7 +16,7 @@ func TestAdminNonAdmin403(t *testing.T) {
 
 	code, _, body := serve(t, s, "GET", "/admin", nil, nil, sessionCookie("user_na", "org_na", "org:admin"))
 	assert.Equal(t, http.StatusForbidden, code)
-	assert.Contains(t, body, "site administrators")
+	assert.Contains(t, body, "You don&#39;t have access", "dedicated 403 page")
 }
 
 func adminUser(t *testing.T, s *Server, id, orgID string) {

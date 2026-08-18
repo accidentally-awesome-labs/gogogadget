@@ -62,27 +62,24 @@ document.addEventListener("alpine:init", function () {
     };
   });
 
-  Alpine.data("dropdown", function () {
+  // Dismissible banners keyed per-element (data-key): the announcement
+  // banner stays hidden for this browser once dismissed, until a new
+  // announcement (new id → new key) arrives. Checklist pattern.
+  Alpine.data("dismissible", function () {
     return {
-      open: false,
-      toggle: function () { this.open = !this.open; },
-      close: function () { this.open = false; },
-    };
-  });
-
-  Alpine.data("modal", function () {
-    return {
-      open: false,
-      show: function () { this.open = true; },
-      hide: function () { this.open = false; },
-    };
-  });
-
-  Alpine.data("tabs", function () {
-    return {
-      active: 0,
-      set: function (i) { this.active = i; },
-      is: function (i) { return this.active === i; },
+      key: "",
+      hidden: false,
+      // init() owns $el (verified against the vendored Alpine CSP build);
+      // expressions under CSP cannot touch globals, so all localStorage
+      // access lives here in real JS.
+      init: function () {
+        this.key = this.$el.dataset.key || "";
+        this.hidden = localStorage.getItem(this.key) === "1";
+      },
+      dismiss: function () {
+        this.hidden = true;
+        if (this.key) localStorage.setItem(this.key, "1");
+      },
     };
   });
 

@@ -6,15 +6,34 @@ package notify
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/jackc/pgx/v5"
 )
 
-// Send notifies ONE user. Errors are logged, never returned: a lost
-// notification must never fail the caller's work.
+// Kinds is the catalog of in-app notification kinds the product emits. The
+// preferences page renders one row per entry; keep in sync with call sites
+// (welcome, payment_failed, export.ready, webhook.failed).
+var Kinds = []string{"welcome", "payment_failed", "export.ready", "webhook.failed"}
+
+// Send notifies ONE user, honoring their per-kind preference: an explicit
+// in_app = false row mutes the kind; an absent row means default-on. Errors
+// are logged, never returned: a lost notification must never fail the
+// caller's work.
 func Send(ctx context.Context, q *sqlc.Queries, orgID, userID, kind, title, body, url string) {
-	_, err := q.InsertNotification(ctx, sqlc.InsertNotificationParams{
+	pref, err := q.GetNotificationPreference(ctx, sqlc.GetNotificationPreferenceParams{
+		ClerkUserID: userID, Kind: kind,
+	})
+	switch {
+	case err == nil && !pref.InApp:
+		return // muted by preference
+	case err != nil && !errors.Is(err, pgx.ErrNoRows):
+		// A prefs hiccup must not silently drop notifications: log, then send.
+		slog.ErrorContext(ctx, "notification preference lookup failed", "kind", kind, "user", userID, "error", err)
+	}
+	_, err = q.InsertNotification(ctx, sqlc.InsertNotificationParams{
 		ClerkOrgID: orgID, ClerkUserID: userID,
 		Kind: kind, Title: title, Body: body, Url: url,
 	})

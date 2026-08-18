@@ -19,3 +19,8 @@ SELECT count(*) FROM org_members WHERE clerk_org_id = $1;
 
 -- name: GetMembership :one
 SELECT * FROM org_members WHERE clerk_org_id = $1 AND clerk_user_id = $2;
+
+-- Sole-admin guard for account deletion: a multi-member org whose only admin
+-- leaves would be orphaned.
+-- name: CountAdminsByOrg :one
+SELECT count(*) FROM org_members WHERE clerk_org_id = $1 AND role = 'org:admin';

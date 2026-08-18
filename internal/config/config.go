@@ -55,7 +55,10 @@ type Config struct {
 	testNow       time.Time
 	hasTestNow    bool
 	DevAuthBypass bool
-	LogLevel      string
+	// MaintenanceMode (MAINTENANCE_MODE=true) sheds all traffic except
+	// probes/static via a 503 page; JSON 503 under /api/.
+	MaintenanceMode bool
+	LogLevel        string
 }
 
 // Load reads the environment, auto-loading `.env` in development, and validates
@@ -95,10 +98,13 @@ func Load() (Config, error) {
 		StorageR2Bucket:          getenv("STORAGE_R2_BUCKET", ""),
 		StorageR2Endpoint:        strings.TrimRight(getenv("STORAGE_R2_ENDPOINT", ""), "/"),
 
-		LLMAPIKey:  getenv("LLM_API_KEY", ""),
-		LLMBaseURL: strings.TrimRight(getenv("LLM_BASE_URL", "https://api.openai.com/v1"), "/"),
-		LLMModel:   getenv("LLM_MODEL", ""),
-		SentryDSN:                getenv("SENTRY_DSN", ""),
+		LLMAPIKey:       getenv("LLM_API_KEY", ""),
+		LLMBaseURL:      strings.TrimRight(getenv("LLM_BASE_URL", "https://api.openai.com/v1"), "/"),
+		LLMModel:        getenv("LLM_MODEL", ""),
+		SentryDSN:       getenv("SENTRY_DSN", ""),
+		ResendAPIKey:    getenv("RESEND_API_KEY", ""),
+		EmailFrom:       getenv("EMAIL_FROM", "GoGoGadget <hello@example.com>"),
+		MaintenanceMode: parseBool(getenv("MAINTENANCE_MODE", "")),
 	}
 
 	cfg.Port = 8080

@@ -3,6 +3,7 @@ package db_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -120,6 +121,112 @@ func TestRoundtripEveryTable(t *testing.T) {
 	require.NoError(t, q.RevokeAPIToken(ctx, sqlc.RevokeAPITokenParams{ID: tid, ClerkOrgID: "org_rt1"}))
 	_, err = q.GetAPITokenByHash(ctx, "hash_rt1")
 	require.ErrorIs(t, err, pgx.ErrNoRows, "revoked token must not authenticate")
+
+	// announcements — one-active partial unique index is the invariant
+	a1, err := q.CreateAnnouncement(ctx, sqlc.CreateAnnouncementParams{Kind: "info", Message: "First", Url: ""})
+	require.NoError(t, err)
+	assert.False(t, a1.Active, "inserts land inactive")
+	a2, err := q.CreateAnnouncement(ctx, sqlc.CreateAnnouncementParams{Kind: "critical", Message: "Second", Url: "https://example.com"})
+	require.NoError(t, err)
+	_, err = q.GetActiveAnnouncement(ctx)
+	require.ErrorIs(t, err, pgx.ErrNoRows, "nothing active yet")
+	require.NoError(t, q.SetAnnouncementActive(ctx, sqlc.SetAnnouncementActiveParams{ID: a1.ID, Active: true}))
+	require.Error(t, q.SetAnnouncementActive(ctx, sqlc.SetAnnouncementActiveParams{ID: a2.ID, Active: true}),
+		"partial unique index must reject a second active row")
+	require.NoError(t, q.DeactivateAnnouncements(ctx))
+	require.NoError(t, q.SetAnnouncementActive(ctx, sqlc.SetAnnouncementActiveParams{ID: a2.ID, Active: true}))
+	active, err := q.GetActiveAnnouncement(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, a2.ID, active.ID)
+	all, err := q.ListAnnouncements(ctx)
+	require.NoError(t, err)
+	require.Len(t, all, 2)
+	assert.Equal(t, a2.ID, all[0].ID, "newest first")
+	require.NoError(t, q.DeleteAnnouncement(ctx, a1.ID))
+	all, err = q.ListAnnouncements(ctx)
+	require.NoError(t, err)
+	require.Len(t, all, 1)
+
+	// notification preferences — upsert idempotency on (user, kind)
+	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
+		ClerkUserID: "user_rt1", Kind: "welcome", InApp: false,
+	}))
+	pref, err := q.GetNotificationPreference(ctx, sqlc.GetNotificationPreferenceParams{ClerkUserID: "user_rt1", Kind: "welcome"})
+	require.NoError(t, err)
+	assert.False(t, pref.InApp)
+	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
+		ClerkUserID: "user_rt1", Kind: "welcome", InApp: true,
+	}))
+	prefs, err := q.ListNotificationPreferencesByUser(ctx, "user_rt1")
+	require.NoError(t, err)
+	require.Len(t, prefs, 1, "upsert must not duplicate the (user, kind) row")
+	assert.True(t, prefs[0].InApp)
+
+	// admin audit queries — platform-wide, filtered
+	allAudit, err := q.ListAuditAll(ctx, sqlc.ListAuditAllParams{Filter: "", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, allAudit, 1)
+	assert.Equal(t, "rt@example.com", allAudit[0].ActorEmail)
+	filtered, err := q.ListAuditAll(ctx, sqlc.ListAuditAllParams{Filter: "project.created", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, filtered, 1)
+	none, err := q.ListAuditAll(ctx, sqlc.ListAuditAllParams{Filter: "no-such-action", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	assert.Empty(t, none)
+	n, err := q.CountAuditAll(ctx, "project.created")
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), n)
+	byUser, err := q.ListAuditByUser(ctx, sqlc.ListAuditByUserParams{UserID: pgtype.Text{String: "user_rt1", Valid: true}, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, byUser, 1)
+
+	// admin jobs queries — status projection + dead-letter requeue
+	jobRows, err := q.ListJobs(ctx, sqlc.ListJobsParams{Filter: "", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, jobRows, 1)
+	assert.Equal(t, "done", jobRows[0].Status)
+	jid2, err := q.EnqueueJob(ctx, sqlc.EnqueueJobParams{Kind: "email.digest", Payload: []byte(`{}`)})
+	require.NoError(t, err)
+	require.NoError(t, q.DeadLetterJob(ctx, jid2))
+	jobRows, err = q.ListJobs(ctx, sqlc.ListJobsParams{Filter: "digest", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, jobRows, 1)
+	assert.Equal(t, "dead", jobRows[0].Status)
+	jn, err := q.CountJobs(ctx, "digest")
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), jn)
+	require.NoError(t, q.RequeueDeadJob(ctx, jid2))
+	requeued, err := q.ListJobs(ctx, sqlc.ListJobsParams{Filter: "digest", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	assert.Equal(t, "pending", requeued[0].Status, "requeue resets done_at/attempts")
+	assert.False(t, requeued[0].LastError.Valid, "requeue clears last_error")
+	require.NoError(t, q.RequeueDeadJob(ctx, jid2))
+	stillPending, err := q.ListJobs(ctx, sqlc.ListJobsParams{Filter: "digest", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	assert.Equal(t, "pending", stillPending[0].Status, "double requeue is a no-op, not a revive")
+	// cleanup so ClaimJob assertions elsewhere keep their queue-empty meaning
+	claimed, err := q.ClaimJob(ctx)
+	require.NoError(t, err)
+	require.NoError(t, q.CompleteJob(ctx, claimed.ID))
+
+	// impersonation sessions must not block account deletion (no FK cascade)
+	_, err = q.UpsertUser(ctx, sqlc.UpsertUserParams{
+		ClerkUserID: "user_rt2", Email: "rt2@example.com", Name: "RT2", AvatarUrl: "",
+	})
+	require.NoError(t, err)
+	sess, err := q.InsertImpersonationSession(ctx, sqlc.InsertImpersonationSessionParams{
+		ID: "sess_rt1", AdminUserID: "user_rt2", TargetUserID: "user_rt1", TargetOrgID: "org_rt1",
+		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(time.Hour), Valid: true},
+	})
+	require.NoError(t, err)
+	require.NoError(t, q.DeleteImpersonationSessionsForUser(ctx, "user_rt1"))
+	_, err = q.GetImpersonationSession(ctx, sess.ID)
+	require.ErrorIs(t, err, pgx.ErrNoRows)
+
+	// sole-admin guard
+	admins, err := q.CountAdminsByOrg(ctx, "org_rt1")
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), admins)
 }
 
 func TestProjectSearchFTS(t *testing.T) {

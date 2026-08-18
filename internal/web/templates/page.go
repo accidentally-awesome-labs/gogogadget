@@ -63,6 +63,10 @@ type Page struct {
 	// Impersonator is non-nil while an admin "views as" this user (banner).
 	Impersonator *identity.Impersonator
 
+	// Announcement is the active platform banner (nil = none). Set by the
+	// render path from the server's 30s cache; layouts tolerate nil.
+	Announcement *sqlc.Announcement
+
 	// Docs navigation context (set by the docs handlers).
 	Docs    *content.Docs
 	DocSlug string

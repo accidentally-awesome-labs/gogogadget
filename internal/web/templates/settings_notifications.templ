@@ -1,0 +1,38 @@
+package templates
+
+import (
+	"strings"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/notify"
+)
+
+// kindKey maps a notify kind to its i18n label key: dots become underscores
+// (export.ready → notifications.kind.export_ready).
+func kindKey(kind string) string {
+	return "notifications.kind." + strings.ReplaceAll(kind, ".", "_")
+}
+
+templ SettingsNotificationsPage(prefs map[string]bool) {
+	@SettingsTabs("/app/settings/notifications")
+	<h1 class="text-2xl font-bold mb-2">{ i18n.T(ctx, "settings.notifications_title") }</h1>
+	<p class="text-fg-muted mb-6">{ i18n.T(ctx, "settings.notifications_intro") }</p>
+	<form hx-post="/app/settings/notifications" hx-swap="none" novalidate hx-disable="this" data-testid="notification-prefs-form" class="card max-w-lg space-y-4">
+		for _, kind := range notify.Kinds {
+			<label class="flex items-center gap-3 text-sm" data-testid={ "pref-" + kind }>
+				<input
+					type="checkbox"
+					name={ "kind_" + kind }
+					checked?={ prefs[kind] }
+					class="h-4 w-4 accent-brand-600"
+				/>
+				<span class="font-medium">{ i18n.T(ctx, kindKey(kind)) }</span>
+				<span class="text-fg-muted">{ kind }</span>
+			</label>
+		}
+		<div class="pt-2 flex items-center gap-3">
+			<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "settings.notifications_save") }</button>
+			@Spinner()
+		</div>
+	</form>
+}

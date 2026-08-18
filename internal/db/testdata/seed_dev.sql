@@ -41,3 +41,8 @@ INSERT INTO feature_flags (key, description, enabled, rollout) VALUES
   ('notifications', 'In-app notifications bell + SSE stream', TRUE, 100),
   ('beta_search', 'Placeholder beta flag — rename for your gated feature', FALSE, 0)
 ON CONFLICT (key) DO NOTHING;
+
+-- Demo announcement: one active info banner in the app shell (the partial
+-- unique index guarantees at most one active row).
+INSERT INTO announcements (kind, message, url, active) VALUES
+  ('info', 'Welcome to your new GoGoGadget dev stack', '', TRUE);

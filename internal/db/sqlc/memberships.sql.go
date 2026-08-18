@@ -11,6 +11,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countAdminsByOrg = `-- name: CountAdminsByOrg :one
+SELECT count(*) FROM org_members WHERE clerk_org_id = $1 AND role = 'org:admin'
+`
+
+// Sole-admin guard for account deletion: a multi-member org whose only admin
+// leaves would be orphaned.
+func (q *Queries) CountAdminsByOrg(ctx context.Context, clerkOrgID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countAdminsByOrg, clerkOrgID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countMembersByOrg = `-- name: CountMembersByOrg :one
 SELECT count(*) FROM org_members WHERE clerk_org_id = $1
 `

@@ -105,7 +105,7 @@ func (s *Server) handleSettingsAccount(w http.ResponseWriter, r *http.Request) {
 		s.cfg.AppURL+r.URL.Path,
 	)
 	s.Render(w, r, Page{Title: "Account settings", Layout: templates.LayoutApp},
-		templates.SettingsAccount(*user, accountURL))
+		templates.SettingsAccount(*user, accountURL, ""))
 }
 
 // GET /app/settings/org

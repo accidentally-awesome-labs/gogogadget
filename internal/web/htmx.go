@@ -101,6 +101,10 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.PostHogKey = s.cfg.PostHogAPIKey
 	page.ClerkPublishableKey = s.cfg.ClerkPublishableKey
 	page.ClerkFrontendAPIURL = s.cfg.ClerkFrontendAPIURL
+	// Active platform banner for the authed shells (nil-safe elsewhere).
+	if page.Layout == templates.LayoutApp || page.Layout == templates.LayoutAdmin {
+		page.Announcement = s.currentAnnouncement(r.Context())
+	}
 	page.Now = s.cfg.Now
 	// Layout identity context, when the guard chain populated it.
 	page.User = identity.UserFrom(r.Context())

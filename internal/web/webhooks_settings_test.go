@@ -24,7 +24,6 @@ func webhookEndpointParams(orgID string) sqlc.InsertWebhookEndpointParams {
 
 func itoa64(v int64) string { return strconv.FormatInt(v, 10) }
 
-
 // enableWebhooks turns the webhooks flag on for tests that drive the UI.
 func enableWebhooks(t *testing.T, s *Server) {
 	t.Helper()

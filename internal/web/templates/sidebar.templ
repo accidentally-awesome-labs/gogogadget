@@ -2,6 +2,62 @@ package templates
 
 import "github.com/gogogadget/gogogadget/internal/i18n"
 
+// appNavSections is the single source for the app-shell navigation items:
+// rendered by the desktop Sidebar and by the mobile drawer in Topbar. Links
+// are boosted and swap only #content, so the shell (and its SSE stream)
+// survives navigation.
+templ appNavSections(page Page) {
+	<nav class="flex flex-col gap-1 text-sm">
+		for _, item := range []struct{ Label, Href, Match string }{
+			{i18n.T(ctx, "sidebar.dashboard"), "/app", "/app"},
+			{i18n.T(ctx, "sidebar.projects"), "/app/projects", "/app/projects"},
+			{i18n.T(ctx, "sidebar.files"), "/app/files", "/app/files"},
+			{i18n.T(ctx, "sidebar.activity"), "/app/activity", "/app/activity"},
+			{i18n.T(ctx, "sidebar.settings"), "/app/settings/account", "/app/settings"},
+		} {
+			<a
+				href={ templ.SafeURL(item.Href) }
+				hx-boost="true"
+				hx-target={ NavTarget }
+				hx-select={ NavTarget }
+				hx-swap={ NavSwap }
+				data-app-nav
+				data-nav-match={ item.Match }
+				aria-current={ navCurrent(page, item.Match) }
+				class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
+			>{ item.Label }</a>
+		}
+	</nav>
+	if page.User != nil && page.User.IsAdmin {
+		<div>
+			<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
+			<nav class="flex flex-col gap-1 text-sm">
+				for _, item := range []struct{ Label, Href, Match string }{
+					{i18n.T(ctx, "sidebar.admin_overview"), "/admin", "/admin"},
+					{i18n.T(ctx, "sidebar.admin_users"), "/admin/users", "/admin/users"},
+					{i18n.T(ctx, "sidebar.admin_orgs"), "/admin/orgs", "/admin/orgs"},
+					{i18n.T(ctx, "sidebar.admin_flags"), "/admin/flags", "/admin/flags"},
+					{i18n.T(ctx, "sidebar.admin_audit"), "/admin/audit", "/admin/audit"},
+					{i18n.T(ctx, "sidebar.admin_jobs"), "/admin/jobs", "/admin/jobs"},
+					{i18n.T(ctx, "sidebar.admin_announcements"), "/admin/announcements", "/admin/announcements"},
+				} {
+					<a
+						href={ templ.SafeURL(item.Href) }
+						hx-boost="true"
+						hx-target={ NavTarget }
+						hx-select={ NavTarget }
+						hx-swap={ NavSwap }
+						data-app-nav
+						data-nav-match={ item.Match }
+						aria-current={ navCurrent(page, item.Match) }
+						class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
+					>{ item.Label }</a>
+				}
+			</nav>
+		</div>
+	}
+}
+
 // Sidebar is the app-shell navigation. The Clerk OrganizationSwitcher mounts
 // at #org-switcher when clerk-js is configured (identity step). Site admins
 // also get the admin section.
@@ -26,62 +82,24 @@ templ Sidebar(page Page) {
 				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, sse:notifications" data-testid="notifications-badge"></span>
 			</a>
 		</div>
-		<nav class="flex flex-col gap-1 text-sm">
-			for _, item := range []struct{ Label, Href, Match string }{
-				{i18n.T(ctx, "sidebar.dashboard"), "/app", "/app"},
-				{i18n.T(ctx, "sidebar.projects"), "/app/projects", "/app/projects"},
-				{i18n.T(ctx, "sidebar.files"), "/app/files", "/app/files"},
-				{i18n.T(ctx, "sidebar.activity"), "/app/activity", "/app/activity"},
-				{i18n.T(ctx, "sidebar.settings"), "/app/settings/account", "/app/settings"},
-			} {
-				<a
-					href={ templ.SafeURL(item.Href) }
-					hx-boost="true"
-					hx-target={ NavTarget }
-					hx-select={ NavTarget }
-					hx-swap={ NavSwap }
-					data-app-nav
-					data-nav-match={ item.Match }
-					aria-current={ navCurrent(page, item.Match) }
-					class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
-				>{ item.Label }</a>
-			}
-		</nav>
-		if page.User != nil && page.User.IsAdmin {
-			<div>
-				<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
-				<nav class="flex flex-col gap-1 text-sm">
-					for _, item := range []struct{ Label, Href, Match string }{
-						{i18n.T(ctx, "sidebar.admin_overview"), "/admin", "/admin"},
-						{i18n.T(ctx, "sidebar.admin_users"), "/admin/users", "/admin/users"},
-						{i18n.T(ctx, "sidebar.admin_orgs"), "/admin/orgs", "/admin/orgs"},
-						{i18n.T(ctx, "sidebar.admin_flags"), "/admin/flags", "/admin/flags"},
-					} {
-						<a
-							href={ templ.SafeURL(item.Href) }
-							hx-boost="true"
-							hx-target={ NavTarget }
-							hx-select={ NavTarget }
-							hx-swap={ NavSwap }
-							data-app-nav
-							data-nav-match={ item.Match }
-							aria-current={ navCurrent(page, item.Match) }
-							class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
-						>{ item.Label }</a>
-					}
-				</nav>
-			</div>
-		}
-	<div class="mt-auto pt-4 border-t border-border">
-		@LocaleSwitcher(page.Path)
-	</div>
+		@appNavSections(page)
+		<div class="mt-auto pt-4 border-t border-border">
+			@LocaleSwitcher(page.Path)
+		</div>
 	</aside>
 }
 
-// Topbar carries the mobile nav + Clerk UserButton mount point.
+// Topbar carries the mobile nav + Clerk UserButton mount point. The hamburger
+// and drawer are md:hidden; the drawer reuses appNavSections so mobile and
+// desktop navigation never drift.
 templ Topbar(page Page) {
-	<div class="border-b border-border bg-surface px-4 h-14 flex items-center justify-between">
-		<div class="md:hidden">
+	<div class="relative border-b border-border bg-surface px-4 h-14 flex items-center justify-between" x-data="mobileNav">
+		<div class="flex items-center gap-2 md:hidden">
+			<button type="button" @click="toggle" :aria-expanded="open.toString()" aria-label={ i18n.T(ctx, "a11y.menu") } data-testid="mobile-nav-toggle" class="btn-ghost btn !px-2">
+				<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<path d="M4 6h16M4 12h16M4 18h16"></path>
+				</svg>
+			</button>
 			@logo()
 		</div>
 		<div class="ml-auto flex items-center gap-3">
@@ -91,6 +109,9 @@ templ Topbar(page Page) {
 				class={ templ.KV("clerk-user-slot", page.ClerkPublishableKey != ""), "min-h-8 min-w-8" }
 				data-clerk-placeholder={ clerkUserPlaceholder(page.User) }
 			></div>
+		</div>
+		<div x-show="open" x-cloak @click.outside="close" @click="close" class="absolute top-14 left-0 right-0 z-40 bg-surface border-b border-border p-4 flex flex-col gap-4 md:hidden">
+			@appNavSections(page)
 		</div>
 	</div>
 }
