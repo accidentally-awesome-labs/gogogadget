@@ -27,7 +27,12 @@ const authedPages: Array<[string, string, 'pro' | 'admin']> = [
   ['dashboard', '/app', 'pro'],
   ['projects', '/app/projects', 'pro'],
   ['billing', '/app/settings/billing', 'pro'],
+  ['notifications-prefs', '/app/settings/notifications', 'pro'],
   ['admin', '/admin', 'admin'],
+  ['admin-announcements', '/admin/announcements', 'admin'],
+  ['admin-audit', '/admin/audit', 'admin'],
+  ['admin-jobs', '/admin/jobs', 'admin'],
+  ['forbidden', '/admin', 'pro'],
 ];
 
 for (const theme of ['light', 'dark'] as const) {

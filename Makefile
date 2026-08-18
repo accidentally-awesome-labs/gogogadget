@@ -31,6 +31,11 @@ check: generate
 test:
 	go test ./...
 
+## fuzz: run both fuzzers briefly (CI runs this; make check deliberately does not)
+fuzz:
+	go test -run=^$$ -fuzz=FuzzFakeVerifier -fuzztime=15s ./internal/identity/
+	go test -run=^$$ -fuzz=FuzzSanitizeFilename -fuzztime=15s ./internal/mail/
+
 ## e2e: Playwright end-to-end suite (real server + db + browser)
 e2e:
 	cd e2e && npx playwright test
@@ -70,4 +75,4 @@ docker-build:
 help:
 	@grep -E '^## ' Makefile | sed 's/## //' | column -t -s ':'
 
-.PHONY: setup generate dev check test e2e e2e-ui visual-update seed db-reset build smoke docker-build help
+.PHONY: setup generate dev check test fuzz e2e e2e-ui visual-update seed db-reset build smoke docker-build help

@@ -8,12 +8,14 @@ INSERT INTO users (clerk_user_id, email, name, avatar_url, is_admin, disabled_at
   ('user_disabled', 'disabled@gogogadget.dev', 'Disabled User', '', FALSE, '2026-01-15T00:00:00Z',      '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
   ('user_noorg',    'noorg@gogogadget.dev',    'No Org',        '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
   ('user_noactive', 'noactive@gogogadget.dev', 'No Active Org', '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_toggle',   'toggle@gogogadget.dev',   'Toggle Target', '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z')
+  ('user_toggle',   'toggle@gogogadget.dev',   'Toggle Target', '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_deleteme', 'deleteme@example.com',    'Delete Me',     '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z')
 ON CONFLICT (clerk_user_id) DO NOTHING;
 
 INSERT INTO orgs (clerk_org_id, name, slug, image_url, created_at, updated_at) VALUES
   ('org_free', 'Free Org', 'free-org', '', '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('org_pro',  'Pro Org',  'pro-org',  '', '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z')
+  ('org_pro',  'Pro Org',  'pro-org',  '', '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('org_deleteme', 'Delete Me Org', 'delete-me-org', '', '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z')
 ON CONFLICT (clerk_org_id) DO NOTHING;
 
 INSERT INTO org_members (clerk_org_id, clerk_user_id, role, created_at) VALUES
@@ -22,7 +24,8 @@ INSERT INTO org_members (clerk_org_id, clerk_user_id, role, created_at) VALUES
   ('org_free', 'user_disabled', 'org:member', '2026-01-15T00:00:00Z'),
   ('org_free', 'user_noactive', 'org:member', '2026-01-15T00:00:00Z'),
   ('org_free', 'user_toggle',   'org:member', '2026-01-15T00:00:00Z'),
-  ('org_pro',  'user_pro',      'org:admin',  '2026-01-15T00:00:00Z')
+  ('org_pro',  'user_pro',      'org:admin',  '2026-01-15T00:00:00Z'),
+  ('org_deleteme', 'user_deleteme', 'org:admin', '2026-01-15T00:00:00Z')
 ON CONFLICT DO NOTHING;
 
 -- Pro org: active subscription ending in 30 days (relative to seed time).
@@ -59,3 +62,6 @@ INSERT INTO notifications (clerk_org_id, clerk_user_id, kind, title, body, url, 
   ('org_pro', 'user_pro', 'welcome', 'Welcome to GoGoGadget', 'Create your first project.', '/app', '2026-01-15T00:00:00Z'),
   ('org_pro', 'user_pro', 'system', 'Storage is now available', 'Uploads are org-scoped.', '/app/files', '2026-01-15T00:05:00Z')
 ON CONFLICT DO NOTHING;
+
+-- No announcements are seeded here on purpose: an active banner would shift
+-- every app-page visual baseline.

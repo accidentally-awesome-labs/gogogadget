@@ -64,4 +64,68 @@ test.describe('admin', () => {
     await expect(page.getByTestId('plan-badge').filter({ hasText: 'pro' })).toBeVisible();
     await context.close();
   });
+
+  test('audit viewer renders platform rows and filters', async ({ browser }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+    await page.goto('/admin/audit');
+
+    await expect(page.getByTestId('audit-table')).toBeVisible();
+    await expect(page.locator('[id^="audit-row-"]').first()).toBeVisible();
+
+    await page.getByLabel('Search audit log').fill('project.created');
+    await expect(page.locator('[id^="audit-row-"]').first()).toContainText('project.created');
+    await context.close();
+  });
+
+  test('jobs viewer shows kind and status', async ({ browser }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+    await page.goto('/admin/jobs');
+
+    // The queue is live state (other specs enqueue export jobs) — the table
+    // itself with its header row is the stable contract.
+    await expect(page.getByTestId('jobs-table').or(page.getByText('No jobs match.'))).toBeVisible();
+    await context.close();
+  });
+
+  test('announcements: create, activate, banner, dismiss, deactivate', async ({ browser }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+    page.on('dialog', (dialog) => dialog.accept());
+
+    // Create (inactive).
+    await page.goto('/admin/announcements');
+    await page.getByTestId('announcement-create-form').locator('#announcement-message').fill('E2E maintenance window');
+    await page.getByTestId('announcement-create-form').getByRole('button', { name: 'Create' }).click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+    // Retry-safe: a previous failed run may have left rows behind — always
+    // operate on the newest and clean every match at the end.
+    const row = page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' }).last();
+    await expect(row).toBeVisible();
+
+    // Activate → banner on /app.
+    await row.getByRole('button', { name: 'Activate' }).click();
+    await page.goto('/app');
+    await expect(page.getByTestId('announcement-banner')).toContainText('E2E maintenance window');
+
+    // Dismiss hides it for this browser (per-announcement key).
+    await page.getByTestId('announcement-banner').getByRole('button').click();
+    await expect(page.getByTestId('announcement-banner')).toBeHidden();
+    await page.goto('/app');
+    await expect(page.getByTestId('announcement-banner')).toBeHidden();
+
+    // Deactivate → banner gone; delete EVERY matching row so re-runs start clean.
+    await page.goto('/admin/announcements');
+    const stale = page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' });
+    const count = await stale.count();
+    for (let i = 0; i < count; i++) {
+      const current = page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' }).first();
+      const active = await current.getByRole('button', { name: 'Deactivate' }).count();
+      if (active) await current.getByRole('button', { name: 'Deactivate' }).click();
+      await current.getByRole('button', { name: 'Delete' }).click();
+      await expect(page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' })).toHaveCount(count - i - 1);
+    }
+    await context.close();
+  });
 });

@@ -76,7 +76,7 @@ func (s *DevSender) Send(ctx context.Context, msg Message) error {
 }
 
 func sanitizeFilename(s string) string {
-	return strings.Map(func(r rune) rune {
+	mapped := strings.Map(func(r rune) rune {
 		switch {
 		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-', r == '.':
 			return r
@@ -84,6 +84,12 @@ func sanitizeFilename(s string) string {
 			return '_'
 		}
 	}, s)
+	// Dots are kept (email domains read naturally: new_example.com) but dot
+	// runs are collapsed so the result can never carry a "../" traversal.
+	for strings.Contains(mapped, "..") {
+		mapped = strings.ReplaceAll(mapped, "..", ".")
+	}
+	return mapped
 }
 
 // --- Message builders: render the templ components to strings at enqueue

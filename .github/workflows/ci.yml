@@ -49,7 +49,10 @@ jobs:
         run: go tool govulncheck ./...
 
       - name: Test
-        run: go test -cover ./...
+        run: go test -race -cover ./...
+
+      - name: Fuzz
+        run: make fuzz
 
       - name: Build
         run: go build ./...
@@ -100,3 +103,66 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report/
           retention-days: 7
+
+  smoke:
+    needs: test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gogogadget_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d gogogadget_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      - name: Generate
+        run: make generate
+
+      - name: Build server
+        run: go build -o tmp/server ./cmd/server
+
+      - name: Start server
+        run: |
+          APP_ENV=test PORT=18080 \
+            DATABASE_URL="postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable" \
+            DEV_AUTH_BYPASS=true CLERK_PORTAL_URL=https://accounts.example.test \
+            TEST_NOW=2026-01-15T00:00:00Z \
+            ./tmp/server &
+
+      - name: Wait for server
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:18080/healthz >/dev/null && exit 0
+            sleep 1
+          done
+          echo "server did not become healthy in 60s"
+          exit 1
+
+      - name: Smoke
+        run: BASE_URL=http://localhost:18080 ./scripts/smoke.sh
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t gogogadget:ci .

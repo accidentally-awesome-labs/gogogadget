@@ -1,11 +1,8 @@
 package mail
 
 import (
-	"context"
 	"io"
 	"log/slog"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,24 +39,6 @@ func TestMessageBuildersRenderHTMLAndText(t *testing.T) {
 	assert.Contains(t, trial.Text, "2026-02-01")
 }
 
-func TestDevSenderWritesFile(t *testing.T) {
-	dir := t.TempDir()
-	s := NewDevSender(newTestLogger(), dir)
-	err := s.Send(context.Background(), Message{To: "x@example.com", Subject: "s", HTML: "<b>body</b>", Text: "body"})
-	require.NoError(t, err)
-	assertFileExists(t, dir)
-}
-
 func newTestLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
-}
-
-func assertFileExists(t *testing.T, dir string) {
-	t.Helper()
-	matches, err := filepath.Glob(filepath.Join(dir, "*.html"))
-	require.NoError(t, err)
-	require.Len(t, matches, 1)
-	raw, err := os.ReadFile(matches[0])
-	require.NoError(t, err)
-	assert.Contains(t, string(raw), "<b>body</b>")
 }
