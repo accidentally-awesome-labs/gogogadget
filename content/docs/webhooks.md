@@ -85,3 +85,29 @@ so delivery enforces it in two places:
 Local testing against `localhost`/LAN receivers is therefore impossible by
 design — use a tunnel (ngrok, cloudflared) or run the test suite's
 guard-relaxed worker.
+
+## Rotating a signing secret
+
+Endpoints show **Rotate secret** in the settings table. Rotation mints a new
+secret, shows it exactly once (like creation), and keeps the previous one
+verifying for a 24-hour grace window (`jobs.WebhookRotationGrace`).
+
+During the window every delivery carries **both** signatures in the
+`webhook-signature` header — the standard-webhooks format is a
+space-delimited list, so a receiver holding either the old or the new secret
+validates:
+
+```
+webhook-signature: v1,<sig-with-new-secret> v1,<sig-with-old-secret>
+```
+
+That is what makes rotation safe to do in production: deploy the new secret
+to your receiver at any point inside the window, with no dropped deliveries
+on either side of the switch. When the window closes, deliveries sign with
+the new secret only, and the worker's janitor clears the stored previous
+secret (`ClearExpiredPreviousSecrets`). Rotation writes a
+`webhook_endpoint.secret_rotated` audit row.
+
+Leaked secret? Rotate, update the receiver, and — if you cannot wait out the
+window — rotate a second time: the first rotation's secret becomes the
+previous one, and the leaked secret stops signing immediately.

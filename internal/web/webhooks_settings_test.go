@@ -194,3 +194,54 @@ func TestEmitCreatesDeliveriesAndJobs(t *testing.T) {
 	assert.Contains(t, string(payload), `"type": "project.created"`)
 	assert.Contains(t, string(payload), `"occurred_at"`)
 }
+
+func TestWebhookSecretRotation(t *testing.T) {
+	s := integrationServer(t, nil)
+	enableWebhooks(t, s)
+	seedMembership(t, s, "user_whr", "org_whr", "org:admin")
+	seedMembership(t, s, "user_whz", "org_whz", "org:admin")
+
+	ep, err := s.q.InsertWebhookEndpoint(t.Context(), webhookEndpointParams("org_whr"))
+	require.NoError(t, err)
+	original := ep.Secret
+
+	token, csrfCookies := csrfFor(t, s)
+	h := http.Header{}
+	h.Set("X-CSRF-Token", token)
+	h.Set("Content-Type", "application/x-www-form-urlencoded")
+	h.Set("HX-Request", "true")
+
+	// Cross-org rotation → 404, secret untouched.
+	code, _, _ := serve(t, s, "POST", "/app/settings/webhooks/endpoints/"+itoa64(ep.ID)+"/rotate", nil, h,
+		append(csrfCookies, sessionCookie("user_whz", "org_whz", "org:admin"))...)
+	require.Equal(t, http.StatusNotFound, code)
+	unchanged, err := s.q.GetWebhookEndpoint(t.Context(), sqlc.GetWebhookEndpointParams{ID: ep.ID, ClerkOrgID: "org_whr"})
+	require.NoError(t, err)
+	assert.Equal(t, original, unchanged.Secret)
+
+	// Owner rotates → new secret revealed ONCE, old one kept for the grace window.
+	code, _, body := serve(t, s, "POST", "/app/settings/webhooks/endpoints/"+itoa64(ep.ID)+"/rotate", nil, h,
+		append(csrfCookies, sessionCookie("user_whr", "org_whr", "org:admin"))...)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="webhook-secret-reveal"`)
+	assert.Contains(t, body, `data-testid="webhook-rotate-note"`, "grace window explained on rotation")
+
+	rotated, err := s.q.GetWebhookEndpoint(t.Context(), sqlc.GetWebhookEndpointParams{ID: ep.ID, ClerkOrgID: "org_whr"})
+	require.NoError(t, err)
+	assert.NotEqual(t, original, rotated.Secret, "new secret minted")
+	assert.Equal(t, original, rotated.SecretPrevious, "old secret retained for the grace window")
+	assert.True(t, rotated.SecretRotatedAt.Valid)
+	assert.Contains(t, body, rotated.Secret, "plaintext shown exactly once, in this response")
+
+	// Re-render without rotating: the secret is never shown again.
+	code, _, body = serve(t, s, "GET", "/app/settings/webhooks", nil, nil,
+		sessionCookie("user_whr", "org_whr", "org:admin"))
+	require.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, rotated.Secret)
+	assert.NotContains(t, body, `data-testid="webhook-secret-reveal"`)
+
+	// Rotation is audited.
+	rows, err := s.q.ListAuditAll(t.Context(), sqlc.ListAuditAllParams{Filter: "webhook_endpoint.secret_rotated", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	assert.Len(t, rows, 1)
+}

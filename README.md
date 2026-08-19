@@ -27,7 +27,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **i18n** — en + es with ?lang=/cookie/Accept-Language detection, `i18n.T` in every template, zero-dependency catalogs (`x/text`), and a CSP-safe switcher.
 - **File storage** — `storage.Store` seam: Cloudflare R2 (presigned downloads) or zero-account DevStore; org-scoped rows, plan quotas, attachment-only downloads.
 - **In-app notifications** — per-user rows, sidebar bell + unread badge, SSE stream (with heartbeat) that survives boosted navigation.
-- **Outbound webhooks** — customer endpoints with standard-webhooks signatures, job-queue retries + dead-letter + replay, and a double-checked SSRF guard.
+- **Outbound webhooks** — customer endpoints with standard-webhooks signatures, secret rotation with a 24h dual-sign grace window, job-queue retries + dead-letter + replay, and a double-checked SSRF guard.
 - **Usage metering** — local `usage_events` + a scheduled flush to Polar events (idempotent, `ue-<id>` dedup); plan meters render on the billing page.
 - **AI seam** — `llm.Completer` over any OpenAI-compatible API; forced server-side model; metered `/api/v1/ai/chat` (402 at the plan cap).
 - **Feature flags** — DB-backed, per-org overrides, deterministic FNV rollouts; admin CRUD + override UI at `/admin/flags`.

@@ -172,6 +172,12 @@ func (w *Worker) janitorPass(ctx context.Context) {
 	if err := w.q.DeleteOldWebhookEvents(ctx); err != nil {
 		w.log.Error("janitor webhook_events", "error", err)
 	}
+	cutoff := pgtype.Timestamptz{Time: time.Now().Add(-WebhookRotationGrace), Valid: true}
+	if n, err := w.q.ClearExpiredPreviousSecrets(ctx, cutoff); err != nil {
+		w.log.Error("janitor webhook secrets", "error", err)
+	} else if n > 0 {
+		w.log.Info("janitor webhook secrets", "cleared", n)
+	}
 	if w.AuditRetentionDays > 0 {
 		cutoff := pgtype.Timestamptz{Time: time.Now().AddDate(0, 0, -w.AuditRetentionDays), Valid: true}
 		n, err := w.q.DeleteOldAuditRows(ctx, cutoff)

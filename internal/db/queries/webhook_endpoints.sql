@@ -24,3 +24,17 @@ SELECT * FROM webhook_endpoints
 WHERE clerk_org_id = $1
   AND disabled_at IS NULL
   AND (event_types = '{}' OR sqlc.arg(event_type)::text = ANY(event_types));
+
+-- Rotation: the current secret becomes the previous one (still verifying
+-- during the grace window), and a fresh secret takes over.
+-- name: RotateWebhookEndpointSecret :one
+UPDATE webhook_endpoints
+SET secret_previous = secret, secret = sqlc.arg(secret), secret_rotated_at = now(), updated_at = now()
+WHERE id = sqlc.arg(id) AND clerk_org_id = sqlc.arg(clerk_org_id)
+RETURNING *;
+
+-- Janitor: drop previous secrets whose grace window has closed.
+-- name: ClearExpiredPreviousSecrets :execrows
+UPDATE webhook_endpoints
+SET secret_previous = '', secret_rotated_at = NULL, updated_at = now()
+WHERE secret_previous <> '' AND secret_rotated_at < $1;

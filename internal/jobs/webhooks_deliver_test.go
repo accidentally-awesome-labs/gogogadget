@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	standardwebhooks "github.com/standard-webhooks/standard-webhooks/libraries/go"
 	"github.com/stretchr/testify/assert"
@@ -46,15 +48,15 @@ func TestWebhookSSRFGuard(t *testing.T) {
 		rawURL  string
 		wantErr bool
 	}{
-		{"http://example.com/hook", true},       // non-https
-		{"https://localhost/hook", true},        // loopback
-		{"https://127.0.0.1/hook", true},        // loopback IP
-		{"https://10.0.0.8/hook", true},         // private
-		{"https://192.168.1.1/hook", true},      // private
-		{"https://169.254.169.254/latest", true},// link-local (cloud metadata)
-		{"https://0.0.0.0/hook", true},           // unspecified
+		{"http://example.com/hook", true},          // non-https
+		{"https://localhost/hook", true},           // loopback
+		{"https://127.0.0.1/hook", true},           // loopback IP
+		{"https://10.0.0.8/hook", true},            // private
+		{"https://192.168.1.1/hook", true},         // private
+		{"https://169.254.169.254/latest", true},   // link-local (cloud metadata)
+		{"https://0.0.0.0/hook", true},             // unspecified
 		{"https://nonexistent.invalid/hook", true}, // unresolvable
-		{"https://example.com/hook", false},     // public, resolvable
+		{"https://example.com/hook", false},        // public, resolvable
 	}
 	for _, c := range cases {
 		err := guardWebhookURL(ctx, c.rawURL)
@@ -194,3 +196,80 @@ func mustJSON(t *testing.T, v any) []byte {
 	return b
 }
 
+func TestSigningSecretsGraceWindow(t *testing.T) {
+	now := time.Now()
+	ep := sqlc.WebhookEndpoint{Secret: "whsec_new"}
+
+	// No rotation yet → current secret only.
+	assert.Equal(t, []string{"whsec_new"}, signingSecrets(ep, now))
+
+	// Inside the window → both, current first.
+	ep.SecretPrevious = "whsec_old"
+	ep.SecretRotatedAt = pgtype.Timestamptz{Time: now.Add(-time.Hour), Valid: true}
+	assert.Equal(t, []string{"whsec_new", "whsec_old"}, signingSecrets(ep, now))
+
+	// Window closed → current only (the janitor clears the column later).
+	ep.SecretRotatedAt = pgtype.Timestamptz{Time: now.Add(-WebhookRotationGrace - time.Minute), Valid: true}
+	assert.Equal(t, []string{"whsec_new"}, signingSecrets(ep, now))
+
+	// Defensive: a previous secret without a timestamp never signs.
+	ep.SecretRotatedAt = pgtype.Timestamptz{}
+	assert.Equal(t, []string{"whsec_new"}, signingSecrets(ep, now))
+}
+
+func TestWebhookDeliverSignsWithBothSecretsDuringGrace(t *testing.T) {
+	w, q, pool, epID := webhookTestSetup(t)
+	ctx := context.Background()
+
+	oldSecret := "whsec_" + "b2xkLXNlY3JldC10aGF0LWlzLWxvbmctZW5vdWdoLTAxMjM="
+	newSecret := "whsec_" + "bmV3LXNlY3JldC10aGF0LWlzLWxvbmctZW5vdWdoLTAxMjM="
+	_, err := pool.Exec(ctx, `UPDATE webhook_endpoints SET secret = $1, secret_previous = $2, secret_rotated_at = now() WHERE id = $3`,
+		newSecret, oldSecret, epID)
+	require.NoError(t, err)
+
+	var gotHeader http.Header
+	var gotBody []byte
+	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		gotHeader = r.Header.Clone()
+		gotBody, _ = io.ReadAll(r.Body)
+		rw.WriteHeader(http.StatusOK)
+	}))
+	t.Cleanup(srv.Close)
+	pointEndpoint(t, pool, epID, srv.URL)
+
+	d := insertDelivery(t, q, epID)
+	require.NoError(t, w.deliverWebhook(ctx, sqlc.Job{Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d.ID})}))
+
+	// Two space-delimited signatures — a receiver holding EITHER secret verifies.
+	sigs := strings.Fields(gotHeader.Get("webhook-signature"))
+	require.Len(t, sigs, 2, "grace window signs with both secrets")
+	for _, secret := range []string{newSecret, oldSecret} {
+		wh, err := standardwebhooks.NewWebhookRaw([]byte(secret))
+		require.NoError(t, err)
+		require.NoError(t, wh.Verify(gotBody, gotHeader), "receiver with %s must verify", secret[:12])
+	}
+
+	// Past the window: only the current secret signs, and the old one fails.
+	_, err = pool.Exec(ctx, `UPDATE webhook_endpoints SET secret_rotated_at = now() - interval '48 hours' WHERE id = $1`, epID)
+	require.NoError(t, err)
+	d2 := insertDelivery(t, q, epID)
+	require.NoError(t, w.deliverWebhook(ctx, sqlc.Job{Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d2.ID})}))
+	require.Len(t, strings.Fields(gotHeader.Get("webhook-signature")), 1)
+	oldWh, err := standardwebhooks.NewWebhookRaw([]byte(oldSecret))
+	require.NoError(t, err)
+	require.Error(t, oldWh.Verify(gotBody, gotHeader), "rotated-out secret stops verifying after the window")
+}
+
+func TestJanitorClearsExpiredPreviousSecrets(t *testing.T) {
+	w, q, pool, epID := webhookTestSetup(t)
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, `UPDATE webhook_endpoints SET secret_previous = 'whsec_old', secret_rotated_at = now() - interval '48 hours' WHERE id = $1`, epID)
+	require.NoError(t, err)
+
+	w.janitorPass(ctx)
+
+	ep, err := q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: epID, ClerkOrgID: "org_wh"})
+	require.NoError(t, err)
+	assert.Empty(t, ep.SecretPrevious, "expired previous secret cleared")
+	assert.False(t, ep.SecretRotatedAt.Valid)
+}

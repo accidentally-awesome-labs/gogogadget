@@ -12,6 +12,7 @@ import (
 	"net/netip"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -19,6 +20,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	standardwebhooks "github.com/standard-webhooks/standard-webhooks/libraries/go"
 )
+
+// WebhookRotationGrace is how long a rotated-out secret keeps signing
+// alongside the new one, so receivers can roll over without dropped
+// deliveries. The janitor clears previous secrets past this window.
+const WebhookRotationGrace = 24 * time.Hour
 
 // WebhookDeliverPayload is the enqueue contract for webhook.deliver.
 type WebhookDeliverPayload struct {
@@ -46,7 +52,7 @@ func (w *Worker) deliverWebhook(ctx context.Context, job sqlc.Job) error {
 		return w.q.MarkDeliveryDead(ctx, sqlc.MarkDeliveryDeadParams{ID: d.ID, LastError: "endpoint disabled"})
 	}
 
-	status, attemptErr := w.postWebhook(ctx, ep.Url, ep.Secret, d.Payload)
+	status, attemptErr := w.postWebhook(ctx, ep.Url, signingSecrets(ep, time.Now()), d.Payload)
 	pgStatus := pgtype.Int4{Int32: status, Valid: status > 0}
 	if attemptErr == nil {
 		return w.q.MarkDeliverySuccess(ctx, sqlc.MarkDeliverySuccessParams{ID: d.ID, LastResponseStatus: pgStatus})
@@ -65,22 +71,41 @@ func (w *Worker) deliverWebhook(ctx context.Context, job sqlc.Job) error {
 	return attemptErr
 }
 
-// postWebhook signs and POSTs, returning the HTTP status (0 when the request
-// never reached the server). 2xx → nil error.
-func (w *Worker) postWebhook(ctx context.Context, rawURL, secret string, payload []byte) (int32, error) {
-	if err := w.WebhookGuard(ctx, rawURL); err != nil {
-		return 0, err
+// signingSecrets returns the secrets a delivery must sign with: the current
+// one always, plus the rotated-out one while its grace window is open.
+// Receivers verify against a space-delimited signature list, so a receiver
+// holding EITHER secret validates during the rollover.
+func signingSecrets(ep sqlc.WebhookEndpoint, now time.Time) []string {
+	secrets := []string{ep.Secret}
+	if ep.SecretPrevious != "" && ep.SecretRotatedAt.Valid &&
+		now.Sub(ep.SecretRotatedAt.Time) < WebhookRotationGrace {
+		secrets = append(secrets, ep.SecretPrevious)
 	}
-	wh, err := standardwebhooks.NewWebhookRaw([]byte(secret))
-	if err != nil {
+	return secrets
+}
+
+// postWebhook signs and POSTs, returning the HTTP status (0 when the request
+// never reached the server). 2xx → nil error. Multiple secrets produce a
+// space-delimited signature list (standard-webhooks §signature).
+func (w *Worker) postWebhook(ctx context.Context, rawURL string, secrets []string, payload []byte) (int32, error) {
+	if err := w.WebhookGuard(ctx, rawURL); err != nil {
 		return 0, err
 	}
 	msgID := "msg_" + strconv.FormatInt(time.Now().UnixNano(), 36)
 	ts := time.Now()
-	sig, err := wh.Sign(msgID, ts, payload)
-	if err != nil {
-		return 0, err
+	sigs := make([]string, 0, len(secrets))
+	for _, secret := range secrets {
+		wh, err := standardwebhooks.NewWebhookRaw([]byte(secret))
+		if err != nil {
+			return 0, err
+		}
+		sig, err := wh.Sign(msgID, ts, payload)
+		if err != nil {
+			return 0, err
+		}
+		sigs = append(sigs, sig)
 	}
+	sig := strings.Join(sigs, " ")
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, rawURL, bytes.NewReader(payload))
 	if err != nil {

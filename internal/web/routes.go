@@ -87,6 +87,7 @@ func (s *Server) routes() {
 	appMux.HandleFunc("POST /app/settings/webhooks/endpoints", s.handleWebhookEndpointCreate)
 	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/disable", s.handleWebhookEndpointToggle)
 	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/enable", s.handleWebhookEndpointToggle)
+	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/rotate", s.handleWebhookEndpointRotate)
 	appMux.HandleFunc("POST /app/settings/webhooks/deliveries/{id}/replay", s.handleWebhookDeliveryReplay)
 	appMux.HandleFunc("GET /app/activity", s.handleActivity)
 	appMux.HandleFunc("POST /app/impersonation/exit", s.handleImpersonationExit)

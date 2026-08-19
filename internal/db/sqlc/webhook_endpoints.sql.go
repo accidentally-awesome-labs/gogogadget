@@ -7,10 +7,27 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const clearExpiredPreviousSecrets = `-- name: ClearExpiredPreviousSecrets :execrows
+UPDATE webhook_endpoints
+SET secret_previous = '', secret_rotated_at = NULL, updated_at = now()
+WHERE secret_previous <> '' AND secret_rotated_at < $1
+`
+
+// Janitor: drop previous secrets whose grace window has closed.
+func (q *Queries) ClearExpiredPreviousSecrets(ctx context.Context, secretRotatedAt pgtype.Timestamptz) (int64, error) {
+	result, err := q.db.Exec(ctx, clearExpiredPreviousSecrets, secretRotatedAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getWebhookEndpoint = `-- name: GetWebhookEndpoint :one
-SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at FROM webhook_endpoints WHERE id = $1 AND clerk_org_id = $2
+SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints WHERE id = $1 AND clerk_org_id = $2
 `
 
 type GetWebhookEndpointParams struct {
@@ -32,6 +49,8 @@ func (q *Queries) GetWebhookEndpoint(ctx context.Context, arg GetWebhookEndpoint
 		&i.DisabledAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SecretPrevious,
+		&i.SecretRotatedAt,
 	)
 	return i, err
 }
@@ -40,7 +59,7 @@ const insertWebhookEndpoint = `-- name: InsertWebhookEndpoint :one
 
 INSERT INTO webhook_endpoints (clerk_org_id, created_by, url, secret, event_types, description)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at
+RETURNING id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at
 `
 
 type InsertWebhookEndpointParams struct {
@@ -74,12 +93,14 @@ func (q *Queries) InsertWebhookEndpoint(ctx context.Context, arg InsertWebhookEn
 		&i.DisabledAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.SecretPrevious,
+		&i.SecretRotatedAt,
 	)
 	return i, err
 }
 
 const listActiveEndpointsForEvent = `-- name: ListActiveEndpointsForEvent :many
-SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at FROM webhook_endpoints
+SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints
 WHERE clerk_org_id = $1
   AND disabled_at IS NULL
   AND (event_types = '{}' OR $2::text = ANY(event_types))
@@ -111,6 +132,8 @@ func (q *Queries) ListActiveEndpointsForEvent(ctx context.Context, arg ListActiv
 			&i.DisabledAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SecretPrevious,
+			&i.SecretRotatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -123,7 +146,7 @@ func (q *Queries) ListActiveEndpointsForEvent(ctx context.Context, arg ListActiv
 }
 
 const listWebhookEndpointsByOrg = `-- name: ListWebhookEndpointsByOrg :many
-SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at FROM webhook_endpoints
+SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints
 WHERE clerk_org_id = $1
 ORDER BY created_at DESC
 `
@@ -148,6 +171,8 @@ func (q *Queries) ListWebhookEndpointsByOrg(ctx context.Context, clerkOrgID stri
 			&i.DisabledAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.SecretPrevious,
+			&i.SecretRotatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -157,6 +182,41 @@ func (q *Queries) ListWebhookEndpointsByOrg(ctx context.Context, clerkOrgID stri
 		return nil, err
 	}
 	return items, nil
+}
+
+const rotateWebhookEndpointSecret = `-- name: RotateWebhookEndpointSecret :one
+UPDATE webhook_endpoints
+SET secret_previous = secret, secret = $1, secret_rotated_at = now(), updated_at = now()
+WHERE id = $2 AND clerk_org_id = $3
+RETURNING id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at
+`
+
+type RotateWebhookEndpointSecretParams struct {
+	Secret     string `json:"secret"`
+	ID         int64  `json:"id"`
+	ClerkOrgID string `json:"clerk_org_id"`
+}
+
+// Rotation: the current secret becomes the previous one (still verifying
+// during the grace window), and a fresh secret takes over.
+func (q *Queries) RotateWebhookEndpointSecret(ctx context.Context, arg RotateWebhookEndpointSecretParams) (WebhookEndpoint, error) {
+	row := q.db.QueryRow(ctx, rotateWebhookEndpointSecret, arg.Secret, arg.ID, arg.ClerkOrgID)
+	var i WebhookEndpoint
+	err := row.Scan(
+		&i.ID,
+		&i.ClerkOrgID,
+		&i.CreatedBy,
+		&i.Url,
+		&i.Secret,
+		&i.EventTypes,
+		&i.Description,
+		&i.DisabledAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.SecretPrevious,
+		&i.SecretRotatedAt,
+	)
+	return i, err
 }
 
 const setWebhookEndpointDisabled = `-- name: SetWebhookEndpointDisabled :exec

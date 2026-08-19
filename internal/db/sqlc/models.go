@@ -197,16 +197,18 @@ type WebhookDelivery struct {
 }
 
 type WebhookEndpoint struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  string             `json:"clerk_org_id"`
-	CreatedBy   string             `json:"created_by"`
-	Url         string             `json:"url"`
-	Secret      string             `json:"secret"`
-	EventTypes  []string           `json:"event_types"`
-	Description string             `json:"description"`
-	DisabledAt  pgtype.Timestamptz `json:"disabled_at"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	ID              int64              `json:"id"`
+	ClerkOrgID      string             `json:"clerk_org_id"`
+	CreatedBy       string             `json:"created_by"`
+	Url             string             `json:"url"`
+	Secret          string             `json:"secret"`
+	EventTypes      []string           `json:"event_types"`
+	Description     string             `json:"description"`
+	DisabledAt      pgtype.Timestamptz `json:"disabled_at"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	SecretPrevious  string             `json:"secret_previous"`
+	SecretRotatedAt pgtype.Timestamptz `json:"secret_rotated_at"`
 }
 
 type WebhookEvent struct {

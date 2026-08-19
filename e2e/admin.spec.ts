@@ -194,13 +194,16 @@ test.describe('admin', () => {
     await expect(page.getByTestId('toast').first()).toBeVisible();
 
     // Clean up every leftover row so re-runs start from the seeded state.
-    const stale = page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' });
-    const count = await stale.count();
-    for (let i = 0; i < count; i++) {
-      await page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' }).first()
-        .getByRole('button', { name: 'Delete' }).click();
-      await expect(page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' })).toHaveCount(count - i - 1);
+    // Delete-while-any (never a precomputed count): each Navigate re-renders
+    // the table, and a prior failed run can leave extra rows behind.
+    const stale = () => page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' });
+    for (let guard = 0; guard < 10 && (await stale().count()) > 0; guard++) {
+      const current = stale().first();
+      const rowId = await current.getAttribute('data-testid');
+      await current.getByRole('button', { name: 'Delete' }).click();
+      await expect(page.locator(`[data-testid="${rowId}"]`)).toHaveCount(0);
     }
+    await expect(stale()).toHaveCount(0);
     await context.close();
   });
 });

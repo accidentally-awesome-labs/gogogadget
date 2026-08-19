@@ -89,6 +89,7 @@ type WebhooksData struct {
 	Endpoints  []sqlc.WebhookEndpoint
 	Deliveries []sqlc.ListDeliveriesByOrgRow
 	EventTypes []string // checkbox catalog
-	NewSecret  string   // plaintext, shown ONCE right after endpoint creation
+	NewSecret  string   // plaintext, shown ONCE right after creation or rotation
+	Rotated    bool     // NewSecret came from a rotation → show the grace note
 	URLErr     string
 }

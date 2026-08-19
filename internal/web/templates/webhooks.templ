@@ -22,6 +22,9 @@ templ WebhooksSection(d WebhooksData) {
 		<div class="card mb-6 max-w-lg border-green-500" data-testid="webhook-secret-reveal">
 			<h2 class="font-semibold text-green-700 dark:text-green-300">{ i18n.T(ctx, "webhooks.secret_title") }</h2>
 			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "webhooks.secret_note") }</p>
+			if d.Rotated {
+				<p class="text-sm text-amber-700 dark:text-amber-300 mt-1" data-testid="webhook-rotate-note">{ i18n.T(ctx, "webhooks.rotate_note") }</p>
+			}
 			<div class="mt-3 flex items-center gap-2" x-data="clipboard">
 				<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ d.NewSecret }</code>
 				<button type="button" @click={ "copy('" + d.NewSecret + "')" } class="btn-ghost !px-2 text-xs">
@@ -96,11 +99,19 @@ templ WebhooksSection(d WebhooksData) {
 							}
 						</td>
 						<td class="text-right">
-							if ep.DisabledAt.Valid {
-								<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/enable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.enable") }</button>
-							} else {
-								<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/disable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.disable") }</button>
-							}
+							<div class="flex justify-end gap-2">
+								<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/rotate", ep.ID) }
+									hx-target="#webhooks-container" hx-swap="innerHTML"
+									hx-confirm={ i18n.T(ctx, "webhooks.rotate_confirm") }
+									class="btn-ghost !px-2 !py-1 text-xs" data-testid={ fmt.Sprintf("webhook-rotate-%d", ep.ID) }>
+									{ i18n.T(ctx, "webhooks.rotate") }
+								</button>
+								if ep.DisabledAt.Valid {
+									<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/enable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.enable") }</button>
+								} else {
+									<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/disable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.disable") }</button>
+								}
+							</div>
 						</td>
 					</tr>
 				}

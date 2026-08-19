@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/jobs"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
@@ -64,6 +65,7 @@ func (s *Server) renderWebhooksSection(w http.ResponseWriter, r *http.Request, d
 		return
 	}
 	fresh.NewSecret = d.NewSecret
+	fresh.Rotated = d.Rotated
 	fresh.URLErr = d.URLErr
 	s.Render(w, r, Page{Title: "Webhooks", Layout: templates.LayoutApp}, templates.WebhooksSection(fresh))
 }
@@ -172,4 +174,38 @@ func (s *Server) handleWebhookDeliveryReplay(w http.ResponseWriter, r *http.Requ
 	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "webhook_delivery.replayed", map[string]any{"id": id})
 	Toast(w, "success", "Delivery requeued")
 	s.renderWebhooksSection(w, r, templates.WebhooksData{})
+}
+
+// POST /app/settings/webhooks/endpoints/{id}/rotate — mint a new signing
+// secret. The old one keeps verifying for the grace window
+// (jobs.WebhookRotationGrace) so receivers can roll over without dropping
+// deliveries; the janitor clears it afterwards. Shown exactly once, like
+// creation.
+func (s *Server) handleWebhookEndpointRotate(w http.ResponseWriter, r *http.Request) {
+	if !s.webhooksEnabled(r) {
+		s.handleNotFound(w, r)
+		return
+	}
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	user := identity.UserFrom(ctx)
+
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+	secret := webhooks.NewSecret()
+	ep, err := s.q.RotateWebhookEndpointSecret(ctx, sqlc.RotateWebhookEndpointSecretParams{
+		ID: id, ClerkOrgID: org.ClerkOrgID, Secret: secret,
+	})
+	if err != nil {
+		// Cross-org ids simply do not match the WHERE clause.
+		http.NotFound(w, r)
+		return
+	}
+	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "webhook_endpoint.secret_rotated",
+		map[string]any{"id": ep.ID, "url": ep.Url})
+	Toast(w, "success", i18n.T(ctx, "webhooks.rotated"))
+	s.renderWebhooksSection(w, r, templates.WebhooksData{NewSecret: secret, Rotated: true})
 }
