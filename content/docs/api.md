@@ -94,3 +94,29 @@ renames, removals, and type changes are not. A breaking change ships as
 
 The full recipe is in [Extending](/docs/extending); handler behavior gets
 integration tests — see [Testing](/docs/testing).
+
+## OpenAPI
+
+The contract is published as OpenAPI 3.1 at **`GET /api/v1/openapi.yaml`** —
+unauthenticated, so tooling can read it before a token exists:
+
+```sh
+curl -s http://localhost:8080/api/v1/openapi.yaml | head
+npx @redocly/cli preview-docs http://localhost:8080/api/v1/openapi.yaml
+```
+
+The spec is hand-written (`internal/api/openapi.yaml`, `go:embed`-ed into the
+binary, so a deployed build always serves the contract it shipped with) and
+kept honest by tests rather than discipline:
+
+- `TestOpenAPISpecMatchesRegisteredRoutes` scans the `/api/v1` patterns in
+  `routes.go` and compares the set against the spec's paths — adding a route
+  without documenting it (or documenting a path that isn't routed) fails CI.
+- `TestOpenAPIProjectShapeMatchesHandler` drives the real endpoint and
+  compares the payload keys against the documented `Project` schema, so the
+  spec cannot drift from what the handler actually emits.
+
+Responses are typed DTOs, not raw sqlc rows: `projectResponse` pins the
+public fields, which is why the internal `search_tsv` FTS column never
+appears in a payload and why adding a database column can't silently change
+the API.

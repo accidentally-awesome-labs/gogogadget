@@ -1,0 +1,291 @@
+openapi: 3.1.0
+info:
+  title: GoGoGadget API
+  version: "1.0.0"
+  summary: Bearer-authenticated JSON API for projects and metered AI chat.
+  description: |
+    The second transport. Every rule the HTML app enforces (plan limits,
+    validation, org scoping) applies identically here — the handlers share
+    the same query layer and plan logic, they only differ in how they answer.
+
+    Authentication is a Bearer token minted at `/app/settings/api`
+    (`ggg_…`, SHA-256 hashed at rest, shown once). Tokens carry a scope:
+    `read` satisfies read operations, `write` satisfies both.
+
+    The token determines the organization — there is no org parameter, and a
+    token can never read another org's rows.
+  license:
+    name: MIT
+servers:
+  - url: /
+    description: Same origin as the app.
+tags:
+  - name: projects
+    description: The canonical CRUD resource.
+  - name: ai
+    description: Metered LLM chat (usage counts against the plan's ai_tokens meter).
+  - name: meta
+    description: Machine-readable description of this API.
+paths:
+  /api/v1/openapi.yaml:
+    get:
+      tags: [meta]
+      summary: This document.
+      description: Unauthenticated so tooling can fetch the contract before holding a token.
+      security: []
+      responses:
+        "200":
+          description: The OpenAPI document.
+          content:
+            application/yaml:
+              schema:
+                type: string
+  /api/v1/projects:
+    get:
+      tags: [projects]
+      summary: List projects for the token's organization.
+      description: Offset pagination, newest first.
+      parameters:
+        - name: limit
+          in: query
+          description: Page size. Values outside 1–100 fall back to the default.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Rows to skip. Negative values are treated as 0.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: A page of projects.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [projects, limit, offset]
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Project"
+                  limit:
+                    type: integer
+                    examples: [50]
+                  offset:
+                    type: integer
+                    examples: [0]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      tags: [projects]
+      summary: Create a project.
+      description: |
+        Enforces the same plan limit as the UI: at the cap the call fails with
+        402 `plan_limit` rather than silently succeeding.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  maxLength: 80
+                  description: Trimmed; required after trimming.
+                  examples: ["Launch checklist"]
+      responses:
+        "201":
+          description: The created project.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "400":
+          $ref: "#/components/responses/InvalidJSON"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PlanLimit"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /api/v1/ai/chat:
+    post:
+      tags: [ai]
+      summary: Chat completion, metered against the plan.
+      description: |
+        Requires the `write` scope. Token usage is recorded per organization
+        and counted against the plan's `ai_tokens` meter; crossing the cap
+        fails with 402 `plan_limit`. With no LLM backend configured the
+        endpoint answers 503 `not_configured` instead of pretending.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  minItems: 1
+                  maxItems: 20
+                  items:
+                    $ref: "#/components/schemas/ChatMessage"
+                max_tokens:
+                  type: integer
+                  minimum: 1
+                  description: Upper bound for the completion; also feeds the pre-flight meter estimate.
+                  examples: [512]
+      responses:
+        "200":
+          description: The completion.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [content, usage]
+                properties:
+                  content:
+                    type: string
+                  usage:
+                    type: object
+                    required: [prompt_tokens, completion_tokens]
+                    properties:
+                      prompt_tokens:
+                        type: integer
+                      completion_tokens:
+                        type: integer
+        "400":
+          $ref: "#/components/responses/InvalidJSON"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PlanLimit"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "502":
+          description: The upstream AI backend failed (`upstream_error`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: No AI backend configured (`not_configured`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        `Authorization: Bearer ggg_…`. Scope `read` satisfies read
+        operations; `write` satisfies read and write.
+  schemas:
+    Project:
+      type: object
+      required: [id, clerk_org_id, name, status, created_at, updated_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        clerk_org_id:
+          type: string
+          description: The organization the token belongs to.
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, archived]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [system, user, assistant]
+        content:
+          type: string
+          maxLength: 8000
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Stable machine-readable code; the message is for humans and may change.
+            message:
+              type: string
+  responses:
+    Unauthorized:
+      description: Missing, malformed, unknown, revoked, or expired token (`unauthorized`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: The token's scope cannot perform this operation (`forbidden`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    PlanLimit:
+      description: The organization's plan limit or meter cap was reached (`plan_limit`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ValidationError:
+      description: The request parsed but failed validation (`validation_error`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InvalidJSON:
+      description: The body is not valid JSON for this endpoint (`invalid_json`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Something failed server-side (`internal_error`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+security:
+  - bearerAuth: []

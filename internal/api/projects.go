@@ -27,6 +27,27 @@ func ValidateProjectName(name string) (string, string) {
 	}
 }
 
+// projectResponse is the public shape of a project. Explicit DTO, not the
+// sqlc row: the row carries search_tsv (an internal FTS column) which has no
+// business in a public payload, and pinning the fields here means adding a
+// column can never silently change the API.
+type projectResponse struct {
+	ID         int64  `json:"id"`
+	ClerkOrgID string `json:"clerk_org_id"`
+	Name       string `json:"name"`
+	Status     string `json:"status"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+}
+
+func newProjectResponse(p sqlc.Project) projectResponse {
+	return projectResponse{
+		ID: p.ID, ClerkOrgID: p.ClerkOrgID, Name: p.Name, Status: p.Status,
+		CreatedAt: p.CreatedAt.Time.UTC().Format(time.RFC3339),
+		UpdatedAt: p.UpdatedAt.Time.UTC().Format(time.RFC3339),
+	}
+}
+
 // Projects serves /api/v1/projects — the same rules as the HTML transport.
 type Projects struct {
 	Q *sqlc.Queries
@@ -51,7 +72,11 @@ func (h *Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
 		WriteError(w, http.StatusInternalServerError, "internal_error", "Could not list projects.")
 		return
 	}
-	WriteJSON(w, http.StatusOK, map[string]any{"projects": projects, "limit": limit, "offset": offset})
+	out := make([]projectResponse, 0, len(projects))
+	for _, p := range projects {
+		out = append(out, newProjectResponse(p))
+	}
+	WriteJSON(w, http.StatusOK, map[string]any{"projects": out, "limit": limit, "offset": offset})
 }
 
 type createProjectRequest struct {
@@ -95,5 +120,5 @@ func (h *Projects) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, h.Q, org.ClerkOrgID, "", "project.created", map[string]any{"id": project.ID, "name": project.Name, "via": "api"})
-	WriteJSON(w, http.StatusCreated, project)
+	WriteJSON(w, http.StatusCreated, newProjectResponse(project))
 }

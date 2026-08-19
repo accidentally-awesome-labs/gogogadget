@@ -47,6 +47,7 @@ check "/sitemap.xml" 200 "urlset"
 check "/healthz" 200 '"status":"ok"'
 check "/readyz" 200 '"status":"ok"'
 check_redirect "/app" "/login"
+check "/api/v1/openapi.yaml" 200 "openapi: 3.1.0"
 check "/nope" 404 "404"
 
 if [[ "$fail" != 0 ]]; then

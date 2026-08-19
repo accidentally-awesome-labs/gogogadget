@@ -136,6 +136,14 @@ func (s *Server) routes() {
 	s.mux.Handle("/admin/", s.adminChain(adminMux))
 
 	// Public JSON API: cookieless Bearer auth (CSRF-exempt in the chain).
+	// The contract itself: unauthenticated so tooling can read it before a
+	// token exists. Registered before the /api/ catch-all 404.
+	s.mux.HandleFunc("GET /api/v1/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/yaml; charset=utf-8")
+		w.Header().Set("Cache-Control", "public, max-age=300")
+		_, _ = w.Write(api.OpenAPISpec)
+	})
+
 	apiMW := &api.Middleware{Q: s.q}
 	apiProjects := &api.Projects{Q: s.q}
 	s.mux.Handle("GET /api/v1/projects", apiMW.RequireAPIToken("read", http.HandlerFunc(apiProjects.ListProjects)))
