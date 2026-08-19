@@ -85,6 +85,9 @@ CSRF middleware to keep it that way.
 
 ## Rate limiting
 
+The budget is `RATE_LIMIT_RPM` (default 100/min per IP, burst 2×) — test
+harnesses that drive a single IP raise it; production keeps the default.
+
 Per-IP token bucket (`x/time/rate`): **100 req/min, burst 200**, on everything
 except `/static/*`, `/healthz`, `/ingest/*`. Over-limit requests get 429 with
 `Retry-After: 1`. The client IP is `Fly-Client-IP` when present (set by the

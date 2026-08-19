@@ -59,6 +59,9 @@ type Config struct {
 	// probes/static via a 503 page; JSON 503 under /api/.
 	MaintenanceMode bool
 	MetricsToken    string // METRICS_TOKEN: bearer gate for /metrics (prod requires it)
+	// RateLimitPerMinute is the per-IP request budget (burst = 2×). Tunable
+	// because load profiles differ — the e2e suite drives one IP hard.
+	RateLimitPerMinute int
 	// AuditRetentionDays (AUDIT_RETENTION_DAYS): janitor deletes older audit
 	// rows; 0 = retain forever.
 	AuditRetentionDays int
@@ -119,6 +122,15 @@ func Load() (Config, error) {
 			return Config{}, fmt.Errorf("PORT: %q is not a valid port", v)
 		}
 		cfg.Port = p
+	}
+
+	cfg.RateLimitPerMinute = 100
+	if v := getenv("RATE_LIMIT_RPM", ""); v != "" {
+		rpm, err := strconv.Atoi(v)
+		if err != nil || rpm < 1 {
+			return Config{}, fmt.Errorf("RATE_LIMIT_RPM: %q must be a positive integer", v)
+		}
+		cfg.RateLimitPerMinute = rpm
 	}
 
 	if v := getenv("AUDIT_RETENTION_DAYS", ""); v != "" {

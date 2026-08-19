@@ -145,6 +145,25 @@ func TestMetricsTokenLoadsFromEnv(t *testing.T) {
 	assert.Equal(t, "tok-1", cfg.MetricsToken, "METRICS_TOKEN must reach Config — guards the wiring, not just the field")
 }
 
+func TestRateLimitRPMParsing(t *testing.T) {
+	baseEnv(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	assert.Equal(t, 100, cfg.RateLimitPerMinute, "production-safe default")
+
+	t.Setenv("RATE_LIMIT_RPM", "100000")
+	cfg, err = Load()
+	require.NoError(t, err)
+	assert.Equal(t, 100000, cfg.RateLimitPerMinute)
+
+	for _, bad := range []string{"0", "-5", "lots"} {
+		t.Setenv("RATE_LIMIT_RPM", bad)
+		_, err = Load()
+		require.Error(t, err, bad)
+		assert.Contains(t, err.Error(), "RATE_LIMIT_RPM")
+	}
+}
+
 func TestConfiguredPredicates(t *testing.T) {
 	baseEnv(t)
 	cfg, err := Load()

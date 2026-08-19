@@ -22,7 +22,7 @@ go build -o tmp/e2e-visual-server ./cmd/server
 echo "==> Starting test server on :18080"
 APP_ENV=test PORT=18080 DATABASE_URL="${HOST_DB}" \
   DEV_AUTH_BYPASS=true CLERK_PORTAL_URL=https://accounts.example.test \
-  TEST_NOW=2026-01-15T00:00:00Z \
+  TEST_NOW=2026-01-15T00:00:00Z RATE_LIMIT_RPM=100000 \
   ./tmp/e2e-visual-server &
 SERVER_PID=$!
 trap 'kill ${SERVER_PID} 2>/dev/null || true' EXIT

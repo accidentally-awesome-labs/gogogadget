@@ -38,6 +38,9 @@ export default defineConfig({
       DEV_AUTH_BYPASS: 'true',
       CLERK_PORTAL_URL: 'https://accounts.example.test',
       TEST_NOW: '2026-01-15T00:00:00Z',
+      // One IP drives the whole suite in parallel; the production default
+      // (100/min) sheds e2e traffic as abuse.
+      RATE_LIMIT_RPM: '100000',
     },
   },
   globalSetup: './global-setup.ts',

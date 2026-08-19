@@ -159,14 +159,18 @@ func (w *statusWriter) Flush() {
 // need it for SetWriteDeadline(…{}) without dropping the status capture.
 func (w *statusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 
-// rateLimit sheds load per client IP: 100 req/min, burst 200, on everything
-// except /static/*, /healthz, /ingest/*.
+// rateLimit sheds load per client IP: RATE_LIMIT_RPM req/min (default 100),
+// burst 2×, on everything except /static/*, /healthz, /ingest/*.
 //
 // NOTE: single-node only, by design. The limiter is in-process; when scaling
 // horizontally (fly scale count > 1), swap this for a shared store
 // (e.g. Upstash) — that is the documented upgrade trigger.
 func (s *Server) rateLimit(next http.Handler) http.Handler {
-	rl := newIPRateLimiter(rate.Every(time.Minute/100), 200)
+	rpm := s.cfg.RateLimitPerMinute
+	if rpm < 1 {
+		rpm = 100 // zero-value Config (tests constructing Server directly)
+	}
+	rl := newIPRateLimiter(rate.Every(time.Minute/time.Duration(rpm)), rpm*2)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if strings.HasPrefix(p, "/static/") || strings.HasPrefix(p, "/ingest/") || p == "/healthz" {
