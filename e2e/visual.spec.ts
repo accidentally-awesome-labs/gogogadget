@@ -31,7 +31,10 @@ const authedPages: Array<[string, string, 'pro' | 'admin']> = [
   ['admin', '/admin', 'admin'],
   ['admin-announcements', '/admin/announcements', 'admin'],
   ['admin-audit', '/admin/audit', 'admin'],
-  ['admin-jobs', '/admin/jobs', 'admin'],
+  // /admin/jobs is deliberately absent: the queue mutates between scrapes
+  // (workers claim/complete rows), so its pixels are not a stable baseline.
+  // a11y still covers the page.
+  ['admin-schedules', '/admin/schedules', 'admin'],
   ['forbidden', '/admin', 'pro'],
 ];
 

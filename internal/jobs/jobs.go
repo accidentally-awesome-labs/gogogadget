@@ -32,6 +32,22 @@ const (
 	KindExportProjectsCSV    = "export.projects_csv"
 )
 
+// SchedulableKinds are the kinds a schedule row may reference — handlers
+// whose payloads are job-specific (webhook.deliver carries a delivery id,
+// emails carry a recipient) can't be scheduled generically and are absent
+// by design. Builders extend this list as they add recurring handlers.
+var SchedulableKinds = []string{KindEmailDigest, KindUsageFlush}
+
+// SchedulableKindsContains reports whether kind may back a schedule row.
+func SchedulableKindsContains(kind string) bool {
+	for _, k := range SchedulableKinds {
+		if k == kind {
+			return true
+		}
+	}
+	return false
+}
+
 // ExportProjectsPayload is the handler-enqueued CSV export contract.
 type ExportProjectsPayload struct {
 	OrgID  string `json:"org_id"`

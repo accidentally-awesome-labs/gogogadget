@@ -1,0 +1,148 @@
+package templates
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+func fmtI64(v int64) string { return fmt.Sprintf("%d", v) }
+
+func fmtI32(v int32) string { return fmt.Sprintf("%d", v) }
+
+// SchedulesData carries the recurring-work table plus create-form state
+// (kept on 422 re-render, project-form convention).
+type SchedulesData struct {
+	Items         []sqlc.Schedule
+	Kinds         []string // schedulable kinds (jobs.SchedulableKinds), passed in — templates must not import jobs (import cycle via mail)
+	Orgs          []sqlc.Org
+	CreateName    string
+	CreateKind    string
+	CreatePayload string
+	CreateEvery   string
+	CreateOrg     string
+	Invalid       bool
+	Now           func() time.Time // render clock for relative times
+}
+
+func scheduleScope(s sqlc.Schedule) string {
+	if s.ClerkOrgID.Valid {
+		return s.ClerkOrgID.String
+	}
+	return "system"
+}
+
+templ AdminSchedulesPage(d SchedulesData) {
+	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.schedules.title") }</h1>
+	<div id="schedule-create-form" class="card mb-8 max-w-2xl">
+		<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "admin.schedules.create_title") }</h2>
+		<form hx-post="/admin/schedules" hx-target="#schedule-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="schedule-create-form" class="space-y-4">
+			if d.Invalid {
+				<div class="alert-error" role="alert">{ i18n.T(ctx, "admin.schedules.invalid") }</div>
+			}
+			<div class="grid sm:grid-cols-2 gap-4">
+				<div>
+					<label class="block text-sm font-medium mb-1" for="schedule-name">{ i18n.T(ctx, "admin.schedules.name_label") }</label>
+					<input id="schedule-name" type="text" name="name" value={ d.CreateName } class="input" placeholder={ i18n.T(ctx, "admin.schedules.name_placeholder") } />
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="schedule-kind">{ i18n.T(ctx, "admin.schedules.kind_label") }</label>
+					<select id="schedule-kind" name="kind" class="input">
+						for _, k := range d.Kinds {
+							<option value={ k } selected?={ k == d.CreateKind }>{ k }</option>
+						}
+					</select>
+				</div>
+			</div>
+			<div class="grid sm:grid-cols-2 gap-4">
+				<div>
+					<label class="block text-sm font-medium mb-1" for="schedule-every">{ i18n.T(ctx, "admin.schedules.every_label") }</label>
+					<input id="schedule-every" type="number" name="every_seconds" value={ d.CreateEvery } min="60" class="input" />
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="schedule-org">{ i18n.T(ctx, "admin.schedules.scope_label") }</label>
+					<select id="schedule-org" name="org" class="input">
+						<option value="">{ i18n.T(ctx, "admin.schedules.scope_system") }</option>
+						for _, o := range d.Orgs {
+							<option value={ o.ClerkOrgID } selected?={ o.ClerkOrgID == d.CreateOrg }>{ o.Name }</option>
+						}
+					</select>
+				</div>
+			</div>
+			<div>
+				<label class="block text-sm font-medium mb-1" for="schedule-payload">{ i18n.T(ctx, "admin.schedules.payload_label") }</label>
+				<input id="schedule-payload" type="text" name="payload" value={ d.CreatePayload } class="input" placeholder='{"filter":"unread"}' />
+			</div>
+			<div class="flex items-center gap-3">
+				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.schedules.create") }</button>
+				@Spinner()
+			</div>
+		</form>
+	</div>
+	<div class="card !p-0 overflow-hidden max-w-4xl" data-testid="schedules-table">
+		if len(d.Items) == 0 {
+			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "admin.schedules.empty") }</p>
+		} else {
+			<table class="table">
+				<thead>
+					<tr>
+						<th>{ i18n.T(ctx, "admin.schedules.col_name") }</th>
+						<th>{ i18n.T(ctx, "admin.schedules.col_kind") }</th>
+						<th>{ i18n.T(ctx, "admin.schedules.col_scope") }</th>
+						<th>{ i18n.T(ctx, "admin.schedules.col_every") }</th>
+						<th>{ i18n.T(ctx, "admin.schedules.col_enabled") }</th>
+						<th>{ i18n.T(ctx, "admin.schedules.col_next") }</th>
+						<th class="text-right">{ i18n.T(ctx, "admin.schedules.col_actions") }</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, row := range d.Items {
+						<tr data-testid={ "schedule-row-" + fmtI64(row.ID) }>
+							<td class="font-medium">{ row.Name }</td>
+							<td><code class="text-xs">{ row.Kind }</code></td>
+							<td class="text-fg-muted text-xs">{ scheduleScope(row) }</td>
+							<td>{ fmtI32(row.EverySeconds) }s</td>
+							<td>
+								<form hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/toggle" } hx-disable="this" class="inline">
+									<button type="submit" class={
+										"badge cursor-pointer",
+										templ.KV("bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300", row.Enabled),
+										templ.KV("bg-surface-raised text-fg-muted", !row.Enabled),
+									} data-testid={ "schedule-toggle-" + fmtI64(row.ID) }>
+										if row.Enabled {
+											{ i18n.T(ctx, "admin.schedules.on") }
+										} else {
+											{ i18n.T(ctx, "admin.schedules.off") }
+										}
+									</button>
+								</form>
+							</td>
+							<td>
+								<span data-testid="relative-time" title={ row.NextRunAt.Time.Format("2006-01-02 15:04") }>{ RelTime(d.Now(), row.NextRunAt.Time) }</span>
+							</td>
+							<td class="text-right">
+								<div class="flex justify-end gap-2">
+									if row.Enabled {
+										<button type="button" hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/run" }
+											class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "schedule-run-" + fmtI64(row.ID) }>
+											{ i18n.T(ctx, "admin.schedules.run_now") }
+										</button>
+									}
+									<button type="button" hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/delete" }
+										hx-confirm={ i18n.T(ctx, "admin.schedules.delete_confirm") }
+										class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400"
+										data-testid={ "schedule-delete-" + fmtI64(row.ID) }>
+										{ i18n.T(ctx, "admin.schedules.delete") }
+									</button>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+	<p class="text-xs text-fg-muted mt-3">{ i18n.T(ctx, "admin.schedules.hint") }</p>
+}

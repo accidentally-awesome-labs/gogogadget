@@ -109,6 +109,29 @@ func (q *Queries) DeleteSchedule(ctx context.Context, id int64) error {
 	return err
 }
 
+const getSchedule = `-- name: GetSchedule :one
+SELECT id, name, kind, payload, clerk_org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at FROM schedules WHERE id = $1
+`
+
+func (q *Queries) GetSchedule(ctx context.Context, id int64) (Schedule, error) {
+	row := q.db.QueryRow(ctx, getSchedule, id)
+	var i Schedule
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Kind,
+		&i.Payload,
+		&i.ClerkOrgID,
+		&i.EverySeconds,
+		&i.NextRunAt,
+		&i.LastRunAt,
+		&i.Enabled,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listSchedules = `-- name: ListSchedules :many
 SELECT id, name, kind, payload, clerk_org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at FROM schedules ORDER BY name
 `
@@ -143,6 +166,17 @@ func (q *Queries) ListSchedules(ctx context.Context) ([]Schedule, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const runScheduleNow = `-- name: RunScheduleNow :exec
+UPDATE schedules SET next_run_at = now(), updated_at = now() WHERE id = $1 AND enabled
+`
+
+// Fires the schedule on the next scheduler pass (worker polls every ~2s).
+// Guarded on enabled so a disabled row can't be sneak-fired.
+func (q *Queries) RunScheduleNow(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, runScheduleNow, id)
+	return err
 }
 
 const setScheduleEnabled = `-- name: SetScheduleEnabled :exec

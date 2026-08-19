@@ -115,17 +115,22 @@ test.describe('admin', () => {
     await page.goto('/app');
     await expect(page.getByTestId('announcement-banner')).toBeHidden();
 
-    // Deactivate → banner gone; delete EVERY matching row so re-runs start clean.
+    // Deactivate → banner gone; delete EVERY matching row so re-runs start
+    // clean. Delete-while-any (never a precomputed count): each Navigate
+    // re-renders the table, so a fixed loop bound races the re-render.
     await page.goto('/admin/announcements');
-    const stale = page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' });
-    const count = await stale.count();
-    for (let i = 0; i < count; i++) {
-      const current = page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' }).first();
-      const active = await current.getByRole('button', { name: 'Deactivate' }).count();
-      if (active) await current.getByRole('button', { name: 'Deactivate' }).click();
+    const stale = () => page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' });
+    for (let guard = 0; guard < 10 && (await stale().count()) > 0; guard++) {
+      const current = stale().first();
+      const rowId = await current.getAttribute('id');
+      if (await current.getByRole('button', { name: 'Deactivate' }).count()) {
+        await current.getByRole('button', { name: 'Deactivate' }).click();
+        await expect(page.getByTestId('toast').first()).toBeVisible();
+      }
       await current.getByRole('button', { name: 'Delete' }).click();
-      await expect(page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' })).toHaveCount(count - i - 1);
+      await expect(page.locator(`[id="${rowId}"]`)).toHaveCount(0);
     }
+    await expect(stale()).toHaveCount(0);
     await context.close();
   });
 
@@ -158,6 +163,44 @@ test.describe('admin', () => {
     await page.getByTestId(`flag-delete-${key}`).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
     await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(0);
+    await context.close();
+  });
+
+  test('schedules: create, run now, toggle, delete', async ({ browser }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+    page.on('dialog', (dialog) => dialog.accept());
+
+    await page.goto('/admin/schedules');
+    await expect(page.getByTestId('schedules-table')).toBeVisible();
+
+    // Create a system-wide hourly schedule.
+    await page.getByTestId('schedule-create-form').locator('#schedule-name').fill('E2E flush');
+    await page.getByTestId('schedule-create-form').locator('#schedule-kind').selectOption('usage.flush');
+    await page.getByTestId('schedule-create-form').locator('#schedule-every').fill('3600');
+    await page.getByTestId('schedule-create-form').getByRole('button', { name: 'Create schedule' }).click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+
+    const row = page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' }).last();
+    await expect(row).toBeVisible();
+    await expect(row).toContainText('usage.flush');
+    await expect(row).toContainText('system');
+
+    // Run now, then toggle off (the run button disappears when disabled).
+    await row.getByRole('button', { name: 'Run now' }).click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+    const again = page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' }).last();
+    await again.getByRole('button', { name: 'on' }).click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+
+    // Clean up every leftover row so re-runs start from the seeded state.
+    const stale = page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' });
+    const count = await stale.count();
+    for (let i = 0; i < count; i++) {
+      await page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' }).first()
+        .getByRole('button', { name: 'Delete' }).click();
+      await expect(page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' })).toHaveCount(count - i - 1);
+    }
     await context.close();
   });
 });

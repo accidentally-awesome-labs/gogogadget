@@ -30,6 +30,7 @@ for (const theme of ['light', 'dark'] as const) {
       ['/admin/announcements', 'admin'],
       ['/admin/audit', 'admin'],
       ['/admin/jobs', 'admin'],
+      ['/admin/schedules', 'admin'],
     ];
     for (const [path, user] of authedPages) {
       test(`authed ${path}`, async ({ browser }) => {

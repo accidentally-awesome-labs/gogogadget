@@ -8,6 +8,9 @@ RETURNING *;
 -- name: ListSchedules :many
 SELECT * FROM schedules ORDER BY name;
 
+-- name: GetSchedule :one
+SELECT * FROM schedules WHERE id = $1;
+
 -- name: SetScheduleEnabled :exec
 UPDATE schedules SET enabled = $2, updated_at = now() WHERE id = $1;
 
@@ -26,3 +29,8 @@ WHERE id IN (
   FOR UPDATE SKIP LOCKED
 )
 RETURNING *;
+
+-- name: RunScheduleNow :exec
+-- Fires the schedule on the next scheduler pass (worker polls every ~2s).
+-- Guarded on enabled so a disabled row can't be sneak-fired.
+UPDATE schedules SET next_run_at = now(), updated_at = now() WHERE id = $1 AND enabled;

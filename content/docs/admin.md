@@ -74,3 +74,22 @@ outside `#content` (it survives boosted navigation). Session semantics:
   optional link; each visitor can dismiss it per-browser. Admin mutations
   invalidate a 30s server-side cache, so activation takes effect on the next
   render.
+
+## Schedules
+
+`/admin/schedules` is the UI over the `schedules` table the worker's
+scheduler pass claims each poll cycle. Create takes a name, a **schedulable
+kind**, an interval (60s–30 days), an optional JSON payload, and a scope
+(system-wide or one org). Only kinds in `jobs.SchedulableKinds` are offered:
+handlers whose payloads are job-specific (`webhook.deliver` carries a
+delivery id, the email kinds carry a recipient) can't be scheduled
+generically — extend that list as you add recurring handlers.
+
+Rows toggle enabled/disabled, delete, and offer **Run now**, which sets
+`next_run_at = now()` so the schedule fires on the next worker pass (~2s).
+Run-now is guarded on `enabled` — a disabled schedule cannot be sneak-fired.
+Missed ticks are skipped by design: `ClaimDueSchedules` advances
+`next_run_at` to `now() + interval` in the claiming statement, so an outage
+never produces a catch-up stampede. Every mutation writes an audit row
+(`schedule.created` / `schedule.updated` / `schedule.run_now` /
+`schedule.deleted`).

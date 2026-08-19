@@ -42,7 +42,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Mobile nav** — hamburger drawer in the app topbar; the sidebar nav is shared, not duplicated.
 - **Public API** — org-scoped Bearer tokens (`ggg_…`), `/api/v1/projects`, JSON error shape.
 - **Content** — markdown blog + RSS + sitemap + OG; docs section rendered in-app (`/docs`) with ranked search (`/docs/search`).
-- **Platform** — Postgres job queue, audit log (configurable retention), rate limiting, strict CSP, CSRF, structured logs, Sentry + PostHog hooks, `/healthz` + `/readyz` + `/metrics` (Prometheus, bearer-gated).
+- **Platform** — Postgres job queue + schedules admin, audit log (configurable retention), rate limiting, strict CSP, CSRF, structured logs, Sentry + PostHog hooks, `/healthz` + `/readyz` + `/metrics` (Prometheus, bearer-gated).
 - **Testing** — unit + integration (per-package test DBs) + seam contract suites + fuzz tests for trust-boundary parsers + race detector + Playwright e2e + docker-pinned visual baselines + a11y (axe) + smoke and docker-build CI jobs.
 
 ## Quick start
