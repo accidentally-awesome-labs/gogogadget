@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	contentfs "github.com/gogogadget/gogogadget/content"
 	"github.com/getsentry/sentry-go"
+	contentfs "github.com/gogogadget/gogogadget/content"
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -153,8 +153,8 @@ func run() error {
 		Blog: blog, Docs: docs,
 		Verifier: verifier, Fetcher: fetcher, IdentityDeleter: deleter,
 		Billing: polarClient, Analytics: capturer,
-		Storage: fileStore,
-		LLM:     completer,
+		Storage:  fileStore,
+		LLM:      completer,
 		Reporter: reporter,
 	})
 
@@ -171,7 +171,8 @@ func run() error {
 	// Background jobs worker (SKIP LOCKED claim; stops on shutdown signal).
 	worker := jobs.NewWorker(sqlc.New(pool), sender, log)
 	worker.Billing = polarClient // nil-safe: usage.flush no-ops when unconfigured
-	worker.Storage = fileStore   // export jobs write through the same seam
+	worker.AuditRetentionDays = cfg.AuditRetentionDays
+	worker.Storage = fileStore // export jobs write through the same seam
 	if cfg.SentryEnabled() {
 		worker.OnDeadLetter = func(kind string, err error) {
 			reporter.Capture(fmt.Errorf("job %s dead-lettered: %w", kind, err))

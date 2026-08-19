@@ -25,9 +25,16 @@ test('badge, page, read-all flow', async ({ browser }) => {
   expect(await before.text()).toContain('rounded-full');
 
   await page.getByTestId('notifications-read-all').click();
-  const after = await page.request.get('/app/notifications/badge');
-  expect(after.ok()).toBeTruthy();
-  expect(await after.text()).not.toContain('rounded-full');
+  // The click resolves on click, not on the htmx swap — poll the badge
+  // until read-all lands (a single immediate read races the POST under
+  // parallel-suite load and flakes).
+  await expect
+    .poll(async () => {
+      const after = await page.request.get('/app/notifications/badge');
+      expect(after.ok()).toBeTruthy();
+      return (await after.text()).includes('rounded-full');
+    })
+    .toBe(false);
 
   await context.close();
 });

@@ -34,6 +34,20 @@ func (q *Queries) CountAuditByOrg(ctx context.Context, clerkOrgID pgtype.Text) (
 	return count, err
 }
 
+const deleteOldAuditRows = `-- name: DeleteOldAuditRows :execrows
+DELETE FROM audit_log WHERE created_at < $1
+`
+
+// Retention janitor: AUDIT_RETENTION_DAYS > 0 deletes older rows. Returns
+// the count for logging. 0 = retain forever (the documented default).
+func (q *Queries) DeleteOldAuditRows(ctx context.Context, createdAt pgtype.Timestamptz) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteOldAuditRows, createdAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const insertAuditLog = `-- name: InsertAuditLog :one
 INSERT INTO audit_log (clerk_org_id, clerk_user_id, action, metadata)
 VALUES ($1, $2, $3, $4)

@@ -175,7 +175,8 @@ the escape hatch physically cannot reach production. See
 
 Two deliberate survivors: **audit rows are retained** (`audit_log` has no
 foreign keys by design — the audit trail outlives the entities it records;
-retention is currently unbounded, see the roadmap), and **R2 objects** remain
+retention is configurable via `AUDIT_RETENTION_DAYS`, 0 = forever by
+default), and **R2 objects** remain
 in the bucket (the DB rows pointing at them are gone; a lifecycle rule on the
 bucket is the platform owner's call).
 

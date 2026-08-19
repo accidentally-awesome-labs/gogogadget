@@ -223,6 +223,18 @@ func TestRoundtripEveryTable(t *testing.T) {
 	_, err = q.GetImpersonationSession(ctx, sess.ID)
 	require.ErrorIs(t, err, pgx.ErrNoRows)
 
+	// audit retention: future cutoff deletes, past cutoff keeps
+	future := pgtype.Timestamptz{Time: time.Now().Add(time.Hour), Valid: true}
+	n, err = q.DeleteOldAuditRows(ctx, future)
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), n, "cutoff in the future deletes everything inserted so far")
+	past := pgtype.Timestamptz{Time: time.Now().Add(-24 * time.Hour), Valid: true}
+	_, err = q.InsertAuditLog(ctx, sqlc.InsertAuditLogParams{Action: "retention.check", Metadata: []byte(`{}`)})
+	require.NoError(t, err)
+	n, err = q.DeleteOldAuditRows(ctx, past)
+	require.NoError(t, err)
+	assert.Equal(t, int64(0), n, "cutoff in the past deletes nothing recent")
+
 	// sole-admin guard
 	admins, err := q.CountAdminsByOrg(ctx, "org_rt1")
 	require.NoError(t, err)

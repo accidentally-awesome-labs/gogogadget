@@ -43,3 +43,8 @@ LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
 WHERE a.clerk_user_id = sqlc.arg(user_id)
 ORDER BY a.created_at DESC
 LIMIT sqlc.arg(lim);
+
+-- Retention janitor: AUDIT_RETENTION_DAYS > 0 deletes older rows. Returns
+-- the count for logging. 0 = retain forever (the documented default).
+-- name: DeleteOldAuditRows :execrows
+DELETE FROM audit_log WHERE created_at < $1;

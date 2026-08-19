@@ -96,6 +96,9 @@ type Worker struct {
 	// Billing is the usage-flush target: nil (unconfigured) → flush no-ops
 	// and events stay local. Set in cmd/server when Polar is configured.
 	Billing billing.Client
+	// AuditRetentionDays > 0 makes the janitor delete audit rows older than
+	// that many days (AUDIT_RETENTION_DAYS). 0 = retain forever.
+	AuditRetentionDays int
 	// Storage is the export target; set in cmd/server. Nil → export fails
 	// loudly (the handler should not enqueue without it).
 	Storage storage.Store
@@ -152,6 +155,15 @@ func (w *Worker) janitorPass(ctx context.Context) {
 	}
 	if err := w.q.DeleteOldWebhookEvents(ctx); err != nil {
 		w.log.Error("janitor webhook_events", "error", err)
+	}
+	if w.AuditRetentionDays > 0 {
+		cutoff := pgtype.Timestamptz{Time: time.Now().AddDate(0, 0, -w.AuditRetentionDays), Valid: true}
+		n, err := w.q.DeleteOldAuditRows(ctx, cutoff)
+		if err != nil {
+			w.log.Error("janitor audit_log", "error", err)
+		} else if n > 0 {
+			w.log.Info("janitor audit_log", "deleted", n, "retention_days", w.AuditRetentionDays)
+		}
 	}
 }
 

@@ -217,3 +217,46 @@ func TestSchedulerClaimsDueAndEnqueues(t *testing.T) {
 	require.NoError(t, pool.QueryRow(ctx, "SELECT count(*) FROM jobs WHERE kind = $1", KindEmailDigest).Scan(&n))
 	assert.Equal(t, 1, n)
 }
+
+func TestJanitorAppliesAuditRetention(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsret")
+	ctx := context.Background()
+
+	// Two audit rows: one stale, one fresh — created_at is defaulted to
+	// now(), so backdate the stale one directly.
+	for _, action := range []string{"retention.stale", "retention.fresh"} {
+		if _, err := q.InsertAuditLog(ctx, sqlc.InsertAuditLogParams{Action: action, Metadata: []byte(`{}`)}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := pool.Exec(ctx, `UPDATE audit_log SET created_at = now() - interval '90 days' WHERE action = 'retention.stale'`); err != nil {
+		t.Fatal(err)
+	}
+
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	w := NewWorker(q, nil, log)
+	w.AuditRetentionDays = 30
+	w.janitorPass(ctx)
+
+	rows, err := q.ListAuditAll(ctx, sqlc.ListAuditAllParams{Filter: "retention.", Off: 0, Lim: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 || rows[0].Action != "retention.fresh" {
+		t.Fatalf("expected only the fresh row, got %d rows", len(rows))
+	}
+
+	// Retention disabled (0) must never delete.
+	if _, err := pool.Exec(ctx, `UPDATE audit_log SET created_at = now() - interval '400 days' WHERE action = 'retention.fresh'`); err != nil {
+		t.Fatal(err)
+	}
+	w.AuditRetentionDays = 0
+	w.janitorPass(ctx)
+	rows, err = q.ListAuditAll(ctx, sqlc.ListAuditAllParams{Filter: "retention.", Off: 0, Lim: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 {
+		t.Fatalf("retention=0 deleted rows: %d remain", len(rows))
+	}
+}
