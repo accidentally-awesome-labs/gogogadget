@@ -16,6 +16,8 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Capability | What landed |
 |---|---|
 | Admin audit-log viewer | `/admin/audit` |
+| Docs search | `/docs/search?q=` — sidebar box, ranked results with snippets |
+| Flags admin | Create/delete + per-org overrides at `/admin/flags/{key}`; evaluator cache invalidated on mutation |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -28,11 +30,9 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 
 | Gap | Evidence of absence | One-line approach |
 |---|---|---|
-| Flags admin: create/delete flags + per-org override UI | Only toggle/rollout exist — `internal/web/handlers_admin_flags.go`; `UpsertFlagOverride` in `internal/db/queries/feature_flags.sql` is unused by UI | Extend the existing admin page with CRUD + override rows |
 | Schedules admin UI | `schedules` table + `internal/jobs` scheduler pass exist; no UI — `internal/db/queries/schedules.sql` | Admin list/create/delete mirroring the flags page |
 | OpenAPI spec + API expansion | Only 3 endpoints (projects list/create, ai/chat) — `internal/web/routes.go`; no spec; offset pagination only; no idempotency keys on POST; no per-token rate limits | Author `openapi.yaml`, then grow endpoints against it |
 | Metrics/tracing | Sentry seam exists in `internal/observability`, no metrics/tracing; pprof is non-prod only — `internal/web/routes.go` | `/metrics` Prometheus endpoint or an OTel OTLP exporter |
-| Docs search | 26 pages, no search — `internal/content/content.go`; Postgres FTS pattern already proven by projects search (migration `0010_projects_search.sql`) | Index docs into a tsvector table, reuse the FTS + ILIKE-fallback query shape |
 | Impersonation reason capture + approval trail | Impersonation exists, no required-reason field — migration `0009_impersonation.sql`; norms: reason + immutable separate log | Require a reason at session start; write to a separate append-only log |
 | Webhook secret rotation + token rotation UX | Secrets minted once — `internal/webhooks/webhooks.go` `NewSecret` | Add rotate-with-grace-period flow in settings |
 | Audit retention policy config | Retention norms: auth 12mo / admin 24mo / impersonation 36mo; today retention is unbounded | Scheduled purge job with per-category env-configured windows |

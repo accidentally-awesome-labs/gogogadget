@@ -34,3 +34,7 @@ LIMIT $1 OFFSET $2;
 
 -- name: CountOrgs :one
 SELECT count(*) FROM orgs;
+
+-- ListOrgs feeds admin org pickers (no stats baggage).
+-- name: ListOrgs :many
+SELECT * FROM orgs ORDER BY name;

@@ -7,27 +7,64 @@ import (
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
+// FlagsData carries the flag table plus the create-form state (kept on 422
+// re-render, project-form convention).
+type FlagsData struct {
+	Flags            []sqlc.FeatureFlag
+	CreateKey        string
+	CreateDescription string
+	CreateErr        string
+}
+
 // AdminFlagsPage is the feature-flag table: key, description, enabled,
-// rollout — with per-row toggle and rollout form.
-templ AdminFlagsPage(flags []sqlc.FeatureFlag) {
+// rollout — with per-row toggle, rollout form, delete, and a create form.
+// The key cell links to the per-org override detail page.
+templ AdminFlagsPage(d FlagsData) {
 	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "flags.title") }</h1>
+	<div id="flag-create-form" class="card mb-8 max-w-3xl">
+		<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "flags.create_title") }</h2>
+		<form hx-post="/admin/flags" hx-target="#flag-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="flag-create-form" class="space-y-4">
+			if d.CreateErr != "" {
+				<div class="alert-error" role="alert">{ d.CreateErr }</div>
+			}
+			<div class="grid sm:grid-cols-2 gap-4">
+				<div>
+					<label class="block text-sm font-medium mb-1" for="flag-key">{ i18n.T(ctx, "flags.key_label") }</label>
+					<input id="flag-key" type="text" name="key" value={ d.CreateKey } placeholder={ i18n.T(ctx, "flags.key_placeholder") } class="input" />
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="flag-rollout">{ i18n.T(ctx, "flags.rollout_label") }</label>
+					<input id="flag-rollout" type="number" name="rollout" value="100" min="0" max="100" class="input" />
+				</div>
+			</div>
+			<div>
+				<label class="block text-sm font-medium mb-1" for="flag-description">{ i18n.T(ctx, "flags.description_label") }</label>
+				<input id="flag-description" type="text" name="description" value={ d.CreateDescription } placeholder={ i18n.T(ctx, "flags.description_placeholder") } class="input" />
+			</div>
+			<div class="flex items-center gap-3">
+				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "flags.create") }</button>
+				@Spinner()
+			</div>
+		</form>
+	</div>
 	<div class="card !p-0 overflow-hidden max-w-3xl">
-		<table class="table">
+		<table class="table" data-testid="flags-table">
 			<thead>
 				<tr>
 					<th>{ i18n.T(ctx, "flags.col_key") }</th>
 					<th>{ i18n.T(ctx, "flags.col_description") }</th>
 					<th>{ i18n.T(ctx, "flags.col_enabled") }</th>
 					<th>{ i18n.T(ctx, "flags.col_rollout") }</th>
+					<th class="text-right">{ i18n.T(ctx, "flags.col_actions") }</th>
 				</tr>
 			</thead>
 			<tbody>
-				if len(flags) == 0 {
-					<tr><td colspan="4" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "flags.empty") }</td></tr>
+				if len(d.Flags) == 0 {
+					<tr><td colspan="5" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "flags.empty") }</td></tr>
 				}
-				for _, f := range flags {
+				for _, f := range d.Flags {
 					<tr data-testid="flag-row">
-						<td><code class="text-xs font-medium">{ f.Key }</code></td>
+						<td><a href={ "/admin/flags/" + f.Key } class="font-medium text-brand-600 dark:text-brand-400"><code class="text-xs">{ f.Key }</code></a></td>
 						<td class="text-fg-muted text-xs">{ f.Description }</td>
 						<td>
 							<form hx-post={ fmt.Sprintf("/admin/flags/%s/toggle", f.Key) } hx-disable="this" class="inline">
@@ -50,10 +87,91 @@ templ AdminFlagsPage(flags []sqlc.FeatureFlag) {
 								<button type="submit" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "flags.set") }</button>
 							</form>
 						</td>
+						<td class="text-right">
+							<button type="button" hx-post={ fmt.Sprintf("/admin/flags/%s/delete", f.Key) }
+								hx-confirm={ i18n.T(ctx, "flags.delete_confirm") }
+								class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400"
+								data-testid={ "flag-delete-" + f.Key }>
+								{ i18n.T(ctx, "flags.delete") }
+							</button>
+						</td>
 					</tr>
 				}
 			</tbody>
 		</table>
 	</div>
 	<p class="text-xs text-fg-muted mt-3">{ i18n.T(ctx, "flags.hint") }</p>
+}
+
+// AdminFlagDetailPage shows one flag and its per-org overrides. Overrides
+// win over the global setting in both directions and are read per
+// evaluation (no cache), so they apply immediately.
+templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverridesByFlagRow, orgs []sqlc.Org) {
+	<h1 class="text-2xl font-bold mb-2"><code class="text-xl">{ flag.Key }</code></h1>
+	<p class="text-fg-muted text-sm mb-1">{ flag.Description }</p>
+	<p class="text-sm mb-8">
+		if flag.Enabled {
+			<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "flags.on") }</span>
+		} else {
+			<span class="badge bg-surface-raised text-fg-muted">{ i18n.T(ctx, "flags.off") }</span>
+		}
+		<span class="text-fg-muted ml-2">{ i18n.T(ctx, "flags.col_rollout") }: { fmt.Sprint(flag.Rollout) }%</span>
+		<a href="/admin/flags" class="link ml-4 text-sm">{ i18n.T(ctx, "flags.back") }</a>
+	</p>
+
+	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "flags.overrides_heading") }</h2>
+	<div class="card !p-0 overflow-hidden max-w-3xl mb-6" data-testid="flag-overrides">
+		if len(overrides) == 0 {
+			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "flags.overrides_empty") }</p>
+		} else {
+			<table class="table">
+				<thead>
+					<tr><th>{ i18n.T(ctx, "flags.col_org") }</th><th>{ i18n.T(ctx, "flags.col_override") }</th><th class="text-right">{ i18n.T(ctx, "flags.col_actions") }</th></tr>
+				</thead>
+				<tbody>
+					for _, o := range overrides {
+						<tr data-testid={ "flag-override-" + o.ClerkOrgID }>
+							<td class="font-medium">{ o.Name }</td>
+							<td>
+								if o.OverrideEnabled {
+									<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "flags.on") }</span>
+								} else {
+									<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">{ i18n.T(ctx, "flags.off") }</span>
+								}
+							</td>
+							<td class="text-right">
+								<button type="button" hx-post={ "/admin/flags/" + flag.Key + "/overrides/" + o.ClerkOrgID + "/delete" }
+									hx-confirm={ i18n.T(ctx, "flags.override_delete_confirm") }
+									class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400"
+									data-testid={ "flag-override-delete-" + o.ClerkOrgID }>
+									{ i18n.T(ctx, "flags.override_delete") }
+								</button>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+
+	<form hx-post={ "/admin/flags/" + flag.Key + "/overrides" } hx-swap="none" novalidate hx-disable="this" class="card max-w-3xl space-y-4" data-testid="flag-override-form">
+		<div class="grid sm:grid-cols-[1fr_auto_auto] gap-4 items-end">
+			<div>
+				<label class="block text-sm font-medium mb-1" for="override-org">{ i18n.T(ctx, "flags.override_org_label") }</label>
+				<select id="override-org" name="org" class="input">
+					for _, o := range orgs {
+						<option value={ o.ClerkOrgID }>{ o.Name }</option>
+					}
+				</select>
+			</div>
+			<div>
+				<label class="block text-sm font-medium mb-1" for="override-state">{ i18n.T(ctx, "flags.override_state_label") }</label>
+				<select id="override-state" name="state" class="input">
+					<option value="on">{ i18n.T(ctx, "flags.on") }</option>
+					<option value="off">{ i18n.T(ctx, "flags.off") }</option>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "flags.override_add") }</button>
+		</div>
+	</form>
 }

@@ -83,6 +83,38 @@ func (q *Queries) GetOrgsForUser(ctx context.Context, clerkUserID string) ([]Org
 	return items, nil
 }
 
+const listOrgs = `-- name: ListOrgs :many
+SELECT clerk_org_id, name, slug, image_url, created_at, updated_at FROM orgs ORDER BY name
+`
+
+// ListOrgs feeds admin org pickers (no stats baggage).
+func (q *Queries) ListOrgs(ctx context.Context) ([]Org, error) {
+	rows, err := q.db.Query(ctx, listOrgs)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Org
+	for rows.Next() {
+		var i Org
+		if err := rows.Scan(
+			&i.ClerkOrgID,
+			&i.Name,
+			&i.Slug,
+			&i.ImageUrl,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listOrgsWithStats = `-- name: ListOrgsWithStats :many
 SELECT o.clerk_org_id, o.name, o.slug, o.image_url, o.created_at, o.updated_at,
   (SELECT count(*) FROM org_members m WHERE m.clerk_org_id = o.clerk_org_id) AS member_count,

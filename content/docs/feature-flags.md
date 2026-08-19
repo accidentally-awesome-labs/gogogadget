@@ -42,8 +42,19 @@ Templates see the gate through a context value — the Webhooks tab pattern:
 ## Admin UI
 
 `/admin/flags` lists every flag (key, description, enabled badge, rollout
-input 0–100). The badge toggles on click; the rollout form sets the
-percentage. Both write `flag.updated` audit rows.
+input 0–100, delete). The badge toggles on click; the rollout form sets the
+percentage; delete removes the flag and cascades its overrides (FK, migration
+0008). The create form adds flags — keys are lowercase letters, digits, and
+dashes (max 64); new flags start **off**. Every mutation writes an audit row
+(`flag.created` / `flag.updated` / `flag.deleted` / `flag.override`) and
+drops the evaluator's 30s flag-row cache, so changes apply on the next
+render — including deletions, which would otherwise keep serving for up to
+the TTL.
+
+Clicking a flag's key opens `/admin/flags/{key}`: the per-org override
+table plus a set-override form (org, on/off). Overrides win over the global
+setting in both directions and are read per evaluation (never cached), so
+they apply immediately.
 
 ## Gate a feature
 
@@ -52,5 +63,5 @@ percentage. Both write `flag.updated` audit rows.
 2. Guard the handler: `if !s.flags.Enabled(ctx, org.ClerkOrgID, "beta_search") { 404 }`.
 3. Hide the UI behind the same evaluation (context value like
    `WithWebhooksEnabled`, or pass a bool in the view data).
-4. Roll out: admin UI 0 → 10 → 50 → 100, or per-org overrides via SQL
-   (`flag_overrides`).
+4. Roll out: admin UI 0 → 10 → 50 → 100, or per-org overrides from the
+   flag's detail page (`/admin/flags/{key}`).

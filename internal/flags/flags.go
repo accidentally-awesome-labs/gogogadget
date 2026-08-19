@@ -31,6 +31,16 @@ func NewDBEvaluator(q *sqlc.Queries, ttl time.Duration) *DBEvaluator {
 	return &DBEvaluator{q: q, ttl: ttl}
 }
 
+// Invalidate drops the flag-row cache so the next evaluation re-reads the
+// table. Admin mutations call it: without it, a created flag stays missing
+// and a deleted flag stays ON for up to the TTL.
+func (e *DBEvaluator) Invalidate() {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.cached = nil
+	e.expires = time.Time{}
+}
+
 func (e *DBEvaluator) flags(ctx context.Context) map[string]sqlc.FeatureFlag {
 	e.mu.Lock()
 	defer e.mu.Unlock()

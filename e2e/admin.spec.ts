@@ -128,4 +128,36 @@ test.describe('admin', () => {
     }
     await context.close();
   });
+
+  test('flags: create, override per org, delete', async ({ browser }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+    page.on('dialog', (dialog) => dialog.accept());
+    const key = 'flag-e2e-flow';
+
+    // Create (retry-safe: delete leftovers from a failed prior run first).
+    await page.goto('/admin/flags');
+    const leftover = page.locator(`[data-testid="flag-delete-${key}"]`);
+    if (await leftover.count()) await leftover.click();
+
+    await page.getByTestId('flag-create-form').locator('#flag-key').fill(key);
+    await page.getByTestId('flag-create-form').locator('#flag-description').fill('e2e flow flag');
+    await page.getByTestId('flag-create-form').getByRole('button', { name: 'Create flag' }).click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+
+    // Detail: set an ON override for Free Org (global is off).
+    await page.goto(`/admin/flags/${key}`);
+    await page.locator('#override-org').selectOption({ label: 'Free Org' });
+    await page.locator('#override-state').selectOption('on');
+    await page.getByTestId('flag-override-form').getByRole('button', { name: 'Set override' }).click();
+    await expect(page.getByTestId('flag-override-org_free')).toBeVisible();
+    await expect(page.getByTestId('flag-override-org_free')).toContainText('on');
+
+    // Delete the flag — overrides cascade.
+    await page.goto('/admin/flags');
+    await page.getByTestId(`flag-delete-${key}`).click();
+    await expect(page.getByTestId('toast').first()).toBeVisible();
+    await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(0);
+    await context.close();
+  });
 });

@@ -131,3 +131,26 @@ func TestDBEvaluatorCanceledContextFailsClosed(t *testing.T) {
 	require.False(t, e.Enabled(canceled, "org_any", "flag_canceled"))
 	require.False(t, e.Enabled(canceled, "org_any", "flag_never_created"))
 }
+
+func TestDBEvaluatorInvalidateDropsCache(t *testing.T) {
+	_, q := testdb.Open(t, "flagsinv")
+	ctx := context.Background()
+	insertFlag(t, ctx, q, "flag_inv", false, 100)
+
+	e := freshEvaluator(q)
+	require.False(t, e.Enabled(ctx, "org_inv", "flag_inv"))
+
+	// Mutate BEHIND the evaluator's back; the 30s cache still serves old.
+	require.NoError(t, q.SetFeatureFlagEnabled(ctx, sqlc.SetFeatureFlagEnabledParams{Key: "flag_inv", Enabled: true}))
+	require.False(t, e.Enabled(ctx, "org_inv", "flag_inv"), "cached value before TTL")
+
+	// Invalidate → next evaluation re-reads.
+	e.Invalidate()
+	require.True(t, e.Enabled(ctx, "org_inv", "flag_inv"), "fresh read after Invalidate")
+
+	// And a deleted flag stops evaluating after Invalidate.
+	require.NoError(t, q.DeleteFeatureFlag(ctx, "flag_inv"))
+	require.True(t, e.Enabled(ctx, "org_inv", "flag_inv"), "still cached")
+	e.Invalidate()
+	require.False(t, e.Enabled(ctx, "org_inv", "flag_inv"), "missing key after Invalidate")
+}

@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 	"testing"
 	"time"
@@ -101,4 +102,77 @@ func TestAdminFlagToggleGatesWebhooksTab(t *testing.T) {
 	assert.NotContains(t, body, "/app/settings/webhooks", "tab hidden when flag off")
 	code, _, _ = serve(t, s, "GET", "/app/settings/webhooks", nil, nil, cookie)
 	assert.Equal(t, http.StatusNotFound, code, "route 404s when flag off")
+}
+
+func TestAdminFlagCreateAndDuplicate(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_fc", "org_fc")
+
+	form := url.Values{"key": []string{"Bad Key!"}, "description": []string{"x"}, "rollout": []string{"100"}}
+	code, _, body := postForm(t, s, "/admin/flags", form, sessionCookie("user_fc", "org_fc", "org:admin"))
+	assert.Equal(t, http.StatusUnprocessableEntity, code, "invalid key rejected")
+	assert.Contains(t, body, "alert-error")
+
+	form = url.Values{"key": []string{"flag-e2e-new"}, "description": []string{"created by test"}, "rollout": []string{"100"}}
+	code, _, _ = postForm(t, s, "/admin/flags", form, sessionCookie("user_fc", "org_fc", "org:admin"))
+	assert.Equal(t, http.StatusOK, code)
+	flag, err := s.q.GetFeatureFlag(t.Context(), "flag-e2e-new")
+	require.NoError(t, err)
+	assert.False(t, flag.Enabled, "flags are created off")
+	assert.EqualValues(t, 100, flag.Rollout)
+
+	// Duplicate key → 422, values kept.
+	code, _, body = postForm(t, s, "/admin/flags", form, sessionCookie("user_fc", "org_fc", "org:admin"))
+	assert.Equal(t, http.StatusUnprocessableEntity, code)
+	assert.Contains(t, body, "already exists")
+}
+
+func TestAdminFlagDetailAndOverrides(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_fo", "org_fo")
+	seedOrg(t, s, "org_fo2", "Override Org")
+	require.NoError(t, s.q.UpsertFeatureFlag(t.Context(), sqlc.UpsertFeatureFlagParams{Key: "flag_ov", Description: "", Enabled: false, Rollout: 100}))
+	s.invalidateFlagCache()
+	cookie := sessionCookie("user_fo", "org_fo", "org:admin")
+
+	// Detail renders with the add-override form and no overrides.
+	code, _, body := serve(t, s, "GET", "/admin/flags/flag_ov", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="flag-override-form"`)
+	assert.Contains(t, body, `data-testid="flag-overrides"`)
+
+	// Set an ON override for org_fo2 (global is off): evaluator flips for
+	// that org IMMEDIATELY (overrides are uncached).
+	form := url.Values{"org": []string{"org_fo2"}, "state": []string{"on"}}
+	code, _, _ = postForm(t, s, "/admin/flags/flag_ov/overrides", form, cookie)
+	assert.Equal(t, http.StatusOK, code)
+	assert.True(t, s.flags.Enabled(t.Context(), "org_fo2", "flag_ov"), "override wins over global off")
+	assert.False(t, s.flags.Enabled(t.Context(), "org_other", "flag_ov"), "other orgs keep global")
+
+	code, _, body = serve(t, s, "GET", "/admin/flags/flag_ov", nil, nil, cookie)
+	assert.Contains(t, body, `data-testid="flag-override-org_fo2"`)
+
+	// Remove the override → back to global.
+	code, _, _ = postForm(t, s, "/admin/flags/flag_ov/overrides/org_fo2/delete", nil, cookie)
+	assert.Equal(t, http.StatusOK, code)
+	assert.False(t, s.flags.Enabled(t.Context(), "org_fo2", "flag_ov"), "org follows global after removal")
+}
+
+func TestAdminFlagDeleteCascadesOverrides(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_fd", "org_fd")
+	require.NoError(t, s.q.UpsertFeatureFlag(t.Context(), sqlc.UpsertFeatureFlagParams{Key: "flag_del", Description: "", Enabled: true, Rollout: 100}))
+	require.NoError(t, s.q.UpsertFlagOverride(t.Context(), sqlc.UpsertFlagOverrideParams{FlagKey: "flag_del", ClerkOrgID: "org_fd", Enabled: false}))
+	s.invalidateFlagCache()
+	cookie := sessionCookie("user_fd", "org_fd", "org:admin")
+
+	code, _, _ := postForm(t, s, "/admin/flags/flag_del/delete", nil, cookie)
+	assert.Equal(t, http.StatusOK, code)
+
+	_, err := s.q.GetFeatureFlag(t.Context(), "flag_del")
+	require.Error(t, err, "flag row deleted")
+	overrides, err := s.q.ListFlagOverridesByFlag(t.Context(), "flag_del")
+	require.NoError(t, err)
+	assert.Empty(t, overrides, "FK cascade removed the override rows")
+	assert.False(t, s.flags.Enabled(t.Context(), "org_fd", "flag_del"), "evaluator stops serving the deleted flag (invalidated)")
 }

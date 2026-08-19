@@ -9,6 +9,31 @@ import (
 	"context"
 )
 
+const deleteFeatureFlag = `-- name: DeleteFeatureFlag :exec
+DELETE FROM feature_flags WHERE key = $1
+`
+
+// DeleteFeatureFlag removes the flag; flag_overrides cascade (FK ON DELETE
+// CASCADE, migration 0008).
+func (q *Queries) DeleteFeatureFlag(ctx context.Context, key string) error {
+	_, err := q.db.Exec(ctx, deleteFeatureFlag, key)
+	return err
+}
+
+const deleteFlagOverride = `-- name: DeleteFlagOverride :exec
+DELETE FROM flag_overrides WHERE flag_key = $1 AND clerk_org_id = $2
+`
+
+type DeleteFlagOverrideParams struct {
+	FlagKey    string `json:"flag_key"`
+	ClerkOrgID string `json:"clerk_org_id"`
+}
+
+func (q *Queries) DeleteFlagOverride(ctx context.Context, arg DeleteFlagOverrideParams) error {
+	_, err := q.db.Exec(ctx, deleteFlagOverride, arg.FlagKey, arg.ClerkOrgID)
+	return err
+}
+
 const getFeatureFlag = `-- name: GetFeatureFlag :one
 SELECT key, description, enabled, rollout, updated_at FROM feature_flags WHERE key = $1
 `
@@ -64,6 +89,41 @@ func (q *Queries) ListFeatureFlags(ctx context.Context) ([]FeatureFlag, error) {
 			&i.Rollout,
 			&i.UpdatedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listFlagOverridesByFlag = `-- name: ListFlagOverridesByFlag :many
+SELECT o.clerk_org_id, o.name, f.enabled AS override_enabled
+FROM flag_overrides f
+JOIN orgs o ON o.clerk_org_id = f.clerk_org_id
+WHERE f.flag_key = $1
+ORDER BY o.name
+`
+
+type ListFlagOverridesByFlagRow struct {
+	ClerkOrgID      string `json:"clerk_org_id"`
+	Name            string `json:"name"`
+	OverrideEnabled bool   `json:"override_enabled"`
+}
+
+// ListFlagOverridesByFlag joins orgs for display names.
+func (q *Queries) ListFlagOverridesByFlag(ctx context.Context, flagKey string) ([]ListFlagOverridesByFlagRow, error) {
+	rows, err := q.db.Query(ctx, listFlagOverridesByFlag, flagKey)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListFlagOverridesByFlagRow
+	for rows.Next() {
+		var i ListFlagOverridesByFlagRow
+		if err := rows.Scan(&i.ClerkOrgID, &i.Name, &i.OverrideEnabled); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
