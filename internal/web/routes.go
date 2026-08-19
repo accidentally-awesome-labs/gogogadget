@@ -31,6 +31,8 @@ func (s *Server) routes() {
 	// Docs (in-app, versioned with the code).
 	s.mux.HandleFunc("GET /docs", s.handleDocsIndex)
 	s.mux.HandleFunc("GET /docs/{slug}", s.handleDocsPage)
+	// Exact literal beats the {slug} wildcard per mux precedence rules.
+	s.mux.HandleFunc("GET /docs/search", s.handleDocsSearch)
 
 	// Auth redirects (public) → Clerk hosted Account Portal.
 	s.mux.HandleFunc("GET /login", s.handleLogin)
@@ -99,6 +101,11 @@ func (s *Server) routes() {
 	adminMux := http.NewServeMux()
 	adminMux.HandleFunc("GET /admin", s.handleAdminHome)
 	adminMux.HandleFunc("GET /admin/users", s.handleAdminUsers)
+	adminMux.HandleFunc("POST /admin/flags", s.handleAdminFlagCreate)
+	adminMux.HandleFunc("GET /admin/flags/{key}", s.handleAdminFlagDetail)
+	adminMux.HandleFunc("POST /admin/flags/{key}/delete", s.handleAdminFlagDelete)
+	adminMux.HandleFunc("POST /admin/flags/{key}/overrides", s.handleAdminFlagOverrideSet)
+	adminMux.HandleFunc("POST /admin/flags/{key}/overrides/{org}/delete", s.handleAdminFlagOverrideDelete)
 	adminMux.HandleFunc("POST /admin/users/{id}/disable", s.handleAdminUserDisable)
 	adminMux.HandleFunc("POST /admin/users/{id}/impersonate", s.handleAdminImpersonate)
 	adminMux.HandleFunc("GET /admin/orgs", s.handleAdminOrgs)

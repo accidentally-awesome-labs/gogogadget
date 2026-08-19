@@ -105,6 +105,10 @@ type DocPage struct {
 	Weight      int
 	Draft       bool
 	Body        string
+
+	// raw is the markdown source (frontmatter stripped) — the searchable
+	// text. Unexported: rendering uses Body, search uses raw.
+	raw string
 }
 
 type DocSection struct {
@@ -161,6 +165,7 @@ func LoadDocs(fsys fs.FS, production bool) (*Docs, error) {
 			Weight:      fm.Weight,
 			Draft:       fm.Draft,
 			Body:        html,
+			raw:         string(body),
 		})
 	}
 	sort.Slice(docs.Pages, func(i, j int) bool { return docs.Pages[i].Weight < docs.Pages[j].Weight })

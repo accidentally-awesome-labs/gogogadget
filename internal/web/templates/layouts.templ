@@ -233,6 +233,16 @@ templ docsBody(page Page, content templ.Component) {
 		<aside class="hidden md:block w-56 shrink-0">
 			<nav class="sticky top-24 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
 				if page.Docs != nil {
+					<form action="/docs/search" method="get" class="mb-6" data-testid="docs-search-form">
+						<input
+							type="search" name="q"
+							placeholder={ i18n.T(ctx, "docs.search_placeholder") }
+							aria-label={ i18n.T(ctx, "docs.search_aria") }
+							class="input !py-1.5 text-sm"
+						/>
+					</form>
+				}
+				if page.Docs != nil {
 					for _, section := range page.Docs.Sections {
 						<div>
 							<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ section.Name }</p>

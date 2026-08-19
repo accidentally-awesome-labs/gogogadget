@@ -41,6 +41,19 @@ test.describe('public pages', () => {
     await expect(page.getByTestId('docs-page')).toBeVisible();
   });
 
+  test('docs search finds and ranks pages', async ({ page }) => {
+    await page.goto('/docs/getting-started');
+    await page.getByTestId('docs-search-form').locator('input').fill('webhook');
+    await page.getByTestId('docs-search-form').locator('input').press('Enter');
+    await expect(page).toHaveURL(/\/docs\/search\?q=webhook$/);
+    await expect(page.getByTestId('docs-search-result').first()).toBeVisible();
+    await expect(page.getByTestId('docs-search-result').first()).toContainText('Webhooks');
+
+    // AND semantics: a pair that co-occurs nowhere shows the empty state.
+    await page.goto('/docs/search?q=webhook+kubernetes');
+    await expect(page.getByTestId('docs-search-empty')).toBeVisible();
+  });
+
   test('docs table of contents arrives and leaves with the page', async ({ page }) => {
     // The header renders its links twice (desktop + mobile menu) and the footer
     // repeats them, so scope nav clicks to the visible header link.

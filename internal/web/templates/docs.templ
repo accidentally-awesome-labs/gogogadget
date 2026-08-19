@@ -31,3 +31,35 @@ templ DocsPage(docs *content.Docs, slug string) {
 		}
 	}
 }
+
+// DocsSearchPage renders ranked results for ?q=. Empty query shows the
+// prompt; a query with no hits shows the no-results state.
+templ DocsSearchPage(query string, results []content.SearchResult) {
+	<article class="prose max-w-none" data-testid="docs-search">
+		if query == "" {
+			<h1>{ i18n.T(ctx, "docs.search_title") }</h1>
+			<p class="text-fg-muted">{ i18n.T(ctx, "docs.search_prompt") }</p>
+		} else {
+			<h1>{ i18n.T(ctx, "docs.search_results_for", query) }</h1>
+			if len(results) == 0 {
+				<p class="text-fg-muted" data-testid="docs-search-empty">{ i18n.T(ctx, "docs.search_no_results") }</p>
+			} else {
+				<ul class="list-none p-0 space-y-6 not-prose">
+					for _, r := range results {
+						<li class="card" data-testid="docs-search-result">
+							<a href={ "/docs/" + r.Slug }
+								hx-boost="true"
+								hx-target={ NavTarget }
+								hx-select={ NavTarget }
+								hx-swap={ NavSwap }
+								class="font-semibold text-brand-600 dark:text-brand-400"
+							>{ r.Title }</a>
+							<span class="badge bg-surface-raised text-fg-muted ml-2">{ r.Section }</span>
+							<p class="text-sm text-fg-muted mt-2">{ r.Snippet }</p>
+						</li>
+					}
+				</ul>
+			}
+		}
+	</article>
+}

@@ -23,6 +23,19 @@ greppable by coding agents.
 - `draft: true` hides the page when `APP_ENV=production`; drafts render in
   development.
 
+## Search
+
+The docs sidebar carries a search box (`GET /docs/search?q=`). Scoring lives
+in `internal/content/search.go`, over the markdown source (not the rendered
+HTML): whitespace-split terms with **AND semantics** — every term must hit
+title, description, or body, the same contract as the projects search. Title
+hits weigh 50, description 10, body frequency 2 (capped at 10 hits per term
+so a keyword-spam page can't dominate); ties keep `weight` order. Each result
+carries a cleaned snippet windowed around the longest term. The collection is
+27 static embedded pages, so a linear scan per query is exact and fast — no
+index to keep in sync; content changes are live on the next boot by
+construction.
+
 ## Rendering
 
 Bodies render through goldmark with the GFM extension and **default renderer

@@ -71,3 +71,30 @@ func indexOf(s, sub string) int {
 	}
 	return -1
 }
+
+func TestDocsSearchResults(t *testing.T) {
+	s := docsServer(t)
+
+	// Sidebar search box on every docs page.
+	code, _, body := serve(t, s, "GET", "/docs/getting-started", nil, nil)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="docs-search-form"`, "search box in the docs sidebar")
+
+	// A term that lives in titles/bodies: results page renders ranked hits.
+	code, _, body = serve(t, s, "GET", "/docs/search?q=webhook", nil, nil)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="docs-search"`)
+	assert.Contains(t, body, "Results for")
+	assert.Contains(t, body, "/docs/webhooks", "webhooks page ranks for webhook")
+	assert.Contains(t, body, `data-testid="docs-search-result"`)
+
+	// AND semantics: a term pair that co-occurs nowhere matches nothing.
+	code, _, body = serve(t, s, "GET", "/docs/search?q=webhook+kubernetes", nil, nil)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="docs-search-empty"`)
+
+	// Empty query: the prompt state, not an error.
+	code, _, body = serve(t, s, "GET", "/docs/search", nil, nil)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, "Type a term to search")
+}
