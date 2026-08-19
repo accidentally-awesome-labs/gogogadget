@@ -44,7 +44,18 @@ paths:
     get:
       tags: [projects]
       summary: List projects for the token's organization.
-      description: Offset pagination, newest first.
+      description: |
+        Newest first. Two pagination modes share one response shape:
+
+        - **`cursor` (preferred)** — keyset paging. Follow `next_cursor` from
+          the previous response. Stable under concurrent writes: a cursor
+          names a row, so projects created while you page do not shift rows
+          across page boundaries, and depth costs nothing server-side.
+        - **`offset` (legacy)** — the original contract, still honoured. It
+          repeats or drops rows when the set changes mid-walk.
+
+        `next_cursor` is `null` on the last page. Cursors are opaque: echo
+        them back verbatim, never parse or construct them.
       parameters:
         - name: limit
           in: query
@@ -55,9 +66,24 @@ paths:
             minimum: 1
             maximum: 100
             default: 50
+        - name: cursor
+          in: query
+          description: |
+            Opaque position from a previous response's `next_cursor`.
+            Takes precedence over `offset`. A malformed value is rejected
+            with 400 rather than silently restarting at the first page.
+          required: false
+          schema:
+            type: string
+          examples:
+            page2:
+              value: MTc3MjE1MzYwMDAwMDAwMDAwMC40Mg
         - name: offset
           in: query
-          description: Rows to skip. Negative values are treated as 0.
+          description: |
+            Legacy. Rows to skip; negative values are treated as 0. Ignored
+            when `cursor` is supplied.
+          deprecated: true
           required: false
           schema:
             type: integer
@@ -70,7 +96,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [projects, limit, offset]
+                required: [projects, limit, offset, next_cursor]
                 properties:
                   projects:
                     type: array
@@ -82,6 +108,16 @@ paths:
                   offset:
                     type: integer
                     examples: [0]
+                  next_cursor:
+                    type: [string, "null"]
+                    description: Pass as `cursor` for the next page; null on the last page.
+                    examples: [MTc3MjE1MzYwMDAwMDAwMDAwMC40Mg]
+        "400":
+          description: The cursor is malformed (`invalid_cursor`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":

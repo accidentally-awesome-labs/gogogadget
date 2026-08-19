@@ -42,3 +42,18 @@ WHERE id = $1 AND clerk_org_id = $2;
 
 -- name: DeleteProject :exec
 DELETE FROM projects WHERE id = $1 AND clerk_org_id = $2;
+
+-- name: ListProjectsByOrgCursor :many
+-- Keyset ("cursor") pagination for the public API: rows strictly older than
+-- the (created_at, id) cursor, newest first. The id tiebreak makes the order
+-- total — created_at alone can collide, which is exactly how offset paging
+-- drops or repeats rows. A NULL cursor starts at the newest row. The
+-- row-value comparison rides projects_org_idx (clerk_org_id, created_at DESC).
+SELECT * FROM projects
+WHERE clerk_org_id = sqlc.arg(clerk_org_id) AND status = 'active'
+  AND (
+    sqlc.narg(cursor_created_at)::timestamptz IS NULL
+    OR (created_at, id) < (sqlc.narg(cursor_created_at)::timestamptz, sqlc.narg(cursor_id)::bigint)
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT sqlc.arg(lim);

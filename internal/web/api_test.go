@@ -160,3 +160,103 @@ func TestAPIUnknownRoute404JSON(t *testing.T) {
 	require.Equal(t, http.StatusNotFound, code)
 	assert.Equal(t, "not_found", out["error"].(map[string]any)["code"])
 }
+
+// Cursor pagination's whole point is stability under concurrent writes.
+// Offset paging shifts every row one position when a newer row is inserted,
+// so a client walking pages sees the boundary row twice; a keyset cursor
+// names a row, so an insert at the head is simply not in the walk.
+func TestAPIProjectsCursorStableUnderInserts(t *testing.T) {
+	s := integrationServer(t, nil)
+	ctx := t.Context()
+	seedMembership(t, s, "user_cur", "org_cur", "org:admin")
+	t.Cleanup(func() {
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_cur'")
+	})
+	for i := range 6 {
+		_, err := s.q.CreateProject(ctx, sqlcCreateP("org_cur", fmt.Sprintf("P%d", i)))
+		require.NoError(t, err)
+	}
+	token := seedAPIToken(t, s, "org_cur", "read")
+
+	names := func(m map[string]any) []string {
+		rows, _ := m["projects"].([]any)
+		out := make([]string, 0, len(rows))
+		for _, r := range rows {
+			out = append(out, r.(map[string]any)["name"].(string))
+		}
+		return out
+	}
+
+	// Page 1.
+	code, page1 := apiGet(t, s, "/api/v1/projects?limit=2", token)
+	require.Equal(t, http.StatusOK, code)
+	require.Len(t, names(page1), 2)
+	next, ok := page1["next_cursor"].(string)
+	require.True(t, ok, "a further page must advertise a cursor")
+
+	// A write lands between page fetches — the classic offset-paging hazard.
+	_, err := s.q.CreateProject(ctx, sqlcCreateP("org_cur", "Interloper"))
+	require.NoError(t, err)
+
+	code, page2 := apiGet(t, s, "/api/v1/projects?limit=2&cursor="+url.QueryEscape(next), token)
+	require.Equal(t, http.StatusOK, code)
+
+	seen := append(names(page1), names(page2)...)
+	assert.NotContains(t, names(page2), "Interloper", "a row created after the walk started must not appear mid-walk")
+	uniq := map[string]bool{}
+	for _, n := range seen {
+		assert.False(t, uniq[n], "cursor paging repeated row %q", n)
+		uniq[n] = true
+	}
+
+	// Contrast: the same walk with offset does repeat the boundary row.
+	_, off2 := apiGet(t, s, "/api/v1/projects?limit=2&offset=2", token)
+	assert.Contains(t, names(page1), names(off2)[0],
+		"offset paging repeats a row after an insert — this is why cursors exist")
+}
+
+func TestAPIProjectsCursorWalksEveryRowExactlyOnce(t *testing.T) {
+	s := integrationServer(t, nil)
+	ctx := t.Context()
+	seedMembership(t, s, "user_curw", "org_curw", "org:admin")
+	t.Cleanup(func() {
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_curw'")
+	})
+	const total = 7
+	for i := range total {
+		_, err := s.q.CreateProject(ctx, sqlcCreateP("org_curw", fmt.Sprintf("W%d", i)))
+		require.NoError(t, err)
+	}
+	token := seedAPIToken(t, s, "org_curw", "read")
+
+	seen, target, pages := map[string]bool{}, "/api/v1/projects?limit=3", 0
+	for {
+		pages++
+		require.Less(t, pages, 10, "cursor walk must terminate")
+		code, page := apiGet(t, s, target, token)
+		require.Equal(t, http.StatusOK, code)
+		for _, r := range page["projects"].([]any) {
+			name := r.(map[string]any)["name"].(string)
+			require.False(t, seen[name], "row %q returned twice", name)
+			seen[name] = true
+		}
+		next, ok := page["next_cursor"].(string)
+		if !ok {
+			assert.Nil(t, page["next_cursor"], "last page reports next_cursor: null, not an empty string")
+			break
+		}
+		target = "/api/v1/projects?limit=3&cursor=" + url.QueryEscape(next)
+	}
+	assert.Len(t, seen, total, "every row visited exactly once")
+	assert.Equal(t, 3, pages, "7 rows at limit 3 = 3 pages, the last one short")
+}
+
+func TestAPIProjectsRejectsMalformedCursor(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_curb", "org_curb", "org:admin")
+	token := seedAPIToken(t, s, "org_curb", "read")
+
+	code, body := apiGet(t, s, "/api/v1/projects?cursor=not-a-cursor%21", token)
+	assert.Equal(t, http.StatusBadRequest, code, "a bad cursor must not silently restart at page one")
+	assert.Equal(t, "invalid_cursor", body["error"].(map[string]any)["code"])
+}

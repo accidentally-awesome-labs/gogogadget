@@ -7,6 +7,8 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const archiveProject = `-- name: ArchiveProject :exec
@@ -177,6 +179,62 @@ func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgPa
 		arg.Column2,
 		arg.Limit,
 		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Project
+	for rows.Next() {
+		var i Project
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClerkOrgID,
+			&i.Name,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.SearchTsv,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProjectsByOrgCursor = `-- name: ListProjectsByOrgCursor :many
+SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects
+WHERE clerk_org_id = $1 AND status = 'active'
+  AND (
+    $2::timestamptz IS NULL
+    OR (created_at, id) < ($2::timestamptz, $3::bigint)
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT $4
+`
+
+type ListProjectsByOrgCursorParams struct {
+	ClerkOrgID      string             `json:"clerk_org_id"`
+	CursorCreatedAt pgtype.Timestamptz `json:"cursor_created_at"`
+	CursorID        pgtype.Int8        `json:"cursor_id"`
+	Lim             int32              `json:"lim"`
+}
+
+// Keyset ("cursor") pagination for the public API: rows strictly older than
+// the (created_at, id) cursor, newest first. The id tiebreak makes the order
+// total — created_at alone can collide, which is exactly how offset paging
+// drops or repeats rows. A NULL cursor starts at the newest row. The
+// row-value comparison rides projects_org_idx (clerk_org_id, created_at DESC).
+func (q *Queries) ListProjectsByOrgCursor(ctx context.Context, arg ListProjectsByOrgCursorParams) ([]Project, error) {
+	rows, err := q.db.Query(ctx, listProjectsByOrgCursor,
+		arg.ClerkOrgID,
+		arg.CursorCreatedAt,
+		arg.CursorID,
+		arg.Lim,
 	)
 	if err != nil {
 		return nil, err

@@ -95,6 +95,34 @@ renames, removals, and type changes are not. A breaking change ships as
 The full recipe is in [Extending](/docs/extending); handler behavior gets
 integration tests — see [Testing](/docs/testing).
 
+## Pagination
+
+`GET /api/v1/projects` supports two modes; both return the same envelope.
+
+**Cursor (preferred).** Follow `next_cursor` until it is `null`:
+
+```sh
+curl -H "Authorization: Bearer ggg_…" "$API/api/v1/projects?limit=50"
+# {"projects":[…],"limit":50,"offset":0,"next_cursor":"MTc3…MC40Mg"}
+curl -H "Authorization: Bearer ggg_…" "$API/api/v1/projects?limit=50&cursor=MTc3…MC40Mg"
+```
+
+Keyset paging over `(created_at DESC, id DESC)` — the `id` tiebreak makes the
+order **total**, which offset paging quietly lacked when two projects shared a
+timestamp. A cursor names a row rather than a position, so a project created
+while a client walks pages cannot shift rows across a page boundary, and deep
+pages cost the same as the first (`projects_org_idx` serves the row-value
+comparison; no rows are skipped server-side).
+
+Cursors are **opaque** — base64url today, subject to change. Echo them back
+verbatim; parsing or constructing one is unsupported, and a malformed cursor
+is a `400 invalid_cursor` rather than a silent restart at page one.
+
+**Offset (legacy).** `?limit=&offset=` still works and is still tested, but it
+repeats or drops rows when the set changes mid-walk. Every response — offset
+included — carries `next_cursor`, so a client can switch to cursors mid-stream
+without a flag day.
+
 ## OpenAPI
 
 The contract is published as OpenAPI 3.1 at **`GET /api/v1/openapi.yaml`** —

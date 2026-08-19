@@ -11,6 +11,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // ValidateProjectName is the project name rule shared by both transports
@@ -54,6 +55,14 @@ type Projects struct {
 }
 
 // ListProjects handles GET /api/v1/projects (scope read).
+//
+// Two pagination modes, one response shape. `cursor` is keyset paging and is
+// what clients should follow: it is stable under concurrent writes, because
+// it names a row rather than a position — inserting a project while a client
+// pages does not shift rows across page boundaries the way offset does, and
+// it stays fast at depth (no rows skipped server-side). `offset` is the
+// original contract, still honoured; every response carries next_cursor, so
+// an offset client can switch to cursors mid-stream without a flag day.
 func (h *Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -64,19 +73,53 @@ func (h *Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
 	if offset < 0 {
 		offset = 0
 	}
-	projects, err := h.Q.ListProjectsByOrg(r.Context(), sqlc.ListProjectsByOrgParams{
-		ClerkOrgID: org.ClerkOrgID, Column2: "",
-		Limit: int32(limit), Offset: int32(offset),
-	})
+
+	var (
+		projects []sqlc.Project
+		err      error
+	)
+	if raw := r.URL.Query().Get("cursor"); raw != "" || offset == 0 {
+		var after cursor
+		if raw != "" {
+			if after, err = decodeCursor(raw); err != nil {
+				WriteError(w, http.StatusBadRequest, "invalid_cursor",
+					"The cursor is malformed. Echo back next_cursor verbatim; cursors are opaque.")
+				return
+			}
+		}
+		params := sqlc.ListProjectsByOrgCursorParams{ClerkOrgID: org.ClerkOrgID, Lim: int32(limit) + 1}
+		if raw != "" {
+			params.CursorCreatedAt = pgtype.Timestamptz{Time: after.CreatedAt, Valid: true}
+			params.CursorID = pgtype.Int8{Int64: after.ID, Valid: true}
+		}
+		projects, err = h.Q.ListProjectsByOrgCursor(r.Context(), params) // limit+1 probes for a next page
+	} else {
+		projects, err = h.Q.ListProjectsByOrg(r.Context(), sqlc.ListProjectsByOrgParams{
+			ClerkOrgID: org.ClerkOrgID, Column2: "",
+			Limit: int32(limit) + 1, Offset: int32(offset),
+		})
+	}
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "internal_error", "Could not list projects.")
 		return
 	}
+
+	// The extra row is a probe, never a result: its presence is the only
+	// honest way to say "there is more" without a second COUNT query.
+	var next any
+	if len(projects) > limit {
+		projects = projects[:limit]
+		last := projects[len(projects)-1]
+		next = encodeCursor(cursor{CreatedAt: last.CreatedAt.Time, ID: last.ID})
+	}
+
 	out := make([]projectResponse, 0, len(projects))
 	for _, p := range projects {
 		out = append(out, newProjectResponse(p))
 	}
-	WriteJSON(w, http.StatusOK, map[string]any{"projects": out, "limit": limit, "offset": offset})
+	WriteJSON(w, http.StatusOK, map[string]any{
+		"projects": out, "limit": limit, "offset": offset, "next_cursor": next,
+	})
 }
 
 type createProjectRequest struct {
