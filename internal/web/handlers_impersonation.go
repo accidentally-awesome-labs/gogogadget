@@ -5,11 +5,14 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -80,6 +83,48 @@ func (s *Server) applyImpersonation(w http.ResponseWriter, r *http.Request, ctx 
 // POST /admin/users/{id}/impersonate (adminChain). Org = the optional `org`
 // form field, else the target's first membership. Disabled targets and
 // org-less targets are rejected.
+// Reason capture: impersonation is a deliberate act, not a one-click one.
+// The admin states WHY on an interstitial; the reason lands on the session
+// row and in both audit entries. Minimum length keeps "test" out of the
+// compliance trail.
+const (
+	impersonationReasonMin = 10
+	impersonationReasonMax = 280
+)
+
+// GET /admin/users/{id}/impersonate — interstitial: pick the org, state the
+// reason, see what will be recorded before starting.
+func (s *Server) handleAdminImpersonateForm(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	targetID := r.PathValue("id")
+	target, err := s.q.GetUserByClerkID(ctx, targetID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	orgs, err := s.q.GetOrgsForUser(ctx, targetID)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	s.Render(w, r, Page{Title: i18n.T(ctx, "impersonation.start_title"), Layout: templates.LayoutAdmin},
+		templates.AdminImpersonateForm(templates.ImpersonateData{Target: target, Orgs: orgs}))
+}
+
+// renderImpersonateFormError re-renders the interstitial with 422 so the
+// stated reason survives the round trip (project-form convention).
+func (s *Server) renderImpersonateFormError(w http.ResponseWriter, r *http.Request, target sqlc.User, reason, msg string) {
+	ctx := r.Context()
+	orgs, err := s.q.GetOrgsForUser(ctx, target.ClerkUserID)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusUnprocessableEntity)
+	s.Render(w, r, Page{Title: i18n.T(ctx, "impersonation.start_title"), Layout: templates.LayoutAdmin},
+		templates.AdminImpersonateForm(templates.ImpersonateData{Target: target, Orgs: orgs, Reason: reason, Err: msg}))
+}
+
 func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	admin := identity.UserFrom(ctx)
@@ -92,6 +137,12 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 	}
 	if target.DisabledAt.Valid {
 		http.Error(w, "cannot impersonate a disabled account", http.StatusUnprocessableEntity)
+		return
+	}
+
+	reason := strings.TrimSpace(r.FormValue("reason"))
+	if len(reason) < impersonationReasonMin || len(reason) > impersonationReasonMax {
+		s.renderImpersonateFormError(w, r, target, reason, i18n.T(ctx, "impersonation.reason_invalid"))
 		return
 	}
 
@@ -118,6 +169,7 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 		ID: newImpersonationID(), AdminUserID: admin.ClerkUserID,
 		TargetUserID: targetID, TargetOrgID: orgID,
 		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(2 * time.Hour), Valid: true},
+		Reason:    reason,
 	})
 	if err != nil {
 		s.renderError(w, r, err.Error())
@@ -129,7 +181,7 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 		MaxAge: 2 * 60 * 60,
 	})
 	audit.Log(ctx, s.q, orgID, admin.ClerkUserID, "impersonation.start", map[string]any{
-		"target_user_id": targetID, "target_org_id": orgID, "session_id": sess.ID,
+		"target_user_id": targetID, "target_org_id": orgID, "session_id": sess.ID, "reason": reason,
 	})
 	// HARD redirect: the banner and the org switcher both live in the shell,
 	// which a soft Navigate never re-renders — the target view must boot fresh.
@@ -145,7 +197,12 @@ func (s *Server) handleImpersonationExit(w http.ResponseWriter, r *http.Request)
 		if err := s.q.EndImpersonationSession(ctx, imp.SessionID); err != nil {
 			s.log.Error("impersonation end", "error", err)
 		}
-		audit.Log(ctx, s.q, imp.SessionID, imp.AdminUserID, "impersonation.stop", map[string]any{"session_id": imp.SessionID})
+		meta := map[string]any{"session_id": imp.SessionID}
+		if sess, err := s.q.GetImpersonationSession(ctx, imp.SessionID); err == nil {
+			meta["reason"] = sess.Reason
+			meta["target_user_id"] = sess.TargetUserID
+		}
+		audit.Log(ctx, s.q, imp.SessionID, imp.AdminUserID, "impersonation.stop", meta)
 	}
 	http.SetCookie(w, &http.Cookie{Name: impersonationCookieName, Value: "", Path: "/", MaxAge: -1})
 	Redirect(w, r, "/admin")

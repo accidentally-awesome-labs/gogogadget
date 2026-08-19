@@ -196,13 +196,19 @@ test.describe('admin', () => {
     // Clean up every leftover row so re-runs start from the seeded state.
     // Delete-while-any (never a precomputed count): each Navigate re-renders
     // the table, and a prior failed run can leave extra rows behind.
+    // Reload before each delete: clicking into a table that an in-flight
+    // HX-Location swap is replacing lands on a detached row and silently
+    // does nothing (observed flake).
     const stale = () => page.locator('[data-testid^="schedule-row-"]').filter({ hasText: 'E2E flush' });
-    for (let guard = 0; guard < 10 && (await stale().count()) > 0; guard++) {
-      const current = stale().first();
-      const rowId = await current.getAttribute('data-testid');
-      await current.getByRole('button', { name: 'Delete' }).click();
+    for (let guard = 0; guard < 10; guard++) {
+      await page.goto('/admin/schedules');
+      if ((await stale().count()) === 0) break;
+      const rowId = await stale().first().getAttribute('data-testid');
+      await stale().first().getByRole('button', { name: 'Delete' }).click();
+      await expect(page.getByTestId('toast').first()).toBeVisible();
       await expect(page.locator(`[data-testid="${rowId}"]`)).toHaveCount(0);
     }
+    await page.goto('/admin/schedules');
     await expect(stale()).toHaveCount(0);
     await context.close();
   });

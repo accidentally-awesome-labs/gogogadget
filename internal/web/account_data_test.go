@@ -113,7 +113,8 @@ func TestAccountDeleteRefusedUnderImpersonation(t *testing.T) {
 
 	// Start a real impersonation; harvest BOTH cookies it issues.
 	adminCookie := sessionCookie("user_imp_admin", "org_imp_a", "org:admin")
-	code, header, _ := postForm(t, s, "/admin/users/user_imp_t/impersonate", nil, adminCookie)
+	code, header, _ := postForm(t, s, "/admin/users/user_imp_t/impersonate",
+		url.Values{"reason": []string{"Ticket #101 — verifying deletion is refused"}}, adminCookie)
 	require.Equal(t, http.StatusOK, code)
 	var imp string
 	for _, c := range header.Values("Set-Cookie") {

@@ -150,6 +150,14 @@ directives in `go.mod`; the Tailwind binary and all vendored frontend assets
 are sha256-pinned in their fetch scripts. CI runs `go tool govulncheck ./...`
 — known-vulnerable dependencies do not merge.
 
+## Impersonation is reason-gated
+
+Admins cannot "view as" a user in one click: the interstitial requires a
+stated reason (10–280 characters), which lands on the `impersonation_sessions`
+row and in both the `impersonation.start` and `impersonation.stop` audit
+entries. Audit rows have no foreign keys, so the trail outlives the session
+and the accounts involved.
+
 ## The dev backdoor cannot ship
 
 `DEV_AUTH_BYPASS=true` enables synthetic `e2e:` session tokens for local and

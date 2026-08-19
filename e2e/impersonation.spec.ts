@@ -10,6 +10,13 @@ test('impersonate, banner, exit', async ({ browser }) => {
   const row = page.locator('tr#user-user_pro');
   await row.getByTestId('admin-impersonate').click();
 
+  // Interstitial: impersonation needs a stated reason (audited).
+  await expect(page.getByTestId('impersonate-form')).toBeVisible();
+  await page.getByTestId('impersonate-start').click();
+  await expect(page.getByTestId('impersonate-error')).toBeVisible();
+  await page.getByTestId('impersonate-reason').fill('Ticket #7 — reproducing the reported export failure');
+  await page.getByTestId('impersonate-start').click();
+
   // Landed in the app as the target, banner visible, target org in shell
   // (no clerk-js in test env → the org switcher shows the data placeholder).
   await expect(page.getByTestId('impersonation-banner')).toBeVisible();

@@ -1,0 +1,59 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+// ImpersonateData backs the impersonation interstitial: who is being viewed
+// as, which org, and the stated reason (kept across a 422 re-render).
+type ImpersonateData struct {
+	Target sqlc.User
+	Orgs   []sqlc.Org
+	Reason string
+	Err    string
+}
+
+// AdminImpersonateForm is the deliberate step before "view as": it names what
+// gets recorded (reason + both audit entries) before the session starts.
+templ AdminImpersonateForm(d ImpersonateData) {
+	<h1 class="text-2xl font-bold mb-2">{ i18n.T(ctx, "impersonation.start_title") }</h1>
+	<p class="text-fg-muted mb-6">{ i18n.T(ctx, "impersonation.start_intro", string(d.Target.Email)) }</p>
+
+	<div id="impersonate-form-wrap" class="card max-w-lg" data-testid="impersonate-form">
+		if d.Err != "" {
+			<div class="alert-error mb-4" role="alert" data-testid="impersonate-error">{ d.Err }</div>
+		}
+		if len(d.Orgs) == 0 {
+			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "impersonation.no_orgs") }</p>
+		} else {
+			<form
+				hx-post={ "/admin/users/" + d.Target.ClerkUserID + "/impersonate" }
+				hx-target="#impersonate-form-wrap"
+				hx-swap="outerHTML"
+				novalidate hx-disable="this" class="space-y-4"
+			>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="impersonate-org">{ i18n.T(ctx, "impersonation.org_label") }</label>
+					<select id="impersonate-org" name="org" class="input">
+						for _, o := range d.Orgs {
+							<option value={ o.ClerkOrgID }>{ o.Name }</option>
+						}
+					</select>
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="impersonate-reason">{ i18n.T(ctx, "impersonation.reason_label") }</label>
+					<input id="impersonate-reason" type="text" name="reason" value={ d.Reason }
+						maxlength="280" class="input" placeholder={ i18n.T(ctx, "impersonation.reason_placeholder") }
+						data-testid="impersonate-reason"/>
+					<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "impersonation.reason_hint") }</p>
+				</div>
+				<div class="flex items-center gap-3">
+					<button type="submit" class="btn btn-primary" data-testid="impersonate-start">{ i18n.T(ctx, "impersonation.start_button") }</button>
+					<a href="/admin/users" class="link text-sm">{ i18n.T(ctx, "impersonation.cancel") }</a>
+					@Spinner()
+				</div>
+			</form>
+		}
+	</div>
+}

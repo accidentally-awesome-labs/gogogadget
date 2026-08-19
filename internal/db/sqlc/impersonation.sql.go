@@ -32,7 +32,7 @@ func (q *Queries) EndImpersonationSession(ctx context.Context, id string) error 
 }
 
 const getImpersonationSession = `-- name: GetImpersonationSession :one
-SELECT id, admin_user_id, target_user_id, target_org_id, created_at, expires_at, ended_at FROM impersonation_sessions WHERE id = $1
+SELECT id, admin_user_id, target_user_id, target_org_id, created_at, expires_at, ended_at, reason FROM impersonation_sessions WHERE id = $1
 `
 
 func (q *Queries) GetImpersonationSession(ctx context.Context, id string) (ImpersonationSession, error) {
@@ -46,15 +46,16 @@ func (q *Queries) GetImpersonationSession(ctx context.Context, id string) (Imper
 		&i.CreatedAt,
 		&i.ExpiresAt,
 		&i.EndedAt,
+		&i.Reason,
 	)
 	return i, err
 }
 
 const insertImpersonationSession = `-- name: InsertImpersonationSession :one
 
-INSERT INTO impersonation_sessions (id, admin_user_id, target_user_id, target_org_id, expires_at)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, admin_user_id, target_user_id, target_org_id, created_at, expires_at, ended_at
+INSERT INTO impersonation_sessions (id, admin_user_id, target_user_id, target_org_id, expires_at, reason)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, admin_user_id, target_user_id, target_org_id, created_at, expires_at, ended_at, reason
 `
 
 type InsertImpersonationSessionParams struct {
@@ -63,6 +64,7 @@ type InsertImpersonationSessionParams struct {
 	TargetUserID string             `json:"target_user_id"`
 	TargetOrgID  string             `json:"target_org_id"`
 	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
+	Reason       string             `json:"reason"`
 }
 
 // impersonation_sessions (admin "view as" sessions, opaque cookie ids)
@@ -73,6 +75,7 @@ func (q *Queries) InsertImpersonationSession(ctx context.Context, arg InsertImpe
 		arg.TargetUserID,
 		arg.TargetOrgID,
 		arg.ExpiresAt,
+		arg.Reason,
 	)
 	var i ImpersonationSession
 	err := row.Scan(
@@ -83,6 +86,7 @@ func (q *Queries) InsertImpersonationSession(ctx context.Context, arg InsertImpe
 		&i.CreatedAt,
 		&i.ExpiresAt,
 		&i.EndedAt,
+		&i.Reason,
 	)
 	return i, err
 }

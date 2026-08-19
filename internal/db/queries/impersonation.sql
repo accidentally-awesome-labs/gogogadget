@@ -1,8 +1,8 @@
 -- impersonation_sessions (admin "view as" sessions, opaque cookie ids)
 
 -- name: InsertImpersonationSession :one
-INSERT INTO impersonation_sessions (id, admin_user_id, target_user_id, target_org_id, expires_at)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO impersonation_sessions (id, admin_user_id, target_user_id, target_org_id, expires_at, reason)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetImpersonationSession :one

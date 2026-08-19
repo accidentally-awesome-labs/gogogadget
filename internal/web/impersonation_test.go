@@ -3,6 +3,7 @@ package web
 import (
 	"net/http"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -15,7 +16,9 @@ import (
 func startImpersonation(t *testing.T, s *Server, adminCookie *http.Cookie, targetID string) *http.Cookie {
 	t.Helper()
 	token, csrfCookies := csrfFor(t, s)
-	form := url.Values{}
+	// Reason is mandatory (10–280 chars) — it lands on the session row and
+	// in both audit entries.
+	form := url.Values{"reason": []string{"Ticket #99 — reproducing the reported bug"}}
 	h := http.Header{}
 	h.Set("X-CSRF-Token", token)
 	h.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -131,9 +134,10 @@ func TestImpersonationDisabledTarget422(t *testing.T) {
 	h.Set("X-CSRF-Token", token)
 	h.Set("Content-Type", "application/x-www-form-urlencoded")
 	h.Set("HX-Request", "true")
-	code, _, _ := serve(t, s, "POST", "/admin/users/user_dis_target/impersonate", nil, h,
+	reason := url.Values{"reason": []string{"Ticket #100 — checking the disabled-account guard"}}
+	code, _, _ := serve(t, s, "POST", "/admin/users/user_dis_target/impersonate", []byte(reason.Encode()), h,
 		append(csrfCookies, sessionCookie("user_dis_admin", "org_dis_admin", "org:admin"))...)
-	assert.Equal(t, http.StatusUnprocessableEntity, code)
+	assert.Equal(t, http.StatusUnprocessableEntity, code, "disabled target rejected even with a valid reason")
 }
 
 func TestImpersonationAdminDemotedMidSession(t *testing.T) {
@@ -153,4 +157,84 @@ func TestImpersonationAdminDemotedMidSession(t *testing.T) {
 	code, _, body := serve(t, s, "GET", "/app", nil, nil, adminCookie, imp)
 	require.Equal(t, http.StatusOK, code)
 	assert.NotContains(t, body, "impersonation-banner")
+}
+
+func TestImpersonationRequiresReason(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_rsn_admin", "org_rsn")
+	seedMembership(t, s, "user_rsn_target", "org_rsn", "org:member")
+	adminCookie := sessionCookie("user_rsn_admin", "org_rsn", "org:admin")
+
+	// Interstitial renders the target, the org picker, and the reason field.
+	code, _, body := serve(t, s, "GET", "/admin/users/user_rsn_target/impersonate", nil, nil, adminCookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="impersonate-form"`)
+	assert.Contains(t, body, `data-testid="impersonate-reason"`)
+	assert.Contains(t, body, "user_rsn_target@example.com")
+	assert.Contains(t, body, "org_rsn")
+
+	post := func(reason string) (int, string) {
+		token, csrfCookies := csrfFor(t, s)
+		h := http.Header{}
+		h.Set("X-CSRF-Token", token)
+		h.Set("Content-Type", "application/x-www-form-urlencoded")
+		form := url.Values{"reason": []string{reason}}
+		code, _, body := serve(t, s, "POST", "/admin/users/user_rsn_target/impersonate",
+			[]byte(form.Encode()), h, append(csrfCookies, adminCookie)...)
+		return code, body
+	}
+
+	// Missing / too short / whitespace-only → 422, nothing started.
+	for _, bad := range []string{"", "too short", "         "} {
+		code, body := post(bad)
+		assert.Equal(t, http.StatusUnprocessableEntity, code, "reason %q", bad)
+		assert.Contains(t, body, `data-testid="impersonate-error"`)
+	}
+	sessions, err := s.q.ListAuditAll(t.Context(), sqlc.ListAuditAllParams{Filter: "impersonation.start", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	assert.Empty(t, sessions, "no session started while the reason is invalid")
+
+	// Over the 280-char cap → 422 as well.
+	code, _ = post(strings.Repeat("x", 281))
+	assert.Equal(t, http.StatusUnprocessableEntity, code)
+
+	// Valid reason → 303 to /app (plain form post: an auth-boundary switch is
+	// a hard navigation), session row + start audit carry the reason.
+	reason := "Ticket #4242 — customer cannot export projects"
+	code, _ = post(reason)
+	require.Equal(t, http.StatusSeeOther, code)
+
+	rows, err := s.q.ListAuditAll(t.Context(), sqlc.ListAuditAllParams{Filter: "impersonation.start", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	assert.Contains(t, string(rows[0].Metadata), reason, "reason recorded in the audit trail")
+
+	// …and on the session row itself.
+	var stored string
+	require.NoError(t, s.db.QueryRow(t.Context(),
+		`SELECT reason FROM impersonation_sessions WHERE target_user_id = $1`, "user_rsn_target").Scan(&stored))
+	assert.Equal(t, reason, stored)
+}
+
+func TestImpersonationStopAuditCarriesReason(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_stp_admin", "org_stp")
+	seedMembership(t, s, "user_stp_target", "org_stp", "org:member")
+	adminCookie := sessionCookie("user_stp_admin", "org_stp", "org:admin")
+
+	imp := startImpersonation(t, s, adminCookie, "user_stp_target")
+
+	token, csrfCookies := csrfFor(t, s)
+	h := http.Header{}
+	h.Set("X-CSRF-Token", token)
+	h.Set("HX-Request", "true")
+	code, _, _ := serve(t, s, "POST", "/app/impersonation/exit", nil, h,
+		append(csrfCookies, adminCookie, imp)...)
+	require.Equal(t, http.StatusOK, code)
+
+	rows, err := s.q.ListAuditAll(t.Context(), sqlc.ListAuditAllParams{Filter: "impersonation.stop", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	assert.Contains(t, string(rows[0].Metadata), "Ticket #99", "stop entry reads standalone: it repeats the reason")
+	assert.Contains(t, string(rows[0].Metadata), "user_stp_target")
 }

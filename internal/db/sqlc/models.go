@@ -72,6 +72,7 @@ type ImpersonationSession struct {
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	ExpiresAt    pgtype.Timestamptz `json:"expires_at"`
 	EndedAt      pgtype.Timestamptz `json:"ended_at"`
+	Reason       string             `json:"reason"`
 }
 
 type Job struct {

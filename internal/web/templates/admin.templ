@@ -79,12 +79,16 @@ templ AdminUsersTable(d AdminUsersData) {
 							<td class="text-right">
 								<div class="flex justify-end gap-2">
 									if !u.DisabledAt.Valid {
-										<button
-											type="button"
-											hx-post={ "/admin/users/" + u.ClerkUserID + "/impersonate" }
+	
+										<a
+											href={ templ.SafeURL("/admin/users/" + u.ClerkUserID + "/impersonate") }
+											hx-boost="true"
+											hx-target={ NavTarget }
+											hx-select={ NavTarget }
+											hx-swap={ NavSwap }
 											class="btn-ghost !px-2 !py-1 text-xs"
 											data-testid="admin-impersonate"
-										>{ i18n.T(ctx, "admin.users.impersonate") }</button>
+										>{ i18n.T(ctx, "admin.users.impersonate") }</a>
 									}
 									<button
 										type="button"

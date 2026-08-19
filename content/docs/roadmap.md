@@ -22,6 +22,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Audit retention | `AUDIT_RETENTION_DAYS` janitor (0 = forever, the default); per-category windows remain future work |
 | Schedules admin | `/admin/schedules` — create/toggle/delete + run-now over the scheduler table; only `jobs.SchedulableKinds` offered |
 | Webhook secret rotation | Rotate from settings; previous secret keeps verifying for a 24h grace window (deliveries dual-sign), janitor clears it |
+| Impersonation reason capture | Interstitial requires a 10–280 char reason; stored on the session row and in both audit entries |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -35,7 +36,6 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Gap | Evidence of absence | One-line approach |
 |---|---|---|
 | OpenAPI spec + API expansion | Only 3 endpoints (projects list/create, ai/chat) — `internal/web/routes.go`; no spec; offset pagination only; no idempotency keys on POST; no per-token rate limits | Author `openapi.yaml`, then grow endpoints against it |
-| Impersonation reason capture + approval trail | Impersonation exists, no required-reason field — migration `0009_impersonation.sql`; norms: reason + immutable separate log | Require a reason at session start; write to a separate append-only log |
 | Org-level data export | Only projects CSV exists — `internal/jobs/export_csv.go` | Full-org JSON/CSV bundle via the same job + storage pattern |
 | Dunning depth | Single payment_failed email — `internal/billing/webhook.go` | Add a retry-schedule comms sequence |
 | Email digest implementation | `email.digest` job kind is a registered no-op — `internal/jobs/jobs.go` | Implement daily/weekly rollup rendering |

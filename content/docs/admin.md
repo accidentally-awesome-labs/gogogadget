@@ -35,7 +35,10 @@ the Disabled page with `403`. Re-enabling is the same button.
 
 ## Impersonation
 
-**Impersonate** on `/admin/users` starts an in-app "view as" session: a
+**Impersonate** on `/admin/users` opens an interstitial first: pick the
+target org, state a **reason** (10–280 chars), then start. There is no
+one-click path — the reason is stored on the session row and repeated in
+both audit entries, so the trail reads standalone. Starting then creates a
 2-hour `impersonation_sessions` row + an opaque `ggg_imp` cookie, then a
 redirect into the target's app view with an amber **Viewing as** banner
 outside `#content` (it survives boosted navigation). Session semantics:
