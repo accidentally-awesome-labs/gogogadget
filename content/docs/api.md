@@ -95,6 +95,21 @@ renames, removals, and type changes are not. A breaking change ships as
 The full recipe is in [Extending](/docs/extending); handler behavior gets
 integration tests — see [Testing](/docs/testing).
 
+## Rate limits
+
+Each token carries its own budget — `API_RATE_LIMIT_RPM`, default **60
+req/min, burst 120** — spent across every `/api/v1` endpoint, so a client
+cannot multiply its allowance by spreading calls over routes. Exceeding it
+returns `429` with code `rate_limited` and a `Retry-After` header:
+
+```json
+{"error":{"code":"rate_limited","message":"This API token is over its request budget. …"}}
+```
+
+Budgets are per **token**, not per IP: one customer's traffic cannot spend
+another's allowance, and issuing a second token gives a second budget. The
+per-IP shield described in [Security](/docs/security) still applies on top.
+
 ## Pagination
 
 `GET /api/v1/projects` supports two modes; both return the same envelope.

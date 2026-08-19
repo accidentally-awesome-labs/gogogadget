@@ -122,6 +122,8 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
         "500":
           $ref: "#/components/responses/InternalError"
     post:
@@ -160,6 +162,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimited"
         "500":
           $ref: "#/components/responses/InternalError"
   /api/v1/ai/chat:
@@ -219,6 +223,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/RateLimited"
         "500":
           $ref: "#/components/responses/InternalError"
         "502":
@@ -295,6 +301,20 @@ components:
             $ref: "#/components/schemas/Error"
     Forbidden:
       description: The token's scope cannot perform this operation (`forbidden`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    RateLimited:
+      description: |
+        The token exceeded its per-token request budget (`rate_limited`).
+        Budgets are per API token, not per IP, so one token cannot spend
+        another's allowance. Honour `Retry-After`.
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying.
+          schema:
+            type: integer
       content:
         application/json:
           schema:

@@ -260,3 +260,57 @@ func TestAPIProjectsRejectsMalformedCursor(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, code, "a bad cursor must not silently restart at page one")
 	assert.Equal(t, "invalid_cursor", body["error"].(map[string]any)["code"])
 }
+
+// The per-token budget exists so one noisy token cannot spend another
+// customer's allowance — that isolation is the property under test, not the
+// arithmetic of the bucket (covered in internal/ratelimit).
+func TestAPIPerTokenRateLimitIsolatesTokens(t *testing.T) {
+	s := integrationServer(t, func(d *Deps) { d.Config.APIRateLimitPerMinute = 1 }) // burst 2
+	seedMembership(t, s, "user_rl", "org_rl", "org:admin")
+	noisy := seedAPIToken(t, s, "org_rl", "read")
+	quiet := seedAPIToken(t, s, "org_rl", "read")
+
+	var last int
+	for range 3 {
+		last, _ = apiGet(t, s, "/api/v1/projects", noisy)
+	}
+	require.Equal(t, http.StatusTooManyRequests, last, "the noisy token must exhaust its own budget")
+
+	code, body := apiGet(t, s, "/api/v1/projects", noisy)
+	assert.Equal(t, http.StatusTooManyRequests, code)
+	assert.Equal(t, "rate_limited", body["error"].(map[string]any)["code"])
+
+	code, _ = apiGet(t, s, "/api/v1/projects", quiet)
+	assert.Equal(t, http.StatusOK, code, "a second token keeps its full budget — no shared bucket")
+}
+
+func TestAPIRateLimitSendsRetryAfterAndJSON(t *testing.T) {
+	s := integrationServer(t, func(d *Deps) { d.Config.APIRateLimitPerMinute = 1 })
+	seedMembership(t, s, "user_rl2", "org_rl2", "org:admin")
+	token := seedAPIToken(t, s, "org_rl2", "read")
+
+	h := http.Header{}
+	h.Set("Authorization", "Bearer "+token)
+	var code int
+	var header http.Header
+	var body string
+	for range 3 {
+		code, header, body = serve(t, s, "GET", "/api/v1/projects", nil, h)
+	}
+	require.Equal(t, http.StatusTooManyRequests, code)
+	assert.Equal(t, "1", header.Get("Retry-After"), "clients need to know when to come back")
+	assert.Contains(t, header.Get("Content-Type"), "application/json", "an API 429 must not be the HTML error page")
+	assert.Contains(t, body, "rate_limited")
+}
+
+// A rejected credential must fail as unauthorized, never as rate-limited:
+// budget is spent by authenticated identity, so a 429 always means "over
+// budget" rather than leaking that some other token is busy.
+func TestAPIRateLimitDoesNotApplyBeforeAuth(t *testing.T) {
+	s := integrationServer(t, func(d *Deps) { d.Config.APIRateLimitPerMinute = 1 })
+	for range 5 {
+		code, body := apiGet(t, s, "/api/v1/projects", "ggg_nope")
+		require.Equal(t, http.StatusUnauthorized, code)
+		assert.Equal(t, "unauthorized", body["error"].(map[string]any)["code"])
+	}
+}

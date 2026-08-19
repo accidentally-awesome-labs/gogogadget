@@ -9,14 +9,13 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/api"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/justinas/nosurf"
-	"golang.org/x/time/rate"
 )
 
 // Middleware chain (outermost → innermost), assembled in Handler:
@@ -170,14 +169,14 @@ func (s *Server) rateLimit(next http.Handler) http.Handler {
 	if rpm < 1 {
 		rpm = 100 // zero-value Config (tests constructing Server directly)
 	}
-	rl := newIPRateLimiter(rate.Every(time.Minute/time.Duration(rpm)), rpm*2)
+	rl := ratelimit.PerMinute(rpm)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := r.URL.Path
 		if strings.HasPrefix(p, "/static/") || strings.HasPrefix(p, "/ingest/") || p == "/healthz" {
 			next.ServeHTTP(w, r)
 			return
 		}
-		if !rl.allow(clientIP(r)) {
+		if !rl.Allow(clientIP(r)) {
 			w.Header().Set("Retry-After", "1")
 			s.renderStatus(w, r, http.StatusTooManyRequests, "Too many requests", "Slow down and try again in a moment.")
 			return
@@ -198,52 +197,6 @@ func clientIP(r *http.Request) string {
 		return r.RemoteAddr
 	}
 	return host
-}
-
-type ipEntry struct {
-	limiter  *rate.Limiter
-	lastSeen time.Time
-}
-
-type ipRateLimiter struct {
-	mu      sync.Mutex
-	entries map[string]*ipEntry
-	rate    rate.Limit
-	burst   int
-}
-
-func newIPRateLimiter(r rate.Limit, burst int) *ipRateLimiter {
-	rl := &ipRateLimiter{entries: make(map[string]*ipEntry), rate: r, burst: burst}
-	go rl.janitor()
-	return rl
-}
-
-func (rl *ipRateLimiter) allow(ip string) bool {
-	rl.mu.Lock()
-	e, ok := rl.entries[ip]
-	if !ok {
-		e = &ipEntry{limiter: rate.NewLimiter(rl.rate, rl.burst)}
-		rl.entries[ip] = e
-	}
-	e.lastSeen = time.Now()
-	rl.mu.Unlock()
-	return e.limiter.Allow()
-}
-
-// janitor sweeps entries idle for >10 minutes so the map cannot grow forever.
-func (rl *ipRateLimiter) janitor() {
-	tick := time.NewTicker(5 * time.Minute)
-	defer tick.Stop()
-	for range tick.C {
-		cutoff := time.Now().Add(-10 * time.Minute)
-		rl.mu.Lock()
-		for ip, e := range rl.entries {
-			if e.lastSeen.Before(cutoff) {
-				delete(rl.entries, ip)
-			}
-		}
-		rl.mu.Unlock()
-	}
 }
 
 // secureHeaders sets the strict header set. CSP is assembled from config so

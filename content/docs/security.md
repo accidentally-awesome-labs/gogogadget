@@ -95,6 +95,24 @@ fly edge, not spoofable by clients there) and `RemoteAddr` otherwise — behind
 any other proxy, the header story is yours to fix. Entries idle longer than
 10 minutes are swept so the map cannot grow forever.
 
+### Per-token budgets on the API
+
+Authenticated API traffic gets a **second, independent** budget keyed on the
+API token: `API_RATE_LIMIT_RPM` (default 60/min, burst 2×), enforced in
+`RequireAPIToken` after scope resolution. A token is a better identity than an
+address — it survives NAT and roaming, and it is the thing a customer can
+rotate. Over-budget requests get a JSON `429 rate_limited` with `Retry-After`,
+never the HTML error page.
+
+The bucket is keyed on the token **row id**, not the plaintext, so the
+limiter's map never holds a live credential. The check runs *after*
+authentication, so a 429 always means "over budget" and never doubles as an
+auth failure; unauthenticated hammering is shed by the per-IP shield instead.
+
+Both layers apply. Behind a shared egress IP the per-IP shield is the binding
+constraint, so an installation serving API clients from one NAT should raise
+`RATE_LIMIT_RPM` and let `API_RATE_LIMIT_RPM` do the per-customer fairness.
+
 This limiter is **single-node by design**. `fly scale count > 1` is the
 documented trigger to swap it for a shared store (e.g. Upstash); the swap
 point is the `rateLimit` middleware and nothing else.

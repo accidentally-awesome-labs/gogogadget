@@ -12,10 +12,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
 )
@@ -54,9 +56,24 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// Middleware authenticates Bearer tokens against api_tokens.
+// Middleware authenticates Bearer tokens against api_tokens and enforces the
+// per-token request budget.
 type Middleware struct {
 	Q *sqlc.Queries
+	// Limiter is the per-token budget, shared across every guarded route so
+	// a client cannot multiply its allowance by spreading calls over
+	// endpoints. Nil disables token limiting (tests that construct the
+	// middleware directly); NewMiddleware wires the configured one.
+	Limiter *ratelimit.Keyed
+}
+
+// NewMiddleware builds the API guard with a per-token budget of rpm requests
+// per minute (burst 2×).
+func NewMiddleware(q *sqlc.Queries, rpm int) *Middleware {
+	if rpm < 1 {
+		rpm = 60
+	}
+	return &Middleware{Q: q, Limiter: ratelimit.PerMinute(rpm)}
 }
 
 // RequireAPIToken guards a route group with a minimum scope ("read" or
@@ -85,6 +102,17 @@ func (m *Middleware) RequireAPIToken(scope string, next http.Handler) http.Handl
 		}
 		if !scopeSatisfies(token.Scope, scope) {
 			WriteError(w, http.StatusForbidden, "forbidden", "This token's scope ("+token.Scope+") cannot perform a "+scope+" operation.")
+			return
+		}
+
+		// Budget is spent by authenticated identity, not by address: keyed on
+		// the token row id rather than the plaintext, so the limiter map
+		// never holds a live credential. Checked after scope so a 429 always
+		// means "you are over budget", never "you were also unauthorized".
+		if m.Limiter != nil && !m.Limiter.Allow(strconv.FormatInt(token.ID, 10)) {
+			w.Header().Set("Retry-After", "1")
+			WriteError(w, http.StatusTooManyRequests, "rate_limited",
+				"This API token is over its request budget. Retry shortly, or spread work across tokens.")
 			return
 		}
 

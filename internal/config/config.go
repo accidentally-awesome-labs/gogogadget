@@ -62,6 +62,11 @@ type Config struct {
 	// RateLimitPerMinute is the per-IP request budget (burst = 2×). Tunable
 	// because load profiles differ — the e2e suite drives one IP hard.
 	RateLimitPerMinute int
+	// APIRateLimitPerMinute is the per-API-token budget (burst = 2×) on
+	// /api/v1. Separate from the per-IP shield above because a token is a
+	// better identity than an address: it survives NAT and roaming, and it
+	// is the thing a customer can rotate when they abuse it.
+	APIRateLimitPerMinute int
 	// AuditRetentionDays (AUDIT_RETENTION_DAYS): janitor deletes older audit
 	// rows; 0 = retain forever.
 	AuditRetentionDays int
@@ -131,6 +136,15 @@ func Load() (Config, error) {
 			return Config{}, fmt.Errorf("RATE_LIMIT_RPM: %q must be a positive integer", v)
 		}
 		cfg.RateLimitPerMinute = rpm
+	}
+
+	cfg.APIRateLimitPerMinute = 60
+	if v := getenv("API_RATE_LIMIT_RPM", ""); v != "" {
+		rpm, err := strconv.Atoi(v)
+		if err != nil || rpm < 1 {
+			return Config{}, fmt.Errorf("API_RATE_LIMIT_RPM: %q must be a positive integer", v)
+		}
+		cfg.APIRateLimitPerMinute = rpm
 	}
 
 	if v := getenv("AUDIT_RETENTION_DAYS", ""); v != "" {

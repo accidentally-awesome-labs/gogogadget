@@ -226,3 +226,22 @@ no-equals-line
 		assert.NotPanics(t, func() { loadDotEnv(filepath.Join(dir, "nope")) })
 	})
 }
+
+func TestAPIRateLimitRPMParsing(t *testing.T) {
+	baseEnv(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	assert.Equal(t, 60, cfg.APIRateLimitPerMinute, "unset → the documented default, never 0 (which would mean no budget)")
+
+	t.Setenv("API_RATE_LIMIT_RPM", "600")
+	cfg, err = Load()
+	require.NoError(t, err)
+	assert.Equal(t, 600, cfg.APIRateLimitPerMinute)
+
+	for _, bad := range []string{"0", "-5", "lots"} {
+		t.Setenv("API_RATE_LIMIT_RPM", bad)
+		_, err = Load()
+		require.Error(t, err, "%q must be rejected at boot, not silently become a zero budget", bad)
+		assert.Contains(t, err.Error(), "API_RATE_LIMIT_RPM")
+	}
+}

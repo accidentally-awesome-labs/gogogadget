@@ -144,7 +144,7 @@ func (s *Server) routes() {
 		_, _ = w.Write(api.OpenAPISpec)
 	})
 
-	apiMW := &api.Middleware{Q: s.q}
+	apiMW := api.NewMiddleware(s.q, s.cfg.APIRateLimitPerMinute)
 	apiProjects := &api.Projects{Q: s.q}
 	s.mux.Handle("GET /api/v1/projects", apiMW.RequireAPIToken("read", http.HandlerFunc(apiProjects.ListProjects)))
 	s.mux.Handle("POST /api/v1/projects", apiMW.RequireAPIToken("write", http.HandlerFunc(apiProjects.CreateProject)))
