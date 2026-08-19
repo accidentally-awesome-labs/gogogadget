@@ -49,6 +49,9 @@ type Server struct {
 	reporter      observability.Reporter
 
 	mux *http.ServeMux
+
+	// metrics is the process-local Prometheus registry (see metrics.go).
+	metrics metricsRegistry
 }
 
 // Deps is the server wiring bag: every external service enters here, behind

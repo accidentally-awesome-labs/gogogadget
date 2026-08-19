@@ -10,6 +10,11 @@ import (
 
 func (s *Server) routes() {
 	s.mux.HandleFunc("GET /healthz", s.handleHealthz)
+	// /metrics: bearer-gated when METRICS_TOKEN is set; unregistered in
+	// production without one (internal Go stats must not be public default).
+	if !s.cfg.Production() || s.cfg.MetricsToken != "" {
+		s.mux.HandleFunc("GET /metrics", s.handleMetrics)
+	}
 	s.mux.HandleFunc("GET /readyz", s.handleReadyz)
 
 	s.mux.Handle("GET /static/", s.serveStatic())

@@ -18,6 +18,8 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Admin audit-log viewer | `/admin/audit` |
 | Docs search | `/docs/search?q=` — sidebar box, ranked results with snippets |
 | Flags admin | Create/delete + per-org overrides at `/admin/flags/{key}`; evaluator cache invalidated on mutation |
+| Metrics | `GET /metrics` — stdlib Prometheus exposition (HTTP counters, latency, runtime, DB pool); bearer-gated via `METRICS_TOKEN`, unregistered in prod without one |
+| Audit retention | `AUDIT_RETENTION_DAYS` janitor (0 = forever, the default); per-category windows remain future work |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -32,10 +34,8 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 |---|---|---|
 | Schedules admin UI | `schedules` table + `internal/jobs` scheduler pass exist; no UI — `internal/db/queries/schedules.sql` | Admin list/create/delete mirroring the flags page |
 | OpenAPI spec + API expansion | Only 3 endpoints (projects list/create, ai/chat) — `internal/web/routes.go`; no spec; offset pagination only; no idempotency keys on POST; no per-token rate limits | Author `openapi.yaml`, then grow endpoints against it |
-| Metrics/tracing | Sentry seam exists in `internal/observability`, no metrics/tracing; pprof is non-prod only — `internal/web/routes.go` | `/metrics` Prometheus endpoint or an OTel OTLP exporter |
 | Impersonation reason capture + approval trail | Impersonation exists, no required-reason field — migration `0009_impersonation.sql`; norms: reason + immutable separate log | Require a reason at session start; write to a separate append-only log |
 | Webhook secret rotation + token rotation UX | Secrets minted once — `internal/webhooks/webhooks.go` `NewSecret` | Add rotate-with-grace-period flow in settings |
-| Audit retention policy config | Retention norms: auth 12mo / admin 24mo / impersonation 36mo; today retention is unbounded | Scheduled purge job with per-category env-configured windows |
 | Org-level data export | Only projects CSV exists — `internal/jobs/export_csv.go` | Full-org JSON/CSV bundle via the same job + storage pattern |
 | Dunning depth | Single payment_failed email — `internal/billing/webhook.go` | Add a retry-schedule comms sequence |
 | Email digest implementation | `email.digest` job kind is a registered no-op — `internal/jobs/jobs.go` | Implement daily/weekly rollup rendering |

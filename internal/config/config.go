@@ -58,7 +58,11 @@ type Config struct {
 	// MaintenanceMode (MAINTENANCE_MODE=true) sheds all traffic except
 	// probes/static via a 503 page; JSON 503 under /api/.
 	MaintenanceMode bool
-	LogLevel        string
+	MetricsToken    string // METRICS_TOKEN: bearer gate for /metrics (prod requires it)
+	// AuditRetentionDays (AUDIT_RETENTION_DAYS): janitor deletes older audit
+	// rows; 0 = retain forever.
+	AuditRetentionDays int
+	LogLevel           string
 }
 
 // Load reads the environment, auto-loading `.env` in development, and validates
@@ -105,6 +109,7 @@ func Load() (Config, error) {
 		ResendAPIKey:    getenv("RESEND_API_KEY", ""),
 		EmailFrom:       getenv("EMAIL_FROM", "GoGoGadget <hello@example.com>"),
 		MaintenanceMode: parseBool(getenv("MAINTENANCE_MODE", "")),
+		MetricsToken:    getenv("METRICS_TOKEN", ""),
 	}
 
 	cfg.Port = 8080
@@ -114,6 +119,14 @@ func Load() (Config, error) {
 			return Config{}, fmt.Errorf("PORT: %q is not a valid port", v)
 		}
 		cfg.Port = p
+	}
+
+	if v := getenv("AUDIT_RETENTION_DAYS", ""); v != "" {
+		days, err := strconv.Atoi(v)
+		if err != nil || days < 0 {
+			return Config{}, fmt.Errorf("AUDIT_RETENTION_DAYS: %q must be a non-negative integer", v)
+		}
+		cfg.AuditRetentionDays = days
 	}
 
 	cfg.LogLevel = getenv("LOG_LEVEL", "")

@@ -36,6 +36,8 @@ production the process environment is the only source.
 | `EMAIL_FROM` | | `GoGoGadget <hello@example.com>` | |
 | `POSTHOG_API_KEY` | | | Empty → disabled: no client script, no `/ingest` proxy, server capture no-ops |
 | `POSTHOG_HOST` | | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
+| `METRICS_TOKEN` | | | Bearer token for `GET /metrics`. Empty outside production → open scrape; empty in production → `/metrics` is not registered (internal stats never public by default) |
+| `AUDIT_RETENTION_DAYS` | | `0` | Daily janitor deletes audit rows older than N days; 0 = retain forever |
 | `MAINTENANCE_MODE` | | | `true` → 503 for everything except `/healthz`, `/readyz`, `/static/`, `/favicon.ico`; JSON 503 under `/api/` |
 | `SENTRY_DSN` | | | Empty → disabled |
 | `STORAGE_R2_ACCOUNT_ID` | | | With the three below, enables R2 file storage; any missing → DevStore (`tmp/uploads/`) |

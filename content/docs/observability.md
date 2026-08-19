@@ -120,3 +120,22 @@ registered when `APP_ENV=production`.
 `/healthz` (liveness, includes the build version) and `/readyz` (readiness,
 pings the DB) double as the cheapest uptime monitor. Their exact semantics
 are in [Deployment](/docs/deployment).
+
+## /metrics
+
+`GET /metrics` serves a Prometheus text-exposition scrape — hand-rolled,
+stdlib only (no client_golang dependency). What it carries:
+
+- `gogogadget_http_requests_total{status=…}` — 2xx/3xx/4xx/5xx counters,
+  counted in the `accessLog` middleware (every request through the chain)
+- `gogogadget_http_request_duration_seconds_count` / `_sum` — latency
+  average = sum/count
+- `go_goroutines`, `go_memstats_*` gauges
+- `gogogadget_db_pool_*` — pgxpool acquired/idle/total/max connections
+- `gogogadget_build_info{version=…}` — the `-ldflags` build version
+
+Access model: with `METRICS_TOKEN` set, the scrape requires
+`Authorization: Bearer <token>`. Without a token, `/metrics` is open outside
+production and **not registered** in production — internal Go stats are never
+public by default. A scrape during maintenance mode gets the 503 like
+everything else (the 503 is itself a signal to the alerting stack).

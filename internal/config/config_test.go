@@ -114,6 +114,37 @@ func TestTestNowFreezesClock(t *testing.T) {
 	assert.Contains(t, err.Error(), "TEST_NOW")
 }
 
+func TestAuditRetentionDaysParsing(t *testing.T) {
+	baseEnv(t)
+	t.Setenv("AUDIT_RETENTION_DAYS", "365")
+	cfg, err := Load()
+	require.NoError(t, err)
+	assert.Equal(t, 365, cfg.AuditRetentionDays)
+
+	t.Setenv("AUDIT_RETENTION_DAYS", "") // unset → 0 = retain forever
+	cfg, err = Load()
+	require.NoError(t, err)
+	assert.Zero(t, cfg.AuditRetentionDays)
+
+	t.Setenv("AUDIT_RETENTION_DAYS", "-7")
+	_, err = Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "AUDIT_RETENTION_DAYS")
+
+	t.Setenv("AUDIT_RETENTION_DAYS", "soon")
+	_, err = Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "AUDIT_RETENTION_DAYS")
+}
+
+func TestMetricsTokenLoadsFromEnv(t *testing.T) {
+	baseEnv(t)
+	t.Setenv("METRICS_TOKEN", "tok-1")
+	cfg, err := Load()
+	require.NoError(t, err)
+	assert.Equal(t, "tok-1", cfg.MetricsToken, "METRICS_TOKEN must reach Config — guards the wiring, not just the field")
+}
+
 func TestConfiguredPredicates(t *testing.T) {
 	baseEnv(t)
 	cfg, err := Load()
