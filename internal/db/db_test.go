@@ -34,6 +34,24 @@ func TestRoundtripEveryTable(t *testing.T) {
 	gotU, err := q.GetUserByClerkID(ctx, "user_rt1")
 	require.NoError(t, err)
 	assert.Equal(t, u.ClerkUserID, gotU.ClerkUserID)
+	assert.Equal(t, "weekly", gotU.DigestFrequency, "a new user is opted into the digest by default")
+	assert.False(t, gotU.LastDigestAt.Valid, "never sent = due immediately")
+
+	// digest cadence + stamp
+	require.NoError(t, q.SetUserDigestFrequency(ctx, sqlc.SetUserDigestFrequencyParams{
+		ClerkUserID: "user_rt1", DigestFrequency: "daily",
+	}))
+	require.NoError(t, q.MarkUserDigestSent(ctx, "user_rt1"))
+	gotU, err = q.GetUserByClerkID(ctx, "user_rt1")
+	require.NoError(t, err)
+	assert.Equal(t, "daily", gotU.DigestFrequency)
+	require.True(t, gotU.LastDigestAt.Valid)
+	// A user stamped just now is no longer due on any cadence.
+	due, err := q.ListUsersDueForDigest(ctx, 100)
+	require.NoError(t, err)
+	for _, d := range due {
+		assert.NotEqual(t, "user_rt1", d.ClerkUserID, "a freshly stamped user must drop out of the due set")
+	}
 
 	// orgs
 	_, err = q.UpsertOrg(ctx, sqlc.UpsertOrgParams{

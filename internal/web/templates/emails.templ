@@ -61,6 +61,18 @@ templ TrialEndingEmailBody(appURL, trialEnd string) {
 	<p style="margin:0;"><a href={ appURL + "/app/settings/billing" } style="color:#4f46e5;">{ i18n.T(ctx, "email.trial_ending.cta") }</a></p>
 }
 
+// absoluteURL turns a stored notification path into a link for email. Only
+// in-app relative paths are honoured: a notification row's url is written by
+// internal callers today, but a digest is the one place those strings leave
+// the app and land in a mail client, so anything that is not a plain "/path"
+// is dropped rather than linked.
+func absoluteURL(appURL, path string) string {
+	if len(path) < 2 || path[0] != '/' || path[1] == '/' {
+		return ""
+	}
+	return appURL + path
+}
+
 func greetingName(name string) string {
 	if name == "" {
 		return ""
@@ -100,4 +112,56 @@ templ TrialEndingEmailText(appURL, trialEnd string) {
 	{ i18n.T(ctx, "email.trial_ending.body_a") } { trialEnd }. { i18n.T(ctx, "email.trial_ending.body_b") }
 
 	{ i18n.T(ctx, "email.trial_ending.cta") } { appURL }/app/settings/billing
+}
+
+// DigestItem is one line of the periodic rollup — deliberately a view struct
+// rather than sqlc.Notification, so the email never depends on the shape of
+// a database row.
+type DigestItem struct {
+	Title string
+	Body  string
+	URL   string
+	When  string
+}
+
+templ DigestEmailHTML(appURL, name string, items []DigestItem) {
+	@EmailLayout(DigestEmailBody(appURL, name, items))
+}
+
+templ DigestEmailBody(appURL, name string, items []DigestItem) {
+	<h1 style="font-size:22px;margin:0 0 12px;">{ i18n.T(ctx, "email.digest.title", greetingName(name)) }</h1>
+	<p style="margin:0 0 16px;line-height:1.6;">{ i18n.T(ctx, "email.digest.intro") }</p>
+	<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+		for _, item := range items {
+			<tr>
+				<td style="padding:0 0 16px;border-bottom:1px solid #e2e8f0;">
+					<div style="font-weight:600;font-size:15px;margin-bottom:2px;">
+						if link := absoluteURL(appURL, item.URL); link != "" {
+							<a href={ templ.URL(link) } style="color:#4f46e5;text-decoration:none;">{ item.Title }</a>
+						} else {
+							{ item.Title }
+						}
+					</div>
+					<div style="color:#475569;font-size:14px;line-height:1.5;">{ item.Body }</div>
+					<div style="color:#94a3b8;font-size:12px;margin-top:4px;">{ item.When }</div>
+				</td>
+			</tr>
+		}
+	</table>
+	<p style="margin:24px 0 0;"><a href={ appURL + "/app/notifications" } style="color:#4f46e5;">{ i18n.T(ctx, "email.digest.cta") }</a></p>
+	<p style="margin:16px 0 0;color:#94a3b8;font-size:12px;">
+		{ i18n.T(ctx, "email.digest.manage") } <a href={ appURL + "/app/settings/notifications" } style="color:#94a3b8;">{ appURL }/app/settings/notifications</a>
+	</p>
+}
+
+templ DigestEmailText(appURL, name string, items []DigestItem) {
+	{ i18n.T(ctx, "email.digest.title", greetingName(name)) }
+
+	{ i18n.T(ctx, "email.digest.intro") }
+	for _, item := range items {
+		- { item.Title }: { item.Body } ({ item.When })
+	}
+
+	{ i18n.T(ctx, "email.digest.cta") } { appURL }/app/notifications
+	{ i18n.T(ctx, "email.digest.manage") } { appURL }/app/settings/notifications
 }

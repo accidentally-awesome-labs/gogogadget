@@ -29,3 +29,12 @@ WHERE clerk_org_id = $1 AND clerk_user_id = $2 AND read_at IS NULL;
 
 -- name: DeleteOldReadNotifications :exec
 DELETE FROM notifications WHERE read_at IS NOT NULL AND read_at < now() - interval '90 days';
+
+-- name: ListNotificationsSince :many
+-- Digest content: what the user was notified about during the window. Read
+-- rows are included on purpose — a digest is a summary of the period, not an
+-- inbox of unread items.
+SELECT * FROM notifications
+WHERE clerk_user_id = $1 AND created_at > $2
+ORDER BY created_at DESC
+LIMIT $3;

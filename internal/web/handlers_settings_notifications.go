@@ -27,7 +27,7 @@ func (s *Server) handleSettingsNotifications(w http.ResponseWriter, r *http.Requ
 		prefs[row.Kind] = row.InApp
 	}
 	s.Render(w, r, Page{Title: i18n.T(ctx, "settings.notifications_title"), Layout: templates.LayoutApp},
-		templates.SettingsNotificationsPage(prefs))
+		templates.SettingsNotificationsPage(prefs, user.DigestFrequency))
 }
 
 // POST /app/settings/notifications — checkbox presence per kind: an
@@ -44,6 +44,17 @@ func (s *Server) handleSettingsNotificationsSave(w http.ResponseWriter, r *http.
 			ClerkUserID: user.ClerkUserID, Kind: kind, InApp: r.PostForm.Has("kind_" + kind),
 		})
 		if err != nil {
+			s.renderError(w, r, err.Error())
+			return
+		}
+	}
+	// Digest cadence rides the same form. An unknown value is ignored rather
+	// than written: the column has a CHECK constraint, and a hand-crafted
+	// POST should not 500 on it.
+	if f := r.PostFormValue("digest_frequency"); templates.IsDigestFrequency(f) {
+		if err := s.q.SetUserDigestFrequency(ctx, sqlc.SetUserDigestFrequencyParams{
+			ClerkUserID: user.ClerkUserID, DigestFrequency: f,
+		}); err != nil {
 			s.renderError(w, r, err.Error())
 			return
 		}

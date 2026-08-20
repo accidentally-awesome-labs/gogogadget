@@ -183,15 +183,17 @@ type UsageEvent struct {
 }
 
 type User struct {
-	ClerkUserID string             `json:"clerk_user_id"`
-	Email       string             `json:"email"`
-	Name        string             `json:"name"`
-	AvatarUrl   string             `json:"avatar_url"`
-	IsAdmin     bool               `json:"is_admin"`
-	DisabledAt  pgtype.Timestamptz `json:"disabled_at"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	Locale      string             `json:"locale"`
+	ClerkUserID     string             `json:"clerk_user_id"`
+	Email           string             `json:"email"`
+	Name            string             `json:"name"`
+	AvatarUrl       string             `json:"avatar_url"`
+	IsAdmin         bool               `json:"is_admin"`
+	DisabledAt      pgtype.Timestamptz `json:"disabled_at"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	Locale          string             `json:"locale"`
+	DigestFrequency string             `json:"digest_frequency"`
+	LastDigestAt    pgtype.Timestamptz `json:"last_digest_at"`
 }
 
 type WebhookDelivery struct {

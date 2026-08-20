@@ -37,6 +37,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Admin** — users/orgs/MRR stats, user search + disable, plan badges, platform-wide audit-log viewer (`/admin/audit`), jobs viewer with dead-letter requeue (`/admin/jobs`), and announcement banner CRUD (`/admin/announcements`).
 - **Announcement banner** — one-active-at-a-time platform announcements (info/warning/critical) rendered in the app shell, dismissible per user, 30s-cached.
 - **Notification preferences** — per-user, per-kind in-app mutes at `/app/settings/notifications`; default-on, absent row means send.
+- **Email digest** — per-user cadence (off/daily/weekly) rolling up in-app notifications; worker-rendered, window-stamped so nothing repeats or is skipped.
 - **GDPR self-serve** — one-click JSON data export and email-confirmed account deletion with org-cascade safety checks at `/app/settings/account`.
 - **Maintenance mode** — `MAINTENANCE_MODE=true` serves a dedicated 503 page (JSON for `/api/`) while `/healthz`/`/readyz` stay live; dedicated 403 page for non-admins.
 - **Mobile nav** — hamburger drawer in the app topbar; the sidebar nav is shared, not duplicated.

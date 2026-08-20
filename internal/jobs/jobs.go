@@ -18,6 +18,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/text/language"
 )
 
 // Job kinds.
@@ -26,7 +27,7 @@ const (
 	KindPaymentFailed        = "email.payment_failed"
 	KindSubscriptionCanceled = "email.subscription_canceled"
 	KindTrialEnding          = "email.trial_ending"
-	KindEmailDigest          = "email.digest" // seeded example — no-ops until a builder replaces it
+	KindEmailDigest          = "email.digest" // per-user rollup of in-app notifications (digest.go)
 	KindUsageFlush           = "usage.flush"  // usage metering (see internal/usage)
 	KindWebhookDeliver       = "webhook.deliver"
 	KindExportProjectsCSV    = "export.projects_csv"
@@ -118,6 +119,23 @@ type Worker struct {
 	// Storage is the export target; set in cmd/server. Nil → export fails
 	// loudly (the handler should not enqueue without it).
 	Storage storage.Store
+	// AppURL is the base for links inside digest emails. The digest is the
+	// one mail the worker renders itself (its content is a query result that
+	// only exists at send time), so it needs the base URL that enqueue-time
+	// builders normally supply.
+	AppURL string
+	// DigestLocale picks the catalog for digest emails. Users have no
+	// per-user locale column yet (see /docs/roadmap), so this is a
+	// deployment-wide choice; the zero value is English.
+	DigestLocale language.Tag
+}
+
+// digestLocale normalizes the zero value to English.
+func (w *Worker) digestLocale() language.Tag {
+	if w.DigestLocale == language.Und {
+		return language.English
+	}
+	return w.DigestLocale
 }
 
 func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
@@ -265,14 +283,7 @@ func (w *Worker) schedulerPass(ctx context.Context) error {
 func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 	switch job.Kind {
 	case KindEmailDigest:
-		// Placeholder for builders: scheduled example job; no-ops politely
-		// with a log when the payload carries nothing to digest.
-		var sp SchedulePayload
-		if err := json.Unmarshal(job.Payload, &sp); err != nil {
-			return err
-		}
-		w.log.Info("email.digest: placeholder — nothing to send", "schedule_id", sp.ScheduleID)
-		return nil
+		return w.sendDigests(ctx, job)
 	case KindUsageFlush:
 		return w.flushUsage(ctx, job)
 	case KindWebhookDeliver:

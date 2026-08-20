@@ -7,6 +7,8 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countNotificationsByUser = `-- name: CountNotificationsByUser :one
@@ -114,6 +116,52 @@ func (q *Queries) ListNotificationsByUser(ctx context.Context, arg ListNotificat
 		arg.Limit,
 		arg.Offset,
 	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Notification
+	for rows.Next() {
+		var i Notification
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClerkOrgID,
+			&i.ClerkUserID,
+			&i.Kind,
+			&i.Title,
+			&i.Body,
+			&i.Url,
+			&i.ReadAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listNotificationsSince = `-- name: ListNotificationsSince :many
+SELECT id, clerk_org_id, clerk_user_id, kind, title, body, url, read_at, created_at FROM notifications
+WHERE clerk_user_id = $1 AND created_at > $2
+ORDER BY created_at DESC
+LIMIT $3
+`
+
+type ListNotificationsSinceParams struct {
+	ClerkUserID string             `json:"clerk_user_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	Limit       int32              `json:"limit"`
+}
+
+// Digest content: what the user was notified about during the window. Read
+// rows are included on purpose — a digest is a summary of the period, not an
+// inbox of unread items.
+func (q *Queries) ListNotificationsSince(ctx context.Context, arg ListNotificationsSinceParams) ([]Notification, error) {
+	rows, err := q.db.Query(ctx, listNotificationsSince, arg.ClerkUserID, arg.CreatedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

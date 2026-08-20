@@ -173,6 +173,7 @@ func run() error {
 	worker.Billing = polarClient // nil-safe: usage.flush no-ops when unconfigured
 	worker.AuditRetentionDays = cfg.AuditRetentionDays
 	worker.Storage = fileStore // export jobs write through the same seam
+	worker.AppURL = cfg.AppURL // digest emails are rendered by the worker
 	if cfg.SentryEnabled() {
 		worker.OnDeadLetter = func(kind string, err error) {
 			reporter.Capture(fmt.Errorf("job %s dead-lettered: %w", kind, err))

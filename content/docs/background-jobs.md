@@ -110,8 +110,9 @@ advances from *now*, never catch-up storms. `every_seconds >= 60` is a table
 CHECK.
 
 Seeded for the dev database: `usage-flush` (`usage.flush`, every 300s — feeds
-the metering job) and `weekly-digest` (`email.digest`, disabled — the
-placeholder dispatch case logs and completes; builders replace it).
+the metering job) and `email-digest` (`email.digest`, every 3600s). The digest
+pass looks hourly and mails only the users whose own cadence is due — see
+[Email](/docs/email).
 
 Create schedules from seeds, admin tooling, or your own code with the
 `schedules` helper:

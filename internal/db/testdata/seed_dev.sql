@@ -23,11 +23,11 @@ INSERT INTO projects (clerk_org_id, name) VALUES
 ON CONFLICT DO NOTHING;
 
 -- System schedules: usage metering flushes to Polar every 5 minutes (the
--- jobs worker claims due rows and enqueues their kind); the digest example
--- stays disabled until a builder replaces the dispatch case.
+-- jobs worker claims due rows and enqueues their kind); the digest pass runs
+-- hourly and decides per user who is actually due (users.digest_frequency).
 INSERT INTO schedules (name, kind, payload, clerk_org_id, every_seconds, next_run_at, enabled) VALUES
   ('usage-flush', 'usage.flush', '{}', NULL, 300, now(), TRUE),
-  ('weekly-digest', 'email.digest', '{}', NULL, 604800, now(), FALSE)
+  ('email-digest', 'email.digest', '{}', NULL, 3600, now(), TRUE)
 ON CONFLICT DO NOTHING;
 
 -- Demo notifications: two unread + one read for the demo user.

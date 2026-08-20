@@ -156,3 +156,20 @@ func TrialEndingMessage(locale language.Tag, appURL, to, trialEnd string) (Messa
 	}
 	return Message{To: to, Subject: i18n.T(ctx, "email.trial_ending.subject"), HTML: html, Text: text}, nil
 }
+
+// DigestMessage renders the periodic rollup. Unlike the transactional
+// builders it is called from the worker rather than at enqueue time: the
+// content is a query result that only exists when the digest actually runs,
+// so rendering early would mean storing a stale email in a job payload.
+func DigestMessage(locale language.Tag, appURL, to, name string, items []templates.DigestItem) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.DigestEmailHTML(appURL, name, items))
+	if err != nil {
+		return Message{}, err
+	}
+	text, err := renderHTML(ctx, templates.DigestEmailText(appURL, name, items))
+	if err != nil {
+		return Message{}, err
+	}
+	return Message{To: to, Subject: i18n.T(ctx, "email.digest.subject"), HTML: html, Text: text}, nil
+}

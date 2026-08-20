@@ -43,7 +43,7 @@ implementation.
 
 Every email is **two templ components** — an HTML body and a plain-text body
 — living in `internal/web/templates/emails.templ` on the shared inline-styled
-`EmailLayout`. The four shipped kinds:
+`EmailLayout`. The five shipped kinds:
 
 | Kind | Subject | Trigger |
 |---|---|---|
@@ -51,10 +51,45 @@ Every email is **two templ components** — an HTML body and a plain-text body
 | `email.payment_failed` | "Your payment failed" | Transition **into** `past_due` |
 | `email.subscription_canceled` | "Your subscription is canceled" | First `subscription.canceled`/`revoked` (one-shot guard) |
 | `email.trial_ending` | "Your trial ends soon" | Scheduled at trial_end − 3 days |
+| `email.digest` | "Your GoGoGadget digest" | Hourly schedule; sends to users whose cadence is due |
 
 Builder functions in `mail.go` (`WelcomeMessage`, `PaymentFailedMessage`,
-`SubscriptionCanceledMessage`, `TrialEndingMessage`) render both components
-to strings and return a `Message`.
+`SubscriptionCanceledMessage`, `TrialEndingMessage`, `DigestMessage`) render
+both components to strings and return a `Message`.
+
+## The digest
+
+Everything else is transactional — one event, one email, rendered when the
+job is enqueued. The digest is the exception on both counts, and the
+differences are the design:
+
+- **Cadence is per user, not per schedule.** `users.digest_frequency` is
+  `off` / `daily` / `weekly` (default `weekly`, changeable at
+  **Settings → Notifications**). The `email.digest` schedule only decides how
+  often the worker *looks*; the handler decides who is actually due. Run it
+  hourly and daily users get theirs on time.
+- **Rendered by the worker, not at enqueue time.** Its content is a query
+  result that only exists at send time; rendering early would store a stale
+  email in a job payload. `Worker.AppURL` exists for exactly this reason —
+  the worker needs the base URL that enqueue-time builders normally supply.
+- **Window = `users.last_digest_at`.** The stamp is both "when we last sent"
+  and "where the next window starts", so nothing is repeated and nothing is
+  skipped.
+- **Send, then stamp.** Stamping first would drop a period's content on a
+  delivery failure. The trade is that a crash between the two can repeat one
+  digest — a duplicate summary being the smaller harm than a lost one. A
+  failed send returns an error, so the job retries with backoff and the
+  unstamped users are still due.
+- **Quiet accounts are stamped anyway.** No notifications in the window means
+  no email (an empty digest is spam) but the stamp still advances, so a dormant
+  user is not rescanned on every pass.
+- **In-app mutes apply first.** The digest reads the `notifications` table, so
+  a kind the user muted never got a row and therefore never reaches the email.
+- **Batched at 200 users, 25 items each** — a pass that would email the whole
+  user table in one job is a job that times out and retries from zero.
+
+Locale is deployment-wide (`Worker.DigestLocale`, default English): users have
+no per-user locale column yet — see [Roadmap](/docs/roadmap).
 
 ## Rendered at enqueue time
 

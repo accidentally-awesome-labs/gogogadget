@@ -7,6 +7,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/notify"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -47,4 +48,54 @@ func TestNotificationPrefsPageAndSave(t *testing.T) {
 	code, _, body = serve(t, s, "GET", "/app/settings/notifications", nil, nil, cookie)
 	assert.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, `data-testid="pref-welcome"`)
+}
+
+func TestDigestFrequencyPersists(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_dig", "org_dig_w", "org:admin")
+	cookie := sessionCookie("user_dig", "org_dig_w", "org:admin")
+
+	code, _, body := serve(t, s, "GET", "/app/settings/notifications", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `data-testid="digest-frequency"`)
+	assert.Contains(t, body, `value="weekly" selected`, "the schema default is reflected in the form")
+
+	code, _, _ = postForm(t, s, "/app/settings/notifications",
+		url.Values{"digest_frequency": {"daily"}}, cookie)
+	require.Equal(t, http.StatusOK, code)
+	u, err := s.q.GetUserByClerkID(t.Context(), "user_dig")
+	require.NoError(t, err)
+	assert.Equal(t, "daily", u.DigestFrequency)
+
+	code, _, body = serve(t, s, "GET", "/app/settings/notifications", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, body, `value="daily" selected`, "the saved cadence comes back selected")
+}
+
+// A hand-crafted POST must not reach the CHECK constraint and 500.
+func TestDigestFrequencyRejectsUnknownValue(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_digx", "org_dig_x", "org:admin")
+	cookie := sessionCookie("user_digx", "org_dig_x", "org:admin")
+
+	code, _, _ := postForm(t, s, "/app/settings/notifications",
+		url.Values{"digest_frequency": {"hourly'; DROP TABLE users; --"}}, cookie)
+	assert.Equal(t, http.StatusOK, code, "an unknown cadence is ignored, not a 500")
+
+	u, err := s.q.GetUserByClerkID(t.Context(), "user_digx")
+	require.NoError(t, err)
+	assert.Equal(t, "weekly", u.DigestFrequency, "the stored value is untouched")
+}
+
+// The select is spelled out in the template (computed i18n keys are invisible
+// to the catalog guard), so a test ties that markup back to the canonical list.
+func TestDigestFrequencyOptions(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_digo", "org_dig_o", "org:admin")
+
+	_, _, body := serve(t, s, "GET", "/app/settings/notifications", nil, nil,
+		sessionCookie("user_digo", "org_dig_o", "org:admin"))
+	for _, f := range templates.DigestFrequencies {
+		assert.Contains(t, body, `value="`+f+`"`, "cadence %q is offered by the server but missing from the form", f)
+	}
 }

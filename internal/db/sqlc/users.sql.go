@@ -45,7 +45,7 @@ func (q *Queries) DeleteUser(ctx context.Context, clerkUserID string) error {
 
 const getUserByClerkID = `-- name: GetUserByClerkID :one
 
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale FROM users WHERE clerk_user_id = $1
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at FROM users WHERE clerk_user_id = $1
 `
 
 // users mirror table (identity is Clerk; these rows are a local query cache)
@@ -62,12 +62,14 @@ func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (Use
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Locale,
+		&i.DigestFrequency,
+		&i.LastDigestAt,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale FROM users
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at FROM users
 WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -98,6 +100,8 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Locale,
+			&i.DigestFrequency,
+			&i.LastDigestAt,
 		); err != nil {
 			return nil, err
 		}
@@ -107,6 +111,67 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 		return nil, err
 	}
 	return items, nil
+}
+
+const listUsersDueForDigest = `-- name: ListUsersDueForDigest :many
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at FROM users
+WHERE disabled_at IS NULL
+  AND digest_frequency <> 'off'
+  AND (
+    last_digest_at IS NULL
+    OR last_digest_at < now() - (
+      CASE digest_frequency WHEN 'daily' THEN interval '1 day' ELSE interval '7 days' END
+    )
+  )
+ORDER BY last_digest_at NULLS FIRST
+LIMIT $1
+`
+
+// Opted-in users whose last digest is older than their chosen cadence.
+// A user who has never received one is due immediately; the handler stamps
+// even when there is nothing to say, so a quiet account is not rescanned
+// every pass. Disabled accounts never receive mail.
+func (q *Queries) ListUsersDueForDigest(ctx context.Context, limit int32) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsersDueForDigest, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ClerkUserID,
+			&i.Email,
+			&i.Name,
+			&i.AvatarUrl,
+			&i.IsAdmin,
+			&i.DisabledAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Locale,
+			&i.DigestFrequency,
+			&i.LastDigestAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const markUserDigestSent = `-- name: MarkUserDigestSent :exec
+UPDATE users SET last_digest_at = now(), updated_at = now() WHERE clerk_user_id = $1
+`
+
+// Stamped after a successful send: the stamp is also the next window's start,
+// so writing it before delivery would silently drop that period's content.
+func (q *Queries) MarkUserDigestSent(ctx context.Context, clerkUserID string) error {
+	_, err := q.db.Exec(ctx, markUserDigestSent, clerkUserID)
+	return err
 }
 
 const setUserAdminByEmail = `-- name: SetUserAdminByEmail :exec
@@ -120,6 +185,20 @@ type SetUserAdminByEmailParams struct {
 
 func (q *Queries) SetUserAdminByEmail(ctx context.Context, arg SetUserAdminByEmailParams) error {
 	_, err := q.db.Exec(ctx, setUserAdminByEmail, arg.Email, arg.IsAdmin)
+	return err
+}
+
+const setUserDigestFrequency = `-- name: SetUserDigestFrequency :exec
+UPDATE users SET digest_frequency = $2, updated_at = now() WHERE clerk_user_id = $1
+`
+
+type SetUserDigestFrequencyParams struct {
+	ClerkUserID     string `json:"clerk_user_id"`
+	DigestFrequency string `json:"digest_frequency"`
+}
+
+func (q *Queries) SetUserDigestFrequency(ctx context.Context, arg SetUserDigestFrequencyParams) error {
+	_, err := q.db.Exec(ctx, setUserDigestFrequency, arg.ClerkUserID, arg.DigestFrequency)
 	return err
 }
 
@@ -142,7 +221,7 @@ INSERT INTO users (clerk_user_id, email, name, avatar_url)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (clerk_user_id) DO UPDATE
 SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = now()
-RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale
+RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at
 `
 
 type UpsertUserParams struct {
@@ -170,6 +249,8 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, e
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Locale,
+		&i.DigestFrequency,
+		&i.LastDigestAt,
 	)
 	return i, err
 }

@@ -82,3 +82,15 @@ one user (a `notification_preferences` row, per-user per-kind). `SendOrg`
 fan-out honors per-member preferences, so a broadcast reaches everyone except
 the people who muted it. A preference-lookup hiccup logs and sends — the
 failure mode is an extra notification, never a silently dropped one.
+
+## Digest emails
+
+Preferences on `/app/settings/notifications` govern the **in-app** channel;
+the same page carries the **email digest** cadence
+(`users.digest_frequency`: `off` / `daily` / `weekly`, default `weekly`).
+
+The two compose in one direction on purpose: the digest is built from the
+`notifications` table, so a kind muted in-app never produced a row and can
+never appear in an email. Muting a kind mutes it everywhere; the cadence only
+controls how often the surviving rows are mailed. See
+[Email → The digest](/docs/email).
