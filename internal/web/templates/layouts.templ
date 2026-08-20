@@ -26,6 +26,21 @@ templ headMeta(page Page) {
 	<meta property="og:url" content={ page.AppURL + page.Path }/>
 	<meta property="og:image" content={ page.AppURL + "/static/og.png" }/>
 	<meta name="twitter:card" content="summary_large_image"/>
+	if page.Canonical != "" {
+		<link rel="canonical" href={ page.Canonical }/>
+		for _, alt := range page.Alternates {
+			<link rel="alternate" hreflang={ alt.Lang } href={ alt.Href }/>
+		}
+		// Autodiscovery: the feed has existed since day one, but without this
+		// no browser or reader could find it from a page.
+		<link rel="alternate" type="application/rss+xml" title={ "GoGoGadget Blog" } href={ page.AppURL + "/rss.xml" }/>
+	}
+	if page.JSONLD != nil {
+		// A data block, not executable script: CSP script-src does not apply
+		// to non-JavaScript script types. templ marshals and escapes the
+		// value, so page content cannot close the element.
+		@LDScript(page.JSONLD)
+	}
 }
 
 // headScripts loads vendored JS. app.js is NOT deferred so dark-mode init runs

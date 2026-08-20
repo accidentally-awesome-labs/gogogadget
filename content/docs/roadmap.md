@@ -2,7 +2,7 @@
 title: Roadmap
 description: Researched feature gaps vs. production SaaS norms — what exists, what's tiered, what's deliberately delegated.
 section: Guides
-weight: 27
+weight: 28
 ---
 
 This page is a point-in-time audit (2026-08-17) of what a production SaaS
@@ -28,6 +28,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Email digest | Per-user cadence (`off`/`daily`/`weekly`) rolled up from in-app notifications; worker-rendered, window-stamped |
 | Server-side theme + locale | Stored on the user row, mirrored to cookies; dark paints server-side (no flash), digests speak the user's language |
 | Support role tier | `users.admin_role` (`support`/`admin`); read-only staff, method-based write guard, audited grants, last-admin lockout |
+| SEO hardening | Self-referential canonicals (collapsing the `?lang=` duplicates), reciprocal hreflang, JSON-LD, sitemap `lastmod`, RSS autodiscovery — `/docs/seo` |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -43,7 +44,6 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Org-level data export | Only projects CSV exists — `internal/jobs/export_csv.go` | Full-org JSON/CSV bundle via the same job + storage pattern |
 | Dunning depth | Single payment_failed email — `internal/billing/webhook.go` | Add a retry-schedule comms sequence |
 | Changelog page; in-app help; breadcrumbs; keyboard shortcuts/command palette; skeleton screens beyond Clerk slots | All absent — `internal/web/templates/` | Add incrementally; skeletons first |
-| SEO hardening: canonical tags, JSON-LD, RSS autodiscovery `<link>`, sitemap `<lastmod>` | Absent — `internal/web/templates/layouts.templ` `headMeta`, `internal/web/handlers_content.go` | Extend head meta + sitemap renderer |
 
 ## Tier 3 — platform/delegated
 

@@ -49,6 +49,15 @@ type Page struct {
 	Path        string
 	Layout      string
 	CSRFToken   string
+	// Canonical is the absolute self-referential URL for this page, and
+	// Alternates are its language versions (see internal/web/seo.go).
+	// Empty on authed pages — /app and /admin are noindex by nature.
+	Canonical  string
+	Alternates []Alternate
+	// JSONLD is schema.org data for this page (a map or slice of maps), or
+	// nil for none. Rendered through templ.JSONScriptElement, which marshals
+	// and escapes it for script context — the page never hand-builds JSON.
+	JSONLD any
 	// Theme is the resolved appearance: "dark" renders the class on <html>
 	// server-side so a fresh device never flashes light before app.js runs.
 	// "system" and "light" render nothing — only the browser knows the OS
@@ -152,4 +161,23 @@ func WithAdminWrite(ctx context.Context, on bool) context.Context {
 func AdminWrite(ctx context.Context) bool {
 	on, _ := ctx.Value(ctxAdminWrite{}).(bool)
 	return on
+}
+
+// Alternate is one hreflang link: a language code (or "x-default") and the
+// URL that serves that version.
+type Alternate struct {
+	Lang string
+	Href string
+}
+
+// LDScript renders a schema.org data block.
+//
+// Built through templ.JSONScript rather than a JSONScriptElement literal:
+// the element's Nonce field is a func that only the constructor populates,
+// so a literal panics on render. templ marshals and escapes the data, which
+// is why page content cannot close the element.
+func LDScript(data any) templ.Component {
+	el := templ.JSONScript("structured-data", data)
+	el.Type = "application/ld+json"
+	return el
 }

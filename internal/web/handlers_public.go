@@ -19,6 +19,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		Title:       "Ship your SaaS this weekend",
 		Description: "The production-grade Go + HTMX SaaS boilerplate: auth, teams, billing, email, admin, blog, and docs out of the box.",
 		Layout:      templates.LayoutPublic,
+		JSONLD:      s.siteJSONLD(),
 	}, templates.Home(billing.Plans))
 }
 

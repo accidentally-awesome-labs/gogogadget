@@ -2,7 +2,7 @@
 title: Security
 description: CSP, CSRF, rate limiting, webhook verification, token hashing, and the XSS rules.
 section: Guides
-weight: 23
+weight: 24
 ---
 
 The security posture is a small set of **enforced defaults**, not a checklist.

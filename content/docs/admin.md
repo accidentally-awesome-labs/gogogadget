@@ -2,7 +2,7 @@
 title: Admin
 description: The /admin dashboard, staff roles, the ADMIN_EMAIL grant, and the disable flow.
 section: Features
-weight: 14
+weight: 15
 ---
 
 Staff access is a role on the local user mirror (`users.admin_role`), with two

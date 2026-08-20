@@ -2,7 +2,7 @@
 title: Extending GoGoGadget
 description: The recipe hub — add resources, plans, emails, jobs, webhooks, endpoints, or swap a provider.
 section: Guides
-weight: 25
+weight: 26
 ---
 
 Every common change follows the same shape: edit the **source of truth**

@@ -113,6 +113,12 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.Sub = identity.SubFrom(r.Context())
 	page.Impersonator = identity.ImpersonatorFrom(r.Context())
 	page.Theme = resolveTheme(r, page.User)
+	// Indexable surfaces only. /app and /admin are behind auth, so a crawler
+	// never sees them and canonical/hreflang on them would be noise.
+	if page.Layout == templates.LayoutPublic || page.Layout == templates.LayoutDocs {
+		page.Canonical = s.canonicalFor(r)
+		page.Alternates = s.alternatesFor(r)
+	}
 
 	if page.Layout == templates.LayoutAdmin {
 		r = r.WithContext(templates.WithAdminWrite(r.Context(), identity.IsAdmin(page.User)))

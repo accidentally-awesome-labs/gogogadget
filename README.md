@@ -40,6 +40,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Email digest** — per-user cadence (off/daily/weekly) rolling up in-app notifications; worker-rendered, window-stamped so nothing repeats or is skipped.
 - **Appearance preferences** — theme and language stored per user, mirrored to cookies; dark mode paints server-side (no flash on a new device).
 - **Staff roles** — read-only `support` tier beside full `admin`; one method-based guard covers every mutating admin route, grants are audited, last admin can't be demoted.
+- **SEO** — self-referential canonicals that collapse the `?lang=` duplicates, reciprocal hreflang, Organization/WebSite/BlogPosting JSON-LD, sitemap `lastmod`, RSS autodiscovery.
 - **GDPR self-serve** — one-click JSON data export and email-confirmed account deletion with org-cascade safety checks at `/app/settings/account`.
 - **Maintenance mode** — `MAINTENANCE_MODE=true` serves a dedicated 503 page (JSON for `/api/`) while `/healthz`/`/readyz` stay live; dedicated 403 page for non-admins.
 - **Mobile nav** — hamburger drawer in the app topbar; the sidebar nav is shared, not duplicated.
