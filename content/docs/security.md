@@ -83,6 +83,20 @@ CSRF middleware to keep it that way.
   Bearer — no cookie, nothing to forge), `/ingest/*`, `/static/*`,
   `/healthz`, `/readyz`.
 
+## Staff roles
+
+Platform access is two-tier (`users.admin_role`): `support` reads `/admin`,
+`admin` also changes it. The separation exists because the alternative is
+handing a support hire impersonation, account disable, feature-flag mutation,
+schedule run-now, and dead-letter requeue in order to let them read a
+dashboard.
+
+Enforcement is a single method-based guard (`requireAdminWrite`) rather than a
+per-route annotation, so routes added later inherit the boundary instead of
+silently missing it. Role grants are audited (`admin.role_changed`, with the
+old and new value), and the last full admin cannot be demoted — see
+[Admin](/docs/admin).
+
 ## Rate limiting
 
 The budget is `RATE_LIMIT_RPM` (default 100/min per IP, burst 2×) — test

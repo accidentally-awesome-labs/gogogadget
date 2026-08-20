@@ -1,15 +1,16 @@
 -- E2E fixtures: fixed timestamps (2026-01-15) throughout for visual
 -- determinism. Loaded by playwright globalSetup via `go run ./cmd/seed -reset`.
 
-INSERT INTO users (clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at) VALUES
-  ('user_free',     'free@gogogadget.dev',     'Free User',     '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_pro',      'pro@gogogadget.dev',      'Pro User',      '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_admin',    'admin@gogogadget.dev',    'Site Admin',    '', TRUE,  NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_disabled', 'disabled@gogogadget.dev', 'Disabled User', '', FALSE, '2026-01-15T00:00:00Z',      '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_noorg',    'noorg@gogogadget.dev',    'No Org',        '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_noactive', 'noactive@gogogadget.dev', 'No Active Org', '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_toggle',   'toggle@gogogadget.dev',   'Toggle Target', '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
-  ('user_deleteme', 'deleteme@example.com',    'Delete Me',     '', FALSE, NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z')
+INSERT INTO users (clerk_user_id, email, name, avatar_url, admin_role, disabled_at, created_at, updated_at) VALUES
+  ('user_free',     'free@gogogadget.dev',     'Free User',     '', '',      NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_pro',      'pro@gogogadget.dev',      'Pro User',      '', '',      NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_admin',    'admin@gogogadget.dev',    'Site Admin',    '', 'admin', NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_disabled', 'disabled@gogogadget.dev', 'Disabled User', '', '',      '2026-01-15T00:00:00Z',      '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_noorg',    'noorg@gogogadget.dev',    'No Org',        '', '',      NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_noactive', 'noactive@gogogadget.dev', 'No Active Org', '', '',      NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_toggle',   'toggle@gogogadget.dev',   'Toggle Target', '', '',      NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_deleteme', 'deleteme@example.com',    'Delete Me',     '', '',      NULL,                        '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
+  ('user_support',  'support@gogogadget.dev',  'Support Staff', '', 'support', NULL,                      '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z')
 ON CONFLICT (clerk_user_id) DO NOTHING;
 
 INSERT INTO orgs (clerk_org_id, name, slug, image_url, created_at, updated_at) VALUES

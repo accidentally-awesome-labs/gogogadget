@@ -48,9 +48,10 @@ func (s *Server) applyImpersonation(w http.ResponseWriter, r *http.Request, ctx 
 		clear()
 		return ctx
 	}
-	// The admin must STILL be a site admin (demotion mid-session kills it).
+	// The admin must STILL hold the full role: demotion mid-session — to
+	// 'support' or to nothing — kills the impersonation.
 	admin, err := s.q.GetUserByClerkID(ctx, sess.AdminUserID)
-	if err != nil || !admin.IsAdmin {
+	if err != nil || !identity.IsAdmin(&admin) {
 		clear()
 		return ctx
 	}

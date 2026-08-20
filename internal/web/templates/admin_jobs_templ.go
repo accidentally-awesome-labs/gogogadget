@@ -304,7 +304,7 @@ func AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page,
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if row.Status == "dead" {
+				if row.Status == "dead" && AdminWrite(ctx) {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<button type=\"button\" hx-post=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

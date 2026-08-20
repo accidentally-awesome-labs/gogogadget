@@ -149,8 +149,8 @@ func TestImpersonationAdminDemotedMidSession(t *testing.T) {
 	imp := startImpersonation(t, s, adminCookie, "user_dem_target")
 
 	// Demote the admin mid-session…
-	require.NoError(t, s.q.SetUserAdminByEmail(t.Context(), sqlc.SetUserAdminByEmailParams{
-		Email: "user_dem_admin@example.com", IsAdmin: false,
+	require.NoError(t, s.q.SetUserAdminRoleByEmail(t.Context(), sqlc.SetUserAdminRoleByEmailParams{
+		Email: "user_dem_admin@example.com", AdminRole: "",
 	}))
 
 	// …the next request clears the cookie and proceeds as the (former) admin.

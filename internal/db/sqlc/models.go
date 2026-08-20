@@ -187,7 +187,6 @@ type User struct {
 	Email           string             `json:"email"`
 	Name            string             `json:"name"`
 	AvatarUrl       string             `json:"avatar_url"`
-	IsAdmin         bool               `json:"is_admin"`
 	DisabledAt      pgtype.Timestamptz `json:"disabled_at"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
@@ -195,6 +194,7 @@ type User struct {
 	DigestFrequency string             `json:"digest_frequency"`
 	LastDigestAt    pgtype.Timestamptz `json:"last_digest_at"`
 	Theme           string             `json:"theme"`
+	AdminRole       string             `json:"admin_role"`
 }
 
 type WebhookDelivery struct {

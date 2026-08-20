@@ -26,7 +26,7 @@ production the process environment is the only source.
 | `CLERK_PORTAL_URL` | **production** | | Hosted Account Portal base, e.g. `https://accounts.your-app.com` |
 | `CLERK_PUBLISHABLE_KEY` | **production** | | Drives the vendored clerk-js that keeps the `__session` JWT fresh |
 | `CLERK_FRONTEND_API_URL` | | dev: `https://*.clerk.accounts.dev`; prod: `https://clerk.<APP_URL host>` | Clerk Frontend API origin — feeds CSP `connect-src` |
-| `ADMIN_EMAIL` | | | First sign-in with this email is granted site admin. Empty → nobody is admin |
+| `ADMIN_EMAIL` | | | First sign-in with this email is granted the full `admin` role. Empty → nobody is staff |
 | `POLAR_ACCESS_TOKEN` | | | Empty → billing routes render 503 "not configured" |
 | `POLAR_WEBHOOK_SECRET` | | | Verifies `webhook-*` signatures on `/webhooks/polar` |
 | `POLAR_PRODUCT_PRO` | | | Polar product ID for the Pro plan |

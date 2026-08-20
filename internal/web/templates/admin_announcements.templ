@@ -19,9 +19,11 @@ type AnnouncementsData struct {
 
 templ AdminAnnouncementsPage(d AnnouncementsData) {
 	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.announcements.title") }</h1>
-	<div id="announcement-form-wrap">
-		@AnnouncementForm(d)
-	</div>
+	if AdminWrite(ctx) {
+		<div id="announcement-form-wrap">
+			@AnnouncementForm(d)
+		</div>
+	}
 	<div class="card !p-0 overflow-hidden" data-testid="announcements-table">
 		if len(d.Items) == 0 {
 			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.empty") }</p>
@@ -44,24 +46,26 @@ templ AdminAnnouncementsPage(d AnnouncementsData) {
 							</td>
 							<td class="text-fg-muted">{ a.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 							<td class="text-right">
-								<div class="flex justify-end gap-2">
-									if a.Active {
-										<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/deactivate" }
-											class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-deactivate-" + fmt.Sprintf("%d", a.ID) }>
-											{ i18n.T(ctx, "admin.announcements.deactivate") }
+								if AdminWrite(ctx) {
+									<div class="flex justify-end gap-2">
+										if a.Active {
+											<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/deactivate" }
+												class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-deactivate-" + fmt.Sprintf("%d", a.ID) }>
+												{ i18n.T(ctx, "admin.announcements.deactivate") }
+											</button>
+										} else {
+											<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/activate" }
+												class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-activate-" + fmt.Sprintf("%d", a.ID) }>
+												{ i18n.T(ctx, "admin.announcements.activate") }
+											</button>
+										}
+										<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/delete" }
+											hx-confirm={ i18n.T(ctx, "admin.announcements.delete_confirm") }
+											class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400" data-testid={ "announcement-delete-" + fmt.Sprintf("%d", a.ID) }>
+											{ i18n.T(ctx, "admin.announcements.delete") }
 										</button>
-									} else {
-										<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/activate" }
-											class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-activate-" + fmt.Sprintf("%d", a.ID) }>
-											{ i18n.T(ctx, "admin.announcements.activate") }
-										</button>
-									}
-									<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/delete" }
-										hx-confirm={ i18n.T(ctx, "admin.announcements.delete_confirm") }
-										class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400" data-testid={ "announcement-delete-" + fmt.Sprintf("%d", a.ID) }>
-										{ i18n.T(ctx, "admin.announcements.delete") }
-									</button>
-								</div>
+									</div>
+								}
 							</td>
 						</tr>
 					}
@@ -94,32 +98,32 @@ templ AnnouncementForm(d AnnouncementsData) {
 	<div class="card mb-8 max-w-xl">
 		<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "admin.announcements.create_title") }</h2>
 		<form hx-post="/admin/announcements" hx-target="#announcement-form-wrap" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="announcement-create-form" class="space-y-4">
-			if d.Invalid {
-				<div class="alert-error" role="alert">{ i18n.T(ctx, "admin.announcements.invalid") }</div>
-			}
-			<div>
-				<label class="block text-sm font-medium mb-1" for="announcement-kind">{ i18n.T(ctx, "admin.announcements.kind_label") }</label>
-				<select id="announcement-kind" name="kind" class="input">
-					<option value="info" selected?={ d.Kind == "info" }>{ i18n.T(ctx, "admin.announcements.kind_info") }</option>
-					<option value="warning" selected?={ d.Kind == "warning" }>{ i18n.T(ctx, "admin.announcements.kind_warning") }</option>
-					<option value="critical" selected?={ d.Kind == "critical" }>{ i18n.T(ctx, "admin.announcements.kind_critical") }</option>
-				</select>
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="announcement-message">{ i18n.T(ctx, "admin.announcements.message_label") }</label>
-				<input id="announcement-message" type="text" name="message" value={ d.Message } maxlength="280"
-					placeholder={ i18n.T(ctx, "admin.announcements.message_placeholder") } class="input" />
-			</div>
-			<div>
-				<label class="block text-sm font-medium mb-1" for="announcement-url">{ i18n.T(ctx, "admin.announcements.url_label") }</label>
-				<input id="announcement-url" type="url" name="url" value={ d.Url }
-					placeholder={ i18n.T(ctx, "admin.announcements.url_placeholder") } class="input" />
-			</div>
-			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.one_active_hint") }</p>
-			<div class="flex items-center gap-3">
-				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.announcements.create") }</button>
-				@Spinner()
-			</div>
+				if d.Invalid {
+					<div class="alert-error" role="alert">{ i18n.T(ctx, "admin.announcements.invalid") }</div>
+				}
+				<div>
+					<label class="block text-sm font-medium mb-1" for="announcement-kind">{ i18n.T(ctx, "admin.announcements.kind_label") }</label>
+					<select id="announcement-kind" name="kind" class="input">
+						<option value="info" selected?={ d.Kind == "info" }>{ i18n.T(ctx, "admin.announcements.kind_info") }</option>
+						<option value="warning" selected?={ d.Kind == "warning" }>{ i18n.T(ctx, "admin.announcements.kind_warning") }</option>
+						<option value="critical" selected?={ d.Kind == "critical" }>{ i18n.T(ctx, "admin.announcements.kind_critical") }</option>
+					</select>
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="announcement-message">{ i18n.T(ctx, "admin.announcements.message_label") }</label>
+					<input id="announcement-message" type="text" name="message" value={ d.Message } maxlength="280"
+						placeholder={ i18n.T(ctx, "admin.announcements.message_placeholder") } class="input" />
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-1" for="announcement-url">{ i18n.T(ctx, "admin.announcements.url_label") }</label>
+					<input id="announcement-url" type="url" name="url" value={ d.Url }
+						placeholder={ i18n.T(ctx, "admin.announcements.url_placeholder") } class="input" />
+				</div>
+				<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.one_active_hint") }</p>
+				<div class="flex items-center gap-3">
+					<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.announcements.create") }</button>
+					@Spinner()
+				</div>
 		</form>
 	</div>
 }

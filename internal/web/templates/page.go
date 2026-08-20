@@ -134,3 +134,22 @@ func (p Page) HTMLAttrs() templ.Attributes {
 	}
 	return templ.Attributes{}
 }
+
+type ctxAdminWrite struct{}
+
+// WithAdminWrite carries "this viewer may change platform state" into admin
+// templates. A context value rather than a field on five different data
+// structs: the capability belongs to the request, not to the table being
+// rendered, and a new admin page inherits the gate instead of having to
+// remember a bool.
+func WithAdminWrite(ctx context.Context, on bool) context.Context {
+	return context.WithValue(ctx, ctxAdminWrite{}, on)
+}
+
+// AdminWrite reports the viewer's capability. Default FALSE — an unset
+// context renders read-only, so forgetting to set it hides controls rather
+// than offering ones that 403.
+func AdminWrite(ctx context.Context) bool {
+	on, _ := ctx.Value(ctxAdminWrite{}).(bool)
+	return on
+}

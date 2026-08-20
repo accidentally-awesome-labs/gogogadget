@@ -64,8 +64,10 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 			}
 			// ADMIN_EMAIL grant on first sight of the configured address.
 			if s.cfg.AdminEmail != "" && strings.EqualFold(profile.Email, s.cfg.AdminEmail) {
-				if err := s.q.SetUserAdminByEmail(ctx, sqlc.SetUserAdminByEmailParams{Email: profile.Email, IsAdmin: true}); err == nil {
-					user.IsAdmin = true
+				if err := s.q.SetUserAdminRoleByEmail(ctx, sqlc.SetUserAdminRoleByEmailParams{
+					Email: profile.Email, AdminRole: identity.RoleAdmin,
+				}); err == nil {
+					user.AdminRole = identity.RoleAdmin
 				}
 			}
 		case err != nil:
@@ -208,11 +210,15 @@ func (s *Server) loadPlan(next http.Handler) http.Handler {
 	})
 }
 
-// requireAdmin: site admins only (is_admin via ADMIN_EMAIL).
-func (s *Server) requireAdmin(next http.Handler) http.Handler {
+// requireStaff gates the /admin subtree: 'support' and 'admin' may read it.
+//
+// Write access is a separate, narrower check (requireAdminWrite) rather than
+// a per-route annotation on fifteen handlers — one of which would eventually
+// be added without it.
+func (s *Server) requireStaff(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u := identity.UserFrom(r.Context())
-		if u == nil || !u.IsAdmin {
+		if !identity.IsStaff(u) {
 			ctx := r.Context()
 			w.WriteHeader(http.StatusForbidden)
 			s.Render(w, r, Page{Title: i18n.T(ctx, "errors.forbidden"), Layout: templates.LayoutApp}, templates.Forbidden())
@@ -227,7 +233,32 @@ func (s *Server) appChain(h http.Handler) http.Handler {
 	return s.requireAuth(s.requireNotDisabled(s.requireOrg(s.loadPlan(h))))
 }
 
-// adminChain adds RequireAdmin for /admin/*.
+// adminChain adds the staff guards for /admin/*.
 func (s *Server) adminChain(h http.Handler) http.Handler {
-	return s.requireAuth(s.requireNotDisabled(s.requireOrg(s.loadPlan(s.requireAdmin(h)))))
+	return s.requireAuth(s.requireNotDisabled(s.requireOrg(s.loadPlan(s.requireStaff(s.requireAdminWrite(h))))))
+}
+
+// requireAdminWrite: inside /admin, anything that is not a read requires the
+// full role. Support staff get the dashboards; they do not get impersonation,
+// account disable, flag and schedule mutation, dead-letter requeue, or role
+// grants.
+//
+// The rule is by METHOD, not by route list, because the route list grows: a
+// new POST added next year inherits the boundary instead of quietly missing
+// it. Every read in the admin surface is a GET (HEAD is a read too), and any
+// GET that mutated would already be a CSRF bug.
+func (s *Server) requireAdminWrite(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet || r.Method == http.MethodHead {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if !identity.IsAdmin(identity.UserFrom(r.Context())) {
+			ctx := r.Context()
+			w.WriteHeader(http.StatusForbidden)
+			s.Render(w, r, Page{Title: i18n.T(ctx, "errors.forbidden"), Layout: templates.LayoutApp}, templates.Forbidden())
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

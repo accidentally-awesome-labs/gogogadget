@@ -61,7 +61,7 @@ templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page
 								</td>
 								<td class="max-w-xs truncate text-fg-muted" title={ row.LastError.String }>{ row.LastError.String }</td>
 								<td class="text-right">
-									if row.Status == "dead" {
+									if row.Status == "dead" && AdminWrite(ctx) {
 										<button
 											type="button"
 											hx-post={ fmt.Sprintf("/admin/jobs/%d/requeue", row.ID) }

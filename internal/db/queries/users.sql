@@ -16,8 +16,18 @@ DELETE FROM users WHERE clerk_user_id = $1;
 -- name: SetUserDisabled :exec
 UPDATE users SET disabled_at = $2, updated_at = now() WHERE clerk_user_id = $1;
 
--- name: SetUserAdminByEmail :exec
-UPDATE users SET is_admin = $2, updated_at = now() WHERE email = $1;
+-- name: SetUserAdminRoleByEmail :exec
+-- ADMIN_EMAIL bootstrap: grants the full role on first sight of the address.
+UPDATE users SET admin_role = $2, updated_at = now() WHERE email = $1;
+
+-- name: SetUserAdminRole :exec
+UPDATE users SET admin_role = $2, updated_at = now() WHERE clerk_user_id = $1;
+
+-- name: CountFullAdmins :one
+-- Lockout guard: demoting the last full admin would leave a platform whose
+-- only remaining staff can read but never act — including never restoring
+-- anyone's role.
+SELECT count(*) FROM users WHERE admin_role = 'admin' AND disabled_at IS NULL;
 
 -- name: ListUsers :many
 SELECT * FROM users

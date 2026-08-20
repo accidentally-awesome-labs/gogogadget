@@ -85,3 +85,21 @@ func ImpersonatorFrom(ctx context.Context) *Impersonator {
 	}
 	return &imp
 }
+
+// Staff roles on users.admin_role. Empty means "not staff".
+const (
+	RoleSupport = "support" // read-only access to /admin
+	RoleAdmin   = "admin"   // full platform access, including impersonation
+)
+
+// IsStaff reports whether the user may READ the admin area.
+func IsStaff(u *sqlc.User) bool {
+	return u != nil && (u.AdminRole == RoleSupport || u.AdminRole == RoleAdmin)
+}
+
+// IsAdmin reports whether the user may CHANGE platform state: impersonate,
+// disable accounts, mutate flags and schedules, requeue jobs, publish
+// announcements, grant roles.
+func IsAdmin(u *sqlc.User) bool {
+	return u != nil && u.AdminRole == RoleAdmin
+}

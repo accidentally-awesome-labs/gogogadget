@@ -211,18 +211,23 @@ func TestRequireAdmin(t *testing.T) {
 	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{ClerkOrgID: "org_adm", ClerkUserID: "user_adm", Role: "org:admin"}))
 
 	probe := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(204) })
-	h := s.requireAdmin(probe)
+	h := s.requireStaff(probe)
 
 	// Non-admin → 403.
 	req := httptest.NewRequest("GET", "/admin", nil)
-	ctx := identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", IsAdmin: false})
+	ctx := identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", AdminRole: ""})
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req.WithContext(ctx))
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 
+	// Support reads the admin area too — the write boundary is a separate guard.
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", AdminRole: identity.RoleSupport})))
+	assert.Equal(t, http.StatusNoContent, rec.Code)
+
 	// Admin → pass.
 	rec = httptest.NewRecorder()
-	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", IsAdmin: true})))
+	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", AdminRole: identity.RoleAdmin})))
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 }
 

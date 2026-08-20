@@ -1,20 +1,58 @@
 ---
 title: Admin
-description: The /admin dashboard, the ADMIN_EMAIL grant, and the disable flow.
+description: The /admin dashboard, staff roles, the ADMIN_EMAIL grant, and the disable flow.
 section: Features
 weight: 14
 ---
 
-Site admin is a flag on the local user mirror (`users.is_admin`), enforced by
-`requireAdmin` at the end of the `/admin` chain:
-`requireAuth → requireNotDisabled → requireOrg → loadPlan → requireAdmin`.
+Staff access is a role on the local user mirror (`users.admin_role`), with two
+tiers:
 
-## Becoming admin
+| Role | Reads `/admin` | Changes platform state |
+|---|---|---|
+| `support` | yes | **no** |
+| `admin` | yes | yes |
+
+Anything else (the empty default) gets the 403 page.
+
+## The read/write boundary
+
+The `/admin` chain is
+`requireAuth → requireNotDisabled → requireOrg → loadPlan → requireStaff → requireAdminWrite`.
+
+`requireStaff` admits both roles. `requireAdminWrite` then refuses any request
+that is **not a GET or HEAD** unless the caller is a full `admin`.
+
+That rule is by method rather than by route list on purpose: the admin surface
+is fifteen mutating routes today and will be more tomorrow, and a per-handler
+annotation is a thing you forget exactly once. Every read in the admin area is
+a GET; a GET that mutated would already be a CSRF bug.
+
+Support-visible pages hide the controls they cannot use — a button that always
+403s is worse than no button. Templates read the capability from the request
+context (`templates.AdminWrite(ctx)`, set in `Render`), which defaults to
+**false**, so a new admin page that forgets the gate renders read-only rather
+than offering actions that fail. State stays visible: support sees *whether* a
+flag is on, just not the toggle.
+
+Impersonation is not a read. A session ends the moment its owner drops below
+`admin`, mid-session, on the next request.
+
+## Becoming staff
 
 Set `ADMIN_EMAIL` in `.env`. The first time that address is seen — either by
-the sign-in lazy upsert or by the `user.created` webhook — the app sets
-`is_admin` via `SetUserAdminByEmail`, and the account is admin from then on.
-No seed script, no manual SQL.
+the sign-in lazy upsert or by the `user.created` webhook — the app grants the
+full `admin` role, and the account is admin from then on. No seed script, no
+manual SQL.
+
+Everyone else is promoted from **`/admin/users`**: a per-row role select
+(`—` / Support / Admin) that writes an `admin.role_changed` audit row with the
+old and new values.
+
+**The last full admin cannot be demoted.** Without that guard a platform can
+be left with staff who can read everything and change nothing — including the
+roles required to fix it. Promote a second admin first; the guard counts only
+enabled accounts.
 
 ## Dashboards
 

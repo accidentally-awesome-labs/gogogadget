@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,7 @@ func TestAdminNonAdmin403(t *testing.T) {
 func adminUser(t *testing.T, s *Server, id, orgID string) {
 	t.Helper()
 	seedMembership(t, s, id, orgID, "org:admin")
-	require.NoError(t, s.q.SetUserAdminByEmail(t.Context(), sqlc.SetUserAdminByEmailParams{Email: id + "@example.com", IsAdmin: true}))
+	require.NoError(t, s.q.SetUserAdminRoleByEmail(t.Context(), sqlc.SetUserAdminRoleByEmailParams{Email: id + "@example.com", AdminRole: identity.RoleAdmin}))
 }
 
 func TestAdminHomeStats(t *testing.T) {

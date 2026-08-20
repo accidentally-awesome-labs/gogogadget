@@ -1,10 +1,10 @@
 -- Demo data for local development. Pair with DEV_AUTH_BYPASS=true and log in
 -- with cookie __session=e2e:user_demo:org_demo:org:admin
--- is_admin is seeded directly: the ADMIN_EMAIL grant only fires on FIRST SIGHT
+-- admin_role is seeded directly: the ADMIN_EMAIL grant only fires on FIRST SIGHT
 -- of a missing row (sessionLoad upsert path), so a pre-seeded user_demo would
 -- otherwise never reach /admin after make db-reset.
-INSERT INTO users (clerk_user_id, email, name, avatar_url, is_admin) VALUES
-  ('user_demo', 'demo@gogogadget.dev', 'Demo User', '', TRUE)
+INSERT INTO users (clerk_user_id, email, name, avatar_url, admin_role) VALUES
+  ('user_demo', 'demo@gogogadget.dev', 'Demo User', '', 'admin')
 ON CONFLICT (clerk_user_id) DO NOTHING;
 
 INSERT INTO orgs (clerk_org_id, name, slug) VALUES

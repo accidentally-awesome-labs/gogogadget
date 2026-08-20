@@ -213,3 +213,31 @@ test.describe('admin', () => {
     await context.close();
   });
 });
+
+test('support staff read the admin area without the controls', async ({ browser }) => {
+  const context = await loginAs(browser, 'support');
+  const page = await context.newPage();
+
+  // The dashboards are readable…
+  for (const path of ['/admin', '/admin/users', '/admin/flags', '/admin/audit']) {
+    await page.goto(path);
+    await expect(page.getByRole('heading').first()).toBeVisible();
+  }
+
+  // …the data is there…
+  await page.goto('/admin/flags');
+  await expect(page.getByTestId('flags-table')).toBeVisible();
+
+  // …but nothing that mutates is offered.
+  await expect(page.getByTestId('flag-create-form')).toHaveCount(0);
+  await page.goto('/admin/users');
+  await expect(page.getByTestId('admin-impersonate')).toHaveCount(0);
+  await expect(page.getByTestId('admin-disable-toggle')).toHaveCount(0);
+  await expect(page.getByTestId('admin-readonly').first()).toBeVisible();
+
+  // And the boundary is enforced server-side, not just hidden in the UI.
+  const resp = await page.request.post('/admin/users/user_pro/disable');
+  expect(resp.status()).toBe(403);
+
+  await context.close();
+});

@@ -1,6 +1,9 @@
 package templates
 
-import "github.com/gogogadget/gogogadget/internal/i18n"
+import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/identity"
+)
 
 // appNavSections is the single source for the app-shell navigation items:
 // rendered by the desktop Sidebar and by the mobile drawer in Topbar. Links
@@ -28,7 +31,7 @@ templ appNavSections(page Page) {
 			>{ item.Label }</a>
 		}
 	</nav>
-	if page.User != nil && page.User.IsAdmin {
+	if identity.IsStaff(page.User) {
 		<div>
 			<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
 			<nav class="flex flex-col gap-1 text-sm">

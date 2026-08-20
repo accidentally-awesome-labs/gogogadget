@@ -95,7 +95,9 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 			return err
 		}
 		if s.cfg.AdminEmail != "" && strings.EqualFold(profile.Email, s.cfg.AdminEmail) {
-			if err := s.q.SetUserAdminByEmail(ctx, sqlc.SetUserAdminByEmailParams{Email: profile.Email, IsAdmin: true}); err != nil {
+			if err := s.q.SetUserAdminRoleByEmail(ctx, sqlc.SetUserAdminRoleByEmailParams{
+				Email: profile.Email, AdminRole: identity.RoleAdmin,
+			}); err != nil {
 				return err
 			}
 		}

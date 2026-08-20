@@ -61,7 +61,7 @@ templ AdminUsersTable(d AdminUsersData) {
 		<div class="card !p-0 overflow-hidden">
 			<table class="table">
 				<thead>
-					<tr><th>{ i18n.T(ctx, "admin.users.col_email") }</th><th>{ i18n.T(ctx, "admin.users.col_name") }</th><th>{ i18n.T(ctx, "admin.users.col_joined") }</th><th>{ i18n.T(ctx, "admin.users.col_status") }</th><th class="text-right">{ i18n.T(ctx, "admin.users.col_actions") }</th></tr>
+					<tr><th>{ i18n.T(ctx, "admin.users.col_email") }</th><th>{ i18n.T(ctx, "admin.users.col_name") }</th><th>{ i18n.T(ctx, "admin.users.col_joined") }</th><th>{ i18n.T(ctx, "admin.users.col_role") }</th><th>{ i18n.T(ctx, "admin.users.col_status") }</th><th class="text-right">{ i18n.T(ctx, "admin.users.col_actions") }</th></tr>
 				</thead>
 				<tbody>
 					for _, u := range d.Users {
@@ -70,6 +70,13 @@ templ AdminUsersTable(d AdminUsersData) {
 							<td>{ u.Name }</td>
 							<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 							<td>
+								if AdminWrite(ctx) {
+									@roleForm(u)
+								} else {
+									@roleBadge(u.AdminRole)
+								}
+							</td>
+							<td>
 								if u.DisabledAt.Valid {
 									<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">{ i18n.T(ctx, "admin.users.status_disabled") }</span>
 								} else {
@@ -77,33 +84,36 @@ templ AdminUsersTable(d AdminUsersData) {
 								}
 							</td>
 							<td class="text-right">
-								<div class="flex justify-end gap-2">
-									if !u.DisabledAt.Valid {
-	
-										<a
-											href={ templ.SafeURL("/admin/users/" + u.ClerkUserID + "/impersonate") }
-											hx-boost="true"
-											hx-target={ NavTarget }
-											hx-select={ NavTarget }
-											hx-swap={ NavSwap }
+								if AdminWrite(ctx) {
+									<div class="flex justify-end gap-2">
+										if !u.DisabledAt.Valid {
+											<a
+												href={ templ.SafeURL("/admin/users/" + u.ClerkUserID + "/impersonate") }
+												hx-boost="true"
+												hx-target={ NavTarget }
+												hx-select={ NavTarget }
+												hx-swap={ NavSwap }
+												class="btn-ghost !px-2 !py-1 text-xs"
+												data-testid="admin-impersonate"
+											>{ i18n.T(ctx, "admin.users.impersonate") }</a>
+										}
+										<button
+											type="button"
+											hx-post={ "/admin/users/" + u.ClerkUserID + "/disable" }
+											hx-confirm={ disableConfirm(ctx, u) }
 											class="btn-ghost !px-2 !py-1 text-xs"
-											data-testid="admin-impersonate"
-										>{ i18n.T(ctx, "admin.users.impersonate") }</a>
-									}
-									<button
-										type="button"
-										hx-post={ "/admin/users/" + u.ClerkUserID + "/disable" }
-										hx-confirm={ disableConfirm(ctx, u) }
-										class="btn-ghost !px-2 !py-1 text-xs"
-										data-testid="admin-disable-toggle"
-									>
-									if u.DisabledAt.Valid {
-										{ i18n.T(ctx, "admin.users.enable") }
-									} else {
-										{ i18n.T(ctx, "admin.users.disable") }
-									}
-									</button>
-								</div>
+											data-testid="admin-disable-toggle"
+										>
+											if u.DisabledAt.Valid {
+												{ i18n.T(ctx, "admin.users.enable") }
+											} else {
+												{ i18n.T(ctx, "admin.users.disable") }
+											}
+										</button>
+									</div>
+								} else {
+									<span class="text-xs text-fg-muted" data-testid="admin-readonly">{ i18n.T(ctx, "admin.read_only") }</span>
+								}
 							</td>
 						</tr>
 					}
@@ -141,4 +151,36 @@ templ AdminOrgsPage(d AdminOrgsData) {
 			</tbody>
 		</table>
 	</div>
+}
+
+// roleBadge shows a staff role without offering to change it (support view).
+templ roleBadge(role string) {
+	switch role {
+		case "admin":
+			<span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300" data-testid="role-badge">{ i18n.T(ctx, "admin.users.role_admin") }</span>
+		case "support":
+			<span class="badge bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" data-testid="role-badge">{ i18n.T(ctx, "admin.users.role_support") }</span>
+		default:
+			<span class="text-xs text-fg-muted" data-testid="role-badge">{ i18n.T(ctx, "admin.users.role_none") }</span>
+	}
+}
+
+// roleForm grants or revokes staff access. Options are spelled out rather
+// than looped: a computed i18n key is invisible to the catalog guard, and the
+// three roles are a closed set by construction (the column has a CHECK).
+templ roleForm(u sqlc.User) {
+	<form hx-post={ "/admin/users/" + u.ClerkUserID + "/role" } hx-swap="none" class="inline-block">
+		<select
+			name="role"
+			class="input !py-1 text-xs w-28"
+			data-testid={ "role-select-" + u.ClerkUserID }
+			hx-post={ "/admin/users/" + u.ClerkUserID + "/role" }
+			hx-trigger="change"
+			hx-swap="none"
+		>
+			<option value="" selected?={ u.AdminRole == "" }>{ i18n.T(ctx, "admin.users.role_none") }</option>
+			<option value="support" selected?={ u.AdminRole == "support" }>{ i18n.T(ctx, "admin.users.role_support") }</option>
+			<option value="admin" selected?={ u.AdminRole == "admin" }>{ i18n.T(ctx, "admin.users.role_admin") }</option>
+		</select>
+	</form>
 }

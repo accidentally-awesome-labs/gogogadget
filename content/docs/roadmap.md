@@ -27,6 +27,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | API expansion | Cursor pagination (`next_cursor`), `Idempotency-Key` on POST with 24h replay, per-token rate limits (`API_RATE_LIMIT_RPM`) |
 | Email digest | Per-user cadence (`off`/`daily`/`weekly`) rolled up from in-app notifications; worker-rendered, window-stamped |
 | Server-side theme + locale | Stored on the user row, mirrored to cookies; dark paints server-side (no flash), digests speak the user's language |
+| Support role tier | `users.admin_role` (`support`/`admin`); read-only staff, method-based write guard, audited grants, last-admin lockout |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -43,7 +44,6 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Dunning depth | Single payment_failed email — `internal/billing/webhook.go` | Add a retry-schedule comms sequence |
 | Changelog page; in-app help; breadcrumbs; keyboard shortcuts/command palette; skeleton screens beyond Clerk slots | All absent — `internal/web/templates/` | Add incrementally; skeletons first |
 | SEO hardening: canonical tags, JSON-LD, RSS autodiscovery `<link>`, sitemap `<lastmod>` | Absent — `internal/web/templates/layouts.templ` `headMeta`, `internal/web/handlers_content.go` | Extend head meta + sitemap renderer |
-| Moderator/support role tier | Only global `users.is_admin` + org roles; no read-only admin — `internal/web/auth.go` `requireAdmin` | Add a read-only admin tier |
 
 ## Tier 3 — platform/delegated
 

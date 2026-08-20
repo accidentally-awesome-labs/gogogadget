@@ -119,6 +119,7 @@ func (s *Server) routes() {
 	adminMux.HandleFunc("POST /admin/schedules/{id}/run", s.handleAdminScheduleRun)
 	adminMux.HandleFunc("POST /admin/schedules/{id}/delete", s.handleAdminScheduleDelete)
 	adminMux.HandleFunc("POST /admin/users/{id}/disable", s.handleAdminUserDisable)
+	adminMux.HandleFunc("POST /admin/users/{id}/role", s.handleAdminUserRole)
 	adminMux.HandleFunc("GET /admin/users/{id}/impersonate", s.handleAdminImpersonateForm)
 	adminMux.HandleFunc("POST /admin/users/{id}/impersonate", s.handleAdminImpersonate)
 	adminMux.HandleFunc("GET /admin/orgs", s.handleAdminOrgs)

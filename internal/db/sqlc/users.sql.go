@@ -11,6 +11,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countFullAdmins = `-- name: CountFullAdmins :one
+SELECT count(*) FROM users WHERE admin_role = 'admin' AND disabled_at IS NULL
+`
+
+// Lockout guard: demoting the last full admin would leave a platform whose
+// only remaining staff can read but never act — including never restoring
+// anyone's role.
+func (q *Queries) CountFullAdmins(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countFullAdmins)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countUsers = `-- name: CountUsers :one
 SELECT count(*) FROM users
 WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
@@ -45,7 +59,7 @@ func (q *Queries) DeleteUser(ctx context.Context, clerkUserID string) error {
 
 const getUserByClerkID = `-- name: GetUserByClerkID :one
 
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme FROM users WHERE clerk_user_id = $1
+SELECT clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users WHERE clerk_user_id = $1
 `
 
 // users mirror table (identity is Clerk; these rows are a local query cache)
@@ -57,7 +71,6 @@ func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (Use
 		&i.Email,
 		&i.Name,
 		&i.AvatarUrl,
-		&i.IsAdmin,
 		&i.DisabledAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -65,12 +78,13 @@ func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (Use
 		&i.DigestFrequency,
 		&i.LastDigestAt,
 		&i.Theme,
+		&i.AdminRole,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme FROM users
+SELECT clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users
 WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -96,7 +110,6 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.Email,
 			&i.Name,
 			&i.AvatarUrl,
-			&i.IsAdmin,
 			&i.DisabledAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -104,6 +117,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.DigestFrequency,
 			&i.LastDigestAt,
 			&i.Theme,
+			&i.AdminRole,
 		); err != nil {
 			return nil, err
 		}
@@ -116,7 +130,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 }
 
 const listUsersDueForDigest = `-- name: ListUsersDueForDigest :many
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme FROM users
+SELECT clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users
 WHERE disabled_at IS NULL
   AND digest_frequency <> 'off'
   AND (
@@ -147,7 +161,6 @@ func (q *Queries) ListUsersDueForDigest(ctx context.Context, limit int32) ([]Use
 			&i.Email,
 			&i.Name,
 			&i.AvatarUrl,
-			&i.IsAdmin,
 			&i.DisabledAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -155,6 +168,7 @@ func (q *Queries) ListUsersDueForDigest(ctx context.Context, limit int32) ([]Use
 			&i.DigestFrequency,
 			&i.LastDigestAt,
 			&i.Theme,
+			&i.AdminRole,
 		); err != nil {
 			return nil, err
 		}
@@ -177,17 +191,32 @@ func (q *Queries) MarkUserDigestSent(ctx context.Context, clerkUserID string) er
 	return err
 }
 
-const setUserAdminByEmail = `-- name: SetUserAdminByEmail :exec
-UPDATE users SET is_admin = $2, updated_at = now() WHERE email = $1
+const setUserAdminRole = `-- name: SetUserAdminRole :exec
+UPDATE users SET admin_role = $2, updated_at = now() WHERE clerk_user_id = $1
 `
 
-type SetUserAdminByEmailParams struct {
-	Email   string `json:"email"`
-	IsAdmin bool   `json:"is_admin"`
+type SetUserAdminRoleParams struct {
+	ClerkUserID string `json:"clerk_user_id"`
+	AdminRole   string `json:"admin_role"`
 }
 
-func (q *Queries) SetUserAdminByEmail(ctx context.Context, arg SetUserAdminByEmailParams) error {
-	_, err := q.db.Exec(ctx, setUserAdminByEmail, arg.Email, arg.IsAdmin)
+func (q *Queries) SetUserAdminRole(ctx context.Context, arg SetUserAdminRoleParams) error {
+	_, err := q.db.Exec(ctx, setUserAdminRole, arg.ClerkUserID, arg.AdminRole)
+	return err
+}
+
+const setUserAdminRoleByEmail = `-- name: SetUserAdminRoleByEmail :exec
+UPDATE users SET admin_role = $2, updated_at = now() WHERE email = $1
+`
+
+type SetUserAdminRoleByEmailParams struct {
+	Email     string `json:"email"`
+	AdminRole string `json:"admin_role"`
+}
+
+// ADMIN_EMAIL bootstrap: grants the full role on first sight of the address.
+func (q *Queries) SetUserAdminRoleByEmail(ctx context.Context, arg SetUserAdminRoleByEmailParams) error {
+	_, err := q.db.Exec(ctx, setUserAdminRoleByEmail, arg.Email, arg.AdminRole)
 	return err
 }
 
@@ -253,7 +282,7 @@ INSERT INTO users (clerk_user_id, email, name, avatar_url)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (clerk_user_id) DO UPDATE
 SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = now()
-RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme
+RETURNING clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role
 `
 
 type UpsertUserParams struct {
@@ -276,7 +305,6 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, e
 		&i.Email,
 		&i.Name,
 		&i.AvatarUrl,
-		&i.IsAdmin,
 		&i.DisabledAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -284,6 +312,7 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, e
 		&i.DigestFrequency,
 		&i.LastDigestAt,
 		&i.Theme,
+		&i.AdminRole,
 	)
 	return i, err
 }

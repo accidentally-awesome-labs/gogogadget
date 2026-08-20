@@ -114,6 +114,10 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.Impersonator = identity.ImpersonatorFrom(r.Context())
 	page.Theme = resolveTheme(r, page.User)
 
+	if page.Layout == templates.LayoutAdmin {
+		r = r.WithContext(templates.WithAdminWrite(r.Context(), identity.IsAdmin(page.User)))
+	}
+
 	// Feature gates flow into templates via the request context (SettingsTabs
 	// hides the Webhooks tab when its flag is off for this org).
 	if page.Org != nil && s.flags != nil {
