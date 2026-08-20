@@ -31,6 +31,7 @@ const (
 	KindUsageFlush           = "usage.flush"  // usage metering (see internal/usage)
 	KindWebhookDeliver       = "webhook.deliver"
 	KindExportProjectsCSV    = "export.projects_csv"
+	KindExportOrgJSON        = "export.org_json"
 )
 
 // SchedulableKinds are the kinds a schedule row may reference — handlers
@@ -290,6 +291,8 @@ func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 		return w.deliverWebhook(ctx, job)
 	case KindExportProjectsCSV:
 		return w.exportProjectsCSV(ctx, job)
+	case KindExportOrgJSON:
+		return w.exportOrgJSON(ctx, job)
 	case KindWelcome, KindPaymentFailed, KindSubscriptionCanceled, KindTrialEnding:
 		var p EmailPayload
 		if err := json.Unmarshal(job.Payload, &p); err != nil {

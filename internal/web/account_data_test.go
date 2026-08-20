@@ -135,3 +135,57 @@ func TestAccountDeleteRefusedUnderImpersonation(t *testing.T) {
 	_, err := s.q.GetUserByClerkID(t.Context(), "user_imp_t")
 	require.NoError(t, err, "target user survives")
 }
+
+// The org export spans every member's activity, the whole audit trail, and
+// the API/webhook inventory — an owner's view of the company, not something
+// any member should walk out with.
+func TestOrgExportRequiresOrgAdmin(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_oexp_m", "org_oexp", "org:member")
+
+	code, _, _ := postForm(t, s, "/app/settings/org/export", url.Values{},
+		sessionCookie("user_oexp_m", "org_oexp", "org:member"))
+	assert.Equal(t, http.StatusForbidden, code)
+
+	var jobs int
+	require.NoError(t, s.db.QueryRow(t.Context(),
+		`SELECT count(*) FROM jobs WHERE kind = 'export.org_json'`).Scan(&jobs))
+	assert.Zero(t, jobs, "a refused export must not enqueue work")
+}
+
+func TestOrgExportEnqueuesAndAudits(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_oexp_a", "org_oexp2", "org:admin")
+	t.Cleanup(func() {
+		_, _ = s.db.Exec(t.Context(), "DELETE FROM jobs WHERE kind = 'export.org_json'")
+	})
+
+	code, _, _ := postForm(t, s, "/app/settings/org/export", url.Values{},
+		sessionCookie("user_oexp_a", "org_oexp2", "org:admin"))
+	require.Equal(t, http.StatusOK, code)
+
+	var kind, payload string
+	require.NoError(t, s.db.QueryRow(t.Context(),
+		`SELECT kind, payload::text FROM jobs WHERE kind = 'export.org_json' ORDER BY id DESC LIMIT 1`).Scan(&kind, &payload))
+	assert.Contains(t, payload, "org_oexp2", "the job carries the requesting org")
+	assert.Contains(t, payload, "user_oexp_a", "…and who to notify")
+
+	rows, err := s.q.ListAuditAll(t.Context(), sqlc.ListAuditAllParams{Filter: "org.exported", Off: 0, Lim: 5})
+	require.NoError(t, err)
+	assert.NotEmpty(t, rows, "exporting the whole organization is an auditable act")
+}
+
+// The button must not be offered to someone who would be refused.
+func TestOrgExportCardOnlyForAdmins(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_oexp_v", "org_oexp3", "org:member")
+	seedMembership(t, s, "user_oexp_va", "org_oexp3", "org:admin")
+
+	_, _, memberBody := serve(t, s, "GET", "/app/settings/org", nil, nil,
+		sessionCookie("user_oexp_v", "org_oexp3", "org:member"))
+	assert.NotContains(t, memberBody, "org-export")
+
+	_, _, adminBody := serve(t, s, "GET", "/app/settings/org", nil, nil,
+		sessionCookie("user_oexp_va", "org_oexp3", "org:admin"))
+	assert.Contains(t, adminBody, `data-testid="org-export"`)
+}

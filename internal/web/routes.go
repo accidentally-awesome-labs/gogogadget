@@ -96,6 +96,7 @@ func (s *Server) routes() {
 	appMux.HandleFunc("GET /app/settings/notifications", s.handleSettingsNotifications)
 	appMux.HandleFunc("POST /app/settings/notifications", s.handleSettingsNotificationsSave)
 	appMux.HandleFunc("GET /app/settings/account/export", s.handleAccountExport)
+	appMux.HandleFunc("POST /app/settings/org/export", s.handleOrgExport)
 	appMux.HandleFunc("POST /app/settings/account/delete", s.handleAccountDelete)
 	appMux.HandleFunc("GET /app/notifications/badge", s.handleNotificationsBadge)
 	appMux.HandleFunc("GET /app/notifications/stream", s.handleNotificationsStream)

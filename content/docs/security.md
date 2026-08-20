@@ -97,6 +97,15 @@ silently missing it. Role grants are audited (`admin.role_changed`, with the
 old and new value), and the last full admin cannot be demoted — see
 [Admin](/docs/admin).
 
+## Exports never carry secrets
+
+Both self-serve exports map database rows to explicit DTOs. That is a security
+control, not a style: `api_tokens.token_hash`, `webhook_endpoints.secret` and
+`secret_previous` have json tags, so marshaling sqlc rows straight into an
+export would hand a downloadable file every credential the org holds. The
+org export is tested against exactly that regression — the assertion fails if
+a secret field is ever added back to the payload.
+
 ## Rate limiting
 
 The budget is `RATE_LIMIT_RPM` (default 100/min per IP, burst 2×) — test

@@ -42,6 +42,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Staff roles** — read-only `support` tier beside full `admin`; one method-based guard covers every mutating admin route, grants are audited, last admin can't be demoted.
 - **SEO** — self-referential canonicals that collapse the `?lang=` duplicates, reciprocal hreflang, Organization/WebSite/BlogPosting JSON-LD, sitemap `lastmod`, RSS autodiscovery.
 - **GDPR self-serve** — one-click JSON data export and email-confirmed account deletion with org-cascade safety checks at `/app/settings/account`.
+- **Org data export** — `org:admin` JSON bundle (members, projects, files, audit, billing, API/webhook inventory) delivered as a background job; secrets excluded by construction.
 - **Maintenance mode** — `MAINTENANCE_MODE=true` serves a dedicated 503 page (JSON for `/api/`) while `/healthz`/`/readyz` stay live; dedicated 403 page for non-admins.
 - **Mobile nav** — hamburger drawer in the app topbar; the sidebar nav is shared, not duplicated.
 - **Public API** — org-scoped Bearer tokens (`ggg_…`), `/api/v1/projects`, JSON error shape; OpenAPI 3.1 contract at `/api/v1/openapi.yaml`, kept in step with the router by tests Cursor pagination, idempotency keys on POST, per-token rate limits.

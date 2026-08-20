@@ -156,7 +156,7 @@ templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 	</div>
 }
 
-templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string) {
+templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string, canExport bool) {
 	@SettingsTabs("/app/settings/org")
 	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "settings.org_title") }</h1>
 	<div class="card mb-6 max-w-lg">
@@ -177,6 +177,19 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 			}
 		</p>
 	</div>
+	if canExport {
+		<div class="card mb-6 max-w-lg" data-testid="org-export-card">
+			<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.org_export_title") }</h2>
+			<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.org_export_body") }</p>
+			<button
+				type="button"
+				hx-post="/app/settings/org/export"
+				hx-swap="none"
+				class="btn mt-4"
+				data-testid="org-export"
+			>{ i18n.T(ctx, "settings.org_export_button") }</button>
+		</div>
+	}
 	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "settings.org_members_heading") }</h2>
 	<div class="card !p-0 overflow-hidden">
 		<table class="table">

@@ -122,5 +122,5 @@ func (s *Server) handleSettingsOrg(w http.ResponseWriter, r *http.Request) {
 		s.cfg.AppURL+r.URL.Path,
 	)
 	s.Render(w, r, Page{Title: "Organization settings", Layout: templates.LayoutApp},
-		templates.SettingsOrg(*org, members, organizationURL))
+		templates.SettingsOrg(*org, members, organizationURL, isOrgAdmin(r)))
 }
