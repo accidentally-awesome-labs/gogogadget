@@ -147,9 +147,13 @@ func (s *Server) routes() {
 	apiMW := api.NewMiddleware(s.q, s.cfg.APIRateLimitPerMinute)
 	apiProjects := &api.Projects{Q: s.q}
 	s.mux.Handle("GET /api/v1/projects", apiMW.RequireAPIToken("read", http.HandlerFunc(apiProjects.ListProjects)))
-	s.mux.Handle("POST /api/v1/projects", apiMW.RequireAPIToken("write", http.HandlerFunc(apiProjects.CreateProject)))
+	// Unsafe verbs run inside Idempotent, which sits under RequireAPIToken:
+	// the key is scoped to the authenticated org, so it needs identity first.
+	s.mux.Handle("POST /api/v1/projects", apiMW.RequireAPIToken("write",
+		apiMW.Idempotent(http.HandlerFunc(apiProjects.CreateProject))))
 	apiAI := &api.AI{Q: s.q, LLM: s.llm}
-	s.mux.Handle("POST /api/v1/ai/chat", apiMW.RequireAPIToken("write", http.HandlerFunc(apiAI.Chat)))
+	s.mux.Handle("POST /api/v1/ai/chat", apiMW.RequireAPIToken("write",
+		apiMW.Idempotent(http.HandlerFunc(apiAI.Chat))))
 	// Unknown /api/ routes get the JSON 404, never the HTML one.
 	s.mux.Handle("/api/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		api.WriteError(w, http.StatusNotFound, "not_found", "Unknown API route.")

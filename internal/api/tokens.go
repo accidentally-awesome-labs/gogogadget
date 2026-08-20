@@ -65,6 +65,9 @@ type Middleware struct {
 	// endpoints. Nil disables token limiting (tests that construct the
 	// middleware directly); NewMiddleware wires the configured one.
 	Limiter *ratelimit.Keyed
+	// Log records the two failures the idempotency path must not surface to
+	// the caller (the write already happened). Nil is silent.
+	Log *slog.Logger
 }
 
 // NewMiddleware builds the API guard with a per-token budget of rpm requests
@@ -73,7 +76,7 @@ func NewMiddleware(q *sqlc.Queries, rpm int) *Middleware {
 	if rpm < 1 {
 		rpm = 60
 	}
-	return &Middleware{Q: q, Limiter: ratelimit.PerMinute(rpm)}
+	return &Middleware{Q: q, Limiter: ratelimit.PerMinute(rpm), Log: slog.Default()}
 }
 
 // RequireAPIToken guards a route group with a minimum scope ("read" or

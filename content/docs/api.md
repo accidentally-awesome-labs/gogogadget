@@ -95,6 +95,46 @@ renames, removals, and type changes are not. A breaking change ships as
 The full recipe is in [Extending](/docs/extending); handler behavior gets
 integration tests — see [Testing](/docs/testing).
 
+## Idempotency
+
+A POST that times out leaves the client unable to tell whether the work
+happened: retry and risk a duplicate, or don't and risk losing the write.
+Send an `Idempotency-Key` and the retry is safe.
+
+```sh
+curl -X POST "$API/api/v1/projects" \
+  -H "Authorization: Bearer ggg_…" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Only once"}'
+```
+
+| Situation | Result |
+|---|---|
+| No `Idempotency-Key` | Nothing changes — the feature is opt-in, two POSTs are two creates |
+| New key | Executes, stores the outcome, returns it |
+| Same key, same body | Replays the stored status and body, with `Idempotency-Replayed: true` |
+| Same key, **different** body or endpoint | `409 idempotency_conflict` — the operation does **not** run |
+| Same key, first request still running | `409 idempotency_in_progress` — retry shortly |
+| Key longer than 255 chars | `400 invalid_idempotency_key` |
+
+Details that matter in production:
+
+- **The claim is the lock.** The key row is inserted *before* the handler
+  runs, and the primary key on `(clerk_org_id, key)` is what makes two
+  concurrent retries resolve to exactly one execution — no advisory locks, no
+  application-level mutex that dies with the process.
+- **Keys are org-scoped, not token-scoped.** A client that rotates
+  credentials mid-retry still deduplicates.
+- **5xx releases the claim.** A server error says nothing about whether the
+  work should happen, so the key is freed rather than pinned to a failure —
+  otherwise a transient blip would poison that key for its whole lifetime,
+  which is the exact situation the client is retrying to escape. 4xx *is* a
+  real outcome and is stored, so a retry replays the same validation error.
+- **Retention is 24 hours**, swept by the worker's janitor pass
+  (`jobs.IdempotencyRetention`). Long enough for any sane retry schedule,
+  short enough that `idempotency_keys` stays a cache rather than an archive.
+
 ## Rate limits
 
 Each token carries its own budget — `API_RATE_LIMIT_RPM`, default **60

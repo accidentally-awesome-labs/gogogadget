@@ -14,6 +14,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/assert"
@@ -259,4 +260,30 @@ func TestJanitorAppliesAuditRetention(t *testing.T) {
 	if len(rows) != 1 {
 		t.Fatalf("retention=0 deleted rows: %d remain", len(rows))
 	}
+}
+
+func TestJanitorSweepsExpiredIdempotencyKeys(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsidem")
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ('org_jan','Jan','jan') ON CONFLICT DO NOTHING`)
+	require.NoError(t, err)
+
+	// One key inside the retention window, one past it — created_at defaults
+	// to now(), so the stale one is backdated directly.
+	for _, k := range []string{"fresh", "stale"} {
+		_, err = q.ClaimIdempotencyKey(ctx, sqlc.ClaimIdempotencyKeyParams{
+			ClerkOrgID: "org_jan", Key: k, Endpoint: "POST /api/v1/projects", RequestHash: "h",
+		})
+		require.NoError(t, err)
+	}
+	_, err = pool.Exec(ctx, `UPDATE idempotency_keys SET created_at = now() - $1::interval WHERE key = 'stale'`,
+		(IdempotencyRetention + time.Hour).String())
+	require.NoError(t, err)
+
+	NewWorker(q, nil, slog.New(slog.NewTextHandler(io.Discard, nil))).janitorPass(ctx)
+
+	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_jan", Key: "stale"})
+	assert.ErrorIs(t, err, pgx.ErrNoRows, "keys past the retention window are swept")
+	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_jan", Key: "fresh"})
+	assert.NoError(t, err, "a key a client might still retry against must survive")
 }

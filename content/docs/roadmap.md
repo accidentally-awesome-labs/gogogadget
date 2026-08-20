@@ -24,6 +24,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Webhook secret rotation | Rotate from settings; previous secret keeps verifying for a 24h grace window (deliveries dual-sign), janitor clears it |
 | Impersonation reason capture | Interstitial requires a 10–280 char reason; stored on the session row and in both audit entries |
 | OpenAPI spec | `GET /api/v1/openapi.yaml` (3.1, embedded); route⇄spec parity and payload-shape tests block drift |
+| API expansion | Cursor pagination (`next_cursor`), `Idempotency-Key` on POST with 24h replay, per-token rate limits (`API_RATE_LIMIT_RPM`) |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -36,7 +37,6 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 
 | Gap | Evidence of absence | One-line approach |
 |---|---|---|
-| API expansion | Only 3 endpoints; offset-only pagination, no idempotency keys on POST, no per-token rate limits — `internal/api` | Cursor pagination, `Idempotency-Key` on POST, per-token buckets |
 | Org-level data export | Only projects CSV exists — `internal/jobs/export_csv.go` | Full-org JSON/CSV bundle via the same job + storage pattern |
 | Dunning depth | Single payment_failed email — `internal/billing/webhook.go` | Add a retry-schedule comms sequence |
 | Email digest implementation | `email.digest` job kind is a registered no-op — `internal/jobs/jobs.go` | Implement daily/weekly rollup rendering |

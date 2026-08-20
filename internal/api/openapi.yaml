@@ -145,6 +145,8 @@ paths:
                   maxLength: 80
                   description: Trimmed; required after trimming.
                   examples: ["Launch checklist"]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       responses:
         "201":
           description: The created project.
@@ -162,6 +164,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/IdempotencyConflict"
         "429":
           $ref: "#/components/responses/RateLimited"
         "500":
@@ -194,6 +198,8 @@ paths:
                   minimum: 1
                   description: Upper bound for the completion; also feeds the pre-flight meter estimate.
                   examples: [512]
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
       responses:
         "200":
           description: The completion.
@@ -223,6 +229,8 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/IdempotencyConflict"
         "429":
           $ref: "#/components/responses/RateLimited"
         "500":
@@ -292,7 +300,33 @@ components:
               description: Stable machine-readable code; the message is for humans and may change.
             message:
               type: string
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Client-generated key (≤255 chars, a UUID is ideal) making this call
+        safe to retry. The first request's outcome is stored and replayed for
+        any later request with the same key and body; the replay carries
+        `Idempotency-Replayed: true`. Keys are scoped to the organization and
+        to this exact endpoint + body, and expire after 24 hours.
+      schema:
+        type: string
+        maxLength: 255
+      examples:
+        uuid:
+          value: 6f1f1d9e-3a1b-4d3a-9f6c-2f2f0f0a1b2c
   responses:
+    IdempotencyConflict:
+      description: |
+        The key was already used for a different request (`idempotency_conflict`),
+        or an earlier request with this key is still running
+        (`idempotency_in_progress`). Neither case executes the operation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
     Unauthorized:
       description: Missing, malformed, unknown, revoked, or expired token (`unauthorized`).
       content:

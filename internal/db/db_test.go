@@ -239,6 +239,33 @@ func TestRoundtripEveryTable(t *testing.T) {
 	admins, err := q.CountAdminsByOrg(ctx, "org_rt1")
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), admins)
+
+	// idempotency keys — the claim is a PK conflict, so a second claim with
+	// the same (org, key) must return no rows rather than a second row.
+	claim := sqlc.ClaimIdempotencyKeyParams{
+		ClerkOrgID: "org_rt1", Key: "k1", Endpoint: "POST /api/v1/projects", RequestHash: "abc",
+	}
+	row, err := q.ClaimIdempotencyKey(ctx, claim)
+	require.NoError(t, err)
+	assert.EqualValues(t, 0, row.Status, "a fresh claim is in-flight until completed")
+	_, err = q.ClaimIdempotencyKey(ctx, claim)
+	require.ErrorIs(t, err, pgx.ErrNoRows, "the second claimant must lose")
+
+	require.NoError(t, q.CompleteIdempotencyKey(ctx, sqlc.CompleteIdempotencyKeyParams{
+		ClerkOrgID: "org_rt1", Key: "k1", Status: 201, Response: []byte(`{"id":1}`),
+	}))
+	stored, err := q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_rt1", Key: "k1"})
+	require.NoError(t, err)
+	assert.EqualValues(t, 201, stored.Status)
+	assert.Equal(t, `{"id":1}`, string(stored.Response), "bytes are stored verbatim, not normalized")
+
+	// retention: a fresh key survives a past cutoff, a future cutoff sweeps it
+	n, err = q.DeleteOldIdempotencyKeys(ctx, pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true})
+	require.NoError(t, err)
+	assert.EqualValues(t, 0, n)
+	n, err = q.DeleteOldIdempotencyKeys(ctx, pgtype.Timestamptz{Time: time.Now().Add(time.Hour), Valid: true})
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, n)
 }
 
 func TestProjectSearchFTS(t *testing.T) {

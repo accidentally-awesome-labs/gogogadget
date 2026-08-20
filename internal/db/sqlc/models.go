@@ -64,6 +64,17 @@ type FlagOverride struct {
 	Enabled    bool   `json:"enabled"`
 }
 
+type IdempotencyKey struct {
+	ClerkOrgID  string             `json:"clerk_org_id"`
+	Key         string             `json:"key"`
+	Endpoint    string             `json:"endpoint"`
+	RequestHash string             `json:"request_hash"`
+	Status      int32              `json:"status"`
+	Response    []byte             `json:"response"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
 type ImpersonationSession struct {
 	ID           string             `json:"id"`
 	AdminUserID  string             `json:"admin_user_id"`

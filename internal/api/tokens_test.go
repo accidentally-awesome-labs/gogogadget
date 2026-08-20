@@ -43,10 +43,10 @@ func TestScopeSatisfies(t *testing.T) {
 		{"write", "read", true},  // write satisfies read
 		{"read", "write", false}, // read never satisfies write
 		{"", "read", false},
-		{"admin", "read", false},   // unknown stored scope satisfies nothing
-		{"read", "admin", false},   // unknown required scope: nothing satisfies it
-		{"write", "admin", false},  // even write cannot satisfy an unknown scope
-		{"admin", "admin", false},  // unknown want is refused regardless
+		{"admin", "read", false},  // unknown stored scope satisfies nothing
+		{"read", "admin", false},  // unknown required scope: nothing satisfies it
+		{"write", "admin", false}, // even write cannot satisfy an unknown scope
+		{"admin", "admin", false}, // unknown want is refused regardless
 		{"", "", false},
 	}
 	for _, tc := range cases {
