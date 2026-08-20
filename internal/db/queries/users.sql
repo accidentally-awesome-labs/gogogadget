@@ -56,3 +56,10 @@ UPDATE users SET digest_frequency = $2, updated_at = now() WHERE clerk_user_id =
 -- Stamped after a successful send: the stamp is also the next window's start,
 -- so writing it before delivery would silently drop that period's content.
 UPDATE users SET last_digest_at = now(), updated_at = now() WHERE clerk_user_id = $1;
+
+-- name: SetUserLocale :exec
+-- '' restores "follow the browser" rather than pinning English.
+UPDATE users SET locale = $2, updated_at = now() WHERE clerk_user_id = $1;
+
+-- name: SetUserTheme :exec
+UPDATE users SET theme = $2, updated_at = now() WHERE clerk_user_id = $1;

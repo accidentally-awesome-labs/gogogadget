@@ -41,9 +41,9 @@ func (s *Server) handleDocsPage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleDocsSearch(w http.ResponseWriter, r *http.Request) {
 	query := strings.TrimSpace(r.URL.Query().Get("q"))
 	p := Page{
-		Title:   i18n.T(r.Context(), "docs.search_title") + " — Docs",
+		Title:  i18n.T(r.Context(), "docs.search_title") + " — Docs",
 		Layout: templates.LayoutDocs,
-		Docs:    s.docs,
+		Docs:   s.docs,
 	}
 	s.Render(w, r, p, templates.DocsSearchPage(query, s.docs.Search(query)))
 }

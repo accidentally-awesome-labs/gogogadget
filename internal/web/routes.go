@@ -53,6 +53,7 @@ func (s *Server) routes() {
 	// Locale switch (public; NOT CSRF-exempt — switcher forms carry the token
 	// via the body-inherited X-CSRF-Token header).
 	s.mux.HandleFunc("POST /set-locale", s.handleSetLocale)
+	s.mux.HandleFunc("POST /set-theme", s.handleSetTheme)
 
 	// Webhooks are CSRF-exempt in the chain and signature-verified here.
 	s.mux.HandleFunc("POST /webhooks/clerk", s.handleClerkWebhook)

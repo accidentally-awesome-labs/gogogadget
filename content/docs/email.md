@@ -88,8 +88,10 @@ differences are the design:
 - **Batched at 200 users, 25 items each** — a pass that would email the whole
   user table in one job is a job that times out and retries from zero.
 
-Locale is deployment-wide (`Worker.DigestLocale`, default English): users have
-no per-user locale column yet — see [Roadmap](/docs/roadmap).
+Locale is per user: `users.locale` when they picked a language, otherwise the
+deployment default (`Worker.DigestLocale`, English). An email has no
+`Accept-Language` header to fall back on, which is exactly why that preference
+is stored server-side — see [i18n](/docs/i18n).
 
 ## Rendered at enqueue time
 

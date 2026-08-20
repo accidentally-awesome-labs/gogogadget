@@ -2,6 +2,7 @@ package templates
 
 import (
 	"context"
+	"github.com/a-h/templ"
 	"strings"
 	"time"
 	"unicode"
@@ -48,7 +49,12 @@ type Page struct {
 	Path        string
 	Layout      string
 	CSRFToken   string
-	AppURL      string
+	// Theme is the resolved appearance: "dark" renders the class on <html>
+	// server-side so a fresh device never flashes light before app.js runs.
+	// "system" and "light" render nothing — only the browser knows the OS
+	// setting, and light is the stylesheet's default.
+	Theme  string
+	AppURL string
 
 	PostHogKey          string
 	ClerkPublishableKey string
@@ -117,4 +123,14 @@ func clerkUserPlaceholder(user *sqlc.User) string {
 		return "?"
 	}
 	return avatarInitial(user.Name)
+}
+
+// HTMLAttrs carries the resolved theme onto <html>. A spread rather than
+// class={…} because templ renders an empty class="" for the light case, and
+// every page in the app would carry that noise; an empty map renders nothing.
+func (p Page) HTMLAttrs() templ.Attributes {
+	if p.Theme == "dark" {
+		return templ.Attributes{"class": "dark"}
+	}
+	return templ.Attributes{}
 }

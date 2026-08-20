@@ -112,6 +112,7 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.Plan = identity.PlanFrom(r.Context())
 	page.Sub = identity.SubFrom(r.Context())
 	page.Impersonator = identity.ImpersonatorFrom(r.Context())
+	page.Theme = resolveTheme(r, page.User)
 
 	// Feature gates flow into templates via the request context (SettingsTabs
 	// hides the Webhooks tab when its flag is off for this org).

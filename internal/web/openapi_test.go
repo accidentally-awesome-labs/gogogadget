@@ -21,10 +21,10 @@ import (
 // inventory check: scan the source of truth, compare sets, fail on drift.
 
 type openAPIDoc struct {
-	OpenAPI string                                  `yaml:"openapi"`
-	Info    struct{ Title, Version string }         `yaml:"info"`
-	Paths   map[string]map[string]any               `yaml:"paths"`
-	Comps   struct{ Schemas map[string]any }        `yaml:"components"`
+	OpenAPI string                           `yaml:"openapi"`
+	Info    struct{ Title, Version string }  `yaml:"info"`
+	Paths   map[string]map[string]any        `yaml:"paths"`
+	Comps   struct{ Schemas map[string]any } `yaml:"components"`
 }
 
 func loadSpec(t *testing.T) openAPIDoc {

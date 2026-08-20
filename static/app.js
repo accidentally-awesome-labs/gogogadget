@@ -3,12 +3,52 @@
 // This file is loaded WITHOUT defer so theme init runs pre-paint.
 
 // --- Theme init (pre-paint, prevents dark-mode flash) ---
+// Order matters: an explicit light/dark in the `theme` cookie is what the
+// SERVER knows (it mirrors the signed-in user's saved preference, so a fresh
+// device is already correct on first paint); "system" means the account made
+// no choice, so this browser's localStorage wins; the OS setting is the last
+// resort. The server renders class="dark" itself when it can — this runs for
+// the cases it cannot answer, and keeps static/cached pages honest.
 (function () {
-  var t = localStorage.getItem("theme");
-  if (t === "dark" || (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-    document.documentElement.classList.add("dark");
+  function cookie(name) {
+    var m = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : "";
   }
+  var c = cookie("theme");
+  // "system" in the cookie means the ACCOUNT has no explicit preference, so a
+  // per-browser choice is more specific and wins. Only an explicit light/dark
+  // from the server outranks localStorage.
+  var t = c === "light" || c === "dark" ? c : localStorage.getItem("theme") || "system";
+  var dark = t === "dark" || (t === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark", dark);
 })();
+
+// --- Theme persistence ---
+// A plain fetch rather than htmx: htmx.ajax's `source` option silently drops
+// the request under htmx 4, and this call has no swap to perform anyway. The
+// CSRF token comes from the same body attribute every hx-post inherits, so
+// there is exactly one token in the page.
+function persistTheme(theme) {
+  var raw = document.body.getAttribute("hx-headers:inherited") || "{}";
+  var token = "";
+  try {
+    token = JSON.parse(raw)["X-CSRF-Token"] || "";
+  } catch (e) {
+    token = "";
+  }
+  fetch("/set-theme", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-CSRF-Token": token,
+    },
+    body: "theme=" + encodeURIComponent(theme),
+    credentials: "same-origin",
+  }).catch(function () {
+    // A failed write only costs cross-device persistence; the local flip and
+    // the localStorage copy already keep THIS browser correct.
+  });
+}
 
 // --- htmx notes (config lives in the <meta name="htmx-config"> tag) ---
 // Attribute inheritance is EXPLICIT in htmx 4: the only inherited attribute
@@ -51,13 +91,20 @@ document.addEventListener("htmx:after:settle", syncAppNavigation);
 
 // --- Alpine CSP components (registered before Alpine boots) ---
 document.addEventListener("alpine:init", function () {
+  // Flip locally for instant feedback, then persist the RESULTING value.
+  //
+  // The value has to come from the client: when the stored preference is
+  // "system", only the browser knows which way the OS points, so a server
+  // that flipped on its own would disagree with what the user just saw.
   Alpine.data("themeToggle", function () {
     return {
       dark: document.documentElement.classList.contains("dark"),
       toggle: function () {
         this.dark = !this.dark;
+        var next = this.dark ? "dark" : "light";
         document.documentElement.classList.toggle("dark", this.dark);
-        localStorage.setItem("theme", this.dark ? "dark" : "light");
+        localStorage.setItem("theme", next);
+        persistTheme(next);
       },
     };
   });

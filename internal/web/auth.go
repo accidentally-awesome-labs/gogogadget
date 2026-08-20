@@ -75,6 +75,7 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 		}
 
 		ctx = identity.WithUser(ctx, &user)
+		ctx = s.applyStoredAppearance(w, r, ctx, user)
 		ctx = identity.WithClaims(ctx, claims)
 		if claims.OrgID != "" {
 			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)

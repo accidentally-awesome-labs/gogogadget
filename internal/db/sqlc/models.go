@@ -194,6 +194,7 @@ type User struct {
 	Locale          string             `json:"locale"`
 	DigestFrequency string             `json:"digest_frequency"`
 	LastDigestAt    pgtype.Timestamptz `json:"last_digest_at"`
+	Theme           string             `json:"theme"`
 }
 
 type WebhookDelivery struct {

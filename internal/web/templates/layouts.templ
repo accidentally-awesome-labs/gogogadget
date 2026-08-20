@@ -97,7 +97,7 @@ templ phConsent(page Page) {
 // So the rule is: if it differs between pages, it belongs inside #content.
 templ publicShell(page Page, content templ.Component) {
 	<!DOCTYPE html>
-	<html lang={ i18n.Tag(ctx).String() }>
+	<html lang={ i18n.Tag(ctx).String() } { page.HTMLAttrs()... }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -128,7 +128,7 @@ templ PublicLayout(page Page, content templ.Component) {
 // AppLayout is the authenticated shell (sidebar + topbar + toast root).
 templ AppLayout(page Page, content templ.Component) {
 	<!DOCTYPE html>
-	<html lang={ i18n.Tag(ctx).String() }>
+	<html lang={ i18n.Tag(ctx).String() } { page.HTMLAttrs()... }>
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>

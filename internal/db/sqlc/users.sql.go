@@ -45,7 +45,7 @@ func (q *Queries) DeleteUser(ctx context.Context, clerkUserID string) error {
 
 const getUserByClerkID = `-- name: GetUserByClerkID :one
 
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at FROM users WHERE clerk_user_id = $1
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme FROM users WHERE clerk_user_id = $1
 `
 
 // users mirror table (identity is Clerk; these rows are a local query cache)
@@ -64,12 +64,13 @@ func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (Use
 		&i.Locale,
 		&i.DigestFrequency,
 		&i.LastDigestAt,
+		&i.Theme,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at FROM users
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme FROM users
 WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -102,6 +103,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.Locale,
 			&i.DigestFrequency,
 			&i.LastDigestAt,
+			&i.Theme,
 		); err != nil {
 			return nil, err
 		}
@@ -114,7 +116,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 }
 
 const listUsersDueForDigest = `-- name: ListUsersDueForDigest :many
-SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at FROM users
+SELECT clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme FROM users
 WHERE disabled_at IS NULL
   AND digest_frequency <> 'off'
   AND (
@@ -152,6 +154,7 @@ func (q *Queries) ListUsersDueForDigest(ctx context.Context, limit int32) ([]Use
 			&i.Locale,
 			&i.DigestFrequency,
 			&i.LastDigestAt,
+			&i.Theme,
 		); err != nil {
 			return nil, err
 		}
@@ -216,12 +219,41 @@ func (q *Queries) SetUserDisabled(ctx context.Context, arg SetUserDisabledParams
 	return err
 }
 
+const setUserLocale = `-- name: SetUserLocale :exec
+UPDATE users SET locale = $2, updated_at = now() WHERE clerk_user_id = $1
+`
+
+type SetUserLocaleParams struct {
+	ClerkUserID string `json:"clerk_user_id"`
+	Locale      string `json:"locale"`
+}
+
+// ” restores "follow the browser" rather than pinning English.
+func (q *Queries) SetUserLocale(ctx context.Context, arg SetUserLocaleParams) error {
+	_, err := q.db.Exec(ctx, setUserLocale, arg.ClerkUserID, arg.Locale)
+	return err
+}
+
+const setUserTheme = `-- name: SetUserTheme :exec
+UPDATE users SET theme = $2, updated_at = now() WHERE clerk_user_id = $1
+`
+
+type SetUserThemeParams struct {
+	ClerkUserID string `json:"clerk_user_id"`
+	Theme       string `json:"theme"`
+}
+
+func (q *Queries) SetUserTheme(ctx context.Context, arg SetUserThemeParams) error {
+	_, err := q.db.Exec(ctx, setUserTheme, arg.ClerkUserID, arg.Theme)
+	return err
+}
+
 const upsertUser = `-- name: UpsertUser :one
 INSERT INTO users (clerk_user_id, email, name, avatar_url)
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (clerk_user_id) DO UPDATE
 SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = now()
-RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at
+RETURNING clerk_user_id, email, name, avatar_url, is_admin, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme
 `
 
 type UpsertUserParams struct {
@@ -251,6 +283,7 @@ func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, e
 		&i.Locale,
 		&i.DigestFrequency,
 		&i.LastDigestAt,
+		&i.Theme,
 	)
 	return i, err
 }

@@ -267,3 +267,34 @@ values or ad-hoc pixel sizes.
 
 Put `data-testid` on every element a test will assert on — Playwright never
 selects by visible copy. See [Testing](/docs/testing).
+
+## Theme
+
+Three values: `system` (default), `light`, `dark` — stored on `users.theme`
+for signed-in users and mirrored into a non-HttpOnly `theme` cookie.
+
+The cookie is not a duplicate for its own sake: the pre-paint script in
+`app.js` cannot query the database, and it runs before first paint precisely
+to avoid a flash of the wrong theme. Resolution order there is **an explicit
+`light`/`dark` cookie (the account's saved choice) → localStorage (this
+browser's own choice) → OS `prefers-color-scheme`**.
+
+A cookie of `system` does *not* outrank localStorage: it means the account
+expressed no preference, so the per-browser choice is the more specific one.
+
+The server also renders `class="dark"` on `<html>` itself when the resolved
+theme is dark, so a fresh device is correct on the very first byte — before
+any JavaScript executes. `system` deliberately renders **no** class: only the
+browser knows the OS setting, and guessing server-side reintroduces the flash.
+
+Two controls write it:
+
+- **The topbar toggle** flips light↔dark. It `hx-post`s `/set-theme` with no
+  value and the server flips from the same current value the client just
+  flipped from, so repeated clicks stay in agreement. It cannot send the
+  desired value: the vendored Alpine CSP build forbids the inline expression
+  that would compute one, and a value baked in at render time goes stale after
+  the first click. The response is `204` — the class is already correct.
+- **Settings → Account → Appearance** sets a value exactly. Those forms carry
+  `returnTo`, so the server answers with a hard redirect: the theme class
+  lives on `<html>`, which boosted navigation never re-renders.

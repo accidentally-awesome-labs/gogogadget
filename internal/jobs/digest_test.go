@@ -203,3 +203,33 @@ func clearDigestFixtures(t *testing.T, pool poolExec) {
 		require.NoError(t, err)
 	}
 }
+
+// The digest is the payoff for storing locale server-side: an email has no
+// Accept-Language header to fall back on, so without the user row it could
+// only ever speak the deployment default.
+func TestDigestSpeaksTheUsersLanguage(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsdigest")
+	ctx := context.Background()
+	clearDigestFixtures(t, pool)
+
+	cap := &captureSender{}
+	w := digestWorker(t, q, cap)
+	seedDigestUser(t, pool, "u_es", "es@example.com", "daily", nil)
+	seedDigestUser(t, pool, "u_en", "en@example.com", "daily", nil)
+	_, err := pool.Exec(ctx, `UPDATE users SET locale = 'es' WHERE clerk_user_id = 'u_es'`)
+	require.NoError(t, err)
+	seedDigestOrgAndNotification(t, pool, "org_dig", "u_es", "Exportación lista")
+	seedDigestOrgAndNotification(t, pool, "org_dig", "u_en", "Export ready")
+
+	require.NoError(t, w.sendDigests(ctx, sqlc.Job{}))
+	require.Len(t, cap.sent, 2)
+
+	byTo := map[string]mail.Message{}
+	for _, m := range cap.sent {
+		byTo[m.To] = m
+	}
+	assert.Equal(t, "Tu resumen de GoGoGadget", byTo["es@example.com"].Subject,
+		"a user who chose Spanish gets a Spanish digest")
+	assert.Equal(t, "Your GoGoGadget digest", byTo["en@example.com"].Subject,
+		"a user with no stored locale gets the deployment default")
+}

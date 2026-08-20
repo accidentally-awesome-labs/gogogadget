@@ -98,6 +98,28 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 		</p>
 	</div>
 
+	<div class="card max-w-lg mt-6" data-testid="appearance-card">
+		<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.appearance_title") }</h2>
+		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.appearance_body") }</p>
+		<div class="mt-4">
+			<p class="text-sm font-medium mb-2">{ i18n.T(ctx, "settings.theme_label") }</p>
+			<div class="flex gap-2">
+				@themeChoice("system", i18n.T(ctx, "settings.theme_system"), user.Theme)
+				@themeChoice("light", i18n.T(ctx, "settings.theme_light"), user.Theme)
+				@themeChoice("dark", i18n.T(ctx, "settings.theme_dark"), user.Theme)
+			</div>
+		</div>
+		<div class="mt-6">
+			<p class="text-sm font-medium mb-2">{ i18n.T(ctx, "settings.language_label") }</p>
+			<div class="flex gap-2">
+				@localeChoice("", i18n.T(ctx, "settings.language_auto"), user.Locale)
+				for _, l := range i18n.Locales {
+					@localeChoice(l.Code, l.Label, user.Locale)
+				}
+			</div>
+		</div>
+	</div>
+
 	<div class="card max-w-lg mt-6">
 		<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.data_title") }</h2>
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.data_body") }</p>
@@ -172,4 +194,41 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 			</tbody>
 		</table>
 	</div>
+}
+
+// choiceClass styles a preference button as selected or not.
+func choiceClass(selected bool) string {
+	if selected {
+		return "btn btn-primary !px-3 !py-1.5 text-sm"
+	}
+	return "btn !px-3 !py-1.5 text-sm"
+}
+
+// themeChoice and localeChoice are one-field hx-post forms rather than a
+// select: the vendored Alpine CSP build forbids the inline expression that
+// would submit a select on change, and a form needs no JS at all. Both carry
+// returnTo, so the server hard-redirects and the shell re-renders with the
+// new <html> class / language.
+templ themeChoice(value, label, current string) {
+	<form hx-post="/set-theme" hx-swap="none">
+		<input type="hidden" name="theme" value={ value }/>
+		<input type="hidden" name="returnTo" value="/app/settings/account"/>
+		<button type="submit" class={ choiceClass(current == value) } data-testid={ "theme-" + value }>{ label }</button>
+	</form>
+}
+
+templ localeChoice(code, label, current string) {
+	<form hx-post="/set-locale" hx-swap="none">
+		<input type="hidden" name="lang" value={ code }/>
+		<input type="hidden" name="returnTo" value="/app/settings/account"/>
+		<button type="submit" class={ choiceClass(current == code) } data-testid={ "locale-pref-" + localeTestID(code) }>{ label }</button>
+	</form>
+}
+
+// localeTestID keeps the "follow the browser" option addressable in tests.
+func localeTestID(code string) string {
+	if code == "" {
+		return "auto"
+	}
+	return code
 }

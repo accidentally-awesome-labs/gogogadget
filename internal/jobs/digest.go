@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/mail"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -60,7 +61,13 @@ func (w *Worker) sendDigests(ctx context.Context, job sqlc.Job) error {
 			quiet++
 			continue
 		}
-		msg, err := mail.DigestMessage(w.digestLocale(), w.AppURL, u.Email, u.Name, digestItems(rows))
+		// Each user's own language when they picked one (users.locale, set
+		// from the switcher); the deployment default otherwise.
+		locale := w.digestLocale()
+		if u.Locale != "" {
+			locale = i18n.ParseOrDefault(u.Locale)
+		}
+		msg, err := mail.DigestMessage(locale, w.AppURL, u.Email, u.Name, digestItems(rows))
 		if err != nil {
 			return err
 		}
