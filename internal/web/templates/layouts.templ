@@ -151,8 +151,6 @@ templ AppLayout(page Page, content templ.Component) {
 			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
 			<link rel="stylesheet" href="/static/app.css"/>
 			@headScripts(page)
-			// htmx SSE extension — app shell only (public pages have no stream).
-			<script defer src="/static/vendor/sse.min.js"></script>
 		</head>
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()

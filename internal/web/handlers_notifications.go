@@ -113,8 +113,9 @@ func (s *Server) handleNotificationsReadAll(w http.ResponseWriter, r *http.Reque
 // disabled per-response via ResponseController.
 //
 // The loop polls the DB every 5s; the documented upgrade path (not built) is
-// Postgres LISTEN/NOTIFY. Event subscribers: the sidebar badge span
-// (hx-trigger="load, sse:notifications").
+// Postgres LISTEN/NOTIFY. The subscriber is the sidebar badge span
+// (hx-trigger="load, notifications"), fed by the native EventSource in
+// app.js — there is no htmx SSE extension; see /docs/notifications.
 func (s *Server) handleNotificationsStream(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
 	user := identity.UserFrom(r.Context())

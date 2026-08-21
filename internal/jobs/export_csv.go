@@ -47,8 +47,9 @@ func (w *Worker) exportProjectsCSV(ctx context.Context, job sqlc.Job) error {
 		return err
 	}
 
-	filename := "projects-" + time.Now().UTC().Format("20060102-150405") + ".csv"
-	key := "exports/" + p.OrgID + "/" + filename
+	now := time.Now().UTC()
+	filename := "projects-" + now.Format("20060102-150405") + ".csv"
+	key := exportKey(p.OrgID, now, filename)
 	size, err := w.Storage.Put(ctx, key, "text/csv", bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		return err

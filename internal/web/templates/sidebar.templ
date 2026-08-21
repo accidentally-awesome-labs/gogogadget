@@ -74,8 +74,10 @@ templ Sidebar(page Page) {
 			data-clerk-placeholder={ clerkOrgPlaceholder(page.Org) }
 		></div>
 		// The SSE connection lives in the shell on purpose: boosted navigation
-		// swaps only #content, so the stream survives page changes.
-		<div sse-connect="/app/notifications/stream">
+		// swaps only #content, so the stream survives page changes. app.js
+		// opens it with a native EventSource and fires a "notifications"
+		// event at the badge below.
+		<div data-notification-stream="/app/notifications/stream">
 			<a href="/app/notifications" data-testid="notifications-bell" aria-label={ i18n.T(ctx, "notifications.title") }
 				hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
 				class="relative inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
@@ -83,7 +85,7 @@ templ Sidebar(page Page) {
 					<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path>
 				</svg>
 				{ i18n.T(ctx, "sidebar.notifications") }
-				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, sse:notifications" data-testid="notifications-badge"></span>
+				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, notifications" data-testid="notifications-badge"></span>
 			</a>
 		</div>
 		@appNavSections(page)

@@ -34,20 +34,35 @@ export job notifies `export.ready` (see [File storage](/docs/storage)).
 ## The badge and the stream
 
 The sidebar renders a self-swapping span that loads its count from
-`GET /app/notifications/badge` and re-fetches on `sse:notifications` events:
+`GET /app/notifications/badge` and re-fetches whenever a `notifications` event
+is dispatched at it:
 
 ```html
-<div sse-connect="/app/notifications/stream">
+<div data-notification-stream="/app/notifications/stream">
   <a href="/app/notifications" ...>
     <span id="notif-badge" hx-get="/app/notifications/badge"
-          hx-trigger="load, sse:notifications" hx-swap="outerHTML"></span>
+          hx-trigger="load, notifications" hx-swap="outerHTML"></span>
   </a>
 </div>
 ```
 
-The `sse-connect` div lives **in the shell** deliberately: boosted navigation
-swaps only `#content`, so the EventSource survives page changes. The SSE
-endpoint (`GET /app/notifications/stream`):
+The connection is a **native `EventSource`**, opened by `app.js`, which
+dispatches a plain `CustomEvent("notifications")` at the badge and lets htmx
+do the fetch (it owns the swap, the headers and the CSRF token).
+
+There is deliberately no SSE extension. `htmx-ext-sse` is built for htmx 2 —
+it registers through `htmx.defineExtension`, which htmx 4 removed — so
+vendoring it here threw on every authed page load and the stream was **never
+opened**: the badge only ever updated on navigation, while the endpoint sat
+there working perfectly. Twenty lines of `EventSource` replace it with one
+less dependency to keep in step with htmx.
+
+The carrier element lives **in the shell** deliberately: boosted navigation
+swaps only `#content`, so the connection survives page changes. `EventSource`
+reconnects by itself after a drop, so nothing in the client does retry
+bookkeeping; the listener closes on `pagehide`.
+
+The endpoint (`GET /app/notifications/stream`):
 
 - disables the server's 30s WriteTimeout per-response via
   `http.NewResponseController(w).SetWriteDeadline(time.Time{})` — the
@@ -60,9 +75,8 @@ endpoint (`GET /app/notifications/stream`):
 - exits on `r.Context().Done()`.
 
 The documented upgrade path — not built — is Postgres LISTEN/NOTIFY in place
-of the 5s poll. If the vendored htmx-ext-sse ever misbehaves against a future
-htmx version, drop `sse-connect` and give the badge
-`hx-trigger="load, every 30s"`; the stream endpoint stays for builders.
+of the 5s poll. To drop live updates entirely, remove the carrier element and
+give the badge `hx-trigger="load, every 30s"`; the endpoint stays for builders.
 
 ## Pages and marks
 

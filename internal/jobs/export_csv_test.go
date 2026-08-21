@@ -37,8 +37,12 @@ func TestExportProjectsCSVJob(t *testing.T) {
 		Filename string
 	}
 	require.NoError(t, pool.QueryRow(ctx, "SELECT storage_key, filename FROM files WHERE clerk_org_id = 'org_ex'").Scan(&f.Key, &f.Filename))
-	assert.True(t, strings.HasPrefix(f.Key, "exports/org_ex/projects-"))
+	// The key carries a nanosecond prefix so two exports in the same second
+	// cannot overwrite each other; the human filename rides along after it.
+	assert.True(t, strings.HasPrefix(f.Key, "exports/org_ex/"), "keys stay namespaced per org: %s", f.Key)
+	assert.Contains(t, f.Key, "-projects-")
 	assert.True(t, strings.HasSuffix(f.Key, ".csv"))
+	assert.NotEqual(t, "exports/org_ex/"+f.Filename, f.Key, "key must not be just the (second-granular) filename")
 
 	stored, err := os.ReadFile(filepath.Join(dir, f.Key))
 	require.NoError(t, err)

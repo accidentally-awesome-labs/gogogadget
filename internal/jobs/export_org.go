@@ -134,8 +134,9 @@ func (w *Worker) exportOrgJSON(ctx context.Context, job sqlc.Job) error {
 		return err
 	}
 
-	filename := "organization-" + time.Now().UTC().Format("20060102-150405") + ".json"
-	key := "exports/" + p.OrgID + "/" + filename
+	now := time.Now().UTC()
+	filename := "organization-" + now.Format("20060102-150405") + ".json"
+	key := exportKey(p.OrgID, now, filename)
 	size, err := w.Storage.Put(ctx, key, "application/json", bytes.NewReader(body))
 	if err != nil {
 		return err
@@ -267,4 +268,16 @@ func optTime(ts pgtype.Timestamptz) *time.Time {
 	}
 	t := ts.Time.UTC()
 	return &t
+}
+
+// exportKey builds the storage key for an export artifact.
+//
+// The filename users see is a second-granularity timestamp, which is friendly
+// but not unique: two exports for one organization inside the same second
+// produced the SAME key, so the second Put silently overwrote the first
+// object while both files rows survived — a download already streaming the
+// old bytes gets cut off. The key therefore carries nanoseconds; the pretty
+// name stays on the row.
+func exportKey(orgID string, at time.Time, filename string) string {
+	return "exports/" + orgID + "/" + strconv.FormatInt(at.UnixNano(), 10) + "-" + filename
 }

@@ -23,11 +23,6 @@ fetch "htmx.org@4.0.0-beta6" \
   "static/vendor/htmx.min.js" \
   "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25"
 
-fetch "htmx-ext-sse@2.2.4" \
-  "https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.4/sse.min.js" \
-  "static/vendor/sse.min.js" \
-  "ae3ab4747accd148da53626aec194187544b301899de0afc0576c43af34c95ac"
-
 fetch "@alpinejs/csp@3.15.12" \
   "https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.15.12/dist/cdn.min.js" \
   "static/vendor/alpine-csp.min.js" \

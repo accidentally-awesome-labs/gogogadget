@@ -104,8 +104,11 @@ test.describe('admin', () => {
     const row = page.locator('[id^="announcement-row-"]').filter({ hasText: 'E2E maintenance window' }).last();
     await expect(row).toBeVisible();
 
-    // Activate → banner on /app.
+    // Activate → banner on /app. Wait for the row to flip before navigating:
+    // going straight to /app races the in-flight POST, and the banner is only
+    // there if the activation landed first.
     await row.getByRole('button', { name: 'Activate' }).click();
+    await expect(row.getByRole('button', { name: 'Deactivate' })).toBeVisible();
     await page.goto('/app');
     await expect(page.getByTestId('announcement-banner')).toContainText('E2E maintenance window');
 

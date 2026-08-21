@@ -67,7 +67,7 @@ active org). `DEV_AUTH_BYPASS` is boot-refused when `APP_ENV=production`.
 - **UI strings go through `i18n.T(ctx, "area.key")`** in templates — catalogs in `internal/i18n/catalog_*.go`, en+es; content markdown and handler-side strings (titles, toasts) stay English (documented in `/docs/i18n`).
 - **Webhook header families**: Clerk = `svix-*` (svix lib), Polar = `webhook-*` (standard-webhooks lib). Fixtures mirror real names. Outbound customer webhooks also sign with the standard-webhooks lib (`webhook-id`/`webhook-timestamp`/`webhook-signature`); the SSRF guard is double-checked (URL validate + dial-time IP allowlist) and https-only in every environment.
 - **Fire-and-forget quartet**: `audit.Log`, `notify.Send`, `webhooks.Emit`, `usage.Record` — errors are logged, never returned; a notification/webhook/meter hiccup must never fail the caller.
-- **SSE notes**: the notifications stream disables the 30s WriteTimeout per-response via `http.NewResponseController(w).SetWriteDeadline(time.Time{})` — that only works because middleware `statusWriter` implements `Unwrap()`; keep it. The `sse-connect` div lives in the shell so boosted nav never kills the stream; badge fragment swaps target the bubble, not the shell.
+- **SSE notes**: the notifications stream disables the 30s WriteTimeout per-response via `http.NewResponseController(w).SetWriteDeadline(time.Time{})` — that only works because middleware `statusWriter` implements `Unwrap()`; keep it. The stream is a native `EventSource` in `app.js` (NOT htmx-ext-sse, which is htmx 2 only and threw under htmx 4); its carrier div lives in the shell so boosted nav never kills the connection, and badge fragment swaps target the bubble, not the shell.
 
 ## Test-layer decision rule
 

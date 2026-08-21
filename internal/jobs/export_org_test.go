@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
@@ -177,4 +178,18 @@ func TestOrgExportJobFailsLoudlyWithoutStorage(t *testing.T) {
 	err := w.exportOrgJSON(context.Background(), sqlc.Job{Payload: payload})
 	require.Error(t, err, "no storage configured is a job failure, not a silent no-op")
 	assert.Contains(t, err.Error(), "storage")
+}
+
+// Two exports for one org inside the same second must not share a storage
+// key: the second Put would overwrite the first object while both files rows
+// survive, and a download already streaming the old bytes is cut off. Caught
+// by an e2e flake, not by review.
+func TestExportKeysAreUniqueWithinASecond(t *testing.T) {
+	at := time.Date(2026, 8, 20, 12, 0, 0, 0, time.UTC)
+	first := exportKey("org_x", at, "projects-20260820-120000.csv")
+	second := exportKey("org_x", at.Add(time.Millisecond), "projects-20260820-120000.csv")
+
+	assert.NotEqual(t, first, second, "same-second exports must not collide")
+	assert.Contains(t, first, "exports/org_x/", "still namespaced per organization")
+	assert.Contains(t, first, "projects-20260820-120000.csv", "the human filename survives in the key")
 }

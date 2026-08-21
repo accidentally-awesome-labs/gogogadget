@@ -50,6 +50,43 @@ function persistTheme(theme) {
   });
 }
 
+// --- Live notification stream ---
+//
+// A native EventSource rather than htmx's SSE extension: that extension is
+// built for htmx 2 (it calls htmx.defineExtension, which htmx 4 removed), so
+// vendoring it here meant the script threw on every authed page load and the
+// stream was never opened at all — the badge only ever updated on navigation.
+//
+// The element carrying data-notification-stream lives in the app shell, which
+// boosted navigation never swaps, so one connection survives page changes.
+// EventSource reconnects on its own after a drop; nothing here needs to.
+(function () {
+  function connect() {
+    var el = document.querySelector("[data-notification-stream]");
+    if (!el || el.dataset.streamOpen === "1") return;
+    var url = el.getAttribute("data-notification-stream");
+    if (!url) return;
+    el.dataset.streamOpen = "1";
+
+    var source = new EventSource(url);
+    source.addEventListener("notifications", function () {
+      // Let htmx do the fetch: it owns the swap, the headers and the CSRF
+      // token. A plain DOM event is all hx-trigger needs.
+      var badge = document.getElementById("notif-badge");
+      if (badge) badge.dispatchEvent(new CustomEvent("notifications"));
+    });
+    window.addEventListener("pagehide", function () {
+      source.close();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", connect);
+  } else {
+    connect();
+  }
+})();
+
 // --- htmx notes (config lives in the <meta name="htmx-config"> tag) ---
 // Attribute inheritance is EXPLICIT in htmx 4: the only inherited attribute
 // this app needs is the body's CSRF header, declared as hx-headers:inherited,
