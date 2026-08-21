@@ -29,6 +29,7 @@ func (s *Server) routes() {
 	// Content: blog, feed, SEO.
 	s.mux.HandleFunc("GET /blog", s.handleBlogIndex)
 	s.mux.HandleFunc("GET /blog/{slug}", s.handleBlogPost)
+	s.mux.HandleFunc("GET /changelog", s.handleChangelog)
 	s.mux.HandleFunc("GET /rss.xml", s.handleRSS)
 	s.mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
 	s.mux.HandleFunc("GET /robots.txt", s.handleRobots)

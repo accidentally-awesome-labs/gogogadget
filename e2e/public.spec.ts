@@ -131,3 +131,24 @@ test.describe('public pages', () => {
     await expect(page.getByRole('link', { name: 'Back to home' })).toBeVisible();
   });
 });
+
+test('the changelog lists releases newest-first and deep-links to one', async ({ page }) => {
+  await page.goto('/changelog');
+  await expect(page.getByRole('heading', { name: 'Changelog', exact: true })).toBeVisible();
+
+  const entries = page.getByTestId('changelog-entry');
+  const count = await entries.count();
+  expect(count, 'the changelog ships with real entries').toBeGreaterThan(1);
+
+  // Newest first: the ids are ISO dates, so string order is date order.
+  const ids = await entries.evaluateAll((els) => els.map((e) => e.id));
+  expect(ids).toEqual([...ids].sort().reverse());
+
+  // A support reply links at one release; it must land under the sticky nav.
+  await page.goto(`/changelog#${ids[1]}`);
+  const target = page.locator(`#${ids[1]}`);
+  await expect(target).toBeVisible();
+  const top = await target.evaluate((el) => el.getBoundingClientRect().top);
+  expect(top, 'the anchored release clears the header').toBeGreaterThan(0);
+  expect(top).toBeLessThan(200);
+});

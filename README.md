@@ -46,7 +46,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Maintenance mode** — `MAINTENANCE_MODE=true` serves a dedicated 503 page (JSON for `/api/`) while `/healthz`/`/readyz` stay live; dedicated 403 page for non-admins.
 - **Mobile nav** — hamburger drawer in the app topbar; the sidebar nav is shared, not duplicated.
 - **Public API** — org-scoped Bearer tokens (`ggg_…`), `/api/v1/projects`, JSON error shape; OpenAPI 3.1 contract at `/api/v1/openapi.yaml`, kept in step with the router by tests Cursor pagination, idempotency keys on POST, per-token rate limits.
-- **Content** — markdown blog + RSS + sitemap + OG; docs section rendered in-app (`/docs`) with ranked search (`/docs/search`).
+- **Content** — markdown blog + RSS + sitemap + OG; docs section rendered in-app (`/docs`) with ranked search (`/docs/search`), plus a `/changelog` collection rendered newest-first with per-release anchors.
 - **Platform** — Postgres job queue + schedules admin, audit log (configurable retention), rate limiting, strict CSP, CSRF, structured logs, Sentry + PostHog hooks, `/healthz` + `/readyz` + `/metrics` (Prometheus, bearer-gated).
 - **Testing** — unit + integration (per-package test DBs) + seam contract suites + fuzz tests for trust-boundary parsers + race detector + Playwright e2e + docker-pinned visual baselines + a11y (axe) + smoke and docker-build CI jobs.
 

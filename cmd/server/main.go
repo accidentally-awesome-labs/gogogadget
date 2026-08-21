@@ -72,6 +72,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("load docs: %w", err)
 	}
+	changelog, err := content.LoadChangelog(contentfs.FS)
+	if err != nil {
+		return fmt.Errorf("load changelog: %w", err)
+	}
 
 	// Identity: FakeVerifier powers zero-account dev/e2e; ClerkVerifier is the
 	// only production path. Both satisfy the same seam.
@@ -150,7 +154,7 @@ func run() error {
 	q := sqlc.New(pool)
 	srv := web.NewServer(web.Deps{
 		Config: cfg, Log: log, DB: pool, Queries: q, Version: version,
-		Blog: blog, Docs: docs,
+		Blog: blog, Docs: docs, Changelog: changelog,
 		Verifier: verifier, Fetcher: fetcher, IdentityDeleter: deleter,
 		Billing: polarClient, Analytics: capturer,
 		Storage:  fileStore,

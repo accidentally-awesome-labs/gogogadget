@@ -38,6 +38,7 @@ type Server struct {
 	version       string
 	blog          *content.Blog
 	docs          *content.Docs
+	changelog     *content.Changelog
 	verifier      identity.Verifier
 	fetcher       identity.UserFetcher
 	deleter       identity.Deleter // nil → local-only account deletion
@@ -57,13 +58,14 @@ type Server struct {
 // Deps is the server wiring bag: every external service enters here, behind
 // its seam interface.
 type Deps struct {
-	Config  config.Config
-	Log     *slog.Logger
-	DB      *pgxpool.Pool
-	Queries *sqlc.Queries
-	Version string
-	Blog    *content.Blog
-	Docs    *content.Docs
+	Config    config.Config
+	Log       *slog.Logger
+	DB        *pgxpool.Pool
+	Queries   *sqlc.Queries
+	Version   string
+	Blog      *content.Blog
+	Docs      *content.Docs
+	Changelog *content.Changelog
 
 	Verifier        identity.Verifier
 	Fetcher         identity.UserFetcher
@@ -85,6 +87,7 @@ func NewServer(d Deps) *Server {
 		version:       d.Version,
 		blog:          d.Blog,
 		docs:          d.Docs,
+		changelog:     d.Changelog,
 		verifier:      d.Verifier,
 		fetcher:       d.Fetcher,
 		deleter:       d.IdentityDeleter,
@@ -104,6 +107,12 @@ func NewServer(d Deps) *Server {
 	}
 	if s.reporter == nil {
 		s.reporter = observability.NoopReporter{}
+	}
+	if s.changelog == nil {
+		// An empty collection, not nil: /changelog and the sitemap read it on
+		// every request, and a server wired without one should render an
+		// empty page rather than panic into the 500 handler.
+		s.changelog = &content.Changelog{}
 	}
 	if d.Analytics != nil {
 		s.analytics = d.Analytics

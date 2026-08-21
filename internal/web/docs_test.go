@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 
 	contentfs "github.com/gogogadget/gogogadget/content"
@@ -97,4 +98,75 @@ func TestDocsSearchResults(t *testing.T) {
 	code, _, body = serve(t, s, "GET", "/docs/search", nil, nil)
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, "Type a term to search")
+}
+
+func changelogServer(t *testing.T) *Server {
+	t.Helper()
+	return integrationServer(t, func(d *Deps) {
+		log, err := content.LoadChangelog(contentfs.FS)
+		require.NoError(t, err)
+		d.Changelog = log
+	})
+}
+
+func TestChangelogPageRendersEveryRelease(t *testing.T) {
+	s := changelogServer(t)
+	code, _, body := serve(t, s, "GET", "/changelog", nil, nil)
+	require.Equal(t, http.StatusOK, code)
+
+	for _, r := range s.changelog.Releases {
+		assert.Contains(t, body, `id="`+r.Anchor+`"`, "release %s needs its anchor", r.Slug)
+		assert.Contains(t, body, r.Title)
+	}
+	assert.Contains(t, body, "Everything that shipped")
+}
+
+// Newest-first is the contract a changelog reader relies on: they scan down
+// until they reach the version they were on.
+func TestChangelogPageOrdersNewestFirst(t *testing.T) {
+	s := changelogServer(t)
+	_, _, body := serve(t, s, "GET", "/changelog", nil, nil)
+
+	prev := -1
+	for _, r := range s.changelog.Releases {
+		at := strings.Index(body, `id="`+r.Anchor+`"`)
+		require.NotEqual(t, -1, at)
+		assert.Greater(t, at, prev, "release %s renders out of order", r.Slug)
+		prev = at
+	}
+}
+
+// It is a public page: same chrome, indexable, and linked from the shell.
+func TestChangelogIsPublicAndIndexable(t *testing.T) {
+	s := changelogServer(t)
+	_, _, body := serve(t, s, "GET", "/changelog", nil, nil)
+
+	assert.Contains(t, body, `<link rel="canonical" href="http://localhost:18080/changelog"`)
+	assert.Contains(t, body, `hreflang="es"`)
+	assert.Contains(t, body, `href="/changelog"`, "the nav links to it")
+}
+
+func TestSitemapIncludesChangelogWithLastmod(t *testing.T) {
+	s := changelogServer(t)
+	_, _, body := serve(t, s, "GET", "/sitemap.xml", nil, nil)
+
+	latest := s.changelog.Latest()
+	require.NotNil(t, latest)
+	assert.Contains(t, body,
+		"<loc>http://localhost:18080/changelog</loc><lastmod>"+latest.Date.UTC().Format("2006-01-02")+"</lastmod>",
+		"the changelog is the one marketing page with a real modification date")
+}
+
+// A server wired without a changelog must render an empty page, not panic
+// into the 500 handler — the collection is optional, like storage and flags.
+func TestChangelogAbsentCollectionDoesNotPanic(t *testing.T) {
+	s := integrationServer(t, nil) // Deps.Changelog left nil
+
+	code, _, body := serve(t, s, "GET", "/changelog", nil, nil)
+	assert.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, "Something went wrong")
+
+	code, hdr, _ := serve(t, s, "GET", "/sitemap.xml", nil, nil)
+	assert.Equal(t, http.StatusOK, code)
+	assert.Contains(t, hdr.Get("Content-Type"), "application/xml")
 }

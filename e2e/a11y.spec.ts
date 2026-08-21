@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { loginAs } from './helpers';
 
 // axe over the visual-spec pages, both themes; serious/critical fails the run.
-const publicPages = ['/', '/pricing', '/blog', '/blog/hello-world', '/docs/getting-started', '/nope'];
+const publicPages = ['/', '/pricing', '/blog', '/blog/hello-world', '/docs/getting-started', '/changelog', '/nope'];
 
 for (const theme of ['light', 'dark'] as const) {
   test.describe(`a11y (${theme})`, () => {

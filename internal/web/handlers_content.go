@@ -56,6 +56,12 @@ func (s *Server) handleSitemap(w http.ResponseWriter, r *http.Request) {
 	for _, u := range []string{"/", "/pricing", "/terms", "/privacy", "/blog", "/docs"} {
 		fmt.Fprintf(w, "<url><loc>%s%s</loc></url>", s.cfg.AppURL, u)
 	}
+	// The changelog is the one marketing page with a real modification date:
+	// its newest release.
+	if latest := s.changelog.Latest(); latest != nil {
+		fmt.Fprintf(w, "<url><loc>%s/changelog</loc><lastmod>%s</lastmod></url>",
+			s.cfg.AppURL, latest.Date.UTC().Format("2006-01-02"))
+	}
 	for _, p := range s.blog.Posts {
 		fmt.Fprintf(w, "<url><loc>%s/blog/%s</loc><lastmod>%s</lastmod></url>",
 			s.cfg.AppURL, p.Slug, p.Date.UTC().Format("2006-01-02"))
@@ -64,4 +70,13 @@ func (s *Server) handleSitemap(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "<url><loc>%s/docs/%s</loc></url>", s.cfg.AppURL, d.Slug)
 	}
 	fmt.Fprint(w, `</urlset>`)
+}
+
+// GET /changelog — every release on one page, newest first.
+func (s *Server) handleChangelog(w http.ResponseWriter, r *http.Request) {
+	s.Render(w, r, Page{
+		Title:       "Changelog",
+		Description: "Everything that shipped in GoGoGadget, newest first.",
+		Layout:      templates.LayoutPublic,
+	}, templates.ChangelogPage(s.changelog.Releases))
 }

@@ -20,6 +20,7 @@ const publicPages = [
   ['blog', '/blog'],
   ['blog-post', '/blog/hello-world'],
   ['docs', '/docs/getting-started'],
+  ['changelog', '/changelog'],
   ['not-found', '/nope'],
 ] as const;
 

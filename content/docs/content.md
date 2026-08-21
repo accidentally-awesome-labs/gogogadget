@@ -1,6 +1,6 @@
 ---
 title: Content
-description: Markdown blog and docs collections, rendered in-app and embedded in the binary.
+description: Markdown blog, docs, and changelog collections, rendered in-app and embedded in the binary.
 section: Features
 weight: 13
 ---
@@ -16,10 +16,12 @@ greppable by coding agents.
 |------------|----------------------|------------------------------------------------------|
 | Blog       | `content/blog/*.md`  | `title`, `description`, `date`, `author`, `draft`    |
 | Docs       | `content/docs/*.md`  | `title`, `description`, `section`, `weight`, `draft` |
+| Changelog  | `content/changelog/*.md` | `title`, `date`, `summary`                       |
 
 - Blog posts sort date-descending on the index and in the feed.
 - Docs pages group by `section` and order by `weight` — the sidebar is a
   direct reflection of frontmatter.
+- Changelog releases sort date-descending onto one page (see below).
 - `draft: true` hides the page when `APP_ENV=production`; drafts render in
   development.
 
@@ -71,3 +73,27 @@ Every page gets Open Graph/Twitter meta from a shared partial (`og:title`,
 Internal `/docs/…` links are enforced by a test
 (`TestDocsInternalLinksResolve` in `internal/content`): linking to a slug
 that does not exist fails the build.
+
+## Changelog
+
+`content/changelog/YYYY-MM-DD.md` — one file per release, rendered together at
+**`/changelog`**, newest first. The filename is the date, and the date in the
+frontmatter must agree with it (a test enforces that): the two disagreeing
+means a link points at the wrong release.
+
+A changelog is a separate collection from the blog because it is read
+differently — you scan backwards until you reach the version you were on,
+which is why every release lives on one page rather than getting its own URL.
+Each entry still carries a stable anchor, so support can link at the exact
+release that fixed someone's problem.
+
+Anchors are `release-2026-08-19`, not `2026-08-19`. A bare date is a legal
+HTML id but **not** a legal CSS selector — ids cannot start with a digit, so
+`document.querySelector("#2026-08-19")` throws and no stylesheet can target
+it. The prefix costs nothing and removes the trap.
+
+There is no `draft` flag. An entry exists once the work ships; a half-written
+release note is a file you have not committed yet.
+
+The changelog is also the one marketing page with an honest `lastmod` in the
+sitemap — the date of its newest release.

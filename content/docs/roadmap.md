@@ -32,6 +32,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Org-level data export | `org:admin` JSON bundle via the job → storage → notification path; secrets excluded by construction, capped and marked when truncated |
 | Dunning sequence | Day 0 / +3 / +7 comms scheduled at failure, each re-checking the subscription so a recovered customer is never chased — `/docs/billing` |
 | Loading feedback | Delayed navigation progress bar + content dim (no flicker on fast swaps), `.skeleton` for load-triggered fragments — `/docs/frontend` |
+| Changelog | `/changelog` — a dated markdown collection rendered newest-first with per-release anchors; sitemap `lastmod` tracks it |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -44,7 +45,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 
 | Gap | Evidence of absence | One-line approach |
 |---|---|---|
-| Changelog page; in-app help; breadcrumbs; keyboard shortcuts/command palette | Absent — `internal/web/templates/` | Add incrementally |
+| In-app help; breadcrumbs; keyboard shortcuts/command palette | Absent — `internal/web/templates/` | Add incrementally |
 
 ## Tier 3 — platform/delegated
 
