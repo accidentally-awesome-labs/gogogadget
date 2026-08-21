@@ -43,7 +43,7 @@ implementation.
 
 Every email is **two templ components** — an HTML body and a plain-text body
 — living in `internal/web/templates/emails.templ` on the shared inline-styled
-`EmailLayout`. The five shipped kinds:
+`EmailLayout`. The seven shipped kinds:
 
 | Kind | Subject | Trigger |
 |---|---|---|
@@ -52,9 +52,12 @@ Every email is **two templ components** — an HTML body and a plain-text body
 | `email.subscription_canceled` | "Your subscription is canceled" | First `subscription.canceled`/`revoked` (one-shot guard) |
 | `email.trial_ending` | "Your trial ends soon" | Scheduled at trial_end − 3 days |
 | `email.digest` | "Your GoGoGadget digest" | Hourly schedule; sends to users whose cadence is due |
+| `email.dunning_reminder` | "Your payment is still failing" | 3 days after entering `past_due`, if still failing |
+| `email.dunning_final` | "Final notice: your plan is about to be canceled" | 7 days after entering `past_due`, if still failing |
 
 Builder functions in `mail.go` (`WelcomeMessage`, `PaymentFailedMessage`,
-`SubscriptionCanceledMessage`, `TrialEndingMessage`, `DigestMessage`) render
+`SubscriptionCanceledMessage`, `TrialEndingMessage`, `DigestMessage`,
+`DunningReminderMessage`, `DunningFinalMessage`) render
 both components to strings and return a `Message`.
 
 ## The digest

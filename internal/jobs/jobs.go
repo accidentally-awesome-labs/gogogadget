@@ -15,6 +15,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,6 +28,8 @@ const (
 	KindPaymentFailed        = "email.payment_failed"
 	KindSubscriptionCanceled = "email.subscription_canceled"
 	KindTrialEnding          = "email.trial_ending"
+	KindDunningReminder      = "email.dunning_reminder"
+	KindDunningFinal         = "email.dunning_final"
 	KindEmailDigest          = "email.digest" // per-user rollup of in-app notifications (digest.go)
 	KindUsageFlush           = "usage.flush"  // usage metering (see internal/usage)
 	KindWebhookDeliver       = "webhook.deliver"
@@ -293,7 +296,7 @@ func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 		return w.exportProjectsCSV(ctx, job)
 	case KindExportOrgJSON:
 		return w.exportOrgJSON(ctx, job)
-	case KindWelcome, KindPaymentFailed, KindSubscriptionCanceled, KindTrialEnding:
+	case KindWelcome, KindPaymentFailed, KindSubscriptionCanceled, KindTrialEnding, KindDunningReminder, KindDunningFinal:
 		var p EmailPayload
 		if err := json.Unmarshal(job.Payload, &p); err != nil {
 			return err
@@ -306,10 +309,43 @@ func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 				return nil
 			}
 		}
+		if job.Kind == KindDunningReminder || job.Kind == KindDunningFinal {
+			if skip, err := w.paymentRecovered(ctx, p.OrgID); err != nil {
+				return err
+			} else if skip {
+				w.log.Info("dunning email skipped: payment no longer failing", "kind", job.Kind, "org", p.OrgID)
+				return nil
+			}
+			if job.Kind == KindDunningFinal {
+				// The day-0 notification is a week stale by now; the last
+				// notice is the one worth putting back in front of them.
+				notify.SendOrg(ctx, w.q, p.OrgID, "payment_failed", "Final notice: payment still failing",
+					"Update your card to keep your plan active.", "/app/settings/billing")
+			}
+		}
 		return w.sender.Send(ctx, mail.Message{To: p.To, Subject: p.Subject, HTML: p.HTML, Text: p.Text})
 	default:
 		return errors.New("unknown job kind: " + job.Kind)
 	}
+}
+
+// paymentRecovered is the run-time guard for the dunning follow-ups. They are
+// scheduled days ahead at the moment of failure, so by send time the customer
+// may well have fixed their card — and few things burn goodwill faster than a
+// "your payment is failing" email arriving after it succeeded. Anything other
+// than a still-past_due subscription (recovered, canceled, or gone) skips.
+func (w *Worker) paymentRecovered(ctx context.Context, orgID string) (bool, error) {
+	if orgID == "" {
+		return true, nil
+	}
+	sub, err := w.q.GetSubscriptionByOrg(ctx, orgID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return sub.Status != "past_due", nil
 }
 
 // trialNoLongerActive is the run-time guard for email.trial_ending: the row

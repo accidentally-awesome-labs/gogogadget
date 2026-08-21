@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -47,3 +48,32 @@ func (e emailSink) EnqueueSubscriptionCanceled(ctx context.Context, to string, p
 }
 
 var _ billing.EmailSink = emailSink{}
+
+// EnqueueDunning schedules one follow-up in the dunning sequence. The body is
+// rendered now (like every other billing email) but the job carries a future
+// run_at; the worker re-checks the subscription before it sends.
+func (e emailSink) EnqueueDunning(ctx context.Context, stage, to string, periodEnd time.Time, orgID string, runAt time.Time) error {
+	var (
+		msg  mail.Message
+		kind string
+		err  error
+	)
+	switch stage {
+	case billing.DunningReminder:
+		kind = jobs.KindDunningReminder
+		msg, err = mail.DunningReminderMessage(language.English, e.s.cfg.AppURL, to)
+	case billing.DunningFinal:
+		kind = jobs.KindDunningFinal
+		periodEndStr := ""
+		if !periodEnd.IsZero() {
+			periodEndStr = periodEnd.Format("January 2, 2006")
+		}
+		msg, err = mail.DunningFinalMessage(language.English, e.s.cfg.AppURL, to, periodEndStr)
+	default:
+		return fmt.Errorf("unknown dunning stage %q", stage)
+	}
+	if err != nil {
+		return err
+	}
+	return jobs.EnqueueEmail(ctx, e.s.q, kind, msg, orgID, runAt)
+}

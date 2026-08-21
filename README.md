@@ -22,7 +22,7 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 ## Features
 
 - **Auth & teams (Clerk)** — social OAuth, 2FA, orgs, roles, invitations, all hosted; local mirror synced via webhooks for fast queries.
-- **Billing (Polar.sh)** — checkout, customer portal, webhook sync, entitlements, dunning + trial emails, merchant-of-record tax.
+- **Billing (Polar.sh)** — checkout, customer portal, webhook sync, entitlements, dunning + trial emails, merchant-of-record tax. Dunning is a scheduled day-0/+3/+7 sequence whose follow-ups re-check the subscription, so a recovered customer is never chased.
 - **App shell** — dashboard, projects CRUD (the canonical example), activity feed, settings (account/org/billing/API/webhooks).
 - **i18n** — en + es with ?lang=/cookie/Accept-Language detection, `i18n.T` in every template, zero-dependency catalogs (`x/text`), and a CSP-safe switcher.
 - **File storage** — `storage.Store` seam: Cloudflare R2 (presigned downloads) or zero-account DevStore; org-scoped rows, plan quotas, attachment-only downloads.

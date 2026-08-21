@@ -173,3 +173,31 @@ func DigestMessage(locale language.Tag, appURL, to, name string, items []templat
 	}
 	return Message{To: to, Subject: i18n.T(ctx, "email.digest.subject"), HTML: html, Text: text}, nil
 }
+
+// DunningReminderMessage is the day-3 nudge: the card is still failing.
+func DunningReminderMessage(locale language.Tag, appURL, to string) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.DunningReminderEmailHTML(appURL))
+	if err != nil {
+		return Message{}, err
+	}
+	text, err := renderHTML(ctx, templates.DunningReminderEmailText(appURL))
+	if err != nil {
+		return Message{}, err
+	}
+	return Message{To: to, Subject: i18n.T(ctx, "email.dunning_reminder.subject"), HTML: html, Text: text}, nil
+}
+
+// DunningFinalMessage is the last notice before the subscription lapses.
+func DunningFinalMessage(locale language.Tag, appURL, to, periodEnd string) (Message, error) {
+	ctx := i18n.WithTag(context.Background(), locale)
+	html, err := renderHTML(ctx, templates.DunningFinalEmailHTML(appURL, periodEnd))
+	if err != nil {
+		return Message{}, err
+	}
+	text, err := renderHTML(ctx, templates.DunningFinalEmailText(appURL, periodEnd))
+	if err != nil {
+		return Message{}, err
+	}
+	return Message{To: to, Subject: i18n.T(ctx, "email.dunning_final.subject"), HTML: html, Text: text}, nil
+}

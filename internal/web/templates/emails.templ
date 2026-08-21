@@ -165,3 +165,47 @@ templ DigestEmailText(appURL, name string, items []DigestItem) {
 	{ i18n.T(ctx, "email.digest.cta") } { appURL }/app/notifications
 	{ i18n.T(ctx, "email.digest.manage") } { appURL }/app/settings/notifications
 }
+
+templ DunningReminderEmailHTML(appURL string) {
+	@EmailLayout(DunningReminderEmailBody(appURL))
+}
+
+templ DunningReminderEmailBody(appURL string) {
+	<h1 style="font-size:22px;margin:0 0 12px;">{ i18n.T(ctx, "email.dunning_reminder.title") }</h1>
+	<p style="margin:0 0 12px;line-height:1.6;">{ i18n.T(ctx, "email.dunning_reminder.body") }</p>
+	<p style="margin:0;"><a href={ appURL + "/app/settings/billing" } style="color:#4f46e5;">{ i18n.T(ctx, "email.dunning_reminder.cta") }</a></p>
+}
+
+templ DunningFinalEmailHTML(appURL, periodEnd string) {
+	@EmailLayout(DunningFinalEmailBody(appURL, periodEnd))
+}
+
+templ DunningFinalEmailBody(appURL, periodEnd string) {
+	<h1 style="font-size:22px;margin:0 0 12px;">{ i18n.T(ctx, "email.dunning_final.title") }</h1>
+	if periodEnd != "" {
+		<p style="margin:0 0 12px;line-height:1.6;">{ i18n.T(ctx, "email.dunning_final.body_dated") } <strong>{ periodEnd }</strong>.</p>
+	} else {
+		<p style="margin:0 0 12px;line-height:1.6;">{ i18n.T(ctx, "email.dunning_final.body") }</p>
+	}
+	<p style="margin:0;"><a href={ appURL + "/app/settings/billing" } style="color:#4f46e5;">{ i18n.T(ctx, "email.dunning_final.cta") }</a></p>
+}
+
+templ DunningReminderEmailText(appURL string) {
+	{ i18n.T(ctx, "email.dunning_reminder.title") }
+
+	{ i18n.T(ctx, "email.dunning_reminder.body") }
+
+	{ i18n.T(ctx, "email.dunning_reminder.cta") } { appURL }/app/settings/billing
+}
+
+templ DunningFinalEmailText(appURL, periodEnd string) {
+	{ i18n.T(ctx, "email.dunning_final.title") }
+
+	if periodEnd != "" {
+		{ i18n.T(ctx, "email.dunning_final.body_dated") } { periodEnd }.
+	} else {
+		{ i18n.T(ctx, "email.dunning_final.body") }
+	}
+
+	{ i18n.T(ctx, "email.dunning_final.cta") } { appURL }/app/settings/billing
+}

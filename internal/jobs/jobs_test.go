@@ -287,3 +287,106 @@ func TestJanitorSweepsExpiredIdempotencyKeys(t *testing.T) {
 	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_jan", Key: "fresh"})
 	assert.NoError(t, err, "a key a client might still retry against must survive")
 }
+
+// seedDunningSub creates an org with a subscription in the given status.
+func seedDunningSub(t *testing.T, pool poolExec, orgID, status string) {
+	t.Helper()
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ($1,$1,$1) ON CONFLICT DO NOTHING`, orgID)
+	require.NoError(t, err)
+	_, err = pool.Exec(ctx, `INSERT INTO users (clerk_user_id, email, name) VALUES ($1, $1 || '@example.com', 'U') ON CONFLICT DO NOTHING`, "u_"+orgID)
+	require.NoError(t, err)
+	_, err = pool.Exec(ctx, `INSERT INTO org_members (clerk_org_id, clerk_user_id, role) VALUES ($1, $2, 'org:admin') ON CONFLICT DO NOTHING`, orgID, "u_"+orgID)
+	require.NoError(t, err)
+	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (clerk_org_id, polar_customer_id, product_key, status)
+		VALUES ($1, 'cus', 'pro', $2)
+		ON CONFLICT (clerk_org_id) DO UPDATE SET status = EXCLUDED.status`, orgID, status)
+	require.NoError(t, err)
+}
+
+// The dunning follow-ups are scheduled days ahead, so by send time the card
+// may already be fixed. Few things burn goodwill faster than "your payment is
+// failing" arriving after it succeeded.
+func TestDunningEmailSkippedAfterRecovery(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsdunning")
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, "DELETE FROM jobs")
+	require.NoError(t, err)
+	seedDunningSub(t, pool, "org_recovered", "active")
+
+	sender := &captureSender{}
+	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	require.NoError(t, EnqueueEmail(ctx, q, KindDunningFinal, mail.Message{
+		To: "a@example.com", Subject: "Final notice", HTML: "<p>x</p>", Text: "x",
+	}, "org_recovered", time.Time{}))
+
+	done, err := w.ProcessOne(ctx)
+	require.NoError(t, err)
+	assert.True(t, done, "the job runs…")
+	assert.Empty(t, sender.sent, "…and sends nothing, because the payment recovered")
+}
+
+func TestDunningEmailSentWhileStillPastDue(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsdunning")
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, "DELETE FROM jobs")
+	require.NoError(t, err)
+	seedDunningSub(t, pool, "org_stillbad", "past_due")
+
+	sender := &captureSender{}
+	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	require.NoError(t, EnqueueEmail(ctx, q, KindDunningReminder, mail.Message{
+		To: "b@example.com", Subject: "Still failing", HTML: "<p>x</p>", Text: "x",
+	}, "org_stillbad", time.Time{}))
+
+	done, err := w.ProcessOne(ctx)
+	require.NoError(t, err)
+	require.True(t, done)
+	require.Len(t, sender.sent, 1)
+	assert.Equal(t, "b@example.com", sender.sent[0].To)
+}
+
+// The final notice also re-notifies in-app: the day-0 notification is a week
+// stale by the time this runs.
+func TestFinalDunningNotifiesInApp(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsdunning")
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, "DELETE FROM jobs")
+	require.NoError(t, err)
+	seedDunningSub(t, pool, "org_final", "past_due")
+
+	w := NewWorker(q, &captureSender{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	require.NoError(t, EnqueueEmail(ctx, q, KindDunningFinal, mail.Message{
+		To: "c@example.com", Subject: "Final", HTML: "<p>x</p>", Text: "x",
+	}, "org_final", time.Time{}))
+	_, err = w.ProcessOne(ctx)
+	require.NoError(t, err)
+
+	notes, err := q.ListNotificationsByUser(ctx, sqlc.ListNotificationsByUserParams{
+		ClerkOrgID: "org_final", ClerkUserID: "u_org_final", Limit: 10, Offset: 0,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, notes)
+	assert.Contains(t, notes[0].Title, "Final notice")
+	assert.Equal(t, "/app/settings/billing", notes[0].Url)
+}
+
+// A subscription that vanished (org deleted, never subscribed) must not error
+// the job — there is simply nobody to dun.
+func TestDunningEmailSkippedWithoutSubscription(t *testing.T) {
+	pool, q := testdb.Open(t, "jobsdunning")
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, "DELETE FROM jobs")
+	require.NoError(t, err)
+
+	sender := &captureSender{}
+	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	require.NoError(t, EnqueueEmail(ctx, q, KindDunningReminder, mail.Message{
+		To: "d@example.com", Subject: "x", HTML: "<p>x</p>", Text: "x",
+	}, "org_gone", time.Time{}))
+
+	done, err := w.ProcessOne(ctx)
+	require.NoError(t, err, "a missing subscription is a skip, not a failure")
+	assert.True(t, done)
+	assert.Empty(t, sender.sent)
+}

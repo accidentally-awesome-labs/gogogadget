@@ -45,7 +45,29 @@ type EmailSink interface {
 	EnqueueTrialEnding(ctx context.Context, to string, trialEnd time.Time, orgID string) error
 	EnqueuePaymentFailed(ctx context.Context, to string, orgID string) error
 	EnqueueSubscriptionCanceled(ctx context.Context, to string, periodEnd time.Time, orgID string) error
+	// EnqueueDunning schedules a follow-up for a payment that is still
+	// failing. Both are sent into the future and both re-check the
+	// subscription before delivering.
+	EnqueueDunning(ctx context.Context, stage, to string, periodEnd time.Time, orgID string, runAt time.Time) error
 }
+
+// Dunning schedule: how long after the first failure each follow-up goes out.
+//
+// The payment processor runs its own card retries; this is the human half —
+// the reminders that get someone to update an expired card before the
+// subscription dies. Two follow-ups is the boilerplate default because a
+// third rarely converts and starts to read as harassment. Change the
+// constants to change the cadence; nothing else knows the numbers.
+const (
+	DunningReminderAfter = 72 * time.Hour  // day 3: "we are still retrying"
+	DunningFinalAfter    = 168 * time.Hour // day 7: last notice before cancellation
+)
+
+// Dunning stages, used as the email kind suffix and in logs.
+const (
+	DunningReminder = "reminder"
+	DunningFinal    = "final"
+)
 
 // Processor is the subscription state machine: webhook event → row, audit,
 // email job, analytics. Constructed per-request by the webhook handler.
@@ -119,13 +141,30 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 		}
 
 	case "subscription.updated":
+		if sub.Status == "past_due" && prevStatus != "past_due" {
+			// In-app first, and outside the email gate: it needs no address,
+			// so an org whose owner lookup failed still learns that its card
+			// is failing instead of silently sliding toward cancellation.
+			notify.SendOrg(ctx, p.Q, orgID, "payment_failed", "Payment failed",
+				"We couldn't charge your card — your plan stays active while we retry.", "/app/settings/billing")
+		}
 		if sub.Status == "past_due" && prevStatus != "past_due" && ownerEmail != "" && p.Emails != nil {
 			if err := p.Emails.EnqueuePaymentFailed(ctx, ownerEmail, orgID); err != nil {
 				return err
 			}
-			// Org admins also get an in-app notification (billing page link).
-			notify.SendOrg(ctx, p.Q, orgID, "payment_failed", "Payment failed",
-				"We couldn't charge your card — your plan stays active while we retry.", "/app/settings/billing")
+
+			// …and the follow-up sequence. Scheduled now, guarded later: each
+			// job re-reads the subscription before sending, so a customer who
+			// fixes their card tomorrow never receives the day-7 warning.
+			now := time.Now()
+			for stage, after := range map[string]time.Duration{
+				DunningReminder: DunningReminderAfter,
+				DunningFinal:    DunningFinalAfter,
+			} {
+				if err := p.Emails.EnqueueDunning(ctx, stage, ownerEmail, sub.CurrentPeriodEnd, orgID, now.Add(after)); err != nil {
+					return err
+				}
+			}
 		}
 		if sub.Status != prevStatus {
 			audit.Log(ctx, p.Q, orgID, "", "subscription.updated", map[string]any{"from": prevStatus, "to": sub.Status})

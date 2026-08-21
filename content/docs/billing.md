@@ -196,3 +196,35 @@ family: replay the same `webhook-id` → 200 with no duplicate row and no
 second email; transition coverage includes resubscribe-after-cancel,
 `uncanceled`, and `revoked` payload-status mapping. See
 [Testing](/docs/testing).
+
+## Dunning
+
+A failed charge starts a sequence, not a single email. Polar retries the card
+on its own schedule; this is the human half — the messages that get someone to
+replace an expired card before the subscription dies.
+
+| When | What |
+|---|---|
+| Failure (transition into `past_due`) | In-app notification to the org, email to the owner, and a persistent banner in the app shell while the status lasts |
+| +3 days (`billing.DunningReminderAfter`) | Reminder email: still retrying, here is the link |
+| +7 days (`billing.DunningFinalAfter`) | Final notice email **plus** a fresh in-app notification — the day-0 one is a week stale by then |
+
+Both follow-ups are enqueued **at the moment of failure** with a future
+`run_at`, and both re-read the subscription before sending
+(`Worker.paymentRecovered`). A customer who fixes their card on day 4 never
+receives the day-7 warning: an apology-generating email that arrives after the
+problem is solved is worse than no email at all. A subscription that has since
+vanished skips too, rather than failing the job.
+
+Only the **transition into** `past_due` schedules a sequence, so repeated
+`subscription.updated` deliveries with the same status cannot stack five sets
+of warnings. A genuine second failure after a recovery does earn a fresh
+sequence, because that is a new transition.
+
+Change the cadence by changing the two constants in `internal/billing` —
+nothing else knows the numbers. Two follow-ups is the default because a third
+rarely converts and starts to read as harassment.
+
+The in-app notification is deliberately **outside** the email gate: it needs
+no address, so an organization whose owner-email lookup fails still learns its
+card is failing instead of sliding silently toward cancellation.

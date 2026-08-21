@@ -30,6 +30,7 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 | Support role tier | `users.admin_role` (`support`/`admin`); read-only staff, method-based write guard, audited grants, last-admin lockout |
 | SEO hardening | Self-referential canonicals (collapsing the `?lang=` duplicates), reciprocal hreflang, JSON-LD, sitemap `lastmod`, RSS autodiscovery — `/docs/seo` |
 | Org-level data export | `org:admin` JSON bundle via the job → storage → notification path; secrets excluded by construction, capped and marked when truncated |
+| Dunning sequence | Day 0 / +3 / +7 comms scheduled at failure, each re-checking the subscription so a recovered customer is never chased — `/docs/billing` |
 | Admin jobs viewer + dead-letter requeue | `/admin/jobs` |
 | Announcement banner + admin CRUD | `/admin/announcements`, app-shell banner |
 | Notification preferences | `/app/settings/notifications` |
@@ -42,7 +43,6 @@ vendor neutrality. Every claim of absence cites the repo path as evidence.
 
 | Gap | Evidence of absence | One-line approach |
 |---|---|---|
-| Dunning depth | Single payment_failed email — `internal/billing/webhook.go` | Add a retry-schedule comms sequence |
 | Changelog page; in-app help; breadcrumbs; keyboard shortcuts/command palette; skeleton screens beyond Clerk slots | All absent — `internal/web/templates/` | Add incrementally; skeletons first |
 
 ## Tier 3 — platform/delegated
