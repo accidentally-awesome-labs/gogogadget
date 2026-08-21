@@ -50,6 +50,58 @@ function persistTheme(theme) {
   });
 }
 
+// --- Navigation progress ---
+//
+// Boosted navigation swaps #content, which means the old page sits there
+// untouched until the response lands: on anything slower than a local
+// network, a click looked like nothing happened. htmx marks the *triggering
+// element* with .htmx-request, which is right for a button's spinner and
+// useless for a whole-page change.
+//
+// This flags the document while a navigation is in flight and lets CSS draw
+// the feedback (see input.css). The bar is delayed there, so fast swaps —
+// the common case — never flash it.
+//
+// The event names and payload shape are htmx 4's: colon-namespaced events
+// (htmx:before:request, not htmx:beforeRequest) whose detail carries a single
+// `ctx`, with the resolved swap target on ctx.target. htmx:finally:request
+// always fires — success, error or abort — so the counter cannot get stuck.
+(function () {
+  var inFlight = 0;
+
+  function isNavigation(evt) {
+    var ctx = (evt.detail || {}).ctx;
+    var target = ctx && ctx.target;
+    // A navigation is a request that replaces the content box itself; the
+    // badge fragment and in-page table swaps target something smaller.
+    return !!target && target.id === "content";
+  }
+
+  // Clearing happens once per request, on whichever comes first: the swap
+  // (the normal path) or the request finishing (abort, network error, a
+  // response that swaps nothing). The flag on ctx keeps the pair balanced.
+  function done(evt) {
+    var ctx = (evt.detail || {}).ctx;
+    if (!isNavigation(evt) || !ctx || ctx.__navSettled) return;
+    ctx.__navSettled = true;
+    inFlight = Math.max(0, inFlight - 1);
+    if (inFlight === 0) document.documentElement.removeAttribute("data-navigating");
+  }
+
+  document.addEventListener("htmx:before:request", function (evt) {
+    if (!isNavigation(evt)) return;
+    inFlight++;
+    document.documentElement.setAttribute("data-navigating", "");
+  });
+
+  // BEFORE the swap, not after the request: the swap replaces #content
+  // wholesale, and an element inserted while the flag is still set paints
+  // dimmed from birth — CSS transitions do not apply to initial values, so
+  // the new page would flash grey before snapping to full opacity.
+  document.addEventListener("htmx:before:swap", done);
+  document.addEventListener("htmx:finally:request", done);
+})();
+
 // --- Live notification stream ---
 //
 // A native EventSource rather than htmx's SSE extension: that extension is

@@ -298,3 +298,50 @@ Two controls write it:
 - **Settings → Account → Appearance** sets a value exactly. Those forms carry
   `returnTo`, so the server answers with a hard redirect: the theme class
   lives on `<html>`, which boosted navigation never re-renders.
+
+## Loading feedback
+
+Navigation swaps `#content` and nothing else, so until the response lands the
+old page sits there untouched — on anything slower than a local network, a
+click looked like nothing happened. htmx's `.htmx-request` marks the element
+that *issued* the request, which is right for a button's spinner and useless
+for a whole-page change.
+
+`app.js` therefore sets `data-navigating` on `<html>` while a swap of the
+content box is in flight, and `input.css` draws everything from that flag: a
+2px progress bar pinned to the top edge, and the stale content dimmed to 60%.
+
+Three details carry the design:
+
+- **A 150ms delay before anything appears.** A local navigation finishes well
+  inside it, so the common case shows nothing at all and only a genuinely slow
+  response produces a bar. An indicator that flickers on every click is worse
+  than no indicator.
+- **The flag clears before the swap, not after the request.** The swap
+  replaces `#content` wholesale, and an element inserted while the flag is
+  still set paints dimmed *from birth* — CSS transitions do not apply to
+  initial values — so every fast navigation would flash grey. Clearing on
+  `htmx:before:swap` (with `htmx:finally:request` as the fallback for aborts
+  and errors) puts the new element into a clean document.
+- **Only navigations count.** The flag keys off the resolved swap target being
+  `#content`, so table search, pagination and the billing poll — which keep
+  their content on screen and have their own indicators — never dim the page.
+
+The event names are htmx 4's: colon-namespaced (`htmx:before:request`, not
+`htmx:beforeRequest`), with a single `ctx` on the detail carrying the resolved
+target.
+
+### Skeletons
+
+`.skeleton` is the placeholder for regions that load *after* first paint —
+fragments with `hx-trigger="load"`, which are empty until their fetch returns.
+It reserves the space the content will take so nothing shifts when it arrives;
+the notification badge uses it.
+
+There is deliberately no skeleton anywhere content already exists. Replacing a
+rendered table with a shimmering grey copy of itself is a downgrade: the user
+could read the old rows a moment ago. Skeletons are for empty space, and the
+progress bar covers the rest.
+
+Both respect `prefers-reduced-motion`: the bar still appears and the content
+still dims, but the animation is dropped rather than the feedback.

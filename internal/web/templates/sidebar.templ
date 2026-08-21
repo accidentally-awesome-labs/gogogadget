@@ -85,7 +85,12 @@ templ Sidebar(page Page) {
 					<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path>
 				</svg>
 				{ i18n.T(ctx, "sidebar.notifications") }
-				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, notifications" data-testid="notifications-badge"></span>
+				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, notifications" data-testid="notifications-badge">
+					// Placeholder until the count arrives, so the bell does not
+					// jump sideways on every page load. Replaced wholesale by
+					// the fragment (hx-swap defaults to innerHTML here).
+					<span class="skeleton inline-block h-4 w-4 align-middle" aria-hidden="true"></span>
+				</span>
 			</a>
 		</div>
 		@appNavSections(page)

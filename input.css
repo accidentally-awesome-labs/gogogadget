@@ -153,6 +153,40 @@
     opacity: 1;
   }
 
+  /* Navigation progress. app.js sets data-navigating on <html> while a swap
+     of #content is in flight; everything visible is drawn here.
+
+     The 150ms delay is the whole design: a local navigation completes well
+     inside it, so the common case shows nothing at all and only a genuinely
+     slow response produces a bar. An indicator that flickers on every click
+     is worse than none. */
+  html[data-navigating]::before {
+    content: "";
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    z-index: 60;
+    background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-600));
+    transform-origin: 0 50%;
+    animation: nav-progress 8s cubic-bezier(0.1, 0.6, 0.3, 1) 150ms forwards;
+  }
+
+  /* The stale content recedes slightly so it reads as "being replaced"
+     rather than "ignored the click". Same delay, same reasoning. */
+  html[data-navigating] #content {
+    opacity: 0.6;
+    transition: opacity 200ms ease 150ms;
+  }
+
+  /* .skeleton is the placeholder for regions that load after first paint
+     (fragments with hx-trigger="load"). It reserves the space the content
+     will take, so nothing shifts when it arrives. */
+  .skeleton {
+    @apply rounded bg-surface-raised;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+  }
+
   /* .prose styles rendered markdown (blog + docs). No typography plugin —
      keeps the standalone toolchain JS-free. */
   .prose {
@@ -179,7 +213,29 @@
 /* Navigation swaps opt into the View Transitions API (hx-swap="… transition:true"),
    which the browser drives with its own cross-fade. Honour a reduced-motion
    preference by cutting the animation but keeping the swap. */
+@keyframes nav-progress {
+  /* Fast to 60%, then crawl: the bar must never imply completion it cannot
+     promise, and it is removed the moment the swap lands. */
+  0% { transform: scaleX(0); }
+  40% { transform: scaleX(0.6); }
+  100% { transform: scaleX(0.95); }
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Keep the feedback, drop the motion: the bar still appears (static, at a
+     fixed width) and the content still dims. */
+  html[data-navigating]::before {
+    animation: none;
+    transform: scaleX(0.6);
+  }
+  .skeleton {
+    animation: none;
+  }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {
