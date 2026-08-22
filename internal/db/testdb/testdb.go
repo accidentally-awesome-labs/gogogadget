@@ -19,6 +19,25 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Phase budgets. One shared deadline for the whole of Open was wrong twice
+// over: the retry backoff below spent the same clock the migrations needed,
+// and the migration set grows with the schema, so a fixed budget silently
+// tightened every time a migration was added. Each phase now gets a budget
+// sized to its own job.
+const (
+	// connectTimeout is a reachability probe. No server means Skip, so this
+	// only needs to be long enough to distinguish "absent" from "busy".
+	connectTimeout = 10 * time.Second
+	// ddlTimeout covers ONE drop or create attempt, so the backoff between
+	// attempts cannot starve anything downstream.
+	ddlTimeout = 15 * time.Second
+	// migrateTimeout covers opening the pool and running every embedded
+	// migration. This is the phase that grows, and on a server shared with
+	// other work it is the phase that stalls, so it is sized for a loaded
+	// machine rather than for today's migration count.
+	migrateTimeout = 2 * time.Minute
+)
+
 // Open drops, recreates, and migrates gogogadget_test_<name> on the server
 // from TEST_DATABASE_URL (default postgres://postgres:postgres@localhost:5432).
 func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
@@ -33,25 +52,28 @@ func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 	}
 	dbName := "gogogadget_test_" + name
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
+	connectCtx, cancelConnect := context.WithTimeout(context.Background(), connectTimeout)
+	defer cancelConnect()
 
 	admin := *u
 	admin.Path = "/postgres"
-	conn, err := pgx.Connect(ctx, admin.String())
+	conn, err := pgx.Connect(connectCtx, admin.String())
 	if err != nil {
 		t.Skipf("test database server unreachable: %v", err)
 	}
-	defer conn.Close(ctx)
+	// Closing gets its own context: the phase budget that opened the
+	// connection is typically spent by the time this runs.
+	defer func() { _ = conn.Close(context.Background()) }()
 
 	q := `"` + strings.ReplaceAll(dbName, `"`, `""`) + `"`
 	// DROP races the previous test's pool teardown: pool.Close() closes
 	// sockets client-side, and the server backend can lag a few ms behind.
-	// Retrying on 42501 is the boring fix; a real permission failure fails
+	// Retrying is the boring fix, and it also covers a drop that timed out
+	// against a momentarily busy server; a real permission failure fails
 	// all attempts and still surfaces.
 	var dropErr error
 	for attempt := range 5 {
-		_, dropErr = conn.Exec(ctx, `DROP DATABASE IF EXISTS `+q+` WITH (FORCE)`)
+		dropErr = execDDL(conn, `DROP DATABASE IF EXISTS `+q+` WITH (FORCE)`)
 		if dropErr == nil {
 			break
 		}
@@ -60,19 +82,30 @@ func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-	if _, err := conn.Exec(ctx, `CREATE DATABASE `+q); err != nil {
+	if err := execDDL(conn, `CREATE DATABASE `+q); err != nil {
 		t.Fatalf("create %s: %v", dbName, err)
 	}
 
+	migrateCtx, cancelMigrate := context.WithTimeout(context.Background(), migrateTimeout)
+	defer cancelMigrate()
+
 	u.Path = "/" + dbName
-	pool, err := db.Open(ctx, u.String())
+	pool, err := db.Open(migrateCtx, u.String())
 	if err != nil {
 		t.Fatalf("open %s: %v", dbName, err)
 	}
-	if err := db.Migrate(ctx, pool); err != nil {
+	if err := db.Migrate(migrateCtx, pool); err != nil {
 		pool.Close()
 		t.Fatalf("migrate %s: %v", dbName, err)
 	}
 	t.Cleanup(pool.Close)
 	return pool, sqlc.New(pool)
+}
+
+// execDDL runs one CREATE/DROP DATABASE statement under its own budget.
+func execDDL(conn *pgx.Conn, sql string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), ddlTimeout)
+	defer cancel()
+	_, err := conn.Exec(ctx, sql)
+	return err
 }
