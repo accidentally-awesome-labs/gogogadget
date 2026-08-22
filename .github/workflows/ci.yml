@@ -138,6 +138,16 @@ jobs:
       - name: Build server
         run: go build -o tmp/server ./cmd/server
 
+      # Blog posts and changelog releases live in content_entries now, not in
+      # the binary, so the public surface smoke.sh asserts on (a real post at
+      # /blog/hello-world) only exists once the markdown corpus is imported.
+      # Seeding is part of standing up the stack, and it exercises the
+      # importer in CI as a side effect.
+      - name: Seed
+        run: |
+          DATABASE_URL="postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable" \
+            go run ./cmd/seed internal/db/testdata/seed_dev.sql
+
       - name: Start server
         run: |
           APP_ENV=test PORT=18080 \
