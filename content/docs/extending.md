@@ -114,7 +114,9 @@ moment the plan exists. See [Billing](/docs/billing).
 3. `make generate`, then a db round-trip test (exact word, websearch
    multi-word, partial token, ranking).
 
-## Schedule recurring work1. Add a job kind + dispatch case (see "Add a job kind" above). Scheduled
+## Schedule recurring work
+
+1. Add a job kind + dispatch case (see "Add a job kind" above). Scheduled
    payloads arrive wrapped in `jobs.SchedulePayload` — unwrap `.Payload`.
 2. Insert a row via `schedules.Create` (seeds: `internal/db/testdata/`), or
    straight SQL. `clerk_org_id NULL` = system-wide; `every_seconds >= 60`.
@@ -122,7 +124,9 @@ moment the plan exists. See [Billing](/docs/billing).
    to configure. See [Background jobs](/docs/background-jobs) for the
    missed-tick semantics.
 
-## Add a webhook eventUnknown events are already ACKed (200 + log), so this is purely additive.
+## Add a webhook event
+
+Unknown events are already ACKed (200 + log), so this is purely additive.
 
 - **Clerk** — add a parser for the payload shape in
   `internal/identity/sync.go`, then a `case` in `processClerkEvent`
@@ -239,7 +243,9 @@ shape, from `internal/jobs/export_csv.go`:
 3. The handler enqueues + toasts "Export started"; the worker completes
    async. See [File storage](/docs/storage) for the seam.
 
-## Add a locale1. Copy `internal/i18n/catalog_es.go` → `catalog_<lang>.go` and translate
+## Add a locale
+
+1. Copy `internal/i18n/catalog_es.go` → `catalog_<lang>.go` and translate
    every key (Spanish quality is the floor, not the ceiling).
 2. Add the tag to the matcher list and an entry (code + native label) to
    `Locales` in `internal/i18n/i18n.go` — the switcher picks it up
