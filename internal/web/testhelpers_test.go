@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -16,6 +17,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	svix "github.com/svix/svix-webhooks/go"
 )
@@ -49,7 +51,7 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	}
 	deps := Deps{
 		Config: cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
-		Blog: &content.Blog{}, Docs: &content.Docs{},
+		Docs:     &content.Docs{},
 		Verifier: identity.FakeVerifier{},
 		Fetcher:  identity.DevUserFetcher{},
 	}
@@ -57,6 +59,36 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 		mutate(&deps)
 	}
 	return NewServer(deps)
+}
+
+// seedEntries inserts content rows, invalidates the CMS cache so the very
+// next public request sees them, and removes them at the end of the test.
+// The web package shares one database across tests, so every caller must use
+// slugs of its own.
+func seedEntries(t *testing.T, s *Server, rows ...sqlc.CreateEntryParams) []sqlc.ContentEntry {
+	t.Helper()
+	out := make([]sqlc.ContentEntry, 0, len(rows))
+	for _, row := range rows {
+		if row.Meta == nil {
+			row.Meta = []byte("{}")
+		}
+		entry, err := s.q.CreateEntry(t.Context(), row)
+		if err != nil {
+			t.Fatalf("seed content entry %s/%s: %v", row.Kind, row.Slug, err)
+		}
+		out = append(out, entry)
+		t.Cleanup(func() {
+			_ = s.q.DeleteEntry(context.Background(), entry.ID)
+			s.cms.Invalidate()
+		})
+	}
+	s.cms.Invalidate()
+	return out
+}
+
+// publishedAt is the timestamp shorthand seeded entries use.
+func publishedAt(t time.Time) pgtype.Timestamptz {
+	return pgtype.Timestamptz{Time: t, Valid: true}
 }
 
 // signSvix emits the exact headers a Clerk (Svix) delivery carries.

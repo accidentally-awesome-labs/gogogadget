@@ -1,6 +1,7 @@
-// Package content parses the embedded markdown collections at startup and
-// renders bodies with goldmark (GFM; raw HTML stays escaped — never enable
-// html.WithUnsafe).
+// Package content owns the app's editorial surface: the embedded docs
+// collection parsed at startup, the database-backed CMS for every registered
+// content type (see types.go and cms.go), and the goldmark renderer they
+// share (GFM; raw HTML stays escaped — never enable html.WithUnsafe).
 package content
 
 import (
@@ -18,7 +19,9 @@ import (
 
 var md = goldmark.New(goldmark.WithExtensions(extension.GFM))
 
-// Post is one blog entry.
+// Post is the blog view model: one live entry of the "post" content type,
+// projected from Entry.AsPost. The markdown seed corpus parses into the same
+// shape (see import.go).
 type Post struct {
 	Slug        string
 	Title       string
@@ -29,71 +32,14 @@ type Post struct {
 	Body        string // rendered HTML (safe: goldmark escapes raw HTML)
 }
 
-type Blog struct {
-	Posts []Post // sorted date-desc
-}
-
+// blogFrontmatter is the seed corpus's frontmatter. A post marked draft is
+// simply not imported.
 type blogFrontmatter struct {
 	Title       string `yaml:"title"`
 	Description string `yaml:"description"`
 	Date        string `yaml:"date"`
 	Author      string `yaml:"author"`
 	Draft       bool   `yaml:"draft"`
-}
-
-// LoadBlog parses content/blog. Drafts are excluded in production.
-func LoadBlog(fsys fs.FS, production bool) (*Blog, error) {
-	entries, err := fs.ReadDir(fsys, "blog")
-	if err != nil {
-		return nil, err
-	}
-	blog := &Blog{}
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".md") {
-			continue
-		}
-		raw, err := fs.ReadFile(fsys, "blog/"+e.Name())
-		if err != nil {
-			return nil, err
-		}
-		var fm blogFrontmatter
-		body, err := splitFrontmatter(raw, &fm)
-		if err != nil {
-			return nil, fmt.Errorf("blog/%s: %w", e.Name(), err)
-		}
-		if fm.Draft && production {
-			continue
-		}
-		date, err := time.Parse("2006-01-02", fm.Date)
-		if err != nil {
-			return nil, fmt.Errorf("blog/%s: date %q: %w", e.Name(), fm.Date, err)
-		}
-		html, err := render(body)
-		if err != nil {
-			return nil, fmt.Errorf("blog/%s: %w", e.Name(), err)
-		}
-		blog.Posts = append(blog.Posts, Post{
-			Slug:        strings.TrimSuffix(e.Name(), ".md"),
-			Title:       fm.Title,
-			Description: fm.Description,
-			Date:        date,
-			Author:      fm.Author,
-			Draft:       fm.Draft,
-			Body:        html,
-		})
-	}
-	sort.Slice(blog.Posts, func(i, j int) bool { return blog.Posts[i].Date.After(blog.Posts[j].Date) })
-	return blog, nil
-}
-
-// BySlug returns the post or nil.
-func (b *Blog) BySlug(slug string) *Post {
-	for i := range b.Posts {
-		if b.Posts[i].Slug == slug {
-			return &b.Posts[i]
-		}
-	}
-	return nil
 }
 
 // DocPage is one documentation page.
@@ -153,7 +99,7 @@ func LoadDocs(fsys fs.FS, production bool) (*Docs, error) {
 		if fm.Draft && production {
 			continue
 		}
-		html, err := render(body)
+		html, err := Render(body)
 		if err != nil {
 			return nil, fmt.Errorf("docs/%s: %w", e.Name(), err)
 		}
@@ -215,7 +161,10 @@ func splitFrontmatter(raw []byte, out any) ([]byte, error) {
 	return []byte(body), nil
 }
 
-func render(src []byte) (string, error) {
+// Render turns markdown into HTML on the shared goldmark instance (GFM, raw
+// HTML escaped). Exported so the admin save and preview paths produce exactly
+// what the public page will show.
+func Render(src []byte) (string, error) {
 	var buf bytes.Buffer
 	if err := md.Convert(src, &buf); err != nil {
 		return "", err

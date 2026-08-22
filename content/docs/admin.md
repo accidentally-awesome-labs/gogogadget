@@ -116,6 +116,60 @@ outside `#content` (it survives boosted navigation). Session semantics:
   invalidate a 30s server-side cache, so activation takes effect on the next
   render.
 
+## Content
+
+`/admin/content` is one table over **every** registered content type — blog
+posts, changelog releases, and anything else declared in
+`internal/content/types.go` (see [Content](/docs/content)). There are no
+per-type pages: the kind is a query parameter (`?kind=post`), so a newly
+registered type appears here with no routing or template change. Above the
+table sit a filter link and a New button per type; the list carries search and
+pagination (20 per page). Columns are Title / Type / Language / Status /
+Published / Actions.
+
+The **Status** badge is computed, never stored: `draft`, `scheduled` (published
+with a `published_at` still in the future), `expired` (`unpublish_at` has
+passed), or `live`. Because it derives from the same predicate the public
+pages use, it cannot drift from what a visitor sees — and an expired entry
+stays listed and editable here while being gone from the site. The
+**Language** column shows *All languages* for the shared `''` row and the bare
+code for a variant.
+
+The editor is one form per entry: title, a slug that auto-fills from the
+title, language, summary, the type's own declared fields, `published_at` and
+an optional `unpublish_at`, and a markdown body with a **live preview pane**
+rendered by the same code that renders the published page. Publish, unpublish,
+and delete are buttons; scheduling is just a date in either field. Every save
+snapshots a revision, so the history list offers **Restore** on any earlier
+version (a restore is itself a save, so it snapshots too). **Preview** is a
+plain link that opens the real public view in a new tab, from the stored row,
+whatever its status or dates — preview and publication cannot diverge because
+they render through the same view lookup.
+
+Every mutation writes an audit row (`content.created` / `updated` /
+`published` / `unpublished` / `deleted` / `restored`) and invalidates the 30s
+content cache, so a publish is visible on the next request.
+
+Reads are GET and mutations are POST, which is all `requireAdminWrite` needs:
+support staff get the full read-only table with the create, publish, and
+delete controls hidden, and no per-route wiring made that true.
+
+## Media
+
+`/admin/media` — reached from the Content page header rather than its own nav
+entry — uploads images for use in content bodies. The allowlist is PNG, JPEG,
+GIF, and WebP, and the content type is **sniffed from the file's first bytes**,
+never taken from the client's part header: media is the one thing served
+inline instead of as an attachment, so the bytes are the only trustworthy
+source. Anything else is a 422 with no row and no stored object. SVG is
+excluded on purpose — it can carry script that would run same-origin.
+
+Each row offers a **copy** button that yields the markdown to paste into a
+body (`![alt](/media/{id}/{filename})`) and a delete. Uploads are
+platform-scoped, not org-scoped, and go through the storage seam, so DevStore
+covers local work with no account (see [File storage](/docs/storage)). Upload
+and delete are audited like every other admin mutation.
+
 ## Schedules
 
 `/admin/schedules` is the UI over the `schedules` table the worker's

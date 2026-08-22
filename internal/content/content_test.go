@@ -60,29 +60,36 @@ Overview body.
 `)},
 }
 
-func TestLoadBlog(t *testing.T) {
-	blog, err := LoadBlog(testFS, false)
+// The seed corpus parses into the blog view model: frontmatter read, GFM
+// rendered, raw HTML escaped, drafts skipped.
+func TestParsePosts(t *testing.T) {
+	posts, err := ParsePosts(testFS)
 	require.NoError(t, err)
-	require.Len(t, blog.Posts, 3)
+	require.Len(t, posts, 2, "a draft in the corpus is a file you have not finished")
+	for _, p := range posts {
+		assert.NotEqual(t, "draft", p.Slug)
+	}
 
 	// Sorted date-desc.
-	assert.Equal(t, "Draft Post", blog.Posts[0].Title)
-	assert.Equal(t, "First Post", blog.Posts[2].Title)
+	assert.Equal(t, "Second Post", posts[0].Title)
+	assert.Equal(t, "First Post", posts[1].Title)
 
-	// Markdown rendered; raw HTML escaped (never html.WithUnsafe).
-	first := blog.BySlug("one")
-	require.NotNil(t, first)
+	first := posts[1]
+	assert.Equal(t, "one", first.Slug)
+	assert.Equal(t, "A", first.Author)
 	assert.Contains(t, first.Body, "<h1>Heading</h1>")
 	assert.Contains(t, first.Body, "<strong>bold</strong>")
+	// goldmark runs without WithUnsafe. This is the whole XSS story for the
+	// @templ.Raw a public page does on a rendered body.
 	assert.NotContains(t, first.Body, "<script>")
 	assert.Contains(t, first.Body, "raw HTML omitted")
 }
 
-func TestLoadBlogDraftsExcludedInProduction(t *testing.T) {
-	blog, err := LoadBlog(testFS, true)
-	require.NoError(t, err)
-	assert.Len(t, blog.Posts, 2)
-	assert.Nil(t, blog.BySlug("draft"))
+func TestParsePostsNamesTheBrokenFile(t *testing.T) {
+	bad := fstest.MapFS{"blog/broken.md": &fstest.MapFile{Data: []byte("no frontmatter here\n")}}
+	_, err := ParsePosts(bad)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "blog/broken.md")
 }
 
 func TestLoadDocsGroupingAndOrder(t *testing.T) {
@@ -102,11 +109,21 @@ func TestLoadDocsGroupingAndOrder(t *testing.T) {
 }
 
 func TestRSS(t *testing.T) {
-	blog, err := LoadBlog(testFS, false)
+	posts, err := ParsePosts(testFS)
 	require.NoError(t, err)
-	feed, err := RSS("https://example.com", blog.Posts)
+	items := make([]FeedItem, 0, len(posts))
+	for _, p := range posts {
+		items = append(items, FeedItem{
+			Title: p.Title, Link: "https://example.com/blog/" + p.Slug,
+			Description: p.Description, Date: p.Date,
+		})
+	}
+	feed, err := RSS("https://example.com", "GoGoGadget Blog", "Product and engineering updates",
+		"https://example.com/blog", items)
 	require.NoError(t, err)
 	assert.Contains(t, feed, `<rss version="2.0">`)
-	assert.Contains(t, feed, "<link>https://example.com/blog/one</link>")
-	assert.NotContains(t, feed, "Draft Post", "drafts never reach the feed")
+	assert.Contains(t, feed, "<title>GoGoGadget Blog</title>")
+	assert.Contains(t, feed, "<link>https://example.com/blog/one</link>",
+		"an item link must be absolute or no reader can follow it")
+	assert.NotContains(t, feed, "Draft Post", "an unpublished entry never reaches the feed")
 }

@@ -7,6 +7,7 @@ import (
 
 	contentfs "github.com/gogogadget/gogogadget/content"
 	"github.com/gogogadget/gogogadget/internal/content"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -14,11 +15,8 @@ import (
 func docsServer(t *testing.T) *Server {
 	t.Helper()
 	return integrationServer(t, func(d *Deps) {
-		blog, err := content.LoadBlog(contentfs.FS, true)
-		require.NoError(t, err)
 		docs, err := content.LoadDocs(contentfs.FS, true)
 		require.NoError(t, err)
-		d.Blog = blog
 		d.Docs = docs
 	})
 }
@@ -100,21 +98,32 @@ func TestDocsSearchResults(t *testing.T) {
 	assert.Contains(t, body, "Type a term to search")
 }
 
-func changelogServer(t *testing.T) *Server {
+// changelogServer seeds the shipped release corpus into content_entries: the
+// changelog is a database-backed content type now, and these tests assert on
+// the page rendered from those rows.
+func changelogServer(t *testing.T) (*Server, []content.Release) {
 	t.Helper()
-	return integrationServer(t, func(d *Deps) {
-		log, err := content.LoadChangelog(contentfs.FS)
-		require.NoError(t, err)
-		d.Changelog = log
-	})
+	s := integrationServer(t, nil)
+	releases, err := content.ParseReleases(contentfs.FS)
+	require.NoError(t, err)
+	rows := make([]sqlc.CreateEntryParams, 0, len(releases))
+	for _, r := range releases {
+		rows = append(rows, sqlc.CreateEntryParams{
+			Kind: "release", Slug: r.Slug, Title: r.Title, Summary: r.Summary,
+			BodyMd: r.Body, BodyHtml: r.Body, Status: "published",
+			PublishedAt: publishedAt(r.Date),
+		})
+	}
+	seedEntries(t, s, rows...)
+	return s, releases
 }
 
 func TestChangelogPageRendersEveryRelease(t *testing.T) {
-	s := changelogServer(t)
+	s, releases := changelogServer(t)
 	code, _, body := serve(t, s, "GET", "/changelog", nil, nil)
 	require.Equal(t, http.StatusOK, code)
 
-	for _, r := range s.changelog.Releases {
+	for _, r := range releases {
 		assert.Contains(t, body, `id="`+r.Anchor+`"`, "release %s needs its anchor", r.Slug)
 		assert.Contains(t, body, r.Title)
 	}
@@ -124,11 +133,11 @@ func TestChangelogPageRendersEveryRelease(t *testing.T) {
 // Newest-first is the contract a changelog reader relies on: they scan down
 // until they reach the version they were on.
 func TestChangelogPageOrdersNewestFirst(t *testing.T) {
-	s := changelogServer(t)
+	s, releases := changelogServer(t)
 	_, _, body := serve(t, s, "GET", "/changelog", nil, nil)
 
 	prev := -1
-	for _, r := range s.changelog.Releases {
+	for _, r := range releases {
 		at := strings.Index(body, `id="`+r.Anchor+`"`)
 		require.NotEqual(t, -1, at)
 		assert.Greater(t, at, prev, "release %s renders out of order", r.Slug)
@@ -138,7 +147,7 @@ func TestChangelogPageOrdersNewestFirst(t *testing.T) {
 
 // It is a public page: same chrome, indexable, and linked from the shell.
 func TestChangelogIsPublicAndIndexable(t *testing.T) {
-	s := changelogServer(t)
+	s, _ := changelogServer(t)
 	_, _, body := serve(t, s, "GET", "/changelog", nil, nil)
 
 	assert.Contains(t, body, `<link rel="canonical" href="http://localhost:18080/changelog"`)
@@ -147,26 +156,30 @@ func TestChangelogIsPublicAndIndexable(t *testing.T) {
 }
 
 func TestSitemapIncludesChangelogWithLastmod(t *testing.T) {
-	s := changelogServer(t)
+	s, releases := changelogServer(t)
 	_, _, body := serve(t, s, "GET", "/sitemap.xml", nil, nil)
 
-	latest := s.changelog.Latest()
-	require.NotNil(t, latest)
+	require.NotEmpty(t, releases)
 	assert.Contains(t, body,
-		"<loc>http://localhost:18080/changelog</loc><lastmod>"+latest.Date.UTC().Format("2006-01-02")+"</lastmod>",
+		"<loc>http://localhost:18080/changelog</loc><lastmod>"+releases[0].Date.UTC().Format("2006-01-02")+"</lastmod>",
 		"the changelog is the one marketing page with a real modification date")
 }
 
-// A server wired without a changelog must render an empty page, not panic
-// into the 500 handler — the collection is optional, like storage and flags.
-func TestChangelogAbsentCollectionDoesNotPanic(t *testing.T) {
-	s := integrationServer(t, nil) // Deps.Changelog left nil
+// An empty collection must render an empty page, not an error page: a fresh
+// database that has not been seeded is a legitimate state.
+func TestChangelogEmptyTableRendersEmptyPage(t *testing.T) {
+	s := integrationServer(t, nil)
+	_, err := s.db.Exec(t.Context(), "DELETE FROM content_entries WHERE kind = 'release'")
+	require.NoError(t, err)
+	s.cms.Invalidate()
 
 	code, _, body := serve(t, s, "GET", "/changelog", nil, nil)
 	assert.Equal(t, http.StatusOK, code)
 	assert.NotContains(t, body, "Something went wrong")
 
-	code, hdr, _ := serve(t, s, "GET", "/sitemap.xml", nil, nil)
+	code, hdr, sitemap := serve(t, s, "GET", "/sitemap.xml", nil, nil)
 	assert.Equal(t, http.StatusOK, code)
 	assert.Contains(t, hdr.Get("Content-Type"), "application/xml")
+	assert.Contains(t, sitemap, "<loc>http://localhost:18080/changelog</loc></url>",
+		"a collection with no entries still has an index page")
 }

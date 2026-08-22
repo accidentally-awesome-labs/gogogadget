@@ -32,6 +32,9 @@ const authedPages: Array<[string, string, 'pro' | 'admin']> = [
   ['admin', '/admin', 'admin'],
   ['admin-announcements', '/admin/announcements', 'admin'],
   ['admin-audit', '/admin/audit', 'admin'],
+  // The content editor (/admin/content/{id}) is deliberately absent: its
+  // live-preview pane and revision timestamps are not stable pixels.
+  ['admin-content', '/admin/content', 'admin'],
   // /admin/jobs is deliberately absent: the queue mutates between scrapes
   // (workers claim/complete rows), so its pixels are not a stable baseline.
   // a11y still covers the page.

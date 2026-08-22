@@ -216,6 +216,55 @@ The Clerk webhook then only needs `user.*` events.
 3. Template in `internal/web/templates/admin.templ` plus a nav entry there.
 4. Test the negative case: non-admin → 403 (`internal/web/admin_test.go`).
 
+## Add a content type
+
+Blog posts and changelog releases are two registered content types; a third is
+one Go value. **No migration, no new table, no new handler, no new template**
+— the admin list, the editor, validation, revisions, publishing, the cache,
+the public index and detail routes, and sitemap and RSS inclusion are all
+driven off the declaration.
+
+1. **Declare it** — append a `content.Type` to `content.DefaultTypes()` in
+   `internal/content/types.go`, or to `web.Deps.ContentTypes` in
+   `cmd/server/main.go` when the type belongs to your app rather than the
+   boilerplate:
+
+   ```go
+   {
+   	Kind: "guide", LabelKey: "content.type.guide", PluralKey: "content.type.guides",
+   	Path: "/guides", Mode: content.ModePages, Slug: content.SlugFromTitle, Sitemap: true,
+   	Fields: []content.Field{{Key: "level", LabelKey: "content.field.level",
+   		Kind: content.FieldSelect, Required: true, Options: []string{"intro", "advanced"}}},
+   }
+   ```
+
+2. **Translate it** — add `LabelKey`, `PluralKey`, every `Field.LabelKey`, and
+   for a `FieldSelect` each `LabelKey + "_" + option`, to **both**
+   `internal/i18n/catalog_en.go` and `catalog_es.go`. Registry keys are read
+   from Go values, so the template scanner cannot see them; a test over
+   `content.DefaultTypes()` fails the build when a catalog is missing one.
+3. **Restart.** `/admin/content` grows a Guides filter and a New button,
+   `/admin/content/new?kind=guide` renders the `level` select and validates
+   against its options, and publishing an entry puts it on `/guides` and
+   `/guides/{slug}` through the generic templates — canonical and `hreflang`
+   tags included, slug in `sitemap.xml`, absent from `/rss.xml` because the
+   type does not set `Feed`.
+
+Bespoke public markup is the one optional step: add an entry to
+`contentViews()` in `internal/web/handlers_content.go`, which is exactly what
+`post` and `release` do to keep their existing pages.
+
+`Path: ""` is a mode of its own. The type gets full admin CRUD, revisions, and
+programmatic reads with **no public route at all** — that is how in-app copy,
+help snippets, and legal blurbs are managed: an operator edits them at
+`/admin/content` and any handler or template reads them by slug.
+
+One limit, worth knowing before you design a type: type-specific fields live
+in the **unindexed** `meta` JSONB. A type that must FILTER or SORT by one of
+its fields has outgrown `meta` and should own a real column or a side table —
+do that rather than adding a JSONB index nobody profiled. See
+[Content](/docs/content).
+
 ## Add a docs page
 
 1. Create `content/docs/<slug>.md` with frontmatter `title`, `description`,

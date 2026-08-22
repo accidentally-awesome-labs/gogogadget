@@ -6,6 +6,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/api"
+	"github.com/gogogadget/gogogadget/internal/content"
 )
 
 func (s *Server) routes() {
@@ -26,10 +27,18 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /terms", s.handleTerms)
 	s.mux.HandleFunc("GET /privacy", s.handlePrivacy)
 
-	// Content: blog, feed, SEO.
-	s.mux.HandleFunc("GET /blog", s.handleBlogIndex)
-	s.mux.HandleFunc("GET /blog/{slug}", s.handleBlogPost)
-	s.mux.HandleFunc("GET /changelog", s.handleChangelog)
+	// Content: one index (and, for paged types, one detail) route per
+	// registered content type. Registered before the /{rest...} catch-all.
+	for _, t := range s.types.All() {
+		if t.Path == "" {
+			continue // admin-managed, read programmatically
+		}
+		s.mux.HandleFunc("GET "+t.Path, s.handleContentIndex(t))
+		if t.Mode == content.ModePages {
+			s.mux.HandleFunc("GET "+t.Path+"/{slug}", s.handleContentDetail(t))
+		}
+	}
+	s.mux.HandleFunc("GET /media/{id}/{filename}", s.handleMedia)
 	s.mux.HandleFunc("GET /rss.xml", s.handleRSS)
 	s.mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
 	s.mux.HandleFunc("GET /robots.txt", s.handleRobots)
@@ -136,6 +145,24 @@ func (s *Server) routes() {
 	adminMux.HandleFunc("POST /admin/announcements/{id}/activate", s.handleAdminAnnouncementActivate)
 	adminMux.HandleFunc("POST /admin/announcements/{id}/deactivate", s.handleAdminAnnouncementDeactivate)
 	adminMux.HandleFunc("POST /admin/announcements/{id}/delete", s.handleAdminAnnouncementDelete)
+	// Content CMS: kind is a QUERY parameter resolved through the registry,
+	// never a path segment — that is what lets a newly registered type arrive
+	// with zero routing changes. Reads are GET and mutations POST, so
+	// requireAdminWrite gates support by method with no per-route wiring.
+	adminMux.HandleFunc("GET /admin/content", s.handleAdminContent)
+	adminMux.HandleFunc("GET /admin/content/new", s.handleAdminContentNew)
+	adminMux.HandleFunc("POST /admin/content", s.handleAdminContentCreate)
+	adminMux.HandleFunc("POST /admin/content/preview", s.handleAdminContentPreview)
+	adminMux.HandleFunc("GET /admin/content/{id}", s.handleAdminContentEdit)
+	adminMux.HandleFunc("POST /admin/content/{id}", s.handleAdminContentUpdate)
+	adminMux.HandleFunc("GET /admin/content/{id}/preview", s.handleAdminContentPreviewPage)
+	adminMux.HandleFunc("POST /admin/content/{id}/publish", s.handleAdminContentPublish)
+	adminMux.HandleFunc("POST /admin/content/{id}/unpublish", s.handleAdminContentUnpublish)
+	adminMux.HandleFunc("POST /admin/content/{id}/delete", s.handleAdminContentDelete)
+	adminMux.HandleFunc("POST /admin/content/{id}/revisions/{rev}/restore", s.handleAdminContentRestore)
+	adminMux.HandleFunc("GET /admin/media", s.handleAdminMedia)
+	adminMux.HandleFunc("POST /admin/media", s.handleAdminMediaUpload)
+	adminMux.HandleFunc("POST /admin/media/{id}/delete", s.handleAdminMediaDelete)
 	s.mux.Handle("/admin", s.adminChain(adminMux))
 	s.mux.Handle("/admin/", s.adminChain(adminMux))
 

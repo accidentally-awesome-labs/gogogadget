@@ -30,7 +30,7 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	return NewServer(Deps{
 		Config: cfg, Log: log, Version: "test",
-		Blog: &content.Blog{}, Docs: &content.Docs{},
+		Docs: &content.Docs{},
 	})
 }
 

@@ -10,8 +10,11 @@ import (
 	"os"
 	"strings"
 
+	contentfs "github.com/gogogadget/gogogadget/content"
 	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -64,6 +67,15 @@ func run() error {
 		return fmt.Errorf("seed %s: %w", seedFile, err)
 	}
 	fmt.Println("seeded", seedFile)
+
+	// The shipped markdown is the content corpus: import it into
+	// content_entries so a fresh clone has a populated blog and changelog.
+	// Idempotent by (kind, slug) — re-seeding never clobbers an edited row.
+	posts, releases, err := content.Import(ctx, sqlc.New(pool), contentfs.FS)
+	if err != nil {
+		return fmt.Errorf("import content: %w", err)
+	}
+	fmt.Printf("imported %d posts, %d releases\n", posts, releases)
 	return nil
 }
 

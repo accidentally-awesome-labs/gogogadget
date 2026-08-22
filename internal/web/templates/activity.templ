@@ -3,19 +3,31 @@ package templates
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
+// pageURL appends the page parameter with the right separator: callers pass a
+// base that already carries their filters ("/admin/content?kind=post"), and
+// hardcoding "?" would bury those in the value of the last one.
+func pageURL(baseURL string, page int) string {
+	sep := "?"
+	if strings.Contains(baseURL, "?") {
+		sep = "&"
+	}
+	return fmt.Sprintf("%s%spage=%d", baseURL, sep, page)
+}
+
 // Pagination renders hx-get pager links targeting #table-container.
 templ Pagination(page, totalPages int, baseURL string) {
 	if totalPages > 1 {
 		<nav class="flex items-center justify-between mt-4 text-sm" aria-label={ i18n.T(ctx, "activity.pagination_aria") }>
 			if page > 1 {
-				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page-1)) }
-					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page-1) }
+				<a href={ templ.SafeURL(pageURL(baseURL, page-1)) }
+					hx-get={ pageURL(baseURL, page-1) }
 					hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
 					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_prev") }</a>
 			} else {
@@ -23,8 +35,8 @@ templ Pagination(page, totalPages int, baseURL string) {
 			}
 			<span class="text-fg-muted">{ i18n.T(ctx, "activity.pagination_page_of", page, totalPages) }</span>
 			if page < totalPages {
-				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, page+1)) }
-					hx-get={ fmt.Sprintf("%s?page=%d", baseURL, page+1) }
+				<a href={ templ.SafeURL(pageURL(baseURL, page+1)) }
+					hx-get={ pageURL(baseURL, page+1) }
 					hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
 					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_next") }</a>
 			} else {

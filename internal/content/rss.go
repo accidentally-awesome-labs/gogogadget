@@ -7,26 +7,33 @@ import (
 	"time"
 )
 
-// RSS renders a hand-rolled RSS 2.0 feed (no feed dependency).
-func RSS(appURL string, posts []Post) (string, error) {
+// FeedItem is one entry in the RSS channel, already resolved to an absolute
+// link. Any content type with Feed: true contributes items.
+type FeedItem struct {
+	Title       string
+	Link        string // absolute
+	Description string
+	Date        time.Time
+}
+
+// RSS renders a hand-rolled RSS 2.0 feed (no feed dependency). The caller
+// passes only items that are live: there is no draft filter here.
+func RSS(appURL, channelTitle, channelDesc, channelLink string, items []FeedItem) (string, error) {
 	var b strings.Builder
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n")
 	b.WriteString(`<rss version="2.0"><channel>`)
-	b.WriteString("<title>GoGoGadget Blog</title>")
-	fmt.Fprintf(&b, "<link>%s/blog</link>", xmlEscape(appURL))
-	b.WriteString("<description>Product and engineering updates</description>")
-	for _, p := range posts {
-		if p.Draft {
-			continue
-		}
+	fmt.Fprintf(&b, "<title>%s</title>", xmlEscape(channelTitle))
+	fmt.Fprintf(&b, "<link>%s</link>", xmlEscape(channelLink))
+	fmt.Fprintf(&b, "<description>%s</description>", xmlEscape(channelDesc))
+	for _, it := range items {
 		b.WriteString("<item>")
-		fmt.Fprintf(&b, "<title>%s</title>", xmlEscape(p.Title))
-		fmt.Fprintf(&b, "<link>%s</link>", xmlEscape(appURL+"/blog/"+p.Slug))
-		fmt.Fprintf(&b, "<guid>%s</guid>", xmlEscape(appURL+"/blog/"+p.Slug))
-		if p.Description != "" {
-			fmt.Fprintf(&b, "<description>%s</description>", xmlEscape(p.Description))
+		fmt.Fprintf(&b, "<title>%s</title>", xmlEscape(it.Title))
+		fmt.Fprintf(&b, "<link>%s</link>", xmlEscape(it.Link))
+		fmt.Fprintf(&b, "<guid>%s</guid>", xmlEscape(it.Link))
+		if it.Description != "" {
+			fmt.Fprintf(&b, "<description>%s</description>", xmlEscape(it.Description))
 		}
-		fmt.Fprintf(&b, "<pubDate>%s</pubDate>", p.Date.Format(time.RFC1123Z))
+		fmt.Fprintf(&b, "<pubDate>%s</pubDate>", it.Date.Format(time.RFC1123Z))
 		b.WriteString("</item>")
 	}
 	b.WriteString("</channel></rss>")

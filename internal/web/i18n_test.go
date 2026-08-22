@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -153,6 +154,33 @@ func TestTemplateKeysExistInCatalogs(t *testing.T) {
 	for k := range used {
 		assert.True(t, en[k], "key %s used in templates but missing from en catalog", k)
 		assert.True(t, es[k], "key %s used in templates but missing from es catalog", k)
+	}
+}
+
+// Content-type labels reach i18n.T through registry VALUES, which the
+// template scanner's literal regexp above cannot see. This is the guard that
+// replaces it — and the one a developer trips when they declare a new type
+// and forget to translate it.
+func TestContentTypeKeysExistInCatalogs(t *testing.T) {
+	en := catalogKeys(t, language.English)
+	es := catalogKeys(t, language.Spanish)
+
+	check := func(key string) {
+		t.Helper()
+		assert.True(t, en[key], "key %s is referenced by a content type but missing from the en catalog", key)
+		assert.True(t, es[key], "key %s is referenced by a content type but missing from the es catalog", key)
+	}
+	types := content.DefaultTypes()
+	require.NotEmpty(t, types)
+	for _, ct := range types {
+		check(ct.LabelKey)
+		check(ct.PluralKey)
+		for _, f := range ct.Fields {
+			check(f.LabelKey)
+			for _, o := range f.Options {
+				check(f.LabelKey + "_" + o)
+			}
+		}
 	}
 }
 

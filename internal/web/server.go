@@ -36,9 +36,9 @@ type Server struct {
 	annExpires    time.Time
 	q             *sqlc.Queries
 	version       string
-	blog          *content.Blog
-	docs          *content.Docs
-	changelog     *content.Changelog
+	docs          *content.Docs   // embedded markdown; versions with the binary
+	types         *content.Registry
+	cms           *content.CMS
 	verifier      identity.Verifier
 	fetcher       identity.UserFetcher
 	deleter       identity.Deleter // nil → local-only account deletion
@@ -63,9 +63,11 @@ type Deps struct {
 	DB        *pgxpool.Pool
 	Queries   *sqlc.Queries
 	Version   string
-	Blog      *content.Blog
 	Docs      *content.Docs
-	Changelog *content.Changelog
+	// ContentTypes declares every content collection. nil → DefaultTypes()
+	// (blog posts and changelog releases). Appending one Type is all it takes
+	// to add a collection: no migration, no table, no handler, no template.
+	ContentTypes []content.Type
 
 	Verifier        identity.Verifier
 	Fetcher         identity.UserFetcher
@@ -85,9 +87,7 @@ func NewServer(d Deps) *Server {
 		db:            d.DB,
 		q:             d.Queries,
 		version:       d.Version,
-		blog:          d.Blog,
 		docs:          d.Docs,
-		changelog:     d.Changelog,
 		verifier:      d.Verifier,
 		fetcher:       d.Fetcher,
 		deleter:       d.IdentityDeleter,
@@ -108,17 +108,29 @@ func NewServer(d Deps) *Server {
 	if s.reporter == nil {
 		s.reporter = observability.NoopReporter{}
 	}
-	if s.changelog == nil {
-		// An empty collection, not nil: /changelog and the sitemap read it on
-		// every request, and a server wired without one should render an
-		// empty page rather than panic into the 500 handler.
-		s.changelog = &content.Changelog{}
+	reg, err := content.NewRegistry(contentTypesOf(d))
+	if err != nil {
+		// cmd/server validates first and exits, so this only ever protects a
+		// test server: refuse the bad declaration, keep the app bootable.
+		s.log.Error("content types rejected, using defaults", "error", err)
+		reg, _ = content.NewRegistry(content.DefaultTypes())
 	}
+	s.types = reg
+	s.cms = content.NewCMS(s.q, s.types)
 	if d.Analytics != nil {
 		s.analytics = d.Analytics
 	}
 	s.routes()
 	return s
+}
+
+// contentTypesOf returns the declared collections, defaulting to the built-in
+// blog and changelog.
+func contentTypesOf(d Deps) []content.Type {
+	if d.ContentTypes == nil {
+		return content.DefaultTypes()
+	}
+	return d.ContentTypes
 }
 
 // currentAnnouncement returns the active platform announcement, cached for

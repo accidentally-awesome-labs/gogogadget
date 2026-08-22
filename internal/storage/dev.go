@@ -67,6 +67,29 @@ func (s *DevStore) Serve(_ context.Context, w http.ResponseWriter, key, filename
 	return err
 }
 
+// ServeInline streams the object for in-page rendering. The disposition is
+// inline and carries no filename: this path is reachable only for content
+// media whose type was sniffed from the bytes at upload.
+func (s *DevStore) ServeInline(_ context.Context, w http.ResponseWriter, key, contentType string) error {
+	p, err := s.safePath(key)
+	if err != nil {
+		return err
+	}
+	f, err := os.Open(p)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Disposition", "inline")
+	w.WriteHeader(http.StatusOK)
+	_, err = io.Copy(w, f)
+	return err
+}
+
 func (s *DevStore) Delete(_ context.Context, key string) error {
 	p, err := s.safePath(key)
 	if err != nil {

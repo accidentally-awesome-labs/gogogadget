@@ -64,17 +64,16 @@ func run() error {
 		return fmt.Errorf("migrate database: %w", err)
 	}
 
-	blog, err := content.LoadBlog(contentfs.FS, cfg.Production())
-	if err != nil {
-		return fmt.Errorf("load blog: %w", err)
-	}
 	docs, err := content.LoadDocs(contentfs.FS, cfg.Production())
 	if err != nil {
 		return fmt.Errorf("load docs: %w", err)
 	}
-	changelog, err := content.LoadChangelog(contentfs.FS)
-	if err != nil {
-		return fmt.Errorf("load changelog: %w", err)
+	// Content types are validated before anything else starts: a bad
+	// declaration is a wiring bug, and refusing to boot is how config
+	// validation already treats one.
+	contentTypes := content.DefaultTypes()
+	if _, err := content.NewRegistry(contentTypes); err != nil {
+		return fmt.Errorf("content types: %w", err)
 	}
 
 	// Identity: FakeVerifier powers zero-account dev/e2e; ClerkVerifier is the
@@ -154,7 +153,7 @@ func run() error {
 	q := sqlc.New(pool)
 	srv := web.NewServer(web.Deps{
 		Config: cfg, Log: log, DB: pool, Queries: q, Version: version,
-		Blog: blog, Docs: docs, Changelog: changelog,
+		Docs: docs, ContentTypes: contentTypes,
 		Verifier: verifier, Fetcher: fetcher, IdentityDeleter: deleter,
 		Billing: polarClient, Analytics: capturer,
 		Storage:  fileStore,

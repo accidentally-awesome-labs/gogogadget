@@ -240,6 +240,49 @@ document.addEventListener("alpine:init", function () {
     };
   });
 
+  // Copy a markdown snippet carried on the button itself. Per-button x-data
+  // so this.$el IS the button: the CSP build cannot read $el from an
+  // expression, and a table of rows cannot share one root.
+  Alpine.data("copyMarkdown", function () {
+    return {
+      copied: false,
+      copy: function () {
+        var self = this;
+        navigator.clipboard.writeText(this.$el.dataset.md || "").then(function () {
+          self.copied = true;
+          setTimeout(function () { self.copied = false; }, 2000);
+        });
+      },
+    };
+  });
+
+  // Content editor: derive the slug from the title until the slug is touched.
+  // Locked from the start when editing an existing entry — changing a
+  // published URL should be a deliberate act, never a side effect of fixing
+  // a typo in the headline.
+  Alpine.data("slugify", function () {
+    return {
+      locked: false,
+      init: function () {
+        var slug = this.$refs.slug;
+        this.locked = !!slug && (slug.dataset.slugLocked === "true" || slug.value !== "");
+      },
+      onTitle: function (event) {
+        if (this.locked) return;
+        var slug = this.$refs.slug;
+        if (!slug) return;
+        slug.value = event.target.value
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 200);
+      },
+      onSlug: function () {
+        this.locked = true;
+      },
+    };
+  });
+
   // Dismissible dashboard checklist (persisted per browser).
   Alpine.data("checklist", function () {
     return {

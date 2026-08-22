@@ -74,6 +74,13 @@ func (s *R2Store) Serve(ctx context.Context, w http.ResponseWriter, key, filenam
 	return nil
 }
 
+// ServeInline is identical to Serve for R2: the presigned GET streams from
+// the provider with no Content-Disposition, so the stored content type
+// governs and an image renders in the page.
+func (s *R2Store) ServeInline(ctx context.Context, w http.ResponseWriter, key, contentType string) error {
+	return s.Serve(ctx, w, key, "", contentType)
+}
+
 func (s *R2Store) Delete(ctx context.Context, key string) error {
 	_, err := s.client.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: &s.bucket, Key: &key})
 	return err

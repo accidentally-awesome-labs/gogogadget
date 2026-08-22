@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"encoding/xml"
 
-	"github.com/gogogadget/gogogadget/internal/content"
-	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"net/http"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/content"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -119,9 +122,14 @@ func TestHomeStructuredData(t *testing.T) {
 }
 
 func TestBlogPostStructuredData(t *testing.T) {
-	s := docsServer(t) // real blog + docs, not the empty fixtures
-	require.NotEmpty(t, s.blog.Posts)
-	post := s.blog.Posts[0]
+	s := integrationServer(t, nil)
+	seeded := seedEntries(t, s, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "seo-structured-data", Title: "Structured data",
+		Summary: "How the JSON-LD block is built.",
+		BodyMd:  "body", BodyHtml: "<p>body</p>", Meta: []byte(`{"author":"Ada"}`),
+		Status: "published", PublishedAt: publishedAt(time.Date(2026, 3, 4, 9, 0, 0, 0, time.UTC)),
+	})
+	post := seeded[0]
 
 	_, _, body := serve(t, s, "GET", "/blog/"+post.Slug, nil, nil)
 	m := jsonLDRe.FindStringSubmatch(body)
@@ -131,7 +139,7 @@ func TestBlogPostStructuredData(t *testing.T) {
 	require.NoError(t, json.Unmarshal([]byte(strings.TrimSpace(m[1])), &ld))
 	assert.Equal(t, "BlogPosting", ld["@type"])
 	assert.Equal(t, post.Title, ld["headline"])
-	assert.Equal(t, post.Date.UTC().Format("2006-01-02"), ld["datePublished"])
+	assert.Equal(t, "2026-03-04", ld["datePublished"])
 	assert.Equal(t, "http://localhost:18080/blog/"+post.Slug, ld["url"])
 	assert.NotEmpty(t, ld["author"], "Google requires an author on BlogPosting")
 	assert.NotEmpty(t, ld["publisher"])
@@ -154,6 +162,11 @@ func TestStructuredDataEscapesMarkup(t *testing.T) {
 
 func TestSitemapCarriesLastmodForDatedContent(t *testing.T) {
 	s := docsServer(t)
+	seedEntries(t, s, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "seo-sitemap-lastmod", Title: "Sitemap lastmod",
+		BodyMd: "b", BodyHtml: "<p>b</p>", Status: "published",
+		PublishedAt: publishedAt(time.Date(2026, 5, 6, 12, 0, 0, 0, time.UTC)),
+	})
 	code, hdr, body := serve(t, s, "GET", "/sitemap.xml", nil, nil)
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, hdr.Get("Content-Type"), "application/xml")
@@ -171,9 +184,8 @@ func TestSitemapCarriesLastmodForDatedContent(t *testing.T) {
 	for _, u := range doc.URLs {
 		byLoc[u.Loc] = u.LastMod
 	}
-	post := s.blog.Posts[0]
-	assert.Equal(t, post.Date.UTC().Format("2006-01-02"),
-		byLoc["http://localhost:18080/blog/"+post.Slug], "posts carry the date they actually have")
+	assert.Equal(t, "2026-05-06",
+		byLoc["http://localhost:18080/blog/seo-sitemap-lastmod"], "posts carry the date they actually have")
 	assert.Empty(t, byLoc["http://localhost:18080/pricing"],
 		"pages with no real date carry no lastmod — a fabricated one teaches crawlers to ignore the field")
 }

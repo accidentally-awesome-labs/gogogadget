@@ -29,7 +29,8 @@ func TestSupportReadsAdminButCannotWrite(t *testing.T) {
 	s := integrationServer(t, nil)
 	support := staffUser(t, s, "user_sup", "org_sup", identity.RoleSupport)
 
-	reads := []string{"/admin", "/admin/users", "/admin/orgs", "/admin/flags", "/admin/audit", "/admin/jobs", "/admin/announcements", "/admin/schedules"}
+	reads := []string{"/admin", "/admin/users", "/admin/orgs", "/admin/flags", "/admin/audit", "/admin/jobs",
+		"/admin/announcements", "/admin/schedules", "/admin/content", "/admin/content/new?kind=post", "/admin/media"}
 	for _, path := range reads {
 		code, _, _ := serve(t, s, "GET", path, nil, nil, support)
 		assert.Equal(t, http.StatusOK, code, "support must be able to read %s", path)
@@ -45,6 +46,10 @@ func TestSupportReadsAdminButCannotWrite(t *testing.T) {
 		"/admin/users/user_sup/disable",
 		"/admin/users/user_sup/impersonate",
 		"/admin/users/user_sup/role",
+		"/admin/content",
+		"/admin/content/1/publish",
+		"/admin/content/1/delete",
+		"/admin/media",
 	}
 	for _, path := range writes {
 		code, _, _ := postForm(t, s, path, url.Values{}, support)
@@ -91,6 +96,7 @@ func TestSupportUINeverOffersMutations(t *testing.T) {
 		"/admin/flags":         {"flag-create-form", "flag-toggle-", "flag-delete-"},
 		"/admin/schedules":     {"schedule-create-form", "schedule-toggle-", "schedule-delete-"},
 		"/admin/announcements": {"announcement-form", "announcement-delete-"},
+		"/admin/content":       {"content-new-", "content-delete-"},
 	}
 	for path, ids := range controls {
 		_, _, supportBody := serve(t, s, "GET", path, nil, nil, support)

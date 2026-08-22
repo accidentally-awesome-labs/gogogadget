@@ -29,7 +29,9 @@ for (const theme of ['light', 'dark'] as const) {
       ['/admin', 'admin'],
       ['/admin/announcements', 'admin'],
       ['/admin/audit', 'admin'],
+      ['/admin/content', 'admin'],
       ['/admin/jobs', 'admin'],
+      ['/admin/media', 'admin'],
       ['/admin/schedules', 'admin'],
     ];
     for (const [path, user] of authedPages) {

@@ -284,6 +284,114 @@ func TestRoundtripEveryTable(t *testing.T) {
 	n, err = q.DeleteOldIdempotencyKeys(ctx, pgtype.Timestamptz{Time: time.Now().Add(time.Hour), Valid: true})
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, n)
+
+	// content — the CMS tables. kind carries no CHECK on purpose: registering
+	// a new content type is a Go change, never a migration.
+	entry, err := q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "roundtrip", Locale: "", Title: "Roundtrip",
+		Summary: "s", BodyMd: "# hi", BodyHtml: "<h1>hi</h1>",
+		Meta: []byte(`{"author":"Ada"}`), Status: "draft",
+	})
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"author":"Ada"}`, string(entry.Meta), "meta round-trips through JSONB")
+
+	entry, err = q.UpdateEntry(ctx, sqlc.UpdateEntryParams{
+		ID: entry.ID, Title: "Roundtrip v2", Slug: entry.Slug, Locale: entry.Locale,
+		Summary: "s2", BodyMd: "# hi2", BodyHtml: "<h1>hi2</h1>", Meta: []byte(`{"author":"Grace"}`),
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "Roundtrip v2", entry.Title)
+
+	entry, err = q.SetEntryStatus(ctx, sqlc.SetEntryStatusParams{
+		ID: entry.ID, Status: "published",
+		PublishedAt: pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true},
+	})
+	require.NoError(t, err)
+
+	live := func(locale string) []sqlc.ContentEntry {
+		rows, err := q.ListLiveEntries(ctx, sqlc.ListLiveEntriesParams{Kind: "post", Locale: locale, Lim: 100})
+		require.NoError(t, err)
+		return rows
+	}
+	require.Len(t, live("en"), 1)
+
+	// A locale variant of the SAME slug replaces the all-languages row for
+	// readers in that language — one row per slug either way.
+	esVariant, err := q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "roundtrip", Locale: "es", Title: "Ida y vuelta",
+		BodyMd: "es", BodyHtml: "<p>es</p>", Meta: []byte("{}"), Status: "published",
+		PublishedAt: pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true},
+	})
+	require.NoError(t, err)
+	esRows := live("es")
+	require.Len(t, esRows, 1, "the variant replaces the shared row, it does not add to it")
+	assert.Equal(t, "Ida y vuelta", esRows[0].Title)
+	enRows := live("en")
+	require.Len(t, enRows, 1)
+	assert.Equal(t, "Roundtrip v2", enRows[0].Title)
+
+	// A past unpublish_at IS the expired state: no job retires an entry.
+	_, err = q.UpdateEntry(ctx, sqlc.UpdateEntryParams{
+		ID: esVariant.ID, Title: esVariant.Title, Slug: esVariant.Slug, Locale: esVariant.Locale,
+		Summary: "", BodyMd: esVariant.BodyMd, BodyHtml: esVariant.BodyHtml, Meta: esVariant.Meta,
+		PublishedAt: pgtype.Timestamptz{Time: time.Now().Add(-2 * time.Hour), Valid: true},
+		UnpublishAt: pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true},
+	})
+	require.NoError(t, err)
+	esRows = live("es")
+	require.Len(t, esRows, 1)
+	assert.Equal(t, "Roundtrip v2", esRows[0].Title, "an expired variant falls back to the shared row")
+
+	// (kind, slug, locale) is unique.
+	_, err = q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "roundtrip", Locale: "", Title: "Duplicate",
+		BodyMd: "x", BodyHtml: "<p>x</p>", Meta: []byte("{}"), Status: "draft",
+	})
+	require.Error(t, err, "a second entry with the same kind, slug and locale must be rejected")
+
+	// published without a date is meaningless: the CHECK refuses it.
+	_, err = q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "post", Slug: "no-date", Title: "No date",
+		BodyMd: "x", BodyHtml: "<p>x</p>", Meta: []byte("{}"), Status: "published",
+	})
+	require.Error(t, err)
+
+	// An unregistered kind is accepted by the SCHEMA: the Go registry is the
+	// validator, which is what makes a new type migration-free.
+	_, err = q.CreateEntry(ctx, sqlc.CreateEntryParams{
+		Kind: "anything", Slug: "free-form", Title: "Free form",
+		BodyMd: "x", BodyHtml: "<p>x</p>", Meta: []byte("{}"), Status: "draft",
+	})
+	require.NoError(t, err, "kind carries no CHECK constraint on purpose")
+
+	rev, err := q.InsertRevision(ctx, sqlc.InsertRevisionParams{
+		EntryID: entry.ID, Title: "Roundtrip v2", Summary: "s2", BodyMd: "# hi2",
+		Meta: []byte(`{"author":"Grace"}`), EditorID: "user_rt1",
+	})
+	require.NoError(t, err)
+	got, err := q.GetRevision(ctx, sqlc.GetRevisionParams{ID: rev.ID, EntryID: entry.ID})
+	require.NoError(t, err)
+	assert.Equal(t, "# hi2", got.BodyMd)
+	_, err = q.GetRevision(ctx, sqlc.GetRevisionParams{ID: rev.ID, EntryID: esVariant.ID})
+	require.ErrorIs(t, err, pgx.ErrNoRows, "a revision id from another entry must miss, not cross-load")
+
+	media, err := q.InsertMedia(ctx, sqlc.InsertMediaParams{
+		Filename: "diagram.png", ContentType: "image/png", SizeBytes: 1234,
+		StorageKey: "content/deadbeef.png", Alt: "A diagram", UploadedBy: "user_rt1",
+	})
+	require.NoError(t, err)
+	fetched, err := q.GetMedia(ctx, media.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "image/png", fetched.ContentType)
+	mediaCount, err := q.CountMedia(ctx)
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, mediaCount)
+	require.NoError(t, q.DeleteMedia(ctx, media.ID))
+
+	// Revisions cascade with their entry.
+	require.NoError(t, q.DeleteEntry(ctx, entry.ID))
+	_, err = q.GetRevision(ctx, sqlc.GetRevisionParams{ID: rev.ID, EntryID: entry.ID})
+	require.ErrorIs(t, err, pgx.ErrNoRows)
 }
 
 func TestProjectSearchFTS(t *testing.T) {

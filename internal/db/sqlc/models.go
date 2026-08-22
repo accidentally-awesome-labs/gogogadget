@@ -39,6 +39,47 @@ type AuditLog struct {
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
+type ContentEntry struct {
+	ID          int64              `json:"id"`
+	Kind        string             `json:"kind"`
+	Slug        string             `json:"slug"`
+	Locale      string             `json:"locale"`
+	Title       string             `json:"title"`
+	Summary     string             `json:"summary"`
+	BodyMd      string             `json:"body_md"`
+	BodyHtml    string             `json:"body_html"`
+	Meta        []byte             `json:"meta"`
+	Status      string             `json:"status"`
+	PublishedAt pgtype.Timestamptz `json:"published_at"`
+	UnpublishAt pgtype.Timestamptz `json:"unpublish_at"`
+	CreatedBy   string             `json:"created_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	SearchTsv   interface{}        `json:"search_tsv"`
+}
+
+type ContentMedium struct {
+	ID          int64              `json:"id"`
+	Filename    string             `json:"filename"`
+	ContentType string             `json:"content_type"`
+	SizeBytes   int64              `json:"size_bytes"`
+	StorageKey  string             `json:"storage_key"`
+	Alt         string             `json:"alt"`
+	UploadedBy  string             `json:"uploaded_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type ContentRevision struct {
+	ID        int64              `json:"id"`
+	EntryID   int64              `json:"entry_id"`
+	Title     string             `json:"title"`
+	Summary   string             `json:"summary"`
+	BodyMd    string             `json:"body_md"`
+	Meta      []byte             `json:"meta"`
+	EditorID  string             `json:"editor_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type FeatureFlag struct {
 	Key         string             `json:"key"`
 	Description string             `json:"description"`

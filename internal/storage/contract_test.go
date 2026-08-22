@@ -64,6 +64,26 @@ func runStoreContract(t *testing.T, factory func(t *testing.T) Store) {
 		}
 	})
 
+	t.Run("ServeInlineDeliveryContract", func(t *testing.T) {
+		s := factory(t)
+		png := []byte("\x89PNG\r\n\x1a\n fake pixels")
+		_, err := s.Put(ctx, "content/deadbeef.png", "image/png", bytes.NewReader(png))
+		require.NoError(t, err)
+
+		rec := httptest.NewRecorder()
+		require.NoError(t, s.ServeInline(ctx, rec, "content/deadbeef.png", "image/png"))
+		switch rec.Code {
+		case http.StatusOK:
+			// Direct delivery: content media renders IN the page.
+			assert.Contains(t, rec.Header().Get("Content-Disposition"), "inline")
+			assert.Equal(t, "image/png", rec.Header().Get("Content-Type"))
+		case http.StatusSeeOther:
+			assert.Contains(t, rec.Header().Get("Location"), "content/deadbeef.png")
+		default:
+			t.Fatalf("ServeInline: unexpected status %d", rec.Code)
+		}
+	})
+
 	t.Run("DeleteRemovesObject", func(t *testing.T) {
 		s := factory(t)
 		_, err := s.Put(ctx, "orgs/org_1/doomed.bin", "application/octet-stream", bytes.NewReader(payload))
