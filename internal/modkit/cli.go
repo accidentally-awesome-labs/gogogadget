@@ -324,19 +324,35 @@ func planEnvelope(plan Plan, exit int) Envelope {
 	}
 }
 
+// claimList collects a repeatable --claim PATH flag.
+type claimList []string
+
+func (c *claimList) String() string { return strings.Join(*c, ",") }
+
+func (c *claimList) Set(value string) error {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return fmt.Errorf("claim path must be non-empty")
+	}
+	*c = append(*c, trimmed)
+	return nil
+}
+
 func (c CLI) runInit(ctx context.Context, args []string) error {
 	set := c.flagSet("init")
 	ref := set.String("ref", "main", "registry ref to pin")
 	repository := set.String("repository", DefaultRegistryRepository, "registry repository")
 	adopt := set.Bool("adopt", false, "produce the initial lock from what is already installed")
 	offline := set.Bool("offline", false, "resolve only from a self-hosted or cached registry")
+	var claims claimList
+	set.Var(&claims, "claim", "adopt a pre-existing divergent file as a recorded modification (repeatable)")
 	asJSON := set.Bool("json", false, "emit the machine envelope")
 	positional, err := parseFlags(set, args)
 	if err != nil {
 		return usageError(err.Error())
 	}
 	if len(positional) != 0 {
-		return usageError("usage: ggg init [--ref REF] [--repository REPO] [--adopt] [--offline] [--json]")
+		return usageError("usage: ggg init [--ref REF] [--repository REPO] [--adopt] [--claim PATH]... [--offline] [--json]")
 	}
 
 	path := filepath.Join(c.root(), ProjectFileName)
@@ -361,9 +377,14 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 	}
 
 	if !*adopt {
+		if len(claims) > 0 {
+			return usageError("--claim only applies to `ggg init --adopt`")
+		}
 		return c.emit("init", *asJSON, Envelope{OK: true, Exit: exitOK})
 	}
-	return c.applyOperation(ctx, "init", *asJSON, Operation{Kind: OpSync, Offline: *offline}, false)
+	return c.applyOperation(ctx, "init", *asJSON, Operation{
+		Kind: OpSync, Offline: *offline, Claims: claims,
+	}, false)
 }
 
 // runGraphMutation drives add/remove/update. All three edit intent and converge
@@ -414,16 +435,21 @@ func (c CLI) runSync(ctx context.Context, args []string) error {
 	set := c.flagSet("sync")
 	check := set.Bool("check", false, "fail on drift without writing")
 	offline := set.Bool("offline", false, "resolve only from the local registry cache")
+	var claims claimList
+	set.Var(&claims, "claim", "adopt a pre-existing divergent file as a recorded modification (repeatable)")
 	asJSON := set.Bool("json", false, "emit the machine envelope")
 	positional, err := parseFlags(set, args)
 	if err != nil {
 		return usageError(err.Error())
 	}
 	if len(positional) != 0 {
-		return usageError("usage: ggg sync [--check] [--offline] [--json]")
+		return usageError("usage: ggg sync [--check] [--offline] [--claim PATH]... [--json]")
+	}
+	if *check && len(claims) > 0 {
+		return usageError("--claim mutates the lock and cannot be combined with --check")
 	}
 	return c.applyOperation(ctx, "sync", *asJSON, Operation{
-		Kind: OpSync, Offline: *offline, DryRun: *check,
+		Kind: OpSync, Offline: *offline, DryRun: *check, Claims: claims,
 	}, *check)
 }
 

@@ -484,13 +484,20 @@ func TestEnginePlanClassifiesDestinationStates(t *testing.T) {
 		}
 	})
 
-	t.Run("unowned target refusal", func(t *testing.T) {
+	t.Run("divergent pre-existing target blocks adoption", func(t *testing.T) {
 		root := writeTargetProject(t, "example.com/acme/app", project)
 		writeTestFile(t, root, "internal/modules/button.go", []byte("local"))
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: plannerRegistry(t)}}})
 		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
-		if err == nil || !strings.Contains(err.Error(), "unowned") {
-			t.Fatalf("Plan error = %v, want unowned refusal", err)
+		if err == nil {
+			t.Fatal("Plan overwrote a divergent pre-existing file")
+		}
+		// The refusal must name the remedy: an operator with no next step will
+		// reach for a force flag that deliberately does not exist.
+		for _, want := range []string{"adoption blocked", "internal/modules/button.go", "--claim"} {
+			if !strings.Contains(err.Error(), want) {
+				t.Fatalf("refusal %q does not mention %q", err, want)
+			}
 		}
 	})
 

@@ -147,6 +147,7 @@ func reconcilePlannedState(
 	payloads []plannedAuthoredPayload,
 	existing Lock,
 	hasLock bool,
+	claims map[string]struct{},
 ) (Lock, []Change, []Conflict, []StagedFile, []Diagnostic, error) {
 	// Generated outputs are tool-owned: authored module targets must never
 	// claim them, so a manifest that points at a registry-owned artifact is a
@@ -169,15 +170,46 @@ func reconcilePlannedState(
 			files[module.ID] = []LockedFile{}
 		}
 		for _, payload := range payloads {
+			upstream := digestBytes(payload.content)
+
+			// Adoption runs against a tree that already has files in it. A
+			// pre-existing file that diverges from its payload is unowned: the
+			// registry never produced those bytes. Overwriting it would destroy
+			// work that predates adoption, and recording it as clean would lie
+			// about what is installed, so a claim is required before the
+			// ownership classifier ever sees it.
+			_, localDigest, missing, stateErr := currentTargetState(root, payload.file.Target)
+			if stateErr != nil {
+				return Lock{}, nil, nil, nil, nil, stateErr
+			}
+			if !missing && localDigest != upstream {
+				if _, claimed := claims[payload.file.Target]; !claimed {
+					return Lock{}, nil, nil, nil, nil, fmt.Errorf(
+						"adoption blocked: %s already exists with different bytes than %s provides; "+
+							"re-run with --claim %s to adopt your version as a recorded modification, "+
+							"or delete the file to take the registry copy",
+						payload.file.Target, payload.module, payload.file.Target,
+					)
+				}
+				changes = append(changes, Change{
+					Path: payload.file.Target, Module: payload.module, Source: payload.file.Source,
+					Class: DestinationAuthored, Kind: ChangeUnchanged,
+				})
+				files[payload.module] = append(files[payload.module], LockedFile{
+					Path: payload.file.Target, Source: payload.file.Source,
+					BaseSHA256: upstream, LocalSHA256: localDigest, State: FileModified,
+				})
+				continue
+			}
+
 			change, err := classifyAuthoredTarget(root, payload.module, payload.file, payload.content, ownership)
 			if err != nil {
 				return Lock{}, nil, nil, nil, nil, err
 			}
 			changes = append(changes, change)
-			digest := digestBytes(payload.content)
 			files[payload.module] = append(files[payload.module], LockedFile{
 				Path: payload.file.Target, Source: payload.file.Source,
-				BaseSHA256: digest, LocalSHA256: digest, State: FileClean,
+				BaseSHA256: upstream, LocalSHA256: upstream, State: FileClean,
 			})
 		}
 		for module := range files {

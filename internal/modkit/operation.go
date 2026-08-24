@@ -19,4 +19,9 @@ type Operation struct {
 	DryRun      bool
 	Offline     bool
 	PurgeData   bool
+	// Claims are project paths the operator explicitly claims during adoption.
+	// A pre-existing file that diverges from its registry payload is unowned and
+	// blocks adoption; claiming it adopts the local bytes as a recorded
+	// modification instead of overwriting them or calling them pristine.
+	Claims []string
 }

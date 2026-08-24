@@ -206,8 +206,12 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
+	claims, err := normalizedClaims(op.Claims)
+	if err != nil {
+		return Plan{}, err
+	}
 	finalLock, changes, conflicts, staged, diagnostics, err := reconcilePlannedState(
-		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock,
+		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -296,4 +300,22 @@ func canonicalProjectRoot(root string) (string, error) {
 		return "", fmt.Errorf("project root is not a directory")
 	}
 	return canonical, nil
+}
+
+// normalizedClaims validates and de-duplicates the claimed paths. A claim names
+// a project path, so an unsafe or absolute path is a usage error rather than a
+// silently ignored flag.
+func normalizedClaims(claims []string) (map[string]struct{}, error) {
+	normalized := make(map[string]struct{}, len(claims))
+	for _, claim := range claims {
+		trimmed := strings.TrimSpace(claim)
+		if trimmed == "" {
+			return nil, fmt.Errorf("claim path must be non-empty")
+		}
+		if err := validateSafePath(trimmed); err != nil {
+			return nil, fmt.Errorf("claim path %q: %w", trimmed, err)
+		}
+		normalized[trimmed] = struct{}{}
+	}
+	return normalized, nil
 }

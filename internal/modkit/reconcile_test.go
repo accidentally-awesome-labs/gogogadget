@@ -631,3 +631,69 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 		t.Fatalf("ResolveConflict error = %v, want fresh payload mismatch", err)
 	}
 }
+
+// Adoption runs against a tree that already contains files. A pre-existing file
+// whose bytes differ from the registry payload is unowned: overwriting it would
+// destroy work that predates the registry, and recording it as clean would lie
+// about what is installed. It blocks adoption until the operator claims it.
+func TestAdoptionRefusesUnclaimedDivergentFile(t *testing.T) {
+	first, _ := removalRegistries(t)
+	source := refSource{snapshots: map[string]Snapshot{
+		"main":      {Commit: testCommitA, FS: first},
+		testCommitA: {Commit: testCommitA, FS: first},
+	}}
+	root := writeTargetProject(t, "example.com/acme/app", Project{
+		Schema:   1,
+		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
+		Modules:  []string{"page/optional"}, Exclude: []string{},
+	})
+	// The operator already had this file, with their own contents.
+	local := []byte("package optional\n\n// hand-written before adoption\nconst Version = 99\n")
+	writeTestFile(t, root, "internal/modules/optional.go", local)
+
+	engine := New(Options{Source: source})
+
+	_, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
+	if err == nil {
+		t.Fatal("Plan adopted a divergent pre-existing file without a claim")
+	}
+	for _, want := range []string{"internal/modules/optional.go", "--claim"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("refusal %q does not mention %q", err, want)
+		}
+	}
+
+	// Claiming it adopts the local bytes as a modification, never overwriting.
+	plan, err := engine.Plan(context.Background(), root, Operation{
+		Kind:   OpSync,
+		Claims: []string{"internal/modules/optional.go"},
+	})
+	if err != nil {
+		t.Fatalf("Plan(claimed): %v", err)
+	}
+	change := plannedChange(t, plan, "internal/modules/optional.go")
+	if change.Kind != ChangeUnchanged {
+		t.Fatalf("claimed file change = %q, want %q so local bytes survive", change.Kind, ChangeUnchanged)
+	}
+
+	var locked *LockedFile
+	for _, module := range plan.Lock.Modules {
+		for i := range module.Files {
+			if module.Files[i].Path == "internal/modules/optional.go" {
+				locked = &module.Files[i]
+			}
+		}
+	}
+	if locked == nil {
+		t.Fatal("claimed file is absent from the lock")
+	}
+	if locked.State != FileModified {
+		t.Fatalf("claimed file state = %q, want %q", locked.State, FileModified)
+	}
+	if locked.LocalSHA256 != digestBytes(local) {
+		t.Fatalf("local_sha256 = %q, want the digest of the operator's bytes", locked.LocalSHA256)
+	}
+	if locked.BaseSHA256 == locked.LocalSHA256 {
+		t.Fatal("base_sha256 equals local_sha256; the upstream digest was not recorded")
+	}
+}

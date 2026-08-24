@@ -366,3 +366,79 @@ func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
 		}
 	})
 }
+
+// Adoption of an existing product is: author the intent, then sync. A divergent
+// pre-existing file must refuse with exit 3 and name the remedy; --claim adopts
+// the operator's bytes untouched and records them as modified.
+func TestCLISyncClaimsDivergentFileDuringAdoption(t *testing.T) {
+	root, engine := cliProject(t)
+	intent, err := MarshalProject(Project{
+		Schema:   1,
+		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
+		Modules:  []string{"page/optional"}, Exclude: []string{},
+	})
+	if err != nil {
+		t.Fatalf("MarshalProject: %v", err)
+	}
+	writeTestFile(t, root, ProjectFileName, intent)
+
+	local := []byte("package optional\n\n// mine\nconst Version = 99\n")
+	writeTestFile(t, root, "internal/modules/optional.go", local)
+
+	cli := CLI{Out: &bytes.Buffer{}, Root: root, Engine: engine}
+	err = cli.Run(context.Background(), []string{"sync", "--offline"})
+	if err == nil {
+		t.Fatal("sync overwrote a divergent pre-existing file")
+	}
+	if got := exitOf(t, err); got != 3 {
+		t.Fatalf("unclaimed adoption exit = %d, want 3", got)
+	}
+
+	// --check must refuse to carry a mutating claim.
+	if err := cli.Run(context.Background(), []string{
+		"sync", "--check", "--offline", "--claim", "internal/modules/optional.go",
+	}); err == nil || exitOf(t, err) != 2 {
+		t.Fatalf("sync --check --claim error = %v, want usage failure", err)
+	}
+
+	if err := cli.Run(context.Background(), []string{
+		"sync", "--offline", "--claim", "internal/modules/optional.go",
+	}); err != nil {
+		t.Fatalf("sync --claim: %v", err)
+	}
+
+	after, err := os.ReadFile(filepath.Join(root, "internal", "modules", "optional.go"))
+	if err != nil {
+		t.Fatalf("read claimed file: %v", err)
+	}
+	if !bytes.Equal(after, local) {
+		t.Fatalf("claimed file was rewritten:\nwant %s\ngot  %s", local, after)
+	}
+
+	lockData, err := os.ReadFile(filepath.Join(root, LockFileName))
+	if err != nil {
+		t.Fatalf("read lock: %v", err)
+	}
+	lock, err := ParseLock(lockData)
+	if err != nil {
+		t.Fatalf("ParseLock: %v", err)
+	}
+	found := false
+	for _, module := range lock.Modules {
+		for _, file := range module.Files {
+			if file.Path != "internal/modules/optional.go" {
+				continue
+			}
+			found = true
+			if file.State != FileModified {
+				t.Fatalf("claimed file state = %q, want %q", file.State, FileModified)
+			}
+			if file.BaseSHA256 == file.LocalSHA256 {
+				t.Fatal("base_sha256 equals local_sha256; upstream digest was not recorded")
+			}
+		}
+	}
+	if !found {
+		t.Fatal("claimed file is absent from the lock")
+	}
+}
