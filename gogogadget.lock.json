@@ -1,26 +1,35 @@
 {
   "schema": 1,
-  "registry_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+  "registry_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
   "order": [
     "system/apphost",
     "system/config",
     "system/analytics",
     "system/billing",
     "system/database",
+    "system/announcements",
+    "system/i18n",
     "system/identity",
     "system/llm",
     "system/mail",
     "system/modkit",
     "system/observability",
+    "system/organizations",
+    "system/audit",
+    "system/impersonation",
+    "system/notifications",
+    "system/seed",
     "system/storage",
-    "system/testdb"
+    "system/testdb",
+    "system/usage",
+    "system/webhooks"
   ],
   "modules": [
     {
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -124,16 +133,91 @@
       "migrations": []
     },
     {
+      "id": "system/announcements",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/announcements",
+        "kind": "system",
+        "name": "announcements",
+        "revision": 1,
+        "contract": 1,
+        "title": "Product announcements",
+        "description": "Administrator-authored banners shown to signed-in users, cached one at a time and invalidated on every admin mutation.",
+        "requires": [
+          "system/database"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/announcements.sql",
+            "target": "internal/db/queries/announcements.sql",
+            "class": "query",
+            "sha256": "4f97cb345d3095a23933fbaa9594f7ba613a222feb0f7baf8b8008a4aba23c50",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "queries": [
+            "announcements"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0011_announcements",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0011_announcements.sql",
+            "sha256": "60e13a9b03a1581845f856adb771d96393ed25efefb7b4d44c9d27222eb84c23"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [
+          {
+            "table": "announcements",
+            "scope": "platform",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "retain"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/announcements.sql",
+          "source": "internal/db/queries/announcements.sql",
+          "base_sha256": "4f97cb345d3095a23933fbaa9594f7ba613a222feb0f7baf8b8008a4aba23c50",
+          "local_sha256": "4f97cb345d3095a23933fbaa9594f7ba613a222feb0f7baf8b8008a4aba23c50",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0011_announcements",
+          "number": 11,
+          "path": "internal/db/migrations/0011_announcements.sql",
+          "sha256": "60e13a9b03a1581845f856adb771d96393ed25efefb7b4d44c9d27222eb84c23"
+        }
+      ]
+    },
+    {
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [
         "system/analytics",
         "system/billing",
         "system/config",
         "system/database",
+        "system/i18n",
         "system/identity",
         "system/llm",
         "system/mail",
@@ -188,10 +272,99 @@
       "migrations": []
     },
     {
+      "id": "system/audit",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/audit",
+        "kind": "system",
+        "name": "audit",
+        "revision": 1,
+        "contract": 1,
+        "title": "Audit log",
+        "description": "Fire-and-forget audit trail. Errors are logged, never returned: an audit hiccup must not fail the caller.",
+        "requires": [
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/audit/audit.go",
+            "target": "internal/audit/audit.go",
+            "class": "go",
+            "sha256": "6058348c53afe64a6a19e00859fe801cfdd4cb49b98abba53d7a579730471894",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/db/queries/audit.sql",
+            "target": "internal/db/queries/audit.sql",
+            "class": "query",
+            "sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/audit"
+          ],
+          "queries": [
+            "audit"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [
+          {
+            "key": "AUDIT_RETENTION_DAYS",
+            "field": "AuditRetentionDays",
+            "description": "Audit janitor retention in days; 0 retains forever"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/audit"
+          ]
+        },
+        "data": [
+          {
+            "table": "audit_log",
+            "scope": "org",
+            "export": true,
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/audit/audit.go",
+          "source": "internal/audit/audit.go",
+          "base_sha256": "6058348c53afe64a6a19e00859fe801cfdd4cb49b98abba53d7a579730471894",
+          "local_sha256": "6058348c53afe64a6a19e00859fe801cfdd4cb49b98abba53d7a579730471894",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/audit.sql",
+          "source": "internal/db/queries/audit.sql",
+          "base_sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
+          "local_sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -389,7 +562,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -471,23 +644,6 @@
             "default": "http://localhost:8080"
           },
           {
-            "key": "AUDIT_RETENTION_DAYS",
-            "field": "AuditRetentionDays",
-            "description": "Audit janitor retention; 0 retains forever"
-          },
-          {
-            "key": "DATABASE_URL",
-            "field": "DatabaseURL",
-            "description": "Postgres DSN; required in production",
-            "production_required": true,
-            "secret": true
-          },
-          {
-            "key": "DEV_AUTH_BYPASS",
-            "field": "DevAuthBypass",
-            "description": "Synthetic e2e sessions; refused in production"
-          },
-          {
             "key": "LOG_LEVEL",
             "field": "LogLevel",
             "description": "debug | info | warn | error"
@@ -552,10 +708,18 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [
-        "system/testdb"
+        "system/announcements",
+        "system/audit",
+        "system/impersonation",
+        "system/notifications",
+        "system/organizations",
+        "system/seed",
+        "system/testdb",
+        "system/usage",
+        "system/webhooks"
       ],
       "manifest": {
         "id": "system/database",
@@ -633,7 +797,15 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "DATABASE_URL",
+            "field": "DatabaseURL",
+            "description": "Postgres DSN; required in production",
+            "production_required": true,
+            "secret": true
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -669,10 +841,126 @@
       "migrations": []
     },
     {
+      "id": "system/i18n",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/i18n",
+        "kind": "system",
+        "name": "i18n",
+        "revision": 1,
+        "contract": 1,
+        "title": "Localization",
+        "description": "Locale detection middleware, catalog lookup, and the English and Spanish catalogs. UI strings resolve through T(ctx, key).",
+        "requires": [
+          "system/apphost"
+        ],
+        "files": [
+          {
+            "source": "internal/i18n/catalog_en.go",
+            "target": "internal/i18n/catalog_en.go",
+            "class": "go",
+            "sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/i18n/catalog_es.go",
+            "target": "internal/i18n/catalog_es.go",
+            "class": "go",
+            "sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/i18n/i18n.go",
+            "target": "internal/i18n/i18n.go",
+            "class": "go",
+            "sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/i18n"
+          ],
+          "i18n": [
+            "en",
+            "es"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0002_users_locale",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0002_users_locale.sql",
+            "sha256": "8f6491a09e511c0a843066501877f5ba973e6de8c030980f8648f5b00a83369a"
+          },
+          {
+            "id": "0017_user_appearance",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0017_user_appearance.sql",
+            "sha256": "848ac56ad533e226f27a1a506bf9de5298b71d934b6c4e255a77d92f5e3b9531"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/i18n"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/i18n/catalog_en.go",
+          "source": "internal/i18n/catalog_en.go",
+          "base_sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
+          "local_sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
+          "state": "clean"
+        },
+        {
+          "path": "internal/i18n/catalog_es.go",
+          "source": "internal/i18n/catalog_es.go",
+          "base_sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
+          "local_sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
+          "state": "clean"
+        },
+        {
+          "path": "internal/i18n/i18n.go",
+          "source": "internal/i18n/i18n.go",
+          "base_sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
+          "local_sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0002_users_locale",
+          "number": 2,
+          "path": "internal/db/migrations/0002_users_locale.sql",
+          "sha256": "8f6491a09e511c0a843066501877f5ba973e6de8c030980f8648f5b00a83369a"
+        },
+        {
+          "id": "0017_user_appearance",
+          "number": 17,
+          "path": "internal/db/migrations/0017_user_appearance.sql",
+          "sha256": "848ac56ad533e226f27a1a506bf9de5298b71d934b6c4e255a77d92f5e3b9531"
+        }
+      ]
+    },
+    {
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -807,6 +1095,11 @@
             "description": "Clerk webhook signing secret",
             "production_required": true,
             "secret": true
+          },
+          {
+            "key": "DEV_AUTH_BYPASS",
+            "field": "DevAuthBypass",
+            "description": "Synthetic e2e sessions; refused in production"
           }
         ],
         "docs": [],
@@ -865,10 +1158,97 @@
       "migrations": []
     },
     {
+      "id": "system/impersonation",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/impersonation",
+        "kind": "system",
+        "name": "impersonation",
+        "revision": 1,
+        "contract": 1,
+        "title": "Support impersonation",
+        "description": "Audited, time-boxed administrator impersonation of a user, including the recorded reason.",
+        "requires": [
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/impersonation.sql",
+            "target": "internal/db/queries/impersonation.sql",
+            "class": "query",
+            "sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "queries": [
+            "impersonation"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0009_impersonation",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0009_impersonation.sql",
+            "sha256": "e79847e3da06cbe89fdde459c9b61675fdde0c27777c856dcdd214616af3623b"
+          },
+          {
+            "id": "0014_impersonation_reason",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0014_impersonation_reason.sql",
+            "sha256": "89286f5e88b1066e78f5e7641afd655fdb89ea6cabca525c700c7beb8c6a343f"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [
+          {
+            "table": "impersonation_sessions",
+            "scope": "user",
+            "export": false,
+            "account_delete": "cascade",
+            "organization_delete": "retain"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/impersonation.sql",
+          "source": "internal/db/queries/impersonation.sql",
+          "base_sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
+          "local_sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0009_impersonation",
+          "number": 9,
+          "path": "internal/db/migrations/0009_impersonation.sql",
+          "sha256": "e79847e3da06cbe89fdde459c9b61675fdde0c27777c856dcdd214616af3623b"
+        },
+        {
+          "id": "0014_impersonation_reason",
+          "number": 14,
+          "path": "internal/db/migrations/0014_impersonation_reason.sql",
+          "sha256": "89286f5e88b1066e78f5e7641afd655fdb89ea6cabca525c700c7beb8c6a343f"
+        }
+      ]
+    },
+    {
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -980,7 +1360,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1087,7 +1467,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1176,7 +1556,7 @@
             "source": "internal/modkit/migration_plan.go",
             "target": "internal/modkit/migration_plan.go",
             "class": "go",
-            "sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
+            "sha256": "eda9d58b46845ad032d6bc372a7659446b9067401c316219fa77882c777f4cb9",
             "rewrite_module": true,
             "contract": false
           },
@@ -1387,8 +1767,8 @@
         {
           "path": "internal/modkit/migration_plan.go",
           "source": "internal/modkit/migration_plan.go",
-          "base_sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
-          "local_sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
+          "base_sha256": "eda9d58b46845ad032d6bc372a7659446b9067401c316219fa77882c777f4cb9",
+          "local_sha256": "eda9d58b46845ad032d6bc372a7659446b9067401c316219fa77882c777f4cb9",
           "state": "clean"
         },
         {
@@ -1500,10 +1880,154 @@
       "migrations": []
     },
     {
+      "id": "system/notifications",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/notifications",
+        "kind": "system",
+        "name": "notifications",
+        "revision": 1,
+        "contract": 1,
+        "title": "In-app notifications",
+        "description": "Fire-and-forget in-app notifications and per-user delivery preferences, including the email digest cadence.",
+        "requires": [
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/notification_preferences.sql",
+            "target": "internal/db/queries/notification_preferences.sql",
+            "class": "query",
+            "sha256": "bfbad0f619496a9e1854571afb759ae7b731aa4a127ea3cae7a1593c32df33ad",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/notifications.sql",
+            "target": "internal/db/queries/notifications.sql",
+            "class": "query",
+            "sha256": "931af3de19675866b6e7bb816bfde48c72d9601897fb020e29c9040e48de3608",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/notify/notify.go",
+            "target": "internal/notify/notify.go",
+            "class": "go",
+            "sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/notify"
+          ],
+          "queries": [
+            "notification_preferences",
+            "notifications"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0005_notifications",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0005_notifications.sql",
+            "sha256": "78c18575bd4fb1bddc5b46f81bdc26f741df094609312d119f74c9ee89a643e0"
+          },
+          {
+            "id": "0012_notification_preferences",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0012_notification_preferences.sql",
+            "sha256": "6192ed2d1ad7e1c266b4076a3b226c407014e20f905816f4bc46e94d3603c6a9"
+          },
+          {
+            "id": "0016_email_digest",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0016_email_digest.sql",
+            "sha256": "835fa42a66956e1023e5699baae78326648b4995dd42840b8e7ebfd249f154ac"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/notify"
+          ]
+        },
+        "data": [
+          {
+            "table": "notification_preferences",
+            "scope": "user",
+            "export": true,
+            "account_delete": "cascade",
+            "organization_delete": "retain"
+          },
+          {
+            "table": "notifications",
+            "scope": "user",
+            "export": true,
+            "account_delete": "cascade",
+            "organization_delete": "cascade"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/notification_preferences.sql",
+          "source": "internal/db/queries/notification_preferences.sql",
+          "base_sha256": "bfbad0f619496a9e1854571afb759ae7b731aa4a127ea3cae7a1593c32df33ad",
+          "local_sha256": "bfbad0f619496a9e1854571afb759ae7b731aa4a127ea3cae7a1593c32df33ad",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/notifications.sql",
+          "source": "internal/db/queries/notifications.sql",
+          "base_sha256": "931af3de19675866b6e7bb816bfde48c72d9601897fb020e29c9040e48de3608",
+          "local_sha256": "931af3de19675866b6e7bb816bfde48c72d9601897fb020e29c9040e48de3608",
+          "state": "clean"
+        },
+        {
+          "path": "internal/notify/notify.go",
+          "source": "internal/notify/notify.go",
+          "base_sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
+          "local_sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0005_notifications",
+          "number": 5,
+          "path": "internal/db/migrations/0005_notifications.sql",
+          "sha256": "78c18575bd4fb1bddc5b46f81bdc26f741df094609312d119f74c9ee89a643e0"
+        },
+        {
+          "id": "0012_notification_preferences",
+          "number": 12,
+          "path": "internal/db/migrations/0012_notification_preferences.sql",
+          "sha256": "6192ed2d1ad7e1c266b4076a3b226c407014e20f905816f4bc46e94d3603c6a9"
+        },
+        {
+          "id": "0016_email_digest",
+          "number": 16,
+          "path": "internal/db/migrations/0016_email_digest.sql",
+          "sha256": "835fa42a66956e1023e5699baae78326648b4995dd42840b8e7ebfd249f154ac"
+        }
+      ]
+    },
+    {
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1616,10 +2140,230 @@
       "migrations": []
     },
     {
+      "id": "system/organizations",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [
+        "system/audit",
+        "system/impersonation",
+        "system/notifications",
+        "system/usage",
+        "system/webhooks"
+      ],
+      "manifest": {
+        "id": "system/organizations",
+        "kind": "system",
+        "name": "organizations",
+        "revision": 1,
+        "contract": 1,
+        "title": "Users, organizations, and membership",
+        "description": "Core tenancy: the users, organizations, and memberships tables, their queries, and the initial schema every other module builds on.",
+        "requires": [
+          "system/database"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/memberships.sql",
+            "target": "internal/db/queries/memberships.sql",
+            "class": "query",
+            "sha256": "f276bbe133d68732ccc861f82d4db136edd2588a839760be144ecb714beacd03",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/orgs.sql",
+            "target": "internal/db/queries/orgs.sql",
+            "class": "query",
+            "sha256": "f88b7aec7c74dec271de5fd8bc88dd53fcfa33c77093d7036862765a9bea6d79",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/users.sql",
+            "target": "internal/db/queries/users.sql",
+            "class": "query",
+            "sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "queries": [
+            "memberships",
+            "orgs",
+            "users"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0001_init",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0001_init.sql",
+            "sha256": "2f589cb3ed81a052b992af345e0a546706ae0844bf5bdbcf541ca317ce8c6c0e"
+          },
+          {
+            "id": "0018_admin_roles",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0018_admin_roles.sql",
+            "sha256": "f64ff818cd920be3497d8b613b946f9258320eda14c6bdd7d238defd356f999b"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [
+          {
+            "table": "memberships",
+            "scope": "org",
+            "export": true,
+            "account_delete": "cascade",
+            "organization_delete": "cascade"
+          },
+          {
+            "table": "organizations",
+            "scope": "org",
+            "export": true,
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          },
+          {
+            "table": "users",
+            "scope": "user",
+            "export": true,
+            "account_delete": "cascade",
+            "organization_delete": "retain"
+          }
+        ],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/memberships.sql",
+          "source": "internal/db/queries/memberships.sql",
+          "base_sha256": "f276bbe133d68732ccc861f82d4db136edd2588a839760be144ecb714beacd03",
+          "local_sha256": "f276bbe133d68732ccc861f82d4db136edd2588a839760be144ecb714beacd03",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/orgs.sql",
+          "source": "internal/db/queries/orgs.sql",
+          "base_sha256": "f88b7aec7c74dec271de5fd8bc88dd53fcfa33c77093d7036862765a9bea6d79",
+          "local_sha256": "f88b7aec7c74dec271de5fd8bc88dd53fcfa33c77093d7036862765a9bea6d79",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/users.sql",
+          "source": "internal/db/queries/users.sql",
+          "base_sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
+          "local_sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0001_init",
+          "number": 1,
+          "path": "internal/db/migrations/0001_init.sql",
+          "sha256": "2f589cb3ed81a052b992af345e0a546706ae0844bf5bdbcf541ca317ce8c6c0e"
+        },
+        {
+          "id": "0018_admin_roles",
+          "number": 18,
+          "path": "internal/db/migrations/0018_admin_roles.sql",
+          "sha256": "f64ff818cd920be3497d8b613b946f9258320eda14c6bdd7d238defd356f999b"
+        }
+      ]
+    },
+    {
+      "id": "system/seed",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/seed",
+        "kind": "system",
+        "name": "seed",
+        "revision": 1,
+        "contract": 1,
+        "title": "Fixture loader",
+        "description": "Loads a SQL fixture into the database, with an optional reset that drops and recreates the schema first.",
+        "requires": [
+          "system/database"
+        ],
+        "files": [
+          {
+            "source": "cmd/seed/main.go",
+            "target": "cmd/seed/main.go",
+            "class": "go",
+            "sha256": "951a7e7ad0266066199212565ef5fad7b92a986c150e104462890c9c1bfc5c15",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/db/testdata/seed_dev.sql",
+            "target": "internal/db/testdata/seed_dev.sql",
+            "class": "query",
+            "sha256": "51140ed0b063a58fe9dc4e3c4c145e228f3fc5dad6aaf5afd1e51e789a88be53",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/testdata/seed_e2e.sql",
+            "target": "internal/db/testdata/seed_e2e.sql",
+            "class": "query",
+            "sha256": "ad7aa8c0624226284aca009bafd9c2a2a35d33316a4b16c69a078223ae54bc50",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "cmd/seed"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "cmd/seed/main.go",
+          "source": "cmd/seed/main.go",
+          "base_sha256": "951a7e7ad0266066199212565ef5fad7b92a986c150e104462890c9c1bfc5c15",
+          "local_sha256": "951a7e7ad0266066199212565ef5fad7b92a986c150e104462890c9c1bfc5c15",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/testdata/seed_dev.sql",
+          "source": "internal/db/testdata/seed_dev.sql",
+          "base_sha256": "51140ed0b063a58fe9dc4e3c4c145e228f3fc5dad6aaf5afd1e51e789a88be53",
+          "local_sha256": "51140ed0b063a58fe9dc4e3c4c145e228f3fc5dad6aaf5afd1e51e789a88be53",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/testdata/seed_e2e.sql",
+          "source": "internal/db/testdata/seed_e2e.sql",
+          "base_sha256": "ad7aa8c0624226284aca009bafd9c2a2a35d33316a4b16c69a078223ae54bc50",
+          "local_sha256": "ad7aa8c0624226284aca009bafd9c2a2a35d33316a4b16c69a078223ae54bc50",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1771,7 +2515,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1822,6 +2566,252 @@
         }
       ],
       "migrations": []
+    },
+    {
+      "id": "system/usage",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/usage",
+        "kind": "system",
+        "name": "usage",
+        "revision": 1,
+        "contract": 1,
+        "title": "Usage metering",
+        "description": "Fire-and-forget usage records, flushed to the billing provider by a job.",
+        "requires": [
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/usage_events.sql",
+            "target": "internal/db/queries/usage_events.sql",
+            "class": "query",
+            "sha256": "0a939d710ea536d7ca723dc37102002051ab9d23461995acc51ff9e311c513a1",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/usage/usage.go",
+            "target": "internal/usage/usage.go",
+            "class": "go",
+            "sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/usage"
+          ],
+          "queries": [
+            "usage_events"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0007_usage_events",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0007_usage_events.sql",
+            "sha256": "a1cce2ad5e3c88ec2f0d72b2c7dcc9e9bb945a75a37bb3c17a0c839cc79ab7ce"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/usage"
+          ]
+        },
+        "data": [
+          {
+            "table": "usage_events",
+            "scope": "org",
+            "export": true,
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/usage_events.sql",
+          "source": "internal/db/queries/usage_events.sql",
+          "base_sha256": "0a939d710ea536d7ca723dc37102002051ab9d23461995acc51ff9e311c513a1",
+          "local_sha256": "0a939d710ea536d7ca723dc37102002051ab9d23461995acc51ff9e311c513a1",
+          "state": "clean"
+        },
+        {
+          "path": "internal/usage/usage.go",
+          "source": "internal/usage/usage.go",
+          "base_sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
+          "local_sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0007_usage_events",
+          "number": 7,
+          "path": "internal/db/migrations/0007_usage_events.sql",
+          "sha256": "a1cce2ad5e3c88ec2f0d72b2c7dcc9e9bb945a75a37bb3c17a0c839cc79ab7ce"
+        }
+      ]
+    },
+    {
+      "id": "system/webhooks",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/webhooks",
+        "kind": "system",
+        "name": "webhooks",
+        "revision": 1,
+        "contract": 1,
+        "title": "Outbound webhooks",
+        "description": "Customer-facing webhook endpoints, signed emission, and secret rotation. Delivery attempts run as jobs.",
+        "requires": [
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/webhook_deliveries.sql",
+            "target": "internal/db/queries/webhook_deliveries.sql",
+            "class": "query",
+            "sha256": "61758010bc052de797b0873b369cb290c059cd93963f8ef44bec85af319abf9c",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/webhook_endpoints.sql",
+            "target": "internal/db/queries/webhook_endpoints.sql",
+            "class": "query",
+            "sha256": "0f8f9e25f799d77e4cda3a3b5578d575bfc910f7973d3af002c4a40d02de1a57",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/webhook_events.sql",
+            "target": "internal/db/queries/webhook_events.sql",
+            "class": "query",
+            "sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/webhooks/webhooks.go",
+            "target": "internal/webhooks/webhooks.go",
+            "class": "go",
+            "sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/webhooks"
+          ],
+          "queries": [
+            "webhook_deliveries",
+            "webhook_endpoints",
+            "webhook_events"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0006_webhooks_out",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0006_webhooks_out.sql",
+            "sha256": "4b14202f8933b0280361ff184b83aeeb15725e237a126f2f6e9b8f7c2e7f8a8b"
+          },
+          {
+            "id": "0013_webhook_secret_rotation",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0013_webhook_secret_rotation.sql",
+            "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/webhooks"
+          ]
+        },
+        "data": [
+          {
+            "table": "webhook_deliveries",
+            "scope": "org",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          },
+          {
+            "table": "webhook_endpoints",
+            "scope": "org",
+            "export": true,
+            "secret_redaction_owner": "system/webhooks",
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/webhook_deliveries.sql",
+          "source": "internal/db/queries/webhook_deliveries.sql",
+          "base_sha256": "61758010bc052de797b0873b369cb290c059cd93963f8ef44bec85af319abf9c",
+          "local_sha256": "61758010bc052de797b0873b369cb290c059cd93963f8ef44bec85af319abf9c",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/webhook_endpoints.sql",
+          "source": "internal/db/queries/webhook_endpoints.sql",
+          "base_sha256": "0f8f9e25f799d77e4cda3a3b5578d575bfc910f7973d3af002c4a40d02de1a57",
+          "local_sha256": "0f8f9e25f799d77e4cda3a3b5578d575bfc910f7973d3af002c4a40d02de1a57",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/webhook_events.sql",
+          "source": "internal/db/queries/webhook_events.sql",
+          "base_sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
+          "local_sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
+          "state": "clean"
+        },
+        {
+          "path": "internal/webhooks/webhooks.go",
+          "source": "internal/webhooks/webhooks.go",
+          "base_sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
+          "local_sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0006_webhooks_out",
+          "number": 6,
+          "path": "internal/db/migrations/0006_webhooks_out.sql",
+          "sha256": "4b14202f8933b0280361ff184b83aeeb15725e237a126f2f6e9b8f7c2e7f8a8b"
+        },
+        {
+          "id": "0013_webhook_secret_rotation",
+          "number": 13,
+          "path": "internal/db/migrations/0013_webhook_secret_rotation.sql",
+          "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4"
+        }
+      ]
     }
   ]
 }

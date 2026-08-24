@@ -168,3 +168,64 @@ func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 		t.Fatalf("Plan error = %v, want refusal for tool-owned generated output", err)
 	}
 }
+
+// Adopting an existing product means adopting its migration history. A migration
+// whose bytes are already on disk must keep the number it shipped under: goose
+// records applied migrations by filename, so re-allocating a new number would
+// re-run schema changes that are already applied in every deployed database.
+func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
+	body := []byte("-- +goose Up\nSELECT 1;\n")
+	registry := fstest.MapFS{
+		"registry.json":              &fstest.MapFile{Data: []byte(`{"schema":1,"includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
+		"registry/elements.json":     &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"element","items":[]}`)},
+		"registry/components.json":   &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"component","items":[]}`)},
+		"registry/pages.json":        &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"page","items":[]}`)},
+		"registry/workflows.json":    &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"workflow","items":[]}`)},
+		"registry/profiles.json":     &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"profile","items":[]}`)},
+		"registry/systems.json":      &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"system","items":["registry/modules/system/legacy/module.json"]}`)},
+		"registry/modules/system/legacy/migrations/0007_legacy.sql": &fstest.MapFile{Data: body},
+		"registry/modules/system/legacy/module.json": &fstest.MapFile{Data: []byte(`{"schema":1,"module":{
+			"id":"system/legacy","kind":"system","name":"legacy","revision":1,"contract":1,
+			"title":"Legacy","description":"Pre-existing schema.","requires":[],"files":[],
+			"claims":{},"runtime":{},
+			"migrations":[{"id":"0007_legacy","kind":"immutable",
+			   "source":"registry/modules/system/legacy/migrations/0007_legacy.sql",
+			   "sha256":"` + sha256Hex(body) + `"}],
+			"environment":[],"docs":[],"tests":{},"data":[],"removal_policy":"retain-data"}}`)},
+	}
+
+	root := writeTargetProject(t, "example.com/acme/app", Project{
+		Schema:   1,
+		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
+		Modules:  []string{"system/legacy"}, Exclude: []string{},
+	})
+	// The migration already shipped as 0007 and is applied in production.
+	writeTestFile(t, root, "internal/db/migrations/0007_legacy.sql", body)
+
+	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
+	plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
+	if err != nil {
+		t.Fatalf("Plan: %v", err)
+	}
+
+	for _, change := range plan.Changes {
+		if change.Class == DestinationMigration && change.Path != "internal/db/migrations/0007_legacy.sql" {
+			t.Fatalf("adoption re-numbered an applied migration to %s", change.Path)
+		}
+	}
+	var locked *LockedMigration
+	for _, module := range plan.Lock.Modules {
+		for i := range module.Migrations {
+			locked = &module.Migrations[i]
+		}
+	}
+	if locked == nil {
+		t.Fatal("migration is absent from the lock")
+	}
+	if locked.Number != 7 {
+		t.Fatalf("adopted migration number = %d, want 7", locked.Number)
+	}
+	if locked.Path != "internal/db/migrations/0007_legacy.sql" {
+		t.Fatalf("adopted migration path = %q", locked.Path)
+	}
+}

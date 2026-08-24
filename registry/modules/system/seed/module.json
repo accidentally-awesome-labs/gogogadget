@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/seed",
+    "kind": "system",
+    "name": "seed",
+    "revision": 1,
+    "contract": 1,
+    "title": "Fixture loader",
+    "description": "Loads a SQL fixture into the database, with an optional reset that drops and recreates the schema first.",
+    "requires": [
+      "system/database"
+    ],
+    "files": [
+      {
+        "source": "cmd/seed/main.go",
+        "target": "cmd/seed/main.go",
+        "class": "go",
+        "sha256": "951a7e7ad0266066199212565ef5fad7b92a986c150e104462890c9c1bfc5c15",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/db/testdata/seed_dev.sql",
+        "target": "internal/db/testdata/seed_dev.sql",
+        "class": "query",
+        "sha256": "51140ed0b063a58fe9dc4e3c4c145e228f3fc5dad6aaf5afd1e51e789a88be53",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed_e2e.sql",
+        "target": "internal/db/testdata/seed_e2e.sql",
+        "class": "query",
+        "sha256": "ad7aa8c0624226284aca009bafd9c2a2a35d33316a4b16c69a078223ae54bc50",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "cmd/seed"
+      ]
+    },
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -70,23 +70,6 @@
         "default": "http://localhost:8080"
       },
       {
-        "key": "AUDIT_RETENTION_DAYS",
-        "field": "AuditRetentionDays",
-        "description": "Audit janitor retention; 0 retains forever"
-      },
-      {
-        "key": "DATABASE_URL",
-        "field": "DatabaseURL",
-        "description": "Postgres DSN; required in production",
-        "production_required": true,
-        "secret": true
-      },
-      {
-        "key": "DEV_AUTH_BYPASS",
-        "field": "DevAuthBypass",
-        "description": "Synthetic e2e sessions; refused in production"
-      },
-      {
         "key": "LOG_LEVEL",
         "field": "LogLevel",
         "description": "debug | info | warn | error"

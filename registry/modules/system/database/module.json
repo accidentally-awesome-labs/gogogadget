@@ -76,7 +76,15 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "DATABASE_URL",
+        "field": "DatabaseURL",
+        "description": "Postgres DSN; required in production",
+        "production_required": true,
+        "secret": true
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/notifications",
+    "kind": "system",
+    "name": "notifications",
+    "revision": 1,
+    "contract": 1,
+    "title": "In-app notifications",
+    "description": "Fire-and-forget in-app notifications and per-user delivery preferences, including the email digest cadence.",
+    "requires": [
+      "system/database",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/notification_preferences.sql",
+        "target": "internal/db/queries/notification_preferences.sql",
+        "class": "query",
+        "sha256": "bfbad0f619496a9e1854571afb759ae7b731aa4a127ea3cae7a1593c32df33ad",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/notifications.sql",
+        "target": "internal/db/queries/notifications.sql",
+        "class": "query",
+        "sha256": "931af3de19675866b6e7bb816bfde48c72d9601897fb020e29c9040e48de3608",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/notify/notify.go",
+        "target": "internal/notify/notify.go",
+        "class": "go",
+        "sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/notify"
+      ],
+      "queries": [
+        "notification_preferences",
+        "notifications"
+      ]
+    },
+    "runtime": {},
+    "migrations": [
+      {
+        "id": "0005_notifications",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0005_notifications.sql",
+        "sha256": "78c18575bd4fb1bddc5b46f81bdc26f741df094609312d119f74c9ee89a643e0"
+      },
+      {
+        "id": "0012_notification_preferences",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0012_notification_preferences.sql",
+        "sha256": "6192ed2d1ad7e1c266b4076a3b226c407014e20f905816f4bc46e94d3603c6a9"
+      },
+      {
+        "id": "0016_email_digest",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0016_email_digest.sql",
+        "sha256": "835fa42a66956e1023e5699baae78326648b4995dd42840b8e7ebfd249f154ac"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/notify"
+      ]
+    },
+    "data": [
+      {
+        "table": "notification_preferences",
+        "scope": "user",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "retain"
+      },
+      {
+        "table": "notifications",
+        "scope": "user",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}

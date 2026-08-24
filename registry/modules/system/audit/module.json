@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/audit",
+    "kind": "system",
+    "name": "audit",
+    "revision": 1,
+    "contract": 1,
+    "title": "Audit log",
+    "description": "Fire-and-forget audit trail. Errors are logged, never returned: an audit hiccup must not fail the caller.",
+    "requires": [
+      "system/database",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/audit/audit.go",
+        "target": "internal/audit/audit.go",
+        "class": "go",
+        "sha256": "6058348c53afe64a6a19e00859fe801cfdd4cb49b98abba53d7a579730471894",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/db/queries/audit.sql",
+        "target": "internal/db/queries/audit.sql",
+        "class": "query",
+        "sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/audit"
+      ],
+      "queries": [
+        "audit"
+      ]
+    },
+    "runtime": {},
+    "migrations": [],
+    "environment": [
+      {
+        "key": "AUDIT_RETENTION_DAYS",
+        "field": "AuditRetentionDays",
+        "description": "Audit janitor retention in days; 0 retains forever"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/audit"
+      ]
+    },
+    "data": [
+      {
+        "table": "audit_log",
+        "scope": "org",
+        "export": true,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}

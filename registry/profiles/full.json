@@ -10,17 +10,26 @@
     "description": "Every module the GoGoGadget catalog publishes. A project selects this and lists removable modules under exclude.",
     "members": [
       "system/analytics",
+      "system/announcements",
       "system/apphost",
+      "system/audit",
       "system/billing",
       "system/config",
       "system/database",
+      "system/i18n",
       "system/identity",
+      "system/impersonation",
       "system/llm",
       "system/mail",
       "system/modkit",
+      "system/notifications",
       "system/observability",
+      "system/organizations",
+      "system/seed",
       "system/storage",
-      "system/testdb"
+      "system/testdb",
+      "system/usage",
+      "system/webhooks"
     ]
   }
 }

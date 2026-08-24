@@ -86,7 +86,7 @@
         "source": "internal/modkit/migration_plan.go",
         "target": "internal/modkit/migration_plan.go",
         "class": "go",
-        "sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
+        "sha256": "eda9d58b46845ad032d6bc372a7659446b9067401c316219fa77882c777f4cb9",
         "rewrite_module": true,
         "contract": false
       },

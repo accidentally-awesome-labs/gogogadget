@@ -132,6 +132,11 @@
         "description": "Clerk webhook signing secret",
         "production_required": true,
         "secret": true
+      },
+      {
+        "key": "DEV_AUTH_BYPASS",
+        "field": "DevAuthBypass",
+        "description": "Synthetic e2e sessions; refused in production"
       }
     ],
     "docs": [],

@@ -2,6 +2,7 @@ package modkit
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -95,12 +96,51 @@ func planMigrations(ctx context.Context, root string, registryFS fs.FS, modules 
 		return payloads[i].migration.ID < payloads[j].migration.ID
 	})
 
+	adoptedMigrations, err := scanAdoptableMigrations(root)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	changes := make([]Change, 0, len(payloads))
 	for _, payload := range payloads {
 		if err := ctx.Err(); err != nil {
 			return nil, nil, err
 		}
 		mapping, exists := byID[payload.migration.ID]
+		if !exists {
+			// Adoption: the migration may already be on disk from before the
+			// registry existed. Goose records applied migrations by filename, so
+			// re-allocating a number would re-run schema changes that are already
+			// applied in every deployed database. Match by content digest, which
+			// is exact, and keep the number the migration shipped under.
+			if adopted, ok := adoptedMigrations[payload.migration.SHA256]; ok {
+				if len(adopted.ambiguousPaths) > 0 {
+					return nil, nil, fmt.Errorf(
+						"cannot adopt migration %q: %s have identical bytes, so the number it shipped under is ambiguous",
+						payload.migration.ID, strings.Join(adopted.ambiguousPaths, ", "))
+				}
+				if owner, collision := usedPaths[adopted.path]; collision {
+					return nil, nil, fmt.Errorf(
+						"adopted migration target %q collides with immutable mapping owned by %s", adopted.path, owner)
+				}
+				mappingValue := LockedMigration{
+					ID: payload.migration.ID, Number: adopted.number,
+					Path: adopted.path, SHA256: payload.migration.SHA256,
+				}
+				planned[payload.module] = append(planned[payload.module], mappingValue)
+				byID[payload.migration.ID] = existingMigration{module: payload.module, value: mappingValue}
+				usedPaths[adopted.path] = payload.module
+				change, err := classifyOwnedTarget(
+					root, adopted.path, payload.module, payload.migration.Source,
+					DestinationMigration, payload.content, false,
+				)
+				if err != nil {
+					return nil, nil, err
+				}
+				changes = append(changes, change)
+				continue
+			}
+		}
 		if exists {
 			if mapping.module != payload.module {
 				return nil, nil, fmt.Errorf("migration id %q is immutably owned by %s, not %s", payload.migration.ID, mapping.module, payload.module)
@@ -212,4 +252,70 @@ func isGeneratedOutput(path string) bool {
 		return true
 	}
 	return false
+}
+
+// adoptableMigration is one migration already present in the project tree,
+// keyed by content digest so adoption is exact rather than name-guessing.
+type adoptableMigration struct {
+	number int
+	path   string
+	// ambiguousPaths is non-empty when several on-disk migrations share these
+	// bytes, which makes the intended number unknowable.
+	ambiguousPaths []string
+}
+
+// scanAdoptableMigrations indexes the migrations already on disk by content
+// digest. Two files with identical bytes are refused rather than guessed at:
+// picking one would silently bind a module to the wrong number forever.
+func scanAdoptableMigrations(root string) (map[string]adoptableMigration, error) {
+	const directory = "internal/db/migrations"
+	entries, err := os.ReadDir(filepath.Join(root, filepath.FromSlash(directory)))
+	if errors.Is(err, fs.ErrNotExist) {
+		return map[string]adoptableMigration{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("scan adoptable migrations: %w", err)
+	}
+
+	adoptable := make(map[string]adoptableMigration, len(entries))
+	ambiguous := make(map[string][]string)
+	for _, entry := range entries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".sql" {
+			continue
+		}
+		name := entry.Name()
+		separator := strings.IndexByte(name, '_')
+		if separator <= 0 {
+			continue
+		}
+		number, convErr := strconv.Atoi(name[:separator])
+		if convErr != nil || number <= 0 {
+			continue
+		}
+		path := directory + "/" + name
+		content, readErr := os.ReadFile(filepath.Join(root, filepath.FromSlash(path)))
+		if readErr != nil {
+			return nil, fmt.Errorf("read adoptable migration %s: %w", path, readErr)
+		}
+		digest := digestBytes(content)
+		if previous, clash := adoptable[digest]; clash {
+			// Identical bytes under two numbers: which one a manifest means is
+			// unknowable, so neither is adoptable. This is only an error if a
+			// manifest actually resolves to this digest, so record it and refuse
+			// at the point of harm rather than failing every unrelated plan.
+			ambiguous[digest] = append(ambiguous[digest], previous.path, path)
+			delete(adoptable, digest)
+			continue
+		}
+		if _, known := ambiguous[digest]; known {
+			ambiguous[digest] = append(ambiguous[digest], path)
+			continue
+		}
+		adoptable[digest] = adoptableMigration{number: number, path: path}
+	}
+	for digest, paths := range ambiguous {
+		sort.Strings(paths)
+		adoptable[digest] = adoptableMigration{ambiguousPaths: paths}
+	}
+	return adoptable, nil
 }

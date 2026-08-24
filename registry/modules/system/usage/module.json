@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/usage",
+    "kind": "system",
+    "name": "usage",
+    "revision": 1,
+    "contract": 1,
+    "title": "Usage metering",
+    "description": "Fire-and-forget usage records, flushed to the billing provider by a job.",
+    "requires": [
+      "system/database",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/usage_events.sql",
+        "target": "internal/db/queries/usage_events.sql",
+        "class": "query",
+        "sha256": "0a939d710ea536d7ca723dc37102002051ab9d23461995acc51ff9e311c513a1",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/usage/usage.go",
+        "target": "internal/usage/usage.go",
+        "class": "go",
+        "sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/usage"
+      ],
+      "queries": [
+        "usage_events"
+      ]
+    },
+    "runtime": {},
+    "migrations": [
+      {
+        "id": "0007_usage_events",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0007_usage_events.sql",
+        "sha256": "a1cce2ad5e3c88ec2f0d72b2c7dcc9e9bb945a75a37bb3c17a0c839cc79ab7ce"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/usage"
+      ]
+    },
+    "data": [
+      {
+        "table": "usage_events",
+        "scope": "org",
+        "export": true,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}

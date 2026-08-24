@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/impersonation",
+    "kind": "system",
+    "name": "impersonation",
+    "revision": 1,
+    "contract": 1,
+    "title": "Support impersonation",
+    "description": "Audited, time-boxed administrator impersonation of a user, including the recorded reason.",
+    "requires": [
+      "system/database",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/impersonation.sql",
+        "target": "internal/db/queries/impersonation.sql",
+        "class": "query",
+        "sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "queries": [
+        "impersonation"
+      ]
+    },
+    "runtime": {},
+    "migrations": [
+      {
+        "id": "0009_impersonation",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0009_impersonation.sql",
+        "sha256": "e79847e3da06cbe89fdde459c9b61675fdde0c27777c856dcdd214616af3623b"
+      },
+      {
+        "id": "0014_impersonation_reason",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0014_impersonation_reason.sql",
+        "sha256": "89286f5e88b1066e78f5e7641afd655fdb89ea6cabca525c700c7beb8c6a343f"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [
+      {
+        "table": "impersonation_sessions",
+        "scope": "user",
+        "export": false,
+        "account_delete": "cascade",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}
