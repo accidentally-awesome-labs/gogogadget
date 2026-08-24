@@ -24,7 +24,7 @@
         "source": "internal/config/module.go",
         "target": "internal/config/module.go",
         "class": "go",
-        "sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+        "sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
         "rewrite_module": true,
         "contract": true
       }

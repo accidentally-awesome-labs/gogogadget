@@ -26,6 +26,14 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	// `make dev` is documented to work from a fresh clone with only a copied
+	// .env, so development fills the process environment from it before parsing.
+	// A host backed by a fixed map never reads the process environment, so this
+	// cannot leak into a test's view.
+	switch h.Env("APP_ENV") {
+	case "", "development":
+		loadDotEnv(".env") // a missing file is fine; the real environment wins
+	}
 	cfg, err := LoadFrom(h.Env)
 	if err != nil {
 		return nil, fmt.Errorf("config: %w", err)

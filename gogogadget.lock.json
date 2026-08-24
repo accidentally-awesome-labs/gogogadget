@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+  "registry_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
   "order": [
     "system/apphost",
     "system/config",
@@ -41,7 +41,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -150,7 +150,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -224,7 +224,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -458,7 +458,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -527,7 +527,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -616,7 +616,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -816,7 +816,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -855,7 +855,7 @@
             "source": "internal/config/module.go",
             "target": "internal/config/module.go",
             "class": "go",
-            "sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+            "sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
             "rewrite_module": true,
             "contract": true
           }
@@ -926,8 +926,8 @@
         {
           "path": "internal/config/module.go",
           "source": "internal/config/module.go",
-          "base_sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
-          "local_sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+          "base_sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
+          "local_sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
           "state": "clean"
         }
       ],
@@ -937,7 +937,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/content-assets",
@@ -1259,7 +1259,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -1898,7 +1898,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/announcements",
@@ -2040,7 +2040,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -2180,7 +2180,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -2298,7 +2298,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/security",
@@ -2502,7 +2502,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2589,7 +2589,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2746,7 +2746,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -2860,7 +2860,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -2969,7 +2969,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3029,7 +3029,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3445,7 +3445,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3589,7 +3589,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -3708,7 +3708,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -3850,7 +3850,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -3954,7 +3954,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4050,7 +4050,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4126,7 +4126,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4208,7 +4208,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4260,7 +4260,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/metrics",
@@ -4493,7 +4493,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4545,7 +4545,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -4700,7 +4700,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4756,7 +4756,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4853,7 +4853,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
       "reason": "profile",
       "required_by": [],
       "manifest": {

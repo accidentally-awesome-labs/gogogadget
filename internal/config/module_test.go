@@ -2,6 +2,8 @@ package config
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -81,5 +83,54 @@ func TestNewModuleIgnoresProcessEnvironment(t *testing.T) {
 	}
 	if m.Config.AppURL == "https://leaked.example.com" {
 		t.Fatal("AppURL came from the process environment, want the host map")
+	}
+}
+
+// `make dev` is documented to work from a fresh clone with only a copied .env,
+// so the module must honor it in development exactly as the process-level loader
+// did. Booting through the runtime without this silently ignores every local
+// setting and looks like an unconfigured deployment.
+func TestNewModuleLoadsDotEnvInDevelopment(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".env"),
+		[]byte("APP_URL=https://from-dotenv.test\nPOLAR_ACCESS_TOKEN=polar_dotenv\n"), 0o644); err != nil {
+		t.Fatalf("write .env: %v", err)
+	}
+	t.Chdir(dir)
+
+	// An OS-backed host reads the process environment, which is what .env fills.
+	m, err := NewModule(context.Background(), apphost.OS("v-test"), Deps{})
+	if err != nil {
+		t.Fatalf("NewModule: %v", err)
+	}
+	if got := m.Config.AppURL; got != "https://from-dotenv.test" {
+		t.Fatalf("AppURL = %q, want the .env value", got)
+	}
+	if !m.Config.PolarConfigured() {
+		t.Fatal("POLAR_ACCESS_TOKEN from .env was ignored")
+	}
+}
+
+// Outside development .env is not consulted: a stray file in a deployment
+// directory must never override real configuration.
+func TestNewModuleIgnoresDotEnvOutsideDevelopment(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, ".env"),
+		[]byte("APP_URL=https://from-dotenv.test\n"), 0o644); err != nil {
+		t.Fatalf("write .env: %v", err)
+	}
+	t.Chdir(dir)
+	t.Setenv("APP_ENV", "test")
+	// Loading .env fills the process environment, and it never overrides a key
+	// that is already set — so clear the one under test explicitly rather than
+	// depending on whatever an earlier test in this process left behind.
+	t.Setenv("APP_URL", "")
+
+	m, err := NewModule(context.Background(), apphost.OS("v-test"), Deps{})
+	if err != nil {
+		t.Fatalf("NewModule: %v", err)
+	}
+	if m.Config.AppURL == "https://from-dotenv.test" {
+		t.Fatal(".env was applied outside development")
 	}
 }
