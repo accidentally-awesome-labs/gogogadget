@@ -58,6 +58,7 @@ func (s *Server) routes() {
 	if s.cfg.DevAuthBypass {
 		s.mux.HandleFunc("GET /dev/login", s.handleDevLogin)
 		s.mux.HandleFunc("GET /dev/switch-org", s.handleDevSwitchOrg)
+		s.mux.HandleFunc("GET /dev/gallery", s.handleDevGallery)
 	}
 
 	// Locale switch (public; NOT CSRF-exempt — switcher forms carry the token

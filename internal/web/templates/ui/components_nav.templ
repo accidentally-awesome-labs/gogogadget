@@ -1,0 +1,120 @@
+package ui
+
+import (
+	"fmt"
+	"strings"
+)
+
+// PageURL appends the page parameter with the right separator: callers pass a
+// base that already carries their filters ("/admin/content?kind=post"), and
+// hardcoding "?" would bury those in the value of the last one.
+func PageURL(baseURL string, page int) string {
+	sep := "?"
+	if strings.Contains(baseURL, "?") {
+		sep = "&"
+	}
+	return fmt.Sprintf("%s%spage=%d", baseURL, sep, page)
+}
+
+// PagerLabels carries the pager's three strings so ui never imports i18n.
+type PagerLabels struct {
+	Aria, Prev, Next, PageOf func(page, totalPages int) string
+}
+
+// Pagination renders hx-get pager links. target is the box the pager morphs.
+// prevLabel/nextLabel are the localized link texts; pageOf renders the
+// "Page X of Y" caption.
+templ Pagination(page, totalPages int, baseURL, target string, labels PagerLabels) {
+	if totalPages > 1 {
+		<nav class="flex items-center justify-between mt-4 text-sm" aria-label={ labels.Aria(page, totalPages) }>
+			if page > 1 {
+				<a href={ templ.SafeURL(PageURL(baseURL, page-1)) }
+					hx-get={ PageURL(baseURL, page-1) }
+					hx-target={ target } hx-swap="innerMorph" hx-push-url="true"
+					class="btn btn-ghost">{ labels.Prev(page, totalPages) }</a>
+			} else {
+				<span></span>
+			}
+			<span class="text-fg-muted">{ labels.PageOf(page, totalPages) }</span>
+			if page < totalPages {
+				<a href={ templ.SafeURL(PageURL(baseURL, page+1)) }
+					hx-get={ PageURL(baseURL, page+1) }
+					hx-target={ target } hx-swap="innerMorph" hx-push-url="true"
+					class="btn btn-ghost">{ labels.Next(page, totalPages) }</a>
+			} else {
+				<span></span>
+			}
+		</nav>
+	}
+}
+
+// NavItem is one entry in a boosted sub-navigation. Label is the display text
+// (callers resolve it via i18n); MatchPath is the prefix marked current.
+type NavItem struct {
+	Label, Href, Match string
+}
+
+// MatchPath is the prefix current-matching compares the request path against.
+func (n NavItem) MatchPath() string {
+	if n.Match != "" {
+		return n.Match
+	}
+	return n.Href
+}
+
+// MatchCurrent returns the aria-current value for a nav item: "page" when the
+// request path matches, otherwise "".
+func MatchCurrent(path, match string) string {
+	if path == match {
+		return "page"
+	}
+	if match != "/app" && match != "/admin" && strings.HasPrefix(path, strings.TrimSuffix(match, "/")+"/") {
+		return "page"
+	}
+	return ""
+}
+
+// NavTabs is the boosted sub-navigation inside a page (settings). activePath
+// is the current path.
+templ NavTabs(items []NavItem, activePath string) {
+	<nav class="tab-bar">
+		for _, item := range items {
+			<a
+				href={ templ.SafeURL(item.Href) }
+				hx-boost="true"
+				hx-target={ NavTarget }
+				hx-select={ NavTarget }
+				hx-swap={ NavSwap }
+				aria-current={ MatchCurrent(activePath, item.MatchPath()) }
+				class="tab"
+			>{ item.Label }</a>
+		}
+	</nav>
+}
+
+// TerminalPage is the one shape every terminal page takes: a big code or
+// title, a sentence, optional detail, optional way home. backHomeLabel is the
+// localized "back home" text; pass "" to suppress the link.
+templ TerminalPage(code, message, detail, backHomeLabel string) {
+	<section class="page-narrow text-center">
+		<h1 class={ errorHeadingClass(code) }>{ code }</h1>
+		<p class="mt-4 text-lg text-fg-muted">{ message }</p>
+		if detail != "" {
+			<pre class="mt-8 card text-xs overflow-auto whitespace-pre-wrap text-left">{ detail }</pre>
+		}
+		if backHomeLabel != "" {
+			<a href="/" class="btn btn-primary mt-8">{ backHomeLabel }</a>
+		}
+	</section>
+}
+
+// errorHeadingClass sizes the terminal-page heading: a numeric HTTP status is
+// the giant code, anything else is a title and reads at display size.
+func errorHeadingClass(code string) string {
+	for _, r := range code {
+		if r < '0' || r > '9' {
+			return "display-title text-brand-text"
+		}
+	}
+	return "error-code"
+}

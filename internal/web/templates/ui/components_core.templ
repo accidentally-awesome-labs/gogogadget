@@ -1,0 +1,180 @@
+package ui
+
+import "fmt"
+
+// Spinner is htmx's request indicator.
+templ Spinner(class string) {
+	@Icon(IconSpinner, mergeClasses("htmx-indicator w-4 h-4 animate-spin", class))
+}
+
+// Badge is a small state pill. kind picks the colour; text is the label.
+templ Badge(text string, kind Kind, attrs Attrs) {
+	<span class={ badgeClasses(kind, attrs.Class) } data-testid={ attrs.TestID }>{ text }</span>
+}
+
+func badgeClasses(kind Kind, extra string) string {
+	return mergeClasses("badge badge-"+string(kind), extra)
+}
+
+// Notice is an in-page notice inside a form or card. role is "alert" for
+// actionable failures and "status" for confirmations.
+templ Notice(kind Kind, role, class, testID string) {
+	<div class={ mergeClasses("alert alert-"+string(kind), class) } role={ role } data-testid={ testID }>
+		{ children... }
+	</div>
+}
+
+// Banner is a full-bleed shell notice (impersonation, billing).
+templ Banner(kind Kind, role, testID string) {
+	<div class={ "banner banner-" + string(kind) } role={ role } data-testid={ testID }>
+		{ children... }
+	</div>
+}
+
+// PageHeader is the title row every page opens with; children are the
+// right-hand actions.
+templ PageHeader(title string) {
+	<div class="page-header">
+		<h1 class="page-title">{ title }</h1>
+		{ children... }
+	</div>
+}
+
+// SectionHeader is a sub-heading inside a page. class carries margins.
+templ SectionHeader(text, class string) {
+	<h2 class={ mergeClasses("section-title", class) }>{ text }</h2>
+}
+
+// TableCard is the bordered, clipped box every table sits in.
+templ TableCard(testID string) {
+	<div class="table-card" data-testid={ testID }>
+		{ children... }
+	</div>
+}
+
+// TableEmpty is the zero-row message inside a TableCard.
+templ TableEmpty(text string) {
+	<p class="table-empty">{ text }</p>
+}
+
+// Metric is one number on a dashboard. Default data-testid is "stat-card".
+templ Metric(title, value, sub string, testID string) {
+	<div class="card" data-testid={ metricTestID(testID) }>
+		<p class="text-sm text-fg-muted">{ title }</p>
+		<p class="text-3xl font-bold mt-1">{ value }</p>
+		if sub != "" {
+			<p class="text-sm text-fg-muted mt-1">{ sub }</p>
+		}
+	</div>
+}
+
+func metricTestID(testID string) string {
+	if testID != "" {
+		return testID
+	}
+	return "stat-card"
+}
+
+// EmptyState is the zero-data pattern for tables.
+templ EmptyState(title, body string) {
+	<div class="card text-center py-12">
+		<h3 class="font-semibold">{ title }</h3>
+		<p class="text-sm text-fg-muted mt-1">{ body }</p>
+		<div class="mt-4">
+			{ children... }
+		</div>
+	</div>
+}
+
+// FieldError is the per-field validation message under an input. Default
+// data-testid is "form-error".
+templ FieldError(err string, testID string) {
+	<p class="field-error" data-testid={ fieldErrorTestID(testID) }>{ err }</p>
+}
+
+func fieldErrorTestID(testID string) string {
+	if testID != "" {
+		return testID
+	}
+	return "form-error"
+}
+
+// Field renders label + control + field-level error. The control is passed as
+// children so any input type composes.
+templ Field(name, label, err string, required bool) {
+	<div>
+		<label for={ name } class="label">{ label }</label>
+		{ children... }
+		if err != "" {
+			@FieldError(err, "")
+		}
+	</div>
+}
+
+// TextInput is a single-line text input.
+templ TextInput(name, value, placeholder, inputType string, required bool) {
+	<input id={ name } name={ name } type={ inputType } value={ value } class="input" placeholder={ placeholder } required?={ required }/>
+}
+
+// SearchInput is the debounced table search. The input morphs target and
+// pushes the URL so a search is shareable and the Back button works.
+templ SearchInput(name, value, placeholder, ariaLabel, getURL, target, indicatorID, testID string) {
+	<div class="toolbar">
+		<input
+			type="search" name={ name } value={ value } placeholder={ placeholder }
+			class="input max-w-sm"
+			hx-get={ getURL } hx-trigger="input changed delay:300ms, search"
+			hx-target={ target } hx-swap="innerMorph" hx-push-url="true" hx-include="this"
+			hx-sync="this:replace"
+			hx-indicator={ "#" + indicatorID }
+			aria-label={ ariaLabel }
+			data-testid={ testID }
+		/>
+		<span id={ indicatorID } class="text-fg-muted">
+			@Spinner("")
+		</span>
+	</div>
+}
+
+// Meter is a usage bar: pct is clamped to 0..100 by the caller.
+templ Meter(pct int, testID string) {
+	<div class="meter" data-testid={ testID }>
+		<div class="meter-fill" style={ fmt.Sprintf("width: %d%%", pct) }></div>
+	</div>
+}
+
+// SecretReveal is the reveal-once secret pattern: the value in a code box and
+// a copy button carrying it on data-copy. The value never reaches an Alpine
+// expression.
+templ SecretReveal(value, copyLabel, copiedLabel string) {
+	<div class="mt-3 flex items-center gap-2">
+		<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ value }</code>
+		<button type="button" x-data="copy" data-copy={ value } @click="copy()" class="btn btn-ghost btn-xs">
+			<span x-show="!copied">{ copyLabel }</span>
+			<span x-show="copied" x-cloak>{ copiedLabel }</span>
+		</button>
+	</div>
+}
+
+// DescriptionItem is one term/value pair in a DescriptionList.
+type DescriptionItem struct{ Term, Value string }
+
+// DescriptionList is the read-only detail pattern (account, org).
+templ DescriptionList(items []DescriptionItem) {
+	<dl class="space-y-4 text-sm">
+		for _, item := range items {
+			<div>
+				<dt class="text-fg-muted">{ item.Term }</dt>
+				<dd class="font-medium">{ item.Value }</dd>
+			</div>
+		}
+	</dl>
+}
+
+// mergeClasses joins component classes with caller-supplied classes.
+func mergeClasses(base, extra string) string {
+	if extra == "" {
+		return base
+	}
+	return base + " " + extra
+}

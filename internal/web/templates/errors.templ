@@ -2,44 +2,29 @@ package templates
 
 import "github.com/gogogadget/gogogadget/internal/i18n"
 
+// The five terminal pages are one shape (ErrorPage) with five vocabularies.
+// All five names stay exported: they are called from htmx.go, auth.go,
+// handlers_account_data.go and the maintenanceMode middleware.
+
 templ NotFound() {
-	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
-		<h1 class="text-6xl font-extrabold text-brand-600 dark:text-brand-400">{ i18n.T(ctx, "errors.code_404") }</h1>
-		<p class="mt-4 text-lg text-fg-muted">{ i18n.T(ctx, "errors.not_found") }</p>
-		<a href="/" class="btn btn-primary mt-8">{ i18n.T(ctx, "errors.back_home") }</a>
-	</section>
+	@ErrorPage(i18n.T(ctx, "errors.code_404"), i18n.T(ctx, "errors.not_found"), "", true)
 }
 
 templ Forbidden() {
-	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
-		<h1 class="text-6xl font-extrabold text-brand-600 dark:text-brand-400">{ i18n.T(ctx, "errors.code_403") }</h1>
-		<p class="mt-4 text-lg text-fg-muted">{ i18n.T(ctx, "errors.forbidden") }</p>
-		<a href="/" class="btn btn-primary mt-8">{ i18n.T(ctx, "errors.back_home") }</a>
-	</section>
+	@ErrorPage(i18n.T(ctx, "errors.code_403"), i18n.T(ctx, "errors.forbidden"), "", true)
 }
 
+// Maintenance offers no way home: the home page is down too.
 templ Maintenance() {
-	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
-		<h1 class="text-6xl font-extrabold text-brand-600 dark:text-brand-400">{ i18n.T(ctx, "errors.code_503") }</h1>
-		<p class="mt-4 text-lg text-fg-muted">{ i18n.T(ctx, "errors.maintenance") }</p>
-	</section>
+	@ErrorPage(i18n.T(ctx, "errors.code_503"), i18n.T(ctx, "errors.maintenance"), "", false)
 }
 
 templ ServerError(detail string) {
-	<section class="max-w-3xl mx-auto px-4 py-24">
-		<h1 class="text-6xl font-extrabold text-brand-600 dark:text-brand-400 text-center">{ i18n.T(ctx, "errors.code_500") }</h1>
-		<p class="mt-4 text-lg text-fg-muted text-center">{ i18n.T(ctx, "errors.server_error") }</p>
-		if detail != "" {
-			<pre class="mt-8 card text-xs overflow-auto whitespace-pre-wrap">{ detail }</pre>
-		}
-		<div class="text-center"><a href="/" class="btn btn-primary mt-8">{ i18n.T(ctx, "errors.back_home") }</a></div>
-	</section>
+	@ErrorPage(i18n.T(ctx, "errors.code_500"), i18n.T(ctx, "errors.server_error"), detail, true)
 }
 
+// StatusPage is the named variant (rate limit, CSRF): a title rather than a
+// status code, so it renders at display size instead of code size.
 templ StatusPage(title, detail string) {
-	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
-		<h1 class="text-4xl font-extrabold text-brand-600 dark:text-brand-400">{ title }</h1>
-		<p class="mt-4 text-fg-muted">{ detail }</p>
-		<a href="/" class="btn btn-primary mt-8">{ i18n.T(ctx, "errors.back_home") }</a>
-	</section>
+	@ErrorPage(title, detail, "", true)
 }

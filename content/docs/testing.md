@@ -114,6 +114,14 @@ under `APP_ENV=test` the render clock freezes (`Config.Now()`), so every
 rendered date and relative time is stable, and the e2e seed uses fixed
 `2026-01-15` timestamps to match.
 
+One of those baselines is `/dev/gallery` (`gallery-light` / `gallery-dark`),
+which renders every design token and every component in every variant on a
+single page — so a shade, spacing or variant regression anywhere in the
+component layer shows up as one failing screenshot instead of leaking into a
+page nobody screenshots. `a11y.spec.ts` sweeps the same URL with axe in both
+themes. It is a dev-only route (`DEV_AUTH_BYPASS`), which the visual and e2e
+harnesses both set.
+
 ## CI
 
 Two jobs. `test` sets up Go and Postgres, then runs the gate: `make setup` →

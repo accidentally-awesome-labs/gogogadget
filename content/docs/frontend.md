@@ -224,46 +224,249 @@ no inline Alpine expressions**. All component logic is registered with
 </div>
 ```
 
-Shipped components: `themeToggle`, `dropdown`, `modal`, `tabs`, `mobileNav`,
-`clipboard`, `checklist`, `selectOrg`, `toastRoot`. `x-cloak` hides pre-boot
+Shipped components: `themeToggle`, `mobileNav`, `dismissible`, `copy`,
+`slugify`, `selectOrg`, `toastRoot`, `phConsent`. `x-cloak` hides pre-boot
 markup (a CSS rule in `input.css`), and the vendored `@alpinejs/focus` plugin
 is loaded for focus trapping on modal-style components. New client behavior
 means a new `Alpine.data` registration — never an inline `x-data="{ … }"`
 object literal.
 
+Two rules the CSP build forces:
+
+- **`$el` and `$refs` are only readable from `init()`**, never from an
+  expression. A per-row control therefore carries its own `x-data`, so
+  `this.$el` IS that control (`copy` reads `data-copy` this way).
+- **Never interpolate a value into an expression.** `@click="copy('<token>')"`
+  put a live API secret in the page's script surface; the value belongs in a
+  `data-` attribute the component reads.
+
+`dismissible` is the one dismiss-and-remember component: `data-key` names the
+`localStorage` entry, so the announcement banner and the dashboard checklist
+share it instead of each shipping their own.
+
 ## Dark mode
 
-`static/app.js` loads **without `defer`** so the theme IIFE runs pre-paint:
-`localStorage.theme` wins, falling back to `prefers-color-scheme`, and sets
-the `.dark` class on `<html>`. `input.css` maps it with
+Dark mode is **token flipping, not `dark:` variants**. `static/app.js` loads
+**without `defer`** so the theme IIFE runs pre-paint: an explicit `light`/`dark`
+`theme` cookie wins, then `localStorage.theme`, then `prefers-color-scheme`; it
+sets the `.dark` class on `<html>`. `input.css` maps it with
 `@custom-variant dark (&:where(.dark, .dark *));`. The toggle
 (`data-testid="theme-toggle"`) flips the class and persists the choice.
 
-## Design tokens
+Every colour a template can name is a token, and the `.dark` block in
+`input.css` re-declares the ones that change. That is why a `dark:` class in a
+`.templ` file is a build failure (see [Enforcement](#enforcement)): it means a
+token is missing, and the fix is to add the token — not the variant.
 
-All styling flows through one `@theme` block in `input.css`:
+Open `/dev/gallery` and toggle the theme: nothing on that page carries a
+per-theme class, so everything that changes changed because a token did.
 
-- `--color-brand-50`…`--color-brand-950` — the brand scale (indigo by
-  default). Rebranding is editing this one block.
-- Semantic tokens — `--color-surface`, `--color-surface-raised`,
-  `--color-border`, `--color-fg`, `--color-fg-muted` — with `.dark`
-  overrides.
-- Component classes — `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-danger`,
-  `.input`, `.label`, `.card`, `.badge`, `.table`, `.link`, `.alert-success`,
-  `.alert-error`.
+## Design system
 
-Templates use ONLY semantic tokens and component classes — never raw hex
-values or ad-hoc pixel sizes.
+Three layers, one home each. Nothing lives in two places.
+
+| Layer | Home | What belongs there |
+|---|---|---|
+| **Tokens** | `input.css` `@theme` + `.dark`; `theme.go` for email | every colour, the layout dimensions, the z-index scale |
+| **Component classes** | `input.css` `@layer components` | every recurring visual: `.btn`, `.badge`, `.alert`, `.card`, `.table-card`, `.page-title` … |
+| **templ components** | `components.templ`, `icons.templ` | every recurring *structure*: `@PageHeader`, `@TableCard`, `@Pagination`, `@Icon` … |
+
+Templates consume those and nothing else — no raw hex, no palette ramp, no
+`dark:` variant, no `!` override, no arbitrary length.
+
+### Colour tokens
+
+The brand **ramp** (`--color-brand-50` … `--color-brand-950`) is the palette.
+Templates never name a ramp step; they name a semantic alias drawn from it.
+
+| Token | Role | Light | Dark |
+|---|---|---|---|
+| `brand` | solid brand fill (buttons, meters, progress) | `brand-600` | `brand-600` |
+| `brand-hover` | that fill on hover | `brand-500` | `brand-500` |
+| `brand-fg` | text on the brand fill | white | white |
+| `brand-fg-muted` | secondary text on the brand fill | `brand-100` | `brand-100` |
+| `brand-text` | brand-coloured text on a normal surface | `brand-600` | `brand-400` |
+| `brand-subtle` | brand-tinted background | `brand-50` | `brand-950` |
+| `brand-subtle-fg` | text on that tint | `brand-700` | `brand-300` |
+| `surface` | page background, cards | white | `#0b1120` |
+| `surface-raised` | sidebars, table stripes, chips | `#f8fafc` | `#111a2e` |
+| `border` | every border and divider | `#e2e8f0` | `#1e293b` |
+| `fg` / `fg-muted` | body text / secondary text | `#0f172a` / `#475569` | `#e2e8f0` / `#94a3b8` |
+
+The brand FILL deliberately does not flip: a primary button is the same colour
+in both themes. Only the text and tint slots do.
+
+State colour comes in four kinds — `success`, `warn`, `danger`, `info` — each
+with the same six slots, so any kind substitutes for any other:
+
+| Slot | Role |
+|---|---|
+| `{kind}` | solid fill |
+| `{kind}-fg` | text on the solid fill |
+| `{kind}-text` | `{kind}`-coloured text on a normal surface |
+| `{kind}-subtle` | tinted background |
+| `{kind}-subtle-fg` | text on the tinted background |
+| `{kind}-border` | border on the tinted background |
+
+### Structural tokens
+
+Layout dimensions are tokens so a shell restyle is a value edit:
+`max-w-page` (72rem), `max-w-narrow` (48rem), `w-sidebar`, `w-docnav`,
+`h-topbar`/`top-topbar`, `h-navbar`/`top-navbar`, and `text-micro` (one step
+below `text-xs`, for the notification counter).
+
+Stacking order is three plain custom properties, because Tailwind has no
+`--z-*` namespace: `z-(--z-nav)` (40, sticky header and drawer),
+`z-(--z-overlay)` (50, toasts, dropdowns, consent, skip link) and
+`--z-progress` (60, the navigation bar, used from CSS only).
+
+### Component classes
+
+Every variant family lists its base selector alongside its variants, so a bare
+variant class still renders the whole component (`class="btn-primary"` works;
+`class="btn btn-primary"` is the house style).
+
+- **Buttons** — `.btn` + `.btn-primary` / `.btn-ghost` / `.btn-danger` /
+  `.btn-inverse`, crossed with `.btn-sm` / `.btn-xs` / `.btn-icon`. The size
+  axis is what removed 26 `!padding` overrides.
+- **Inputs** — `.input` + `.input-sm` / `.input-xs`, `.label`, `.field-error`.
+- **State** — `.badge-*` (six kinds), `.alert-*`, `.banner-*` (full-bleed shell
+  notices), `.toast-*`.
+- **Structure** — `.page-section`, `.page-narrow`, `.page-header`,
+  `.table-card`, `.table-empty`, `.card`, `.card-actions`, `.toolbar`,
+  `.form-actions`, `.meter` / `.meter-fill`, `.count-badge`, `.code-chip`.
+- **Typography** — `.hero-title`, `.display-title`, `.page-title`,
+  `.section-title`, `.error-code`, `.eyebrow`, `.prose`.
+- **Navigation** — `.nav-link`, `.doc-link`, `.tab` / `.tab-bar`. All three key
+  off `aria-current="page"`, set server-side by `navCurrent` and re-derived
+  client-side by `syncAppNavigation` (the shell never swaps, so the server
+  cannot update it after a navigation).
+
+Utility layer beats component layer in Tailwind v4, so `text-danger-text` on a
+`.btn-ghost` wins with no `!` needed. That is why the `!` rule can be absolute.
+
+### templ components
+
+`Kind` is the semantic colour axis shared by `Badge`, `Alert` and `Banner`:
+`KindBrand`, `KindInfo`, `KindSuccess`, `KindWarn`, `KindDanger`,
+`KindNeutral`. Domain values map onto it next to their data (`jobKind`,
+`subKind`, `announcementKind`, `contentStatusKind`, `onOffKind`) — that mapping
+is the only domain-specific part; the shades are not.
+
+```go
+templ Badge(text string, kind Kind)
+templ BadgeTagged(text string, kind Kind, testID string)
+templ Alert(kind Kind, role, class, testID string)   // children
+templ Banner(kind Kind, role, testID string)         // children
+templ PageHeader(title string)                       // children = right-hand actions
+templ SectionHeading(text, class string)
+templ TableCard(testID string)                       // children
+templ TableEmpty(text string)
+templ Pagination(page, totalPages int, baseURL, target string)
+templ SearchToolbar(name, value, placeholder, ariaLabel, getURL, target, indicatorID, testID string)
+templ EmptyState(title, body string)                 // children = CTA
+templ StatCard(title, value, sub string)
+templ PlanCard(plan billing.Plan, current bool)      // children = CTA
+templ FormField(name, label, inputType, value, err, placeholder string, required bool)
+templ FieldError(err string)
+templ Meter(pct int, testID string)
+templ CopyRow(value, copyLabel, copiedLabel string)
+templ DefinitionList(rows []DefRow)
+templ Tabs(items []NavItem, activePath string)
+templ ErrorPage(code, message, detail string, showHome bool)
+templ Icon(name IconName, class string, attrs ...templ.Attributes)
+templ Spinner()
+```
+
+`role` on `Alert`/`Banner` is `"alert"` for something the user must act on and
+`"status"` for a confirmation: `role="alert"` is assertive and interrupts a
+screen reader mid-sentence, which a success message has not earned.
+
+`testID` parameters emit `data-testid` only when non-empty, so a component can
+be adopted without inventing test ids for sites that never had them.
+
+### Chrome configuration
+
+`templates/chrome.go` holds the product identity and navigation as data, not
+markup: `BrandName`, `DocsEditBase`, `PublicNav`, `AppNav`, `AdminNav`,
+`FooterColumns`. Labels are **i18n keys**, not resolved strings — these are
+package-level values and `i18n.T` needs the request context. Overriding them at
+startup restyles the shell without touching a template.
+
+### Enforcement
+
+`internal/web/templates/designsystem_test.go` reads every `*.templ` in the
+package and fails the build on any of these, with **zero exemptions**:
+
+| Rule | Because |
+|---|---|
+| no raw hex | colour lives in tokens; email colour lives in `emailStyle` |
+| no `dark:` variant | a `dark:` in a template means a missing token |
+| no non-brand palette ramp (`text-red-600` …) | use a state token |
+| no numeric brand step (`bg-brand-600` …) | the ramp is `input.css`'s alone |
+| no `!` utility override | an override means a missing variant |
+| no arbitrary length (`text-[10px]`) | sizes come from the scales |
+| no templ expression inside a quoted attribute | `class="badge { f(x) }"` is emitted literally and renders unstyled — this rule exists because it happened |
+
+A companion test walks every `IconName` and asserts it renders an `<svg>`, so a
+new const cannot be added without its switch arm.
+
+### Which layer does my change belong to?
+
+1. **A new colour** → a token in `@theme` (and `.dark` if it flips).
+2. **A recurring visual** → a component class in `@layer components`.
+3. **A recurring structure** → a templ component in `components.templ`.
+4. **A one-off composition** → utilities, drawn from the token scales.
+
+If you are about to type the same utility string a third time, it is step 2 or 3.
+
+## Component gallery
+
+`/dev/gallery` renders every token and every component in every variant on one
+page. It is the reference to read before adding UI, and it is a visual baseline
+(`gallery-light` / `gallery-dark`) plus an axe sweep, so a regression anywhere
+in the component layer fails `make e2e`.
+
+The route is registered only when `DEV_AUTH_BYPASS` is on, which
+`internal/config` refuses under `APP_ENV=production`.
+
+## Rebranding
+
+In order, then `make generate`:
+
+1. **The brand ramp** — `--color-brand-50` … `--color-brand-950` in `@theme`.
+   Replace all eleven: the semantic aliases point at 600/500/400/50/950, and the
+   `.dark` tints use the far ends.
+2. **Semantic aliases** — only if the mapping changes (e.g. a light brand needs
+   `--color-brand-fg: #000`).
+3. **State triads** — only if the product's success/warn/danger hues differ.
+4. **Structural tokens** — layout dimensions, if the shell proportions change.
+5. **`emailStyle`** in `templates/theme.go` — mail clients strip `<style>` and
+   cannot read custom properties, so email is the one surface that inlines hex.
+   Mirror the light-mode token values.
+6. **`chrome.go`** — `BrandName`, `DocsEditBase`, and the nav/footer lists.
+7. **The catalogs** — `grep GoGoGadget internal/i18n/catalog_*.go`. The product
+   name also appears inside translated prose (`email.footer`,
+   `email.*.subject`), which belongs to the catalogs: word order around a brand
+   differs per language, so it is not a template variable.
+8. `make generate`, then `make visual-update` to regenerate the baselines.
+
+The logo mark itself is `IconLogo` in `icons.templ` and
+`static/favicon.svg`.
 
 ## Adding a page or component
 
-1. Write the templ component in `internal/web/templates/`, composed into a
-   layout (`PublicLayout`, `AppLayout`, `AdminLayout`, `DocsLayout`).
+1. Decide the layer (see [Which layer does my change belong to?](#which-layer-does-my-change-belong-to)).
+   New markup is a templ component in `internal/web/templates/`, composed into a
+   layout (`PublicLayout`, `AppLayout`, `AdminLayout`, `DocsLayout`) — reuse
+   `@PageHeader`, `@TableCard`, `@SearchToolbar`, `@Pagination` rather than
+   retyping their utility strings.
 2. Write the handler in the matching `internal/web/handlers_*.go`, returning
    fragments per the rule above.
 3. Register the route in `internal/web/routes.go` inside the right chain
    (public, `appChain`, or `adminChain`).
-4. `make generate` (templ + sqlc + tailwind), then `make check`.
+4. `make generate` (templ + sqlc + tailwind), then `make check`. The
+   design-system test runs there, so a raw hex or a `dark:` fails the gate.
 
 Put `data-testid` on every element a test will assert on — Playwright never
 selects by visible copy. See [Testing](/docs/testing).
@@ -289,12 +492,12 @@ browser knows the OS setting, and guessing server-side reintroduces the flash.
 
 Two controls write it:
 
-- **The topbar toggle** flips light↔dark. It `hx-post`s `/set-theme` with no
-  value and the server flips from the same current value the client just
-  flipped from, so repeated clicks stay in agreement. It cannot send the
-  desired value: the vendored Alpine CSP build forbids the inline expression
-  that would compute one, and a value baked in at render time goes stale after
-  the first click. The response is `204` — the class is already correct.
+- **The topbar toggle** flips light↔dark locally, then `persistTheme` in
+  `app.js` POSTs the RESULTING value to `/set-theme` with a plain `fetch`. It
+  has to send the resolved value: when the stored preference is `system`, only
+  the browser knows which way the OS points, so a server that flipped on its
+  own would disagree with what the user just saw. The response is `204` — the
+  class is already correct, there is nothing to swap.
 - **Settings → Account → Appearance** sets a value exactly. Those forms carry
   `returnTo`, so the server answers with a hard redirect: the theme class
   lives on `<html>`, which boosted navigation never re-renders.

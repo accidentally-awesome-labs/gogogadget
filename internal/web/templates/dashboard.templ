@@ -6,20 +6,12 @@ import (
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
-templ StatCard(title, value, sub string) {
-	<div class="card" data-testid="stat-card">
-		<p class="text-sm text-fg-muted">{ title }</p>
-		<p class="text-3xl font-bold mt-1">{ value }</p>
-		if sub != "" {
-			<p class="text-sm text-fg-muted mt-1">{ sub }</p>
-		}
-	</div>
-}
-
 templ Dashboard(d DashboardData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "dashboard.title") }</h1>
+	@PageHeader(i18n.T(ctx, "dashboard.title"))
 
-	<div x-data="checklist" x-show="!dismissed" x-cloak class="card mb-6">
+	// One dismissible pattern for the whole product: data-key names the
+	// localStorage entry, so the checklist needs no component of its own.
+	<div x-data="dismissible" data-key="gg_checklist_dismissed" x-show="!hidden" x-cloak class="card mb-6">
 		<div class="flex items-start justify-between">
 			<div>
 				<h2 class="font-semibold">{ i18n.T(ctx, "dashboard.getting_started") }</h2>
@@ -29,7 +21,7 @@ templ Dashboard(d DashboardData) {
 					<li>3. <a href="/app/settings/billing" class="link">{ i18n.T(ctx, "dashboard.checklist.review_plans") }</a> { i18n.T(ctx, "dashboard.checklist.review_plans_note") }</li>
 				</ul>
 			</div>
-			<button type="button" @click="dismiss" class="btn-ghost !px-2 text-sm" aria-label={ i18n.T(ctx, "dashboard.checklist.dismiss") }>✕</button>
+			<button type="button" @click="dismiss()" class="btn btn-ghost btn-xs" aria-label={ i18n.T(ctx, "dashboard.checklist.dismiss") }>✕</button>
 		</div>
 	</div>
 
@@ -39,22 +31,22 @@ templ Dashboard(d DashboardData) {
 		@StatCard(i18n.T(ctx, "dashboard.stats.current_plan"), d.Plan.Name, d.Plan.PriceDisplay)
 	</div>
 
-	<h2 class="text-lg font-semibold mt-10 mb-3">{ i18n.T(ctx, "dashboard.recent_activity") }</h2>
-	<div class="card !p-0 overflow-hidden">
+	@SectionHeading(i18n.T(ctx, "dashboard.recent_activity"), "mt-10 mb-3")
+	@TableCard("") {
 		if len(d.Recent) == 0 {
-			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "dashboard.recent_empty") }</p>
+			@TableEmpty(i18n.T(ctx, "dashboard.recent_empty"))
 		} else {
 			<table class="table">
 				<tbody>
 					for _, row := range d.Recent {
 						<tr>
 							<td>{ row.ActorEmail }</td>
-							<td><span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">{ row.Action }</span></td>
+							<td>@Badge(row.Action, KindBrand)</td>
 							<td class="text-right text-fg-muted"><span data-testid="relative-time">{ RelTime(d.Now, row.CreatedAt.Time) }</span></td>
 						</tr>
 					}
 				</tbody>
 			</table>
 		}
-	</div>
+	}
 }

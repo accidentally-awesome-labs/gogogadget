@@ -3,7 +3,7 @@ package templates
 import "github.com/gogogadget/gogogadget/internal/i18n"
 
 templ LegalTerms() {
-	<article class="max-w-3xl mx-auto px-4 py-16 prose">
+	<article class="page-narrow prose">
 		<h1>{ i18n.T(ctx, "legal.terms.title") }</h1>
 		<p>{ i18n.T(ctx, "legal.terms.placeholder") }</p>
 		<p>{ i18n.T(ctx, "legal.terms.body") }</p>
@@ -11,7 +11,7 @@ templ LegalTerms() {
 }
 
 templ LegalPrivacy() {
-	<article class="max-w-3xl mx-auto px-4 py-16 prose">
+	<article class="page-narrow prose">
 		<h1>{ i18n.T(ctx, "legal.privacy.title") }</h1>
 		<p>{ i18n.T(ctx, "legal.privacy.placeholder") }</p>
 		<p>{ i18n.T(ctx, "legal.privacy.body") }</p>

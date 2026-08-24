@@ -9,7 +9,7 @@ import (
 // pageTitle is the one place the document title is composed, so a fragment
 // swap and a full page load can never disagree.
 templ pageTitle(page Page) {
-	<title>{ page.Title } — GoGoGadget</title>
+	<title>{ page.Title } — { BrandName }</title>
 }
 
 // headMeta renders title, description, and OG/Twitter tags.
@@ -19,7 +19,7 @@ templ headMeta(page Page) {
 		<meta name="description" content={ page.Description }/>
 	}
 	<meta property="og:type" content="website"/>
-	<meta property="og:title" content={ page.Title + " — GoGoGadget" }/>
+	<meta property="og:title" content={ page.Title + " — " + BrandName }/>
 	if page.Description != "" {
 		<meta property="og:description" content={ page.Description }/>
 	}
@@ -33,7 +33,7 @@ templ headMeta(page Page) {
 		}
 		// Autodiscovery: the feed has existed since day one, but without this
 		// no browser or reader could find it from a page.
-		<link rel="alternate" type="application/rss+xml" title={ "GoGoGadget Blog" } href={ page.AppURL + "/rss.xml" }/>
+		<link rel="alternate" type="application/rss+xml" title={ BrandName + " Blog" } href={ page.AppURL + "/rss.xml" }/>
 	}
 	if page.JSONLD != nil {
 		// A data block, not executable script: CSP script-src does not apply
@@ -73,17 +73,51 @@ templ headScripts(page Page) {
 	}
 }
 
-templ skipLink() {
-	<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-lg">{ i18n.T(ctx, "layout.skip_content") }</a>
+// documentHead is the ONE <head> both shells render. It exists because the two
+// copies it replaces had already drifted — the web-app manifest link was in
+// the public shell only.
+templ documentHead(page Page) {
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		@headMeta(page)
+		<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
+		<link rel="manifest" href="/static/site.webmanifest"/>
+		<link rel="stylesheet" href="/static/app.css"/>
+		@headScripts(page)
+	</head>
 }
 
+// contentBox is the ONLY element navigation swaps. `id` stays the first
+// attribute and hx-history-elt the second: tests split the document on that
+// literal prefix to assert the chrome around it is identical between layouts.
+templ contentBox(class string, content templ.Component) {
+	<main
+		id="content"
+		hx-history-elt="true"
+		if class != "" {
+			class={ class }
+		}
+	>
+		@content
+	</main>
+}
+
+templ skipLink() {
+	<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-(--z-overlay) focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand focus:text-brand-fg focus:rounded-lg">{ i18n.T(ctx, "layout.skip_content") }</a>
+}
+
+// toastRoot renders the live toast stack. The variant class is computed in
+// app.js (toastRoot.push) rather than as a :class ternary here: a pure
+// property access is unambiguously CSP-safe, and the type→colour mapping is
+// one decision that belongs in one place.
 templ toastRoot() {
-	<div x-data="toastRoot" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2" role="status" aria-live="polite">
+	<div x-data="toastRoot" class="fixed bottom-4 right-4 z-(--z-overlay) flex flex-col gap-2" role="status" aria-live="polite">
 		<template x-for="t in toasts" :key="t.id">
 			<div
 				data-testid="toast"
-				class="card px-4 py-3 text-sm shadow-lg border-l-4"
-				:class="t.type === 'success' ? 'border-l-green-500' : (t.type === 'error' ? 'border-l-red-500' : 'border-l-brand-500')"
+				class="toast"
+				:class="t.cls"
 				x-text="t.message"
 			></div>
 		</template>
@@ -94,11 +128,11 @@ templ toastRoot() {
 // configured). posthog.init runs only after acceptance — see static/analytics.js.
 templ phConsent(page Page) {
 	if page.PostHogKey != "" {
-		<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-50 card max-w-sm text-sm" role="dialog" aria-label={ i18n.T(ctx, "a11y.analytics_consent") }>
+		<div x-data="phConsent" x-show="show" x-cloak class="fixed bottom-4 left-4 z-(--z-overlay) card max-w-sm text-sm" role="dialog" aria-label={ i18n.T(ctx, "a11y.analytics_consent") }>
 			<p>{ i18n.T(ctx, "layout.analytics_consent_body") }</p>
 			<div class="flex gap-2 mt-3">
-				<button type="button" @click="accept" class="btn btn-primary !py-1 text-xs">{ i18n.T(ctx, "layout.analytics_accept") }</button>
-				<button type="button" @click="decline" class="btn-ghost !py-1 text-xs">{ i18n.T(ctx, "layout.analytics_decline") }</button>
+				<button type="button" @click="accept" class="btn btn-primary btn-xs">{ i18n.T(ctx, "layout.analytics_accept") }</button>
+				<button type="button" @click="decline" class="btn btn-ghost btn-xs">{ i18n.T(ctx, "layout.analytics_decline") }</button>
 			</div>
 		</div>
 	}
@@ -113,22 +147,12 @@ templ phConsent(page Page) {
 templ publicShell(page Page, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang={ i18n.Tag(ctx).String() } { page.HTMLAttrs()... }>
-		<head>
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			@headMeta(page)
-			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
-			<link rel="manifest" href="/static/site.webmanifest"/>
-			<link rel="stylesheet" href="/static/app.css"/>
-			@headScripts(page)
-		</head>
+		@documentHead(page)
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
 			@Nav(page)
-			<main id="content" hx-history-elt="true">
-				@content
-			</main>
-			@Footer(page.Path)
+			@contentBox("", content)
+			@Footer(page)
 			@toastRoot()
 			@phConsent(page)
 		</body>
@@ -144,23 +168,18 @@ templ PublicLayout(page Page, content templ.Component) {
 templ AppLayout(page Page, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang={ i18n.Tag(ctx).String() } { page.HTMLAttrs()... }>
-		<head>
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			@headMeta(page)
-			<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
-			<link rel="stylesheet" href="/static/app.css"/>
-			@headScripts(page)
-		</head>
+		@documentHead(page)
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
 			if page.Impersonator != nil {
-				<div class="bg-amber-500 text-amber-950 px-4 py-2 text-sm flex items-center justify-center gap-3" role="alert" data-testid="impersonation-banner">
-					<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
-					<form hx-post="/app/impersonation/exit" hx-disable="this">
-						<button type="submit" class="font-semibold underline" data-testid="impersonation-exit">{ i18n.T(ctx, "impersonation.exit") }</button>
-					</form>
-				</div>
+				@Banner(KindWarn, "alert", "impersonation-banner") {
+					<div class="flex items-center justify-center gap-3">
+						<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
+						<form hx-post="/app/impersonation/exit" hx-disable="this">
+							<button type="submit" class="font-semibold underline cursor-pointer" data-testid="impersonation-exit">{ i18n.T(ctx, "impersonation.exit") }</button>
+						</form>
+					</div>
+				}
 			}
 			<div class="flex min-h-screen">
 				@Sidebar(page)
@@ -168,9 +187,7 @@ templ AppLayout(page Page, content templ.Component) {
 					@Topbar(page)
 					@announcementBanner(page)
 					@billingBanner(page)
-					<main id="content" hx-history-elt="true" class="flex-1 p-6 max-w-6xl w-full mx-auto">
-						@content
-					</main>
+					@contentBox("flex-1 p-6 max-w-page w-full mx-auto", content)
 				</div>
 			</div>
 			@toastRoot()
@@ -179,57 +196,65 @@ templ AppLayout(page Page, content templ.Component) {
 	</html>
 }
 
+// announcementKind maps the stored announcement kind onto the shared semantic
+// axis. This is the only domain-specific part; the colours themselves live in
+// input.css.
+func announcementKind(kind string) Kind {
+	switch kind {
+	case "warning":
+		return KindWarn
+	case "critical":
+		return KindDanger
+	default: // info
+		return KindInfo
+	}
+}
+
 // announcementBanner is the platform-wide admin-authored banner. One active
 // row at a time; dismissal is per-browser per-announcement (id-keyed
-// localStorage, checklist pattern). kind: info=brand, warning=amber,
-// critical=red (state colors).
+// localStorage, dismissible pattern). It cannot use @Banner: the Alpine
+// attributes have to live on the same element the x-show hides.
 templ announcementBanner(page Page) {
 	if page.Announcement != nil {
 		<div
 			x-data="dismissible"
 			data-key={ "ggg_ann_" + fmt.Sprint(page.Announcement.ID) }
 			x-show="!hidden"
-			class={ "px-4 py-2 text-sm border-b", announcementKindClass(page.Announcement.Kind) }
+			class={ "banner", "banner-" + string(announcementKind(page.Announcement.Kind)) }
 			role="alert"
 			data-testid="announcement-banner"
 		>
-			<div class="flex items-center gap-3 max-w-6xl mx-auto">
+			<div class="flex items-center gap-3 max-w-page mx-auto">
 				<span class="flex-1">{ page.Announcement.Message }
 					if page.Announcement.Url != "" {
 						<a href={ templ.SafeURL(page.Announcement.Url) } class="font-semibold underline ml-1" rel="noopener">{ i18n.T(ctx, "announcement.link") }</a>
 					}
 				</span>
-				<button type="button" @click="dismiss()" class="shrink-0 font-semibold" aria-label={ i18n.T(ctx, "announcement.dismiss") }>×</button>
+				<button type="button" @click="dismiss()" class="shrink-0 font-semibold cursor-pointer" aria-label={ i18n.T(ctx, "announcement.dismiss") }>×</button>
 			</div>
 		</div>
 	}
 }
 
-func announcementKindClass(kind string) string {
-	switch kind {
-	case "warning":
-		return "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-amber-200 dark:border-amber-900"
-	case "critical":
-		return "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-200 border-red-200 dark:border-red-900"
-	default: // info
-		return "bg-brand-50 text-brand-800 dark:bg-brand-950 dark:text-brand-200 border-brand-200 dark:border-brand-900"
-	}
-}
 // billingBanner is the persistent past_due / ending-plan nudge in the shell.
 templ billingBanner(page Page) {
 	if page.Sub != nil && page.Sub.Status == "past_due" {
-		<div class="bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border-b border-amber-200 dark:border-amber-900 px-4 py-2 text-sm" role="alert">
+		@Banner(KindWarn, "alert", "") {
 			{ i18n.T(ctx, "layout.banner_past_due_prefix") } <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_past_due_link") }</a> { i18n.T(ctx, "layout.banner_past_due_suffix") }
-		</div>
+		}
 	}
 	if page.Sub != nil && page.Sub.Status == "canceled" && page.Sub.CurrentPeriodEnd.Valid && page.Sub.CurrentPeriodEnd.Time.After(page.NowOrDefault()) {
-		<div class="bg-brand-50 text-brand-800 dark:bg-brand-950 dark:text-brand-200 border-b border-brand-200 dark:border-brand-900 px-4 py-2 text-sm" role="status">
+		@Banner(KindInfo, "status", "") {
 			{ i18n.T(ctx, "layout.banner_ending_prefix") } { page.Sub.CurrentPeriodEnd.Time.Format("January 2, 2006") } — <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_ending_link") }</a>.
-		</div>
+		}
 	}
 }
 
-// AdminLayout is AppLayout plus the admin nav section.
+// AdminLayout is the app shell under the admin routes. It is AppLayout
+// verbatim — the admin nav section is gated by identity.IsStaff inside
+// appNavSections, not by the layout. The distinct name exists because
+// wrapLayout switches on Page.Layout, and an admin page that renders the app
+// shell should say so.
 templ AdminLayout(page Page, content templ.Component) {
 	@AppLayout(page, content)
 }
@@ -242,23 +267,23 @@ templ DocsLayout(page Page, content templ.Component) {
 }
 
 templ docsBody(page Page, content templ.Component) {
-	<div class="max-w-6xl mx-auto px-4 py-8 flex gap-10">
-		<aside class="hidden md:block w-56 shrink-0">
-			<nav class="sticky top-24 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
+	<div class="max-w-page mx-auto px-4 py-8 flex gap-10">
+		<aside class="hidden md:block w-docnav shrink-0">
+			<nav class="sticky top-navbar pt-8 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
 				if page.Docs != nil {
 					<form action="/docs/search" method="get" class="mb-6" data-testid="docs-search-form">
 						<input
 							type="search" name="q"
 							placeholder={ i18n.T(ctx, "docs.search_placeholder") }
 							aria-label={ i18n.T(ctx, "docs.search_aria") }
-							class="input !py-1.5 text-sm"
+							class="input input-sm"
 						/>
 					</form>
 				}
 				if page.Docs != nil {
 					for _, section := range page.Docs.Sections {
 						<div>
-							<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ section.Name }</p>
+							<p class="eyebrow mb-2">{ section.Name }</p>
 							<ul class="space-y-1">
 								for _, doc := range section.Pages {
 									<li>
@@ -269,7 +294,7 @@ templ docsBody(page Page, content templ.Component) {
 											hx-select={ NavTarget }
 											hx-swap={ NavSwap }
 											aria-current={ navCurrent(page, "/docs/" + doc.Slug) }
-											class="block rounded-lg px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised aria-[current=page]:text-brand-600 dark:aria-[current=page]:text-brand-400 dark:aria-[current=page]:text-brand-400 aria-[current=page]:font-semibold"
+											class="doc-link"
 										>{ doc.Title }</a>
 									</li>
 								}

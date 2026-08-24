@@ -15,7 +15,7 @@ templ DocsPage(docs *content.Docs, slug string) {
 			</article>
 
 			<div class="mt-6 text-sm">
-			<a href={ "https://github.com/gogogadget/gogogadget/edit/main/content/docs/" + p.Slug + ".md" } class="link">{ i18n.T(ctx, "docs.edit_page") }</a>
+			<a href={ DocsEditBase + p.Slug + ".md" } class="link">{ i18n.T(ctx, "docs.edit_page") }</a>
 			</div>
 
 			<nav class="mt-10 pt-6 border-t border-border flex justify-between text-sm">
@@ -52,9 +52,9 @@ templ DocsSearchPage(query string, results []content.SearchResult) {
 								hx-target={ NavTarget }
 								hx-select={ NavTarget }
 								hx-swap={ NavSwap }
-								class="font-semibold text-brand-600 dark:text-brand-400"
+								class="font-semibold text-brand-text"
 							>{ r.Title }</a>
-							<span class="badge bg-surface-raised text-fg-muted ml-2">{ r.Section }</span>
+							<span class="badge badge-neutral ml-2">{ r.Section }</span>
 							<p class="text-sm text-fg-muted mt-2">{ r.Snippet }</p>
 						</li>
 					}

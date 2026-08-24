@@ -19,17 +19,35 @@ func planRank(key string) int {
 	}
 }
 
-func statusBadge(status string) string {
+// subKind maps a subscription status onto the shared semantic axis.
+func subKind(status string) Kind {
 	switch status {
 	case "active", "trialing":
-		return "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+		return KindSuccess
 	case "past_due":
-		return "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+		return KindWarn
 	case "canceled":
-		return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+		return KindDanger
 	default:
-		return "bg-surface-raised text-fg-muted"
+		return KindNeutral
 	}
+}
+
+// meterPct is the clamped fill of a usage bar. A zero or negative limit means
+// "unlimited" upstream, so it never reaches here — guard anyway rather than
+// divide by zero.
+func meterPct(used, limit int64) int {
+	if limit <= 0 {
+		limit = 1
+	}
+	v := used * 100 / limit
+	if v > 100 {
+		v = 100
+	}
+	if v < 0 {
+		v = 0
+	}
+	return int(v)
 }
 
 // BillingCard is the current-plan card (polled fragment after checkout).
@@ -44,11 +62,11 @@ templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
 			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "billing.processing_sub") }</p>
 		} else {
 			<div class="flex items-center justify-between">
-				<h2 class="text-lg font-semibold">{ i18n.T(ctx, "billing.plan_heading", plan.Name) }</h2>
+				@SectionHeading(i18n.T(ctx, "billing.plan_heading", plan.Name), "")
 				if sub != nil {
-					<span class={ "badge", statusBadge(sub.Status) } data-testid="plan-badge">{ sub.Status }</span>
+					@BadgeTagged(sub.Status, subKind(sub.Status), "plan-badge")
 				} else {
-					<span class="badge bg-surface-raised text-fg-muted" data-testid="plan-badge">{ i18n.T(ctx, "billing.plan_free") }</span>
+					@BadgeTagged(i18n.T(ctx, "billing.plan_free"), KindNeutral, "plan-badge")
 				}
 			</div>
 			if sub != nil && sub.CurrentPeriodEnd.Valid {
@@ -65,58 +83,68 @@ templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
 }
 
 templ BillingError(msg string) {
-	<div class="alert-error max-w-lg" role="alert">{ msg }</div>
+	@Alert(KindDanger, "alert", "max-w-lg", "") {
+		{ msg }
+	}
 }
 
 // NotConfigured is the 503 fragment for an unconfigured service; it always
 // links the matching docs page.
 templ NotConfigured(feature, docsSlug string) {
-	<section class="max-w-3xl mx-auto px-4 py-24 text-center">
-		<h1 class="text-4xl font-extrabold text-brand-600 dark:text-brand-400">{ i18n.T(ctx, "billing.not_configured", feature) }</h1>
+	<section class="page-narrow text-center">
+		<h1 class="display-title text-brand-text">{ i18n.T(ctx, "billing.not_configured", feature) }</h1>
 		<p class="mt-4 text-fg-muted">{ i18n.T(ctx, "billing.not_configured_body") }</p>
 		<a href={ "/docs/" + docsSlug } class="btn btn-primary mt-8">{ i18n.T(ctx, "billing.setup_guide") }</a>
 	</section>
 }
 
+// usageCard is the shared shape of every quota meter: label, "x of y", bar.
+templ usageCard(heading, detail string, pct int, testID string) {
+	<div class="card mb-6 max-w-lg" data-testid={ testID }>
+		<h2 class="text-sm font-semibold mb-2">{ heading }</h2>
+		<p class="text-sm text-fg-muted">{ detail }</p>
+		@Meter(pct, "")
+	</div>
+}
+
 templ SettingsBilling(d BillingData) {
 	@SettingsTabs("/app/settings/billing")
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "billing.title") }</h1>
+	@PageHeader(i18n.T(ctx, "billing.title"))
 
 	if d.Success && !d.Processing {
-		<div class="alert-success mb-4 max-w-lg" role="status">{ i18n.T(ctx, "billing.welcome") }</div>
+		@Alert(KindSuccess, "status", "mb-4 max-w-lg", "") {
+			{ i18n.T(ctx, "billing.welcome") }
+		}
 	}
 
 	@BillingCard(d.Plan, d.Sub, d.Processing)
 
 	if d.Plan.MaxProjects > 0 {
-		<div class="card mb-6 max-w-lg" data-testid="usage-meter">
-			<h2 class="text-sm font-semibold mb-2">{ i18n.T(ctx, "billing.usage") }</h2>
-			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "billing.projects_used", fmt.Sprint(d.ProjectCount), fmt.Sprint(d.Plan.MaxProjects)) }</p>
-			<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
-				<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.ProjectCount*100/int64(max(d.Plan.MaxProjects, 1)))) }></div>
-			</div>
-		</div>
+		@usageCard(
+			i18n.T(ctx, "billing.usage"),
+			i18n.T(ctx, "billing.projects_used", fmt.Sprint(d.ProjectCount), fmt.Sprint(d.Plan.MaxProjects)),
+			meterPct(d.ProjectCount, int64(d.Plan.MaxProjects)),
+			"usage-meter",
+		)
 	}
 
 	if d.Plan.MaxStorageMB > 0 {
-		<div class="card mb-6 max-w-lg" data-testid="storage-meter">
-			<h2 class="text-sm font-semibold mb-2">{ i18n.T(ctx, "billing.storage") }</h2>
-			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "billing.storage_used", usedMB(d.UsedStorageBytes), fmt.Sprint(d.Plan.MaxStorageMB)) }</p>
-			<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
-				<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.UsedStorageBytes*100/(int64(d.Plan.MaxStorageMB)*1024*1024))) }></div>
-			</div>
-		</div>
+		@usageCard(
+			i18n.T(ctx, "billing.storage"),
+			i18n.T(ctx, "billing.storage_used", usedMB(d.UsedStorageBytes), fmt.Sprint(d.Plan.MaxStorageMB)),
+			meterPct(d.UsedStorageBytes, int64(d.Plan.MaxStorageMB)*1024*1024),
+			"storage-meter",
+		)
 	}
 
 	for _, m := range d.Plan.Meters {
 		if m.LimitPerMonth > 0 {
-			<div class="card mb-6 max-w-lg" data-testid={ "meter-" + m.Key }>
-				<h2 class="text-sm font-semibold mb-2">{ m.Label }</h2>
-				<p class="text-sm text-fg-muted">{ i18n.T(ctx, "billing.meter_used", fmt.Sprint(d.MeterUsage[m.Key]), fmt.Sprint(m.LimitPerMonth)) }</p>
-				<div class="w-full bg-surface-raised rounded-full h-2 mt-2">
-					<div class="bg-brand-600 h-2 rounded-full" style={ fmt.Sprintf("width: %d%%", min(100, d.MeterUsage[m.Key]*100/max(m.LimitPerMonth, 1))) }></div>
-				</div>
-			</div>
+			@usageCard(
+				m.Label,
+				i18n.T(ctx, "billing.meter_used", fmt.Sprint(d.MeterUsage[m.Key]), fmt.Sprint(m.LimitPerMonth)),
+				meterPct(d.MeterUsage[m.Key], m.LimitPerMonth),
+				"meter-"+m.Key,
+			)
 		}
 	}
 
@@ -126,13 +154,13 @@ templ SettingsBilling(d BillingData) {
 				if planRank(p.Key) > planRank(d.Plan.Key) {
 					<form hx-post="/app/billing/checkout" hx-disable="this">
 						<input type="hidden" name="plan" value={ p.Key }/>
-						<button type="submit" class="btn btn-primary w-full inline-flex items-center justify-center gap-2">
+						<button type="submit" class="btn btn-primary w-full">
 							@Spinner()
 							{ i18n.T(ctx, "billing.upgrade_to", p.Name) }
 						</button>
 					</form>
 				} else if p.Key == d.Plan.Key {
-					<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "billing.current_plan") }</span>
+					<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "billing.current_plan") }</span>
 				}
 			}
 		}
@@ -140,7 +168,7 @@ templ SettingsBilling(d BillingData) {
 
 	if d.Sub != nil {
 		<form hx-post="/app/billing/portal" hx-disable="this" class="mt-6">
-			<button type="submit" class="btn btn-ghost inline-flex items-center gap-2" data-testid="manage-subscription">
+			<button type="submit" class="btn btn-ghost" data-testid="manage-subscription">
 				@Spinner()
 				{ i18n.T(ctx, "billing.manage") }
 			</button>

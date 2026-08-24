@@ -299,3 +299,55 @@ shape, from `internal/jobs/export_csv.go`:
 2. Add the tag to the matcher list and an entry (code + native label) to
    `Locales` in `internal/i18n/i18n.go` — the switcher picks it up
    automatically. See [Internationalization](/docs/i18n).
+
+## Add a component
+
+Decide the layer first — that decision *is* the recipe. See
+[Frontend → Design system](/docs/frontend) for the full contract.
+
+1. **A new colour?** Add a token to the `@theme` block in `input.css`, and to
+   the `.dark` block if it changes between themes. Never a hex in a template.
+2. **A recurring visual?** Add a class to `@layer components` in `input.css`.
+   Group its base selector with its variants (`.btn, .btn-primary, …`) so a
+   bare variant class still renders the component. No `dark:` in this layer —
+   the tokens flip instead.
+3. **A recurring structure?** Add a templ component to `components.templ`.
+   Give it a `testID string` parameter if it replaces markup that carries a
+   `data-testid`, and emit the attribute only when it is non-empty. Reuse
+   `Kind` for anything with a semantic colour, and map your domain values onto
+   it with a small function next to their data (`jobKind`, `subKind`).
+4. **An icon?** One const in `icons.templ` plus one switch arm emitting the
+   complete `<svg>`. `TestIconRegistryIsComplete` fails a const with no arm.
+5. **Anything else** is a one-off: compose utilities from the token scales.
+6. Add it to `templ Gallery()` in `gallery.templ`, in every variant. That is
+   the reference page *and* the visual baseline.
+7. `make generate`, then `make check` — the design-system test refuses raw hex,
+   palette ramps, `dark:` variants, `!` overrides, arbitrary lengths and
+   quoted-attribute interpolation, with no exemptions. Then `make visual-update`.
+
+## Add a theme (rebrand)
+
+The whole product's look is a value edit, in this order:
+
+1. **Brand ramp** — replace all eleven `--color-brand-50` … `--color-brand-950`
+   in the `@theme` block of `input.css`. The semantic aliases read 600/500/400
+   and the tints read 50/950, so a partial swap leaves the tints on the old hue.
+2. **Semantic aliases** — `--color-brand`, `-hover`, `-fg`, `-fg-muted`,
+   `-text`, `-subtle`, `-subtle-fg`. Only if the mapping changes (a pale brand
+   needs a dark `--color-brand-fg`).
+3. **State triads** — `success` / `warn` / `danger` / `info`, six slots each,
+   plus their `.dark` overrides.
+4. **Structural tokens** — `--container-page`, `--container-narrow`,
+   `--spacing-sidebar`, `--spacing-docnav`, `--spacing-topbar`,
+   `--spacing-navbar` if the shell proportions change.
+5. **Email** — `emailStyle` in `internal/web/templates/theme.go`. Mail clients
+   strip `<style>` and cannot read custom properties, so email is the one
+   surface that inlines hex; mirror the light-mode token values.
+6. **Identity** — `BrandName`, `DocsEditBase`, and the nav/footer lists in
+   `internal/web/templates/chrome.go`; the logo mark is `IconLogo` in
+   `icons.templ` and `static/favicon.svg`.
+7. **Catalogs** — `grep GoGoGadget internal/i18n/catalog_*.go`. The product
+   name appears inside translated prose (`email.footer`, `email.*.subject`),
+   which belongs to the catalogs, not to a template variable.
+8. `make generate`, open `/dev/gallery` in both themes, then
+   `make visual-update` to regenerate the baselines.

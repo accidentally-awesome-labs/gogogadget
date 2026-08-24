@@ -12,17 +12,17 @@ import (
 // buttons call Clerk.setActive via clerk-js.
 templ SelectOrg(orgs []sqlc.Org, devMode bool) {
 	<section class="max-w-md mx-auto px-4 py-24">
-		<h1 class="text-2xl font-bold text-center">{ i18n.T(ctx, "settings.select_org_title") }</h1>
+		<h1 class="page-title text-center">{ i18n.T(ctx, "settings.select_org_title") }</h1>
 		<p class="mt-2 text-center text-fg-muted text-sm">{ i18n.T(ctx, "settings.select_org_sub", len(orgs)) }</p>
 		<div class="mt-8 space-y-3" x-data="selectOrg">
 			for _, o := range orgs {
 				if devMode {
-					<a href={ "/dev/switch-org?org=" + o.ClerkOrgID } class="card flex items-center gap-3 hover:border-brand-500 w-full" data-testid="select-org-button">
+					<a href={ "/dev/switch-org?org=" + o.ClerkOrgID } class="card flex items-center gap-3 hover:border-brand w-full" data-testid="select-org-button">
 						<span class="font-semibold">{ o.Name }</span>
 						<span class="text-sm text-fg-muted ml-auto">{ o.Slug }</span>
 					</a>
 				} else {
-					<button type="button" @click={ "choose('" + o.ClerkOrgID + "')" } class="card flex items-center gap-3 hover:border-brand-500 w-full text-left" data-testid="select-org-button">
+					<button type="button" @click={ "choose('" + o.ClerkOrgID + "')" } class="card flex items-center gap-3 hover:border-brand w-full text-left cursor-pointer" data-testid="select-org-button">
 						<span class="font-semibold">{ o.Name }</span>
 						<span class="text-sm text-fg-muted ml-auto">{ o.Slug }</span>
 					</button>
@@ -34,62 +34,41 @@ templ SelectOrg(orgs []sqlc.Org, devMode bool) {
 
 templ Disabled() {
 	<section class="max-w-md mx-auto px-4 py-24 text-center">
-		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "settings.disabled_title") }</h1>
+		<h1 class="page-title">{ i18n.T(ctx, "settings.disabled_title") }</h1>
 		<p class="mt-4 text-fg-muted">{ i18n.T(ctx, "settings.disabled_body") }</p>
 	</section>
 }
 
 templ SettingsTabs(active string) {
-	<nav class="flex gap-1 border-b border-border mb-8">
-		for _, item := range settingsTabs(ctx) {
-			<a
-				href={ templ.SafeURL(item.Href) }
-				hx-boost="true"
-				hx-target={ NavTarget }
-				hx-select={ NavTarget }
-				hx-swap={ NavSwap }
-				aria-current={ navCurrent(Page{Path: active}, item.Href) }
-				class="px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent text-fg-muted hover:text-fg aria-[current=page]:border-brand-600 aria-[current=page]:text-fg"
-			>{ item.Label }</a>
-		}
-	</nav>
+	@Tabs(settingsTabs(ctx), active)
 }
 
 // settingsTabs assembles the tab list; the Webhooks tab obeys its feature
 // flag (WithWebhooksEnabled on the request context).
-func settingsTabs(ctx context.Context) []struct{ Label, Href string } {
-	items := []struct{ Label, Href string }{
-		{i18n.T(ctx, "settings.tab_account"), "/app/settings/account"},
-		{i18n.T(ctx, "settings.tab_org"), "/app/settings/org"},
-		{i18n.T(ctx, "settings.tab_billing"), "/app/settings/billing"},
-		{i18n.T(ctx, "settings.tab_api"), "/app/settings/api"},
+func settingsTabs(ctx context.Context) []NavItem {
+	items := []NavItem{
+		{LabelKey: "settings.tab_account", Href: "/app/settings/account"},
+		{LabelKey: "settings.tab_org", Href: "/app/settings/org"},
+		{LabelKey: "settings.tab_billing", Href: "/app/settings/billing"},
+		{LabelKey: "settings.tab_api", Href: "/app/settings/api"},
 	}
 	if WebhooksEnabled(ctx) {
-		items = append(items, struct{ Label, Href string }{i18n.T(ctx, "settings.tab_webhooks"), "/app/settings/webhooks"})
+		items = append(items, NavItem{LabelKey: "settings.tab_webhooks", Href: "/app/settings/webhooks"})
 	}
 	// Notification preferences are always available (not flag-gated).
-	items = append(items, struct{ Label, Href string }{i18n.T(ctx, "settings.tab_notifications"), "/app/settings/notifications"})
+	items = append(items, NavItem{LabelKey: "settings.tab_notifications", Href: "/app/settings/notifications"})
 	return items
 }
 
 templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string) {
 	@SettingsTabs("/app/settings/account")
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "settings.account_title") }</h1>
+	@PageHeader(i18n.T(ctx, "settings.account_title"))
 	<div class="card max-w-lg">
-		<dl class="space-y-4 text-sm">
-			<div>
-				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.account_name") }</dt>
-				<dd class="font-medium">{ user.Name }</dd>
-			</div>
-			<div>
-				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.account_email") }</dt>
-				<dd class="font-medium">{ string(user.Email) }</dd>
-			</div>
-			<div>
-				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.account_member_since") }</dt>
-				<dd class="font-medium">{ user.CreatedAt.Time.Format("January 2, 2006") }</dd>
-			</div>
-		</dl>
+		@DefinitionList([]DefRow{
+			{Term: i18n.T(ctx, "settings.account_name"), Value: user.Name},
+			{Term: i18n.T(ctx, "settings.account_email"), Value: string(user.Email)},
+			{Term: i18n.T(ctx, "settings.account_member_since"), Value: user.CreatedAt.Time.Format("January 2, 2006")},
+		})
 		<p class="mt-6 text-sm text-fg-muted">
 			{ i18n.T(ctx, "settings.account_clerk_managed") }
 			if accountPortalURL != "" {
@@ -99,10 +78,10 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 	</div>
 
 	<div class="card max-w-lg mt-6" data-testid="appearance-card">
-		<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.appearance_title") }</h2>
+		@SectionHeading(i18n.T(ctx, "settings.appearance_title"), "")
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.appearance_body") }</p>
 		<div class="mt-4">
-			<p class="text-sm font-medium mb-2">{ i18n.T(ctx, "settings.theme_label") }</p>
+			<p class="label">{ i18n.T(ctx, "settings.theme_label") }</p>
 			<div class="flex gap-2">
 				@themeChoice("system", i18n.T(ctx, "settings.theme_system"), user.Theme)
 				@themeChoice("light", i18n.T(ctx, "settings.theme_light"), user.Theme)
@@ -110,7 +89,7 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 			</div>
 		</div>
 		<div class="mt-6">
-			<p class="text-sm font-medium mb-2">{ i18n.T(ctx, "settings.language_label") }</p>
+			<p class="label">{ i18n.T(ctx, "settings.language_label") }</p>
 			<div class="flex gap-2">
 				@localeChoice("", i18n.T(ctx, "settings.language_auto"), user.Locale)
 				for _, l := range i18n.Locales {
@@ -121,9 +100,9 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 	</div>
 
 	<div class="card max-w-lg mt-6">
-		<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.data_title") }</h2>
+		@SectionHeading(i18n.T(ctx, "settings.data_title"), "")
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.data_body") }</p>
-		<a href="/app/settings/account/export" class="btn mt-4" data-testid="export-data">{ i18n.T(ctx, "settings.data_export") }</a>
+		<a href="/app/settings/account/export" class="btn btn-ghost mt-4" data-testid="export-data">{ i18n.T(ctx, "settings.data_export") }</a>
 	</div>
 
 	<div id="danger-zone">
@@ -134,18 +113,20 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 // SettingsDangerZone is the account-deletion card. Extracted so the 422
 // re-render (email mismatch, sole-admin blocker) swaps exactly this card.
 templ SettingsDangerZone(user sqlc.User, dangerErr string) {
-	<div class="card max-w-lg mt-6 border-red-200 dark:border-red-900">
-		<h2 class="text-lg font-semibold text-red-700 dark:text-red-400">{ i18n.T(ctx, "settings.danger_title") }</h2>
+	<div class="card max-w-lg mt-6 border-danger-border">
+		@SectionHeading(i18n.T(ctx, "settings.danger_title"), "text-danger-text")
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.danger_body") }</p>
 		<form hx-post="/app/settings/account/delete" hx-target="#danger-zone" hx-swap="outerHTML" novalidate hx-disable="this" class="mt-4 space-y-3">
 			if dangerErr != "" {
-				<div class="alert-error" role="alert" data-testid="delete-account-error">{ dangerErr }</div>
+				@Alert(KindDanger, "alert", "", "delete-account-error") {
+					{ dangerErr }
+				}
 			}
 			<div>
-				<label class="block text-sm font-medium mb-1" for="confirm_email">{ i18n.T(ctx, "settings.danger_confirm_label") }</label>
-				<input id="confirm_email" type="email" name="confirm_email" class="input" autocomplete="email" />
+				<label class="label" for="confirm_email">{ i18n.T(ctx, "settings.danger_confirm_label") }</label>
+				<input id="confirm_email" type="email" name="confirm_email" class="input" autocomplete="email"/>
 			</div>
-			<div class="flex items-center gap-3">
+			<div class="form-actions">
 				<button type="submit" class="btn btn-danger" data-testid="delete-account"
 					hx-confirm={ i18n.T(ctx, "settings.danger_confirm_prompt") }>
 					{ i18n.T(ctx, "settings.danger_delete") }
@@ -158,18 +139,12 @@ templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 
 templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string, canExport bool) {
 	@SettingsTabs("/app/settings/org")
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "settings.org_title") }</h1>
+	@PageHeader(i18n.T(ctx, "settings.org_title"))
 	<div class="card mb-6 max-w-lg">
-		<dl class="space-y-4 text-sm">
-			<div>
-				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.org_name") }</dt>
-				<dd class="font-medium">{ org.Name }</dd>
-			</div>
-			<div>
-				<dt class="text-fg-muted">{ i18n.T(ctx, "settings.org_slug") }</dt>
-				<dd class="font-medium">{ org.Slug }</dd>
-			</div>
-		</dl>
+		@DefinitionList([]DefRow{
+			{Term: i18n.T(ctx, "settings.org_name"), Value: org.Name},
+			{Term: i18n.T(ctx, "settings.org_slug"), Value: org.Slug},
+		})
 		<p class="mt-6 text-sm text-fg-muted">
 			{ i18n.T(ctx, "settings.org_clerk_managed") }
 			if organizationPortalURL != "" {
@@ -179,19 +154,19 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 	</div>
 	if canExport {
 		<div class="card mb-6 max-w-lg" data-testid="org-export-card">
-			<h2 class="text-lg font-semibold">{ i18n.T(ctx, "settings.org_export_title") }</h2>
+			@SectionHeading(i18n.T(ctx, "settings.org_export_title"), "")
 			<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.org_export_body") }</p>
 			<button
 				type="button"
 				hx-post="/app/settings/org/export"
 				hx-swap="none"
-				class="btn mt-4"
+				class="btn btn-ghost mt-4"
 				data-testid="org-export"
 			>{ i18n.T(ctx, "settings.org_export_button") }</button>
 		</div>
 	}
-	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "settings.org_members_heading") }</h2>
-	<div class="card !p-0 overflow-hidden">
+	@SectionHeading(i18n.T(ctx, "settings.org_members_heading"), "mb-3")
+	@TableCard("") {
 		<table class="table">
 			<thead>
 				<tr><th>{ i18n.T(ctx, "settings.org_col_member") }</th><th>{ i18n.T(ctx, "settings.org_col_email") }</th><th>{ i18n.T(ctx, "settings.org_col_role") }</th></tr>
@@ -201,20 +176,20 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 					<tr>
 						<td class="font-medium">{ m.Name }</td>
 						<td>{ string(m.Email) }</td>
-						<td><span class="badge bg-surface-raised text-fg-muted">{ m.Role }</span></td>
+						<td>@Badge(m.Role, KindNeutral)</td>
 					</tr>
 				}
 			</tbody>
 		</table>
-	</div>
+	}
 }
 
 // choiceClass styles a preference button as selected or not.
 func choiceClass(selected bool) string {
 	if selected {
-		return "btn btn-primary !px-3 !py-1.5 text-sm"
+		return "btn btn-primary btn-sm"
 	}
-	return "btn !px-3 !py-1.5 text-sm"
+	return "btn btn-ghost btn-sm"
 }
 
 // themeChoice and localeChoice are one-field hx-post forms rather than a

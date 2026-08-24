@@ -23,21 +23,97 @@
   --color-brand-900: #312e81;
   --color-brand-950: #1e1b4b;
 
-  /* Semantic tokens — templates use ONLY these + component classes. */
+  /* Structural tokens. Layout dimensions are tokens so a shell restyle is a
+     value edit, not a hunt through three template files. */
+  --container-page:   72rem;   /* max-w-page   — was max-w-6xl */
+  --container-narrow: 48rem;   /* max-w-narrow — was max-w-3xl */
+  --spacing-sidebar:  15rem;   /* w-sidebar    — was w-60 */
+  --spacing-docnav:   14rem;   /* w-docnav     — was w-56 */
+  --spacing-topbar:   3.5rem;  /* h-topbar / top-topbar — was h-14 / top-14 */
+  --spacing-navbar:   4rem;    /* h-navbar / top-navbar — was h-16 / top-16 */
+
+  /* One step below text-xs, for counters that must fit inside a 1rem circle.
+     A scale entry rather than an arbitrary text-[10px] in a template. */
+  --text-micro: 0.625rem;
+  --text-micro--line-height: 1;
+
+  /* Semantic surfaces — templates use ONLY these + component classes. */
   --color-surface: #ffffff;
   --color-surface-raised: #f8fafc;
   --color-border: #e2e8f0;
   --color-fg: #0f172a;
   --color-fg-muted: #475569;
+
+  /* Brand semantics. Templates use ONLY these; the numeric ramp above is the
+     palette they are drawn from and is referenced only in this file. */
+  --color-brand:            var(--color-brand-600);
+  --color-brand-hover:      var(--color-brand-500);
+  --color-brand-fg:         #ffffff;
+  /* Secondary text ON the brand fill. Like --color-brand-fg it must NOT flip
+     in dark mode: the fill it sits on does not flip either. */
+  --color-brand-fg-muted:   var(--color-brand-100);
+  --color-brand-text:       var(--color-brand-600);
+  --color-brand-subtle:     var(--color-brand-50);
+  --color-brand-subtle-fg:  var(--color-brand-700);
+
+  /* State triads. Six slots per kind, one per role a state colour plays:
+       {k}            solid fill
+       {k}-fg         text on the solid fill
+       {k}-text       {k}-coloured text on a normal surface
+       {k}-subtle     tinted background
+       {k}-subtle-fg  text on the tinted background
+       {k}-border     border on the tinted background
+     Light values below; .dark overrides all but the solid pair. */
+  --color-success: #16a34a; --color-success-fg: #ffffff;
+  --color-success-text: #15803d; --color-success-subtle: #f0fdf4;
+  --color-success-subtle-fg: #15803d; --color-success-border: #bbf7d0;
+
+  --color-warn: #d97706; --color-warn-fg: #ffffff;
+  --color-warn-text: #b45309; --color-warn-subtle: #fffbeb;
+  --color-warn-subtle-fg: #b45309; --color-warn-border: #fde68a;
+
+  --color-danger: #dc2626; --color-danger-fg: #ffffff;
+  --color-danger-text: #b91c1c; --color-danger-subtle: #fef2f2;
+  --color-danger-subtle-fg: #b91c1c; --color-danger-border: #fecaca;
+
+  --color-info: var(--color-brand-600); --color-info-fg: #ffffff;
+  --color-info-text: var(--color-brand-600); --color-info-subtle: var(--color-brand-50);
+  --color-info-subtle-fg: var(--color-brand-700); --color-info-border: var(--color-brand-200);
 }
 
 @layer base {
+  /* Stacking order. Tailwind has no --z-* theme namespace, so these are plain
+     custom properties consumed as z-(--z-name). One scale, three layers. */
+  :root {
+    --z-nav: 40;       /* sticky header, app drawer */
+    --z-overlay: 50;   /* toasts, dropdowns, consent, skip link */
+    --z-progress: 60;  /* navigation progress bar */
+  }
+
+  /* Dark mode is token flipping, never a dark: variant in a template: every
+     utility and component class below is built on these names, so
+     re-declaring them here restyles the whole product. */
   .dark {
     --color-surface: #0b1120;
     --color-surface-raised: #111a2e;
     --color-border: #1e293b;
     --color-fg: #e2e8f0;
     --color-fg-muted: #94a3b8;
+
+    /* Brand fill stays at ramp step 600 in dark so buttons are identical in
+       both themes; only the text/tint slots flip. */
+    --color-brand-text:      var(--color-brand-400);
+    --color-brand-subtle:    var(--color-brand-950);
+    --color-brand-subtle-fg: var(--color-brand-300);
+
+    --color-success-text: #86efac; --color-success-subtle: #052e16;
+    --color-success-subtle-fg: #86efac; --color-success-border: #166534;
+    --color-warn-text: #fcd34d; --color-warn-subtle: #451a03;
+    --color-warn-subtle-fg: #fcd34d; --color-warn-border: #92400e;
+    --color-danger-text: #fca5a5; --color-danger-subtle: #450a0a;
+    --color-danger-subtle-fg: #fca5a5; --color-danger-border: #991b1b;
+    --color-info-text: var(--color-brand-400); --color-info-subtle: var(--color-brand-950);
+    --color-info-subtle-fg: var(--color-brand-300); --color-info-border: var(--color-brand-800);
   }
 
   @font-face {
@@ -76,35 +152,38 @@
     @apply block h-8 w-8 rounded-full border border-border bg-surface-raised
       text-center text-xs font-semibold text-fg-muted;
   }
-  .btn, .btn-primary, .btn-ghost, .btn-danger {
+
+  /* Buttons. Every variant family lists its base selector alongside its
+     variants so a bare variant class still renders the full component. The
+     size axis (sm/xs/icon) is what removes ad-hoc !padding overrides. */
+  .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
+  .btn-sm, .btn-xs, .btn-icon {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
       transition-colors duration-150 cursor-pointer
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
+      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand
       disabled:opacity-50 disabled:pointer-events-none;
   }
-  .btn-primary {
-    @apply bg-brand-600 text-white hover:bg-brand-500;
-  }
-  .btn-ghost {
-    @apply border border-border text-fg hover:bg-surface-raised;
-  }
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-500;
-  }
+  .btn-primary { @apply bg-brand text-brand-fg hover:bg-brand-hover; }
+  .btn-ghost   { @apply border border-border text-fg hover:bg-surface-raised; }
+  .btn-danger  { @apply bg-danger text-danger-fg hover:opacity-90; }
+  .btn-inverse { @apply bg-surface text-brand-text hover:bg-surface-raised; }
+  .btn-sm      { @apply px-3 py-1.5 text-sm; }
+  .btn-xs      { @apply px-2 py-1 text-xs; }
+  .btn-icon    { @apply px-2 py-2; }
+
   .input {
     @apply block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg
       placeholder:text-fg-muted outline-none
-      focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30
+      focus:border-brand focus:ring-2 focus:ring-brand/30
       disabled:opacity-50;
   }
+  .input-sm { @apply py-1.5 text-sm; }
+  .input-xs { @apply py-1 text-xs; }
   .label {
     @apply block text-sm font-medium text-fg mb-1;
   }
   .card {
     @apply rounded-xl border border-border bg-surface p-6 shadow-sm;
-  }
-  .badge {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
   }
   .table {
     @apply min-w-full divide-y divide-border text-sm;
@@ -122,23 +201,76 @@
     @apply divide-y divide-border;
   }
   .link {
-    @apply text-brand-600 underline underline-offset-4 hover:no-underline;
+    @apply text-brand-text underline underline-offset-4 hover:no-underline;
   }
-  .dark .link {
-    @apply text-brand-400;
+
+  .badge, .badge-brand, .badge-info, .badge-success, .badge-warn, .badge-danger, .badge-neutral {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
   }
-  .alert-success {
-    @apply rounded-lg border border-green-200 bg-green-50 text-green-800 p-3 text-sm;
+  .badge-brand   { @apply bg-brand-subtle text-brand-subtle-fg; }
+  .badge-info    { @apply bg-info-subtle text-info-subtle-fg; }
+  .badge-success { @apply bg-success-subtle text-success-subtle-fg; }
+  .badge-warn    { @apply bg-warn-subtle text-warn-subtle-fg; }
+  .badge-danger  { @apply bg-danger-subtle text-danger-subtle-fg; }
+  .badge-neutral { @apply bg-surface-raised text-fg-muted; }
+
+  .alert, .alert-info, .alert-success, .alert-warn, .alert-danger {
+    @apply rounded-lg border p-3 text-sm;
   }
-  .dark .alert-success {
-    @apply border-green-900 bg-green-950 text-green-200;
+  .alert-info    { @apply border-info-border bg-info-subtle text-info-subtle-fg; }
+  .alert-success { @apply border-success-border bg-success-subtle text-success-subtle-fg; }
+  .alert-warn    { @apply border-warn-border bg-warn-subtle text-warn-subtle-fg; }
+  .alert-danger  { @apply border-danger-border bg-danger-subtle text-danger-subtle-fg; }
+
+  /* Full-bleed shell notices (impersonation, announcement, billing). */
+  .banner, .banner-info, .banner-warn, .banner-danger {
+    @apply border-b px-4 py-2 text-sm;
   }
-  .alert-error {
-    @apply rounded-lg border border-red-200 bg-red-50 text-red-800 p-3 text-sm;
+  .banner-info   { @apply border-info-border bg-info-subtle text-info-subtle-fg; }
+  .banner-warn   { @apply border-warn-border bg-warn-subtle text-warn-subtle-fg; }
+  .banner-danger { @apply border-danger-border bg-danger-subtle text-danger-subtle-fg; }
+
+  .toast, .toast-info, .toast-success, .toast-danger {
+    @apply rounded-xl border border-border bg-surface px-4 py-3 text-sm shadow-lg border-l-4;
   }
-  .dark .alert-error {
-    @apply border-red-900 bg-red-950 text-red-200;
-  }
+  .toast-info    { @apply border-l-brand; }
+  .toast-success { @apply border-l-success; }
+  .toast-danger  { @apply border-l-danger; }
+
+  /* Structure and typography. One class per recurring shape, so a page is
+     composed from named ideas rather than retyped utility strings. */
+  .page-section { @apply max-w-page mx-auto px-4 py-16; }
+  .page-narrow  { @apply max-w-narrow mx-auto px-4 py-16; }
+  .page-header  { @apply flex items-center justify-between gap-4 flex-wrap mb-6; }
+  .page-title    { @apply text-2xl font-bold; }
+  .section-title { @apply text-lg font-semibold; }
+  .display-title { @apply text-4xl font-extrabold tracking-tight; }
+  .hero-title    { @apply text-5xl font-extrabold tracking-tight; }
+  .error-code    { @apply text-6xl font-extrabold text-brand-text; }
+  .eyebrow       { @apply text-xs font-semibold uppercase tracking-wide text-fg-muted; }
+  .table-card   { @apply rounded-xl border border-border bg-surface shadow-sm overflow-hidden; }
+  .table-empty  { @apply p-6 text-sm text-fg-muted; }
+  .card-actions { @apply flex justify-end gap-2 flex-wrap; }
+  .toolbar      { @apply flex items-center gap-2 mb-4; }
+  .form-actions { @apply flex items-center gap-3; }
+  .field-error  { @apply mt-1 text-sm text-danger-text; }
+  .code-chip    { @apply rounded bg-surface-raised border border-border px-1.5 py-0.5 text-xs; }
+  .meter        { @apply w-full bg-surface-raised rounded-full h-2 mt-2 overflow-hidden; }
+  .meter-fill   { @apply bg-brand h-2 rounded-full; }
+  .count-badge  { @apply absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand
+                    text-brand-fg text-micro font-bold flex items-center justify-center; }
+
+  /* Navigation link idioms. aria-current="page" is the active signal (set
+     server-side by navCurrent and client-side by syncAppNavigation). */
+  .nav-link { @apply rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-surface hover:text-fg
+                aria-[current=page]:bg-surface aria-[current=page]:text-fg
+                aria-[current=page]:font-semibold; }
+  .doc-link { @apply block rounded-lg px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised
+                aria-[current=page]:text-brand-text aria-[current=page]:font-semibold; }
+  .tab      { @apply px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent
+                text-fg-muted hover:text-fg
+                aria-[current=page]:border-brand aria-[current=page]:text-fg; }
+  .tab-bar  { @apply flex gap-1 border-b border-border mb-8; }
 
   /* htmx request indicator. htmx adds .htmx-request to the element that issued
      the request and to anything its hx-indicator names; these rules fade the
@@ -166,8 +298,8 @@
     inset-inline: 0;
     top: 0;
     height: 2px;
-    z-index: 60;
-    background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-600));
+    z-index: var(--z-progress);
+    background: linear-gradient(90deg, var(--color-brand-hover), var(--color-brand));
     transform-origin: 0 50%;
     animation: nav-progress 8s cubic-bezier(0.1, 0.6, 0.3, 1) 150ms forwards;
   }
@@ -196,7 +328,7 @@
   .prose h2 { @apply text-2xl font-bold mt-10 mb-3; }
   .prose h3 { @apply text-xl font-semibold mt-8 mb-3; }
   .prose p { @apply my-4; }
-  .prose a { @apply text-brand-600 underline underline-offset-4 dark:text-brand-400; }
+  .prose a { @apply text-brand-text underline underline-offset-4; }
   .prose ul { @apply list-disc pl-6 my-4 space-y-1; }
   .prose ol { @apply list-decimal pl-6 my-4 space-y-1; }
   .prose li > ul, .prose li > ol { @apply my-1; }

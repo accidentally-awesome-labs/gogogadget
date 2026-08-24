@@ -22,6 +22,10 @@ const publicPages = [
   ['docs', '/docs/getting-started'],
   ['changelog', '/changelog'],
   ['not-found', '/nope'],
+  // The component gallery renders every token and component in every variant
+  // on one URL, so this single baseline covers the whole design system.
+  // Dev-only route (DEV_AUTH_BYPASS), which config refuses in production.
+  ['gallery', '/dev/gallery'],
 ] as const;
 
 const authedPages: Array<[string, string, 'pro' | 'admin']> = [
@@ -54,6 +58,10 @@ for (const theme of ['light', 'dark'] as const) {
         await expect(page.locator('body')).toBeVisible();
         await expect(page).toHaveScreenshot(`${name}-${theme}.png`, {
           ...shot,
+          // Every other baseline is the fold, which is what a visitor judges.
+          // The gallery is a reference sheet, not a page: its whole value is
+          // that nothing in the component layer escapes the frame.
+          fullPage: name === 'gallery',
           mask: maskSelectors.map((s) => page.locator(s)),
         });
       });

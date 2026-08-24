@@ -27,12 +27,10 @@ func localeAriaCurrent(current bool) string {
 templ LocaleSwitcher(path string) {
 	<details class="relative">
 		<summary class="flex items-center gap-1 cursor-pointer list-none text-sm text-fg-muted hover:text-fg select-none" data-testid="locale-switcher">
-			<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-				<circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-			</svg>
+			@Icon(IconGlobe, "w-4 h-4")
 			{ i18n.T(ctx, "i18n.language") }
 		</summary>
-		<div class="absolute left-0 mt-2 w-36 card !p-2 flex flex-col gap-1 z-50">
+		<div class="absolute left-0 mt-2 w-36 card p-2 flex flex-col gap-1 z-(--z-overlay)">
 			for _, l := range i18n.Locales {
 				<form hx-post="/set-locale" hx-swap="none">
 					<input type="hidden" name="lang" value={ l.Code }/>

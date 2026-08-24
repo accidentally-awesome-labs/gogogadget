@@ -7,13 +7,12 @@ import (
 )
 
 templ ProjectsPage(d ProjectListData) {
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "projects.title") }</h1>
+	@PageHeader(i18n.T(ctx, "projects.title")) {
 		<div class="flex items-center gap-2">
 			<button type="button" hx-post="/app/projects/export" hx-swap="none" class="btn btn-ghost" data-testid="projects-export">{ i18n.T(ctx, "projects.export") }</button>
 			<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
 		</div>
-	</div>
+	}
 
 	if d.Plan.MaxProjects > 0 {
 		<div class="card mb-4 text-sm" data-testid="usage-meter">
@@ -21,20 +20,8 @@ templ ProjectsPage(d ProjectListData) {
 		</div>
 	}
 
-	<div class="flex items-center gap-2 mb-4">
-		<input
-			type="search" name="q" value={ d.Query } placeholder={ i18n.T(ctx, "projects.search_placeholder") }
-			class="input max-w-sm"
-			hx-get="/app/projects" hx-trigger="input changed delay:300ms, search"
-			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
-			hx-sync="this:replace"
-			hx-indicator="#projects-search-indicator"
-			aria-label={ i18n.T(ctx, "projects.search_label") }
-		/>
-		<span id="projects-search-indicator" class="text-fg-muted">
-			@Spinner()
-		</span>
-	</div>
+	@SearchToolbar("q", d.Query, i18n.T(ctx, "projects.search_placeholder"), i18n.T(ctx, "projects.search_label"),
+		"/app/projects", "#table-container", "projects-search-indicator", "")
 	@ProjectsTable(d)
 }
 
@@ -45,7 +32,7 @@ templ ProjectsTable(d ProjectListData) {
 				<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
 			}
 		} else {
-			<div class="card !p-0 overflow-hidden">
+			@TableCard("") {
 				<table class="table">
 					<thead>
 						<tr><th>{ i18n.T(ctx, "projects.col_name") }</th><th>{ i18n.T(ctx, "projects.col_created") }</th><th class="text-right">{ i18n.T(ctx, "projects.col_actions") }</th></tr>
@@ -56,12 +43,12 @@ templ ProjectsTable(d ProjectListData) {
 								<td class="font-medium">{ p.Name }</td>
 								<td class="text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 								<td class="text-right">
-									<div class="flex justify-end gap-2">
-										<a href={ templ.SafeURL(fmt.Sprintf("/app/projects/%d/edit", p.ID)) } class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "projects.edit") }</a>
+									<div class="card-actions">
+										<a href={ templ.SafeURL(fmt.Sprintf("/app/projects/%d/edit", p.ID)) } class="btn btn-ghost btn-xs">{ i18n.T(ctx, "projects.edit") }</a>
 										<button
 											type="button"
 											hx-post={ fmt.Sprintf("/app/projects/%d/archive", p.ID) }
-											class="btn-ghost !px-2 !py-1 text-xs"
+											class="btn btn-ghost btn-xs"
 										>{ i18n.T(ctx, "projects.archive") }</button>
 										<button
 											type="button"
@@ -69,7 +56,7 @@ templ ProjectsTable(d ProjectListData) {
 											hx-confirm={ i18n.T(ctx, "projects.delete_confirm") }
 											hx-target="closest tr"
 											hx-swap="outerHTML"
-											class="btn-danger !px-2 !py-1 text-xs"
+											class="btn btn-danger btn-xs"
 										>{ i18n.T(ctx, "projects.delete") }</button>
 									</div>
 								</td>
@@ -77,8 +64,8 @@ templ ProjectsTable(d ProjectListData) {
 						}
 					</tbody>
 				</table>
-			</div>
-			@Pagination(d.Page, d.TotalPages, "/app/projects?q="+d.Query)
+			}
+			@Pagination(d.Page, d.TotalPages, "/app/projects?q="+d.Query, "#table-container")
 		}
 	</div>
 }
@@ -86,13 +73,15 @@ templ ProjectsTable(d ProjectListData) {
 templ ProjectForm(d ProjectFormData) {
 	<div id="project-form">
 		if d.LimitHit {
-			<div class="alert-error mb-4" data-testid="plan-limit">
+			@Alert(KindDanger, "alert", "mb-4", "plan-limit") {
 				{ i18n.T(ctx, "projects.limit_hit", d.Plan.Name, fmt.Sprint(d.Plan.MaxProjects)) }
 				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
-			</div>
+			}
 		}
 		if d.NameErr != "" {
-			<div class="alert-error mb-4" role="alert">{ i18n.T(ctx, "projects.fix_error") }</div>
+			@Alert(KindDanger, "alert", "mb-4", "") {
+				{ i18n.T(ctx, "projects.fix_error") }
+			}
 		}
 		<form
 			if d.ID == 0 {
@@ -108,7 +97,7 @@ templ ProjectForm(d ProjectFormData) {
 		>
 			@FormField("name", i18n.T(ctx, "projects.field_name"), "text", d.Name, d.NameErr, i18n.T(ctx, "projects.field_placeholder"), true)
 			<div class="flex gap-3">
-				<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
+				<button type="submit" class="btn btn-primary">
 					@Spinner()
 					if d.ID == 0 {
 						{ i18n.T(ctx, "projects.create") }
@@ -123,11 +112,11 @@ templ ProjectForm(d ProjectFormData) {
 }
 
 templ ProjectNewPage(d ProjectFormData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "projects.new") }</h1>
+	@PageHeader(i18n.T(ctx, "projects.new"))
 	@ProjectForm(d)
 }
 
 templ ProjectEditPage(d ProjectFormData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "projects.edit_heading") }</h1>
+	@PageHeader(i18n.T(ctx, "projects.edit_heading"))
 	@ProjectForm(d)
 }

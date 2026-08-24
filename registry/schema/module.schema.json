@@ -1,0 +1,1126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "module.schema.json",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ModuleDocument"
+    },
+    {
+      "$ref": "#/$defs/ProfileDocument"
+    }
+  ],
+  "$defs": {
+    "ModuleDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "integer",
+          "const": 1
+        },
+        "module": {
+          "$ref": "#/$defs/Manifest"
+        }
+      },
+      "required": [
+        "schema",
+        "module"
+      ]
+    },
+    "ProfileDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "integer",
+          "const": 1
+        },
+        "profile": {
+          "$ref": "#/$defs/Profile"
+        }
+      },
+      "required": [
+        "schema",
+        "profile"
+      ]
+    },
+    "Profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^profile/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "kind": {
+          "type": "string",
+          "const": "profile"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "contract": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "revision",
+        "contract",
+        "title",
+        "description",
+        "members"
+      ]
+    },
+    "Manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "element",
+            "component",
+            "page",
+            "workflow",
+            "system"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "contract": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ManifestFile"
+          }
+        },
+        "claims": {
+          "$ref": "#/$defs/NamespaceClaims"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeContributions"
+        },
+        "migrations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ManifestMigration"
+          }
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EnvironmentVariable"
+          }
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentationRef"
+          }
+        },
+        "tests": {
+          "$ref": "#/$defs/TestMetadata"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DataDeclaration"
+          }
+        },
+        "removal_policy": {
+          "type": "string",
+          "enum": [
+            "free",
+            "retain-data",
+            "drain-required",
+            "replacement-required",
+            "major-version-only"
+          ]
+        },
+        "test_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "revision",
+        "contract",
+        "title",
+        "description",
+        "requires",
+        "files",
+        "claims",
+        "runtime",
+        "migrations",
+        "environment",
+        "docs",
+        "tests",
+        "data",
+        "removal_policy"
+      ]
+    },
+    "ManifestFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "class": {
+          "type": "string",
+          "enum": [
+            "go",
+            "templ",
+            "style",
+            "script",
+            "asset",
+            "query",
+            "migration",
+            "i18n",
+            "content",
+            "seed",
+            "docs",
+            "test",
+            "openapi"
+          ]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "rewrite_module": {
+          "type": "boolean"
+        },
+        "contract": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "class",
+        "sha256",
+        "rewrite_module",
+        "contract"
+      ]
+    },
+    "NamespaceClaims": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "packages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "i18n": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "queries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "openapi": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "content_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "ui": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": []
+    },
+    "RuntimeContributions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "system": {
+          "$ref": "#/$defs/SystemContribution"
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RouteContribution"
+          }
+        },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JobContribution"
+          }
+        },
+        "content_types": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentTypeContribution"
+          }
+        },
+        "navigation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NavigationContribution"
+          }
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SlotContribution"
+          }
+        },
+        "ui": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UIContribution"
+          }
+        },
+        "assets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssetContribution"
+          }
+        }
+      },
+      "required": []
+    },
+    "SystemContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)*$"
+        },
+        "constructor": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "needs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeNeed"
+          }
+        },
+        "provides": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeProvide"
+          }
+        },
+        "start": {
+          "type": "boolean"
+        },
+        "stop": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "package",
+        "constructor",
+        "needs",
+        "provides",
+        "start",
+        "stop"
+      ]
+    },
+    "RuntimeNeed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(?:(?:\\*|\\[\\])*)(?:[A-Za-z_][A-Za-z0-9_]*)(?:\\.[A-Za-z_][A-Za-z0-9_]*)?$"
+        },
+        "optional": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "field",
+        "capability",
+        "type",
+        "optional"
+      ]
+    },
+    "RuntimeProvide": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^(?:(?:\\*|\\[\\])*)(?:[A-Za-z_][A-Za-z0-9_]*)(?:\\.[A-Za-z_][A-Za-z0-9_]*)?$"
+        }
+      },
+      "required": [
+        "field",
+        "capability",
+        "type"
+      ]
+    },
+    "RouteContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "GET",
+            "HEAD",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        },
+        "pattern": {
+          "type": "string",
+          "pattern": "^/(?:(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\})(?:/(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\}))*)?$"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "public",
+            "app",
+            "admin",
+            "api-read",
+            "api-write",
+            "webhook",
+            "static",
+            "probe",
+            "dev"
+          ]
+        },
+        "policy": {
+          "$ref": "#/$defs/RoutePolicy"
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)*$"
+        },
+        "handler": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "enabled": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        }
+      },
+      "required": [
+        "id",
+        "method",
+        "pattern",
+        "scope",
+        "policy",
+        "package",
+        "handler"
+      ]
+    },
+    "RoutePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "csrf_exempt": {
+          "type": "boolean"
+        },
+        "csrf_reason": {
+          "type": "string"
+        },
+        "rate_exempt": {
+          "type": "boolean"
+        },
+        "maintenance_exempt": {
+          "type": "boolean"
+        },
+        "max_body_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "idempotent": {
+          "type": "boolean"
+        },
+        "admin_write": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "csrf_exempt",
+        "csrf_reason",
+        "rate_exempt",
+        "maintenance_exempt",
+        "max_body_bytes",
+        "idempotent",
+        "admin_write"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "csrf_exempt": {
+                "const": true
+              }
+            },
+            "required": [
+              "csrf_exempt"
+            ]
+          },
+          "then": {
+            "properties": {
+              "csrf_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "csrf_reason": {
+                "const": ""
+              }
+            }
+          }
+        }
+      ]
+    },
+    "JobContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)*$"
+        },
+        "handler": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "schedulable": {
+          "type": "boolean"
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "package",
+        "handler",
+        "schedulable",
+        "max_attempts"
+      ]
+    },
+    "ContentTypeContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "pages",
+            "single"
+          ]
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^/(?:(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\})(?:/(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\}))*)?$"
+          },
+          "uniqueItems": true
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)*$"
+        },
+        "handler": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        }
+      },
+      "required": [
+        "id",
+        "mode",
+        "paths",
+        "package",
+        "handler"
+      ]
+    },
+    "NavigationContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "area": {
+          "type": "string",
+          "enum": [
+            "public",
+            "app",
+            "admin",
+            "footer",
+            "settings"
+          ]
+        },
+        "route_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "before": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "after": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "area",
+        "route_id",
+        "label_key"
+      ]
+    },
+    "SlotContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "slot": {
+          "type": "string",
+          "enum": [
+            "head",
+            "app-banner",
+            "sidebar",
+            "topbar",
+            "persistent-body",
+            "dashboard-widget",
+            "settings-section",
+            "admin-row-action",
+            "billing-usage",
+            "content-editor"
+          ]
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)*$"
+        },
+        "renderer": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "before": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "after": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "slot",
+        "package",
+        "renderer"
+      ]
+    },
+    "UIContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "family": {
+          "type": "string",
+          "enum": [
+            "foundations",
+            "actions",
+            "forms",
+            "navigation",
+            "feedback",
+            "overlays",
+            "data",
+            "communication",
+            "layout",
+            "advanced"
+          ]
+        },
+        "engine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alpine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vendor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "native_fallback": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "name",
+        "family"
+      ]
+    },
+    "AssetContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "script",
+            "style",
+            "font",
+            "image",
+            "file"
+          ]
+        },
+        "before": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "after": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "kind"
+      ]
+    },
+    "ManifestMigration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "immutable",
+            "neutralize",
+            "purge"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "source",
+        "sha256"
+      ]
+    },
+    "EnvironmentVariable": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "field": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "production_required": {
+          "type": "boolean"
+        },
+        "secret": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "field",
+        "description"
+      ]
+    },
+    "DocumentationRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "path",
+        "title"
+      ]
+    },
+    "TestMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "go_packages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "smoke": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "e2e": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "visual": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "accessibility": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": []
+    },
+    "DataDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "table": {
+          "type": "string",
+          "pattern": "^[a-z_][a-z0-9_]*$"
+        },
+        "row_discriminator": {
+          "type": "string",
+          "pattern": "^[a-z_][a-z0-9_]*$"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "user",
+            "org",
+            "platform"
+          ]
+        },
+        "export": {
+          "type": "boolean"
+        },
+        "secret_redaction_owner": {
+          "type": "string",
+          "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "account_delete": {
+          "type": "string",
+          "enum": [
+            "cascade",
+            "manual",
+            "retain"
+          ]
+        },
+        "organization_delete": {
+          "type": "string",
+          "enum": [
+            "cascade",
+            "manual",
+            "retain"
+          ]
+        },
+        "external_objects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "persisted_jobs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "table",
+        "scope",
+        "export",
+        "account_delete",
+        "organization_delete"
+      ]
+    }
+  }
+}

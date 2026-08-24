@@ -15,18 +15,20 @@ import (
 // the dead-letter end state (attempts exhausted); only those rows offer a
 // requeue.
 
-func jobStatusBadgeClass(status string) string {
+// jobKind maps a projected job status onto the shared semantic axis. Mapping,
+// not styling: the shades live in input.css.
+func jobKind(status string) Kind {
 	switch status {
 	case "pending":
-		return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+		return KindNeutral
 	case "running":
-		return "bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300"
+		return KindBrand
 	case "retrying":
-		return "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+		return KindWarn
 	case "done":
-		return "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
+		return KindSuccess
 	default: // dead
-		return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+		return KindDanger
 	}
 }
 
@@ -37,13 +39,14 @@ func jobStatusKey(status string) string { return "admin.jobs.status_" + status }
 func jobStatusLabel(ctx context.Context, status string) string {
 	return i18n.T(ctx, jobStatusKey(status))
 }
+
 templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
 	<div id="table-container">
 		if len(rows) == 0 {
 			@EmptyState(i18n.T(ctx, "admin.jobs.title"), i18n.T(ctx, "admin.jobs.empty")) {
 			}
 		} else {
-			<div class="card !p-0 overflow-hidden" data-testid="jobs-table">
+			@TableCard("jobs-table") {
 				<table class="table">
 					<thead>
 						<tr><th>{ i18n.T(ctx, "admin.jobs.col_kind") }</th><th>{ i18n.T(ctx, "admin.jobs.col_status") }</th><th>{ i18n.T(ctx, "admin.jobs.col_attempts") }</th><th>{ i18n.T(ctx, "admin.jobs.col_run_at") }</th><th>{ i18n.T(ctx, "admin.jobs.col_error") }</th><th class="text-right">{ i18n.T(ctx, "admin.jobs.col_actions") }</th></tr>
@@ -53,7 +56,7 @@ templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page
 							<tr id={ fmt.Sprintf("job-row-%d", row.ID) }>
 								<td class="font-medium">{ row.Kind }</td>
 								<td>
-									<span class={ "badge", jobStatusBadgeClass(row.Status) } data-testid="job-status">{ jobStatusLabel(ctx, row.Status) }</span>
+									@BadgeTagged(jobStatusLabel(ctx, row.Status), jobKind(row.Status), "job-status")
 								</td>
 								<td>{ fmt.Sprintf("%d/%d", row.Attempts, row.MaxAttempts) }</td>
 								<td>
@@ -66,7 +69,7 @@ templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page
 											type="button"
 											hx-post={ fmt.Sprintf("/admin/jobs/%d/requeue", row.ID) }
 											hx-confirm={ i18n.T(ctx, "admin.jobs.requeue_confirm") }
-											class="btn-ghost !px-2 !py-1 text-xs"
+											class="btn btn-ghost btn-xs"
 											data-testid={ fmt.Sprintf("job-requeue-%d", row.ID) }
 										>{ i18n.T(ctx, "admin.jobs.requeue") }</button>
 									}
@@ -75,27 +78,15 @@ templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page
 						}
 					</tbody>
 				</table>
-			</div>
-			@Pagination(page, totalPages, "/admin/jobs?q="+filter)
+			}
+			@Pagination(page, totalPages, "/admin/jobs?q="+filter, "#table-container")
 		}
 	</div>
 }
 
 templ AdminJobsPage(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.jobs.title") }</h1>
-	<div class="flex items-center gap-2 mb-4">
-		<input
-			type="search" name="q" value={ filter } placeholder={ i18n.T(ctx, "admin.jobs.search_placeholder") }
-			class="input max-w-sm"
-			hx-get="/admin/jobs" hx-trigger="input changed delay:300ms, search"
-			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
-			hx-sync="this:replace"
-			hx-indicator="#admin-jobs-search-indicator"
-			aria-label={ i18n.T(ctx, "admin.jobs.search_aria") }
-		/>
-		<span id="admin-jobs-search-indicator" class="text-fg-muted">
-			@Spinner()
-		</span>
-	</div>
+	@PageHeader(i18n.T(ctx, "admin.jobs.title"))
+	@SearchToolbar("q", filter, i18n.T(ctx, "admin.jobs.search_placeholder"), i18n.T(ctx, "admin.jobs.search_aria"),
+		"/admin/jobs", "#table-container", "admin-jobs-search-indicator", "")
 	@AdminJobsTable(rows, now, filter, page, totalPages)
 }

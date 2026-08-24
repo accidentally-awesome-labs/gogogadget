@@ -11,6 +11,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
@@ -181,6 +182,22 @@ func TestContentTypeKeysExistInCatalogs(t *testing.T) {
 				check(f.LabelKey + "_" + o)
 			}
 		}
+	}
+}
+
+// Chrome navigation labels and the settings tabs reach i18n.T through struct
+// VALUES in templates/chrome.go and templates/settings.templ, which the
+// literal template scanner above cannot see. Same class of gap as content
+// types, same shape of guard.
+func TestChromeKeysExistInCatalogs(t *testing.T) {
+	en := catalogKeys(t, language.English)
+	es := catalogKeys(t, language.Spanish)
+
+	keys := templates.ChromeCatalogKeys()
+	require.NotEmpty(t, keys)
+	for _, key := range keys {
+		assert.True(t, en[key], "chrome key %s is missing from the en catalog", key)
+		assert.True(t, es[key], "chrome key %s is missing from the es catalog", key)
 	}
 }
 

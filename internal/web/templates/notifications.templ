@@ -12,15 +12,14 @@ import (
 // innerHTML swap, so the shell never carries a drifted hx-swap literal.
 templ NotificationsBadge(unread int64) {
 	if unread > 0 {
-		<span class="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center" aria-label={ i18n.T(ctx, "notifications.unread_aria", unread) }>{ fmt.Sprint(unread) }</span>
+		<span class="count-badge" aria-label={ i18n.T(ctx, "notifications.unread_aria", unread) }>{ fmt.Sprint(unread) }</span>
 	}
 }
 
 // NotificationsPage is the list: unread rows bolded, per-row read buttons,
 // read-all, pagination.
 templ NotificationsPage(d NotificationsData) {
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "notifications.title") }</h1>
+	@PageHeader(i18n.T(ctx, "notifications.title")) {
 		if d.Unread > 0 {
 			<button
 				type="button"
@@ -31,7 +30,7 @@ templ NotificationsPage(d NotificationsData) {
 				data-testid="notifications-read-all"
 			>{ i18n.T(ctx, "notifications.read_all") }</button>
 		}
-	</div>
+	}
 	@NotificationsList(d)
 }
 
@@ -41,7 +40,7 @@ templ NotificationsList(d NotificationsData) {
 		if len(d.Items) == 0 {
 			@EmptyState(i18n.T(ctx, "notifications.empty_title"), i18n.T(ctx, "notifications.empty_body"))
 		} else {
-			<div class="card !p-0 overflow-hidden">
+			@TableCard("") {
 				<ul class="divide-y divide-border">
 					for _, n := range d.Items {
 						<li class={ "flex items-start gap-3 px-4 py-3", templ.KV("font-medium", !n.ReadAt.Valid), "text-fg-muted", templ.KV("text-fg", !n.ReadAt.Valid) } data-testid="notification-row">
@@ -60,7 +59,7 @@ templ NotificationsList(d NotificationsData) {
 										hx-target={ NavTarget }
 										hx-select={ NavTarget }
 										hx-swap={ NavSwap }
-										class="btn-ghost !px-2 !py-1 text-xs"
+										class="btn btn-ghost btn-xs"
 										data-testid="notification-link"
 									>{ i18n.T(ctx, "notifications.open") }</a>
 								}
@@ -70,7 +69,7 @@ templ NotificationsList(d NotificationsData) {
 										hx-post={ fmt.Sprintf("/app/notifications/%d/read", n.ID) }
 										hx-target="#notif-list"
 										hx-swap="outerHTML"
-										class="btn-ghost !px-2 !py-1 text-xs"
+										class="btn btn-ghost btn-xs"
 										data-testid="notification-read"
 									>{ i18n.T(ctx, "notifications.mark_read") }</button>
 								}
@@ -78,34 +77,8 @@ templ NotificationsList(d NotificationsData) {
 						</li>
 					}
 				</ul>
-			</div>
-			@NotificationsPagination(d.Page, d.TotalPages)
+			}
+			@Pagination(d.Page, d.TotalPages, "/app/notifications", "#notif-list")
 		}
 	</div>
 }
-
-// NotificationsPagination mirrors Pagination but targets #notif-list.
-templ NotificationsPagination(page, totalPages int) {
-	if totalPages > 1 {
-		<nav class="flex items-center justify-between mt-4 text-sm" aria-label={ i18n.T(ctx, "activity.pagination_aria") }>
-			if page > 1 {
-				<a href={ templ.SafeURL(fmt.Sprintf("/app/notifications?page=%d", page-1)) }
-					hx-get={ fmt.Sprintf("/app/notifications?page=%d", page-1) }
-					hx-target="#notif-list" hx-swap="innerMorph" hx-push-url="true"
-					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_prev") }</a>
-			} else {
-				<span></span>
-			}
-			<span class="text-fg-muted">{ i18n.T(ctx, "activity.pagination_page_of", page, totalPages) }</span>
-			if page < totalPages {
-				<a href={ templ.SafeURL(fmt.Sprintf("/app/notifications?page=%d", page+1)) }
-					hx-get={ fmt.Sprintf("/app/notifications?page=%d", page+1) }
-					hx-target="#notif-list" hx-swap="innerMorph" hx-push-url="true"
-					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_next") }</a>
-			} else {
-				<span></span>
-			}
-		</nav>
-	}
-}
-

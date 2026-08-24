@@ -1,0 +1,84 @@
+package templates
+
+// IconName is the icon registry key. Adding an icon = one const + one switch
+// arm; TestIconRegistryIsComplete fails a const with no arm.
+type IconName string
+
+const (
+	IconLogo    IconName = "logo"
+	IconMenu    IconName = "menu"
+	IconBell    IconName = "bell"
+	IconSun     IconName = "sun"
+	IconMoon    IconName = "moon"
+	IconGlobe   IconName = "globe"
+	IconCheck   IconName = "check"
+	IconSpinner IconName = "spinner"
+)
+
+// IconNames is every registered icon, in registry order. The gallery renders
+// it and the registry test walks it.
+var IconNames = []IconName{
+	IconLogo, IconMenu, IconBell, IconSun, IconMoon, IconGlobe, IconCheck, IconSpinner,
+}
+
+// iconAttrs flattens the optional attribute spread so the common caller passes
+// nothing. Only the theme toggle needs extras (Alpine x-show/x-cloak), and it
+// needs them ON the svg — a wrapper element would change the flex layout of
+// the button it sits in.
+func iconAttrs(attrs []templ.Attributes) templ.Attributes {
+	switch len(attrs) {
+	case 0:
+		return nil
+	case 1:
+		return attrs[0]
+	}
+	merged := templ.Attributes{}
+	for _, a := range attrs {
+		for k, v := range a {
+			merged[k] = v
+		}
+	}
+	return merged
+}
+
+// Icon renders one registry icon. class carries sizing and colour (w-5 h-5,
+// text-brand-text …); the svg itself is colour-agnostic (currentColor) so it
+// inherits from its parent. An unknown name renders nothing, which reads as a
+// visible bug rather than a silent placeholder.
+templ Icon(name IconName, class string, attrs ...templ.Attributes) {
+	switch name {
+		case IconLogo:
+			<svg class={ class } viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" { iconAttrs(attrs)... }>
+				<path d="M13 2 4.5 13.5H11L9.5 22 19 9.5h-6.5L13 2z"></path>
+			</svg>
+		case IconMenu:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" { iconAttrs(attrs)... }>
+				<path d="M4 6h16M4 12h16M4 18h16"></path>
+			</svg>
+		case IconBell:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" { iconAttrs(attrs)... }>
+				<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path>
+			</svg>
+		case IconSun:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" { iconAttrs(attrs)... }>
+				<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+			</svg>
+		case IconMoon:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" { iconAttrs(attrs)... }>
+				<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path>
+			</svg>
+		case IconGlobe:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" { iconAttrs(attrs)... }>
+				<circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+			</svg>
+		case IconCheck:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" { iconAttrs(attrs)... }>
+				<path d="M20 6 9 17l-5-5"></path>
+			</svg>
+		case IconSpinner:
+			<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true" { iconAttrs(attrs)... }>
+				<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"></circle>
+				<path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+			</svg>
+	}
+}

@@ -7,9 +7,9 @@ import (
 
 templ Home(plans []billing.Plan) {
 	<!-- Hero -->
-	<section class="max-w-6xl mx-auto px-4 pt-20 pb-16 text-center">
-		<h1 class="text-5xl font-extrabold tracking-tight" data-testid="hero">
-			{ i18n.T(ctx, "home.hero.title1") }<span class="text-brand-600 dark:text-brand-400">{ i18n.T(ctx, "home.hero.title2") }</span>
+	<section class="max-w-page mx-auto px-4 pt-20 pb-16 text-center">
+		<h1 class="hero-title" data-testid="hero">
+			{ i18n.T(ctx, "home.hero.title1") }<span class="text-brand-text">{ i18n.T(ctx, "home.hero.title2") }</span>
 		</h1>
 		<p class="mt-6 text-lg text-fg-muted max-w-2xl mx-auto">
 			{ i18n.T(ctx, "home.hero.subtitle") }
@@ -24,7 +24,7 @@ templ Home(plans []billing.Plan) {
 	</section>
 
 	<!-- Logo cloud -->
-	<section class="max-w-6xl mx-auto px-4 py-8">
+	<section class="max-w-page mx-auto px-4 py-8">
 		<p class="text-center text-sm text-fg-muted mb-6">{ i18n.T(ctx, "home.stack") }</p>
 		<div class="flex flex-wrap justify-center gap-x-10 gap-y-4 text-fg-muted font-semibold">
 			<span>Go</span><span>HTMX</span><span>templ</span><span>Tailwind v4</span><span>Postgres</span><span>Clerk</span><span>Polar</span><span>Resend</span><span>PostHog</span><span>Sentry</span>
@@ -32,7 +32,7 @@ templ Home(plans []billing.Plan) {
 	</section>
 
 	<!-- Feature grid -->
-	<section id="features" class="max-w-6xl mx-auto px-4 py-16">
+	<section id="features" class="page-section">
 		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.features.title") }</h2>
 		<div class="mt-10 grid md:grid-cols-3 gap-6">
 			for _, f := range []struct{ Title, Body string }{
@@ -52,7 +52,7 @@ templ Home(plans []billing.Plan) {
 	</section>
 
 	<!-- How it works -->
-	<section class="max-w-6xl mx-auto px-4 py-16">
+	<section class="page-section">
 		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.how.title") }</h2>
 		<div class="mt-10 grid md:grid-cols-3 gap-6 text-center">
 			for i, s := range []struct{ Title, Body string }{
@@ -61,7 +61,7 @@ templ Home(plans []billing.Plan) {
 				{i18n.T(ctx, "home.step3.title"), i18n.T(ctx, "home.step3.body")},
 			} {
 				<div>
-					<div class="w-10 h-10 mx-auto rounded-full bg-brand-600 text-white flex items-center justify-center font-bold">{ i + 1 }</div>
+					<div class="w-10 h-10 mx-auto rounded-full bg-brand text-brand-fg flex items-center justify-center font-bold">{ i + 1 }</div>
 					<h3 class="mt-4 font-semibold">{ s.Title }</h3>
 					<p class="mt-2 text-sm text-fg-muted">{ s.Body }</p>
 				</div>
@@ -70,7 +70,7 @@ templ Home(plans []billing.Plan) {
 	</section>
 
 	<!-- Pricing preview -->
-	<section class="max-w-6xl mx-auto px-4 py-16">
+	<section class="page-section">
 		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.pricing.title") }</h2>
 		<div class="mt-10 grid md:grid-cols-3 gap-6">
 			for _, p := range plans {
@@ -82,7 +82,7 @@ templ Home(plans []billing.Plan) {
 	</section>
 
 	<!-- FAQ -->
-	<section class="max-w-3xl mx-auto px-4 py-16">
+	<section class="page-narrow">
 		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.faq.title") }</h2>
 		<div class="mt-10 space-y-6">
 			for _, q := range []struct{ Q, A string }{
@@ -101,18 +101,18 @@ templ Home(plans []billing.Plan) {
 	</section>
 
 	<!-- CTA band -->
-	<section class="bg-brand-600 text-white">
-		<div class="max-w-6xl mx-auto px-4 py-16 text-center">
+	<section class="bg-brand text-brand-fg">
+		<div class="page-section text-center">
 			<h2 class="text-3xl font-bold">{ i18n.T(ctx, "home.cta_band.title") }</h2>
-			<p class="mt-4 text-brand-100">{ i18n.T(ctx, "home.cta_band.body") }</p>
-			<a href="/signup" class="btn bg-white text-brand-700 hover:bg-brand-50 mt-8 text-base px-6 py-3">{ i18n.T(ctx, "home.cta_band.button") }</a>
+			<p class="mt-4 text-brand-fg-muted">{ i18n.T(ctx, "home.cta_band.body") }</p>
+			<a href="/signup" class="btn btn-inverse mt-8 text-base px-6 py-3">{ i18n.T(ctx, "home.cta_band.button") }</a>
 		</div>
 	</section>
 }
 
 templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
-	<section class="max-w-6xl mx-auto px-4 py-16">
-		<h1 class="text-4xl font-extrabold text-center">{ i18n.T(ctx, "home.pricing.heading") }</h1>
+	<section class="page-section">
+		<h1 class="display-title text-center">{ i18n.T(ctx, "home.pricing.heading") }</h1>
 		<p class="mt-4 text-center text-fg-muted">{ i18n.T(ctx, "home.pricing.subtitle") }</p>
 		<div class="mt-12 grid md:grid-cols-3 gap-6">
 			for _, p := range plans {
@@ -120,7 +120,7 @@ templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
 					if !authed {
 						<a href="/signup" class="btn btn-primary w-full">{ i18n.T(ctx, "home.pricing.choose", p.Name) }</a>
 					} else if p.Key == currentPlanKey {
-						<span class="btn-ghost w-full !border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "home.pricing.current") }</span>
+						<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "home.pricing.current") }</span>
 					} else if p.PolarProductID != "" {
 						<form hx-post="/app/billing/checkout" hx-disable="this">
 							<input type="hidden" name="plan" value={ p.Key }/>

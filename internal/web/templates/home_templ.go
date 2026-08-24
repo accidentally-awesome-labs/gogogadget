@@ -34,7 +34,7 @@ func Home(plans []billing.Plan) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Hero --><section class=\"max-w-6xl mx-auto px-4 pt-20 pb-16 text-center\"><h1 class=\"text-5xl font-extrabold tracking-tight\" data-testid=\"hero\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Hero --><section class=\"max-w-page mx-auto px-4 pt-20 pb-16 text-center\"><h1 class=\"hero-title\" data-testid=\"hero\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,14 +47,14 @@ func Home(plans []billing.Plan) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<span class=\"text-brand-600 dark:text-brand-400\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<span class=\"text-brand-text\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "home.hero.title2"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 12, Col: 120}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 12, Col: 101}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -112,7 +112,7 @@ func Home(plans []billing.Plan) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></section><!-- Logo cloud --><section class=\"max-w-6xl mx-auto px-4 py-8\"><p class=\"text-center text-sm text-fg-muted mb-6\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></section><!-- Logo cloud --><section class=\"max-w-page mx-auto px-4 py-8\"><p class=\"text-center text-sm text-fg-muted mb-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -125,7 +125,7 @@ func Home(plans []billing.Plan) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p><div class=\"flex flex-wrap justify-center gap-x-10 gap-y-4 text-fg-muted font-semibold\"><span>Go</span><span>HTMX</span><span>templ</span><span>Tailwind v4</span><span>Postgres</span><span>Clerk</span><span>Polar</span><span>Resend</span><span>PostHog</span><span>Sentry</span></div></section><!-- Feature grid --><section id=\"features\" class=\"max-w-6xl mx-auto px-4 py-16\"><h2 class=\"text-3xl font-bold text-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p><div class=\"flex flex-wrap justify-center gap-x-10 gap-y-4 text-fg-muted font-semibold\"><span>Go</span><span>HTMX</span><span>templ</span><span>Tailwind v4</span><span>Postgres</span><span>Clerk</span><span>Polar</span><span>Resend</span><span>PostHog</span><span>Sentry</span></div></section><!-- Feature grid --><section id=\"features\" class=\"page-section\"><h2 class=\"text-3xl font-bold text-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,7 +181,7 @@ func Home(plans []billing.Plan) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></section><!-- How it works --><section class=\"max-w-6xl mx-auto px-4 py-16\"><h2 class=\"text-3xl font-bold text-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></section><!-- How it works --><section class=\"page-section\"><h2 class=\"text-3xl font-bold text-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -203,14 +203,14 @@ func Home(plans []billing.Plan) templ.Component {
 			{i18n.T(ctx, "home.step2.title"), i18n.T(ctx, "home.step2.body")},
 			{i18n.T(ctx, "home.step3.title"), i18n.T(ctx, "home.step3.body")},
 		} {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div><div class=\"w-10 h-10 mx-auto rounded-full bg-brand-600 text-white flex items-center justify-center font-bold\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div><div class=\"w-10 h-10 mx-auto rounded-full bg-brand text-brand-fg flex items-center justify-center font-bold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(i + 1)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 64, Col: 123}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 64, Col: 122}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -247,7 +247,7 @@ func Home(plans []billing.Plan) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div></section><!-- Pricing preview --><section class=\"max-w-6xl mx-auto px-4 py-16\"><h2 class=\"text-3xl font-bold text-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div></section><!-- Pricing preview --><section class=\"page-section\"><h2 class=\"text-3xl font-bold text-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -301,7 +301,7 @@ func Home(plans []billing.Plan) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></section><!-- FAQ --><section class=\"max-w-3xl mx-auto px-4 py-16\"><h2 class=\"text-3xl font-bold text-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</div></section><!-- FAQ --><section class=\"page-narrow\"><h2 class=\"text-3xl font-bold text-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -356,7 +356,7 @@ func Home(plans []billing.Plan) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></section><!-- CTA band --><section class=\"bg-brand-600 text-white\"><div class=\"max-w-6xl mx-auto px-4 py-16 text-center\"><h2 class=\"text-3xl font-bold\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div></section><!-- CTA band --><section class=\"bg-brand text-brand-fg\"><div class=\"page-section text-center\"><h2 class=\"text-3xl font-bold\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -369,27 +369,27 @@ func Home(plans []billing.Plan) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</h2><p class=\"mt-4 text-brand-100\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</h2><p class=\"mt-4 text-brand-fg-muted\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "home.cta_band.body"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 107, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 107, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</p><a href=\"/signup\" class=\"btn bg-white text-brand-700 hover:bg-brand-50 mt-8 text-base px-6 py-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</p><a href=\"/signup\" class=\"btn btn-inverse mt-8 text-base px-6 py-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "home.cta_band.button"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 108, Col: 137}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 108, Col: 107}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -424,14 +424,14 @@ func Pricing(plans []billing.Plan, authed bool, currentPlanKey string) templ.Com
 			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<section class=\"max-w-6xl mx-auto px-4 py-16\"><h1 class=\"text-4xl font-extrabold text-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<section class=\"page-section\"><h1 class=\"display-title text-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "home.pricing.heading"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 115, Col: 87}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 115, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
@@ -486,14 +486,14 @@ func Pricing(plans []billing.Plan, authed bool, currentPlanKey string) templ.Com
 						return templ_7745c5c3_Err
 					}
 				} else if p.Key == currentPlanKey {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<span class=\"btn-ghost w-full !border-transparent text-fg-muted pointer-events-none\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<span class=\"btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var30 string
 					templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "home.pricing.current"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 123, Col: 128}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/home.templ`, Line: 123, Col: 131}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 					if templ_7745c5c3_Err != nil {

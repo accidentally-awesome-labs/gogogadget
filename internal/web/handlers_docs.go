@@ -32,7 +32,6 @@ func (s *Server) handleDocsPage(w http.ResponseWriter, r *http.Request) {
 		Description: page.Description,
 		Layout:      templates.LayoutDocs,
 		Docs:        s.docs,
-		DocSlug:     slug,
 	}
 	s.Render(w, r, p, templates.DocsPage(s.docs, slug))
 }

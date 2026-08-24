@@ -153,6 +153,10 @@ function persistTheme(theme) {
 // components in the shell alive). The trade-off is that server-rendered
 // aria-current in the persistent sidebar would go stale, so sync it client-side
 // using the longest matching data-nav-match prefix.
+//
+// This DUPLICATES navCurrent in internal/web/templates/nav.templ by necessity,
+// and the duplication is deliberate: the server sets aria-current on the first
+// render, this keeps it honest afterwards. Change one, change the other.
 function syncAppNavigation() {
   var path = window.location.pathname;
   var links = Array.prototype.slice.call(document.querySelectorAll("[data-app-nav]"));
@@ -227,28 +231,17 @@ document.addEventListener("alpine:init", function () {
     };
   });
 
-  Alpine.data("clipboard", function () {
-    return {
-      copied: false,
-      copy: function (text) {
-        var self = this;
-        navigator.clipboard.writeText(text).then(function () {
-          self.copied = true;
-          setTimeout(function () { self.copied = false; }, 2000);
-        });
-      },
-    };
-  });
-
-  // Copy a markdown snippet carried on the button itself. Per-button x-data
-  // so this.$el IS the button: the CSP build cannot read $el from an
-  // expression, and a table of rows cannot share one root.
-  Alpine.data("copyMarkdown", function () {
+  // Copy the value carried on the button itself (data-copy). Per-button
+  // x-data so this.$el IS the button: the CSP build cannot read $el from an
+  // expression, a table of rows cannot share one root, and keeping the value
+  // in a data attribute means a secret never appears inside an Alpine
+  // expression the way copy('<token>') did.
+  Alpine.data("copy", function () {
     return {
       copied: false,
       copy: function () {
         var self = this;
-        navigator.clipboard.writeText(this.$el.dataset.md || "").then(function () {
+        navigator.clipboard.writeText(this.$el.dataset.copy || "").then(function () {
           self.copied = true;
           setTimeout(function () { self.copied = false; }, 2000);
         });
@@ -279,17 +272,6 @@ document.addEventListener("alpine:init", function () {
       },
       onSlug: function () {
         this.locked = true;
-      },
-    };
-  });
-
-  // Dismissible dashboard checklist (persisted per browser).
-  Alpine.data("checklist", function () {
-    return {
-      dismissed: localStorage.getItem("gg_checklist_dismissed") === "1",
-      dismiss: function () {
-        this.dismissed = true;
-        localStorage.setItem("gg_checklist_dismissed", "1");
       },
     };
   });
@@ -331,9 +313,19 @@ document.addEventListener("alpine:init", function () {
   Alpine.data("toastRoot", function () {
     return {
       toasts: [],
+      // cls is the design-system variant class, decided HERE rather than as a
+      // three-way :class ternary in the template: the mapping from toast type
+      // to colour is one decision, and a pure property access in the markup is
+      // unambiguously CSP-safe.
       push: function (type, message) {
         var self = this;
-        var t = { id: Date.now() + Math.random(), type: type || "info", message: message || "" };
+        var kind = type === "error" ? "danger" : (type === "success" ? "success" : "info");
+        var t = {
+          id: Date.now() + Math.random(),
+          type: type || "info",
+          message: message || "",
+          cls: "toast-" + kind,
+        };
         this.toasts.push(t);
         setTimeout(function () {
           self.toasts = self.toasts.filter(function (x) { return x.id !== t.id; });

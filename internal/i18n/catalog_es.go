@@ -380,7 +380,7 @@ func init() {
 	message.SetString(language.Spanish, "footer.blog", "Blog")
 	message.SetString(language.Spanish, "footer.changelog", "Novedades")
 	message.SetString(language.Spanish, "footer.company", "Empresa")
-	message.SetString(language.Spanish, "footer.copyright", "© %d GoGoGadget. Licencia MIT.")
+	message.SetString(language.Spanish, "footer.copyright", "© %s %s. Licencia MIT.")
 	message.SetString(language.Spanish, "footer.docs", "Documentación")
 	message.SetString(language.Spanish, "footer.features", "Funciones")
 	message.SetString(language.Spanish, "footer.getting_started", "Primeros pasos")

@@ -83,8 +83,7 @@ type Page struct {
 	Announcement *sqlc.Announcement
 
 	// Docs navigation context (set by the docs handlers).
-	Docs    *content.Docs
-	DocSlug string
+	Docs *content.Docs
 
 	// Now is the render clock (frozen under APP_ENV=test via TEST_NOW) so
 	// rendered dates never rot visual baselines.

@@ -18,15 +18,15 @@ type AnnouncementsData struct {
 }
 
 templ AdminAnnouncementsPage(d AnnouncementsData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.announcements.title") }</h1>
+	@PageHeader(i18n.T(ctx, "admin.announcements.title"))
 	if AdminWrite(ctx) {
 		<div id="announcement-form-wrap">
 			@AnnouncementForm(d)
 		</div>
 	}
-	<div class="card !p-0 overflow-hidden" data-testid="announcements-table">
+	@TableCard("announcements-table") {
 		if len(d.Items) == 0 {
-			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.empty") }</p>
+			@TableEmpty(i18n.T(ctx, "admin.announcements.empty"))
 		} else {
 			<table class="table">
 				<thead>
@@ -35,33 +35,33 @@ templ AdminAnnouncementsPage(d AnnouncementsData) {
 				<tbody>
 					for _, a := range d.Items {
 						<tr id={ "announcement-row-" + fmt.Sprintf("%d", a.ID) }>
-							<td><span class="badge { announcementBadgeClass(a.Kind) }">{ announcementKindLabel(ctx, a.Kind) }</span></td>
+							<td>@Badge(announcementKindLabel(ctx, a.Kind), announcementKind(a.Kind))</td>
 							<td class="max-w-md truncate font-medium" title={ a.Message }>{ a.Message }</td>
 							<td>
 								if a.Active {
-									<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "admin.announcements.active") }</span>
+									@Badge(i18n.T(ctx, "admin.announcements.active"), KindSuccess)
 								} else {
-									<span class="badge bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{ i18n.T(ctx, "admin.announcements.inactive") }</span>
+									@Badge(i18n.T(ctx, "admin.announcements.inactive"), KindNeutral)
 								}
 							</td>
 							<td class="text-fg-muted">{ a.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 							<td class="text-right">
 								if AdminWrite(ctx) {
-									<div class="flex justify-end gap-2">
+									<div class="card-actions">
 										if a.Active {
 											<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/deactivate" }
-												class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-deactivate-" + fmt.Sprintf("%d", a.ID) }>
+												class="btn btn-ghost btn-xs" data-testid={ "announcement-deactivate-" + fmt.Sprintf("%d", a.ID) }>
 												{ i18n.T(ctx, "admin.announcements.deactivate") }
 											</button>
 										} else {
 											<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/activate" }
-												class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-activate-" + fmt.Sprintf("%d", a.ID) }>
+												class="btn btn-ghost btn-xs" data-testid={ "announcement-activate-" + fmt.Sprintf("%d", a.ID) }>
 												{ i18n.T(ctx, "admin.announcements.activate") }
 											</button>
 										}
 										<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/delete" }
 											hx-confirm={ i18n.T(ctx, "admin.announcements.delete_confirm") }
-											class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400" data-testid={ "announcement-delete-" + fmt.Sprintf("%d", a.ID) }>
+											class="btn btn-ghost btn-xs text-danger-text" data-testid={ "announcement-delete-" + fmt.Sprintf("%d", a.ID) }>
 											{ i18n.T(ctx, "admin.announcements.delete") }
 										</button>
 									</div>
@@ -72,7 +72,7 @@ templ AdminAnnouncementsPage(d AnnouncementsData) {
 				</tbody>
 			</table>
 		}
-	</div>
+	}
 }
 
 func announcementKindKey(kind string) string { return "admin.announcements.kind_" + kind }
@@ -81,49 +81,40 @@ func announcementKindLabel(ctx context.Context, kind string) string {
 	return i18n.T(ctx, announcementKindKey(kind))
 }
 
-func announcementBadgeClass(kind string) string {
-	switch kind {
-	case "warning":
-		return "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-	case "critical":
-		return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-	default: // info
-		return "bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300"
-	}
-}
-
 // AnnouncementForm is the create card. Extracted so the 422 re-render swaps
 // exactly this fragment (project-form convention).
 templ AnnouncementForm(d AnnouncementsData) {
 	<div class="card mb-8 max-w-xl">
-		<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "admin.announcements.create_title") }</h2>
+		@SectionHeading(i18n.T(ctx, "admin.announcements.create_title"), "mb-4")
 		<form hx-post="/admin/announcements" hx-target="#announcement-form-wrap" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="announcement-create-form" class="space-y-4">
-				if d.Invalid {
-					<div class="alert-error" role="alert">{ i18n.T(ctx, "admin.announcements.invalid") }</div>
+			if d.Invalid {
+				@Alert(KindDanger, "alert", "", "") {
+					{ i18n.T(ctx, "admin.announcements.invalid") }
 				}
-				<div>
-					<label class="block text-sm font-medium mb-1" for="announcement-kind">{ i18n.T(ctx, "admin.announcements.kind_label") }</label>
-					<select id="announcement-kind" name="kind" class="input">
-						<option value="info" selected?={ d.Kind == "info" }>{ i18n.T(ctx, "admin.announcements.kind_info") }</option>
-						<option value="warning" selected?={ d.Kind == "warning" }>{ i18n.T(ctx, "admin.announcements.kind_warning") }</option>
-						<option value="critical" selected?={ d.Kind == "critical" }>{ i18n.T(ctx, "admin.announcements.kind_critical") }</option>
-					</select>
-				</div>
-				<div>
-					<label class="block text-sm font-medium mb-1" for="announcement-message">{ i18n.T(ctx, "admin.announcements.message_label") }</label>
-					<input id="announcement-message" type="text" name="message" value={ d.Message } maxlength="280"
-						placeholder={ i18n.T(ctx, "admin.announcements.message_placeholder") } class="input" />
-				</div>
-				<div>
-					<label class="block text-sm font-medium mb-1" for="announcement-url">{ i18n.T(ctx, "admin.announcements.url_label") }</label>
-					<input id="announcement-url" type="url" name="url" value={ d.Url }
-						placeholder={ i18n.T(ctx, "admin.announcements.url_placeholder") } class="input" />
-				</div>
-				<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.one_active_hint") }</p>
-				<div class="flex items-center gap-3">
-					<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.announcements.create") }</button>
-					@Spinner()
-				</div>
+			}
+			<div>
+				<label class="label" for="announcement-kind">{ i18n.T(ctx, "admin.announcements.kind_label") }</label>
+				<select id="announcement-kind" name="kind" class="input">
+					<option value="info" selected?={ d.Kind == "info" }>{ i18n.T(ctx, "admin.announcements.kind_info") }</option>
+					<option value="warning" selected?={ d.Kind == "warning" }>{ i18n.T(ctx, "admin.announcements.kind_warning") }</option>
+					<option value="critical" selected?={ d.Kind == "critical" }>{ i18n.T(ctx, "admin.announcements.kind_critical") }</option>
+				</select>
+			</div>
+			<div>
+				<label class="label" for="announcement-message">{ i18n.T(ctx, "admin.announcements.message_label") }</label>
+				<input id="announcement-message" type="text" name="message" value={ d.Message } maxlength="280"
+					placeholder={ i18n.T(ctx, "admin.announcements.message_placeholder") } class="input"/>
+			</div>
+			<div>
+				<label class="label" for="announcement-url">{ i18n.T(ctx, "admin.announcements.url_label") }</label>
+				<input id="announcement-url" type="url" name="url" value={ d.Url }
+					placeholder={ i18n.T(ctx, "admin.announcements.url_placeholder") } class="input"/>
+			</div>
+			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.one_active_hint") }</p>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.announcements.create") }</button>
+				@Spinner()
+			</div>
 		</form>
 	</div>
 }

@@ -1,0 +1,586 @@
+package modkit
+
+import (
+	"encoding/json"
+	"io/fs"
+	"os"
+	"reflect"
+	"regexp"
+	"slices"
+	"strings"
+	"testing"
+	"testing/fstest"
+)
+
+var publishedRegistryIncludes = []string{
+	"registry/elements.json",
+	"registry/components.json",
+	"registry/pages.json",
+	"registry/workflows.json",
+	"registry/systems.json",
+	"registry/profiles.json",
+}
+
+func putJSON(t *testing.T, files fstest.MapFS, name string, value any) {
+	t.Helper()
+	data, err := json.Marshal(value)
+	if err != nil {
+		t.Fatalf("json.Marshal(%s): %v", name, err)
+	}
+	files[name] = &fstest.MapFile{Data: data}
+}
+
+func registryFixture(t *testing.T) fstest.MapFS {
+	t.Helper()
+	files := fstest.MapFS{}
+	putJSON(t, files, "registry.json", RegistryRoot{Schema: 1, Includes: append([]string(nil), publishedRegistryIncludes...)})
+	for _, index := range []CatalogIndex{
+		{Schema: 1, Kind: CatalogElement, Items: []string{"registry/modules/element/button/module.json"}},
+		{Schema: 1, Kind: CatalogComponent, Items: []string{}},
+		{Schema: 1, Kind: CatalogPage, Items: []string{}},
+		{Schema: 1, Kind: CatalogWorkflow, Items: []string{}},
+		{Schema: 1, Kind: CatalogSystem, Items: []string{}},
+		{Schema: 1, Kind: CatalogProfile, Items: []string{"registry/profiles/full.json"}},
+	} {
+		name := "registry/" + string(index.Kind) + "s.json"
+		putJSON(t, files, name, index)
+	}
+	module := testLockedModule("element/button", testDigestA).Manifest
+	putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: module})
+	putJSON(t, files, "registry/profiles/full.json", ProfileDocument{
+		Schema: 1,
+		Profile: Profile{
+			ID:          "profile/full",
+			Kind:        CatalogProfile,
+			Name:        "full",
+			Revision:    1,
+			Contract:    1,
+			Title:       "Full",
+			Description: "Every production module.",
+			Members:     []string{"element/button"},
+		},
+	})
+	return files
+}
+
+func TestLoadCatalog(t *testing.T) {
+	catalog, err := LoadCatalog(registryFixture(t))
+	if err != nil {
+		t.Fatalf("LoadCatalog: %v", err)
+	}
+	if got, want := len(catalog.Modules), 1; got != want {
+		t.Fatalf("module count = %d, want %d", got, want)
+	}
+	if got, want := catalog.Modules[0].ID, "element/button"; got != want {
+		t.Fatalf("module id = %q, want %q", got, want)
+	}
+	if got, want := len(catalog.Profiles), 1; got != want {
+		t.Fatalf("profile count = %d, want %d", got, want)
+	}
+	if got, want := catalog.Profiles[0].Members[0], "element/button"; got != want {
+		t.Fatalf("profile member = %q, want %q", got, want)
+	}
+}
+
+func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
+	t.Run("missing required include", func(t *testing.T) {
+		files := registryFixture(t)
+		putJSON(t, files, "registry.json", RegistryRoot{Schema: 1, Includes: publishedRegistryIncludes[:5]})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "includes") {
+			t.Fatalf("LoadCatalog error = %v, want includes rejection", err)
+		}
+	})
+
+	t.Run("index kind must match include", func(t *testing.T) {
+		files := registryFixture(t)
+		putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 1, Kind: CatalogComponent, Items: []string{}})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "kind") {
+			t.Fatalf("LoadCatalog error = %v, want kind rejection", err)
+		}
+	})
+
+	t.Run("duplicate module id", func(t *testing.T) {
+		files := registryFixture(t)
+		module := testLockedModule("element/button", testDigestA).Manifest
+		putJSON(t, files, "registry/modules/element/button/duplicate.json", ModuleDocument{Schema: 1, Module: module})
+		putJSON(t, files, "registry/elements.json", CatalogIndex{
+			Schema: 1,
+			Kind:   CatalogElement,
+			Items: []string{
+				"registry/modules/element/button/duplicate.json",
+				"registry/modules/element/button/module.json",
+			},
+		})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "duplicate") {
+			t.Fatalf("LoadCatalog error = %v, want duplicate id rejection", err)
+		}
+	})
+
+	t.Run("profile member must exist", func(t *testing.T) {
+		files := registryFixture(t)
+		putJSON(t, files, "registry/profiles/full.json", ProfileDocument{
+			Schema: 1,
+			Profile: Profile{
+				ID: "profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
+				Title: "Full", Description: "Every production module.", Members: []string{"element/missing"},
+			},
+		})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "member") {
+			t.Fatalf("LoadCatalog error = %v, want profile member rejection", err)
+		}
+	})
+
+	t.Run("test-only module cannot enter production index", func(t *testing.T) {
+		files := registryFixture(t)
+		module := testLockedModule("element/button", testDigestA).Manifest
+		module.TestOnly = true
+		putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: module})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "test_only") {
+			t.Fatalf("LoadCatalog error = %v, want test_only rejection", err)
+		}
+	})
+
+	for _, tt := range []struct {
+		name string
+		item string
+	}{
+		{name: "parent traversal item", item: "registry/modules/element/../../secret.json"},
+		{name: "absolute item", item: "/etc/passwd"},
+		{name: "backslash item", item: `registry\modules\element\button.json`},
+		{name: "non-json item", item: "registry/modules/element/button/module.go"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			files := registryFixture(t)
+			putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 1, Kind: CatalogElement, Items: []string{tt.item}})
+			_, err := LoadCatalog(files)
+			if err == nil || !strings.Contains(err.Error(), "path") {
+				t.Fatalf("LoadCatalog error = %v, want item path rejection", err)
+			}
+		})
+	}
+
+	t.Run("item prefix must match index kind", func(t *testing.T) {
+		files := registryFixture(t)
+		putJSON(t, files, "registry/elements.json", CatalogIndex{
+			Schema: 1, Kind: CatalogElement, Items: []string{"registry/modules/system/example/module.json"},
+		})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "stay under") {
+			t.Fatalf("LoadCatalog error = %v, want kind-scoped prefix rejection", err)
+		}
+	})
+
+	t.Run("document kind must match index kind", func(t *testing.T) {
+		files := registryFixture(t)
+		module := testLockedModule("component/button", testDigestA).Manifest
+		putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: module})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "kind") {
+			t.Fatalf("LoadCatalog error = %v, want document kind rejection", err)
+		}
+	})
+
+	t.Run("items must be sorted", func(t *testing.T) {
+		files := registryFixture(t)
+		putJSON(t, files, "registry/elements.json", CatalogIndex{
+			Schema: 1, Kind: CatalogElement,
+			Items: []string{"registry/modules/element/z/module.json", "registry/modules/element/a/module.json"},
+		})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "sorted") {
+			t.Fatalf("LoadCatalog error = %v, want sorted rejection", err)
+		}
+	})
+
+	t.Run("items must be unique", func(t *testing.T) {
+		files := registryFixture(t)
+		putJSON(t, files, "registry/elements.json", CatalogIndex{
+			Schema: 1, Kind: CatalogElement,
+			Items: []string{"registry/modules/element/button/module.json", "registry/modules/element/button/module.json"},
+		})
+		_, err := LoadCatalog(files)
+		if err == nil || !strings.Contains(err.Error(), "duplicate") {
+			t.Fatalf("LoadCatalog error = %v, want duplicate item rejection", err)
+		}
+	})
+
+	t.Run("schema versions are closed", func(t *testing.T) {
+		tests := []struct {
+			name   string
+			mutate func(*testing.T, fstest.MapFS)
+		}{
+			{
+				name: "root",
+				mutate: func(t *testing.T, files fstest.MapFS) {
+					putJSON(t, files, "registry.json", RegistryRoot{Schema: 2, Includes: publishedRegistryIncludes})
+				},
+			},
+			{
+				name: "index",
+				mutate: func(t *testing.T, files fstest.MapFS) {
+					putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 2, Kind: CatalogElement, Items: []string{}})
+				},
+			},
+			{
+				name: "document",
+				mutate: func(t *testing.T, files fstest.MapFS) {
+					module := testLockedModule("element/button", testDigestA).Manifest
+					putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
+				},
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				files := registryFixture(t)
+				tt.mutate(t, files)
+				_, err := LoadCatalog(files)
+				if err == nil || !strings.Contains(err.Error(), "schema") {
+					t.Fatalf("LoadCatalog error = %v, want schema rejection", err)
+				}
+			})
+		}
+	})
+
+	for _, tt := range []struct {
+		name string
+		data string
+		want string
+	}{
+		{name: "unknown field", data: `{"schema":1,"kind":"element","items":[],"extra":true}`, want: "unknown field"},
+		{name: "duplicate key", data: `{"schema":1,"schema":1,"kind":"element","items":[]}`, want: "duplicate"},
+		{name: "trailing data", data: `{"schema":1,"kind":"element","items":[]} {}`, want: "trailing"},
+		{name: "null items", data: `{"schema":1,"kind":"element","items":null}`, want: "null"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			files := registryFixture(t)
+			files["registry/elements.json"] = &fstest.MapFile{Data: []byte(tt.data)}
+			_, err := LoadCatalog(files)
+			if err == nil || !strings.Contains(err.Error(), tt.want) {
+				t.Fatalf("LoadCatalog error = %v, want %q rejection", err, tt.want)
+			}
+		})
+	}
+
+	t.Run("returned modules are sorted by id", func(t *testing.T) {
+		files := registryFixture(t)
+		module := testLockedModule("component/card", testDigestB).Manifest
+		putJSON(t, files, "registry/modules/component/card/module.json", ModuleDocument{Schema: 1, Module: module})
+		putJSON(t, files, "registry/components.json", CatalogIndex{
+			Schema: 1, Kind: CatalogComponent, Items: []string{"registry/modules/component/card/module.json"},
+		})
+		catalog, err := LoadCatalog(files)
+		if err != nil {
+			t.Fatalf("LoadCatalog: %v", err)
+		}
+		if got, want := catalog.Modules[0].ID, "component/card"; got != want {
+			t.Fatalf("first module = %q, want %q", got, want)
+		}
+	})
+}
+
+func TestPublishedRegistrySkeleton(t *testing.T) {
+	repo := os.DirFS("../..")
+	catalog, err := LoadCatalog(repo)
+	if err != nil {
+		t.Fatalf("LoadCatalog(repository): %v", err)
+	}
+	if len(catalog.Modules) != 0 || len(catalog.Profiles) != 0 {
+		t.Fatalf("initial catalog = %d modules, %d profiles; want empty skeleton", len(catalog.Modules), len(catalog.Profiles))
+	}
+
+	rootData, err := fs.ReadFile(repo, "registry.json")
+	if err != nil {
+		t.Fatalf("read registry.json: %v", err)
+	}
+	var root RegistryRoot
+	if err := decodeStrict(rootData, &root); err != nil {
+		t.Fatalf("decode registry.json: %v", err)
+	}
+	if !slices.Equal(root.Includes, publishedRegistryIncludes) {
+		t.Fatalf("registry includes = %v, want %v", root.Includes, publishedRegistryIncludes)
+	}
+
+	for _, name := range []string{
+		"registry/schema/registry.schema.json",
+		"registry/schema/module.schema.json",
+		"registry/schema/project.schema.json",
+		"registry/schema/lock.schema.json",
+	} {
+		data, err := fs.ReadFile(repo, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		if !json.Valid(data) {
+			t.Fatalf("%s is not valid JSON", name)
+		}
+		var document map[string]any
+		if err := json.Unmarshal(data, &document); err != nil {
+			t.Fatalf("decode %s: %v", name, err)
+		}
+		if got, want := document["$schema"], "https://json-schema.org/draft/2020-12/schema"; got != want {
+			t.Fatalf("%s $schema = %v, want %v", name, got, want)
+		}
+	}
+}
+
+func TestPublishedSchemaPatternsArePortableAndStrict(t *testing.T) {
+	repo := os.DirFS("../..")
+	data, err := fs.ReadFile(repo, "registry/schema/module.schema.json")
+	if err != nil {
+		t.Fatalf("read module schema: %v", err)
+	}
+	var document map[string]any
+	if err := json.Unmarshal(data, &document); err != nil {
+		t.Fatalf("decode module schema: %v", err)
+	}
+
+	var walk func(any)
+	walk = func(value any) {
+		switch value := value.(type) {
+		case map[string]any:
+			if pattern, ok := value["pattern"].(string); ok {
+				if _, err := regexp.Compile(pattern); err != nil {
+					t.Errorf("schema pattern %q is not RE2 portable: %v", pattern, err)
+				}
+			}
+			for _, child := range value {
+				walk(child)
+			}
+		case []any:
+			for _, child := range value {
+				walk(child)
+			}
+		}
+	}
+	walk(document)
+
+	defs := document["$defs"].(map[string]any)
+	manifestFile := defs["ManifestFile"].(map[string]any)["properties"].(map[string]any)
+	pathPattern := manifestFile["source"].(map[string]any)["pattern"].(string)
+	pathRE, err := regexp.Compile(pathPattern)
+	if err != nil {
+		t.Fatalf("safe path pattern is not RE2 portable: %v", err)
+	}
+	for _, invalid := range []string{"../secret", "a/../secret", "a\n../../secret", "/absolute", `a\b`, "a//b"} {
+		if pathRE.MatchString(invalid) {
+			t.Errorf("safe path pattern accepts %q", invalid)
+		}
+	}
+	for _, valid := range []string{".env", "..config", "dir/file.go", "dir/.hidden"} {
+		if !pathRE.MatchString(valid) {
+			t.Errorf("safe path pattern rejects %q", valid)
+		}
+	}
+
+	profile := defs["Profile"].(map[string]any)["properties"].(map[string]any)
+	nameRE, err := regexp.Compile(profile["name"].(map[string]any)["pattern"].(string))
+	if err != nil {
+		t.Fatalf("kebab pattern is not RE2 portable: %v", err)
+	}
+	if nameRE.MatchString("2fa") || !nameRE.MatchString("two-fa") {
+		t.Errorf("kebab pattern does not match Go validator")
+	}
+
+	route := defs["RouteContribution"].(map[string]any)["properties"].(map[string]any)
+	routeRE, err := regexp.Compile(route["pattern"].(map[string]any)["pattern"].(string))
+	if err != nil {
+		t.Fatalf("route pattern is not RE2 portable: %v", err)
+	}
+	if routeRE.MatchString("/a/../b") || routeRE.MatchString("/a//b") || !routeRE.MatchString("/a/b") {
+		t.Errorf("route pattern does not match Go validator")
+	}
+
+	lockData, err := fs.ReadFile(repo, "registry/schema/lock.schema.json")
+	if err != nil {
+		t.Fatalf("read lock schema: %v", err)
+	}
+	var lockDocument map[string]any
+	if err := json.Unmarshal(lockData, &lockDocument); err != nil {
+		t.Fatalf("decode lock schema: %v", err)
+	}
+	walk(lockDocument)
+	lockDefs := lockDocument["$defs"].(map[string]any)
+	pendingConflict := lockDefs["PendingConflict"].(map[string]any)["properties"].(map[string]any)
+	for _, field := range []string{"candidate_path", "diff_path"} {
+		pattern := pendingConflict[field].(map[string]any)["pattern"].(string)
+		fieldRE, err := regexp.Compile(pattern)
+		if err != nil {
+			t.Fatalf("%s pattern is not RE2 portable: %v", field, err)
+		}
+		if !strings.HasPrefix(pattern, "^"+conflictArtifactPrefix) {
+			t.Errorf("%s pattern does not enforce the %s prefix", field, conflictArtifactPrefix)
+		}
+		if fieldRE.MatchString("internal/modules/button.go") || !fieldRE.MatchString("tmp/ggg/conflicts/run1/element-button/abc-button.go.candidate") {
+			t.Errorf("%s pattern does not match the Go validator prefix rule", field)
+		}
+	}
+}
+
+func TestParseLockEnforcesCatalogRequiredFields(t *testing.T) {
+	withIncompleteRoute := strings.Replace(
+		canonicalLockJSON,
+		`"runtime": {}`,
+		`"runtime": {"routes":[{"id":"route","method":"GET","pattern":"/route","scope":"public","package":"example.com/acme/web","handler":"Handle"}]}`,
+		1,
+	)
+	_, err := ParseLock([]byte(withIncompleteRoute))
+	if err == nil || !strings.Contains(err.Error(), "policy") {
+		t.Fatalf("ParseLock error = %v, want missing policy rejection", err)
+	}
+}
+
+func TestPublishedSchemasMatchModels(t *testing.T) {
+	repo := os.DirFS("../..")
+	definitions := map[string]map[string]any{}
+	for _, name := range []string{
+		"registry/schema/registry.schema.json",
+		"registry/schema/module.schema.json",
+		"registry/schema/project.schema.json",
+		"registry/schema/lock.schema.json",
+	} {
+		data, err := fs.ReadFile(repo, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		var document map[string]any
+		if err := json.Unmarshal(data, &document); err != nil {
+			t.Fatalf("decode %s: %v", name, err)
+		}
+		defs, ok := document["$defs"].(map[string]any)
+		if !ok {
+			t.Fatalf("%s has no $defs object", name)
+		}
+		for definitionName, raw := range defs {
+			definition, ok := raw.(map[string]any)
+			if !ok {
+				t.Fatalf("%s $defs.%s is not an object", name, definitionName)
+			}
+			if _, exists := definitions[definitionName]; exists {
+				t.Fatalf("schema definition %s is duplicated across documents", definitionName)
+			}
+			definitions[definitionName] = definition
+		}
+	}
+
+	modelTypes := []reflect.Type{
+		reflect.TypeOf(RegistryRoot{}), reflect.TypeOf(CatalogIndex{}),
+		reflect.TypeOf(ModuleDocument{}), reflect.TypeOf(ProfileDocument{}), reflect.TypeOf(Profile{}),
+		reflect.TypeOf(Project{}), reflect.TypeOf(ProjectRegistry{}),
+		reflect.TypeOf(Manifest{}), reflect.TypeOf(ManifestFile{}), reflect.TypeOf(NamespaceClaims{}),
+		reflect.TypeOf(RuntimeContributions{}), reflect.TypeOf(SystemContribution{}),
+		reflect.TypeOf(RuntimeNeed{}), reflect.TypeOf(RuntimeProvide{}),
+		reflect.TypeOf(RouteContribution{}), reflect.TypeOf(RoutePolicy{}),
+		reflect.TypeOf(JobContribution{}), reflect.TypeOf(ContentTypeContribution{}),
+		reflect.TypeOf(NavigationContribution{}), reflect.TypeOf(SlotContribution{}),
+		reflect.TypeOf(UIContribution{}), reflect.TypeOf(AssetContribution{}),
+		reflect.TypeOf(ManifestMigration{}), reflect.TypeOf(EnvironmentVariable{}),
+		reflect.TypeOf(DocumentationRef{}), reflect.TypeOf(TestMetadata{}), reflect.TypeOf(DataDeclaration{}),
+		reflect.TypeOf(Lock{}), reflect.TypeOf(LockedModule{}), reflect.TypeOf(LockedFile{}),
+		reflect.TypeOf(LockedMigration{}), reflect.TypeOf(PendingUpdate{}), reflect.TypeOf(PendingConflict{}),
+	}
+	for _, modelType := range modelTypes {
+		assertSchemaDefinition(t, definitions, modelType)
+	}
+}
+
+func assertSchemaDefinition(t *testing.T, definitions map[string]map[string]any, modelType reflect.Type) {
+	t.Helper()
+	definition, ok := definitions[modelType.Name()]
+	if !ok {
+		t.Fatalf("schema definition %s is missing", modelType.Name())
+	}
+	if got := definition["type"]; got != "object" {
+		t.Fatalf("schema definition %s type = %v, want object", modelType.Name(), got)
+	}
+	if got := definition["additionalProperties"]; got != false {
+		t.Fatalf("schema definition %s additionalProperties = %v, want false", modelType.Name(), got)
+	}
+	properties, ok := definition["properties"].(map[string]any)
+	if !ok {
+		t.Fatalf("schema definition %s properties is not an object", modelType.Name())
+	}
+
+	var wantProperties, wantRequired []string
+	for i := range modelType.NumField() {
+		field := modelType.Field(i)
+		tag := field.Tag.Get("json")
+		parts := strings.Split(tag, ",")
+		if parts[0] == "" || parts[0] == "-" {
+			continue
+		}
+		wantProperties = append(wantProperties, parts[0])
+		if !slices.Contains(parts[1:], "omitempty") {
+			wantRequired = append(wantRequired, parts[0])
+		}
+		property, ok := properties[parts[0]].(map[string]any)
+		if !ok {
+			t.Fatalf("schema definition %s property %s is not an object", modelType.Name(), parts[0])
+		}
+		fieldType := field.Type
+		if fieldType.Kind() == reflect.Pointer {
+			fieldType = fieldType.Elem()
+		}
+		switch fieldType.Kind() {
+		case reflect.Bool:
+			if got := property["type"]; got != "boolean" {
+				t.Fatalf("schema definition %s property %s type = %v, want boolean", modelType.Name(), parts[0], got)
+			}
+		case reflect.Int, reflect.Int64:
+			if got := property["type"]; got != "integer" {
+				t.Fatalf("schema definition %s property %s type = %v, want integer", modelType.Name(), parts[0], got)
+			}
+		case reflect.String:
+			if got := property["type"]; got != "string" {
+				t.Fatalf("schema definition %s property %s type = %v, want string", modelType.Name(), parts[0], got)
+			}
+		case reflect.Slice:
+			if got := property["type"]; got != "array" {
+				t.Fatalf("schema definition %s property %s type = %v, want array", modelType.Name(), parts[0], got)
+			}
+			if _, hasItems := property["items"].(map[string]any); !hasItems {
+				if _, hasPrefixItems := property["prefixItems"].([]any); !hasPrefixItems {
+					t.Fatalf("schema definition %s property %s has neither items nor prefixItems", modelType.Name(), parts[0])
+				}
+			}
+		case reflect.Struct:
+			ref, ok := property["$ref"].(string)
+			if !ok || !strings.HasSuffix(ref, "#/$defs/"+fieldType.Name()) {
+				t.Fatalf("schema definition %s property %s ref = %v, want %s", modelType.Name(), parts[0], property["$ref"], fieldType.Name())
+			}
+			if _, ok := definitions[fieldType.Name()]; !ok {
+				t.Fatalf("schema definition %s property %s references missing %s", modelType.Name(), parts[0], fieldType.Name())
+			}
+		}
+	}
+	gotProperties := make([]string, 0, len(properties))
+	for name := range properties {
+		gotProperties = append(gotProperties, name)
+	}
+	requiredValue, ok := definition["required"].([]any)
+	if !ok {
+		t.Fatalf("schema definition %s required is not an array", modelType.Name())
+	}
+	var gotRequired []string
+	for _, raw := range requiredValue {
+		value, ok := raw.(string)
+		if !ok {
+			t.Fatalf("schema definition %s required contains non-string %T", modelType.Name(), raw)
+		}
+		gotRequired = append(gotRequired, value)
+	}
+	slices.Sort(wantProperties)
+	slices.Sort(wantRequired)
+	slices.Sort(gotProperties)
+	slices.Sort(gotRequired)
+	if !slices.Equal(gotProperties, wantProperties) {
+		t.Fatalf("schema definition %s properties = %v, want %v", modelType.Name(), gotProperties, wantProperties)
+	}
+	if !slices.Equal(gotRequired, wantRequired) {
+		t.Fatalf("schema definition %s required = %v, want %v", modelType.Name(), gotRequired, wantRequired)
+	}
+}

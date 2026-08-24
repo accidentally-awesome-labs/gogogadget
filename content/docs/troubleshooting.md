@@ -143,6 +143,32 @@ the document, and only then scrolls to the fragment. Links whose `href` contains
 a `#` must stay unboosted (`isAnchorLink` in `nav.templ`) — the browser then
 scrolls natively with no request at all.
 
+## `make check` fails with "design-system violation"
+
+`internal/web/templates/designsystem_test.go` reads every `*.templ` and refuses
+raw hex, `dark:` variants, palette ramps (`text-red-600`), numeric brand steps
+(`bg-brand-600`), `!` utility overrides, arbitrary lengths (`text-[10px]`) and
+templ expressions inside quoted attributes. The failure names the file, the
+line, the offending text and the fix.
+
+There are **no exemptions** on purpose: the previous "templates use only
+tokens" claim was documented for months while false in eighty-odd places, and
+an exemption list is how that happens. So the fix is always to move the value
+into the layer that owns it — a token in `@theme`, a class in
+`@layer components`, or a component in `components.templ`. See
+[Frontend → Design system](/docs/frontend).
+
+Watch for the trap that a `dark:` or `!` in *prose* (a comment, or documentation
+copy rendered by a template) also matches: the scanner reads file text, which is
+what makes the rule cheap and absolute. Reword the prose.
+
+## An element renders with a literal `{ someFunc(x) }` as its class
+
+templ does **not** interpolate inside a quoted attribute. `class="badge { f(x) }"`
+emits the expression verbatim, so the element renders unstyled and nothing warns
+you. Write `class={ "badge", f(x) }` (or `attr={ expr }` for any other
+attribute). Rule 7 of the design-system test catches this now.
+
 ## 429s during load tests
 
 Working as intended: **100 req/min with burst 200 per IP**, 429 responses
