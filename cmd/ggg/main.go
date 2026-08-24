@@ -19,7 +19,7 @@ func main() {
 }
 
 func run(args []string) error {
-	return (modkit.CLI{Out: os.Stdout, Version: version}).Run(context.Background(), args)
+	return (modkit.CLI{Out: os.Stdout, Err: os.Stderr, Version: version}).Run(context.Background(), args)
 }
 
 func exitCode(err error) int {
