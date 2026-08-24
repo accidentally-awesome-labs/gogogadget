@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/feature-flags",
+    "kind": "system",
+    "name": "feature-flags",
+    "revision": 1,
+    "contract": 1,
+    "title": "Feature flags",
+    "description": "Database-backed flags with a short in-process cache, deterministic percentage bucketing, and per-organization overrides.",
+    "requires": [
+      "system/apphost",
+      "system/database",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/feature_flags.sql",
+        "target": "internal/db/queries/feature_flags.sql",
+        "class": "query",
+        "sha256": "d7c059bb7f416611935b9a6b13a714657a0724728df4c3b7007cba2fdfaec9a9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/flags/flags.go",
+        "target": "internal/flags/flags.go",
+        "class": "go",
+        "sha256": "56054eccc210cb01a39b132cc4332e07c59104a762107f3cbfcca2cc39b5619a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/flags/module.go",
+        "target": "internal/flags/module.go",
+        "class": "go",
+        "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/flags"
+      ],
+      "queries": [
+        "feature_flags"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/flags",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Evaluator",
+            "capability": "flags.evaluator",
+            "type": "flags.Evaluator"
+          }
+        ],
+        "type_imports": [
+          "internal/db/sqlc"
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [
+      {
+        "id": "0008_feature_flags",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0008_feature_flags.sql",
+        "sha256": "0a20a096adddf2ab8abb19f06baaaafa107279c62204505403d96d26a5ad9277"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/flags"
+      ]
+    },
+    "data": [
+      {
+        "table": "feature_flags",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}

@@ -53,11 +53,6 @@
     "migrations": [],
     "environment": [
       {
-        "key": "API_RATE_LIMIT_RPM",
-        "field": "APIRateLimitPerMinute",
-        "description": "Per-API-token budget per minute"
-      },
-      {
         "key": "APP_ENV",
         "field": "Env",
         "description": "development | test | production",
@@ -91,11 +86,6 @@
         "field": "Port",
         "description": "HTTP listen port",
         "default": "8080"
-      },
-      {
-        "key": "RATE_LIMIT_RPM",
-        "field": "RateLimitPerMinute",
-        "description": "Per-IP request budget per minute"
       },
       {
         "key": "TEST_NOW",

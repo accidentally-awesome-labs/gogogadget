@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+  "registry_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
   "order": [
     "system/apphost",
     "system/config",
@@ -16,8 +16,13 @@
     "system/observability",
     "system/organizations",
     "system/audit",
+    "system/content",
+    "system/feature-flags",
     "system/impersonation",
     "system/notifications",
+    "system/rate-limit",
+    "system/api",
+    "system/schedules",
     "system/seed",
     "system/storage",
     "system/testdb",
@@ -29,7 +34,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -136,7 +141,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -207,21 +212,257 @@
       ]
     },
     {
+      "id": "system/api",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/api",
+        "kind": "system",
+        "name": "api",
+        "revision": 1,
+        "contract": 1,
+        "title": "JSON API",
+        "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
+        "requires": [
+          "system/database",
+          "system/organizations",
+          "system/rate-limit"
+        ],
+        "files": [
+          {
+            "source": "internal/api/ai.go",
+            "target": "internal/api/ai.go",
+            "class": "go",
+            "sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/api/cursor.go",
+            "target": "internal/api/cursor.go",
+            "class": "go",
+            "sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/api/cursor_test.go",
+            "target": "internal/api/cursor_test.go",
+            "class": "go",
+            "sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/api/idempotency.go",
+            "target": "internal/api/idempotency.go",
+            "class": "go",
+            "sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/api/openapi.go",
+            "target": "internal/api/openapi.go",
+            "class": "go",
+            "sha256": "86ec22a0d69d87a214a8f45f4bc4a5f9a27df2c2ed456df4931ad9e67b3ca149",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/api/projects.go",
+            "target": "internal/api/projects.go",
+            "class": "go",
+            "sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/api/tokens.go",
+            "target": "internal/api/tokens.go",
+            "class": "go",
+            "sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/api/tokens_test.go",
+            "target": "internal/api/tokens_test.go",
+            "class": "go",
+            "sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/api_tokens.sql",
+            "target": "internal/db/queries/api_tokens.sql",
+            "class": "query",
+            "sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/idempotency_keys.sql",
+            "target": "internal/db/queries/idempotency_keys.sql",
+            "class": "query",
+            "sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/api"
+          ],
+          "queries": [
+            "api_tokens",
+            "idempotency_keys"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0015_idempotency_keys",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0015_idempotency_keys.sql",
+            "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4"
+          }
+        ],
+        "environment": [
+          {
+            "key": "API_RATE_LIMIT_RPM",
+            "field": "APIRateLimitPerMinute",
+            "description": "Per-API-token request budget per minute; bursts to twice this",
+            "default": "60"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/api"
+          ]
+        },
+        "data": [
+          {
+            "table": "api_tokens",
+            "scope": "org",
+            "export": true,
+            "secret_redaction_owner": "system/api",
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          },
+          {
+            "table": "idempotency_keys",
+            "scope": "org",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "cascade"
+          }
+        ],
+        "removal_policy": "major-version-only"
+      },
+      "files": [
+        {
+          "path": "internal/api/ai.go",
+          "source": "internal/api/ai.go",
+          "base_sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
+          "local_sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/cursor.go",
+          "source": "internal/api/cursor.go",
+          "base_sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
+          "local_sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/cursor_test.go",
+          "source": "internal/api/cursor_test.go",
+          "base_sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
+          "local_sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/idempotency.go",
+          "source": "internal/api/idempotency.go",
+          "base_sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
+          "local_sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/openapi.go",
+          "source": "internal/api/openapi.go",
+          "base_sha256": "86ec22a0d69d87a214a8f45f4bc4a5f9a27df2c2ed456df4931ad9e67b3ca149",
+          "local_sha256": "86ec22a0d69d87a214a8f45f4bc4a5f9a27df2c2ed456df4931ad9e67b3ca149",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/projects.go",
+          "source": "internal/api/projects.go",
+          "base_sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
+          "local_sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/tokens.go",
+          "source": "internal/api/tokens.go",
+          "base_sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
+          "local_sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
+          "state": "clean"
+        },
+        {
+          "path": "internal/api/tokens_test.go",
+          "source": "internal/api/tokens_test.go",
+          "base_sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
+          "local_sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/api_tokens.sql",
+          "source": "internal/db/queries/api_tokens.sql",
+          "base_sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
+          "local_sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/idempotency_keys.sql",
+          "source": "internal/db/queries/idempotency_keys.sql",
+          "base_sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
+          "local_sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0015_idempotency_keys",
+          "number": 15,
+          "path": "internal/db/migrations/0015_idempotency_keys.sql",
+          "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4"
+        }
+      ]
+    },
+    {
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [
         "system/analytics",
         "system/billing",
         "system/config",
         "system/database",
+        "system/feature-flags",
         "system/i18n",
         "system/identity",
         "system/llm",
         "system/mail",
         "system/observability",
+        "system/rate-limit",
         "system/storage"
       ],
       "manifest": {
@@ -275,7 +516,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -364,7 +605,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -562,7 +803,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -572,6 +813,7 @@
         "system/llm",
         "system/mail",
         "system/observability",
+        "system/rate-limit",
         "system/storage"
       ],
       "manifest": {
@@ -627,11 +869,6 @@
         "migrations": [],
         "environment": [
           {
-            "key": "API_RATE_LIMIT_RPM",
-            "field": "APIRateLimitPerMinute",
-            "description": "Per-API-token budget per minute"
-          },
-          {
             "key": "APP_ENV",
             "field": "Env",
             "description": "development | test | production",
@@ -667,11 +904,6 @@
             "default": "8080"
           },
           {
-            "key": "RATE_LIMIT_RPM",
-            "field": "RateLimitPerMinute",
-            "description": "Per-IP request budget per minute"
-          },
-          {
             "key": "TEST_NOW",
             "field": "testNow",
             "description": "Freezes the render clock under APP_ENV=test"
@@ -705,17 +937,340 @@
       "migrations": []
     },
     {
+      "id": "system/content",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/content",
+        "kind": "system",
+        "name": "content",
+        "revision": 1,
+        "contract": 1,
+        "title": "Content and CMS",
+        "description": "Embedded markdown corpus, goldmark rendering, RSS, search, and the database-backed CMS for administrator-authored entries, revisions, and media.",
+        "requires": [
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/content/changelog.go",
+            "target": "internal/content/changelog.go",
+            "class": "go",
+            "sha256": "62b3e24a12e1fdeb5accd0522f72c0b0986a6831e5cda2812d0be91fa5c79856",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/changelog_test.go",
+            "target": "internal/content/changelog_test.go",
+            "class": "go",
+            "sha256": "cb6d5b4b0fa0037692fe287239eee45480a997b3e25bb32158bb57cd16566187",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/cms.go",
+            "target": "internal/content/cms.go",
+            "class": "go",
+            "sha256": "fef4dc1ed4da83175dd20bae251493c786199f365442ae24962af094ddd3c95d",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/content/cms_test.go",
+            "target": "internal/content/cms_test.go",
+            "class": "go",
+            "sha256": "91a36b0861ec7f74447cf4af5e24ad8381174bf0bf955b9cc7d2149ccd2f0543",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/content.go",
+            "target": "internal/content/content.go",
+            "class": "go",
+            "sha256": "a7687b821f1537f9f340f6fc24213758fb9bf4a4d4505032c66cad5aa3148fe5",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/content/content_test.go",
+            "target": "internal/content/content_test.go",
+            "class": "go",
+            "sha256": "d3746e1dd8afee7b0f969e92738539f34846277c68562882262d26b69346ea22",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/docs_check_test.go",
+            "target": "internal/content/docs_check_test.go",
+            "class": "go",
+            "sha256": "eb600c051525d68cb0db9e815264b10c3dfd4f0872264708b8bb4aac7ec3a2e0",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/import.go",
+            "target": "internal/content/import.go",
+            "class": "go",
+            "sha256": "81c1fc9e46e9bf89d81ede7a654679bd60c0109c2179c9e49e7808cbc4def86e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/rss.go",
+            "target": "internal/content/rss.go",
+            "class": "go",
+            "sha256": "3911be3cf78a2e431c23e2d70c507a4b78166f2d75c1b8ccf35a9ec299e6e96e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/search.go",
+            "target": "internal/content/search.go",
+            "class": "go",
+            "sha256": "61c8811fe632a8eda96e265c1071f3b1119198f11e87cbbd234d65c3ca247936",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/search_test.go",
+            "target": "internal/content/search_test.go",
+            "class": "go",
+            "sha256": "c7e508ccef8db74a9a6027e1b23bf1b98eb027ce05769e275446649d994167b7",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/content/types.go",
+            "target": "internal/content/types.go",
+            "class": "go",
+            "sha256": "4e064c6ad9d482c60fac0745d9714149bf3529a3e15deecd91fa0de705e4bdef",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/content/types_test.go",
+            "target": "internal/content/types_test.go",
+            "class": "go",
+            "sha256": "5ef69872eb3a4a618e442c38c536c092943099526a61878c1652c3312e96ecef",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/content_entries.sql",
+            "target": "internal/db/queries/content_entries.sql",
+            "class": "query",
+            "sha256": "961a545d520d93c78501959caf0c4101091d6f71634e7717269c5f0c7a76c036",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/content_media.sql",
+            "target": "internal/db/queries/content_media.sql",
+            "class": "query",
+            "sha256": "d757ca9995dcdbf7d51a8b269c248c62d6004736dbca7a0274b9f7434345fa19",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/db/queries/content_revisions.sql",
+            "target": "internal/db/queries/content_revisions.sql",
+            "class": "query",
+            "sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/content"
+          ],
+          "queries": [
+            "content_entries",
+            "content_media",
+            "content_revisions"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0019_content_cms",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0019_content_cms.sql",
+            "sha256": "6709cabb3ae6512e0759d74aca0994d2274422a19a61e74c02e7507a7f675a20"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/content"
+          ]
+        },
+        "data": [
+          {
+            "table": "content_entries",
+            "scope": "platform",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "retain"
+          },
+          {
+            "table": "content_media",
+            "scope": "platform",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "retain",
+            "external_objects": [
+              "storage"
+            ]
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/content/changelog.go",
+          "source": "internal/content/changelog.go",
+          "base_sha256": "62b3e24a12e1fdeb5accd0522f72c0b0986a6831e5cda2812d0be91fa5c79856",
+          "local_sha256": "62b3e24a12e1fdeb5accd0522f72c0b0986a6831e5cda2812d0be91fa5c79856",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/changelog_test.go",
+          "source": "internal/content/changelog_test.go",
+          "base_sha256": "cb6d5b4b0fa0037692fe287239eee45480a997b3e25bb32158bb57cd16566187",
+          "local_sha256": "cb6d5b4b0fa0037692fe287239eee45480a997b3e25bb32158bb57cd16566187",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/cms.go",
+          "source": "internal/content/cms.go",
+          "base_sha256": "fef4dc1ed4da83175dd20bae251493c786199f365442ae24962af094ddd3c95d",
+          "local_sha256": "fef4dc1ed4da83175dd20bae251493c786199f365442ae24962af094ddd3c95d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/cms_test.go",
+          "source": "internal/content/cms_test.go",
+          "base_sha256": "91a36b0861ec7f74447cf4af5e24ad8381174bf0bf955b9cc7d2149ccd2f0543",
+          "local_sha256": "91a36b0861ec7f74447cf4af5e24ad8381174bf0bf955b9cc7d2149ccd2f0543",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/content.go",
+          "source": "internal/content/content.go",
+          "base_sha256": "a7687b821f1537f9f340f6fc24213758fb9bf4a4d4505032c66cad5aa3148fe5",
+          "local_sha256": "a7687b821f1537f9f340f6fc24213758fb9bf4a4d4505032c66cad5aa3148fe5",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/content_test.go",
+          "source": "internal/content/content_test.go",
+          "base_sha256": "d3746e1dd8afee7b0f969e92738539f34846277c68562882262d26b69346ea22",
+          "local_sha256": "d3746e1dd8afee7b0f969e92738539f34846277c68562882262d26b69346ea22",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/docs_check_test.go",
+          "source": "internal/content/docs_check_test.go",
+          "base_sha256": "eb600c051525d68cb0db9e815264b10c3dfd4f0872264708b8bb4aac7ec3a2e0",
+          "local_sha256": "eb600c051525d68cb0db9e815264b10c3dfd4f0872264708b8bb4aac7ec3a2e0",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/import.go",
+          "source": "internal/content/import.go",
+          "base_sha256": "81c1fc9e46e9bf89d81ede7a654679bd60c0109c2179c9e49e7808cbc4def86e",
+          "local_sha256": "81c1fc9e46e9bf89d81ede7a654679bd60c0109c2179c9e49e7808cbc4def86e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/rss.go",
+          "source": "internal/content/rss.go",
+          "base_sha256": "3911be3cf78a2e431c23e2d70c507a4b78166f2d75c1b8ccf35a9ec299e6e96e",
+          "local_sha256": "3911be3cf78a2e431c23e2d70c507a4b78166f2d75c1b8ccf35a9ec299e6e96e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/search.go",
+          "source": "internal/content/search.go",
+          "base_sha256": "61c8811fe632a8eda96e265c1071f3b1119198f11e87cbbd234d65c3ca247936",
+          "local_sha256": "61c8811fe632a8eda96e265c1071f3b1119198f11e87cbbd234d65c3ca247936",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/search_test.go",
+          "source": "internal/content/search_test.go",
+          "base_sha256": "c7e508ccef8db74a9a6027e1b23bf1b98eb027ce05769e275446649d994167b7",
+          "local_sha256": "c7e508ccef8db74a9a6027e1b23bf1b98eb027ce05769e275446649d994167b7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/types.go",
+          "source": "internal/content/types.go",
+          "base_sha256": "4e064c6ad9d482c60fac0745d9714149bf3529a3e15deecd91fa0de705e4bdef",
+          "local_sha256": "4e064c6ad9d482c60fac0745d9714149bf3529a3e15deecd91fa0de705e4bdef",
+          "state": "clean"
+        },
+        {
+          "path": "internal/content/types_test.go",
+          "source": "internal/content/types_test.go",
+          "base_sha256": "5ef69872eb3a4a618e442c38c536c092943099526a61878c1652c3312e96ecef",
+          "local_sha256": "5ef69872eb3a4a618e442c38c536c092943099526a61878c1652c3312e96ecef",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/content_entries.sql",
+          "source": "internal/db/queries/content_entries.sql",
+          "base_sha256": "961a545d520d93c78501959caf0c4101091d6f71634e7717269c5f0c7a76c036",
+          "local_sha256": "961a545d520d93c78501959caf0c4101091d6f71634e7717269c5f0c7a76c036",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/content_media.sql",
+          "source": "internal/db/queries/content_media.sql",
+          "base_sha256": "d757ca9995dcdbf7d51a8b269c248c62d6004736dbca7a0274b9f7434345fa19",
+          "local_sha256": "d757ca9995dcdbf7d51a8b269c248c62d6004736dbca7a0274b9f7434345fa19",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/queries/content_revisions.sql",
+          "source": "internal/db/queries/content_revisions.sql",
+          "base_sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
+          "local_sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0019_content_cms",
+          "number": 19,
+          "path": "internal/db/migrations/0019_content_cms.sql",
+          "sha256": "6709cabb3ae6512e0759d74aca0994d2274422a19a61e74c02e7507a7f675a20"
+        }
+      ]
+    },
+    {
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [
         "system/announcements",
+        "system/api",
         "system/audit",
+        "system/content",
+        "system/feature-flags",
         "system/impersonation",
         "system/notifications",
         "system/organizations",
+        "system/schedules",
         "system/seed",
         "system/testdb",
         "system/usage",
@@ -841,10 +1396,148 @@
       "migrations": []
     },
     {
+      "id": "system/feature-flags",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/feature-flags",
+        "kind": "system",
+        "name": "feature-flags",
+        "revision": 1,
+        "contract": 1,
+        "title": "Feature flags",
+        "description": "Database-backed flags with a short in-process cache, deterministic percentage bucketing, and per-organization overrides.",
+        "requires": [
+          "system/apphost",
+          "system/database",
+          "system/organizations"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/feature_flags.sql",
+            "target": "internal/db/queries/feature_flags.sql",
+            "class": "query",
+            "sha256": "d7c059bb7f416611935b9a6b13a714657a0724728df4c3b7007cba2fdfaec9a9",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/flags/flags.go",
+            "target": "internal/flags/flags.go",
+            "class": "go",
+            "sha256": "56054eccc210cb01a39b132cc4332e07c59104a762107f3cbfcca2cc39b5619a",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/flags/module.go",
+            "target": "internal/flags/module.go",
+            "class": "go",
+            "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/flags"
+          ],
+          "queries": [
+            "feature_flags"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/flags",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Queries",
+                "capability": "database.queries",
+                "type": "*sqlc.Queries",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Evaluator",
+                "capability": "flags.evaluator",
+                "type": "flags.Evaluator"
+              }
+            ],
+            "type_imports": [
+              "internal/db/sqlc"
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [
+          {
+            "id": "0008_feature_flags",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0008_feature_flags.sql",
+            "sha256": "0a20a096adddf2ab8abb19f06baaaafa107279c62204505403d96d26a5ad9277"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/flags"
+          ]
+        },
+        "data": [
+          {
+            "table": "feature_flags",
+            "scope": "platform",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "retain"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/feature_flags.sql",
+          "source": "internal/db/queries/feature_flags.sql",
+          "base_sha256": "d7c059bb7f416611935b9a6b13a714657a0724728df4c3b7007cba2fdfaec9a9",
+          "local_sha256": "d7c059bb7f416611935b9a6b13a714657a0724728df4c3b7007cba2fdfaec9a9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/flags/flags.go",
+          "source": "internal/flags/flags.go",
+          "base_sha256": "56054eccc210cb01a39b132cc4332e07c59104a762107f3cbfcca2cc39b5619a",
+          "local_sha256": "56054eccc210cb01a39b132cc4332e07c59104a762107f3cbfcca2cc39b5619a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/flags/module.go",
+          "source": "internal/flags/module.go",
+          "base_sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+          "local_sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0008_feature_flags",
+          "number": 8,
+          "path": "internal/db/migrations/0008_feature_flags.sql",
+          "sha256": "0a20a096adddf2ab8abb19f06baaaafa107279c62204505403d96d26a5ad9277"
+        }
+      ]
+    },
+    {
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -960,7 +1653,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1161,7 +1854,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1248,7 +1941,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1360,7 +2053,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1467,7 +2160,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1883,7 +2576,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2027,7 +2720,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2143,10 +2836,13 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [
+        "system/api",
         "system/audit",
+        "system/content",
+        "system/feature-flags",
         "system/impersonation",
         "system/notifications",
         "system/usage",
@@ -2278,10 +2974,209 @@
       ]
     },
     {
+      "id": "system/rate-limit",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
+      "reason": "profile",
+      "required_by": [
+        "system/api"
+      ],
+      "manifest": {
+        "id": "system/rate-limit",
+        "kind": "system",
+        "name": "rate-limit",
+        "revision": 1,
+        "contract": 1,
+        "title": "Request rate limiting",
+        "description": "Per-key token-bucket limiter with a bursting budget, used to shield the application from a single abusive client.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/ratelimit/module.go",
+            "target": "internal/ratelimit/module.go",
+            "class": "go",
+            "sha256": "b8299f03a416b9a885920aa8354f46be5974fce17cbe38ac7ac05e7c14438b2d",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/ratelimit/ratelimit.go",
+            "target": "internal/ratelimit/ratelimit.go",
+            "class": "go",
+            "sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/ratelimit"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/ratelimit",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Limiter",
+                "capability": "ratelimit.keyed",
+                "type": "*ratelimit.Keyed"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "RATE_LIMIT_RPM",
+            "field": "RateLimitPerMinute",
+            "description": "Per-IP request budget per minute; bursts to twice this",
+            "default": "100"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/ratelimit"
+          ]
+        },
+        "data": [],
+        "removal_policy": "major-version-only"
+      },
+      "files": [
+        {
+          "path": "internal/ratelimit/module.go",
+          "source": "internal/ratelimit/module.go",
+          "base_sha256": "b8299f03a416b9a885920aa8354f46be5974fce17cbe38ac7ac05e7c14438b2d",
+          "local_sha256": "b8299f03a416b9a885920aa8354f46be5974fce17cbe38ac7ac05e7c14438b2d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/ratelimit/ratelimit.go",
+          "source": "internal/ratelimit/ratelimit.go",
+          "base_sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
+          "local_sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/schedules",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/schedules",
+        "kind": "system",
+        "name": "schedules",
+        "revision": 1,
+        "contract": 1,
+        "title": "Recurring work",
+        "description": "The builder-facing helper for recurring jobs: a schedule row names a job kind and a cadence, and the scheduler pass enqueues it.",
+        "requires": [
+          "system/database"
+        ],
+        "files": [
+          {
+            "source": "internal/db/queries/schedules.sql",
+            "target": "internal/db/queries/schedules.sql",
+            "class": "query",
+            "sha256": "ad3b9d58edb55c8b021d0569dea65bad1a29b4d7a26ec7f811c8752b573183f4",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/schedules/schedules.go",
+            "target": "internal/schedules/schedules.go",
+            "class": "go",
+            "sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/schedules"
+          ],
+          "queries": [
+            "schedules"
+          ]
+        },
+        "runtime": {},
+        "migrations": [
+          {
+            "id": "0004_schedules",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0004_schedules.sql",
+            "sha256": "40fa1eb6ae999f888affaf91bd00c57e78e42eb9ac922240c54ddf55a293fca2"
+          }
+        ],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/schedules"
+          ]
+        },
+        "data": [
+          {
+            "table": "schedules",
+            "scope": "platform",
+            "export": false,
+            "account_delete": "retain",
+            "organization_delete": "retain"
+          }
+        ],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/db/queries/schedules.sql",
+          "source": "internal/db/queries/schedules.sql",
+          "base_sha256": "ad3b9d58edb55c8b021d0569dea65bad1a29b4d7a26ec7f811c8752b573183f4",
+          "local_sha256": "ad3b9d58edb55c8b021d0569dea65bad1a29b4d7a26ec7f811c8752b573183f4",
+          "state": "clean"
+        },
+        {
+          "path": "internal/schedules/schedules.go",
+          "source": "internal/schedules/schedules.go",
+          "base_sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
+          "local_sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
+          "state": "clean"
+        }
+      ],
+      "migrations": [
+        {
+          "id": "0004_schedules",
+          "number": 4,
+          "path": "internal/db/migrations/0004_schedules.sql",
+          "sha256": "40fa1eb6ae999f888affaf91bd00c57e78e42eb9ac922240c54ddf55a293fca2"
+        }
+      ]
+    },
+    {
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2363,7 +3258,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2515,7 +3410,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2571,7 +3466,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2668,7 +3563,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "50764675728223e06623e55fb381149197f3adcda41fe7a1ad2a570f845f7d45",
+      "source_commit": "fa80c6c186e96035e80e0ce8cdc870df6345a09da9a31a2c2f3bc9fde63fc7da",
       "reason": "profile",
       "required_by": [],
       "manifest": {

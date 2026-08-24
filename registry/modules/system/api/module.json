@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/api",
+    "kind": "system",
+    "name": "api",
+    "revision": 1,
+    "contract": 1,
+    "title": "JSON API",
+    "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
+    "requires": [
+      "system/database",
+      "system/organizations",
+      "system/rate-limit"
+    ],
+    "files": [
+      {
+        "source": "internal/api/ai.go",
+        "target": "internal/api/ai.go",
+        "class": "go",
+        "sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/api/cursor.go",
+        "target": "internal/api/cursor.go",
+        "class": "go",
+        "sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/api/cursor_test.go",
+        "target": "internal/api/cursor_test.go",
+        "class": "go",
+        "sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/api/idempotency.go",
+        "target": "internal/api/idempotency.go",
+        "class": "go",
+        "sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/api/openapi.go",
+        "target": "internal/api/openapi.go",
+        "class": "go",
+        "sha256": "86ec22a0d69d87a214a8f45f4bc4a5f9a27df2c2ed456df4931ad9e67b3ca149",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/api/projects.go",
+        "target": "internal/api/projects.go",
+        "class": "go",
+        "sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/api/tokens.go",
+        "target": "internal/api/tokens.go",
+        "class": "go",
+        "sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/api/tokens_test.go",
+        "target": "internal/api/tokens_test.go",
+        "class": "go",
+        "sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/api_tokens.sql",
+        "target": "internal/db/queries/api_tokens.sql",
+        "class": "query",
+        "sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/idempotency_keys.sql",
+        "target": "internal/db/queries/idempotency_keys.sql",
+        "class": "query",
+        "sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/api"
+      ],
+      "queries": [
+        "api_tokens",
+        "idempotency_keys"
+      ]
+    },
+    "runtime": {},
+    "migrations": [
+      {
+        "id": "0015_idempotency_keys",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0015_idempotency_keys.sql",
+        "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4"
+      }
+    ],
+    "environment": [
+      {
+        "key": "API_RATE_LIMIT_RPM",
+        "field": "APIRateLimitPerMinute",
+        "description": "Per-API-token request budget per minute; bursts to twice this",
+        "default": "60"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/api"
+      ]
+    },
+    "data": [
+      {
+        "table": "api_tokens",
+        "scope": "org",
+        "export": true,
+        "secret_redaction_owner": "system/api",
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      },
+      {
+        "table": "idempotency_keys",
+        "scope": "org",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "major-version-only"
+  }
+}

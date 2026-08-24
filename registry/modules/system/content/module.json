@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/content",
+    "kind": "system",
+    "name": "content",
+    "revision": 1,
+    "contract": 1,
+    "title": "Content and CMS",
+    "description": "Embedded markdown corpus, goldmark rendering, RSS, search, and the database-backed CMS for administrator-authored entries, revisions, and media.",
+    "requires": [
+      "system/database",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/content/changelog.go",
+        "target": "internal/content/changelog.go",
+        "class": "go",
+        "sha256": "62b3e24a12e1fdeb5accd0522f72c0b0986a6831e5cda2812d0be91fa5c79856",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/changelog_test.go",
+        "target": "internal/content/changelog_test.go",
+        "class": "go",
+        "sha256": "cb6d5b4b0fa0037692fe287239eee45480a997b3e25bb32158bb57cd16566187",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/cms.go",
+        "target": "internal/content/cms.go",
+        "class": "go",
+        "sha256": "fef4dc1ed4da83175dd20bae251493c786199f365442ae24962af094ddd3c95d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/content/cms_test.go",
+        "target": "internal/content/cms_test.go",
+        "class": "go",
+        "sha256": "91a36b0861ec7f74447cf4af5e24ad8381174bf0bf955b9cc7d2149ccd2f0543",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/content.go",
+        "target": "internal/content/content.go",
+        "class": "go",
+        "sha256": "a7687b821f1537f9f340f6fc24213758fb9bf4a4d4505032c66cad5aa3148fe5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/content/content_test.go",
+        "target": "internal/content/content_test.go",
+        "class": "go",
+        "sha256": "d3746e1dd8afee7b0f969e92738539f34846277c68562882262d26b69346ea22",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/docs_check_test.go",
+        "target": "internal/content/docs_check_test.go",
+        "class": "go",
+        "sha256": "eb600c051525d68cb0db9e815264b10c3dfd4f0872264708b8bb4aac7ec3a2e0",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/import.go",
+        "target": "internal/content/import.go",
+        "class": "go",
+        "sha256": "81c1fc9e46e9bf89d81ede7a654679bd60c0109c2179c9e49e7808cbc4def86e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/rss.go",
+        "target": "internal/content/rss.go",
+        "class": "go",
+        "sha256": "3911be3cf78a2e431c23e2d70c507a4b78166f2d75c1b8ccf35a9ec299e6e96e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/search.go",
+        "target": "internal/content/search.go",
+        "class": "go",
+        "sha256": "61c8811fe632a8eda96e265c1071f3b1119198f11e87cbbd234d65c3ca247936",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/search_test.go",
+        "target": "internal/content/search_test.go",
+        "class": "go",
+        "sha256": "c7e508ccef8db74a9a6027e1b23bf1b98eb027ce05769e275446649d994167b7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/content/types.go",
+        "target": "internal/content/types.go",
+        "class": "go",
+        "sha256": "4e064c6ad9d482c60fac0745d9714149bf3529a3e15deecd91fa0de705e4bdef",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/content/types_test.go",
+        "target": "internal/content/types_test.go",
+        "class": "go",
+        "sha256": "5ef69872eb3a4a618e442c38c536c092943099526a61878c1652c3312e96ecef",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/content_entries.sql",
+        "target": "internal/db/queries/content_entries.sql",
+        "class": "query",
+        "sha256": "961a545d520d93c78501959caf0c4101091d6f71634e7717269c5f0c7a76c036",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/content_media.sql",
+        "target": "internal/db/queries/content_media.sql",
+        "class": "query",
+        "sha256": "d757ca9995dcdbf7d51a8b269c248c62d6004736dbca7a0274b9f7434345fa19",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/content_revisions.sql",
+        "target": "internal/db/queries/content_revisions.sql",
+        "class": "query",
+        "sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/content"
+      ],
+      "queries": [
+        "content_entries",
+        "content_media",
+        "content_revisions"
+      ]
+    },
+    "runtime": {},
+    "migrations": [
+      {
+        "id": "0019_content_cms",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0019_content_cms.sql",
+        "sha256": "6709cabb3ae6512e0759d74aca0994d2274422a19a61e74c02e7507a7f675a20"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/content"
+      ]
+    },
+    "data": [
+      {
+        "table": "content_entries",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      },
+      {
+        "table": "content_media",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain",
+        "external_objects": [
+          "storage"
+        ]
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}

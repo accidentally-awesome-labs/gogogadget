@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/schedules",
+    "kind": "system",
+    "name": "schedules",
+    "revision": 1,
+    "contract": 1,
+    "title": "Recurring work",
+    "description": "The builder-facing helper for recurring jobs: a schedule row names a job kind and a cadence, and the scheduler pass enqueues it.",
+    "requires": [
+      "system/database"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/schedules.sql",
+        "target": "internal/db/queries/schedules.sql",
+        "class": "query",
+        "sha256": "ad3b9d58edb55c8b021d0569dea65bad1a29b4d7a26ec7f811c8752b573183f4",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/schedules/schedules.go",
+        "target": "internal/schedules/schedules.go",
+        "class": "go",
+        "sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/schedules"
+      ],
+      "queries": [
+        "schedules"
+      ]
+    },
+    "runtime": {},
+    "migrations": [
+      {
+        "id": "0004_schedules",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0004_schedules.sql",
+        "sha256": "40fa1eb6ae999f888affaf91bd00c57e78e42eb9ac922240c54ddf55a293fca2"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/schedules"
+      ]
+    },
+    "data": [
+      {
+        "table": "schedules",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}
