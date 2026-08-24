@@ -73,55 +73,52 @@ type Config struct {
 	LogLevel           string
 }
 
-// Load reads the environment, auto-loading `.env` in development, and validates
-// the result. All validation problems are reported together.
-func Load() (Config, error) {
-	env := getenv("APP_ENV", "development")
-	if env == "development" {
-		loadDotEnv(".env")                     // missing file is fine; real env wins
-		env = getenv("APP_ENV", "development") // .env may set APP_ENV
-	}
+// LoadFrom reads configuration through lookup and validates the result. All
+// validation problems are reported together. Modules parse through this so a
+// runtime can boot against a fixed environment without touching the process.
+func LoadFrom(lookup func(string) string) (Config, error) {
+	env := pick(lookup, "APP_ENV", "development")
 
 	cfg := Config{
 		Env:         env,
-		AppURL:      strings.TrimRight(getenv("APP_URL", "http://localhost:8080"), "/"),
-		DatabaseURL: getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable"),
+		AppURL:      strings.TrimRight(pick(lookup, "APP_URL", "http://localhost:8080"), "/"),
+		DatabaseURL: pick(lookup, "DATABASE_URL", "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable"),
 
-		ClerkSecretKey:      getenv("CLERK_SECRET_KEY", ""),
-		ClerkWebhookSecret:  getenv("CLERK_WEBHOOK_SECRET", ""),
-		ClerkPortalURL:      strings.TrimRight(getenv("CLERK_PORTAL_URL", ""), "/"),
-		ClerkPublishableKey: getenv("CLERK_PUBLISHABLE_KEY", ""),
-		ClerkFrontendAPIURL: getenv("CLERK_FRONTEND_API_URL", ""),
+		ClerkSecretKey:      pick(lookup, "CLERK_SECRET_KEY", ""),
+		ClerkWebhookSecret:  pick(lookup, "CLERK_WEBHOOK_SECRET", ""),
+		ClerkPortalURL:      strings.TrimRight(pick(lookup, "CLERK_PORTAL_URL", ""), "/"),
+		ClerkPublishableKey: pick(lookup, "CLERK_PUBLISHABLE_KEY", ""),
+		ClerkFrontendAPIURL: pick(lookup, "CLERK_FRONTEND_API_URL", ""),
 
-		AdminEmail: getenv("ADMIN_EMAIL", ""),
+		AdminEmail: pick(lookup, "ADMIN_EMAIL", ""),
 
-		PolarAccessToken:   getenv("POLAR_ACCESS_TOKEN", ""),
-		PolarWebhookSecret: getenv("POLAR_WEBHOOK_SECRET", ""),
-		PolarProductPro:    getenv("POLAR_PRODUCT_PRO", ""),
-		PolarProductTeam:   getenv("POLAR_PRODUCT_TEAM", ""),
-		PolarServer:        getenv("POLAR_SERVER", "sandbox"),
+		PolarAccessToken:   pick(lookup, "POLAR_ACCESS_TOKEN", ""),
+		PolarWebhookSecret: pick(lookup, "POLAR_WEBHOOK_SECRET", ""),
+		PolarProductPro:    pick(lookup, "POLAR_PRODUCT_PRO", ""),
+		PolarProductTeam:   pick(lookup, "POLAR_PRODUCT_TEAM", ""),
+		PolarServer:        pick(lookup, "POLAR_SERVER", "sandbox"),
 
-		PostHogAPIKey: getenv("POSTHOG_API_KEY", ""),
-		PostHogHost:   getenv("POSTHOG_HOST", "https://us.i.posthog.com"),
+		PostHogAPIKey: pick(lookup, "POSTHOG_API_KEY", ""),
+		PostHogHost:   pick(lookup, "POSTHOG_HOST", "https://us.i.posthog.com"),
 
-		StorageR2AccountID:       getenv("STORAGE_R2_ACCOUNT_ID", ""),
-		StorageR2AccessKeyID:     getenv("STORAGE_R2_ACCESS_KEY_ID", ""),
-		StorageR2SecretAccessKey: getenv("STORAGE_R2_SECRET_ACCESS_KEY", ""),
-		StorageR2Bucket:          getenv("STORAGE_R2_BUCKET", ""),
-		StorageR2Endpoint:        strings.TrimRight(getenv("STORAGE_R2_ENDPOINT", ""), "/"),
+		StorageR2AccountID:       pick(lookup, "STORAGE_R2_ACCOUNT_ID", ""),
+		StorageR2AccessKeyID:     pick(lookup, "STORAGE_R2_ACCESS_KEY_ID", ""),
+		StorageR2SecretAccessKey: pick(lookup, "STORAGE_R2_SECRET_ACCESS_KEY", ""),
+		StorageR2Bucket:          pick(lookup, "STORAGE_R2_BUCKET", ""),
+		StorageR2Endpoint:        strings.TrimRight(pick(lookup, "STORAGE_R2_ENDPOINT", ""), "/"),
 
-		LLMAPIKey:       getenv("LLM_API_KEY", ""),
-		LLMBaseURL:      strings.TrimRight(getenv("LLM_BASE_URL", "https://api.openai.com/v1"), "/"),
-		LLMModel:        getenv("LLM_MODEL", ""),
-		SentryDSN:       getenv("SENTRY_DSN", ""),
-		ResendAPIKey:    getenv("RESEND_API_KEY", ""),
-		EmailFrom:       getenv("EMAIL_FROM", "GoGoGadget <hello@example.com>"),
-		MaintenanceMode: parseBool(getenv("MAINTENANCE_MODE", "")),
-		MetricsToken:    getenv("METRICS_TOKEN", ""),
+		LLMAPIKey:       pick(lookup, "LLM_API_KEY", ""),
+		LLMBaseURL:      strings.TrimRight(pick(lookup, "LLM_BASE_URL", "https://api.openai.com/v1"), "/"),
+		LLMModel:        pick(lookup, "LLM_MODEL", ""),
+		SentryDSN:       pick(lookup, "SENTRY_DSN", ""),
+		ResendAPIKey:    pick(lookup, "RESEND_API_KEY", ""),
+		EmailFrom:       pick(lookup, "EMAIL_FROM", "GoGoGadget <hello@example.com>"),
+		MaintenanceMode: parseBool(pick(lookup, "MAINTENANCE_MODE", "")),
+		MetricsToken:    pick(lookup, "METRICS_TOKEN", ""),
 	}
 
 	cfg.Port = 8080
-	if v := getenv("PORT", ""); v != "" {
+	if v := pick(lookup, "PORT", ""); v != "" {
 		p, err := strconv.Atoi(v)
 		if err != nil || p < 1 || p > 65535 {
 			return Config{}, fmt.Errorf("PORT: %q is not a valid port", v)
@@ -130,7 +127,7 @@ func Load() (Config, error) {
 	}
 
 	cfg.RateLimitPerMinute = 100
-	if v := getenv("RATE_LIMIT_RPM", ""); v != "" {
+	if v := pick(lookup, "RATE_LIMIT_RPM", ""); v != "" {
 		rpm, err := strconv.Atoi(v)
 		if err != nil || rpm < 1 {
 			return Config{}, fmt.Errorf("RATE_LIMIT_RPM: %q must be a positive integer", v)
@@ -139,7 +136,7 @@ func Load() (Config, error) {
 	}
 
 	cfg.APIRateLimitPerMinute = 60
-	if v := getenv("API_RATE_LIMIT_RPM", ""); v != "" {
+	if v := pick(lookup, "API_RATE_LIMIT_RPM", ""); v != "" {
 		rpm, err := strconv.Atoi(v)
 		if err != nil || rpm < 1 {
 			return Config{}, fmt.Errorf("API_RATE_LIMIT_RPM: %q must be a positive integer", v)
@@ -147,7 +144,7 @@ func Load() (Config, error) {
 		cfg.APIRateLimitPerMinute = rpm
 	}
 
-	if v := getenv("AUDIT_RETENTION_DAYS", ""); v != "" {
+	if v := pick(lookup, "AUDIT_RETENTION_DAYS", ""); v != "" {
 		days, err := strconv.Atoi(v)
 		if err != nil || days < 0 {
 			return Config{}, fmt.Errorf("AUDIT_RETENTION_DAYS: %q must be a non-negative integer", v)
@@ -155,7 +152,7 @@ func Load() (Config, error) {
 		cfg.AuditRetentionDays = days
 	}
 
-	cfg.LogLevel = getenv("LOG_LEVEL", "")
+	cfg.LogLevel = pick(lookup, "LOG_LEVEL", "")
 	if cfg.LogLevel == "" {
 		if cfg.Development() {
 			cfg.LogLevel = "debug"
@@ -174,18 +171,18 @@ func Load() (Config, error) {
 
 	// DEV_AUTH_BYPASS enables synthetic e2e: session tokens. It is honored only
 	// outside production — booting production with it on is a hard error.
-	cfg.DevAuthBypass = parseBool(getenv("DEV_AUTH_BYPASS", "false"))
+	cfg.DevAuthBypass = parseBool(pick(lookup, "DEV_AUTH_BYPASS", "false"))
 	if cfg.DevAuthBypass && cfg.Production() {
 		errs = append(errs, errors.New("DEV_AUTH_BYPASS=true is refused when APP_ENV=production"))
 	}
 
 	if cfg.Production() {
 		// No dev fallback DSN in production: refuse to boot into the wrong database.
-		if os.Getenv("DATABASE_URL") == "" {
+		if lookup("DATABASE_URL") == "" {
 			errs = append(errs, errors.New("DATABASE_URL is required when APP_ENV=production"))
 		}
 		for _, k := range []string{"CLERK_SECRET_KEY", "CLERK_WEBHOOK_SECRET", "CLERK_PORTAL_URL", "CLERK_PUBLISHABLE_KEY"} {
-			if os.Getenv(k) == "" {
+			if lookup(k) == "" {
 				errs = append(errs, fmt.Errorf("%s is required when APP_ENV=production", k))
 			}
 		}
@@ -205,7 +202,7 @@ func Load() (Config, error) {
 		errs = append(errs, fmt.Errorf("POLAR_SERVER: %q must be sandbox or production", cfg.PolarServer))
 	}
 
-	if v := getenv("TEST_NOW", ""); v != "" && cfg.Env == "test" {
+	if v := pick(lookup, "TEST_NOW", ""); v != "" && cfg.Env == "test" {
 		t, err := time.Parse(time.RFC3339, v)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("TEST_NOW: %v", err))
@@ -215,6 +212,14 @@ func Load() (Config, error) {
 	}
 
 	return cfg, errors.Join(errs...)
+}
+
+// Load reads the process environment, auto-loading `.env` in development.
+func Load() (Config, error) {
+	if pick(os.Getenv, "APP_ENV", "development") == "development" {
+		loadDotEnv(".env") // missing file is fine; real env wins
+	}
+	return LoadFrom(os.Getenv)
 }
 
 func (c Config) Production() bool       { return c.Env == "production" }
@@ -250,8 +255,11 @@ func (c Config) Now() time.Time {
 	return time.Now()
 }
 
-func getenv(key, def string) string {
-	if v, ok := os.LookupEnv(key); ok && v != "" {
+// pick returns the looked-up value, or def when it is unset or empty. Empty
+// and unset are the same thing here: an exported-but-blank variable is not a
+// configuration choice.
+func pick(lookup func(string) string, key, def string) string {
+	if v := lookup(key); v != "" {
 		return v
 	}
 	return def
