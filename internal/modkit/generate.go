@@ -121,6 +121,22 @@ func qualifyPackage(modulePath, pkg string) string {
 	return modulePath + "/" + strings.Trim(pkg, "/")
 }
 
+// resolveTypeImport resolves a declared provide-type import. An external module
+// path is domain-qualified (its first segment contains a dot) and is used
+// verbatim; anything else is module-relative and qualified against the target
+// module, so a derivative imports its own copy rather than the upstream one.
+func resolveTypeImport(modulePath, declared string) string {
+	trimmed := strings.Trim(declared, "/")
+	first := trimmed
+	if i := strings.Index(trimmed, "/"); i >= 0 {
+		first = trimmed[:i]
+	}
+	if strings.Contains(first, ".") {
+		return trimmed
+	}
+	return qualifyPackage(modulePath, trimmed)
+}
+
 // capabilityField turns a capability name into the exported Runtime field that
 // carries it. Capabilities are globally unique (the namespace preflight enforces
 // it), so deriving the field from the capability — not from the module's own
@@ -227,16 +243,38 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package modules\n\n")
+	needsErrors := false
+	for _, m := range modules {
+		if m.Runtime.System != nil && m.Runtime.System.Stop {
+			needsErrors = true
+		}
+	}
 	b.WriteString("import (\n")
 	b.WriteString("\t\"context\"\n")
+	if needsErrors {
+		b.WriteString("\t\"errors\"\n")
+	}
 	b.WriteString("\t\"fmt\"\n")
 	b.WriteString("\t\"net/http\"\n")
 	b.WriteString("\n")
 	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n"}
+	seenImports := make(map[string]struct{})
 	for _, m := range modules {
-		if m.Runtime.System != nil && m.Runtime.System.Package != "" {
-			qualified := qualifyPackage(modulePath, m.Runtime.System.Package)
+		if m.Runtime.System == nil || m.Runtime.System.Package == "" {
+			continue
+		}
+		qualified := qualifyPackage(modulePath, m.Runtime.System.Package)
+		if _, ok := seenImports[qualified]; !ok {
+			seenImports[qualified] = struct{}{}
 			imports = append(imports, "\t"+goImportName(qualified)+" \""+qualified+"\"\n")
+		}
+		for _, extra := range m.Runtime.System.TypeImports {
+			resolved := resolveTypeImport(modulePath, extra)
+			if _, ok := seenImports[resolved]; ok {
+				continue
+			}
+			seenImports[resolved] = struct{}{}
+			imports = append(imports, "\t"+goImportName(resolved)+" \""+resolved+"\"\n")
 		}
 	}
 	sort.Strings(imports)
@@ -332,6 +370,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			provider[provide.Capability] = "r." + field
 		}
 		if sys.Stop {
+			fmt.Fprintf(&b, "\tr.stop = append(r.stop, %s.Stop)\n", varName)
 			stoppers = append(stoppers, varName)
 		}
 	}
@@ -342,13 +381,23 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("func (r *Runtime) Handler() http.Handler { return r.handler }\n\n")
 	b.WriteString("// Run starts long-lived services.\n")
 	b.WriteString("func (r *Runtime) Run(ctx context.Context) error { return nil }\n\n")
-	b.WriteString("// Close stops services in reverse dependency order.\n")
+	b.WriteString("// Close stops services in reverse dependency order. Every stop hook runs\n")
+	b.WriteString("// even if an earlier one fails, so one stuck service cannot strand the rest;\n")
+	b.WriteString("// the joined error reports all of them.\n")
 	b.WriteString("func (r *Runtime) Close(ctx context.Context) error {\n")
-	for i := len(stoppers) - 1; i >= 0; i-- {
-		fmt.Fprintf(&b, "\t_ = %s\n", stoppers[i])
+	if len(stoppers) == 0 {
+		b.WriteString("\treturn nil\n")
+		b.WriteString("}\n")
+	} else {
+		b.WriteString("\tvar errs []error\n")
+		b.WriteString("\tfor i := len(r.stop) - 1; i >= 0; i-- {\n")
+		b.WriteString("\t\tif err := r.stop[i](ctx); err != nil {\n")
+		b.WriteString("\t\t\terrs = append(errs, err)\n")
+		b.WriteString("\t\t}\n")
+		b.WriteString("\t}\n")
+		b.WriteString("\treturn errors.Join(errs...)\n")
+		b.WriteString("}\n")
 	}
-	b.WriteString("\treturn nil\n")
-	b.WriteString("}\n")
 
 	_ = ctx
 	return &GeneratedFile{Path: "internal/modules/bootstrap_registry_gen.go", Content: b.String()}, nil

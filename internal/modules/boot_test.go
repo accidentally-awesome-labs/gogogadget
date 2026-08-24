@@ -7,27 +7,56 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
 )
 
-// bootHost is a fully unconfigured environment: the state a fresh clone boots
-// in. Only the settings a fresh clone actually has are present.
-func bootHost() apphost.Host {
-	return apphost.Map(map[string]string{
-		"APP_ENV": "test",
-		"APP_URL": "http://localhost:8080",
-	}, time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), "v-test")
+// bootHost is an otherwise unconfigured environment pointed at an empty scratch
+// database: the state a fresh clone boots in. The database is real because the
+// runtime genuinely needs one — every request path depends on it — so a fake
+// would prove nothing about Boot. Skips when no server is reachable.
+func bootHost(t *testing.T, name string, extra map[string]string) apphost.Host {
+	t.Helper()
+	env := map[string]string{
+		"APP_ENV":      "test",
+		"APP_URL":      "http://localhost:8080",
+		"DATABASE_URL": testdb.DSN(t, name),
+	}
+	for k, v := range extra {
+		env[k] = v
+	}
+	return apphost.Map(env, time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), "v-test")
+}
+
+// closeRuntime asserts the generated shutdown path actually runs.
+func closeRuntime(t *testing.T, runtime *Runtime) {
+	t.Helper()
+	if err := runtime.Close(context.Background()); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
 }
 
 // Boot is generated from the selected module graph, so this is the test that
 // proves the generated wiring is real: an unconfigured host must produce a
 // runtime whose every capability is the documented local fallback.
 func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
-	runtime, err := Boot(context.Background(), bootHost(), Options{})
+	runtime, err := Boot(context.Background(), bootHost(t, "boot_fallbacks", nil), Options{})
 	if err != nil {
 		t.Fatalf("Boot: %v", err)
+	}
+	t.Cleanup(func() { closeRuntime(t, runtime) })
+
+	// The database module opened a pool and ran migrations as part of Boot.
+	if runtime.DatabasePool == nil {
+		t.Fatal("DatabasePool capability is nil")
+	}
+	if runtime.DatabaseQueries == nil {
+		t.Fatal("DatabaseQueries capability is nil")
+	}
+	if err := runtime.DatabasePool.Ping(context.Background()); err != nil {
+		t.Fatalf("booted pool is unusable: %v", err)
 	}
 
 	if runtime.Config == nil {
@@ -67,18 +96,17 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 // Configuration reaches the modules through the host, so flipping one host value
 // must change which adapter the generated graph selects.
 func TestBootSelectsConfiguredAdapters(t *testing.T) {
-	host := apphost.Map(map[string]string{
-		"APP_ENV":         "test",
-		"APP_URL":         "http://localhost:8080",
+	host := bootHost(t, "boot_configured", map[string]string{
 		"DEV_AUTH_BYPASS": "true",
 		"RESEND_API_KEY":  "re_test",
 		"EMAIL_FROM":      "hello@example.com",
-	}, time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), "v-test")
+	})
 
 	runtime, err := Boot(context.Background(), host, Options{})
 	if err != nil {
 		t.Fatalf("Boot: %v", err)
 	}
+	t.Cleanup(func() { closeRuntime(t, runtime) })
 	if _, ok := runtime.MailSender.(*mail.ResendSender); !ok {
 		t.Fatalf("MailSender = %T, want *mail.ResendSender", runtime.MailSender)
 	}

@@ -1051,12 +1051,16 @@ func (c CLI) runRegistry(ctx context.Context, args []string) error {
 	}
 
 	if subcommand == "build" {
+		refreshed, err := refreshManifestDigests(c.root())
+		if err != nil {
+			return c.failure("registry build", *asJSON, runtimeError(err))
+		}
 		built, discovered, err := buildRegistryIndexes(c.root())
 		if err != nil {
 			return c.failure("registry build", *asJSON, runtimeError(err))
 		}
 		return c.emit("registry build", *asJSON, Envelope{
-			OK: true, Resolved: discovered, Generated: built, Exit: exitOK,
+			OK: true, Resolved: discovered, Generated: append(built, refreshed...), Exit: exitOK,
 		})
 	}
 
@@ -1073,6 +1077,107 @@ func (c CLI) runRegistry(ctx context.Context, args []string) error {
 	}
 	sort.Strings(ids)
 	return c.emit("registry validate", *asJSON, Envelope{OK: true, Resolved: ids, Exit: exitOK})
+}
+
+// refreshManifestDigests re-reads every manifest payload from disk and rewrites
+// the recorded digests. In a self-hosting registry the payload and the manifest
+// live in the same tree, so editing a module's own source stales its manifest and
+// every later sync refuses on a digest mismatch. This is the upstream authoring
+// step that closes that loop; it only ever touches manifests, never payloads.
+func refreshManifestDigests(root string) ([]string, error) {
+	refreshed := make([]string, 0)
+	for _, include := range catalogIncludes {
+		if include.kind == CatalogProfile {
+			continue
+		}
+		dir := filepath.Join(root, "registry", "modules", string(include.kind))
+		entries, err := os.ReadDir(dir)
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return nil, fmt.Errorf("scan %s: %w", dir, err)
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			rel := "registry/modules/" + string(include.kind) + "/" + entry.Name() + "/module.json"
+			changed, err := refreshManifestDocument(root, rel)
+			if err != nil {
+				return nil, err
+			}
+			if changed {
+				refreshed = append(refreshed, rel)
+			}
+		}
+	}
+	sort.Strings(refreshed)
+	return refreshed, nil
+}
+
+// refreshManifestDocument rewrites one manifest's payload digests. It decodes
+// into the typed model so a malformed manifest is rejected rather than silently
+// rewritten, and it re-encodes with the same canonical shape the loader expects.
+func refreshManifestDocument(root, rel string) (bool, error) {
+	full := filepath.Join(root, filepath.FromSlash(rel))
+	original, err := os.ReadFile(full)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
+	}
+	var document ModuleDocument
+	if err := decodeStrict(original, &document); err != nil {
+		return false, fmt.Errorf("%s: %w", rel, err)
+	}
+
+	changed := false
+	for i, file := range document.Module.Files {
+		digest, err := payloadDigest(root, file.Source)
+		if err != nil {
+			return false, fmt.Errorf("%s: %w", rel, err)
+		}
+		if digest != file.SHA256 {
+			document.Module.Files[i].SHA256 = digest
+			changed = true
+		}
+	}
+	for i, migration := range document.Module.Migrations {
+		digest, err := payloadDigest(root, migration.Source)
+		if err != nil {
+			return false, fmt.Errorf("%s: %w", rel, err)
+		}
+		if digest != migration.SHA256 {
+			document.Module.Migrations[i].SHA256 = digest
+			changed = true
+		}
+	}
+	if !changed {
+		return false, nil
+	}
+
+	encoded, err := json.MarshalIndent(document, "", "  ")
+	if err != nil {
+		return false, err
+	}
+	if err := atomicWrite(full, append(encoded, '\n')); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// payloadDigest hashes one manifest payload from the registry tree.
+func payloadDigest(root, source string) (string, error) {
+	if err := validateSafePath(source); err != nil {
+		return "", fmt.Errorf("payload %q: %w", source, err)
+	}
+	content, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(source)))
+	if err != nil {
+		return "", fmt.Errorf("read payload %s: %w", source, err)
+	}
+	return digestBytes(content), nil
 }
 
 // buildRegistryIndexes rewrites each kind index from the documents actually

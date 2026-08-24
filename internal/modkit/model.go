@@ -235,8 +235,16 @@ type SystemContribution struct {
 	Constructor string           `json:"constructor"`
 	Needs       []RuntimeNeed    `json:"needs"`
 	Provides    []RuntimeProvide `json:"provides"`
-	Start       bool             `json:"start"`
-	Stop        bool             `json:"stop"`
+	// TypeImports are the extra packages the provided type expressions need —
+	// a pool, a generated query struct. The generated bootstrap imports module
+	// packages automatically, but a provided type can come from a package the
+	// module merely uses, and an unimported type is a compile error in a
+	// DO-NOT-EDIT file. A path whose first segment contains a dot is an external
+	// module path used verbatim; anything else is module-relative and qualified
+	// against the target module, exactly like Package.
+	TypeImports []string `json:"type_imports,omitempty"`
+	Start       bool     `json:"start"`
+	Stop        bool     `json:"stop"`
 }
 
 // RuntimeNeed is one typed constructor dependency.

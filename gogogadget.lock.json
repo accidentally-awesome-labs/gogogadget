@@ -1,23 +1,26 @@
 {
   "schema": 1,
-  "registry_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+  "registry_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
   "order": [
     "system/apphost",
     "system/config",
     "system/analytics",
     "system/billing",
+    "system/database",
     "system/identity",
     "system/llm",
     "system/mail",
+    "system/modkit",
     "system/observability",
-    "system/storage"
+    "system/storage",
+    "system/testdb"
   ],
   "modules": [
     {
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -124,12 +127,13 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [
         "system/analytics",
         "system/billing",
         "system/config",
+        "system/database",
         "system/identity",
         "system/llm",
         "system/mail",
@@ -187,7 +191,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -385,11 +389,12 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [
         "system/analytics",
         "system/billing",
+        "system/database",
         "system/identity",
         "system/llm",
         "system/mail",
@@ -544,10 +549,130 @@
       "migrations": []
     },
     {
+      "id": "system/database",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "reason": "profile",
+      "required_by": [
+        "system/testdb"
+      ],
+      "manifest": {
+        "id": "system/database",
+        "kind": "system",
+        "name": "database",
+        "revision": 1,
+        "contract": 1,
+        "title": "Database",
+        "description": "The Postgres connection pool, the embedded migration runner, and the generated query layer's configuration. Owns the pool lifecycle: opening, migrating, and closing.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/db/db.go",
+            "target": "internal/db/db.go",
+            "class": "go",
+            "sha256": "ccb3b880b84603714b5d5fcba119a0f6de8dc5e32ad7b38fdcae71a0be9b9e20",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/db/module.go",
+            "target": "internal/db/module.go",
+            "class": "go",
+            "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "sqlc.yaml",
+            "target": "sqlc.yaml",
+            "class": "asset",
+            "sha256": "24898229406d72c9b4f1b871019b8e1828d2f3d0398b33562e3a364651e9e932",
+            "rewrite_module": false,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/db"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/db",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Pool",
+                "capability": "database.pool",
+                "type": "*pgxpool.Pool"
+              },
+              {
+                "field": "Queries",
+                "capability": "database.queries",
+                "type": "*sqlc.Queries"
+              }
+            ],
+            "type_imports": [
+              "github.com/jackc/pgx/v5/pgxpool",
+              "internal/db/sqlc"
+            ],
+            "start": false,
+            "stop": true
+          }
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/db"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/db/db.go",
+          "source": "internal/db/db.go",
+          "base_sha256": "ccb3b880b84603714b5d5fcba119a0f6de8dc5e32ad7b38fdcae71a0be9b9e20",
+          "local_sha256": "ccb3b880b84603714b5d5fcba119a0f6de8dc5e32ad7b38fdcae71a0be9b9e20",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/module.go",
+          "source": "internal/db/module.go",
+          "base_sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+          "local_sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+          "state": "clean"
+        },
+        {
+          "path": "sqlc.yaml",
+          "source": "sqlc.yaml",
+          "base_sha256": "24898229406d72c9b4f1b871019b8e1828d2f3d0398b33562e3a364651e9e932",
+          "local_sha256": "24898229406d72c9b4f1b871019b8e1828d2f3d0398b33562e3a364651e9e932",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -743,7 +868,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -855,7 +980,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -959,10 +1084,426 @@
       "migrations": []
     },
     {
+      "id": "system/modkit",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/modkit",
+        "kind": "system",
+        "name": "modkit",
+        "revision": 1,
+        "contract": 1,
+        "title": "Module registry engine",
+        "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
+        "requires": [],
+        "files": [
+          {
+            "source": "cmd/ggg/main.go",
+            "target": "cmd/ggg/main.go",
+            "class": "go",
+            "sha256": "4396ce5185a06f843ec3c43e68da0a427fce6edead57c81cf8ddf50fa91c7b6f",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/modkit/apply.go",
+            "target": "internal/modkit/apply.go",
+            "class": "go",
+            "sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/modkit/catalog.go",
+            "target": "internal/modkit/catalog.go",
+            "class": "go",
+            "sha256": "73ccdcf4f8c6a2f202de08256bc5dd34b16c7694c76fe58866e8f013f00be0be",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/cli.go",
+            "target": "internal/modkit/cli.go",
+            "class": "go",
+            "sha256": "81a002915c94df57d3726337683b2325b84cace7b6e129bb67db7fcf8c05b0e8",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/modkit/codec.go",
+            "target": "internal/modkit/codec.go",
+            "class": "go",
+            "sha256": "4d0690200a1f7c5e1e0f1bbd0fb12a3b771f78f1ef3fdd67e51eb91fe2b1b2e4",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/doc.go",
+            "target": "internal/modkit/doc.go",
+            "class": "go",
+            "sha256": "a325cb87fe64aa554a69db05ed036fe8ea616c5f0e5a867faf0bcba43978cf2d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/generate.go",
+            "target": "internal/modkit/generate.go",
+            "class": "go",
+            "sha256": "b2125fd2b2b168c1afb02e71a04c787161aba3163342e59d1af7c970f9012d05",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/generator.go",
+            "target": "internal/modkit/generator.go",
+            "class": "go",
+            "sha256": "204d275f4cbdf48609b85ef3c13ddd141a8511697705126a8e7ff644d3ba4ef9",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/health.go",
+            "target": "internal/modkit/health.go",
+            "class": "go",
+            "sha256": "96f654bd642f1168fbdf571066914b9943bde2971ca6317c1943e98eef05959f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/migration_plan.go",
+            "target": "internal/modkit/migration_plan.go",
+            "class": "go",
+            "sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/model.go",
+            "target": "internal/modkit/model.go",
+            "class": "go",
+            "sha256": "3401c3a24a55e46b0dc551b8f15e91c64af42ac575edfa0534aa7f0afba32601",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/modkit/namespace.go",
+            "target": "internal/modkit/namespace.go",
+            "class": "go",
+            "sha256": "119d54c9e2aa253ee8e7454ac0940c78e53025315c6b666614b6a995f00eccaf",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/operation.go",
+            "target": "internal/modkit/operation.go",
+            "class": "go",
+            "sha256": "eec01224b400f3b4ea761e962a18f62a6566c6769a6cdaeb6170f26285dfd5a6",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/plan.go",
+            "target": "internal/modkit/plan.go",
+            "class": "go",
+            "sha256": "7f25dd0ff1216a86decd47f282b002decda001158b69126c2e8bcfd95121200d",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/modkit/reconcile.go",
+            "target": "internal/modkit/reconcile.go",
+            "class": "go",
+            "sha256": "71501cee55130908e2fedfd103c0e9e2237309133f6abf5a00a296397a7b95cb",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/registry.go",
+            "target": "internal/modkit/registry.go",
+            "class": "go",
+            "sha256": "68b1b7f00def60886b2f15f9e3ec6124b8398487dd6f303161d04e21e6a9446c",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/remove.go",
+            "target": "internal/modkit/remove.go",
+            "class": "go",
+            "sha256": "30eeeb5b85f23914464d3f0f2cd87356c5df2bf8cd9eb9400d601b8c5c39f5f0",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/resolve.go",
+            "target": "internal/modkit/resolve.go",
+            "class": "go",
+            "sha256": "062d8420d8de713dc85b3b199c40159e31793b882b6d923d4d719b04f80c079a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/resolve_conflict.go",
+            "target": "internal/modkit/resolve_conflict.go",
+            "class": "go",
+            "sha256": "1717e10b70e8aa1906553ef664266d2c06213d002ba4022d6a81b29524e5c866",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/rewrite.go",
+            "target": "internal/modkit/rewrite.go",
+            "class": "go",
+            "sha256": "293e1e8564b21bef1e2bc8724722b7b278509eef7dea185e5408be886f924b04",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/source.go",
+            "target": "internal/modkit/source.go",
+            "class": "go",
+            "sha256": "b6bf9045ccff383e80c3b9d77e81de077d5c4a9a7c968333ae2a5224400a4e56",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/modkit/source_directory.go",
+            "target": "internal/modkit/source_directory.go",
+            "class": "go",
+            "sha256": "844729f1663533e04be6a9d88964165123daed55a0ef74c6a309b7b9562a821c",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/source_github.go",
+            "target": "internal/modkit/source_github.go",
+            "class": "go",
+            "sha256": "23483f54546566fed2b19903ad260e5dd9f1a1ece0630198b89559c398b7ca7a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/target_plan.go",
+            "target": "internal/modkit/target_plan.go",
+            "class": "go",
+            "sha256": "a19e0a003ced95c5a11e285d5aafaca083430bfa9d359f7ddb313edf684e40d9",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/validate.go",
+            "target": "internal/modkit/validate.go",
+            "class": "go",
+            "sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "cmd/ggg",
+            "internal/modkit"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "cmd/ggg",
+            "internal/modkit"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "cmd/ggg/main.go",
+          "source": "cmd/ggg/main.go",
+          "base_sha256": "4396ce5185a06f843ec3c43e68da0a427fce6edead57c81cf8ddf50fa91c7b6f",
+          "local_sha256": "4396ce5185a06f843ec3c43e68da0a427fce6edead57c81cf8ddf50fa91c7b6f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/apply.go",
+          "source": "internal/modkit/apply.go",
+          "base_sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
+          "local_sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/catalog.go",
+          "source": "internal/modkit/catalog.go",
+          "base_sha256": "73ccdcf4f8c6a2f202de08256bc5dd34b16c7694c76fe58866e8f013f00be0be",
+          "local_sha256": "73ccdcf4f8c6a2f202de08256bc5dd34b16c7694c76fe58866e8f013f00be0be",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/cli.go",
+          "source": "internal/modkit/cli.go",
+          "base_sha256": "81a002915c94df57d3726337683b2325b84cace7b6e129bb67db7fcf8c05b0e8",
+          "local_sha256": "81a002915c94df57d3726337683b2325b84cace7b6e129bb67db7fcf8c05b0e8",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/codec.go",
+          "source": "internal/modkit/codec.go",
+          "base_sha256": "4d0690200a1f7c5e1e0f1bbd0fb12a3b771f78f1ef3fdd67e51eb91fe2b1b2e4",
+          "local_sha256": "4d0690200a1f7c5e1e0f1bbd0fb12a3b771f78f1ef3fdd67e51eb91fe2b1b2e4",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/doc.go",
+          "source": "internal/modkit/doc.go",
+          "base_sha256": "a325cb87fe64aa554a69db05ed036fe8ea616c5f0e5a867faf0bcba43978cf2d",
+          "local_sha256": "a325cb87fe64aa554a69db05ed036fe8ea616c5f0e5a867faf0bcba43978cf2d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/generate.go",
+          "source": "internal/modkit/generate.go",
+          "base_sha256": "b2125fd2b2b168c1afb02e71a04c787161aba3163342e59d1af7c970f9012d05",
+          "local_sha256": "b2125fd2b2b168c1afb02e71a04c787161aba3163342e59d1af7c970f9012d05",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/generator.go",
+          "source": "internal/modkit/generator.go",
+          "base_sha256": "204d275f4cbdf48609b85ef3c13ddd141a8511697705126a8e7ff644d3ba4ef9",
+          "local_sha256": "204d275f4cbdf48609b85ef3c13ddd141a8511697705126a8e7ff644d3ba4ef9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/health.go",
+          "source": "internal/modkit/health.go",
+          "base_sha256": "96f654bd642f1168fbdf571066914b9943bde2971ca6317c1943e98eef05959f",
+          "local_sha256": "96f654bd642f1168fbdf571066914b9943bde2971ca6317c1943e98eef05959f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/migration_plan.go",
+          "source": "internal/modkit/migration_plan.go",
+          "base_sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
+          "local_sha256": "8ffa7b76b359d41d5d7c531dcf29bacba0316a9c986af373ea5aa6a30ff9b1bf",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/model.go",
+          "source": "internal/modkit/model.go",
+          "base_sha256": "3401c3a24a55e46b0dc551b8f15e91c64af42ac575edfa0534aa7f0afba32601",
+          "local_sha256": "3401c3a24a55e46b0dc551b8f15e91c64af42ac575edfa0534aa7f0afba32601",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/namespace.go",
+          "source": "internal/modkit/namespace.go",
+          "base_sha256": "119d54c9e2aa253ee8e7454ac0940c78e53025315c6b666614b6a995f00eccaf",
+          "local_sha256": "119d54c9e2aa253ee8e7454ac0940c78e53025315c6b666614b6a995f00eccaf",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/operation.go",
+          "source": "internal/modkit/operation.go",
+          "base_sha256": "eec01224b400f3b4ea761e962a18f62a6566c6769a6cdaeb6170f26285dfd5a6",
+          "local_sha256": "eec01224b400f3b4ea761e962a18f62a6566c6769a6cdaeb6170f26285dfd5a6",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/plan.go",
+          "source": "internal/modkit/plan.go",
+          "base_sha256": "7f25dd0ff1216a86decd47f282b002decda001158b69126c2e8bcfd95121200d",
+          "local_sha256": "7f25dd0ff1216a86decd47f282b002decda001158b69126c2e8bcfd95121200d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/reconcile.go",
+          "source": "internal/modkit/reconcile.go",
+          "base_sha256": "71501cee55130908e2fedfd103c0e9e2237309133f6abf5a00a296397a7b95cb",
+          "local_sha256": "71501cee55130908e2fedfd103c0e9e2237309133f6abf5a00a296397a7b95cb",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/registry.go",
+          "source": "internal/modkit/registry.go",
+          "base_sha256": "68b1b7f00def60886b2f15f9e3ec6124b8398487dd6f303161d04e21e6a9446c",
+          "local_sha256": "68b1b7f00def60886b2f15f9e3ec6124b8398487dd6f303161d04e21e6a9446c",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/remove.go",
+          "source": "internal/modkit/remove.go",
+          "base_sha256": "30eeeb5b85f23914464d3f0f2cd87356c5df2bf8cd9eb9400d601b8c5c39f5f0",
+          "local_sha256": "30eeeb5b85f23914464d3f0f2cd87356c5df2bf8cd9eb9400d601b8c5c39f5f0",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/resolve.go",
+          "source": "internal/modkit/resolve.go",
+          "base_sha256": "062d8420d8de713dc85b3b199c40159e31793b882b6d923d4d719b04f80c079a",
+          "local_sha256": "062d8420d8de713dc85b3b199c40159e31793b882b6d923d4d719b04f80c079a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/resolve_conflict.go",
+          "source": "internal/modkit/resolve_conflict.go",
+          "base_sha256": "1717e10b70e8aa1906553ef664266d2c06213d002ba4022d6a81b29524e5c866",
+          "local_sha256": "1717e10b70e8aa1906553ef664266d2c06213d002ba4022d6a81b29524e5c866",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/rewrite.go",
+          "source": "internal/modkit/rewrite.go",
+          "base_sha256": "293e1e8564b21bef1e2bc8724722b7b278509eef7dea185e5408be886f924b04",
+          "local_sha256": "293e1e8564b21bef1e2bc8724722b7b278509eef7dea185e5408be886f924b04",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/source.go",
+          "source": "internal/modkit/source.go",
+          "base_sha256": "b6bf9045ccff383e80c3b9d77e81de077d5c4a9a7c968333ae2a5224400a4e56",
+          "local_sha256": "b6bf9045ccff383e80c3b9d77e81de077d5c4a9a7c968333ae2a5224400a4e56",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/source_directory.go",
+          "source": "internal/modkit/source_directory.go",
+          "base_sha256": "844729f1663533e04be6a9d88964165123daed55a0ef74c6a309b7b9562a821c",
+          "local_sha256": "844729f1663533e04be6a9d88964165123daed55a0ef74c6a309b7b9562a821c",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/source_github.go",
+          "source": "internal/modkit/source_github.go",
+          "base_sha256": "23483f54546566fed2b19903ad260e5dd9f1a1ece0630198b89559c398b7ca7a",
+          "local_sha256": "23483f54546566fed2b19903ad260e5dd9f1a1ece0630198b89559c398b7ca7a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/target_plan.go",
+          "source": "internal/modkit/target_plan.go",
+          "base_sha256": "a19e0a003ced95c5a11e285d5aafaca083430bfa9d359f7ddb313edf684e40d9",
+          "local_sha256": "a19e0a003ced95c5a11e285d5aafaca083430bfa9d359f7ddb313edf684e40d9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/validate.go",
+          "source": "internal/modkit/validate.go",
+          "base_sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
+          "local_sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1078,7 +1619,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "87c831edadfce4e913b2f789ce2b2e3c3c8c030f28cc5a5201647ed5139706e5",
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1221,6 +1762,62 @@
           "source": "internal/storage/storage.go",
           "base_sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
           "local_sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/testdb",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "27d3999cef0997a1e12cec1763bb1c88094d1c1523bb3a3aca14aa91550a9b41",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/testdb",
+        "kind": "system",
+        "name": "testdb",
+        "revision": 1,
+        "contract": 1,
+        "title": "Per-package test databases",
+        "description": "Gives every integration-test package its own database so parallel packages cannot nuke each other's fixtures. Skips when no server is reachable.",
+        "requires": [
+          "system/database"
+        ],
+        "files": [
+          {
+            "source": "internal/db/testdb/testdb.go",
+            "target": "internal/db/testdb/testdb.go",
+            "class": "go",
+            "sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/db/testdb"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/db/testdb"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/db/testdb/testdb.go",
+          "source": "internal/db/testdb/testdb.go",
+          "base_sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
+          "local_sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
           "state": "clean"
         }
       ],

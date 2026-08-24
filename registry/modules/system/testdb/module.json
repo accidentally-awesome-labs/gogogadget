@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/testdb",
+    "kind": "system",
+    "name": "testdb",
+    "revision": 1,
+    "contract": 1,
+    "title": "Per-package test databases",
+    "description": "Gives every integration-test package its own database so parallel packages cannot nuke each other's fixtures. Skips when no server is reachable.",
+    "requires": [
+      "system/database"
+    ],
+    "files": [
+      {
+        "source": "internal/db/testdb/testdb.go",
+        "target": "internal/db/testdb/testdb.go",
+        "class": "go",
+        "sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/db/testdb"
+      ]
+    },
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/db/testdb"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

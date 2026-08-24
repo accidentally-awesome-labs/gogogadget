@@ -274,3 +274,108 @@ func TestEmittersSkipUndeclaredContributionKinds(t *testing.T) {
 		}
 	}
 }
+
+// A module that declares stop must actually be stopped, in reverse dependency
+// order. A generated Close that discards its stoppers leaks pools and
+// connections on every shutdown while looking correct.
+func TestBootstrapClosesStoppableModulesInReverseOrder(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	// Give the fixture a second stoppable module so order is observable.
+	second := Manifest{
+		ID: "system/omega", Kind: ModuleSystem, Name: "omega",
+		Revision: 1, Contract: 1, Title: "Omega", Description: "Omega system.",
+		Files: []ManifestFile{}, Requires: []string{"system/alpha"}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{System: &SystemContribution{
+			Package: "internal/omega", Constructor: "NewModule",
+			Needs:    []RuntimeNeed{{Field: "Alpha", Capability: "alpha", Type: "*alpha.Module"}},
+			Provides: []RuntimeProvide{{Field: "Omega", Capability: "omega", Type: "*omega.Module"}},
+			Stop:     true,
+		}},
+	}
+	graph = append(graph, second)
+	lock.Order = append(lock.Order, "system/omega")
+	lock.Modules = append(lock.Modules, LockedModule{
+		ID: "system/omega", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+		Reason: "explicit", RequiredBy: []string{}, Manifest: second,
+		Files: []LockedFile{}, Migrations: []LockedMigration{},
+	})
+
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var bootstrap string
+	for _, file := range files {
+		if file.Path == "internal/modules/bootstrap_registry_gen.go" {
+			bootstrap = file.Content
+		}
+	}
+	if strings.Contains(bootstrap, "_ = system_") {
+		t.Fatalf("Close discards its stoppers instead of calling them:\n%s", bootstrap)
+	}
+
+	// Stop hooks are registered during Boot, so dependency order is captured by
+	// append order; Close then walks the slice backwards.
+	bootBody := bootstrap[strings.Index(bootstrap, "func Boot("):strings.Index(bootstrap, "func (r *Runtime) Handler(")]
+	alpha := strings.Index(bootBody, "r.stop = append(r.stop, system_alphaModule.Stop)")
+	omega := strings.Index(bootBody, "r.stop = append(r.stop, system_omegaModule.Stop)")
+	if alpha < 0 || omega < 0 {
+		t.Fatalf("Boot does not register both stop hooks:\n%s", bootBody)
+	}
+	if alpha > omega {
+		t.Fatalf("stop hooks registered out of dependency order:\n%s", bootBody)
+	}
+
+	closeBody := bootstrap[strings.Index(bootstrap, "func (r *Runtime) Close("):]
+	if !strings.Contains(closeBody, "for i := len(r.stop) - 1; i >= 0; i--") {
+		t.Fatalf("Close does not stop in reverse order:\n%s", closeBody)
+	}
+	if !strings.Contains(closeBody, "errors.Join(errs...)") {
+		t.Fatalf("Close abandons later stop hooks after a failure:\n%s", closeBody)
+	}
+}
+
+// A provided type can come from a package the providing module merely uses —
+// a pool, a generated query struct. The bootstrap imports module packages, so
+// without declared type imports the generated Runtime references undefined
+// identifiers and the whole project stops compiling.
+func TestBootstrapImportsDeclaredProvideTypePackages(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	for i := range graph {
+		if graph[i].Runtime.System == nil {
+			continue
+		}
+		graph[i].Runtime.System.TypeImports = []string{
+			"github.com/jackc/pgx/v5/pgxpool",
+			"internal/db/sqlc",
+		}
+		graph[i].Runtime.System.Provides = []RuntimeProvide{
+			{Field: "Pool", Capability: "database.pool", Type: "*pgxpool.Pool"},
+			{Field: "Queries", Capability: "database.queries", Type: "*sqlc.Queries"},
+		}
+	}
+	for i := range lock.Modules {
+		lock.Modules[i].Manifest = graph[i]
+	}
+
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var bootstrap string
+	for _, file := range files {
+		if file.Path == "internal/modules/bootstrap_registry_gen.go" {
+			bootstrap = file.Content
+		}
+	}
+	// An external module path is used verbatim; a module-relative one is
+	// qualified against the target module, exactly like a system package.
+	for _, want := range []string{
+		`"github.com/jackc/pgx/v5/pgxpool"`,
+		`"derivative.example/app/internal/db/sqlc"`,
+	} {
+		if !strings.Contains(bootstrap, want) {
+			t.Fatalf("bootstrap does not import %s:\n%s", want, bootstrap)
+		}
+	}
+}

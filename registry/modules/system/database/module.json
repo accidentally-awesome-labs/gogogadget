@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/database",
+    "kind": "system",
+    "name": "database",
+    "revision": 1,
+    "contract": 1,
+    "title": "Database",
+    "description": "The Postgres connection pool, the embedded migration runner, and the generated query layer's configuration. Owns the pool lifecycle: opening, migrating, and closing.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/db/db.go",
+        "target": "internal/db/db.go",
+        "class": "go",
+        "sha256": "ccb3b880b84603714b5d5fcba119a0f6de8dc5e32ad7b38fdcae71a0be9b9e20",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/db/module.go",
+        "target": "internal/db/module.go",
+        "class": "go",
+        "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "sqlc.yaml",
+        "target": "sqlc.yaml",
+        "class": "asset",
+        "sha256": "24898229406d72c9b4f1b871019b8e1828d2f3d0398b33562e3a364651e9e932",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/db"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/db",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool"
+          },
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries"
+          }
+        ],
+        "stop": true,
+        "start": false,
+        "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
+          "internal/db/sqlc"
+        ]
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/db"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

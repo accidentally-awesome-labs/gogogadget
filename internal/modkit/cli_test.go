@@ -442,3 +442,57 @@ func TestCLISyncClaimsDivergentFileDuringAdoption(t *testing.T) {
 		t.Fatal("claimed file is absent from the lock")
 	}
 }
+
+// In a self-hosting registry the module payload and the manifest digest live in
+// the same tree, so editing a module's own source stales its manifest. Without a
+// refresh the upstream author can never evolve a module: every sync refuses on a
+// digest mismatch. `registry build` is that authoring step.
+func TestCLIRegistryBuildRefreshesPayloadDigests(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":1,"includes":[`+
+		`"registry/elements.json","registry/components.json","registry/pages.json",`+
+		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
+	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
+		writeTestFile(t, root, "registry/"+kind+".json",
+			[]byte(`{"schema":1,"kind":"`+strings.TrimSuffix(kind, "s")+`","items":[]}`))
+	}
+	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":1,"kind":"profile","items":[]}`))
+
+	payload := []byte("package widget\n\nconst Version = 1\n")
+	writeTestFile(t, root, "internal/widget/widget.go", payload)
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1,"module":{
+		"id":"system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+		"title":"Widget","description":"A widget system.","requires":[],
+		"files":[{"source":"internal/widget/widget.go","target":"internal/widget/widget.go",
+		          "class":"go","sha256":"`+sha256Hex(payload)+`","rewrite_module":true,"contract":true}],
+		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
+		"data":[],"removal_policy":"free"}}`))
+
+	cli := CLI{Out: &bytes.Buffer{}, Root: root}
+	if err := cli.Run(context.Background(), []string{"registry", "validate"}); err != nil {
+		t.Fatalf("validate before edit: %v", err)
+	}
+
+	// The upstream author edits the module's own source.
+	edited := []byte("package widget\n\nconst Version = 2\n")
+	writeTestFile(t, root, "internal/widget/widget.go", edited)
+
+	if err := cli.Run(context.Background(), []string{"registry", "build"}); err != nil {
+		t.Fatalf("registry build: %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(root, "registry", "modules", "system", "widget", "module.json"))
+	if err != nil {
+		t.Fatalf("read manifest: %v", err)
+	}
+	if !strings.Contains(string(data), sha256Hex(edited)) {
+		t.Fatalf("build did not refresh the payload digest:\n%s", data)
+	}
+	if strings.Contains(string(data), sha256Hex(payload)) {
+		t.Fatalf("build left the stale digest behind:\n%s", data)
+	}
+	if err := cli.Run(context.Background(), []string{"registry", "validate"}); err != nil {
+		t.Fatalf("validate after build: %v", err)
+	}
+}

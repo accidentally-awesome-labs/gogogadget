@@ -13,11 +13,14 @@
       "system/apphost",
       "system/billing",
       "system/config",
+      "system/database",
       "system/identity",
       "system/llm",
       "system/mail",
+      "system/modkit",
       "system/observability",
-      "system/storage"
+      "system/storage",
+      "system/testdb"
     ]
   }
 }

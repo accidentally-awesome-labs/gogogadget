@@ -42,6 +42,28 @@ const (
 // from TEST_DATABASE_URL (default postgres://postgres:postgres@localhost:5432).
 func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 	t.Helper()
+	dsn := DSN(t, name)
+
+	migrateCtx, cancelMigrate := context.WithTimeout(context.Background(), migrateTimeout)
+	defer cancelMigrate()
+
+	pool, err := db.Open(migrateCtx, dsn)
+	if err != nil {
+		t.Fatalf("open %s: %v", name, err)
+	}
+	if err := db.Migrate(migrateCtx, pool); err != nil {
+		pool.Close()
+		t.Fatalf("migrate %s: %v", name, err)
+	}
+	t.Cleanup(pool.Close)
+	return pool, sqlc.New(pool)
+}
+
+// DSN drops and recreates gogogadget_test_<name> and returns its DSN, without
+// migrating. Callers that own their own migration run — a runtime booting the
+// database module, for instance — need an empty database, not a prepared one.
+func DSN(t *testing.T, name string) string {
+	t.Helper()
 	base := os.Getenv("TEST_DATABASE_URL")
 	if base == "" {
 		base = "postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable"
@@ -86,20 +108,8 @@ func Open(t *testing.T, name string) (*pgxpool.Pool, *sqlc.Queries) {
 		t.Fatalf("create %s: %v", dbName, err)
 	}
 
-	migrateCtx, cancelMigrate := context.WithTimeout(context.Background(), migrateTimeout)
-	defer cancelMigrate()
-
 	u.Path = "/" + dbName
-	pool, err := db.Open(migrateCtx, u.String())
-	if err != nil {
-		t.Fatalf("open %s: %v", dbName, err)
-	}
-	if err := db.Migrate(migrateCtx, pool); err != nil {
-		pool.Close()
-		t.Fatalf("migrate %s: %v", dbName, err)
-	}
-	t.Cleanup(pool.Close)
-	return pool, sqlc.New(pool)
+	return u.String()
 }
 
 // execDDL runs one CREATE/DROP DATABASE statement under its own budget.
