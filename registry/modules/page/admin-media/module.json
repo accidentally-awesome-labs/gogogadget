@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-media",
+    "kind": "page",
+    "name": "admin-media",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin media library",
+    "description": "The paginated platform image library that the content editor and admins browse.",
+    "requires": [
+      "system/content",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_media.go",
+        "target": "internal/web/page_admin_media.go",
+        "class": "go",
+        "sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.media.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.media.index",
+          "method": "GET",
+          "pattern": "/admin/media",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminMedia"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

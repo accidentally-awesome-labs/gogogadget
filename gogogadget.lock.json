@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+  "registry_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
   "order": [
     "system/apphost",
     "system/config",
@@ -35,19 +35,63 @@
     "system/metrics",
     "system/security",
     "page/activity",
+    "page/admin-announcements",
     "page/admin-audit",
+    "page/admin-content",
+    "page/admin-flag-detail",
+    "page/admin-flags",
+    "page/admin-media",
+    "page/admin-organizations",
+    "page/admin-overview",
+    "page/admin-schedules",
+    "page/admin-users",
+    "page/dashboard",
+    "page/files",
+    "page/notifications",
+    "page/project-new",
+    "page/projects",
+    "page/settings-api-tokens",
+    "page/settings-notifications",
     "system/seo",
     "system/static",
     "system/testdb",
     "system/usage",
-    "system/webhooks"
+    "page/settings-billing",
+    "system/webhooks",
+    "workflow/account-export",
+    "workflow/admin-announcements",
+    "workflow/admin-content",
+    "page/admin-content-editor",
+    "page/admin-content-preview",
+    "workflow/admin-flags",
+    "workflow/admin-media",
+    "workflow/admin-schedules",
+    "workflow/admin-user-governance",
+    "workflow/api-token-lifecycle",
+    "workflow/appearance",
+    "workflow/auth-session",
+    "page/settings-account",
+    "workflow/account-delete",
+    "workflow/billing-checkout",
+    "workflow/billing-webhook",
+    "workflow/dev-session",
+    "page/dev-gallery",
+    "workflow/files",
+    "workflow/impersonation",
+    "workflow/notification-inbox",
+    "workflow/notification-preferences",
+    "workflow/organization-export",
+    "page/settings-organization",
+    "workflow/project-export",
+    "workflow/projects",
+    "page/project-edit"
   ],
   "modules": [
     {
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -138,10 +182,91 @@
       "migrations": []
     },
     {
+      "id": "page/admin-announcements",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/admin-announcements"
+      ],
+      "manifest": {
+        "id": "page/admin-announcements",
+        "kind": "page",
+        "name": "admin-announcements",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin announcements list",
+        "description": "The platform banner announcements table with the create form.",
+        "requires": [
+          "system/announcements",
+          "system/i18n",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_announcements.go",
+            "target": "internal/web/page_admin_announcements.go",
+            "class": "go",
+            "sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.announcements.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.announcements.index",
+              "method": "GET",
+              "pattern": "/admin/announcements",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminAnnouncements"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_announcements.go",
+          "source": "internal/web/page_admin_announcements.go",
+          "base_sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+          "local_sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -232,10 +357,1103 @@
       "migrations": []
     },
     {
+      "id": "page/admin-content",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-content",
+        "kind": "page",
+        "name": "admin-content",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin content list",
+        "description": "The admin table of every content entry across all registered types, with kind filter, search, and pagination.",
+        "requires": [
+          "system/content",
+          "system/i18n",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_content.go",
+            "target": "internal/web/page_admin_content.go",
+            "class": "go",
+            "sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.content.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.content.index",
+              "method": "GET",
+              "pattern": "/admin/content",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContent"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_content.go",
+          "source": "internal/web/page_admin_content.go",
+          "base_sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
+          "local_sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-content-editor",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-content-editor",
+        "kind": "page",
+        "name": "admin-content-editor",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin content editor",
+        "description": "The admin editor form for a new or existing content entry, including its declared meta fields, revision history, and media picker.",
+        "requires": [
+          "system/content",
+          "system/i18n",
+          "system/security",
+          "system/server",
+          "workflow/admin-content"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_content_editor.go",
+            "target": "internal/web/page_admin_content_editor.go",
+            "class": "go",
+            "sha256": "3a4de18f3d467b50aeba559f174d01bc356e3c0c63136ff56a10e38101462166",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.content.edit",
+            "admin.content.new"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.content.edit",
+              "method": "GET",
+              "pattern": "/admin/content/{id}",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentEdit"
+            },
+            {
+              "id": "admin.content.new",
+              "method": "GET",
+              "pattern": "/admin/content/new",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentNew"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_content_editor.go",
+          "source": "internal/web/page_admin_content_editor.go",
+          "base_sha256": "3a4de18f3d467b50aeba559f174d01bc356e3c0c63136ff56a10e38101462166",
+          "local_sha256": "3a4de18f3d467b50aeba559f174d01bc356e3c0c63136ff56a10e38101462166",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-content-preview",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-content-preview",
+        "kind": "page",
+        "name": "admin-content-preview",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin content preview",
+        "description": "Renders one content entry through its own public view regardless of status or publication dates, so an editor previews exactly what readers get.",
+        "requires": [
+          "system/content",
+          "system/security",
+          "system/server",
+          "workflow/admin-content"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_content_preview.go",
+            "target": "internal/web/page_admin_content_preview.go",
+            "class": "go",
+            "sha256": "a790f36f8f91cab18e187868024fe3104162bc4c69ccc4d8cc910f28efe50908",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.content.preview"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.content.preview",
+              "method": "GET",
+              "pattern": "/admin/content/{id}/preview",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentPreviewPage"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_content_preview.go",
+          "source": "internal/web/page_admin_content_preview.go",
+          "base_sha256": "a790f36f8f91cab18e187868024fe3104162bc4c69ccc4d8cc910f28efe50908",
+          "local_sha256": "a790f36f8f91cab18e187868024fe3104162bc4c69ccc4d8cc910f28efe50908",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-flag-detail",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-flag-detail",
+        "kind": "page",
+        "name": "admin-flag-detail",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin feature flag detail",
+        "description": "One feature flag with its per-organization overrides and the organizations available to override.",
+        "requires": [
+          "system/feature-flags",
+          "system/i18n",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_flag_detail.go",
+            "target": "internal/web/page_admin_flag_detail.go",
+            "class": "go",
+            "sha256": "ef713344a6714467afc994933a32fb7d5f6a8c1792d4f3e1cd9af8987803ebfc",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.flags.show"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.flags.show",
+              "method": "GET",
+              "pattern": "/admin/flags/{key}",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagDetail"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_flag_detail.go",
+          "source": "internal/web/page_admin_flag_detail.go",
+          "base_sha256": "ef713344a6714467afc994933a32fb7d5f6a8c1792d4f3e1cd9af8987803ebfc",
+          "local_sha256": "ef713344a6714467afc994933a32fb7d5f6a8c1792d4f3e1cd9af8987803ebfc",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-flags",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/admin-flags"
+      ],
+      "manifest": {
+        "id": "page/admin-flags",
+        "kind": "page",
+        "name": "admin-flags",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin feature flags list",
+        "description": "The feature-flag table showing each flag's enabled state and percentage rollout.",
+        "requires": [
+          "system/feature-flags",
+          "system/i18n",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_flags.go",
+            "target": "internal/web/page_admin_flags.go",
+            "class": "go",
+            "sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.flags.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.flags.index",
+              "method": "GET",
+              "pattern": "/admin/flags",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlags"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_flags.go",
+          "source": "internal/web/page_admin_flags.go",
+          "base_sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+          "local_sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-media",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/admin-media"
+      ],
+      "manifest": {
+        "id": "page/admin-media",
+        "kind": "page",
+        "name": "admin-media",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin media library",
+        "description": "The paginated platform image library that the content editor and admins browse.",
+        "requires": [
+          "system/content",
+          "system/i18n",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_media.go",
+            "target": "internal/web/page_admin_media.go",
+            "class": "go",
+            "sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.media.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.media.index",
+              "method": "GET",
+              "pattern": "/admin/media",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminMedia"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_media.go",
+          "source": "internal/web/page_admin_media.go",
+          "base_sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
+          "local_sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-organizations",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-organizations",
+        "kind": "page",
+        "name": "admin-organizations",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin organizations list",
+        "description": "The platform organization table with member counts and plan badges.",
+        "requires": [
+          "system/i18n",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_organizations.go",
+            "target": "internal/web/page_admin_organizations.go",
+            "class": "go",
+            "sha256": "2a55d98938962ec0cd41d6eb38baeb126f6eb8d0c8927f1ec76ef0cd0addb143",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.organizations.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.organizations.index",
+              "method": "GET",
+              "pattern": "/admin/orgs",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminOrgs"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_organizations.go",
+          "source": "internal/web/page_admin_organizations.go",
+          "base_sha256": "2a55d98938962ec0cd41d6eb38baeb126f6eb8d0c8927f1ec76ef0cd0addb143",
+          "local_sha256": "2a55d98938962ec0cd41d6eb38baeb126f6eb8d0c8927f1ec76ef0cd0addb143",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-overview",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-overview",
+        "kind": "page",
+        "name": "admin-overview",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin overview",
+        "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
+        "requires": [
+          "system/billing",
+          "system/i18n",
+          "system/identity",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_overview.go",
+            "target": "internal/web/page_admin_overview.go",
+            "class": "go",
+            "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.overview.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.overview.index",
+              "method": "GET",
+              "pattern": "/admin",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminHome"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_overview.go",
+          "source": "internal/web/page_admin_overview.go",
+          "base_sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+          "local_sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-schedules",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/admin-schedules"
+      ],
+      "manifest": {
+        "id": "page/admin-schedules",
+        "kind": "page",
+        "name": "admin-schedules",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin schedules list",
+        "description": "The recurring-work table listing every schedule, its kind, scope, interval and next fire, plus the create form.",
+        "requires": [
+          "system/i18n",
+          "system/jobs",
+          "system/organizations",
+          "system/schedules",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_schedules.go",
+            "target": "internal/web/page_admin_schedules.go",
+            "class": "go",
+            "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.schedules.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.schedules.index",
+              "method": "GET",
+              "pattern": "/admin/schedules",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminSchedules"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_schedules.go",
+          "source": "internal/web/page_admin_schedules.go",
+          "base_sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+          "local_sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/admin-users",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/admin-users",
+        "kind": "page",
+        "name": "admin-users",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin users list",
+        "description": "The platform user table with search and pagination, served whole or as an HTMX table fragment.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_admin_users.go",
+            "target": "internal/web/page_admin_users.go",
+            "class": "go",
+            "sha256": "156f541e3b51d9b264d26a137e7ec94c6bf0505ed38a1a71c0ab8a751f28f715",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.users.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.users.index",
+              "method": "GET",
+              "pattern": "/admin/users",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminUsers"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_admin_users.go",
+          "source": "internal/web/page_admin_users.go",
+          "base_sha256": "156f541e3b51d9b264d26a137e7ec94c6bf0505ed38a1a71c0ab8a751f28f715",
+          "local_sha256": "156f541e3b51d9b264d26a137e7ec94c6bf0505ed38a1a71c0ab8a751f28f715",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/dashboard",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/dashboard",
+        "kind": "page",
+        "name": "dashboard",
+        "revision": 1,
+        "contract": 1,
+        "title": "App dashboard",
+        "description": "The signed-in landing page: active-project and member stat cards, recent organization activity, and the getting-started checklist.",
+        "requires": [
+          "system/audit",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_dashboard.go",
+            "target": "internal/web/page_dashboard.go",
+            "class": "go",
+            "sha256": "680b5fea10377b443d9f5fafb2e2c60d097325e5c09b88e8c828cdf98b3543ff",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/dashboard.templ",
+            "target": "internal/web/templates/dashboard.templ",
+            "class": "templ",
+            "sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "dashboard.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "dashboard.index",
+              "method": "GET",
+              "pattern": "/app",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDashboard"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_dashboard.go",
+          "source": "internal/web/page_dashboard.go",
+          "base_sha256": "680b5fea10377b443d9f5fafb2e2c60d097325e5c09b88e8c828cdf98b3543ff",
+          "local_sha256": "680b5fea10377b443d9f5fafb2e2c60d097325e5c09b88e8c828cdf98b3543ff",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/dashboard.templ",
+          "source": "internal/web/templates/dashboard.templ",
+          "base_sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+          "local_sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/dev-gallery",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/dev-gallery",
+        "kind": "page",
+        "name": "dev-gallery",
+        "revision": 1,
+        "contract": 1,
+        "title": "Component gallery",
+        "description": "The dev-only reference page that renders every design token and component variant on one URL, doubling as the visual baseline for the component layer.",
+        "requires": [
+          "system/billing",
+          "system/i18n",
+          "system/security",
+          "system/server",
+          "workflow/dev-session"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_dev_gallery.go",
+            "target": "internal/web/page_dev_gallery.go",
+            "class": "go",
+            "sha256": "ac415b3d32d617c53b321b563cd0a3f38c8c8286a47aa27185a6cae5a9cc1d43",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/gallery.templ",
+            "target": "internal/web/templates/gallery.templ",
+            "class": "templ",
+            "sha256": "2834e33ac5b32cc92dd5333d04050f06857d137599fbb28bd7954f260a5ccd15",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "dev-gallery.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "dev-gallery.index",
+              "method": "GET",
+              "pattern": "/dev/gallery",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDevGallery",
+              "enabled": "devAuthBypass"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_dev_gallery.go",
+          "source": "internal/web/page_dev_gallery.go",
+          "base_sha256": "ac415b3d32d617c53b321b563cd0a3f38c8c8286a47aa27185a6cae5a9cc1d43",
+          "local_sha256": "ac415b3d32d617c53b321b563cd0a3f38c8c8286a47aa27185a6cae5a9cc1d43",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/gallery.templ",
+          "source": "internal/web/templates/gallery.templ",
+          "base_sha256": "2834e33ac5b32cc92dd5333d04050f06857d137599fbb28bd7954f260a5ccd15",
+          "local_sha256": "2834e33ac5b32cc92dd5333d04050f06857d137599fbb28bd7954f260a5ccd15",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/files",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/files"
+      ],
+      "manifest": {
+        "id": "page/files",
+        "kind": "page",
+        "name": "files",
+        "revision": 1,
+        "contract": 1,
+        "title": "Files list",
+        "description": "The organization's uploaded-file list with storage-quota usage and pagination, rendered full-page or as an htmx table fragment.",
+        "requires": [
+          "system/database",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_files.go",
+            "target": "internal/web/page_files.go",
+            "class": "go",
+            "sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "files.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "files.index",
+              "method": "GET",
+              "pattern": "/app/files",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleFiles"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_files.go",
+          "source": "internal/web/page_files.go",
+          "base_sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+          "local_sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -324,10 +1542,92 @@
       "migrations": []
     },
     {
+      "id": "page/notifications",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/notification-inbox"
+      ],
+      "manifest": {
+        "id": "page/notifications",
+        "kind": "page",
+        "name": "notifications",
+        "revision": 1,
+        "contract": 1,
+        "title": "Notifications list",
+        "description": "The signed-in user's notification inbox list with unread count and pagination, rendered full-page or as an htmx list fragment.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/notifications",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_notifications.go",
+            "target": "internal/web/page_notifications.go",
+            "class": "go",
+            "sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "notifications.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "notifications.index",
+              "method": "GET",
+              "pattern": "/app/notifications",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleNotifications"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_notifications.go",
+          "source": "internal/web/page_notifications.go",
+          "base_sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+          "local_sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -419,7 +1719,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -508,10 +1808,660 @@
       "migrations": []
     },
     {
+      "id": "page/project-edit",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/project-edit",
+        "kind": "page",
+        "name": "project-edit",
+        "revision": 1,
+        "contract": 1,
+        "title": "Edit project form",
+        "description": "The edit form for a single project, scoped to the current organization so cross-org ids 404 rather than leaking existence.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server",
+          "workflow/projects"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_project_edit.go",
+            "target": "internal/web/page_project_edit.go",
+            "class": "go",
+            "sha256": "12a2f8ce82a2919d76c4c52636e3d2998fb2c0c76a876334cbffc84254f249af",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "projects.edit"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "projects.edit",
+              "method": "GET",
+              "pattern": "/app/projects/{id}/edit",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectEdit"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_project_edit.go",
+          "source": "internal/web/page_project_edit.go",
+          "base_sha256": "12a2f8ce82a2919d76c4c52636e3d2998fb2c0c76a876334cbffc84254f249af",
+          "local_sha256": "12a2f8ce82a2919d76c4c52636e3d2998fb2c0c76a876334cbffc84254f249af",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/project-new",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/project-new",
+        "kind": "page",
+        "name": "project-new",
+        "revision": 1,
+        "contract": 1,
+        "title": "New project form",
+        "description": "The empty create-project form, including the plan's project-limit context.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_project_new.go",
+            "target": "internal/web/page_project_new.go",
+            "class": "go",
+            "sha256": "214a3fc9c9d9fc2ef54b15765463b18c35c53b1330336d1ef751aa8bfaeb56ec",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "projects.new"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "projects.new",
+              "method": "GET",
+              "pattern": "/app/projects/new",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectNew"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_project_new.go",
+          "source": "internal/web/page_project_new.go",
+          "base_sha256": "214a3fc9c9d9fc2ef54b15765463b18c35c53b1330336d1ef751aa8bfaeb56ec",
+          "local_sha256": "214a3fc9c9d9fc2ef54b15765463b18c35c53b1330336d1ef751aa8bfaeb56ec",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/projects",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/projects",
+        "kind": "page",
+        "name": "projects",
+        "revision": 1,
+        "contract": 1,
+        "title": "Projects list",
+        "description": "The organization's project list with free-text search and numbered pagination, rendered full-page or as an htmx table fragment.",
+        "requires": [
+          "system/database",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_projects.go",
+            "target": "internal/web/page_projects.go",
+            "class": "go",
+            "sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "projects.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "projects.index",
+              "method": "GET",
+              "pattern": "/app/projects",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjects"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_projects.go",
+          "source": "internal/web/page_projects.go",
+          "base_sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
+          "local_sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/settings-account",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/account-delete"
+      ],
+      "manifest": {
+        "id": "page/settings-account",
+        "kind": "page",
+        "name": "settings-account",
+        "revision": 1,
+        "contract": 1,
+        "title": "Account settings",
+        "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server",
+          "workflow/auth-session"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_settings_account.go",
+            "target": "internal/web/page_settings_account.go",
+            "class": "go",
+            "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "settings-account.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "settings-account.index",
+              "method": "GET",
+              "pattern": "/app/settings/account",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsAccount"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_settings_account.go",
+          "source": "internal/web/page_settings_account.go",
+          "base_sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+          "local_sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/settings-api-tokens",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/api-token-lifecycle"
+      ],
+      "manifest": {
+        "id": "page/settings-api-tokens",
+        "kind": "page",
+        "name": "settings-api-tokens",
+        "revision": 1,
+        "contract": 1,
+        "title": "API token settings",
+        "description": "Renders the organization's API tokens with their scope and last-used state.",
+        "requires": [
+          "system/api",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_settings_api_tokens.go",
+            "target": "internal/web/page_settings_api_tokens.go",
+            "class": "go",
+            "sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "settings-api-tokens.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "settings-api-tokens.index",
+              "method": "GET",
+              "pattern": "/app/settings/api",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsAPI"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_settings_api_tokens.go",
+          "source": "internal/web/page_settings_api_tokens.go",
+          "base_sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
+          "local_sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/settings-billing",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/billing-checkout"
+      ],
+      "manifest": {
+        "id": "page/settings-billing",
+        "kind": "page",
+        "name": "settings-billing",
+        "revision": 1,
+        "contract": 1,
+        "title": "Billing settings",
+        "description": "Renders the organization's plan, subscription state, project count, storage use and metered usage for the current month.",
+        "requires": [
+          "system/billing",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server",
+          "system/usage"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_settings_billing.go",
+            "target": "internal/web/page_settings_billing.go",
+            "class": "go",
+            "sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "settings-billing.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "settings-billing.index",
+              "method": "GET",
+              "pattern": "/app/settings/billing",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsBilling"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_settings_billing.go",
+          "source": "internal/web/page_settings_billing.go",
+          "base_sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
+          "local_sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/settings-notifications",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "workflow/notification-preferences"
+      ],
+      "manifest": {
+        "id": "page/settings-notifications",
+        "kind": "page",
+        "name": "settings-notifications",
+        "revision": 1,
+        "contract": 1,
+        "title": "Notification settings",
+        "description": "Renders the per-kind in-app notification mutes (default-on) and the digest cadence for the signed-in user.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/notifications",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_settings_notifications.go",
+            "target": "internal/web/page_settings_notifications.go",
+            "class": "go",
+            "sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "settings-notifications.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "settings-notifications.index",
+              "method": "GET",
+              "pattern": "/app/settings/notifications",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsNotifications"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_settings_notifications.go",
+          "source": "internal/web/page_settings_notifications.go",
+          "base_sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
+          "local_sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/settings-organization",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/settings-organization",
+        "kind": "page",
+        "name": "settings-organization",
+        "revision": 1,
+        "contract": 1,
+        "title": "Organization settings",
+        "description": "Renders the organization settings tab with the member roster, the hosted Clerk organization-portal link, and the admin-only export control.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/organizations",
+          "system/security",
+          "system/server",
+          "workflow/auth-session",
+          "workflow/organization-export"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_settings_organization.go",
+            "target": "internal/web/page_settings_organization.go",
+            "class": "go",
+            "sha256": "f68e96de477f289a61e8bc49964d11ee267e2936e1230dee6be395209b77f451",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "settings-organization.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "settings-organization.index",
+              "method": "GET",
+              "pattern": "/app/settings/org",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsOrg"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_settings_organization.go",
+          "source": "internal/web/page_settings_organization.go",
+          "base_sha256": "f68e96de477f289a61e8bc49964d11ee267e2936e1230dee6be395209b77f451",
+          "local_sha256": "f68e96de477f289a61e8bc49964d11ee267e2936e1230dee6be395209b77f451",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -603,10 +2553,11 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
-        "system/server"
+        "system/server",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/analytics",
@@ -712,9 +2663,12 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "page/admin-announcements",
+        "workflow/admin-announcements"
+      ],
       "manifest": {
         "id": "system/announcements",
         "kind": "system",
@@ -786,9 +2740,13 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "page/settings-api-tokens",
+        "workflow/api-token-lifecycle",
+        "workflow/projects"
+      ],
       "manifest": {
         "id": "system/api",
         "kind": "system",
@@ -1020,7 +2978,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -1089,11 +3047,24 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "page/activity",
-        "page/admin-audit"
+        "page/admin-audit",
+        "page/dashboard",
+        "workflow/account-delete",
+        "workflow/account-export",
+        "workflow/admin-content",
+        "workflow/admin-flags",
+        "workflow/admin-media",
+        "workflow/admin-schedules",
+        "workflow/admin-user-governance",
+        "workflow/files",
+        "workflow/impersonation",
+        "workflow/organization-export",
+        "workflow/project-export",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/audit",
@@ -1181,10 +3152,15 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
-        "system/server"
+        "page/admin-overview",
+        "page/dev-gallery",
+        "page/settings-billing",
+        "system/server",
+        "workflow/billing-checkout",
+        "workflow/billing-webhook"
       ],
       "manifest": {
         "id": "system/billing",
@@ -1381,7 +3357,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -1502,11 +3478,17 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
+        "page/admin-content",
+        "page/admin-content-editor",
+        "page/admin-content-preview",
+        "page/admin-media",
         "system/content-assets",
-        "system/server"
+        "system/server",
+        "workflow/admin-content",
+        "workflow/admin-media"
       ],
       "manifest": {
         "id": "system/content",
@@ -1824,7 +3806,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -2149,7 +4131,7 @@
             "source": "content/docs/webhooks.md",
             "target": "content/docs/webhooks.md",
             "class": "content",
-            "sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
+            "sha256": "0d5e708c7789034682a59b1666ef853a97fe795240bbdb0df6741eb7205ea604",
             "rewrite_module": false,
             "contract": false
           },
@@ -2445,8 +4427,8 @@
         {
           "path": "content/docs/webhooks.md",
           "source": "content/docs/webhooks.md",
-          "base_sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
-          "local_sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
+          "base_sha256": "0d5e708c7789034682a59b1666ef853a97fe795240bbdb0df6741eb7205ea604",
+          "local_sha256": "0d5e708c7789034682a59b1666ef853a97fe795240bbdb0df6741eb7205ea604",
           "state": "clean"
         },
         {
@@ -2463,9 +4445,11 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
+        "page/files",
+        "page/projects",
         "system/announcements",
         "system/api",
         "system/audit",
@@ -2480,7 +4464,10 @@
         "system/server",
         "system/testdb",
         "system/usage",
-        "system/webhooks"
+        "system/webhooks",
+        "workflow/billing-webhook",
+        "workflow/files",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/database",
@@ -2605,10 +4592,13 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
-        "system/server"
+        "page/admin-flag-detail",
+        "page/admin-flags",
+        "system/server",
+        "workflow/admin-flags"
       ],
       "manifest": {
         "id": "system/feature-flags",
@@ -2745,16 +4735,56 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "page/activity",
+        "page/admin-announcements",
         "page/admin-audit",
+        "page/admin-content",
+        "page/admin-content-editor",
+        "page/admin-flag-detail",
+        "page/admin-flags",
+        "page/admin-media",
+        "page/admin-organizations",
+        "page/admin-overview",
+        "page/admin-schedules",
+        "page/admin-users",
+        "page/dashboard",
+        "page/dev-gallery",
+        "page/files",
         "page/home",
+        "page/notifications",
         "page/pricing",
         "page/privacy",
+        "page/project-edit",
+        "page/project-new",
+        "page/projects",
+        "page/settings-account",
+        "page/settings-api-tokens",
+        "page/settings-billing",
+        "page/settings-notifications",
+        "page/settings-organization",
         "page/terms",
-        "system/server"
+        "system/server",
+        "workflow/account-delete",
+        "workflow/admin-announcements",
+        "workflow/admin-content",
+        "workflow/admin-flags",
+        "workflow/admin-media",
+        "workflow/admin-schedules",
+        "workflow/admin-user-governance",
+        "workflow/api-token-lifecycle",
+        "workflow/appearance",
+        "workflow/auth-session",
+        "workflow/billing-checkout",
+        "workflow/files",
+        "workflow/impersonation",
+        "workflow/notification-inbox",
+        "workflow/notification-preferences",
+        "workflow/organization-export",
+        "workflow/project-export",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/i18n",
@@ -2869,11 +4899,41 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
+        "page/admin-overview",
+        "page/admin-users",
+        "page/dashboard",
+        "page/files",
+        "page/notifications",
+        "page/project-edit",
+        "page/project-new",
+        "page/projects",
+        "page/settings-account",
+        "page/settings-api-tokens",
+        "page/settings-billing",
+        "page/settings-notifications",
+        "page/settings-organization",
         "system/security",
-        "system/server"
+        "system/server",
+        "workflow/account-delete",
+        "workflow/account-export",
+        "workflow/admin-content",
+        "workflow/admin-media",
+        "workflow/admin-user-governance",
+        "workflow/api-token-lifecycle",
+        "workflow/appearance",
+        "workflow/auth-session",
+        "workflow/billing-checkout",
+        "workflow/dev-session",
+        "workflow/files",
+        "workflow/impersonation",
+        "workflow/notification-inbox",
+        "workflow/notification-preferences",
+        "workflow/organization-export",
+        "workflow/project-export",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/identity",
@@ -3073,9 +5133,12 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "workflow/account-delete",
+        "workflow/impersonation"
+      ],
       "manifest": {
         "id": "system/impersonation",
         "kind": "system",
@@ -3160,9 +5223,14 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "page/admin-schedules",
+        "workflow/admin-schedules",
+        "workflow/organization-export",
+        "workflow/project-export"
+      ],
       "manifest": {
         "id": "system/jobs",
         "kind": "system",
@@ -3317,7 +5385,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -3431,7 +5499,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -3540,7 +5608,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3600,7 +5668,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4016,9 +6084,15 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "page/notifications",
+        "page/settings-notifications",
+        "workflow/account-export",
+        "workflow/notification-inbox",
+        "workflow/notification-preferences"
+      ],
       "manifest": {
         "id": "system/notifications",
         "kind": "system",
@@ -4160,7 +6234,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -4279,9 +6353,14 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
+        "page/admin-flag-detail",
+        "page/admin-organizations",
+        "page/admin-overview",
+        "page/admin-schedules",
+        "page/settings-organization",
         "system/api",
         "system/audit",
         "system/content",
@@ -4290,7 +6369,14 @@
         "system/notifications",
         "system/security",
         "system/usage",
-        "system/webhooks"
+        "system/webhooks",
+        "workflow/account-delete",
+        "workflow/account-export",
+        "workflow/admin-flags",
+        "workflow/billing-webhook",
+        "workflow/dev-session",
+        "workflow/impersonation",
+        "workflow/organization-export"
       ],
       "manifest": {
         "id": "system/organizations",
@@ -4421,7 +6507,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -4525,9 +6611,12 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "page/admin-schedules",
+        "workflow/admin-schedules"
+      ],
       "manifest": {
         "id": "system/schedules",
         "kind": "system",
@@ -4621,11 +6710,54 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "page/activity",
-        "page/admin-audit"
+        "page/admin-announcements",
+        "page/admin-audit",
+        "page/admin-content",
+        "page/admin-content-editor",
+        "page/admin-content-preview",
+        "page/admin-flag-detail",
+        "page/admin-flags",
+        "page/admin-media",
+        "page/admin-organizations",
+        "page/admin-overview",
+        "page/admin-schedules",
+        "page/admin-users",
+        "page/dashboard",
+        "page/dev-gallery",
+        "page/files",
+        "page/notifications",
+        "page/project-edit",
+        "page/project-new",
+        "page/projects",
+        "page/settings-account",
+        "page/settings-api-tokens",
+        "page/settings-billing",
+        "page/settings-notifications",
+        "page/settings-organization",
+        "workflow/account-delete",
+        "workflow/account-export",
+        "workflow/admin-announcements",
+        "workflow/admin-content",
+        "workflow/admin-flags",
+        "workflow/admin-media",
+        "workflow/admin-schedules",
+        "workflow/admin-user-governance",
+        "workflow/api-token-lifecycle",
+        "workflow/appearance",
+        "workflow/auth-session",
+        "workflow/billing-checkout",
+        "workflow/dev-session",
+        "workflow/files",
+        "workflow/impersonation",
+        "workflow/notification-inbox",
+        "workflow/notification-preferences",
+        "workflow/organization-export",
+        "workflow/project-export",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/security",
@@ -4700,7 +6832,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4782,7 +6914,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4834,19 +6966,63 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "page/activity",
+        "page/admin-announcements",
         "page/admin-audit",
+        "page/admin-content",
+        "page/admin-content-editor",
+        "page/admin-content-preview",
+        "page/admin-flag-detail",
+        "page/admin-flags",
+        "page/admin-media",
+        "page/admin-organizations",
+        "page/admin-overview",
+        "page/admin-schedules",
+        "page/admin-users",
+        "page/dashboard",
+        "page/dev-gallery",
+        "page/files",
         "page/home",
+        "page/notifications",
         "page/pricing",
         "page/privacy",
+        "page/project-edit",
+        "page/project-new",
+        "page/projects",
+        "page/settings-account",
+        "page/settings-api-tokens",
+        "page/settings-billing",
+        "page/settings-notifications",
+        "page/settings-organization",
         "page/terms",
         "system/metrics",
         "system/security",
         "system/seo",
-        "system/static"
+        "system/static",
+        "workflow/account-delete",
+        "workflow/account-export",
+        "workflow/admin-announcements",
+        "workflow/admin-content",
+        "workflow/admin-flags",
+        "workflow/admin-media",
+        "workflow/admin-schedules",
+        "workflow/admin-user-governance",
+        "workflow/api-token-lifecycle",
+        "workflow/appearance",
+        "workflow/auth-session",
+        "workflow/billing-checkout",
+        "workflow/billing-webhook",
+        "workflow/dev-session",
+        "workflow/files",
+        "workflow/impersonation",
+        "workflow/notification-inbox",
+        "workflow/notification-preferences",
+        "workflow/organization-export",
+        "workflow/project-export",
+        "workflow/projects"
       ],
       "manifest": {
         "id": "system/server",
@@ -4873,6 +7049,22 @@
         ],
         "files": [
           {
+            "source": "internal/web/admin_shared.go",
+            "target": "internal/web/admin_shared.go",
+            "class": "go",
+            "sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/form.go",
+            "target": "internal/web/form.go",
+            "class": "go",
+            "sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/htmx.go",
             "target": "internal/web/htmx.go",
             "class": "go",
@@ -4897,10 +7089,18 @@
             "contract": true
           },
           {
+            "source": "internal/web/route.go",
+            "target": "internal/web/route.go",
+            "class": "go",
+            "sha256": "987fe119cf67b943e7c8f9941e21596687b4589f01456c9c669650f5f7f570e0",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
             "source": "internal/web/routes.go",
             "target": "internal/web/routes.go",
             "class": "go",
-            "sha256": "35edd3584a87b020cfd6ff3288514b1c8765fdcf3efbc7dd2aa54896b3f3f393",
+            "sha256": "e4fb14c738c9a26df0bf86ec5aebca1dc0041caf49298c336e1dd814c28b17cb",
             "rewrite_module": true,
             "contract": false
           },
@@ -5032,6 +7232,20 @@
       },
       "files": [
         {
+          "path": "internal/web/admin_shared.go",
+          "source": "internal/web/admin_shared.go",
+          "base_sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
+          "local_sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/form.go",
+          "source": "internal/web/form.go",
+          "base_sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+          "local_sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/htmx.go",
           "source": "internal/web/htmx.go",
           "base_sha256": "28f2c227e791bcdb10c16644c745b2f8b93bb5f22e9e648f691d38e170989d51",
@@ -5053,10 +7267,17 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/route.go",
+          "source": "internal/web/route.go",
+          "base_sha256": "987fe119cf67b943e7c8f9941e21596687b4589f01456c9c669650f5f7f570e0",
+          "local_sha256": "987fe119cf67b943e7c8f9941e21596687b4589f01456c9c669650f5f7f570e0",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/routes.go",
           "source": "internal/web/routes.go",
-          "base_sha256": "35edd3584a87b020cfd6ff3288514b1c8765fdcf3efbc7dd2aa54896b3f3f393",
-          "local_sha256": "35edd3584a87b020cfd6ff3288514b1c8765fdcf3efbc7dd2aa54896b3f3f393",
+          "base_sha256": "e4fb14c738c9a26df0bf86ec5aebca1dc0041caf49298c336e1dd814c28b17cb",
+          "local_sha256": "e4fb14c738c9a26df0bf86ec5aebca1dc0041caf49298c336e1dd814c28b17cb",
           "state": "clean"
         },
         {
@@ -5073,7 +7294,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5125,11 +7346,13 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [
         "system/jobs",
-        "system/server"
+        "system/server",
+        "workflow/admin-media",
+        "workflow/files"
       ],
       "manifest": {
         "id": "system/storage",
@@ -5280,7 +7503,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5336,9 +7559,11 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "page/settings-billing"
+      ],
       "manifest": {
         "id": "system/usage",
         "kind": "system",
@@ -5433,9 +7658,11 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "3fb6296d02285da02cea5774d1d769eec6fc6b24536a631ec385f64c34f709e6",
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "workflow/projects"
+      ],
       "manifest": {
         "id": "system/webhooks",
         "kind": "system",
@@ -5577,6 +7804,2373 @@
           "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4"
         }
       ]
+    },
+    {
+      "id": "workflow/account-delete",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/account-delete",
+        "kind": "workflow",
+        "name": "account-delete",
+        "revision": 1,
+        "contract": 1,
+        "title": "Account deletion",
+        "description": "GDPR self-serve account deletion: email confirmation and sole-admin guard, then provider delete before local delete, with sole-member organizations removed alongside the user.",
+        "requires": [
+          "page/settings-account",
+          "system/audit",
+          "system/i18n",
+          "system/identity",
+          "system/impersonation",
+          "system/organizations",
+          "system/security",
+          "system/server",
+          "workflow/auth-session"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_account_delete.go",
+            "target": "internal/web/workflow_account_delete.go",
+            "class": "go",
+            "sha256": "c14d401aad4a60cb7ae2aa4a67ad027f3ed2b0d40587f546cec87314178b01df",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "account-delete.submit"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "account-delete.submit",
+              "method": "POST",
+              "pattern": "/app/settings/account/delete",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAccountDelete"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_account_delete.go",
+          "source": "internal/web/workflow_account_delete.go",
+          "base_sha256": "c14d401aad4a60cb7ae2aa4a67ad027f3ed2b0d40587f546cec87314178b01df",
+          "local_sha256": "c14d401aad4a60cb7ae2aa4a67ad027f3ed2b0d40587f546cec87314178b01df",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/account-export",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/account-export",
+        "kind": "workflow",
+        "name": "account-export",
+        "revision": 1,
+        "contract": 1,
+        "title": "Personal data export",
+        "description": "Streams the GDPR self-serve JSON download of everything the platform holds about one user across every organization, and audits the export.",
+        "requires": [
+          "system/audit",
+          "system/identity",
+          "system/notifications",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_account_export.go",
+            "target": "internal/web/workflow_account_export.go",
+            "class": "go",
+            "sha256": "fce2d29d6767e96de19522734a79c63ba5b94df184d2194d05c2b5b9efb4e689",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "account-export.download"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "account-export.download",
+              "method": "GET",
+              "pattern": "/app/settings/account/export",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAccountExport"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_account_export.go",
+          "source": "internal/web/workflow_account_export.go",
+          "base_sha256": "fce2d29d6767e96de19522734a79c63ba5b94df184d2194d05c2b5b9efb4e689",
+          "local_sha256": "fce2d29d6767e96de19522734a79c63ba5b94df184d2194d05c2b5b9efb4e689",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/admin-announcements",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/admin-announcements",
+        "kind": "workflow",
+        "name": "admin-announcements",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin announcement mutations",
+        "description": "Creating, activating, deactivating and deleting platform banner announcements, keeping exactly one active.",
+        "requires": [
+          "page/admin-announcements",
+          "system/announcements",
+          "system/i18n",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_announcements.go",
+            "target": "internal/web/workflow_admin_announcements.go",
+            "class": "go",
+            "sha256": "7c4cf1f5d166219e417f9cfcc1d108f0c5d1fb11c762d5f86d385f0fdd6e7f2d",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.announcements.activate",
+            "admin.announcements.create",
+            "admin.announcements.deactivate",
+            "admin.announcements.delete"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.announcements.activate",
+              "method": "POST",
+              "pattern": "/admin/announcements/{id}/activate",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminAnnouncementActivate"
+            },
+            {
+              "id": "admin.announcements.create",
+              "method": "POST",
+              "pattern": "/admin/announcements",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminAnnouncementCreate"
+            },
+            {
+              "id": "admin.announcements.deactivate",
+              "method": "POST",
+              "pattern": "/admin/announcements/{id}/deactivate",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminAnnouncementDeactivate"
+            },
+            {
+              "id": "admin.announcements.delete",
+              "method": "POST",
+              "pattern": "/admin/announcements/{id}/delete",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminAnnouncementDelete"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_announcements.go",
+          "source": "internal/web/workflow_admin_announcements.go",
+          "base_sha256": "7c4cf1f5d166219e417f9cfcc1d108f0c5d1fb11c762d5f86d385f0fdd6e7f2d",
+          "local_sha256": "7c4cf1f5d166219e417f9cfcc1d108f0c5d1fb11c762d5f86d385f0fdd6e7f2d",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/admin-content",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "page/admin-content-editor",
+        "page/admin-content-preview",
+        "workflow/admin-media"
+      ],
+      "manifest": {
+        "id": "workflow/admin-content",
+        "kind": "workflow",
+        "name": "admin-content",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin content mutations",
+        "description": "Creates, updates, publishes, unpublishes, deletes, and restores content entries, owning the editor form contract, validation, revision snapshots, live Markdown preview, and audit effects.",
+        "requires": [
+          "system/audit",
+          "system/content",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_content.go",
+            "target": "internal/web/workflow_admin_content.go",
+            "class": "go",
+            "sha256": "3e0c7de535f3266d717b03eaebdc2a52cf283be818c8e2384196138982e8d2a5",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.content.create",
+            "admin.content.delete",
+            "admin.content.preview_fragment",
+            "admin.content.publish",
+            "admin.content.restore",
+            "admin.content.unpublish",
+            "admin.content.update"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.content.create",
+              "method": "POST",
+              "pattern": "/admin/content",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentCreate"
+            },
+            {
+              "id": "admin.content.delete",
+              "method": "POST",
+              "pattern": "/admin/content/{id}/delete",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentDelete"
+            },
+            {
+              "id": "admin.content.preview_fragment",
+              "method": "POST",
+              "pattern": "/admin/content/preview",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentPreview"
+            },
+            {
+              "id": "admin.content.publish",
+              "method": "POST",
+              "pattern": "/admin/content/{id}/publish",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentPublish"
+            },
+            {
+              "id": "admin.content.restore",
+              "method": "POST",
+              "pattern": "/admin/content/{id}/revisions/{rev}/restore",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentRestore"
+            },
+            {
+              "id": "admin.content.unpublish",
+              "method": "POST",
+              "pattern": "/admin/content/{id}/unpublish",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentUnpublish"
+            },
+            {
+              "id": "admin.content.update",
+              "method": "POST",
+              "pattern": "/admin/content/{id}",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminContentUpdate"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_content.go",
+          "source": "internal/web/workflow_admin_content.go",
+          "base_sha256": "3e0c7de535f3266d717b03eaebdc2a52cf283be818c8e2384196138982e8d2a5",
+          "local_sha256": "3e0c7de535f3266d717b03eaebdc2a52cf283be818c8e2384196138982e8d2a5",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/admin-flags",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/admin-flags",
+        "kind": "workflow",
+        "name": "admin-flags",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin feature flag mutations",
+        "description": "Creating, toggling, rolling out, deleting and per-organization overriding of feature flags, with cache invalidation and audit entries.",
+        "requires": [
+          "page/admin-flags",
+          "system/audit",
+          "system/feature-flags",
+          "system/i18n",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_flags.go",
+            "target": "internal/web/workflow_admin_flags.go",
+            "class": "go",
+            "sha256": "030f15bde1015bf4a72dbc5385f32524149f83865bc325ff4d02a969e8bbd95c",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.flags.create",
+            "admin.flags.delete",
+            "admin.flags.override_delete",
+            "admin.flags.override_set",
+            "admin.flags.rollout",
+            "admin.flags.toggle"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.flags.create",
+              "method": "POST",
+              "pattern": "/admin/flags",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagCreate"
+            },
+            {
+              "id": "admin.flags.delete",
+              "method": "POST",
+              "pattern": "/admin/flags/{key}/delete",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagDelete"
+            },
+            {
+              "id": "admin.flags.override_delete",
+              "method": "POST",
+              "pattern": "/admin/flags/{key}/overrides/{org}/delete",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagOverrideDelete"
+            },
+            {
+              "id": "admin.flags.override_set",
+              "method": "POST",
+              "pattern": "/admin/flags/{key}/overrides",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagOverrideSet"
+            },
+            {
+              "id": "admin.flags.rollout",
+              "method": "POST",
+              "pattern": "/admin/flags/{key}/rollout",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagRollout"
+            },
+            {
+              "id": "admin.flags.toggle",
+              "method": "POST",
+              "pattern": "/admin/flags/{key}/toggle",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminFlagToggle"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_flags.go",
+          "source": "internal/web/workflow_admin_flags.go",
+          "base_sha256": "030f15bde1015bf4a72dbc5385f32524149f83865bc325ff4d02a969e8bbd95c",
+          "local_sha256": "030f15bde1015bf4a72dbc5385f32524149f83865bc325ff4d02a969e8bbd95c",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/admin-media",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/admin-media",
+        "kind": "workflow",
+        "name": "admin-media",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin media mutations",
+        "description": "Uploads and deletes platform media, sniffing the stored content type from the bytes, keeping the object store and rows consistent, and auditing both effects.",
+        "requires": [
+          "page/admin-media",
+          "system/audit",
+          "system/content",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server",
+          "system/storage",
+          "workflow/admin-content"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_media.go",
+            "target": "internal/web/workflow_admin_media.go",
+            "class": "go",
+            "sha256": "42ae1df6e2d5c6146f6e7f36975a75b21fb66fd6c3d1f55a508fd50a75b87e78",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.media.delete",
+            "admin.media.upload"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.media.delete",
+              "method": "POST",
+              "pattern": "/admin/media/{id}/delete",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminMediaDelete"
+            },
+            {
+              "id": "admin.media.upload",
+              "method": "POST",
+              "pattern": "/admin/media",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminMediaUpload"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_media.go",
+          "source": "internal/web/workflow_admin_media.go",
+          "base_sha256": "42ae1df6e2d5c6146f6e7f36975a75b21fb66fd6c3d1f55a508fd50a75b87e78",
+          "local_sha256": "42ae1df6e2d5c6146f6e7f36975a75b21fb66fd6c3d1f55a508fd50a75b87e78",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/admin-schedules",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/admin-schedules",
+        "kind": "workflow",
+        "name": "admin-schedules",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin schedule mutations",
+        "description": "Creating, enabling, running now and deleting recurring schedules, validated against the schedulable job kinds and audited.",
+        "requires": [
+          "page/admin-schedules",
+          "system/audit",
+          "system/i18n",
+          "system/jobs",
+          "system/schedules",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_schedules.go",
+            "target": "internal/web/workflow_admin_schedules.go",
+            "class": "go",
+            "sha256": "e02035da6eeff1fad841d218171565654ca71df2d133a47759fddb8d17692a01",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.schedules.create",
+            "admin.schedules.delete",
+            "admin.schedules.run",
+            "admin.schedules.toggle"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.schedules.create",
+              "method": "POST",
+              "pattern": "/admin/schedules",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminScheduleCreate"
+            },
+            {
+              "id": "admin.schedules.delete",
+              "method": "POST",
+              "pattern": "/admin/schedules/{id}/delete",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminScheduleDelete"
+            },
+            {
+              "id": "admin.schedules.run",
+              "method": "POST",
+              "pattern": "/admin/schedules/{id}/run",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminScheduleRun"
+            },
+            {
+              "id": "admin.schedules.toggle",
+              "method": "POST",
+              "pattern": "/admin/schedules/{id}/toggle",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminScheduleToggle"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_schedules.go",
+          "source": "internal/web/workflow_admin_schedules.go",
+          "base_sha256": "e02035da6eeff1fad841d218171565654ca71df2d133a47759fddb8d17692a01",
+          "local_sha256": "e02035da6eeff1fad841d218171565654ca71df2d133a47759fddb8d17692a01",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/admin-user-governance",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/admin-user-governance",
+        "kind": "workflow",
+        "name": "admin-user-governance",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin user governance",
+        "description": "Administrator mutations on a user account: disable or re-enable it and grant or revoke staff role, both audited.",
+        "requires": [
+          "system/audit",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_user_governance.go",
+            "target": "internal/web/workflow_admin_user_governance.go",
+            "class": "go",
+            "sha256": "9a6bd850fe9b372e7a8ea77f42159ed05a767339869e6a723bb4f93a20385d35",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.users.disable",
+            "admin.users.role"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.users.disable",
+              "method": "POST",
+              "pattern": "/admin/users/{id}/disable",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminUserDisable"
+            },
+            {
+              "id": "admin.users.role",
+              "method": "POST",
+              "pattern": "/admin/users/{id}/role",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminUserRole"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_user_governance.go",
+          "source": "internal/web/workflow_admin_user_governance.go",
+          "base_sha256": "9a6bd850fe9b372e7a8ea77f42159ed05a767339869e6a723bb4f93a20385d35",
+          "local_sha256": "9a6bd850fe9b372e7a8ea77f42159ed05a767339869e6a723bb4f93a20385d35",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/api-token-lifecycle",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/api-token-lifecycle",
+        "kind": "workflow",
+        "name": "api-token-lifecycle",
+        "revision": 1,
+        "contract": 1,
+        "title": "API token creation and revocation",
+        "description": "Creates org API tokens, revealing the plaintext exactly once, and revokes them with a row swap.",
+        "requires": [
+          "page/settings-api-tokens",
+          "system/api",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_api_token_lifecycle.go",
+            "target": "internal/web/workflow_api_token_lifecycle.go",
+            "class": "go",
+            "sha256": "f25adbadab67e51760e014eb9a34d8df2da4ebfe1ae0880179b83d5318057cb8",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "api-token-lifecycle.create",
+            "api-token-lifecycle.revoke"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "api-token-lifecycle.create",
+              "method": "POST",
+              "pattern": "/app/settings/api/tokens",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAPITokenCreate"
+            },
+            {
+              "id": "api-token-lifecycle.revoke",
+              "method": "DELETE",
+              "pattern": "/app/settings/api/tokens/{id}",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAPITokenRevoke"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_api_token_lifecycle.go",
+          "source": "internal/web/workflow_api_token_lifecycle.go",
+          "base_sha256": "f25adbadab67e51760e014eb9a34d8df2da4ebfe1ae0880179b83d5318057cb8",
+          "local_sha256": "f25adbadab67e51760e014eb9a34d8df2da4ebfe1ae0880179b83d5318057cb8",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/appearance",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/appearance",
+        "kind": "workflow",
+        "name": "appearance",
+        "revision": 1,
+        "contract": 1,
+        "title": "Theme preference",
+        "description": "Persists the caller's named theme to the pre-paint cookie and the user row, and resolves the stored locale and theme onto every request so a preference set on one device applies on the next.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/appearance.go",
+            "target": "internal/web/appearance.go",
+            "class": "go",
+            "sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "routes": [
+            "appearance.set-theme"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "appearance.set-theme",
+              "method": "POST",
+              "pattern": "/set-theme",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSetTheme"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/web/appearance.go",
+          "source": "internal/web/appearance.go",
+          "base_sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
+          "local_sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/auth-session",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "page/settings-account",
+        "page/settings-organization",
+        "workflow/account-delete"
+      ],
+      "manifest": {
+        "id": "workflow/auth-session",
+        "kind": "workflow",
+        "name": "auth-session",
+        "revision": 1,
+        "contract": 1,
+        "title": "Sign-in, sign-up and sign-out",
+        "description": "Redirects the hosted Clerk Account Portal flows for sign-in, sign-up and sign-out, and owns the session cookie clear plus the account-portal link builder the settings pages use.",
+        "requires": [
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_auth_session.go",
+            "target": "internal/web/workflow_auth_session.go",
+            "class": "go",
+            "sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "routes": [
+            "auth.login",
+            "auth.logout",
+            "auth.signup"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "auth.login",
+              "method": "GET",
+              "pattern": "/login",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleLogin"
+            },
+            {
+              "id": "auth.logout",
+              "method": "GET",
+              "pattern": "/logout",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleLogout"
+            },
+            {
+              "id": "auth.signup",
+              "method": "GET",
+              "pattern": "/signup",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSignup"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_auth_session.go",
+          "source": "internal/web/workflow_auth_session.go",
+          "base_sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
+          "local_sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/billing-checkout",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/billing-checkout",
+        "kind": "workflow",
+        "name": "billing-checkout",
+        "revision": 1,
+        "contract": 1,
+        "title": "Checkout and billing portal",
+        "description": "Starts a Polar checkout, opens the hosted billing portal, and serves the polled plan-card fragment that settles the post-checkout success race.",
+        "requires": [
+          "page/settings-billing",
+          "system/billing",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_billing_checkout.go",
+            "target": "internal/web/workflow_billing_checkout.go",
+            "class": "go",
+            "sha256": "ec8c8f0e54245ed26e66572751f1c06901f799efbf54a21ffea08c69d6e90bd1",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "billing-checkout.create",
+            "billing-checkout.fragment",
+            "billing-checkout.portal"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "billing-checkout.create",
+              "method": "POST",
+              "pattern": "/app/billing/checkout",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleBillingCheckout"
+            },
+            {
+              "id": "billing-checkout.fragment",
+              "method": "GET",
+              "pattern": "/app/settings/billing/fragment",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsBillingFragment"
+            },
+            {
+              "id": "billing-checkout.portal",
+              "method": "POST",
+              "pattern": "/app/billing/portal",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleBillingPortal"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_billing_checkout.go",
+          "source": "internal/web/workflow_billing_checkout.go",
+          "base_sha256": "ec8c8f0e54245ed26e66572751f1c06901f799efbf54a21ffea08c69d6e90bd1",
+          "local_sha256": "ec8c8f0e54245ed26e66572751f1c06901f799efbf54a21ffea08c69d6e90bd1",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/billing-webhook",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/billing-webhook",
+        "kind": "workflow",
+        "name": "billing-webhook",
+        "revision": 1,
+        "contract": 1,
+        "title": "Billing provider webhook",
+        "description": "Receives Polar subscription events, verifies the Standard Webhooks signature, and drives the subscription state machine.",
+        "requires": [
+          "system/billing",
+          "system/database",
+          "system/organizations",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_billing_webhook.go",
+            "target": "internal/web/workflow_billing_webhook.go",
+            "class": "go",
+            "sha256": "ba50fa5c1d4e6681c49913a6b914e23f10f480bde79a1df7f61edbd07332d534",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "routes": [
+            "billing.webhook.receive"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "billing.webhook.receive",
+              "method": "POST",
+              "pattern": "/webhooks/polar",
+              "scope": "webhook",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "Standard Webhooks signature verified with POLAR_WEBHOOK_SECRET; not a browser form",
+                "rate_exempt": false,
+                "maintenance_exempt": true,
+                "max_body_bytes": 1048576,
+                "idempotent": true,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePolarWebhook"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "major-version-only"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_billing_webhook.go",
+          "source": "internal/web/workflow_billing_webhook.go",
+          "base_sha256": "ba50fa5c1d4e6681c49913a6b914e23f10f480bde79a1df7f61edbd07332d534",
+          "local_sha256": "ba50fa5c1d4e6681c49913a6b914e23f10f480bde79a1df7f61edbd07332d534",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/dev-session",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "page/dev-gallery"
+      ],
+      "manifest": {
+        "id": "workflow/dev-session",
+        "kind": "workflow",
+        "name": "dev-session",
+        "revision": 1,
+        "contract": 1,
+        "title": "Zero-account dev session",
+        "description": "Sets and rewrites the synthetic session cookie for the seeded demo user in DEV_AUTH_BYPASS mode, and owns the predicate that gates every dev-only route.",
+        "requires": [
+          "system/identity",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_dev_session.go",
+            "target": "internal/web/workflow_dev_session.go",
+            "class": "go",
+            "sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "routes": [
+            "dev.login",
+            "dev.switch-org"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "dev.login",
+              "method": "GET",
+              "pattern": "/dev/login",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDevLogin",
+              "enabled": "devAuthBypass"
+            },
+            {
+              "id": "dev.switch-org",
+              "method": "GET",
+              "pattern": "/dev/switch-org",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDevSwitchOrg",
+              "enabled": "devAuthBypass"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_dev_session.go",
+          "source": "internal/web/workflow_dev_session.go",
+          "base_sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
+          "local_sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/files",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/files",
+        "kind": "workflow",
+        "name": "files",
+        "revision": 1,
+        "contract": 1,
+        "title": "File upload, download and delete",
+        "description": "File mutations and object transport for the app UI: quota-enforced multipart upload, always-attachment download, and delete with best-effort object cleanup.",
+        "requires": [
+          "page/files",
+          "system/audit",
+          "system/database",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server",
+          "system/storage"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_files.go",
+            "target": "internal/web/workflow_files.go",
+            "class": "go",
+            "sha256": "cd3d710bf99e084fd6468bc3eca786357a6d01e3b3abb2f7d3d6a30f186e8cd7",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "files.delete",
+            "files.download",
+            "files.upload"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "files.delete",
+              "method": "DELETE",
+              "pattern": "/app/files/{id}",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleFileDelete"
+            },
+            {
+              "id": "files.download",
+              "method": "GET",
+              "pattern": "/app/files/{id}",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleFileDownload"
+            },
+            {
+              "id": "files.upload",
+              "method": "POST",
+              "pattern": "/app/files",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleFileUpload"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_files.go",
+          "source": "internal/web/workflow_files.go",
+          "base_sha256": "cd3d710bf99e084fd6468bc3eca786357a6d01e3b3abb2f7d3d6a30f186e8cd7",
+          "local_sha256": "cd3d710bf99e084fd6468bc3eca786357a6d01e3b3abb2f7d3d6a30f186e8cd7",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/impersonation",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/impersonation",
+        "kind": "workflow",
+        "name": "impersonation",
+        "revision": 1,
+        "contract": 1,
+        "title": "Administrator impersonation",
+        "description": "The admin \"view as user\" flow: reason interstitial, session start, cookie-scoped identity override, and exit.",
+        "requires": [
+          "system/audit",
+          "system/i18n",
+          "system/identity",
+          "system/impersonation",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/handlers_impersonation.go",
+            "target": "internal/web/handlers_impersonation.go",
+            "class": "go",
+            "sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin_impersonate.templ",
+            "target": "internal/web/templates/admin_impersonate.templ",
+            "class": "templ",
+            "sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.users.impersonate.form",
+            "admin.users.impersonate.start",
+            "app.impersonation.exit"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.users.impersonate.form",
+              "method": "GET",
+              "pattern": "/admin/users/{id}/impersonate",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminImpersonateForm"
+            },
+            {
+              "id": "admin.users.impersonate.start",
+              "method": "POST",
+              "pattern": "/admin/users/{id}/impersonate",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminImpersonate"
+            },
+            {
+              "id": "app.impersonation.exit",
+              "method": "POST",
+              "pattern": "/app/impersonation/exit",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleImpersonationExit"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/handlers_impersonation.go",
+          "source": "internal/web/handlers_impersonation.go",
+          "base_sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+          "local_sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin_impersonate.templ",
+          "source": "internal/web/templates/admin_impersonate.templ",
+          "base_sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
+          "local_sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/notification-inbox",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/notification-inbox",
+        "kind": "workflow",
+        "name": "notification-inbox",
+        "revision": 1,
+        "contract": 1,
+        "title": "Notification inbox read state",
+        "description": "Marks notifications read one-at-a-time or in bulk and serves the fragments that support it: the sidebar unread badge and the server-sent-events unread stream.",
+        "requires": [
+          "page/notifications",
+          "system/i18n",
+          "system/identity",
+          "system/notifications",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_notification_inbox.go",
+            "target": "internal/web/workflow_notification_inbox.go",
+            "class": "go",
+            "sha256": "c8230ed66ad2b1ac74106c0f543b74aa131bc0ee9c7d59d60a1f86e30399c4a7",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "notifications.badge",
+            "notifications.read",
+            "notifications.read-all",
+            "notifications.stream"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "notifications.badge",
+              "method": "GET",
+              "pattern": "/app/notifications/badge",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleNotificationsBadge"
+            },
+            {
+              "id": "notifications.read",
+              "method": "POST",
+              "pattern": "/app/notifications/{id}/read",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleNotificationRead"
+            },
+            {
+              "id": "notifications.read-all",
+              "method": "POST",
+              "pattern": "/app/notifications/read-all",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleNotificationsReadAll"
+            },
+            {
+              "id": "notifications.stream",
+              "method": "GET",
+              "pattern": "/app/notifications/stream",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleNotificationsStream"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_notification_inbox.go",
+          "source": "internal/web/workflow_notification_inbox.go",
+          "base_sha256": "c8230ed66ad2b1ac74106c0f543b74aa131bc0ee9c7d59d60a1f86e30399c4a7",
+          "local_sha256": "c8230ed66ad2b1ac74106c0f543b74aa131bc0ee9c7d59d60a1f86e30399c4a7",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/notification-preferences",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/notification-preferences",
+        "kind": "workflow",
+        "name": "notification-preferences",
+        "revision": 1,
+        "contract": 1,
+        "title": "Notification preference saving",
+        "description": "Persists per-kind in-app notification mutes from checkbox presence and the digest cadence, ignoring an unknown cadence rather than hitting the column CHECK.",
+        "requires": [
+          "page/settings-notifications",
+          "system/i18n",
+          "system/identity",
+          "system/notifications",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_notification_preferences.go",
+            "target": "internal/web/workflow_notification_preferences.go",
+            "class": "go",
+            "sha256": "59bbe4b136bf0fe0a575a1320a095c045735515c66625ecd8da08a5916a59c63",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "notification-preferences.save"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "notification-preferences.save",
+              "method": "POST",
+              "pattern": "/app/settings/notifications",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsNotificationsSave"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_notification_preferences.go",
+          "source": "internal/web/workflow_notification_preferences.go",
+          "base_sha256": "59bbe4b136bf0fe0a575a1320a095c045735515c66625ecd8da08a5916a59c63",
+          "local_sha256": "59bbe4b136bf0fe0a575a1320a095c045735515c66625ecd8da08a5916a59c63",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/organization-export",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "page/settings-organization"
+      ],
+      "manifest": {
+        "id": "workflow/organization-export",
+        "kind": "workflow",
+        "name": "organization-export",
+        "revision": 1,
+        "contract": 1,
+        "title": "Organization data export",
+        "description": "Enqueues the org:admin-only organization data export job and owns the session-claims org:admin check the org surfaces gate on.",
+        "requires": [
+          "system/audit",
+          "system/i18n",
+          "system/identity",
+          "system/jobs",
+          "system/organizations",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_organization_export.go",
+            "target": "internal/web/workflow_organization_export.go",
+            "class": "go",
+            "sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "routes": [
+            "organization-export.enqueue"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "organization-export.enqueue",
+              "method": "POST",
+              "pattern": "/app/settings/org/export",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleOrgExport"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_organization_export.go",
+          "source": "internal/web/workflow_organization_export.go",
+          "base_sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+          "local_sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/project-export",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/project-export",
+        "kind": "workflow",
+        "name": "project-export",
+        "revision": 1,
+        "contract": 1,
+        "title": "Project CSV export",
+        "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
+        "requires": [
+          "system/audit",
+          "system/i18n",
+          "system/identity",
+          "system/jobs",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_project_export.go",
+            "target": "internal/web/workflow_project_export.go",
+            "class": "go",
+            "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "projects.export"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "projects.export",
+              "method": "POST",
+              "pattern": "/app/projects/export",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectsExport"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_project_export.go",
+          "source": "internal/web/workflow_project_export.go",
+          "base_sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+          "local_sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/projects",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "202cd2578f3b8ff995f224fdb1376653553dbe201d8e39f717d32a7d227ff24a",
+      "reason": "profile",
+      "required_by": [
+        "page/project-edit"
+      ],
+      "manifest": {
+        "id": "workflow/projects",
+        "kind": "workflow",
+        "name": "projects",
+        "revision": 1,
+        "contract": 1,
+        "title": "Project create, update, archive and delete",
+        "description": "Project mutations for the app UI: validated create with plan-limit enforcement, rename, archive, and delete, each emitting audit, webhook, and analytics effects.",
+        "requires": [
+          "system/analytics",
+          "system/api",
+          "system/audit",
+          "system/database",
+          "system/i18n",
+          "system/identity",
+          "system/security",
+          "system/server",
+          "system/webhooks"
+        ],
+        "files": [
+          {
+            "source": "internal/web/workflow_projects.go",
+            "target": "internal/web/workflow_projects.go",
+            "class": "go",
+            "sha256": "5fc72bac7f3dcacae307a2c49bd36259cd21e01fbb462808aebb517620d0fe57",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "projects.archive",
+            "projects.create",
+            "projects.delete",
+            "projects.update"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "projects.archive",
+              "method": "POST",
+              "pattern": "/app/projects/{id}/archive",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectArchive"
+            },
+            {
+              "id": "projects.create",
+              "method": "POST",
+              "pattern": "/app/projects",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectCreate"
+            },
+            {
+              "id": "projects.delete",
+              "method": "DELETE",
+              "pattern": "/app/projects/{id}",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectDelete"
+            },
+            {
+              "id": "projects.update",
+              "method": "POST",
+              "pattern": "/app/projects/{id}",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleProjectUpdate"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/workflow_projects.go",
+          "source": "internal/web/workflow_projects.go",
+          "base_sha256": "5fc72bac7f3dcacae307a2c49bd36259cd21e01fbb462808aebb517620d0fe57",
+          "local_sha256": "5fc72bac7f3dcacae307a2c49bd36259cd21e01fbb462808aebb517620d0fe57",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
     }
   ]
 }

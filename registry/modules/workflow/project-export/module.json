@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/project-export",
+    "kind": "workflow",
+    "name": "project-export",
+    "revision": 1,
+    "contract": 1,
+    "title": "Project CSV export",
+    "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
+    "requires": [
+      "system/audit",
+      "system/i18n",
+      "system/identity",
+      "system/jobs",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_project_export.go",
+        "target": "internal/web/workflow_project_export.go",
+        "class": "go",
+        "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "projects.export"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "projects.export",
+          "method": "POST",
+          "pattern": "/app/projects/export",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleProjectsExport"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

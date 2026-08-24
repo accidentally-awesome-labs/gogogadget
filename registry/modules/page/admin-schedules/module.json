@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-schedules",
+    "kind": "page",
+    "name": "admin-schedules",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin schedules list",
+    "description": "The recurring-work table listing every schedule, its kind, scope, interval and next fire, plus the create form.",
+    "requires": [
+      "system/i18n",
+      "system/jobs",
+      "system/organizations",
+      "system/schedules",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_schedules.go",
+        "target": "internal/web/page_admin_schedules.go",
+        "class": "go",
+        "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.schedules.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.schedules.index",
+          "method": "GET",
+          "pattern": "/admin/schedules",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminSchedules"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

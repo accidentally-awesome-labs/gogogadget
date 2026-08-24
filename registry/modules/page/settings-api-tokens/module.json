@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/settings-api-tokens",
+    "kind": "page",
+    "name": "settings-api-tokens",
+    "revision": 1,
+    "contract": 1,
+    "title": "API token settings",
+    "description": "Renders the organization's API tokens with their scope and last-used state.",
+    "requires": [
+      "system/api",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_settings_api_tokens.go",
+        "target": "internal/web/page_settings_api_tokens.go",
+        "class": "go",
+        "sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "settings-api-tokens.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-api-tokens.index",
+          "method": "GET",
+          "pattern": "/app/settings/api",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsAPI"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

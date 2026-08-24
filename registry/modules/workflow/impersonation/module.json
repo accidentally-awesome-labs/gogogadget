@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/impersonation",
+    "kind": "workflow",
+    "name": "impersonation",
+    "revision": 1,
+    "contract": 1,
+    "title": "Administrator impersonation",
+    "description": "The admin \"view as user\" flow: reason interstitial, session start, cookie-scoped identity override, and exit.",
+    "requires": [
+      "system/audit",
+      "system/i18n",
+      "system/identity",
+      "system/impersonation",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/handlers_impersonation.go",
+        "target": "internal/web/handlers_impersonation.go",
+        "class": "go",
+        "sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_impersonate.templ",
+        "target": "internal/web/templates/admin_impersonate.templ",
+        "class": "templ",
+        "sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.users.impersonate.form",
+        "admin.users.impersonate.start",
+        "app.impersonation.exit"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.users.impersonate.form",
+          "method": "GET",
+          "pattern": "/admin/users/{id}/impersonate",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminImpersonateForm"
+        },
+        {
+          "id": "admin.users.impersonate.start",
+          "method": "POST",
+          "pattern": "/admin/users/{id}/impersonate",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminImpersonate"
+        },
+        {
+          "id": "app.impersonation.exit",
+          "method": "POST",
+          "pattern": "/app/impersonation/exit",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleImpersonationExit"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

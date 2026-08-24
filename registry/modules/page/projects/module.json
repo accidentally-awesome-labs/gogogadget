@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/projects",
+    "kind": "page",
+    "name": "projects",
+    "revision": 1,
+    "contract": 1,
+    "title": "Projects list",
+    "description": "The organization's project list with free-text search and numbered pagination, rendered full-page or as an htmx table fragment.",
+    "requires": [
+      "system/database",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_projects.go",
+        "target": "internal/web/page_projects.go",
+        "class": "go",
+        "sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "projects.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "projects.index",
+          "method": "GET",
+          "pattern": "/app/projects",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleProjects"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

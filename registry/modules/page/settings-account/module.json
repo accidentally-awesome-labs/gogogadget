@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/settings-account",
+    "kind": "page",
+    "name": "settings-account",
+    "revision": 1,
+    "contract": 1,
+    "title": "Account settings",
+    "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
+    "requires": [
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server",
+      "workflow/auth-session"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_settings_account.go",
+        "target": "internal/web/page_settings_account.go",
+        "class": "go",
+        "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "settings-account.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-account.index",
+          "method": "GET",
+          "pattern": "/app/settings/account",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsAccount"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

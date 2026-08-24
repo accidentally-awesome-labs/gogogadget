@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/account-export",
+    "kind": "workflow",
+    "name": "account-export",
+    "revision": 1,
+    "contract": 1,
+    "title": "Personal data export",
+    "description": "Streams the GDPR self-serve JSON download of everything the platform holds about one user across every organization, and audits the export.",
+    "requires": [
+      "system/audit",
+      "system/identity",
+      "system/notifications",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_account_export.go",
+        "target": "internal/web/workflow_account_export.go",
+        "class": "go",
+        "sha256": "fce2d29d6767e96de19522734a79c63ba5b94df184d2194d05c2b5b9efb4e689",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "account-export.download"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "account-export.download",
+          "method": "GET",
+          "pattern": "/app/settings/account/export",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAccountExport"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

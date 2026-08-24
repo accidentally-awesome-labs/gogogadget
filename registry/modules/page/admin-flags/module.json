@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-flags",
+    "kind": "page",
+    "name": "admin-flags",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin feature flags list",
+    "description": "The feature-flag table showing each flag's enabled state and percentage rollout.",
+    "requires": [
+      "system/feature-flags",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_flags.go",
+        "target": "internal/web/page_admin_flags.go",
+        "class": "go",
+        "sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.flags.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.flags.index",
+          "method": "GET",
+          "pattern": "/admin/flags",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlags"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

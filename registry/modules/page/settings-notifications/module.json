@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/settings-notifications",
+    "kind": "page",
+    "name": "settings-notifications",
+    "revision": 1,
+    "contract": 1,
+    "title": "Notification settings",
+    "description": "Renders the per-kind in-app notification mutes (default-on) and the digest cadence for the signed-in user.",
+    "requires": [
+      "system/i18n",
+      "system/identity",
+      "system/notifications",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_settings_notifications.go",
+        "target": "internal/web/page_settings_notifications.go",
+        "class": "go",
+        "sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "settings-notifications.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-notifications.index",
+          "method": "GET",
+          "pattern": "/app/settings/notifications",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsNotifications"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

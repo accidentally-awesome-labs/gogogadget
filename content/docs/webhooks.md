@@ -29,7 +29,7 @@ Event catalog (`webhooks.EventTypes` — extend it to add events):
 | `project.deleted` | `id`, `name`, `status`, `org_id` |
 
 Emitting your own event is one line, fire-and-forget (the emit sites for
-projects in `internal/web/handlers_projects.go` are the canonical example):
+projects in `internal/web/workflow_projects.go` are the canonical example):
 
 ```go
 webhooks.Emit(ctx, q, orgID, "project.created", map[string]any{"id": p.ID, "name": p.Name, "status": p.Status, "org_id": orgID})

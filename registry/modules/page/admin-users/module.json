@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-users",
+    "kind": "page",
+    "name": "admin-users",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin users list",
+    "description": "The platform user table with search and pagination, served whole or as an HTMX table fragment.",
+    "requires": [
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_users.go",
+        "target": "internal/web/page_admin_users.go",
+        "class": "go",
+        "sha256": "156f541e3b51d9b264d26a137e7ec94c6bf0505ed38a1a71c0ab8a751f28f715",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.users.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.users.index",
+          "method": "GET",
+          "pattern": "/admin/users",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminUsers"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

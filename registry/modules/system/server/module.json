@@ -25,6 +25,22 @@
     ],
     "files": [
       {
+        "source": "internal/web/admin_shared.go",
+        "target": "internal/web/admin_shared.go",
+        "class": "go",
+        "sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/form.go",
+        "target": "internal/web/form.go",
+        "class": "go",
+        "sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/htmx.go",
         "target": "internal/web/htmx.go",
         "class": "go",
@@ -49,10 +65,18 @@
         "contract": true
       },
       {
+        "source": "internal/web/route.go",
+        "target": "internal/web/route.go",
+        "class": "go",
+        "sha256": "987fe119cf67b943e7c8f9941e21596687b4589f01456c9c669650f5f7f570e0",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/web/routes.go",
         "target": "internal/web/routes.go",
         "class": "go",
-        "sha256": "35edd3584a87b020cfd6ff3288514b1c8765fdcf3efbc7dd2aa54896b3f3f393",
+        "sha256": "e4fb14c738c9a26df0bf86ec5aebca1dc0041caf49298c336e1dd814c28b17cb",
         "rewrite_module": true,
         "contract": false
       },

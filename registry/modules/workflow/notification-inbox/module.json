@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/notification-inbox",
+    "kind": "workflow",
+    "name": "notification-inbox",
+    "revision": 1,
+    "contract": 1,
+    "title": "Notification inbox read state",
+    "description": "Marks notifications read one-at-a-time or in bulk and serves the fragments that support it: the sidebar unread badge and the server-sent-events unread stream.",
+    "requires": [
+      "page/notifications",
+      "system/i18n",
+      "system/identity",
+      "system/notifications",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_notification_inbox.go",
+        "target": "internal/web/workflow_notification_inbox.go",
+        "class": "go",
+        "sha256": "c8230ed66ad2b1ac74106c0f543b74aa131bc0ee9c7d59d60a1f86e30399c4a7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "notifications.badge",
+        "notifications.read",
+        "notifications.read-all",
+        "notifications.stream"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "notifications.badge",
+          "method": "GET",
+          "pattern": "/app/notifications/badge",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleNotificationsBadge"
+        },
+        {
+          "id": "notifications.read",
+          "method": "POST",
+          "pattern": "/app/notifications/{id}/read",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleNotificationRead"
+        },
+        {
+          "id": "notifications.read-all",
+          "method": "POST",
+          "pattern": "/app/notifications/read-all",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleNotificationsReadAll"
+        },
+        {
+          "id": "notifications.stream",
+          "method": "GET",
+          "pattern": "/app/notifications/stream",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleNotificationsStream"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

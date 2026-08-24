@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/billing-webhook",
+    "kind": "workflow",
+    "name": "billing-webhook",
+    "revision": 1,
+    "contract": 1,
+    "title": "Billing provider webhook",
+    "description": "Receives Polar subscription events, verifies the Standard Webhooks signature, and drives the subscription state machine.",
+    "requires": [
+      "system/billing",
+      "system/database",
+      "system/organizations",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_billing_webhook.go",
+        "target": "internal/web/workflow_billing_webhook.go",
+        "class": "go",
+        "sha256": "ba50fa5c1d4e6681c49913a6b914e23f10f480bde79a1df7f61edbd07332d534",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "routes": [
+        "billing.webhook.receive"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "billing.webhook.receive",
+          "method": "POST",
+          "pattern": "/webhooks/polar",
+          "scope": "webhook",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "Standard Webhooks signature verified with POLAR_WEBHOOK_SECRET; not a browser form",
+            "rate_exempt": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 1048576,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePolarWebhook"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "major-version-only"
+  }
+}

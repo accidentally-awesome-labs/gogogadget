@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-announcements",
+    "kind": "page",
+    "name": "admin-announcements",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin announcements list",
+    "description": "The platform banner announcements table with the create form.",
+    "requires": [
+      "system/announcements",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_announcements.go",
+        "target": "internal/web/page_admin_announcements.go",
+        "class": "go",
+        "sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.announcements.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.announcements.index",
+          "method": "GET",
+          "pattern": "/admin/announcements",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminAnnouncements"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

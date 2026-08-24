@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/admin-media",
+    "kind": "workflow",
+    "name": "admin-media",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin media mutations",
+    "description": "Uploads and deletes platform media, sniffing the stored content type from the bytes, keeping the object store and rows consistent, and auditing both effects.",
+    "requires": [
+      "page/admin-media",
+      "system/audit",
+      "system/content",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server",
+      "system/storage",
+      "workflow/admin-content"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_media.go",
+        "target": "internal/web/workflow_admin_media.go",
+        "class": "go",
+        "sha256": "42ae1df6e2d5c6146f6e7f36975a75b21fb66fd6c3d1f55a508fd50a75b87e78",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.media.delete",
+        "admin.media.upload"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.media.delete",
+          "method": "POST",
+          "pattern": "/admin/media/{id}/delete",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminMediaDelete"
+        },
+        {
+          "id": "admin.media.upload",
+          "method": "POST",
+          "pattern": "/admin/media",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminMediaUpload"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

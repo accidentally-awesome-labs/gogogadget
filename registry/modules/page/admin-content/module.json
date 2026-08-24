@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-content",
+    "kind": "page",
+    "name": "admin-content",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin content list",
+    "description": "The admin table of every content entry across all registered types, with kind filter, search, and pagination.",
+    "requires": [
+      "system/content",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_content.go",
+        "target": "internal/web/page_admin_content.go",
+        "class": "go",
+        "sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.content.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.content.index",
+          "method": "GET",
+          "pattern": "/admin/content",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContent"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

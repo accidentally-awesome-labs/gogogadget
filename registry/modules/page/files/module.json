@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/files",
+    "kind": "page",
+    "name": "files",
+    "revision": 1,
+    "contract": 1,
+    "title": "Files list",
+    "description": "The organization's uploaded-file list with storage-quota usage and pagination, rendered full-page or as an htmx table fragment.",
+    "requires": [
+      "system/database",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_files.go",
+        "target": "internal/web/page_files.go",
+        "class": "go",
+        "sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "files.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "files.index",
+          "method": "GET",
+          "pattern": "/app/files",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFiles"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

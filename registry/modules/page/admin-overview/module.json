@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-overview",
+    "kind": "page",
+    "name": "admin-overview",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin overview",
+    "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
+    "requires": [
+      "system/billing",
+      "system/i18n",
+      "system/identity",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_overview.go",
+        "target": "internal/web/page_admin_overview.go",
+        "class": "go",
+        "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.overview.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.overview.index",
+          "method": "GET",
+          "pattern": "/admin",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminHome"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

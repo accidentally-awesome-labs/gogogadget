@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/admin-announcements",
+    "kind": "workflow",
+    "name": "admin-announcements",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin announcement mutations",
+    "description": "Creating, activating, deactivating and deleting platform banner announcements, keeping exactly one active.",
+    "requires": [
+      "page/admin-announcements",
+      "system/announcements",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_announcements.go",
+        "target": "internal/web/workflow_admin_announcements.go",
+        "class": "go",
+        "sha256": "7c4cf1f5d166219e417f9cfcc1d108f0c5d1fb11c762d5f86d385f0fdd6e7f2d",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.announcements.activate",
+        "admin.announcements.create",
+        "admin.announcements.deactivate",
+        "admin.announcements.delete"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.announcements.activate",
+          "method": "POST",
+          "pattern": "/admin/announcements/{id}/activate",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminAnnouncementActivate"
+        },
+        {
+          "id": "admin.announcements.create",
+          "method": "POST",
+          "pattern": "/admin/announcements",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminAnnouncementCreate"
+        },
+        {
+          "id": "admin.announcements.deactivate",
+          "method": "POST",
+          "pattern": "/admin/announcements/{id}/deactivate",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminAnnouncementDeactivate"
+        },
+        {
+          "id": "admin.announcements.delete",
+          "method": "POST",
+          "pattern": "/admin/announcements/{id}/delete",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminAnnouncementDelete"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

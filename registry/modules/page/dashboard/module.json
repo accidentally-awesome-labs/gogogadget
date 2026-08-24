@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/dashboard",
+    "kind": "page",
+    "name": "dashboard",
+    "revision": 1,
+    "contract": 1,
+    "title": "App dashboard",
+    "description": "The signed-in landing page: active-project and member stat cards, recent organization activity, and the getting-started checklist.",
+    "requires": [
+      "system/audit",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_dashboard.go",
+        "target": "internal/web/page_dashboard.go",
+        "class": "go",
+        "sha256": "680b5fea10377b443d9f5fafb2e2c60d097325e5c09b88e8c828cdf98b3543ff",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dashboard.templ",
+        "target": "internal/web/templates/dashboard.templ",
+        "class": "templ",
+        "sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "dashboard.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "dashboard.index",
+          "method": "GET",
+          "pattern": "/app",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDashboard"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}
