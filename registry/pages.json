@@ -2,6 +2,8 @@
   "schema": 1,
   "kind": "page",
   "items": [
+    "registry/modules/page/activity/module.json",
+    "registry/modules/page/admin-audit/module.json",
     "registry/modules/page/home/module.json",
     "registry/modules/page/pricing/module.json",
     "registry/modules/page/privacy/module.json",

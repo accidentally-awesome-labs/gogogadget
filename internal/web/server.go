@@ -122,7 +122,9 @@ func NewServer(d Deps) (*Server, error) {
 	if d.Analytics != nil {
 		s.analytics = d.Analytics
 	}
-	s.routes()
+	if err := s.routes(); err != nil {
+		return nil, err
+	}
 	return s, nil
 }
 

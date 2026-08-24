@@ -9,7 +9,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/content"
 )
 
-func (s *Server) routes() {
+func (s *Server) routes() error {
 	s.mux.HandleFunc("GET /healthz", s.handleHealthz)
 	// /metrics: bearer-gated when METRICS_TOKEN is set; unregistered in
 	// production without one (internal Go stats must not be public default).
@@ -20,11 +20,6 @@ func (s *Server) routes() {
 
 	s.mux.Handle("GET /static/", s.serveStatic())
 	s.mux.HandleFunc("GET /favicon.ico", s.faviconRedirect)
-
-	// Generated routes come from module manifests. ServeMux panics on a duplicate
-	// pattern, so a route that still has a hand-written registration below fails
-	// loudly here rather than silently shadowing the generated one.
-	s.registerGenerated()
 
 	// Content: one index (and, for paged types, one detail) route per
 	// registered content type. Registered before the /{rest...} catch-all.
@@ -100,7 +95,6 @@ func (s *Server) routes() {
 	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/enable", s.handleWebhookEndpointToggle)
 	appMux.HandleFunc("POST /app/settings/webhooks/endpoints/{id}/rotate", s.handleWebhookEndpointRotate)
 	appMux.HandleFunc("POST /app/settings/webhooks/deliveries/{id}/replay", s.handleWebhookDeliveryReplay)
-	appMux.HandleFunc("GET /app/activity", s.handleActivity)
 	appMux.HandleFunc("POST /app/impersonation/exit", s.handleImpersonationExit)
 	appMux.HandleFunc("GET /app/notifications", s.handleNotifications)
 	appMux.HandleFunc("GET /app/settings/notifications", s.handleSettingsNotifications)
@@ -137,7 +131,6 @@ func (s *Server) routes() {
 	adminMux.HandleFunc("GET /admin/flags", s.handleAdminFlags)
 	adminMux.HandleFunc("POST /admin/flags/{key}/toggle", s.handleAdminFlagToggle)
 	adminMux.HandleFunc("POST /admin/flags/{key}/rollout", s.handleAdminFlagRollout)
-	adminMux.HandleFunc("GET /admin/audit", s.handleAdminAudit)
 	adminMux.HandleFunc("GET /admin/jobs", s.handleAdminJobs)
 	adminMux.HandleFunc("POST /admin/jobs/{id}/requeue", s.handleAdminJobRequeue)
 	adminMux.HandleFunc("GET /admin/announcements", s.handleAdminAnnouncements)
@@ -211,5 +204,22 @@ func (s *Server) routes() {
 
 	// Catch-all 404 (least-specific pattern matches last; method-less so it
 	// can't conflict with the /app and /admin subtrees).
+	// Generated routes come from module manifests, and each record's scope picks
+	// the mux carrying that scope's guards. This runs after the group muxes exist
+	// and before the catch-all, so a generated pattern still wins over it.
+	// ServeMux panics on a duplicate pattern, so a route that also has a
+	// hand-written registration above fails loudly instead of shadowing.
+	if err := registerRoutes(s, RouteRegistry, scopeTargets{
+		public: s.mux,
+		app:    appMux,
+		admin:  adminMux,
+		apiWrap: func(scope string, h http.Handler) http.Handler {
+			return apiMW.RequireAPIToken(scope, h)
+		},
+	}); err != nil {
+		return err
+	}
+
 	s.mux.HandleFunc("/{rest...}", s.handleNotFound)
+	return nil
 }

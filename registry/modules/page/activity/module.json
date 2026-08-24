@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/activity",
+    "kind": "page",
+    "name": "activity",
+    "revision": 1,
+    "contract": 1,
+    "title": "Activity feed",
+    "description": "The organization's audit trail rendered for members, with search and pagination.",
+    "requires": [
+      "system/audit",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/handlers_activity.go",
+        "target": "internal/web/handlers_activity.go",
+        "class": "go",
+        "sha256": "c4c33e1d804b57e9b10eaf98f03f9cd1917dab99606389d6fc77f6a0bf1cd098",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/activity.templ",
+        "target": "internal/web/templates/activity.templ",
+        "class": "templ",
+        "sha256": "b2ec84cacc5853fb3d852ba075c559b17514e7d0cc877a05fea4e0adffa6cdbf",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "activity.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "activity.index",
+          "method": "GET",
+          "pattern": "/app/activity",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleActivity"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

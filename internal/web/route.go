@@ -2,7 +2,10 @@
 // they use; the table itself lives in routes_registry_gen.go.
 package web
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 // Scope is the closed set of middleware groups a route can belong to. It decides
 // which guards wrap the handler, so it is a security boundary rather than a
@@ -59,18 +62,59 @@ type Route struct {
 	Enabled func(*Server) bool
 }
 
-// registerGenerated installs every generated route whose Enabled predicate
-// passes. ServeMux panics on a duplicate pattern, which is the property that
-// makes migrating routes out of the hand-written table safe: a pattern that
-// exists in both places fails loudly on the first request rather than silently
-// shadowing.
-func (s *Server) registerGenerated() {
-	for _, route := range RouteRegistry {
+// scopeTargets names the mux that carries each scope's guards. A scope is a
+// security boundary, so registration is explicit per scope rather than a single
+// default mux: an /app route installed on the public mux would serve with no
+// authentication at all, and nothing downstream would notice.
+type scopeTargets struct {
+	public *http.ServeMux
+	app    *http.ServeMux
+	admin  *http.ServeMux
+	// apiWrap wraps an API handler in its token guard. The read/write split is
+	// the declared scope, so the caller cannot forget which one a route needs.
+	apiWrap func(scope string, h http.Handler) http.Handler
+}
+
+// target resolves the mux and any scope-specific wrapping for one route.
+func (t scopeTargets) target(scope Scope) (*http.ServeMux, func(http.Handler) http.Handler, bool) {
+	identity := func(h http.Handler) http.Handler { return h }
+	switch scope {
+	case ScopePublic, ScopeProbe, ScopeStatic, ScopeWebhook, ScopeDev:
+		return t.public, identity, t.public != nil
+	case ScopeApp:
+		return t.app, identity, t.app != nil
+	case ScopeAdmin:
+		return t.admin, identity, t.admin != nil
+	case ScopeAPIRead:
+		if t.public == nil || t.apiWrap == nil {
+			return nil, nil, false
+		}
+		return t.public, func(h http.Handler) http.Handler { return t.apiWrap("read", h) }, true
+	case ScopeAPIWrite:
+		if t.public == nil || t.apiWrap == nil {
+			return nil, nil, false
+		}
+		return t.public, func(h http.Handler) http.Handler { return t.apiWrap("write", h) }, true
+	}
+	return nil, nil, false
+}
+
+// registerRoutes installs every route whose Enabled predicate passes onto the
+// mux its scope selects. ServeMux panics on a duplicate pattern, which is the
+// property that makes migrating routes out of the hand-written table safe: a
+// pattern registered in both places fails loudly instead of shadowing.
+func registerRoutes(s *Server, registry []Route, targets scopeTargets) error {
+	for _, route := range registry {
 		if route.Enabled != nil && !route.Enabled(s) {
 			continue
 		}
-		s.mux.Handle(route.Method+" "+route.Pattern, route.Handler(s))
+		mux, wrap, ok := targets.target(route.Scope)
+		if !ok {
+			return fmt.Errorf("route %s: scope %q has no registration target", route.ID, route.Scope)
+		}
+		mux.Handle(route.Method+" "+route.Pattern, wrap(route.Handler(s)))
 	}
+	return nil
 }
 
 // routePolicies indexes the generated policy by method and pattern so the
