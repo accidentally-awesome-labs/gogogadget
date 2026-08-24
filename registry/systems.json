@@ -15,6 +15,7 @@
     "registry/modules/system/i18n/module.json",
     "registry/modules/system/identity/module.json",
     "registry/modules/system/impersonation/module.json",
+    "registry/modules/system/jobs/module.json",
     "registry/modules/system/llm/module.json",
     "registry/modules/system/mail/module.json",
     "registry/modules/system/modkit/module.json",

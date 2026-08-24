@@ -132,3 +132,37 @@ func TestBootFailsClosedOnInvalidConfiguration(t *testing.T) {
 		t.Fatal("Boot returned a runtime alongside an error")
 	}
 }
+
+// The generated Run/Close pair is the whole runtime lifecycle. Run must start
+// the background worker and hand control back promptly — a Run that blocked
+// would stop the process from ever listening — and Close must end it.
+func TestRuntimeRunStartsAndCloseStopsBackgroundServices(t *testing.T) {
+	runtime, err := Boot(context.Background(), bootHost(t, "boot_lifecycle", nil), Options{})
+	if err != nil {
+		t.Fatalf("Boot: %v", err)
+	}
+	if runtime.JobsWorker == nil {
+		t.Fatal("JobsWorker capability is nil")
+	}
+
+	ran := make(chan error, 1)
+	go func() { ran <- runtime.Run(context.Background()) }()
+	select {
+	case err := <-ran:
+		if err != nil {
+			t.Fatalf("Run: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("Run blocked; long-lived services must own their own goroutines")
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := runtime.Close(ctx); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+	// Close is the shutdown path; reaching it twice must not error or hang.
+	if err := runtime.Close(ctx); err != nil {
+		t.Fatalf("second Close: %v", err)
+	}
+}

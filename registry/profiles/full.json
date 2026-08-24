@@ -22,6 +22,7 @@
       "system/i18n",
       "system/identity",
       "system/impersonation",
+      "system/jobs",
       "system/llm",
       "system/mail",
       "system/modkit",

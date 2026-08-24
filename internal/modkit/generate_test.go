@@ -379,3 +379,40 @@ func TestBootstrapImportsDeclaredProvideTypePackages(t *testing.T) {
 		}
 	}
 }
+
+// A module that declares start owns a long-lived service. The generated Run must
+// actually start it: a Run that returns nil without starting anything means the
+// job worker never claims a row while every test still passes.
+func TestBootstrapRunsStartableModules(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	for i := range graph {
+		if graph[i].Runtime.System != nil {
+			graph[i].Runtime.System.Start = true
+		}
+	}
+	for i := range lock.Modules {
+		lock.Modules[i].Manifest = graph[i]
+	}
+
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var bootstrap string
+	for _, file := range files {
+		if file.Path == "internal/modules/bootstrap_registry_gen.go" {
+			bootstrap = file.Content
+		}
+	}
+	if !strings.Contains(bootstrap, "r.start = append(r.start, system_alphaModule.Start)") {
+		t.Fatalf("Boot does not register the start hook:\n%s", bootstrap)
+	}
+	runBody := bootstrap[strings.Index(bootstrap, "func (r *Runtime) Run("):]
+	runBody = runBody[:strings.Index(runBody, "\n}\n")]
+	if !strings.Contains(runBody, "for _, start := range r.start") {
+		t.Fatalf("Run does not start registered services:\n%s", runBody)
+	}
+	if !strings.Contains(runBody, "return err") {
+		t.Fatalf("Run swallows a start failure:\n%s", runBody)
+	}
+}

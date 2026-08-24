@@ -294,6 +294,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("// than reconstructing providers.\n")
 	b.WriteString("type Runtime struct {\n")
 	b.WriteString("\thandler http.Handler\n")
+	b.WriteString("\tstart   []func(context.Context) error\n")
 	b.WriteString("\tstop    []apphost.Stop\n")
 	provided := make([]string, 0)
 	for _, m := range modules {
@@ -324,6 +325,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("\t_ = h\n")
 	provider := make(map[string]string)
 	stoppers := make([]string, 0)
+	starters := make([]string, 0)
 	for _, m := range modules {
 		sys := m.Runtime.System
 		if sys == nil || sys.Package == "" || sys.Constructor == "" {
@@ -335,7 +337,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		pkg := goImportName(qualifyPackage(modulePath, sys.Package))
 		varName := goVar(m.ID)
 		target := varName
-		if len(sys.Provides) == 0 && !sys.Stop {
+		if len(sys.Provides) == 0 && !sys.Stop && !sys.Start {
 			// Nothing consumes the result, so binding it would not compile.
 			target = "_"
 		}
@@ -369,6 +371,10 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			fmt.Fprintf(&b, "\tr.%s = %s.%s\n", field, varName, provide.Field)
 			provider[provide.Capability] = "r." + field
 		}
+		if sys.Start {
+			fmt.Fprintf(&b, "\tr.start = append(r.start, %s.Start)\n", varName)
+			starters = append(starters, varName)
+		}
 		if sys.Stop {
 			fmt.Fprintf(&b, "\tr.stop = append(r.stop, %s.Stop)\n", varName)
 			stoppers = append(stoppers, varName)
@@ -379,8 +385,21 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 
 	b.WriteString("// Handler returns the composed HTTP handler.\n")
 	b.WriteString("func (r *Runtime) Handler() http.Handler { return r.handler }\n\n")
-	b.WriteString("// Run starts long-lived services.\n")
-	b.WriteString("func (r *Runtime) Run(ctx context.Context) error { return nil }\n\n")
+	b.WriteString("// Run starts every long-lived service in dependency order. Each Start must\n")
+	b.WriteString("// return promptly — a module owns its own goroutine — so Run hands control back\n")
+	b.WriteString("// to the caller that serves traffic.\n")
+	if len(starters) == 0 {
+		b.WriteString("func (r *Runtime) Run(ctx context.Context) error { return nil }\n\n")
+	} else {
+		b.WriteString("func (r *Runtime) Run(ctx context.Context) error {\n")
+		b.WriteString("\tfor _, start := range r.start {\n")
+		b.WriteString("\t\tif err := start(ctx); err != nil {\n")
+		b.WriteString("\t\t\treturn err\n")
+		b.WriteString("\t\t}\n")
+		b.WriteString("\t}\n")
+		b.WriteString("\treturn nil\n")
+		b.WriteString("}\n\n")
+	}
 	b.WriteString("// Close stops services in reverse dependency order. Every stop hook runs\n")
 	b.WriteString("// even if an earlier one fails, so one stuck service cannot strand the rest;\n")
 	b.WriteString("// the joined error reports all of them.\n")
