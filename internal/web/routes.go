@@ -69,6 +69,11 @@ func (s *Server) routes() error {
 		// patterns cannot be reached by a deployed runtime.
 		registry = append(append([]Route{}, registry...), testOnlyRoutes()...)
 	}
+	// The matcher is built from the same slice that gets registered, so the
+	// policy the middleware consults can never drift from the route that was
+	// actually installed.
+	s.policies = newPolicyMatcher(registry)
+
 	if err := registerRoutes(s, registry, scopeTargets{
 		public: s.mux,
 		app:    appMux,

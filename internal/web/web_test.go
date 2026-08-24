@@ -150,14 +150,37 @@ func TestCSRFForbidden(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 
-func TestCSRFExemptPaths(t *testing.T) {
+// CSRF exemptions are per route, not per path: each one is the policy a specific
+// method+pattern declared. That is the point of moving off prefix regexes, so it
+// is asserted both ways — the declared surfaces are exempt, and a method nobody
+// declared does not inherit the exemption.
+func TestCSRFExemptRoutes(t *testing.T) {
 	s := testServer(t, nil)
-	for _, path := range []string{"/webhooks/clerk", "/api/v1/projects", "/ingest/e/", "/healthz"} {
-		req := httptest.NewRequest("POST", path, nil)
+
+	exempt := []struct{ method, path string }{
+		{"POST", "/webhooks/clerk"},  // svix signature
+		{"POST", "/webhooks/polar"},  // standard webhooks signature
+		{"POST", "/api/v1/projects"}, // cookieless bearer transport
+		{"POST", "/ingest/e/"},       // same-origin analytics proxy
+		{"GET", "/healthz"},          // probe, no session
+		{"GET", "/readyz"},           // probe, no session
+	}
+	for _, tc := range exempt {
+		req := httptest.NewRequest(tc.method, tc.path, nil)
 		rec := httptest.NewRecorder()
 		s.Handler().ServeHTTP(rec, req)
-		assert.NotEqual(t, http.StatusForbidden, rec.Code, "path %s must be CSRF-exempt", path)
+		assert.NotEqual(t, http.StatusForbidden, rec.Code,
+			"%s %s declares a CSRF exemption", tc.method, tc.path)
 	}
+
+	// /healthz is declared GET-only. A POST to it is not a declared route, so it
+	// must not inherit the exemption — the old prefix/path form exempted every
+	// method on the path, which is how an exemption widens past its reason.
+	req := httptest.NewRequest("POST", "/healthz", nil)
+	rec := httptest.NewRecorder()
+	s.Handler().ServeHTTP(rec, req)
+	assert.Equal(t, http.StatusForbidden, rec.Code,
+		"POST /healthz is undeclared and must not be CSRF-exempt")
 }
 
 func TestCSRFCookieNames(t *testing.T) {

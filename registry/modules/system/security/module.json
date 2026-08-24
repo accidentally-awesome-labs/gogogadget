@@ -7,7 +7,7 @@
     "revision": 1,
     "contract": 1,
     "title": "Middleware and request security",
-    "description": "The load-bearing middleware chain \u2014 recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF \u2014 and the route-group guards.",
+    "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards.",
     "requires": [
       "system/identity",
       "system/organizations",
@@ -27,7 +27,7 @@
         "source": "internal/web/middleware.go",
         "target": "internal/web/middleware.go",
         "class": "go",
-        "sha256": "9aa29883e349e92c9959cce2794aff3afcebcdec1ccbff8bb674d0298c6cabd8",
+        "sha256": "a8e52bdb9c858ab98a8c27dfba936da43d0172e1cf31436116ac5c04f4adf5f8",
         "rewrite_module": true,
         "contract": true
       }

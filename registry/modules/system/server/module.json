@@ -68,7 +68,7 @@
         "source": "internal/web/route.go",
         "target": "internal/web/route.go",
         "class": "go",
-        "sha256": "987fe119cf67b943e7c8f9941e21596687b4589f01456c9c669650f5f7f570e0",
+        "sha256": "64b2761a1c4062e6346b0a577480cc05344f93e97cfbb547233dd66466a3c1ec",
         "rewrite_module": true,
         "contract": true
       },
@@ -84,7 +84,7 @@
         "source": "internal/web/routes.go",
         "target": "internal/web/routes.go",
         "class": "go",
-        "sha256": "a1b0110f53760c6eb847cafd6a07b146e707d92f1fc922866d7003bd0282e4d8",
+        "sha256": "ae50b9f7d6f8c2dc939f5e1ed3953c9145dfbfc848ccb89146bded8beea0661f",
         "rewrite_module": true,
         "contract": false
       },
@@ -92,7 +92,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "72d3d63ebafc0418f2d07c6c34b6d0b9a1f5d69337f4de612178633fa64cebc4",
+        "sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
         "rewrite_module": true,
         "contract": true
       }

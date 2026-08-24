@@ -63,6 +63,9 @@ type Server struct {
 
 	// staticAssets is the embedded-asset handler, built once at construction.
 	staticAssets http.Handler
+
+	// policies resolves a request to the policy its route declared.
+	policies *policyMatcher
 }
 
 // Deps is the server wiring bag: every external service enters here, behind

@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -62,5 +63,72 @@ func TestRegisterRoutesRejectsUnroutableScope(t *testing.T) {
 	err := registerRoutes(nil, registry, scopeTargets{public: http.NewServeMux()})
 	if err == nil {
 		t.Fatal("registerRoutes accepted a route whose scope has no target mux")
+	}
+}
+
+// The declared policy has to be what the middleware actually consults, or
+// RoutePolicy is documentation. Resolution goes through a real ServeMux built
+// from the generated patterns, so wildcard and subtree routes resolve by Go's
+// own matching rules rather than by a prefix guess.
+func TestPolicyMatcherResolvesDeclaredPolicies(t *testing.T) {
+	matcher := newPolicyMatcher([]Route{
+		{ID: "exempt", Method: "POST", Pattern: "/webhooks/thing", Scope: ScopeWebhook,
+			Policy:  RoutePolicy{CSRFExempt: true, CSRFReason: "signed payload", MaxBodyBytes: 4096},
+			Handler: func(*Server) http.Handler { return http.NotFoundHandler() }},
+		{ID: "guarded", Method: "POST", Pattern: "/app/thing", Scope: ScopeApp,
+			Handler: func(*Server) http.Handler { return http.NotFoundHandler() }},
+		{ID: "wildcard", Method: "GET", Pattern: "/thing/{id}", Scope: ScopePublic,
+			Policy:  RoutePolicy{RateExempt: true},
+			Handler: func(*Server) http.Handler { return http.NotFoundHandler() }},
+		{ID: "subtree", Method: "GET", Pattern: "/assets/", Scope: ScopeStatic,
+			Policy:  RoutePolicy{MaintenanceExempt: true},
+			Handler: func(*Server) http.Handler { return http.NotFoundHandler() }},
+	})
+
+	cases := []struct {
+		name         string
+		method, path string
+		found        bool
+		csrf, rate   bool
+		maint        bool
+		maxBody      int64
+	}{
+		{"declared exemption", "POST", "/webhooks/thing", true, true, false, false, 4096},
+		{"declared guard", "POST", "/app/thing", true, false, false, false, 0},
+		{"wildcard match", "GET", "/thing/42", true, false, true, false, 0},
+		{"subtree match", "GET", "/assets/app.css", true, false, false, true, 0},
+		{"undeclared path", "POST", "/nowhere", false, false, false, false, 0},
+		{"declared path wrong method", "GET", "/webhooks/thing", false, false, false, false, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			request := httptest.NewRequest(tc.method, "http://example.test"+tc.path, nil)
+			policy, ok := matcher.policyFor(request)
+			if ok != tc.found {
+				t.Fatalf("policyFor(%s %s) found = %v, want %v", tc.method, tc.path, ok, tc.found)
+			}
+			if policy.CSRFExempt != tc.csrf {
+				t.Errorf("CSRFExempt = %v, want %v", policy.CSRFExempt, tc.csrf)
+			}
+			if policy.RateExempt != tc.rate {
+				t.Errorf("RateExempt = %v, want %v", policy.RateExempt, tc.rate)
+			}
+			if policy.MaintenanceExempt != tc.maint {
+				t.Errorf("MaintenanceExempt = %v, want %v", policy.MaintenanceExempt, tc.maint)
+			}
+			if policy.MaxBodyBytes != tc.maxBody {
+				t.Errorf("MaxBodyBytes = %d, want %d", policy.MaxBodyBytes, tc.maxBody)
+			}
+		})
+	}
+}
+
+// An undeclared path must never be exempt. Defaulting to exempt would mean any
+// route someone forgets to declare silently loses CSRF protection.
+func TestPolicyMatcherFailsClosed(t *testing.T) {
+	matcher := newPolicyMatcher(nil)
+	request := httptest.NewRequest(http.MethodPost, "http://example.test/anything", nil)
+	if policy, ok := matcher.policyFor(request); ok || policy.CSRFExempt {
+		t.Fatalf("empty registry yielded found=%v exempt=%v, want closed", ok, policy.CSRFExempt)
 	}
 }

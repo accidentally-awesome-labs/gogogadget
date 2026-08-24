@@ -117,13 +117,50 @@ func registerRoutes(s *Server, registry []Route, targets scopeTargets) error {
 	return nil
 }
 
-// routePolicies indexes the generated policy by method and pattern so the
-// middleware chain can consult the declared profile instead of re-deriving one
-// from the request path.
-func routePolicies() map[string]RoutePolicy {
-	policies := make(map[string]RoutePolicy, len(RouteRegistry))
-	for _, route := range RouteRegistry {
-		policies[route.Method+" "+route.Pattern] = route.Policy
+// policyMatcher resolves a request to the policy its route declared. Matching
+// runs through a real ServeMux built from the generated patterns, so wildcard
+// ("/thing/{id}") and subtree ("/assets/") routes resolve by Go's own rules —
+// the same rules that dispatch the request — instead of by a prefix guess. A
+// prefix guess is how an exemption silently widens to cover a route nobody
+// intended.
+type policyMatcher struct {
+	mux *http.ServeMux
+}
+
+// policyHolder carries a policy through the mux. It never serves: the matcher
+// only ever asks the mux which pattern a request resolves to.
+type policyHolder struct {
+	policy RoutePolicy
+}
+
+func (policyHolder) ServeHTTP(http.ResponseWriter, *http.Request) {}
+
+// newPolicyMatcher indexes the supplied routes. Patterns are already known not
+// to conflict — the generator validates them against a ServeMux — so this cannot
+// panic on a duplicate.
+func newPolicyMatcher(routes []Route) *policyMatcher {
+	mux := http.NewServeMux()
+	for _, route := range routes {
+		mux.Handle(route.Method+" "+route.Pattern, policyHolder{policy: route.Policy})
 	}
-	return policies
+	return &policyMatcher{mux: mux}
+}
+
+// policyFor returns the declared policy for a request, and whether any route
+// claimed it. It fails closed: an undeclared path gets the zero policy, so a
+// route someone forgets to declare keeps every protection rather than silently
+// losing CSRF.
+func (m *policyMatcher) policyFor(r *http.Request) (RoutePolicy, bool) {
+	if m == nil || m.mux == nil {
+		return RoutePolicy{}, false
+	}
+	handler, pattern := m.mux.Handler(r)
+	if pattern == "" {
+		return RoutePolicy{}, false
+	}
+	holder, ok := handler.(policyHolder)
+	if !ok {
+		return RoutePolicy{}, false
+	}
+	return holder.policy, true
 }
