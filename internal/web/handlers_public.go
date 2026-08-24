@@ -8,41 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/gogogadget/gogogadget/internal/billing"
-	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	staticfs "github.com/gogogadget/gogogadget/static"
 )
-
-func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
-	s.Render(w, r, Page{
-		Title:       "Ship your SaaS this weekend",
-		Description: "The production-grade Go + HTMX SaaS boilerplate: auth, teams, billing, email, admin, blog, and docs out of the box.",
-		Layout:      templates.LayoutPublic,
-		JSONLD:      s.siteJSONLD(),
-	}, templates.Home(billing.Plans))
-}
-
-func (s *Server) handlePricing(w http.ResponseWriter, r *http.Request) {
-	authed := identity.UserFrom(r.Context()) != nil && identity.OrgFrom(r.Context()) != nil
-	currentPlan := ""
-	if authed {
-		currentPlan = billing.CurrentPlan(r.Context(), s.q, identity.OrgFrom(r.Context()).ClerkOrgID, s.cfg.Now()).Key
-	}
-	s.Render(w, r, Page{
-		Title:       "Pricing",
-		Description: "Simple pricing that scales with you. Start free, upgrade when you outgrow it.",
-		Layout:      templates.LayoutPublic,
-	}, templates.Pricing(billing.Plans, authed, currentPlan))
-}
-
-func (s *Server) handleTerms(w http.ResponseWriter, r *http.Request) {
-	s.Render(w, r, Page{Title: "Terms of Service", Layout: templates.LayoutPublic}, templates.LegalTerms())
-}
-
-func (s *Server) handlePrivacy(w http.ResponseWriter, r *http.Request) {
-	s.Render(w, r, Page{Title: "Privacy Policy", Layout: templates.LayoutPublic}, templates.LegalPrivacy())
-}
 
 func (s *Server) handleNotFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)

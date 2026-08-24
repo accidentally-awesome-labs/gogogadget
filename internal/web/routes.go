@@ -21,11 +21,10 @@ func (s *Server) routes() {
 	s.mux.Handle("GET /static/", s.serveStatic())
 	s.mux.HandleFunc("GET /favicon.ico", s.faviconRedirect)
 
-	// Public marketing pages.
-	s.mux.HandleFunc("GET /{$}", s.handleHome)
-	s.mux.HandleFunc("GET /pricing", s.handlePricing)
-	s.mux.HandleFunc("GET /terms", s.handleTerms)
-	s.mux.HandleFunc("GET /privacy", s.handlePrivacy)
+	// Generated routes come from module manifests. ServeMux panics on a duplicate
+	// pattern, so a route that still has a hand-written registration below fails
+	// loudly here rather than silently shadowing the generated one.
+	s.registerGenerated()
 
 	// Content: one index (and, for paged types, one detail) route per
 	// registered content type. Registered before the /{rest...} catch-all.

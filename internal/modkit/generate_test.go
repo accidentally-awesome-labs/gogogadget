@@ -492,3 +492,132 @@ func TestBootstrapSkipsFixedImportsInTypeImports(t *testing.T) {
 		}
 	}
 }
+
+// routeFixture builds a lock/graph whose single module contributes the supplied
+// routes, so route-emitter tests state only what they are about.
+func routeFixture(t *testing.T, routes ...RouteContribution) (Lock, []Manifest) {
+	t.Helper()
+	module := Manifest{
+		ID: "page/sample", Kind: ModulePage, Name: "sample",
+		Revision: 1, Contract: 1, Title: "Sample", Description: "Sample page.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{Routes: routes},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"page/sample"},
+		Modules: []LockedModule{{
+			ID: "page/sample", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: module,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+	return lock, []Manifest{module}
+}
+
+func routesRegistry(t *testing.T, lock Lock, graph []Manifest) string {
+	t.Helper()
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	for _, file := range files {
+		if file.Path == "internal/web/routes_registry_gen.go" {
+			// gofmt aligns struct fields, so assertions collapse runs of spaces.
+			// Pinning the formatter's padding would test gofmt, not the contract.
+			return strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	t.Fatal("routes registry was not emitted")
+	return ""
+}
+
+// The generated table is what the server registers, so it must carry the
+// concrete pattern, the scope that selects the guards, the declared policy, and
+// a handler resolver — not just a list of paths.
+func TestRoutesRegistryEmitsConcreteRecords(t *testing.T) {
+	lock, graph := routeFixture(t, RouteContribution{
+		ID: "sample.show", Method: "GET", Pattern: "/sample", Scope: RoutePublic,
+		Package: "internal/web", Handler: "handleSample",
+	}, RouteContribution{
+		ID: "sample.hook", Method: "POST", Pattern: "/hooks/sample", Scope: RouteWebhook,
+		Package: "internal/web", Handler: "handleSampleHook",
+		Policy: RoutePolicy{
+			CSRFExempt: true, CSRFReason: "signed provider payload, not a browser form",
+			MaxBodyBytes: 65536,
+		},
+	})
+	registry := routesRegistry(t, lock, graph)
+
+	for _, want := range []string{
+		`ID: "sample.show"`,
+		`Method: "GET"`,
+		`Pattern: "/sample"`,
+		`Scope: ScopePublic`,
+		`Handler: func(s *Server) http.Handler { return http.HandlerFunc(s.handleSample) }`,
+		`Scope: ScopeWebhook`,
+		`CSRFExempt: true`,
+		`CSRFReason: "signed provider payload, not a browser form"`,
+		`MaxBodyBytes: 65536`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("routes registry missing %s:\n%s", want, registry)
+		}
+	}
+}
+
+// A conditional route declares its predicate. Registering it and answering 404
+// would leak the path's existence; not registering it at all is the contract.
+func TestRoutesRegistryEmitsEnabledPredicate(t *testing.T) {
+	lock, graph := routeFixture(t, RouteContribution{
+		ID: "sample.dev", Method: "GET", Pattern: "/dev/sample", Scope: RouteDev,
+		Package: "internal/web", Handler: "handleDevSample", Enabled: "devBypassEnabled",
+	})
+	registry := routesRegistry(t, lock, graph)
+	if !strings.Contains(registry, `Enabled: func(s *Server) bool { return s.devBypassEnabled() }`) {
+		t.Fatalf("routes registry does not emit the predicate:\n%s", registry)
+	}
+}
+
+// Patterns are validated against a real ServeMux at generation time. Two routes
+// that conflict would otherwise panic on the first request in production, long
+// after the generated file was committed.
+func TestRoutesRegistryRejectsConflictingPatterns(t *testing.T) {
+	cases := map[string][]RouteContribution{
+		"exact duplicate": {
+			{ID: "a", Method: "GET", Pattern: "/dup", Scope: RoutePublic, Package: "internal/web", Handler: "handleA"},
+			{ID: "b", Method: "GET", Pattern: "/dup", Scope: RoutePublic, Package: "internal/web", Handler: "handleB"},
+		},
+		"wildcard equivalent": {
+			{ID: "a", Method: "GET", Pattern: "/thing/{id}", Scope: RoutePublic, Package: "internal/web", Handler: "handleA"},
+			{ID: "b", Method: "GET", Pattern: "/thing/{other}", Scope: RoutePublic, Package: "internal/web", Handler: "handleB"},
+		},
+		"malformed pattern": {
+			{ID: "a", Method: "GET", Pattern: "/bad/{unclosed", Scope: RoutePublic, Package: "internal/web", Handler: "handleA"},
+		},
+	}
+	for name, routes := range cases {
+		t.Run(name, func(t *testing.T) {
+			lock, graph := routeFixture(t, routes...)
+			if _, err := GenerateAll(context.Background(), "example.com/acme", lock, graph); err == nil {
+				t.Fatalf("GenerateAll accepted %s patterns", name)
+			}
+		})
+	}
+}
+
+// An exemption without a stated reason is how a security hole gets reviewed and
+// approved: the diff shows a bool, not a decision.
+func TestRoutesRegistryRejectsUnexplainedExemption(t *testing.T) {
+	lock, graph := routeFixture(t, RouteContribution{
+		ID: "sample.hook", Method: "POST", Pattern: "/hooks/sample", Scope: RouteWebhook,
+		Package: "internal/web", Handler: "handleSampleHook",
+		Policy: RoutePolicy{CSRFExempt: true},
+	})
+	_, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err == nil {
+		t.Fatal("GenerateAll accepted a CSRF exemption with no reason")
+	}
+	if !strings.Contains(err.Error(), "csrf") {
+		t.Fatalf("error %v does not name the exemption", err)
+	}
+}

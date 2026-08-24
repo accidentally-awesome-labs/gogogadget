@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/home",
+    "kind": "page",
+    "name": "home",
+    "revision": 1,
+    "contract": 1,
+    "title": "Home page",
+    "description": "The marketing home page: hero, feature grid, plan comparison, and call-to-action band.",
+    "requires": [
+      "system/i18n",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_home.go",
+        "target": "internal/web/page_home.go",
+        "class": "go",
+        "sha256": "26ffb3d8306416938a710e4c2507ccafb4ee7198886b9173f22833392501b0e7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/home.templ",
+        "target": "internal/web/templates/home.templ",
+        "class": "templ",
+        "sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "home.show"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "home.show",
+          "method": "GET",
+          "pattern": "/{$}",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleHome"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

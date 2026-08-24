@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+  "registry_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
   "order": [
     "system/apphost",
     "system/config",
@@ -28,6 +28,10 @@
     "system/storage",
     "system/jobs",
     "system/server",
+    "page/home",
+    "page/pricing",
+    "page/privacy",
+    "page/terms",
     "system/metrics",
     "system/security",
     "system/seo",
@@ -38,10 +42,378 @@
   ],
   "modules": [
     {
+      "id": "page/home",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/home",
+        "kind": "page",
+        "name": "home",
+        "revision": 1,
+        "contract": 1,
+        "title": "Home page",
+        "description": "The marketing home page: hero, feature grid, plan comparison, and call-to-action band.",
+        "requires": [
+          "system/i18n",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_home.go",
+            "target": "internal/web/page_home.go",
+            "class": "go",
+            "sha256": "26ffb3d8306416938a710e4c2507ccafb4ee7198886b9173f22833392501b0e7",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/home.templ",
+            "target": "internal/web/templates/home.templ",
+            "class": "templ",
+            "sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "home.show"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "home.show",
+              "method": "GET",
+              "pattern": "/{$}",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleHome"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_home.go",
+          "source": "internal/web/page_home.go",
+          "base_sha256": "26ffb3d8306416938a710e4c2507ccafb4ee7198886b9173f22833392501b0e7",
+          "local_sha256": "26ffb3d8306416938a710e4c2507ccafb4ee7198886b9173f22833392501b0e7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/home.templ",
+          "source": "internal/web/templates/home.templ",
+          "base_sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+          "local_sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/pricing",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/pricing",
+        "kind": "page",
+        "name": "pricing",
+        "revision": 1,
+        "contract": 1,
+        "title": "Pricing page",
+        "description": "Plan comparison with the signed-in organization's current plan highlighted.",
+        "requires": [
+          "system/i18n",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_pricing.go",
+            "target": "internal/web/page_pricing.go",
+            "class": "go",
+            "sha256": "3b4ccebff03d89ce3b2e4d9cc7c2377a4a3d4f9d5e6861c8ca0838611e14c7a4",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/pricing.templ",
+            "target": "internal/web/templates/pricing.templ",
+            "class": "templ",
+            "sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "pricing.show"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "pricing.show",
+              "method": "GET",
+              "pattern": "/pricing",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePricing"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_pricing.go",
+          "source": "internal/web/page_pricing.go",
+          "base_sha256": "3b4ccebff03d89ce3b2e4d9cc7c2377a4a3d4f9d5e6861c8ca0838611e14c7a4",
+          "local_sha256": "3b4ccebff03d89ce3b2e4d9cc7c2377a4a3d4f9d5e6861c8ca0838611e14c7a4",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/pricing.templ",
+          "source": "internal/web/templates/pricing.templ",
+          "base_sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
+          "local_sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/privacy",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/privacy",
+        "kind": "page",
+        "name": "privacy",
+        "revision": 1,
+        "contract": 1,
+        "title": "Privacy policy",
+        "description": "The privacy policy document.",
+        "requires": [
+          "system/i18n",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_privacy.go",
+            "target": "internal/web/page_privacy.go",
+            "class": "go",
+            "sha256": "90adebe01339a5c0769e6713788044101987b5296398182ab06dba758b7ce5a1",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/privacy.templ",
+            "target": "internal/web/templates/privacy.templ",
+            "class": "templ",
+            "sha256": "fb098f2b20072350ea71b17ba0fafeafdafaf08d5a7bbee2ef26f6b3573399e6",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "privacy.show"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "privacy.show",
+              "method": "GET",
+              "pattern": "/privacy",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePrivacy"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_privacy.go",
+          "source": "internal/web/page_privacy.go",
+          "base_sha256": "90adebe01339a5c0769e6713788044101987b5296398182ab06dba758b7ce5a1",
+          "local_sha256": "90adebe01339a5c0769e6713788044101987b5296398182ab06dba758b7ce5a1",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/privacy.templ",
+          "source": "internal/web/templates/privacy.templ",
+          "base_sha256": "fb098f2b20072350ea71b17ba0fafeafdafaf08d5a7bbee2ef26f6b3573399e6",
+          "local_sha256": "fb098f2b20072350ea71b17ba0fafeafdafaf08d5a7bbee2ef26f6b3573399e6",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/terms",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/terms",
+        "kind": "page",
+        "name": "terms",
+        "revision": 1,
+        "contract": 1,
+        "title": "Terms of service",
+        "description": "The terms of service document.",
+        "requires": [
+          "system/i18n",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/page_terms.go",
+            "target": "internal/web/page_terms.go",
+            "class": "go",
+            "sha256": "d81b392000fe1a2e60a67622a5abb469769480d03224796affa36ca7f3bbcc69",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/terms.templ",
+            "target": "internal/web/templates/terms.templ",
+            "class": "templ",
+            "sha256": "516e5381e3bd4ee074f0797c77184e774af9382f63a845f24a09074821d4415c",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "terms.show"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "terms.show",
+              "method": "GET",
+              "pattern": "/terms",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleTerms"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/page_terms.go",
+          "source": "internal/web/page_terms.go",
+          "base_sha256": "d81b392000fe1a2e60a67622a5abb469769480d03224796affa36ca7f3bbcc69",
+          "local_sha256": "d81b392000fe1a2e60a67622a5abb469769480d03224796affa36ca7f3bbcc69",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/terms.templ",
+          "source": "internal/web/templates/terms.templ",
+          "base_sha256": "516e5381e3bd4ee074f0797c77184e774af9382f63a845f24a09074821d4415c",
+          "local_sha256": "516e5381e3bd4ee074f0797c77184e774af9382f63a845f24a09074821d4415c",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -150,7 +522,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -224,7 +596,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -458,7 +830,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -527,7 +899,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -616,7 +988,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -816,7 +1188,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -937,7 +1309,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/content-assets",
@@ -1259,7 +1631,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -1898,7 +2270,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/announcements",
@@ -2040,7 +2412,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -2180,9 +2552,13 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
+        "page/home",
+        "page/pricing",
+        "page/privacy",
+        "page/terms",
         "system/server"
       ],
       "manifest": {
@@ -2298,7 +2674,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/security",
@@ -2502,7 +2878,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2589,7 +2965,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2746,7 +3122,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/server"
@@ -2860,7 +3236,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -2969,7 +3345,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3029,7 +3405,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3094,7 +3470,7 @@
             "source": "internal/modkit/generate.go",
             "target": "internal/modkit/generate.go",
             "class": "go",
-            "sha256": "8d4a9155e0e23a9db2f4d2a3bd144d5a2c663dbbe660fb3210c4a5b5e51e9bf7",
+            "sha256": "4d1fe724fabfd7855e2c72164ee9bd5c5af0a596b3690362d54b2c5174a9f22f",
             "rewrite_module": true,
             "contract": false
           },
@@ -3308,8 +3684,8 @@
         {
           "path": "internal/modkit/generate.go",
           "source": "internal/modkit/generate.go",
-          "base_sha256": "8d4a9155e0e23a9db2f4d2a3bd144d5a2c663dbbe660fb3210c4a5b5e51e9bf7",
-          "local_sha256": "8d4a9155e0e23a9db2f4d2a3bd144d5a2c663dbbe660fb3210c4a5b5e51e9bf7",
+          "base_sha256": "4d1fe724fabfd7855e2c72164ee9bd5c5af0a596b3690362d54b2c5174a9f22f",
+          "local_sha256": "4d1fe724fabfd7855e2c72164ee9bd5c5af0a596b3690362d54b2c5174a9f22f",
           "state": "clean"
         },
         {
@@ -3445,7 +3821,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3589,7 +3965,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -3708,7 +4084,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -3850,7 +4226,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -3954,7 +4330,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4050,7 +4426,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4126,7 +4502,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4208,7 +4584,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4260,9 +4636,13 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
+        "page/home",
+        "page/pricing",
+        "page/privacy",
+        "page/terms",
         "system/metrics",
         "system/security",
         "system/seo",
@@ -4320,7 +4700,7 @@
             "source": "internal/web/routes.go",
             "target": "internal/web/routes.go",
             "class": "go",
-            "sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
+            "sha256": "331776cf9bfcbfa8b253b3876760584e931cd535d5a60c252762eeeed4985145",
             "rewrite_module": true,
             "contract": false
           },
@@ -4475,8 +4855,8 @@
         {
           "path": "internal/web/routes.go",
           "source": "internal/web/routes.go",
-          "base_sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
-          "local_sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
+          "base_sha256": "331776cf9bfcbfa8b253b3876760584e931cd535d5a60c252762eeeed4985145",
+          "local_sha256": "331776cf9bfcbfa8b253b3876760584e931cd535d5a60c252762eeeed4985145",
           "state": "clean"
         },
         {
@@ -4493,7 +4873,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4545,7 +4925,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -4700,7 +5080,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4756,7 +5136,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4853,7 +5233,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ba5695b4ae7f6cfb82e684d4c6863be8f772d18f75c217d281f6c8fe31e5e09e",
+      "source_commit": "269501277cf2dd81d80a661db2c6a155a079a514d13a9c8f44adf0231e1ded74",
       "reason": "profile",
       "required_by": [],
       "manifest": {

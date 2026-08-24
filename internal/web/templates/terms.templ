@@ -1,0 +1,11 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/i18n"
+
+templ LegalTerms() {
+	<article class="page-narrow prose">
+		<h1>{ i18n.T(ctx, "legal.terms.title") }</h1>
+		<p>{ i18n.T(ctx, "legal.terms.placeholder") }</p>
+		<p>{ i18n.T(ctx, "legal.terms.body") }</p>
+	</article>
+}

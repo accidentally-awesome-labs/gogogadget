@@ -1,5 +1,10 @@
 {
   "schema": 1,
   "kind": "page",
-  "items": []
+  "items": [
+    "registry/modules/page/home/module.json",
+    "registry/modules/page/pricing/module.json",
+    "registry/modules/page/privacy/module.json",
+    "registry/modules/page/terms/module.json"
+  ]
 }

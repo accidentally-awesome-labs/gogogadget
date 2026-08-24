@@ -1,0 +1,30 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
+	<section class="page-section">
+		<h1 class="display-title text-center">{ i18n.T(ctx, "home.pricing.heading") }</h1>
+		<p class="mt-4 text-center text-fg-muted">{ i18n.T(ctx, "home.pricing.subtitle") }</p>
+		<div class="mt-12 grid md:grid-cols-3 gap-6">
+			for _, p := range plans {
+				@PlanCard(p, authed && p.Key == currentPlanKey) {
+					if !authed {
+						<a href="/signup" class="btn btn-primary w-full">{ i18n.T(ctx, "home.pricing.choose", p.Name) }</a>
+					} else if p.Key == currentPlanKey {
+						<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "home.pricing.current") }</span>
+					} else if p.PolarProductID != "" {
+						<form hx-post="/app/billing/checkout" hx-disable="this">
+							<input type="hidden" name="plan" value={ p.Key }/>
+							<button type="submit" class="btn btn-primary w-full">{ i18n.T(ctx, "home.pricing.upgrade", p.Name) }</button>
+						</form>
+					}
+				}
+			}
+		</div>
+		<p class="mt-8 text-center text-sm text-fg-muted">{ i18n.T(ctx, "home.pricing.taxes") }</p>
+	</section>
+}

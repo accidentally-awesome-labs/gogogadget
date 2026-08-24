@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"go/format"
+	"net/http"
 	"sort"
 	"strings"
 )
@@ -523,36 +524,131 @@ func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph
 		}
 	}
 	sort.Slice(routes, func(i, j int) bool {
-		if routes[i].moduleID != routes[j].moduleID {
-			return routes[i].moduleID < routes[j].moduleID
+		if routes[i].contrib.Pattern != routes[j].contrib.Pattern {
+			return routes[i].contrib.Pattern < routes[j].contrib.Pattern
+		}
+		if routes[i].contrib.Method != routes[j].contrib.Method {
+			return routes[i].contrib.Method < routes[j].contrib.Method
 		}
 		return routes[i].contrib.ID < routes[j].contrib.ID
 	})
-
 	if len(routes) == 0 {
 		// Nothing contributes a route, so the project has no reason to define the
 		// route type this table would reference.
 		return nil, nil
 	}
+
+	// Every exemption must carry a reason. A bare bool in a diff is a security
+	// decision nobody can review.
+	for _, r := range routes {
+		if r.contrib.Policy.CSRFExempt && strings.TrimSpace(r.contrib.Policy.CSRFReason) == "" {
+			return nil, fmt.Errorf(
+				"route %s (%s): csrf_exempt requires csrf_reason", r.contrib.ID, r.moduleID)
+		}
+	}
+
+	// Validate against a real ServeMux. A conflicting or malformed pattern would
+	// otherwise panic on the first matching request, long after this generated
+	// file was committed and shipped.
+	patterns := make([]routePattern, 0, len(routes))
+	for _, r := range routes {
+		patterns = append(patterns, routePattern{
+			id: r.contrib.ID, module: r.moduleID,
+			method: r.contrib.Method, pattern: r.contrib.Pattern,
+		})
+	}
+	if err := validateRoutePatterns(patterns); err != nil {
+		return nil, err
+	}
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package web\n\n")
-	b.WriteString("// RouteRegistry is the complete set of selected routes. The runtime content\n")
-	b.WriteString("// loop is gone; every pattern is known before boot.\n")
+	b.WriteString("import \"net/http\"\n\n")
+	b.WriteString("// RouteRegistry is the complete set of selected routes. Every pattern is a\n")
+	b.WriteString("// concrete string known before boot, so the reserved-prefix, sitemap, policy,\n")
+	b.WriteString("// and catch-all decisions are all derived from this one table.\n")
 	b.WriteString("var RouteRegistry = []Route{\n")
 	for _, r := range routes {
-		fmt.Fprintf(&b, "\t{ID: %s, Method: %s, Pattern: %s, Scope: %s,\n",
-			goString(r.contrib.ID), goString(r.contrib.Method), goString(r.contrib.Pattern), goString(string(r.contrib.Scope)))
-		fmt.Fprintf(&b, "\t\tPolicy: RoutePolicy{CSRFExempt: %t, CSRFReason: %s, RateExempt: %t, MaintenanceExempt: %t, MaxBodyBytes: %d, Idempotent: %t, AdminWrite: %t},\n",
-			r.contrib.Policy.CSRFExempt, goString(r.contrib.Policy.CSRFReason),
-			r.contrib.Policy.RateExempt, r.contrib.Policy.MaintenanceExempt,
-			r.contrib.Policy.MaxBodyBytes, r.contrib.Policy.Idempotent, r.contrib.Policy.AdminWrite)
-		fmt.Fprintf(&b, "\t\tHandler: (*Server).%sHandler, Enabled: (*Server).%sEnabled},\n",
-			routeHandlerName(r.contrib), routeEnabledName(r.contrib))
+		c := r.contrib
+		if !validIdentifier(c.Handler) {
+			return nil, fmt.Errorf("route %s: handler %q is not a Go identifier", c.ID, c.Handler)
+		}
+		if c.Enabled != "" && !validIdentifier(c.Enabled) {
+			return nil, fmt.Errorf("route %s: enabled %q is not a Go identifier", c.ID, c.Enabled)
+		}
+		scope, ok := routeScopeConstant(c.Scope)
+		if !ok {
+			return nil, fmt.Errorf("route %s: scope %q is not a known scope", c.ID, c.Scope)
+		}
+		fmt.Fprintf(&b, "\t{\n\t\tID: %s, Method: %s, Pattern: %s,\n",
+			goString(c.ID), goString(c.Method), goString(c.Pattern))
+		fmt.Fprintf(&b, "\t\tScope: %s,\n", scope)
+		fmt.Fprintf(&b, "\t\tPolicy: %s,\n", routePolicyLiteral(c.Policy))
+		fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return http.HandlerFunc(s.%s) },\n", c.Handler)
+		if c.Enabled != "" {
+			fmt.Fprintf(&b, "\t\tEnabled: func(s *Server) bool { return s.%s() },\n", c.Enabled)
+		}
+		b.WriteString("\t},\n")
 	}
 	b.WriteString("}\n")
 	_ = ctx
 	return &GeneratedFile{Path: "internal/web/routes_registry_gen.go", Content: b.String()}, nil
+}
+
+// routePolicyLiteral renders only the fields that differ from the zero policy,
+// so a reader sees the decisions a route actually made.
+func routePolicyLiteral(policy RoutePolicy) string {
+	parts := make([]string, 0, 7)
+	if policy.CSRFExempt {
+		parts = append(parts, "CSRFExempt: true")
+		parts = append(parts, "CSRFReason: "+goString(policy.CSRFReason))
+	}
+	if policy.RateExempt {
+		parts = append(parts, "RateExempt: true")
+	}
+	if policy.MaintenanceExempt {
+		parts = append(parts, "MaintenanceExempt: true")
+	}
+	if policy.MaxBodyBytes != 0 {
+		parts = append(parts, fmt.Sprintf("MaxBodyBytes: %d", policy.MaxBodyBytes))
+	}
+	if policy.Idempotent {
+		parts = append(parts, "Idempotent: true")
+	}
+	if policy.AdminWrite {
+		parts = append(parts, "AdminWrite: true")
+	}
+	if len(parts) == 0 {
+		return "RoutePolicy{}"
+	}
+	return "RoutePolicy{" + strings.Join(parts, ", ") + "}"
+}
+
+// routeScopeConstant maps a declared scope onto the exported Go constant, so an
+// unknown scope is a generation failure rather than an unguarded string.
+func routeScopeConstant(scope RouteScope) (string, bool) {
+	switch scope {
+	case RoutePublic:
+		return "ScopePublic", true
+	case RouteApp:
+		return "ScopeApp", true
+	case RouteAdmin:
+		return "ScopeAdmin", true
+	case RouteAPIRead:
+		return "ScopeAPIRead", true
+	case RouteAPIWrite:
+		return "ScopeAPIWrite", true
+	case RouteWebhook:
+		return "ScopeWebhook", true
+	case RouteStatic:
+		return "ScopeStatic", true
+	case RouteProbe:
+		return "ScopeProbe", true
+	case RouteDev:
+		return "ScopeDev", true
+	}
+	return "", false
 }
 
 func routeHandlerName(r RouteContribution) string {
@@ -836,4 +932,40 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 	b.WriteString("}\n")
 	_ = ctx
 	return &GeneratedFile{Path: "internal/jobs/jobs_registry_gen.go", Content: b.String()}, nil
+}
+
+// routePattern is one concrete method+pattern pair awaiting validation.
+type routePattern struct {
+	id      string
+	module  string
+	method  string
+	pattern string
+}
+
+// validateRoutePatterns registers every pattern on a throwaway ServeMux. That is
+// the only authority on what Go's router considers a conflict — exact duplicates,
+// wildcard-equivalent paths, and malformed patterns all panic there — so the
+// check runs at generation time instead of on the first matching request in
+// production.
+func validateRoutePatterns(patterns []routePattern) (err error) {
+	mux := http.NewServeMux()
+	for _, p := range patterns {
+		if err := registerRoutePattern(mux, p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// registerRoutePattern isolates one registration so a panic names the route that
+// caused it rather than aborting generation with a bare runtime message.
+func registerRoutePattern(mux *http.ServeMux, p routePattern) (err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("route %s (%s): pattern %q %q is invalid or conflicts: %v",
+				p.id, p.module, p.method, p.pattern, recovered)
+		}
+	}()
+	mux.Handle(p.method+" "+p.pattern, http.NotFoundHandler())
+	return nil
 }

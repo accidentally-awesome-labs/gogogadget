@@ -9,6 +9,10 @@
     "title": "Full GoGoGadget",
     "description": "Every module the GoGoGadget catalog publishes. A project selects this and lists removable modules under exclude.",
     "members": [
+      "page/home",
+      "page/pricing",
+      "page/privacy",
+      "page/terms",
       "system/analytics",
       "system/announcements",
       "system/api",

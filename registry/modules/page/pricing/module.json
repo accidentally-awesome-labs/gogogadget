@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/pricing",
+    "kind": "page",
+    "name": "pricing",
+    "revision": 1,
+    "contract": 1,
+    "title": "Pricing page",
+    "description": "Plan comparison with the signed-in organization's current plan highlighted.",
+    "requires": [
+      "system/i18n",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_pricing.go",
+        "target": "internal/web/page_pricing.go",
+        "class": "go",
+        "sha256": "3b4ccebff03d89ce3b2e4d9cc7c2377a4a3d4f9d5e6861c8ca0838611e14c7a4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/pricing.templ",
+        "target": "internal/web/templates/pricing.templ",
+        "class": "templ",
+        "sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "pricing.show"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "pricing.show",
+          "method": "GET",
+          "pattern": "/pricing",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePricing"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}
