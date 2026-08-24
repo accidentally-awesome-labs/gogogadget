@@ -70,24 +70,6 @@
         "description": "debug | info | warn | error"
       },
       {
-        "key": "MAINTENANCE_MODE",
-        "field": "MaintenanceMode",
-        "description": "Shed all traffic except probes and static"
-      },
-      {
-        "key": "METRICS_TOKEN",
-        "field": "MetricsToken",
-        "description": "Bearer gate for /metrics; required in production",
-        "production_required": true,
-        "secret": true
-      },
-      {
-        "key": "PORT",
-        "field": "Port",
-        "description": "HTTP listen port",
-        "default": "8080"
-      },
-      {
         "key": "TEST_NOW",
         "field": "testNow",
         "description": "Freezes the render clock under APP_ENV=test"

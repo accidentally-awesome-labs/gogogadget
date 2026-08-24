@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+  "registry_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
   "order": [
     "system/apphost",
     "system/config",
@@ -17,6 +17,7 @@
     "system/organizations",
     "system/audit",
     "system/content",
+    "system/content-assets",
     "system/feature-flags",
     "system/impersonation",
     "system/notifications",
@@ -26,6 +27,11 @@
     "system/seed",
     "system/storage",
     "system/jobs",
+    "system/server",
+    "system/metrics",
+    "system/security",
+    "system/seo",
+    "system/static",
     "system/testdb",
     "system/usage",
     "system/webhooks"
@@ -35,9 +41,11 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/server"
+      ],
       "manifest": {
         "id": "system/analytics",
         "kind": "system",
@@ -142,7 +150,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -216,7 +224,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -450,7 +458,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -465,6 +473,7 @@
         "system/mail",
         "system/observability",
         "system/rate-limit",
+        "system/server",
         "system/storage"
       ],
       "manifest": {
@@ -481,7 +490,7 @@
             "source": "internal/apphost/apphost.go",
             "target": "internal/apphost/apphost.go",
             "class": "go",
-            "sha256": "c3839d336e2c496d7d55f81fb79d613624a790400c61ca4f06aeb480e459c70e",
+            "sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
             "rewrite_module": true,
             "contract": true
           }
@@ -507,8 +516,8 @@
         {
           "path": "internal/apphost/apphost.go",
           "source": "internal/apphost/apphost.go",
-          "base_sha256": "c3839d336e2c496d7d55f81fb79d613624a790400c61ca4f06aeb480e459c70e",
-          "local_sha256": "c3839d336e2c496d7d55f81fb79d613624a790400c61ca4f06aeb480e459c70e",
+          "base_sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
+          "local_sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
           "state": "clean"
         }
       ],
@@ -518,7 +527,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -607,9 +616,11 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/server"
+      ],
       "manifest": {
         "id": "system/billing",
         "kind": "system",
@@ -805,7 +816,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -817,6 +828,7 @@
         "system/mail",
         "system/observability",
         "system/rate-limit",
+        "system/server",
         "system/storage"
       ],
       "manifest": {
@@ -889,24 +901,6 @@
             "description": "debug | info | warn | error"
           },
           {
-            "key": "MAINTENANCE_MODE",
-            "field": "MaintenanceMode",
-            "description": "Shed all traffic except probes and static"
-          },
-          {
-            "key": "METRICS_TOKEN",
-            "field": "MetricsToken",
-            "description": "Bearer gate for /metrics; required in production",
-            "production_required": true,
-            "secret": true
-          },
-          {
-            "key": "PORT",
-            "field": "Port",
-            "description": "HTTP listen port",
-            "default": "8080"
-          },
-          {
             "key": "TEST_NOW",
             "field": "testNow",
             "description": "Freezes the render clock under APP_ENV=test"
@@ -943,9 +937,12 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/content-assets",
+        "system/server"
+      ],
       "manifest": {
         "id": "system/content",
         "kind": "system",
@@ -1259,10 +1256,649 @@
       ]
     },
     {
+      "id": "system/content-assets",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "reason": "profile",
+      "required_by": [
+        "system/server"
+      ],
+      "manifest": {
+        "id": "system/content-assets",
+        "kind": "system",
+        "name": "content-assets",
+        "revision": 1,
+        "contract": 1,
+        "title": "Embedded content corpus",
+        "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
+        "requires": [
+          "system/content"
+        ],
+        "files": [
+          {
+            "source": "content/blog/hello-world.md",
+            "target": "content/blog/hello-world.md",
+            "class": "content",
+            "sha256": "c4c0cb370348ccbc34e9b8b6804089aedd9e349eadb093528be0782525f15bda",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/blog/value-stack.md",
+            "target": "content/blog/value-stack.md",
+            "class": "content",
+            "sha256": "67bc24bd43b76e8923020dc3f6cd64fb22e8399d73e78adbf4aaa162a57bfeb6",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/blog/why-htmx.md",
+            "target": "content/blog/why-htmx.md",
+            "class": "content",
+            "sha256": "c2bd6ae522f05c83ccfe6f9074dab047da1e087d9af561849553b88d1913e681",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-02.md",
+            "target": "content/changelog/2026-08-02.md",
+            "class": "content",
+            "sha256": "7bb590f7705558d336f0990ea03989004a318b5ed29ab93f9205082a69ba999d",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-05.md",
+            "target": "content/changelog/2026-08-05.md",
+            "class": "content",
+            "sha256": "7fca188246a43e34e47f05d2ae90998186ece878bddc57fce769c86f0fd83e85",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-17.md",
+            "target": "content/changelog/2026-08-17.md",
+            "class": "content",
+            "sha256": "21686dad615da3d103a3ce90a075afe0954ef343580d9602aa95bf9c771b7008",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-18.md",
+            "target": "content/changelog/2026-08-18.md",
+            "class": "content",
+            "sha256": "86b12313bb4bd21aa71435aeaa48fc2d391d3b57939386adf13aae0a28d669ab",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-19.md",
+            "target": "content/changelog/2026-08-19.md",
+            "class": "content",
+            "sha256": "7713e8bb19d70ea51f603af985af30c2db2d34739f786a4af128c544e82f2270",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-20.md",
+            "target": "content/changelog/2026-08-20.md",
+            "class": "content",
+            "sha256": "408866e94e50ac42bea7f696c8bf02b30253487380d6125633d65646601528e3",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-21.md",
+            "target": "content/changelog/2026-08-21.md",
+            "class": "content",
+            "sha256": "39146e7d62a83936f9c74b0eb009d288c762e4288a595b49dc0d810496b992f7",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/changelog/2026-08-22.md",
+            "target": "content/changelog/2026-08-22.md",
+            "class": "content",
+            "sha256": "2302e2309393a50324760f1c791f24a6d6f50fb646c64d1f5d06454fab0358b0",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/admin.md",
+            "target": "content/docs/admin.md",
+            "class": "content",
+            "sha256": "5a32812330e50acf4ab9240cc56cdf14e081cad53e1f5e50511f35ca2ae10e53",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/ai.md",
+            "target": "content/docs/ai.md",
+            "class": "content",
+            "sha256": "c6673069a7c7c9189c5cb270aa1d9baa5f90a870988f47feb43cb82762b323e4",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/api.md",
+            "target": "content/docs/api.md",
+            "class": "content",
+            "sha256": "4a302c5fd5bcd1eb72b14ef3b74c4e3f7386fb75d75723d3214f8b558f3dd516",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/architecture.md",
+            "target": "content/docs/architecture.md",
+            "class": "content",
+            "sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/authentication.md",
+            "target": "content/docs/authentication.md",
+            "class": "content",
+            "sha256": "de22117d64b16129b71ece5d5b12ed7a65a3796edb0b5d154ba0c7d764d7e01d",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/background-jobs.md",
+            "target": "content/docs/background-jobs.md",
+            "class": "content",
+            "sha256": "c413c5d50a140313541fdea44dc60774f81a09c99e739e956a845a56ea8f85f1",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/billing.md",
+            "target": "content/docs/billing.md",
+            "class": "content",
+            "sha256": "e3d302732af2c552669aae991750adee5bae5116372e21d1256dcb86b172cc0d",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/configuration.md",
+            "target": "content/docs/configuration.md",
+            "class": "content",
+            "sha256": "d33b4ba2ca019a7726dbde55b6cedfba32652fe25d3b6a60053ddeeb9136e311",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/content.md",
+            "target": "content/docs/content.md",
+            "class": "content",
+            "sha256": "900c35bc9b039c33d7e9eaa70246e1ab57bc7049d6d214934de9ef5339c7963c",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/database.md",
+            "target": "content/docs/database.md",
+            "class": "content",
+            "sha256": "27aac11e77cf0db3c10183bf07c8f4149ce59010a18feb4b0d0160f73c787457",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/deployment.md",
+            "target": "content/docs/deployment.md",
+            "class": "content",
+            "sha256": "deef8775c7096fb6e74f8c349aa9f8581499c5e05e06cb2e4113e4103db32038",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/email.md",
+            "target": "content/docs/email.md",
+            "class": "content",
+            "sha256": "9c787793f6ff4fe9131642576b1ef00ed01a6d5547a5b2a79a4e41b313255aa6",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/extending.md",
+            "target": "content/docs/extending.md",
+            "class": "content",
+            "sha256": "3f0abd23ac8c859d95c57bc0b3e1d83e9142afcdd7d98e92f6a7073bff844edc",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/feature-flags.md",
+            "target": "content/docs/feature-flags.md",
+            "class": "content",
+            "sha256": "6ad121f59b356c375db69ddd724e9bc6f51a27d7d75815c741e5ceaf1fef8c92",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/frontend.md",
+            "target": "content/docs/frontend.md",
+            "class": "content",
+            "sha256": "074b016105b0bc3d0525058d22c71361ac233b4dffb1e5cc6cdbd7d22c4ef62b",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/getting-started.md",
+            "target": "content/docs/getting-started.md",
+            "class": "content",
+            "sha256": "e0e53def844cb95884f8eda6640a90e954fb33d29c587298394b56432fe19ce0",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/i18n.md",
+            "target": "content/docs/i18n.md",
+            "class": "content",
+            "sha256": "6658a246d50ff688fb3c208aadb499a438be3565fb0ecf4c078b86a685d0a339",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/index.md",
+            "target": "content/docs/index.md",
+            "class": "content",
+            "sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/notifications.md",
+            "target": "content/docs/notifications.md",
+            "class": "content",
+            "sha256": "ba8d5e4d51f81c8bdd57ef2ef10015c03b2526b3fb45d4e76f1b211c4fc6e283",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/observability.md",
+            "target": "content/docs/observability.md",
+            "class": "content",
+            "sha256": "c22a7546f23a5b1ca28d428e28bb25ee28539671387b12565d8e030f508a06bd",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/organizations.md",
+            "target": "content/docs/organizations.md",
+            "class": "content",
+            "sha256": "7640ac62e0fb0a12fc485a293de39e9a45528b1dc501fe0266677bd3a7debeb3",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/roadmap.md",
+            "target": "content/docs/roadmap.md",
+            "class": "content",
+            "sha256": "da8cfc6873b971917e30b6f03cd39c20ef9d71991a4288739dab14043574de14",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/security.md",
+            "target": "content/docs/security.md",
+            "class": "content",
+            "sha256": "2610bc36885cc65730ea7e3497330176be8bc8d84029c387d7c4da6b32887f47",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/seo.md",
+            "target": "content/docs/seo.md",
+            "class": "content",
+            "sha256": "8e61824ff5081cd075e90492ff25ed5197823afcfb83e0016307676a0791d2f8",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/storage.md",
+            "target": "content/docs/storage.md",
+            "class": "content",
+            "sha256": "1582efccfd4b3327569f1f131ae6b4d506b018e7baae69b8f238b48520968abe",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/testing.md",
+            "target": "content/docs/testing.md",
+            "class": "content",
+            "sha256": "1223f8a667dff5f708bc8205642ee31e5d5c2c76b15fd063df811e7ae22fb65d",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/troubleshooting.md",
+            "target": "content/docs/troubleshooting.md",
+            "class": "content",
+            "sha256": "0e78a5dfb5b4e3456022c1c7e82d50c2dddd0b95512e454aacebf1ee411baef7",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/docs/webhooks.md",
+            "target": "content/docs/webhooks.md",
+            "class": "content",
+            "sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
+            "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "content/embed.go",
+            "target": "content/embed.go",
+            "class": "go",
+            "sha256": "3780436d0f8ab466a85954c291e227ddaa87d58ba31a7a8635bca96d07f9e708",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "content"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "content/blog/hello-world.md",
+          "source": "content/blog/hello-world.md",
+          "base_sha256": "c4c0cb370348ccbc34e9b8b6804089aedd9e349eadb093528be0782525f15bda",
+          "local_sha256": "c4c0cb370348ccbc34e9b8b6804089aedd9e349eadb093528be0782525f15bda",
+          "state": "clean"
+        },
+        {
+          "path": "content/blog/value-stack.md",
+          "source": "content/blog/value-stack.md",
+          "base_sha256": "67bc24bd43b76e8923020dc3f6cd64fb22e8399d73e78adbf4aaa162a57bfeb6",
+          "local_sha256": "67bc24bd43b76e8923020dc3f6cd64fb22e8399d73e78adbf4aaa162a57bfeb6",
+          "state": "clean"
+        },
+        {
+          "path": "content/blog/why-htmx.md",
+          "source": "content/blog/why-htmx.md",
+          "base_sha256": "c2bd6ae522f05c83ccfe6f9074dab047da1e087d9af561849553b88d1913e681",
+          "local_sha256": "c2bd6ae522f05c83ccfe6f9074dab047da1e087d9af561849553b88d1913e681",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-02.md",
+          "source": "content/changelog/2026-08-02.md",
+          "base_sha256": "7bb590f7705558d336f0990ea03989004a318b5ed29ab93f9205082a69ba999d",
+          "local_sha256": "7bb590f7705558d336f0990ea03989004a318b5ed29ab93f9205082a69ba999d",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-05.md",
+          "source": "content/changelog/2026-08-05.md",
+          "base_sha256": "7fca188246a43e34e47f05d2ae90998186ece878bddc57fce769c86f0fd83e85",
+          "local_sha256": "7fca188246a43e34e47f05d2ae90998186ece878bddc57fce769c86f0fd83e85",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-17.md",
+          "source": "content/changelog/2026-08-17.md",
+          "base_sha256": "21686dad615da3d103a3ce90a075afe0954ef343580d9602aa95bf9c771b7008",
+          "local_sha256": "21686dad615da3d103a3ce90a075afe0954ef343580d9602aa95bf9c771b7008",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-18.md",
+          "source": "content/changelog/2026-08-18.md",
+          "base_sha256": "86b12313bb4bd21aa71435aeaa48fc2d391d3b57939386adf13aae0a28d669ab",
+          "local_sha256": "86b12313bb4bd21aa71435aeaa48fc2d391d3b57939386adf13aae0a28d669ab",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-19.md",
+          "source": "content/changelog/2026-08-19.md",
+          "base_sha256": "7713e8bb19d70ea51f603af985af30c2db2d34739f786a4af128c544e82f2270",
+          "local_sha256": "7713e8bb19d70ea51f603af985af30c2db2d34739f786a4af128c544e82f2270",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-20.md",
+          "source": "content/changelog/2026-08-20.md",
+          "base_sha256": "408866e94e50ac42bea7f696c8bf02b30253487380d6125633d65646601528e3",
+          "local_sha256": "408866e94e50ac42bea7f696c8bf02b30253487380d6125633d65646601528e3",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-21.md",
+          "source": "content/changelog/2026-08-21.md",
+          "base_sha256": "39146e7d62a83936f9c74b0eb009d288c762e4288a595b49dc0d810496b992f7",
+          "local_sha256": "39146e7d62a83936f9c74b0eb009d288c762e4288a595b49dc0d810496b992f7",
+          "state": "clean"
+        },
+        {
+          "path": "content/changelog/2026-08-22.md",
+          "source": "content/changelog/2026-08-22.md",
+          "base_sha256": "2302e2309393a50324760f1c791f24a6d6f50fb646c64d1f5d06454fab0358b0",
+          "local_sha256": "2302e2309393a50324760f1c791f24a6d6f50fb646c64d1f5d06454fab0358b0",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/admin.md",
+          "source": "content/docs/admin.md",
+          "base_sha256": "5a32812330e50acf4ab9240cc56cdf14e081cad53e1f5e50511f35ca2ae10e53",
+          "local_sha256": "5a32812330e50acf4ab9240cc56cdf14e081cad53e1f5e50511f35ca2ae10e53",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/ai.md",
+          "source": "content/docs/ai.md",
+          "base_sha256": "c6673069a7c7c9189c5cb270aa1d9baa5f90a870988f47feb43cb82762b323e4",
+          "local_sha256": "c6673069a7c7c9189c5cb270aa1d9baa5f90a870988f47feb43cb82762b323e4",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/api.md",
+          "source": "content/docs/api.md",
+          "base_sha256": "4a302c5fd5bcd1eb72b14ef3b74c4e3f7386fb75d75723d3214f8b558f3dd516",
+          "local_sha256": "4a302c5fd5bcd1eb72b14ef3b74c4e3f7386fb75d75723d3214f8b558f3dd516",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/architecture.md",
+          "source": "content/docs/architecture.md",
+          "base_sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
+          "local_sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/authentication.md",
+          "source": "content/docs/authentication.md",
+          "base_sha256": "de22117d64b16129b71ece5d5b12ed7a65a3796edb0b5d154ba0c7d764d7e01d",
+          "local_sha256": "de22117d64b16129b71ece5d5b12ed7a65a3796edb0b5d154ba0c7d764d7e01d",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/background-jobs.md",
+          "source": "content/docs/background-jobs.md",
+          "base_sha256": "c413c5d50a140313541fdea44dc60774f81a09c99e739e956a845a56ea8f85f1",
+          "local_sha256": "c413c5d50a140313541fdea44dc60774f81a09c99e739e956a845a56ea8f85f1",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/billing.md",
+          "source": "content/docs/billing.md",
+          "base_sha256": "e3d302732af2c552669aae991750adee5bae5116372e21d1256dcb86b172cc0d",
+          "local_sha256": "e3d302732af2c552669aae991750adee5bae5116372e21d1256dcb86b172cc0d",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/configuration.md",
+          "source": "content/docs/configuration.md",
+          "base_sha256": "d33b4ba2ca019a7726dbde55b6cedfba32652fe25d3b6a60053ddeeb9136e311",
+          "local_sha256": "d33b4ba2ca019a7726dbde55b6cedfba32652fe25d3b6a60053ddeeb9136e311",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/content.md",
+          "source": "content/docs/content.md",
+          "base_sha256": "900c35bc9b039c33d7e9eaa70246e1ab57bc7049d6d214934de9ef5339c7963c",
+          "local_sha256": "900c35bc9b039c33d7e9eaa70246e1ab57bc7049d6d214934de9ef5339c7963c",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/database.md",
+          "source": "content/docs/database.md",
+          "base_sha256": "27aac11e77cf0db3c10183bf07c8f4149ce59010a18feb4b0d0160f73c787457",
+          "local_sha256": "27aac11e77cf0db3c10183bf07c8f4149ce59010a18feb4b0d0160f73c787457",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/deployment.md",
+          "source": "content/docs/deployment.md",
+          "base_sha256": "deef8775c7096fb6e74f8c349aa9f8581499c5e05e06cb2e4113e4103db32038",
+          "local_sha256": "deef8775c7096fb6e74f8c349aa9f8581499c5e05e06cb2e4113e4103db32038",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/email.md",
+          "source": "content/docs/email.md",
+          "base_sha256": "9c787793f6ff4fe9131642576b1ef00ed01a6d5547a5b2a79a4e41b313255aa6",
+          "local_sha256": "9c787793f6ff4fe9131642576b1ef00ed01a6d5547a5b2a79a4e41b313255aa6",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/extending.md",
+          "source": "content/docs/extending.md",
+          "base_sha256": "3f0abd23ac8c859d95c57bc0b3e1d83e9142afcdd7d98e92f6a7073bff844edc",
+          "local_sha256": "3f0abd23ac8c859d95c57bc0b3e1d83e9142afcdd7d98e92f6a7073bff844edc",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/feature-flags.md",
+          "source": "content/docs/feature-flags.md",
+          "base_sha256": "6ad121f59b356c375db69ddd724e9bc6f51a27d7d75815c741e5ceaf1fef8c92",
+          "local_sha256": "6ad121f59b356c375db69ddd724e9bc6f51a27d7d75815c741e5ceaf1fef8c92",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/frontend.md",
+          "source": "content/docs/frontend.md",
+          "base_sha256": "074b016105b0bc3d0525058d22c71361ac233b4dffb1e5cc6cdbd7d22c4ef62b",
+          "local_sha256": "074b016105b0bc3d0525058d22c71361ac233b4dffb1e5cc6cdbd7d22c4ef62b",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/getting-started.md",
+          "source": "content/docs/getting-started.md",
+          "base_sha256": "e0e53def844cb95884f8eda6640a90e954fb33d29c587298394b56432fe19ce0",
+          "local_sha256": "e0e53def844cb95884f8eda6640a90e954fb33d29c587298394b56432fe19ce0",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/i18n.md",
+          "source": "content/docs/i18n.md",
+          "base_sha256": "6658a246d50ff688fb3c208aadb499a438be3565fb0ecf4c078b86a685d0a339",
+          "local_sha256": "6658a246d50ff688fb3c208aadb499a438be3565fb0ecf4c078b86a685d0a339",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/index.md",
+          "source": "content/docs/index.md",
+          "base_sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
+          "local_sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/notifications.md",
+          "source": "content/docs/notifications.md",
+          "base_sha256": "ba8d5e4d51f81c8bdd57ef2ef10015c03b2526b3fb45d4e76f1b211c4fc6e283",
+          "local_sha256": "ba8d5e4d51f81c8bdd57ef2ef10015c03b2526b3fb45d4e76f1b211c4fc6e283",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/observability.md",
+          "source": "content/docs/observability.md",
+          "base_sha256": "c22a7546f23a5b1ca28d428e28bb25ee28539671387b12565d8e030f508a06bd",
+          "local_sha256": "c22a7546f23a5b1ca28d428e28bb25ee28539671387b12565d8e030f508a06bd",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/organizations.md",
+          "source": "content/docs/organizations.md",
+          "base_sha256": "7640ac62e0fb0a12fc485a293de39e9a45528b1dc501fe0266677bd3a7debeb3",
+          "local_sha256": "7640ac62e0fb0a12fc485a293de39e9a45528b1dc501fe0266677bd3a7debeb3",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/roadmap.md",
+          "source": "content/docs/roadmap.md",
+          "base_sha256": "da8cfc6873b971917e30b6f03cd39c20ef9d71991a4288739dab14043574de14",
+          "local_sha256": "da8cfc6873b971917e30b6f03cd39c20ef9d71991a4288739dab14043574de14",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/security.md",
+          "source": "content/docs/security.md",
+          "base_sha256": "2610bc36885cc65730ea7e3497330176be8bc8d84029c387d7c4da6b32887f47",
+          "local_sha256": "2610bc36885cc65730ea7e3497330176be8bc8d84029c387d7c4da6b32887f47",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/seo.md",
+          "source": "content/docs/seo.md",
+          "base_sha256": "8e61824ff5081cd075e90492ff25ed5197823afcfb83e0016307676a0791d2f8",
+          "local_sha256": "8e61824ff5081cd075e90492ff25ed5197823afcfb83e0016307676a0791d2f8",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/storage.md",
+          "source": "content/docs/storage.md",
+          "base_sha256": "1582efccfd4b3327569f1f131ae6b4d506b018e7baae69b8f238b48520968abe",
+          "local_sha256": "1582efccfd4b3327569f1f131ae6b4d506b018e7baae69b8f238b48520968abe",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/testing.md",
+          "source": "content/docs/testing.md",
+          "base_sha256": "1223f8a667dff5f708bc8205642ee31e5d5c2c76b15fd063df811e7ae22fb65d",
+          "local_sha256": "1223f8a667dff5f708bc8205642ee31e5d5c2c76b15fd063df811e7ae22fb65d",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/troubleshooting.md",
+          "source": "content/docs/troubleshooting.md",
+          "base_sha256": "0e78a5dfb5b4e3456022c1c7e82d50c2dddd0b95512e454aacebf1ee411baef7",
+          "local_sha256": "0e78a5dfb5b4e3456022c1c7e82d50c2dddd0b95512e454aacebf1ee411baef7",
+          "state": "clean"
+        },
+        {
+          "path": "content/docs/webhooks.md",
+          "source": "content/docs/webhooks.md",
+          "base_sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
+          "local_sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
+          "state": "clean"
+        },
+        {
+          "path": "content/embed.go",
+          "source": "content/embed.go",
+          "base_sha256": "3780436d0f8ab466a85954c291e227ddaa87d58ba31a7a8635bca96d07f9e708",
+          "local_sha256": "3780436d0f8ab466a85954c291e227ddaa87d58ba31a7a8635bca96d07f9e708",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
         "system/announcements",
@@ -1276,6 +1912,7 @@
         "system/organizations",
         "system/schedules",
         "system/seed",
+        "system/server",
         "system/testdb",
         "system/usage",
         "system/webhooks"
@@ -1403,9 +2040,11 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/server"
+      ],
       "manifest": {
         "id": "system/feature-flags",
         "kind": "system",
@@ -1541,9 +2180,11 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/server"
+      ],
       "manifest": {
         "id": "system/i18n",
         "kind": "system",
@@ -1657,9 +2298,12 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/security",
+        "system/server"
+      ],
       "manifest": {
         "id": "system/identity",
         "kind": "system",
@@ -1858,7 +2502,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1945,7 +2589,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2102,9 +2746,11 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "system/server"
+      ],
       "manifest": {
         "id": "system/llm",
         "kind": "system",
@@ -2214,7 +2860,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -2320,10 +2966,70 @@
       "migrations": []
     },
     {
+      "id": "system/metrics",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/metrics",
+        "kind": "system",
+        "name": "metrics",
+        "revision": 1,
+        "contract": 1,
+        "title": "Runtime metrics endpoint",
+        "description": "The bearer-gated /metrics endpoint. Production refuses to expose it without a token, because Go runtime stats must not be public by default.",
+        "requires": [
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/metrics.go",
+            "target": "internal/web/metrics.go",
+            "class": "go",
+            "sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [
+          {
+            "key": "METRICS_TOKEN",
+            "field": "MetricsToken",
+            "description": "Bearer token gating /metrics; required in production",
+            "production_required": true,
+            "secret": true
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/metrics.go",
+          "source": "internal/web/metrics.go",
+          "base_sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
+          "local_sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2388,7 +3094,7 @@
             "source": "internal/modkit/generate.go",
             "target": "internal/modkit/generate.go",
             "class": "go",
-            "sha256": "5a713d2e5df34947498af22ec07b9ac90cc60e0b6b7df8f98783ac82a596177e",
+            "sha256": "8d4a9155e0e23a9db2f4d2a3bd144d5a2c663dbbe660fb3210c4a5b5e51e9bf7",
             "rewrite_module": true,
             "contract": false
           },
@@ -2602,8 +3308,8 @@
         {
           "path": "internal/modkit/generate.go",
           "source": "internal/modkit/generate.go",
-          "base_sha256": "5a713d2e5df34947498af22ec07b9ac90cc60e0b6b7df8f98783ac82a596177e",
-          "local_sha256": "5a713d2e5df34947498af22ec07b9ac90cc60e0b6b7df8f98783ac82a596177e",
+          "base_sha256": "8d4a9155e0e23a9db2f4d2a3bd144d5a2c663dbbe660fb3210c4a5b5e51e9bf7",
+          "local_sha256": "8d4a9155e0e23a9db2f4d2a3bd144d5a2c663dbbe660fb3210c4a5b5e51e9bf7",
           "state": "clean"
         },
         {
@@ -2739,7 +3445,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2883,10 +3589,11 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
-        "system/jobs"
+        "system/jobs",
+        "system/server"
       ],
       "manifest": {
         "id": "system/observability",
@@ -3001,7 +3708,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -3010,6 +3717,7 @@
         "system/feature-flags",
         "system/impersonation",
         "system/notifications",
+        "system/security",
         "system/usage",
         "system/webhooks"
       ],
@@ -3142,10 +3850,11 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
-        "system/api"
+        "system/api",
+        "system/security"
       ],
       "manifest": {
         "id": "system/rate-limit",
@@ -3245,7 +3954,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3338,10 +4047,86 @@
       ]
     },
     {
+      "id": "system/security",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/security",
+        "kind": "system",
+        "name": "security",
+        "revision": 1,
+        "contract": 1,
+        "title": "Middleware and request security",
+        "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards.",
+        "requires": [
+          "system/identity",
+          "system/organizations",
+          "system/rate-limit",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/auth.go",
+            "target": "internal/web/auth.go",
+            "class": "go",
+            "sha256": "06f513e15df3fce19ab446c7cd62723afd021d8d45fdee12307abfb69bc0fd3e",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/middleware.go",
+            "target": "internal/web/middleware.go",
+            "class": "go",
+            "sha256": "9aa29883e349e92c9959cce2794aff3afcebcdec1ccbff8bb674d0298c6cabd8",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [
+          {
+            "key": "MAINTENANCE_MODE",
+            "field": "MaintenanceMode",
+            "description": "Shed all traffic except probes and static with a 503"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/web/auth.go",
+          "source": "internal/web/auth.go",
+          "base_sha256": "06f513e15df3fce19ab446c7cd62723afd021d8d45fdee12307abfb69bc0fd3e",
+          "local_sha256": "06f513e15df3fce19ab446c7cd62723afd021d8d45fdee12307abfb69bc0fd3e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/middleware.go",
+          "source": "internal/web/middleware.go",
+          "base_sha256": "9aa29883e349e92c9959cce2794aff3afcebcdec1ccbff8bb674d0298c6cabd8",
+          "local_sha256": "9aa29883e349e92c9959cce2794aff3afcebcdec1ccbff8bb674d0298c6cabd8",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3420,13 +4205,351 @@
       "migrations": []
     },
     {
+      "id": "system/seo",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/seo",
+        "kind": "system",
+        "name": "seo",
+        "revision": 1,
+        "contract": 1,
+        "title": "Discovery surfaces",
+        "description": "robots.txt, the sitemap, and the canonical and alternate link metadata search engines read.",
+        "requires": [
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/seo.go",
+            "target": "internal/web/seo.go",
+            "class": "go",
+            "sha256": "4d80c0611b53c4e01296ae6c285e918bc1f05465351b86c2cb97488a631d1320",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/seo.go",
+          "source": "internal/web/seo.go",
+          "base_sha256": "4d80c0611b53c4e01296ae6c285e918bc1f05465351b86c2cb97488a631d1320",
+          "local_sha256": "4d80c0611b53c4e01296ae6c285e918bc1f05465351b86c2cb97488a631d1320",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/server",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "reason": "profile",
+      "required_by": [
+        "system/metrics",
+        "system/security",
+        "system/seo",
+        "system/static"
+      ],
+      "manifest": {
+        "id": "system/server",
+        "kind": "system",
+        "name": "server",
+        "revision": 1,
+        "contract": 1,
+        "title": "HTTP server core",
+        "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
+        "requires": [
+          "system/analytics",
+          "system/apphost",
+          "system/billing",
+          "system/config",
+          "system/content",
+          "system/content-assets",
+          "system/database",
+          "system/feature-flags",
+          "system/i18n",
+          "system/identity",
+          "system/llm",
+          "system/observability",
+          "system/storage"
+        ],
+        "files": [
+          {
+            "source": "internal/web/htmx.go",
+            "target": "internal/web/htmx.go",
+            "class": "go",
+            "sha256": "28f2c227e791bcdb10c16644c745b2f8b93bb5f22e9e648f691d38e170989d51",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/module.go",
+            "target": "internal/web/module.go",
+            "class": "go",
+            "sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/params.go",
+            "target": "internal/web/params.go",
+            "class": "go",
+            "sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/routes.go",
+            "target": "internal/web/routes.go",
+            "class": "go",
+            "sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/server.go",
+            "target": "internal/web/server.go",
+            "class": "go",
+            "sha256": "877deb15cd3cfbe8d46a01ba752a0ae4df0ff08e09eff84d7492c8bfbff2b724",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/web"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/web",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Analytics",
+                "capability": "analytics.capturer",
+                "type": "analytics.Capturer",
+                "optional": true
+              },
+              {
+                "field": "Billing",
+                "capability": "billing.client",
+                "type": "billing.Client",
+                "optional": true
+              },
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              },
+              {
+                "field": "DB",
+                "capability": "database.pool",
+                "type": "*pgxpool.Pool",
+                "optional": false
+              },
+              {
+                "field": "Fetcher",
+                "capability": "identity.fetcher",
+                "type": "identity.UserFetcher",
+                "optional": true
+              },
+              {
+                "field": "Flags",
+                "capability": "flags.evaluator",
+                "type": "flags.Evaluator",
+                "optional": true
+              },
+              {
+                "field": "IdentityDeleter",
+                "capability": "identity.deleter",
+                "type": "identity.Deleter",
+                "optional": true
+              },
+              {
+                "field": "LLM",
+                "capability": "llm.completer",
+                "type": "llm.Completer",
+                "optional": true
+              },
+              {
+                "field": "Queries",
+                "capability": "database.queries",
+                "type": "*sqlc.Queries",
+                "optional": false
+              },
+              {
+                "field": "Reporter",
+                "capability": "observability.reporter",
+                "type": "observability.Reporter",
+                "optional": true
+              },
+              {
+                "field": "Storage",
+                "capability": "storage.store",
+                "type": "storage.Store",
+                "optional": true
+              },
+              {
+                "field": "Verifier",
+                "capability": "identity.verifier",
+                "type": "identity.Verifier",
+                "optional": true
+              }
+            ],
+            "provides": [
+              {
+                "field": "Handler",
+                "capability": "http.handler",
+                "type": "http.Handler"
+              }
+            ],
+            "type_imports": [
+              "github.com/jackc/pgx/v5/pgxpool",
+              "internal/db/sqlc",
+              "net/http"
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "PORT",
+            "field": "Port",
+            "description": "HTTP listen port",
+            "default": "8080"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/web/htmx.go",
+          "source": "internal/web/htmx.go",
+          "base_sha256": "28f2c227e791bcdb10c16644c745b2f8b93bb5f22e9e648f691d38e170989d51",
+          "local_sha256": "28f2c227e791bcdb10c16644c745b2f8b93bb5f22e9e648f691d38e170989d51",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/module.go",
+          "source": "internal/web/module.go",
+          "base_sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
+          "local_sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/params.go",
+          "source": "internal/web/params.go",
+          "base_sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
+          "local_sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/routes.go",
+          "source": "internal/web/routes.go",
+          "base_sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
+          "local_sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/server.go",
+          "source": "internal/web/server.go",
+          "base_sha256": "877deb15cd3cfbe8d46a01ba752a0ae4df0ff08e09eff84d7492c8bfbff2b724",
+          "local_sha256": "877deb15cd3cfbe8d46a01ba752a0ae4df0ff08e09eff84d7492c8bfbff2b724",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/static",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/static",
+        "kind": "system",
+        "name": "static",
+        "revision": 1,
+        "contract": 1,
+        "title": "Static asset serving",
+        "description": "The embedded static file set — built CSS, client JavaScript, fonts, icons, and the vendored browser assets — served with content-addressed caching.",
+        "requires": [
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "static/static.go",
+            "target": "static/static.go",
+            "class": "go",
+            "sha256": "81c93bbf9d4f9945b167aad850ed81c51532a44b75e774d011c981f3222fdaf9",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "static"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "static/static.go",
+          "source": "static/static.go",
+          "base_sha256": "81c93bbf9d4f9945b167aad850ed81c51532a44b75e774d011c981f3222fdaf9",
+          "local_sha256": "81c93bbf9d4f9945b167aad850ed81c51532a44b75e774d011c981f3222fdaf9",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [
-        "system/jobs"
+        "system/jobs",
+        "system/server"
       ],
       "manifest": {
         "id": "system/storage",
@@ -3577,7 +4700,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3633,7 +4756,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3730,7 +4853,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "0f7378c35210a85497e58310fdd2097c822840fce5f8b07efb90b9f26a5376f4",
+      "source_commit": "11cc86fddd38fa52a71a1f2e47d8bc0dd54742c948760cdc301b2e58544b4b71",
       "reason": "profile",
       "required_by": [],
       "manifest": {

@@ -28,10 +28,14 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 		mutate(&cfg)
 	}
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return NewServer(Deps{
-		Config: cfg, Log: log, Version: "test",
+	server, err := NewServer(Deps{
+		Config: &cfg, Log: log, Version: "test",
 		Docs: &content.Docs{},
 	})
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+	return server
 }
 
 // renderToString renders a component outside a request, for asserting on the

@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/static",
+    "kind": "system",
+    "name": "static",
+    "revision": 1,
+    "contract": 1,
+    "title": "Static asset serving",
+    "description": "The embedded static file set \u2014 built CSS, client JavaScript, fonts, icons, and the vendored browser assets \u2014 served with content-addressed caching.",
+    "requires": [
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "static/static.go",
+        "target": "static/static.go",
+        "class": "go",
+        "sha256": "81c93bbf9d4f9945b167aad850ed81c51532a44b75e774d011c981f3222fdaf9",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "static"
+      ]
+    },
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

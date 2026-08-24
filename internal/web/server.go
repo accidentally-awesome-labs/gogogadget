@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -36,7 +37,7 @@ type Server struct {
 	annExpires    time.Time
 	q             *sqlc.Queries
 	version       string
-	docs          *content.Docs   // embedded markdown; versions with the binary
+	docs          *content.Docs // embedded markdown; versions with the binary
 	types         *content.Registry
 	cms           *content.CMS
 	verifier      identity.Verifier
@@ -58,12 +59,12 @@ type Server struct {
 // Deps is the server wiring bag: every external service enters here, behind
 // its seam interface.
 type Deps struct {
-	Config    config.Config
-	Log       *slog.Logger
-	DB        *pgxpool.Pool
-	Queries   *sqlc.Queries
-	Version   string
-	Docs      *content.Docs
+	Config  *config.Config
+	Log     *slog.Logger
+	DB      *pgxpool.Pool
+	Queries *sqlc.Queries
+	Version string
+	Docs    *content.Docs
 	// ContentTypes declares every content collection. nil → DefaultTypes()
 	// (blog posts and changelog releases). Appending one Type is all it takes
 	// to add a collection: no migration, no table, no handler, no template.
@@ -80,9 +81,9 @@ type Deps struct {
 	Reporter        observability.Reporter // nil → NoopReporter
 }
 
-func NewServer(d Deps) *Server {
+func NewServer(d Deps) (*Server, error) {
 	s := &Server{
-		cfg:           d.Config,
+		cfg:           *d.Config,
 		log:           d.Log,
 		db:            d.DB,
 		q:             d.Queries,
@@ -108,12 +109,13 @@ func NewServer(d Deps) *Server {
 	if s.reporter == nil {
 		s.reporter = observability.NoopReporter{}
 	}
+	// A bad content-type declaration is a wiring bug, so it refuses here. There
+	// is deliberately no fallback to the defaults: silently serving a different
+	// set of collections than the one declared hides the mistake until a reader
+	// notices a missing page.
 	reg, err := content.NewRegistry(contentTypesOf(d))
 	if err != nil {
-		// cmd/server validates first and exits, so this only ever protects a
-		// test server: refuse the bad declaration, keep the app bootable.
-		s.log.Error("content types rejected, using defaults", "error", err)
-		reg, _ = content.NewRegistry(content.DefaultTypes())
+		return nil, fmt.Errorf("content types: %w", err)
 	}
 	s.types = reg
 	s.cms = content.NewCMS(s.q, s.types)
@@ -121,7 +123,7 @@ func NewServer(d Deps) *Server {
 		s.analytics = d.Analytics
 	}
 	s.routes()
-	return s
+	return s, nil
 }
 
 // contentTypesOf returns the declared collections, defaulting to the built-in

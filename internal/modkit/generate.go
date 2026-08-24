@@ -137,26 +137,58 @@ func resolveTypeImport(modulePath, declared string) string {
 	return qualifyPackage(modulePath, trimmed)
 }
 
+// bootstrapFixedImports are the packages the generated bootstrap always imports.
+// A declared type import naming one of these is skipped rather than resolved,
+// because a dotless stdlib path is indistinguishable from a module-relative one.
+var bootstrapFixedImports = map[string]struct{}{
+	"context":  {},
+	"errors":   {},
+	"fmt":      {},
+	"net/http": {},
+}
+
+// httpHandlerCapability is the one structurally special capability: the module
+// providing it is what the runtime serves.
+const httpHandlerCapability = "http.handler"
+
 // capabilityField turns a capability name into the exported Runtime field that
 // carries it. Capabilities are globally unique (the namespace preflight enforces
 // it), so deriving the field from the capability — not from the module's own
 // field name — keeps two modules that both provide a "Client" from colliding.
 func capabilityField(capability string) string {
 	var b strings.Builder
-	upper := true
-	for _, r := range capability {
-		if r == '.' || r == '-' || r == '_' || r == '/' {
-			upper = true
+	for _, segment := range strings.FieldsFunc(capability, func(r rune) bool {
+		return r == '.' || r == '-' || r == '_' || r == '/'
+	}) {
+		if initialism, ok := goInitialisms[segment]; ok {
+			b.WriteString(initialism)
 			continue
 		}
-		if upper {
-			b.WriteString(strings.ToUpper(string(r)))
-			upper = false
-			continue
-		}
-		b.WriteRune(r)
+		b.WriteString(strings.ToUpper(segment[:1]))
+		b.WriteString(segment[1:])
 	}
 	return b.String()
+}
+
+// goInitialisms keeps generated field names idiomatic. Go spells initialisms in
+// one case, and so does the rest of this codebase (AppURL, LLMAPIKey), so the
+// generator must not emit HttpHandler or LlmCompleter.
+var goInitialisms = map[string]string{
+	"api":   "API",
+	"csv":   "CSV",
+	"db":    "DB",
+	"dsn":   "DSN",
+	"html":  "HTML",
+	"http":  "HTTP",
+	"https": "HTTPS",
+	"id":    "ID",
+	"json":  "JSON",
+	"llm":   "LLM",
+	"sql":   "SQL",
+	"ui":    "UI",
+	"url":   "URL",
+	"uuid":  "UUID",
+	"yaml":  "YAML",
 }
 
 func goImportName(pkg string) string {
@@ -269,6 +301,11 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			imports = append(imports, "\t"+goImportName(qualified)+" \""+qualified+"\"\n")
 		}
 		for _, extra := range m.Runtime.System.TypeImports {
+			if _, fixed := bootstrapFixedImports[strings.Trim(extra, "/")]; fixed {
+				// Already imported unconditionally below; resolving it would also
+				// mistake a dotless stdlib path for a module-relative one.
+				continue
+			}
 			resolved := resolveTypeImport(modulePath, extra)
 			if _, ok := seenImports[resolved]; ok {
 				continue
@@ -292,10 +329,24 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("// Runtime is the booted module closure. Every capability the selected\n")
 	b.WriteString("// graph provides is reachable here, so consumers take typed values rather\n")
 	b.WriteString("// than reconstructing providers.\n")
+	// One capability is structural: whichever module provides http.handler is
+	// what Handler() returns, so the runtime composes a servable handler instead
+	// of carrying a field nothing ever assigns.
+	handlerField := ""
+	for _, m := range modules {
+		if m.Runtime.System == nil {
+			continue
+		}
+		for _, provide := range m.Runtime.System.Provides {
+			if provide.Capability == httpHandlerCapability {
+				handlerField = capabilityField(provide.Capability)
+			}
+		}
+	}
+
 	b.WriteString("type Runtime struct {\n")
-	b.WriteString("\thandler http.Handler\n")
-	b.WriteString("\tstart   []func(context.Context) error\n")
-	b.WriteString("\tstop    []apphost.Stop\n")
+	b.WriteString("\tstart []func(context.Context) error\n")
+	b.WriteString("\tstop  []apphost.Stop\n")
 	provided := make([]string, 0)
 	for _, m := range modules {
 		if m.Runtime.System == nil {
@@ -384,7 +435,12 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("}\n\n")
 
 	b.WriteString("// Handler returns the composed HTTP handler.\n")
-	b.WriteString("func (r *Runtime) Handler() http.Handler { return r.handler }\n\n")
+	if handlerField == "" {
+		b.WriteString("// The selected graph provides none, so there is nothing to serve.\n")
+		b.WriteString("func (r *Runtime) Handler() http.Handler { return nil }\n\n")
+	} else {
+		fmt.Fprintf(&b, "func (r *Runtime) Handler() http.Handler { return r.%s }\n\n", handlerField)
+	}
 	b.WriteString("// Run starts every long-lived service in dependency order. Each Start must\n")
 	b.WriteString("// return promptly — a module owns its own goroutine — so Run hands control back\n")
 	b.WriteString("// to the caller that serves traffic.\n")

@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/security",
+    "kind": "system",
+    "name": "security",
+    "revision": 1,
+    "contract": 1,
+    "title": "Middleware and request security",
+    "description": "The load-bearing middleware chain \u2014 recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF \u2014 and the route-group guards.",
+    "requires": [
+      "system/identity",
+      "system/organizations",
+      "system/rate-limit",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/auth.go",
+        "target": "internal/web/auth.go",
+        "class": "go",
+        "sha256": "06f513e15df3fce19ab446c7cd62723afd021d8d45fdee12307abfb69bc0fd3e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/middleware.go",
+        "target": "internal/web/middleware.go",
+        "class": "go",
+        "sha256": "9aa29883e349e92c9959cce2794aff3afcebcdec1ccbff8bb674d0298c6cabd8",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [
+      {
+        "key": "MAINTENANCE_MODE",
+        "field": "MaintenanceMode",
+        "description": "Shed all traffic except probes and static with a 503"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

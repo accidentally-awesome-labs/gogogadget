@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/content-assets",
+    "kind": "system",
+    "name": "content-assets",
+    "revision": 1,
+    "contract": 1,
+    "title": "Embedded content corpus",
+    "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
+    "requires": [
+      "system/content"
+    ],
+    "files": [
+      {
+        "source": "content/blog/hello-world.md",
+        "target": "content/blog/hello-world.md",
+        "class": "content",
+        "sha256": "c4c0cb370348ccbc34e9b8b6804089aedd9e349eadb093528be0782525f15bda",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/blog/value-stack.md",
+        "target": "content/blog/value-stack.md",
+        "class": "content",
+        "sha256": "67bc24bd43b76e8923020dc3f6cd64fb22e8399d73e78adbf4aaa162a57bfeb6",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/blog/why-htmx.md",
+        "target": "content/blog/why-htmx.md",
+        "class": "content",
+        "sha256": "c2bd6ae522f05c83ccfe6f9074dab047da1e087d9af561849553b88d1913e681",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-02.md",
+        "target": "content/changelog/2026-08-02.md",
+        "class": "content",
+        "sha256": "7bb590f7705558d336f0990ea03989004a318b5ed29ab93f9205082a69ba999d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-05.md",
+        "target": "content/changelog/2026-08-05.md",
+        "class": "content",
+        "sha256": "7fca188246a43e34e47f05d2ae90998186ece878bddc57fce769c86f0fd83e85",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-17.md",
+        "target": "content/changelog/2026-08-17.md",
+        "class": "content",
+        "sha256": "21686dad615da3d103a3ce90a075afe0954ef343580d9602aa95bf9c771b7008",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-18.md",
+        "target": "content/changelog/2026-08-18.md",
+        "class": "content",
+        "sha256": "86b12313bb4bd21aa71435aeaa48fc2d391d3b57939386adf13aae0a28d669ab",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-19.md",
+        "target": "content/changelog/2026-08-19.md",
+        "class": "content",
+        "sha256": "7713e8bb19d70ea51f603af985af30c2db2d34739f786a4af128c544e82f2270",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-20.md",
+        "target": "content/changelog/2026-08-20.md",
+        "class": "content",
+        "sha256": "408866e94e50ac42bea7f696c8bf02b30253487380d6125633d65646601528e3",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-21.md",
+        "target": "content/changelog/2026-08-21.md",
+        "class": "content",
+        "sha256": "39146e7d62a83936f9c74b0eb009d288c762e4288a595b49dc0d810496b992f7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/changelog/2026-08-22.md",
+        "target": "content/changelog/2026-08-22.md",
+        "class": "content",
+        "sha256": "2302e2309393a50324760f1c791f24a6d6f50fb646c64d1f5d06454fab0358b0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/admin.md",
+        "target": "content/docs/admin.md",
+        "class": "content",
+        "sha256": "5a32812330e50acf4ab9240cc56cdf14e081cad53e1f5e50511f35ca2ae10e53",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/ai.md",
+        "target": "content/docs/ai.md",
+        "class": "content",
+        "sha256": "c6673069a7c7c9189c5cb270aa1d9baa5f90a870988f47feb43cb82762b323e4",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/api.md",
+        "target": "content/docs/api.md",
+        "class": "content",
+        "sha256": "4a302c5fd5bcd1eb72b14ef3b74c4e3f7386fb75d75723d3214f8b558f3dd516",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/architecture.md",
+        "target": "content/docs/architecture.md",
+        "class": "content",
+        "sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/authentication.md",
+        "target": "content/docs/authentication.md",
+        "class": "content",
+        "sha256": "de22117d64b16129b71ece5d5b12ed7a65a3796edb0b5d154ba0c7d764d7e01d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/background-jobs.md",
+        "target": "content/docs/background-jobs.md",
+        "class": "content",
+        "sha256": "c413c5d50a140313541fdea44dc60774f81a09c99e739e956a845a56ea8f85f1",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/billing.md",
+        "target": "content/docs/billing.md",
+        "class": "content",
+        "sha256": "e3d302732af2c552669aae991750adee5bae5116372e21d1256dcb86b172cc0d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/configuration.md",
+        "target": "content/docs/configuration.md",
+        "class": "content",
+        "sha256": "d33b4ba2ca019a7726dbde55b6cedfba32652fe25d3b6a60053ddeeb9136e311",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/content.md",
+        "target": "content/docs/content.md",
+        "class": "content",
+        "sha256": "900c35bc9b039c33d7e9eaa70246e1ab57bc7049d6d214934de9ef5339c7963c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/database.md",
+        "target": "content/docs/database.md",
+        "class": "content",
+        "sha256": "27aac11e77cf0db3c10183bf07c8f4149ce59010a18feb4b0d0160f73c787457",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/deployment.md",
+        "target": "content/docs/deployment.md",
+        "class": "content",
+        "sha256": "deef8775c7096fb6e74f8c349aa9f8581499c5e05e06cb2e4113e4103db32038",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/email.md",
+        "target": "content/docs/email.md",
+        "class": "content",
+        "sha256": "9c787793f6ff4fe9131642576b1ef00ed01a6d5547a5b2a79a4e41b313255aa6",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/extending.md",
+        "target": "content/docs/extending.md",
+        "class": "content",
+        "sha256": "3f0abd23ac8c859d95c57bc0b3e1d83e9142afcdd7d98e92f6a7073bff844edc",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/feature-flags.md",
+        "target": "content/docs/feature-flags.md",
+        "class": "content",
+        "sha256": "6ad121f59b356c375db69ddd724e9bc6f51a27d7d75815c741e5ceaf1fef8c92",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/frontend.md",
+        "target": "content/docs/frontend.md",
+        "class": "content",
+        "sha256": "074b016105b0bc3d0525058d22c71361ac233b4dffb1e5cc6cdbd7d22c4ef62b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/getting-started.md",
+        "target": "content/docs/getting-started.md",
+        "class": "content",
+        "sha256": "e0e53def844cb95884f8eda6640a90e954fb33d29c587298394b56432fe19ce0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/i18n.md",
+        "target": "content/docs/i18n.md",
+        "class": "content",
+        "sha256": "6658a246d50ff688fb3c208aadb499a438be3565fb0ecf4c078b86a685d0a339",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/index.md",
+        "target": "content/docs/index.md",
+        "class": "content",
+        "sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/notifications.md",
+        "target": "content/docs/notifications.md",
+        "class": "content",
+        "sha256": "ba8d5e4d51f81c8bdd57ef2ef10015c03b2526b3fb45d4e76f1b211c4fc6e283",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/observability.md",
+        "target": "content/docs/observability.md",
+        "class": "content",
+        "sha256": "c22a7546f23a5b1ca28d428e28bb25ee28539671387b12565d8e030f508a06bd",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/organizations.md",
+        "target": "content/docs/organizations.md",
+        "class": "content",
+        "sha256": "7640ac62e0fb0a12fc485a293de39e9a45528b1dc501fe0266677bd3a7debeb3",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/roadmap.md",
+        "target": "content/docs/roadmap.md",
+        "class": "content",
+        "sha256": "da8cfc6873b971917e30b6f03cd39c20ef9d71991a4288739dab14043574de14",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/security.md",
+        "target": "content/docs/security.md",
+        "class": "content",
+        "sha256": "2610bc36885cc65730ea7e3497330176be8bc8d84029c387d7c4da6b32887f47",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/seo.md",
+        "target": "content/docs/seo.md",
+        "class": "content",
+        "sha256": "8e61824ff5081cd075e90492ff25ed5197823afcfb83e0016307676a0791d2f8",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/storage.md",
+        "target": "content/docs/storage.md",
+        "class": "content",
+        "sha256": "1582efccfd4b3327569f1f131ae6b4d506b018e7baae69b8f238b48520968abe",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/testing.md",
+        "target": "content/docs/testing.md",
+        "class": "content",
+        "sha256": "1223f8a667dff5f708bc8205642ee31e5d5c2c76b15fd063df811e7ae22fb65d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/troubleshooting.md",
+        "target": "content/docs/troubleshooting.md",
+        "class": "content",
+        "sha256": "0e78a5dfb5b4e3456022c1c7e82d50c2dddd0b95512e454aacebf1ee411baef7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/webhooks.md",
+        "target": "content/docs/webhooks.md",
+        "class": "content",
+        "sha256": "bd5c519f1ae32d5e5a811adab275a7e7fa40dc4a8c6399704c09a0e1c127f542",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/embed.go",
+        "target": "content/embed.go",
+        "class": "go",
+        "sha256": "3780436d0f8ab466a85954c291e227ddaa87d58ba31a7a8635bca96d07f9e708",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "content"
+      ]
+    },
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

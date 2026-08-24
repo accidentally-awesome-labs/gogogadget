@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/metrics",
+    "kind": "system",
+    "name": "metrics",
+    "revision": 1,
+    "contract": 1,
+    "title": "Runtime metrics endpoint",
+    "description": "The bearer-gated /metrics endpoint. Production refuses to expose it without a token, because Go runtime stats must not be public by default.",
+    "requires": [
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/metrics.go",
+        "target": "internal/web/metrics.go",
+        "class": "go",
+        "sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [
+      {
+        "key": "METRICS_TOKEN",
+        "field": "MetricsToken",
+        "description": "Bearer token gating /metrics; required in production",
+        "production_required": true,
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

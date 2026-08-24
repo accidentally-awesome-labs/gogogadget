@@ -36,9 +36,42 @@ type osHost struct {
 	log     *slog.Logger
 }
 
-// OS returns a Host backed by the process environment and wall clock.
+// OS returns a Host backed by the process environment and wall clock. The
+// logger is built here because every module takes one at construction, and the
+// runtime cannot parse configuration before its first module exists — so level
+// and format come from the ambient environment, which is what a host is for.
 func OS(version string) Host {
-	return &osHost{version: version, log: slog.Default()}
+	return &osHost{version: version, log: environmentLogger()}
+}
+
+// environmentLogger reads LOG_LEVEL and APP_ENV directly. Development defaults
+// to debug because that is the loop where you want it; production emits JSON so
+// a log pipeline can parse it.
+func environmentLogger() *slog.Logger {
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+	level := slog.LevelInfo
+	switch os.Getenv("LOG_LEVEL") {
+	case "debug":
+		level = slog.LevelDebug
+	case "info":
+		level = slog.LevelInfo
+	case "warn":
+		level = slog.LevelWarn
+	case "error":
+		level = slog.LevelError
+	case "":
+		if env == "development" {
+			level = slog.LevelDebug
+		}
+	}
+	opts := &slog.HandlerOptions{Level: level}
+	if env == "production" {
+		return slog.New(slog.NewJSONHandler(os.Stdout, opts))
+	}
+	return slog.New(slog.NewTextHandler(os.Stdout, opts))
 }
 
 func (h *osHost) Env(key string) string { return os.Getenv(key) }

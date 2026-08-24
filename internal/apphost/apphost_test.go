@@ -89,3 +89,39 @@ func TestLoggersAreDistinctPerHost(t *testing.T) {
 		t.Fatalf("Log() type = %T, want *slog.Logger", a)
 	}
 }
+
+// The host owns the logger because every module takes one at construction, and
+// the runtime cannot parse configuration before its first module is built. The
+// level and format therefore come from the ambient environment, which is
+// exactly what the host is for.
+func TestOSHostLoggerHonorsEnvironment(t *testing.T) {
+	t.Run("debug level is enabled when requested", func(t *testing.T) {
+		t.Setenv("LOG_LEVEL", "debug")
+		t.Setenv("APP_ENV", "development")
+		h := OS("v-test")
+		if !h.Log().Enabled(context.Background(), slog.LevelDebug) {
+			t.Fatal("LOG_LEVEL=debug did not enable debug logging")
+		}
+	})
+
+	t.Run("debug is off by default", func(t *testing.T) {
+		t.Setenv("LOG_LEVEL", "")
+		t.Setenv("APP_ENV", "production")
+		h := OS("v-test")
+		if h.Log().Enabled(context.Background(), slog.LevelDebug) {
+			t.Fatal("debug logging is on in production without LOG_LEVEL")
+		}
+		if !h.Log().Enabled(context.Background(), slog.LevelInfo) {
+			t.Fatal("info logging is off")
+		}
+	})
+
+	t.Run("development defaults to debug", func(t *testing.T) {
+		t.Setenv("LOG_LEVEL", "")
+		t.Setenv("APP_ENV", "development")
+		h := OS("v-test")
+		if !h.Log().Enabled(context.Background(), slog.LevelDebug) {
+			t.Fatal("development did not default to debug logging")
+		}
+	})
+}

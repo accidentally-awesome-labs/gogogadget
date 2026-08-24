@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/seo",
+    "kind": "system",
+    "name": "seo",
+    "revision": 1,
+    "contract": 1,
+    "title": "Discovery surfaces",
+    "description": "robots.txt, the sitemap, and the canonical and alternate link metadata search engines read.",
+    "requires": [
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/seo.go",
+        "target": "internal/web/seo.go",
+        "class": "go",
+        "sha256": "4d80c0611b53c4e01296ae6c285e918bc1f05465351b86c2cb97488a631d1320",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

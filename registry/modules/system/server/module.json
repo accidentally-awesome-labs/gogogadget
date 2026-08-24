@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/server",
+    "kind": "system",
+    "name": "server",
+    "revision": 1,
+    "contract": 1,
+    "title": "HTTP server core",
+    "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
+    "requires": [
+      "system/analytics",
+      "system/apphost",
+      "system/billing",
+      "system/config",
+      "system/content",
+      "system/content-assets",
+      "system/database",
+      "system/feature-flags",
+      "system/i18n",
+      "system/identity",
+      "system/llm",
+      "system/observability",
+      "system/storage"
+    ],
+    "files": [
+      {
+        "source": "internal/web/htmx.go",
+        "target": "internal/web/htmx.go",
+        "class": "go",
+        "sha256": "28f2c227e791bcdb10c16644c745b2f8b93bb5f22e9e648f691d38e170989d51",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/module.go",
+        "target": "internal/web/module.go",
+        "class": "go",
+        "sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/params.go",
+        "target": "internal/web/params.go",
+        "class": "go",
+        "sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/routes.go",
+        "target": "internal/web/routes.go",
+        "class": "go",
+        "sha256": "3fd8d0c7ff458adae3651e32119318858703987a08786407f5bb1b9f1d650833",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/server.go",
+        "target": "internal/web/server.go",
+        "class": "go",
+        "sha256": "877deb15cd3cfbe8d46a01ba752a0ae4df0ff08e09eff84d7492c8bfbff2b724",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/web"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/web",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Analytics",
+            "capability": "analytics.capturer",
+            "type": "analytics.Capturer",
+            "optional": true
+          },
+          {
+            "field": "Billing",
+            "capability": "billing.client",
+            "type": "billing.Client",
+            "optional": true
+          },
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          },
+          {
+            "field": "DB",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          },
+          {
+            "field": "Fetcher",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher",
+            "optional": true
+          },
+          {
+            "field": "Flags",
+            "capability": "flags.evaluator",
+            "type": "flags.Evaluator",
+            "optional": true
+          },
+          {
+            "field": "IdentityDeleter",
+            "capability": "identity.deleter",
+            "type": "identity.Deleter",
+            "optional": true
+          },
+          {
+            "field": "LLM",
+            "capability": "llm.completer",
+            "type": "llm.Completer",
+            "optional": true
+          },
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries",
+            "optional": false
+          },
+          {
+            "field": "Reporter",
+            "capability": "observability.reporter",
+            "type": "observability.Reporter",
+            "optional": true
+          },
+          {
+            "field": "Storage",
+            "capability": "storage.store",
+            "type": "storage.Store",
+            "optional": true
+          },
+          {
+            "field": "Verifier",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier",
+            "optional": true
+          }
+        ],
+        "provides": [
+          {
+            "field": "Handler",
+            "capability": "http.handler",
+            "type": "http.Handler"
+          }
+        ],
+        "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
+          "internal/db/sqlc",
+          "net/http"
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "PORT",
+        "field": "Port",
+        "description": "HTTP listen port",
+        "default": "8080"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

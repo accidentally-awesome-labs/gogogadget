@@ -416,3 +416,79 @@ func TestBootstrapRunsStartableModules(t *testing.T) {
 		t.Fatalf("Run swallows a start failure:\n%s", runBody)
 	}
 }
+
+// The runtime composes an HTTP handler, so one capability is structural: the
+// module that provides http.handler is what Handler() returns. Without this the
+// generated Handler() returns nil and the process serves nothing.
+func TestBootstrapHandlerReturnsProvidedHTTPHandler(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	for i := range graph {
+		if graph[i].Runtime.System == nil {
+			continue
+		}
+		graph[i].Runtime.System.Provides = append(graph[i].Runtime.System.Provides,
+			RuntimeProvide{Field: "Handler", Capability: "http.handler", Type: "http.Handler"})
+	}
+	for i := range lock.Modules {
+		lock.Modules[i].Manifest = graph[i]
+	}
+
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var bootstrap string
+	for _, file := range files {
+		if file.Path == "internal/modules/bootstrap_registry_gen.go" {
+			bootstrap = file.Content
+		}
+	}
+	handlerBody := bootstrap[strings.Index(bootstrap, "func (r *Runtime) Handler("):]
+	handlerBody = handlerBody[:strings.Index(handlerBody, "\n\n")]
+	if !strings.Contains(handlerBody, "return r.HTTPHandler") {
+		t.Fatalf("Handler() does not return the provided handler:\n%s", handlerBody)
+	}
+	if strings.Contains(bootstrap, "\thandler http.Handler\n") {
+		t.Fatalf("runtime keeps an unassigned private handler field:\n%s", bootstrap)
+	}
+}
+
+// The bootstrap always imports a small fixed set. A declared type import that
+// names one of them must be skipped, not re-resolved: "net/http" has no dot in
+// its first segment, so treating it as module-relative would emit an import of
+// <module>/net/http and fail to compile.
+func TestBootstrapSkipsFixedImportsInTypeImports(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	for i := range graph {
+		if graph[i].Runtime.System == nil {
+			continue
+		}
+		graph[i].Runtime.System.TypeImports = []string{"net/http", "context", "fmt", "errors"}
+		graph[i].Runtime.System.Provides = []RuntimeProvide{
+			{Field: "Handler", Capability: "http.handler", Type: "http.Handler"},
+		}
+	}
+	for i := range lock.Modules {
+		lock.Modules[i].Manifest = graph[i]
+	}
+
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	for _, file := range files {
+		if file.Path != "internal/modules/bootstrap_registry_gen.go" {
+			continue
+		}
+		for _, forbidden := range []string{
+			"derivative.example/app/net/http",
+			"derivative.example/app/context",
+			"derivative.example/app/fmt",
+			"derivative.example/app/errors",
+		} {
+			if strings.Contains(file.Content, forbidden) {
+				t.Fatalf("bootstrap mis-resolved a stdlib import as %s:\n%s", forbidden, file.Content)
+			}
+		}
+	}
+}

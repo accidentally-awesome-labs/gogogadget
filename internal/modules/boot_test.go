@@ -2,6 +2,8 @@ package modules
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -85,8 +87,8 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 	if runtime.BillingClient != nil {
 		t.Fatalf("BillingClient = %T, want nil when unconfigured", runtime.BillingClient)
 	}
-	if runtime.LlmCompleter != nil {
-		t.Fatalf("LlmCompleter = %T, want nil when unconfigured", runtime.LlmCompleter)
+	if runtime.LLMCompleter != nil {
+		t.Fatalf("LlmCompleter = %T, want nil when unconfigured", runtime.LLMCompleter)
 	}
 	if runtime.IdentityVerifier != nil {
 		t.Fatalf("IdentityVerifier = %T, want nil when unconfigured", runtime.IdentityVerifier)
@@ -164,5 +166,35 @@ func TestRuntimeRunStartsAndCloseStopsBackgroundServices(t *testing.T) {
 	// Close is the shutdown path; reaching it twice must not error or hang.
 	if err := runtime.Close(ctx); err != nil {
 		t.Fatalf("second Close: %v", err)
+	}
+}
+
+// The whole point of the generated graph is that the process can serve traffic
+// without anyone hand-wiring providers. This is that end-to-end claim: boot the
+// real closure and drive a real request through the handler it composed.
+func TestBootedRuntimeServesRequests(t *testing.T) {
+	runtime, err := Boot(context.Background(), bootHost(t, "boot_serving", nil), Options{})
+	if err != nil {
+		t.Fatalf("Boot: %v", err)
+	}
+	t.Cleanup(func() { closeRuntime(t, runtime) })
+
+	handler := runtime.Handler()
+	if handler == nil {
+		t.Fatal("Handler() = nil; the process would serve nothing")
+	}
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/healthz", nil))
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("GET /healthz = %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	// A public page proves templates, i18n, and the middleware chain are all
+	// assembled, not just the probe route.
+	page := httptest.NewRecorder()
+	handler.ServeHTTP(page, httptest.NewRequest(http.MethodGet, "/", nil))
+	if page.Code != http.StatusOK {
+		t.Fatalf("GET / = %d, want %d", page.Code, http.StatusOK)
 	}
 }

@@ -609,3 +609,67 @@ func assertSchemaDefinition(t *testing.T, definitions map[string]map[string]any,
 		t.Fatalf("schema definition %s required = %v, want %v", modelType.Name(), gotRequired, wantRequired)
 	}
 }
+
+// A content-type contribution names generated routes and a handler, so a bad
+// declaration must be refused by registry validation — before generation emits a
+// route table and before any runtime boots against it. Catching it at boot would
+// already be too late: the generated aggregate is committed.
+//
+// The valid case is asserted first. Without that control every subtable would
+// pass even if the mutation under test were harmless, because a broken base
+// fixture fails for its own reasons.
+func TestInvalidContentTypeManifestRejected(t *testing.T) {
+	validContribution := func() map[string]any {
+		return map[string]any{
+			"id": "blog", "mode": "pages", "paths": []string{"/blog"},
+			"package": "internal/web", "handler": "handleBlog",
+		}
+	}
+	catalogWith := func(t *testing.T, contribution map[string]any) (Catalog, error) {
+		t.Helper()
+		module := map[string]any{
+			"id": "system/broken", "kind": "system", "name": "broken",
+			"revision": 1, "contract": 1, "title": "Broken",
+			"description": "A module with a content type declaration.",
+			"requires":    []string{}, "files": []any{}, "claims": map[string]any{},
+			"runtime":    map[string]any{"content_types": []any{contribution}},
+			"migrations": []any{}, "environment": []any{}, "docs": []any{},
+			"tests": map[string]any{}, "data": []any{}, "removal_policy": "free",
+		}
+		document, err := json.Marshal(map[string]any{"schema": 1, "module": module})
+		if err != nil {
+			t.Fatalf("marshal: %v", err)
+		}
+		files := registryFixture(t)
+		files["registry/systems.json"] = &fstest.MapFile{
+			Data: []byte(`{"schema":1,"kind":"system","items":["registry/modules/system/broken/module.json"]}`),
+		}
+		files["registry/modules/system/broken/module.json"] = &fstest.MapFile{Data: document}
+		return LoadCatalog(files)
+	}
+
+	if _, err := catalogWith(t, validContribution()); err != nil {
+		t.Fatalf("control: a valid content type declaration was rejected: %v", err)
+	}
+
+	cases := map[string]func(map[string]any){
+		"empty id":        func(m map[string]any) { m["id"] = "" },
+		"unknown mode":    func(m map[string]any) { m["mode"] = "carousel" },
+		"relative path":   func(m map[string]any) { m["paths"] = []string{"blog"} },
+		"traversal path":  func(m map[string]any) { m["paths"] = []string{"/../etc/passwd"} },
+		"missing paths":   func(m map[string]any) { delete(m, "paths") },
+		"bad package":     func(m map[string]any) { m["package"] = "../internal/web" },
+		"bad handler":     func(m map[string]any) { m["handler"] = "1handler" },
+		"empty handler":   func(m map[string]any) { m["handler"] = "" },
+		"duplicate paths": func(m map[string]any) { m["paths"] = []string{"/blog", "/blog"} },
+	}
+	for name, mutate := range cases {
+		t.Run(name, func(t *testing.T) {
+			contribution := validContribution()
+			mutate(contribution)
+			if _, err := catalogWith(t, contribution); err == nil {
+				t.Fatalf("LoadCatalog accepted a %s content type declaration", name)
+			}
+		})
+	}
+}

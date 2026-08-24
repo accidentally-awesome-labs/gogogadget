@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
@@ -153,13 +154,19 @@ func TestUnknownKindIsNotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, code)
 }
 
-// An invalid declaration must not take the server down: NewServer falls back
-// to the built-in types and logs. cmd/server validates first and exits.
-func TestInvalidTypeDeclarationFallsBackToDefaults(t *testing.T) {
-	s := integrationServer(t, func(d *Deps) {
-		d.ContentTypes = []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}}
+// An invalid declaration is a wiring bug, so construction refuses it. There is
+// deliberately no fallback to the built-in types: silently serving a different
+// set of collections than the one declared hides the mistake until a reader
+// notices a missing page.
+func TestInvalidTypeDeclarationIsRefused(t *testing.T) {
+	_, err := NewServer(Deps{
+		Config:       &config.Config{Env: "test", AppURL: "http://localhost:18080"},
+		Log:          testLogger(),
+		Docs:         &content.Docs{},
+		ContentTypes: []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}},
 	})
-	assert.Len(t, s.types.All(), 2, "the built-in types")
-	code, _, _ := serve(t, s, "GET", "/blog", nil, nil)
-	assert.Equal(t, http.StatusOK, code)
+	if err == nil {
+		t.Fatal("NewServer accepted an invalid content type declaration")
+	}
+	assert.Contains(t, err.Error(), "content type")
 }
