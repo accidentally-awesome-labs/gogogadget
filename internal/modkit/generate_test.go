@@ -2,6 +2,7 @@ package modkit
 
 import (
 	"context"
+	"go/format"
 	"strings"
 	"testing"
 )
@@ -16,7 +17,7 @@ func genFixtureLock(t *testing.T) (Lock, []Manifest) {
 		RemovalPolicy: RemovalFree,
 		Runtime: RuntimeContributions{
 			System: &SystemContribution{
-				Package:     "example.com/acme/internal/alpha",
+				Package:     "internal/alpha",
 				Constructor: "New",
 				Needs: []RuntimeNeed{
 					{Field: "Config", Capability: "config", Type: "*config.Config"},
@@ -37,7 +38,7 @@ func genFixtureLock(t *testing.T) (Lock, []Manifest) {
 		Runtime: RuntimeContributions{
 			Routes: []RouteContribution{
 				{ID: "beta.show", Method: "GET", Pattern: "/beta", Scope: RoutePublic,
-					Policy: RoutePolicy{}, Package: "example.com/acme/internal/beta", Handler: "Show"},
+					Policy: RoutePolicy{}, Package: "internal/beta", Handler: "Show"},
 			},
 		},
 	}
@@ -152,4 +153,124 @@ func TestIndexSHAChangesWithLock(t *testing.T) {
 		t.Fatalf("index SHA did not change with lock revision")
 	}
 	_ = graph
+}
+
+// Manifests are distributed to derivatives whose Go module path differs from the
+// canonical one, so a manifest must never carry an absolute import path. Package
+// fields are module-relative and the generator prefixes the target module path;
+// otherwise every installed derivative would import the upstream module and fail
+// to compile.
+func TestGeneratedImportsUseTargetModulePath(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var bootstrap string
+	for _, file := range files {
+		if file.Path == "internal/modules/bootstrap_registry_gen.go" {
+			bootstrap = file.Content
+		}
+	}
+	if bootstrap == "" {
+		t.Fatal("bootstrap registry was not emitted")
+	}
+	if want := `"derivative.example/app/internal/alpha"`; !strings.Contains(bootstrap, want) {
+		t.Fatalf("bootstrap does not import %s:\n%s", want, bootstrap)
+	}
+	if strings.Contains(bootstrap, "example.com/acme/internal/alpha") {
+		t.Fatalf("bootstrap leaked the canonical module path:\n%s", bootstrap)
+	}
+}
+
+// Generated Go must parse, must be gofmt-clean, and must not declare unused
+// variables. The pipeline runs inside a transaction that has already replaced
+// authored files, so emitting source the compiler rejects would leave the tree
+// broken until someone hand-edited a DO-NOT-EDIT file.
+func TestGeneratedGoIsParseableAndFormatted(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	emitted := 0
+	for _, file := range files {
+		if !strings.HasSuffix(file.Path, ".go") {
+			continue
+		}
+		emitted++
+		formatted, err := format.Source([]byte(file.Content))
+		if err != nil {
+			t.Fatalf("%s does not parse: %v\n%s", file.Path, err, file.Content)
+		}
+		if string(formatted) != file.Content {
+			t.Fatalf("%s is not gofmt-clean:\n--- emitted ---\n%s\n--- gofmt ---\n%s",
+				file.Path, file.Content, formatted)
+		}
+	}
+	if emitted == 0 {
+		t.Fatal("no Go files were emitted")
+	}
+}
+
+// Every capability a module provides must be reachable from the booted runtime.
+// A constructor whose result is dropped is both dead wiring and a compile error.
+func TestBootstrapExposesProvidedCapabilities(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	files, err := GenerateAll(context.Background(), "derivative.example/app", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var bootstrap string
+	for _, file := range files {
+		if file.Path == "internal/modules/bootstrap_registry_gen.go" {
+			bootstrap = file.Content
+		}
+	}
+	for _, m := range graph {
+		if m.Runtime.System == nil {
+			continue
+		}
+		for _, provide := range m.Runtime.System.Provides {
+			field := capabilityField(provide.Capability)
+			if !strings.Contains(bootstrap, "\t"+field+" ") {
+				t.Fatalf("runtime has no field for capability %q (want %q):\n%s",
+					provide.Capability, field, bootstrap)
+			}
+			if !strings.Contains(bootstrap, "r."+field+" = ") {
+				t.Fatalf("capability %q is never assigned to the runtime:\n%s",
+					provide.Capability, bootstrap)
+			}
+		}
+	}
+}
+
+// An emitter must not render a table for a contribution kind nothing declares.
+// The generated file would reference a type the project has no reason to define,
+// turning an unused feature into a build break — and generated files are
+// DO-NOT-EDIT, so the operator has no legitimate way to fix it.
+func TestEmittersSkipUndeclaredContributionKinds(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	for i := range graph {
+		graph[i].Runtime.Jobs = nil
+		graph[i].Runtime.Routes = nil
+		graph[i].Runtime.ContentTypes = nil
+	}
+	for i := range lock.Modules {
+		lock.Modules[i].Manifest.Runtime.Jobs = nil
+		lock.Modules[i].Manifest.Runtime.Routes = nil
+		lock.Modules[i].Manifest.Runtime.ContentTypes = nil
+	}
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	for _, file := range files {
+		for _, forbidden := range []string{"jobs_registry_gen", "routes_registry_gen"} {
+			if strings.Contains(file.Path, forbidden) {
+				t.Fatalf("emitted %s with no matching contributions:\n%s", forbidden, file.Content)
+			}
+		}
+	}
 }

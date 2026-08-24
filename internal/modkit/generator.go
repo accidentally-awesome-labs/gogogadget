@@ -2,9 +2,7 @@ package modkit
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -13,30 +11,33 @@ import (
 // RegistryGenerator is the production generator pipeline. It renders the
 // deterministic `*_registry_gen.*` aggregates from the installed lock and its
 // resolved manifest graph. External generators (templ, sqlc, Tailwind) run after
-// this from the Makefile, so this stage owns only registry-derived output and
-// stays hermetic — it reads the project's own lock and nothing else.
+// this from the Makefile, so this stage owns only registry-derived output and is
+// a pure function of the plan — it never reads the target tree.
 type RegistryGenerator struct {
-	// ModulePath is the target Go import prefix. Empty means read it from go.mod.
+	// ModulePath overrides the target Go import prefix. Empty uses the plan's,
+	// which the planner resolved from the project's go.mod.
 	ModulePath string
 }
 
-// Generate renders every registry aggregate for the project at root.
-func (g RegistryGenerator) Generate(ctx context.Context, root string) error {
+// Render returns every registry aggregate the plan implies, writing nothing.
+func (g RegistryGenerator) Render(ctx context.Context, plan Plan) ([]GeneratedFile, error) {
 	if err := ctx.Err(); err != nil {
-		return err
+		return nil, err
 	}
-	lock, graph, modulePath, err := g.inputs(root)
+	lock, graph, modulePath := g.inputs(plan)
+	files, err := GenerateAll(ctx, modulePath, lock, graph)
+	if err != nil {
+		return nil, fmt.Errorf("render registry aggregates: %w", err)
+	}
+	return files, nil
+}
+
+// Generate renders every registry aggregate the plan implies and writes it.
+func (g RegistryGenerator) Generate(ctx context.Context, plan Plan) error {
+	root := plan.Root
+	files, err := g.Render(ctx, plan)
 	if err != nil {
 		return err
-	}
-	if lock == nil {
-		// No lock yet: nothing is installed, so there is nothing to render. This
-		// is the first-sync case, where Apply writes the lock after generation.
-		return nil
-	}
-	files, err := GenerateAll(ctx, modulePath, *lock, graph)
-	if err != nil {
-		return fmt.Errorf("render registry aggregates: %w", err)
 	}
 	for _, file := range files {
 		target := filepath.Join(root, filepath.FromSlash(file.Path))
@@ -52,12 +53,8 @@ func (g RegistryGenerator) Generate(ctx context.Context, root string) error {
 
 // GeneratedPaths reports every path this pipeline owns, so the transaction
 // journal can snapshot them before generation and restore them on failure.
-func (g RegistryGenerator) GeneratedPaths(root string) []string {
-	lock, graph, modulePath, err := g.inputs(root)
-	if err != nil || lock == nil {
-		return nil
-	}
-	files, err := GenerateAll(context.Background(), modulePath, *lock, graph)
+func (g RegistryGenerator) GeneratedPaths(plan Plan) []string {
+	files, err := g.Render(context.Background(), plan)
 	if err != nil {
 		return nil
 	}
@@ -69,33 +66,15 @@ func (g RegistryGenerator) GeneratedPaths(root string) []string {
 	return paths
 }
 
-// inputs reads the lock and reconstructs the manifest graph it embeds. The lock
-// carries a full manifest snapshot per module, so generation never needs the
-// registry source and works offline.
-func (g RegistryGenerator) inputs(root string) (*Lock, []Manifest, string, error) {
-	data, err := os.ReadFile(filepath.Join(root, LockFileName))
-	if errors.Is(err, fs.ErrNotExist) {
-		return nil, nil, "", nil
-	}
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("read %s: %w", LockFileName, err)
-	}
-	lock, err := ParseLock(data)
-	if err != nil {
-		return nil, nil, "", fmt.Errorf("parse %s: %w", LockFileName, err)
-	}
-
+// inputs derives generation inputs from the plan. The plan carries the lock the
+// transaction is about to write and the module path resolved from go.mod, so
+// generation is a pure function of the plan and never reads the target tree.
+func (g RegistryGenerator) inputs(plan Plan) (Lock, []Manifest, string) {
 	modulePath := g.ModulePath
 	if modulePath == "" {
-		goMod, readErr := os.ReadFile(filepath.Join(root, "go.mod"))
-		if readErr != nil {
-			return nil, nil, "", fmt.Errorf("read go.mod: %w", readErr)
-		}
-		modulePath, err = parseModulePath(goMod)
-		if err != nil {
-			return nil, nil, "", fmt.Errorf("parse go.mod: %w", err)
-		}
+		modulePath = plan.ModulePath
 	}
+	lock := plan.Lock
 
 	graph := make([]Manifest, 0, len(lock.Modules))
 	for _, module := range lock.Modules {
@@ -104,5 +83,5 @@ func (g RegistryGenerator) inputs(root string) (*Lock, []Manifest, string, error
 		}
 		graph = append(graph, module.Manifest)
 	}
-	return &lock, graph, modulePath, nil
+	return lock, graph, modulePath
 }

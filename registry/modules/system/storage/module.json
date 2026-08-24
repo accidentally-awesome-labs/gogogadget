@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/storage",
+    "kind": "system",
+    "name": "storage",
+    "revision": 1,
+    "contract": 1,
+    "title": "Object storage",
+    "description": "Store port with an R2/S3-compatible adapter and a development store rooted in tmp/uploads.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/storage/dev.go",
+        "target": "internal/storage/dev.go",
+        "class": "go",
+        "sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/storage/module.go",
+        "target": "internal/storage/module.go",
+        "class": "go",
+        "sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/storage/r2.go",
+        "target": "internal/storage/r2.go",
+        "class": "go",
+        "sha256": "c4c10fdd2f04b40254c59aa04a2a4ced8cf84569a7a9b58f62f4fb672175478f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/storage/storage.go",
+        "target": "internal/storage/storage.go",
+        "class": "go",
+        "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/storage"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/storage",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Store",
+            "capability": "storage.store",
+            "type": "storage.Store"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "STORAGE_R2_ACCESS_KEY_ID",
+        "field": "StorageR2AccessKeyID",
+        "description": "R2 access key id",
+        "secret": true
+      },
+      {
+        "key": "STORAGE_R2_ACCOUNT_ID",
+        "field": "StorageR2AccountID",
+        "description": "R2 account id"
+      },
+      {
+        "key": "STORAGE_R2_BUCKET",
+        "field": "StorageR2Bucket",
+        "description": "R2 bucket name"
+      },
+      {
+        "key": "STORAGE_R2_ENDPOINT",
+        "field": "StorageR2Endpoint",
+        "description": "Endpoint override for S3/MinIO compatibility"
+      },
+      {
+        "key": "STORAGE_R2_SECRET_ACCESS_KEY",
+        "field": "StorageR2SecretAccessKey",
+        "description": "R2 secret access key",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/storage"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

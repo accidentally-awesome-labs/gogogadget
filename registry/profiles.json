@@ -1,5 +1,7 @@
 {
   "schema": 1,
   "kind": "profile",
-  "items": []
+  "items": [
+    "registry/profiles/full.json"
+  ]
 }

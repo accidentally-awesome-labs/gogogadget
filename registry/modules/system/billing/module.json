@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/billing",
+    "kind": "system",
+    "name": "billing",
+    "revision": 1,
+    "contract": 1,
+    "title": "Billing",
+    "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/billing/client.go",
+        "target": "internal/billing/client.go",
+        "class": "go",
+        "sha256": "9955dc7e497593f2c17d1eb1f9a4cac59351993915dd41a1726c5cd4a3c961c6",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/entitlements.go",
+        "target": "internal/billing/entitlements.go",
+        "class": "go",
+        "sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/mock.go",
+        "target": "internal/billing/mock.go",
+        "class": "go",
+        "sha256": "287bce46aaed812c90555769fd80d11ffa666b8206be29e76b0d2cf47d79758f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/module.go",
+        "target": "internal/billing/module.go",
+        "class": "go",
+        "sha256": "7a46696bf8f887a06ef5c67b25e9b81d68df89d607054dec35f8d273aa0d835d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/plans.go",
+        "target": "internal/billing/plans.go",
+        "class": "go",
+        "sha256": "87b44bcdd25160de9efdef17aaefa3a5eb57defa169910b898382914a4481c9f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/polar.go",
+        "target": "internal/billing/polar.go",
+        "class": "go",
+        "sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/webhook.go",
+        "target": "internal/billing/webhook.go",
+        "class": "go",
+        "sha256": "48f7295089c996511d51da44b49893b4359afc836f34186a557f30a9b2f815c7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/billing"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/billing",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Client",
+            "capability": "billing.client",
+            "type": "billing.Client"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "POLAR_ACCESS_TOKEN",
+        "field": "PolarAccessToken",
+        "description": "Polar API access token",
+        "secret": true
+      },
+      {
+        "key": "POLAR_PRODUCT_PRO",
+        "field": "PolarProductPro",
+        "description": "Polar product id for the pro plan"
+      },
+      {
+        "key": "POLAR_PRODUCT_TEAM",
+        "field": "PolarProductTeam",
+        "description": "Polar product id for the team plan"
+      },
+      {
+        "key": "POLAR_SERVER",
+        "field": "PolarServer",
+        "description": "sandbox | production",
+        "default": "sandbox"
+      },
+      {
+        "key": "POLAR_WEBHOOK_SECRET",
+        "field": "PolarWebhookSecret",
+        "description": "Polar webhook signing secret",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/billing"
+      ]
+    },
+    "data": [],
+    "removal_policy": "major-version-only"
+  }
+}

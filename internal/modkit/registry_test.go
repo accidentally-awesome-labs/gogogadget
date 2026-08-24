@@ -283,14 +283,39 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	})
 }
 
-func TestPublishedRegistrySkeleton(t *testing.T) {
+// The repository publishes its own catalog, so the catalog it ships must load
+// and be internally consistent: every profile member has to name a real module,
+// or `ggg sync` would resolve a profile to a missing dependency.
+func TestPublishedRegistryIsConsistent(t *testing.T) {
 	repo := os.DirFS("../..")
 	catalog, err := LoadCatalog(repo)
 	if err != nil {
 		t.Fatalf("LoadCatalog(repository): %v", err)
 	}
-	if len(catalog.Modules) != 0 || len(catalog.Profiles) != 0 {
-		t.Fatalf("initial catalog = %d modules, %d profiles; want empty skeleton", len(catalog.Modules), len(catalog.Profiles))
+	if len(catalog.Modules) == 0 {
+		t.Fatal("published catalog has no modules")
+	}
+
+	known := make(map[string]struct{}, len(catalog.Modules))
+	for _, module := range catalog.Modules {
+		known[module.ID] = struct{}{}
+	}
+	for _, module := range catalog.Modules {
+		for _, dependency := range module.Requires {
+			if _, ok := known[dependency]; !ok {
+				t.Fatalf("module %s requires %s, which the catalog does not publish", module.ID, dependency)
+			}
+		}
+	}
+	for _, profile := range catalog.Profiles {
+		if len(profile.Members) == 0 {
+			t.Fatalf("profile %s has no members", profile.ID)
+		}
+		for _, member := range profile.Members {
+			if _, ok := known[member]; !ok {
+				t.Fatalf("profile %s names %s, which the catalog does not publish", profile.ID, member)
+			}
+		}
 	}
 
 	rootData, err := fs.ReadFile(repo, "registry.json")

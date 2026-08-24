@@ -1,0 +1,1230 @@
+{
+  "schema": 1,
+  "registry_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+  "order": [
+    "system/apphost",
+    "system/config",
+    "system/analytics",
+    "system/billing",
+    "system/identity",
+    "system/llm",
+    "system/mail",
+    "system/observability",
+    "system/storage"
+  ],
+  "modules": [
+    {
+      "id": "system/analytics",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/analytics",
+        "kind": "system",
+        "name": "analytics",
+        "revision": 1,
+        "contract": 1,
+        "title": "Product analytics",
+        "description": "Capturer port with a PostHog adapter and a no-op default so every call site can fire and forget.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/analytics/analytics.go",
+            "target": "internal/analytics/analytics.go",
+            "class": "go",
+            "sha256": "d1de5361a3f7e85136709c275051b86d288aa6922fac7ae56221f743b4d8c0c5",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/analytics/module.go",
+            "target": "internal/analytics/module.go",
+            "class": "go",
+            "sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/analytics"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/analytics",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Capturer",
+                "capability": "analytics.capturer",
+                "type": "analytics.Capturer"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "POSTHOG_API_KEY",
+            "field": "PostHogAPIKey",
+            "description": "PostHog project API key",
+            "secret": true
+          },
+          {
+            "key": "POSTHOG_HOST",
+            "field": "PostHogHost",
+            "description": "PostHog ingestion host",
+            "default": "https://us.i.posthog.com"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/analytics"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/analytics/analytics.go",
+          "source": "internal/analytics/analytics.go",
+          "base_sha256": "d1de5361a3f7e85136709c275051b86d288aa6922fac7ae56221f743b4d8c0c5",
+          "local_sha256": "d1de5361a3f7e85136709c275051b86d288aa6922fac7ae56221f743b4d8c0c5",
+          "state": "clean"
+        },
+        {
+          "path": "internal/analytics/module.go",
+          "source": "internal/analytics/module.go",
+          "base_sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+          "local_sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/apphost",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [
+        "system/analytics",
+        "system/billing",
+        "system/config",
+        "system/identity",
+        "system/llm",
+        "system/mail",
+        "system/observability",
+        "system/storage"
+      ],
+      "manifest": {
+        "id": "system/apphost",
+        "kind": "system",
+        "name": "apphost",
+        "revision": 1,
+        "contract": 1,
+        "title": "Application host seam",
+        "description": "Leaf ambient-environment seam (configuration lookup, logging, clock, version) that every runtime module is constructed against.",
+        "requires": [],
+        "files": [
+          {
+            "source": "internal/apphost/apphost.go",
+            "target": "internal/apphost/apphost.go",
+            "class": "go",
+            "sha256": "c3839d336e2c496d7d55f81fb79d613624a790400c61ca4f06aeb480e459c70e",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/apphost"
+          ]
+        },
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/apphost"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/apphost/apphost.go",
+          "source": "internal/apphost/apphost.go",
+          "base_sha256": "c3839d336e2c496d7d55f81fb79d613624a790400c61ca4f06aeb480e459c70e",
+          "local_sha256": "c3839d336e2c496d7d55f81fb79d613624a790400c61ca4f06aeb480e459c70e",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/billing",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/billing",
+        "kind": "system",
+        "name": "billing",
+        "revision": 1,
+        "contract": 1,
+        "title": "Billing",
+        "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/billing/client.go",
+            "target": "internal/billing/client.go",
+            "class": "go",
+            "sha256": "9955dc7e497593f2c17d1eb1f9a4cac59351993915dd41a1726c5cd4a3c961c6",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/billing/entitlements.go",
+            "target": "internal/billing/entitlements.go",
+            "class": "go",
+            "sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/billing/mock.go",
+            "target": "internal/billing/mock.go",
+            "class": "go",
+            "sha256": "287bce46aaed812c90555769fd80d11ffa666b8206be29e76b0d2cf47d79758f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/billing/module.go",
+            "target": "internal/billing/module.go",
+            "class": "go",
+            "sha256": "7a46696bf8f887a06ef5c67b25e9b81d68df89d607054dec35f8d273aa0d835d",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/billing/plans.go",
+            "target": "internal/billing/plans.go",
+            "class": "go",
+            "sha256": "87b44bcdd25160de9efdef17aaefa3a5eb57defa169910b898382914a4481c9f",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/billing/polar.go",
+            "target": "internal/billing/polar.go",
+            "class": "go",
+            "sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/billing/webhook.go",
+            "target": "internal/billing/webhook.go",
+            "class": "go",
+            "sha256": "48f7295089c996511d51da44b49893b4359afc836f34186a557f30a9b2f815c7",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/billing"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/billing",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Client",
+                "capability": "billing.client",
+                "type": "billing.Client"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "POLAR_ACCESS_TOKEN",
+            "field": "PolarAccessToken",
+            "description": "Polar API access token",
+            "secret": true
+          },
+          {
+            "key": "POLAR_PRODUCT_PRO",
+            "field": "PolarProductPro",
+            "description": "Polar product id for the pro plan"
+          },
+          {
+            "key": "POLAR_PRODUCT_TEAM",
+            "field": "PolarProductTeam",
+            "description": "Polar product id for the team plan"
+          },
+          {
+            "key": "POLAR_SERVER",
+            "field": "PolarServer",
+            "description": "sandbox | production",
+            "default": "sandbox"
+          },
+          {
+            "key": "POLAR_WEBHOOK_SECRET",
+            "field": "PolarWebhookSecret",
+            "description": "Polar webhook signing secret",
+            "secret": true
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/billing"
+          ]
+        },
+        "data": [],
+        "removal_policy": "major-version-only"
+      },
+      "files": [
+        {
+          "path": "internal/billing/client.go",
+          "source": "internal/billing/client.go",
+          "base_sha256": "9955dc7e497593f2c17d1eb1f9a4cac59351993915dd41a1726c5cd4a3c961c6",
+          "local_sha256": "9955dc7e497593f2c17d1eb1f9a4cac59351993915dd41a1726c5cd4a3c961c6",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/entitlements.go",
+          "source": "internal/billing/entitlements.go",
+          "base_sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+          "local_sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/mock.go",
+          "source": "internal/billing/mock.go",
+          "base_sha256": "287bce46aaed812c90555769fd80d11ffa666b8206be29e76b0d2cf47d79758f",
+          "local_sha256": "287bce46aaed812c90555769fd80d11ffa666b8206be29e76b0d2cf47d79758f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/module.go",
+          "source": "internal/billing/module.go",
+          "base_sha256": "7a46696bf8f887a06ef5c67b25e9b81d68df89d607054dec35f8d273aa0d835d",
+          "local_sha256": "7a46696bf8f887a06ef5c67b25e9b81d68df89d607054dec35f8d273aa0d835d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/plans.go",
+          "source": "internal/billing/plans.go",
+          "base_sha256": "87b44bcdd25160de9efdef17aaefa3a5eb57defa169910b898382914a4481c9f",
+          "local_sha256": "87b44bcdd25160de9efdef17aaefa3a5eb57defa169910b898382914a4481c9f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/polar.go",
+          "source": "internal/billing/polar.go",
+          "base_sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+          "local_sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/webhook.go",
+          "source": "internal/billing/webhook.go",
+          "base_sha256": "48f7295089c996511d51da44b49893b4359afc836f34186a557f30a9b2f815c7",
+          "local_sha256": "48f7295089c996511d51da44b49893b4359afc836f34186a557f30a9b2f815c7",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/config",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [
+        "system/analytics",
+        "system/billing",
+        "system/identity",
+        "system/llm",
+        "system/mail",
+        "system/observability",
+        "system/storage"
+      ],
+      "manifest": {
+        "id": "system/config",
+        "kind": "system",
+        "name": "config",
+        "revision": 1,
+        "contract": 1,
+        "title": "Configuration",
+        "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",
+        "requires": [
+          "system/apphost"
+        ],
+        "files": [
+          {
+            "source": "internal/config/config.go",
+            "target": "internal/config/config.go",
+            "class": "go",
+            "sha256": "dc9f2eea2e71acb062f871df582d29bc2ddef0b9c0ee2f8b39bb0f09a6fbc1c8",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/config/module.go",
+            "target": "internal/config/module.go",
+            "class": "go",
+            "sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/config"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/config",
+            "constructor": "NewModule",
+            "needs": [],
+            "provides": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "API_RATE_LIMIT_RPM",
+            "field": "APIRateLimitPerMinute",
+            "description": "Per-API-token budget per minute"
+          },
+          {
+            "key": "APP_ENV",
+            "field": "Env",
+            "description": "development | test | production",
+            "default": "development"
+          },
+          {
+            "key": "APP_URL",
+            "field": "AppURL",
+            "description": "Public base URL",
+            "default": "http://localhost:8080"
+          },
+          {
+            "key": "AUDIT_RETENTION_DAYS",
+            "field": "AuditRetentionDays",
+            "description": "Audit janitor retention; 0 retains forever"
+          },
+          {
+            "key": "DATABASE_URL",
+            "field": "DatabaseURL",
+            "description": "Postgres DSN; required in production",
+            "production_required": true,
+            "secret": true
+          },
+          {
+            "key": "DEV_AUTH_BYPASS",
+            "field": "DevAuthBypass",
+            "description": "Synthetic e2e sessions; refused in production"
+          },
+          {
+            "key": "LOG_LEVEL",
+            "field": "LogLevel",
+            "description": "debug | info | warn | error"
+          },
+          {
+            "key": "MAINTENANCE_MODE",
+            "field": "MaintenanceMode",
+            "description": "Shed all traffic except probes and static"
+          },
+          {
+            "key": "METRICS_TOKEN",
+            "field": "MetricsToken",
+            "description": "Bearer gate for /metrics; required in production",
+            "production_required": true,
+            "secret": true
+          },
+          {
+            "key": "PORT",
+            "field": "Port",
+            "description": "HTTP listen port",
+            "default": "8080"
+          },
+          {
+            "key": "RATE_LIMIT_RPM",
+            "field": "RateLimitPerMinute",
+            "description": "Per-IP request budget per minute"
+          },
+          {
+            "key": "TEST_NOW",
+            "field": "testNow",
+            "description": "Freezes the render clock under APP_ENV=test"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/config"
+          ]
+        },
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/config/config.go",
+          "source": "internal/config/config.go",
+          "base_sha256": "dc9f2eea2e71acb062f871df582d29bc2ddef0b9c0ee2f8b39bb0f09a6fbc1c8",
+          "local_sha256": "dc9f2eea2e71acb062f871df582d29bc2ddef0b9c0ee2f8b39bb0f09a6fbc1c8",
+          "state": "clean"
+        },
+        {
+          "path": "internal/config/module.go",
+          "source": "internal/config/module.go",
+          "base_sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+          "local_sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/identity",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/identity",
+        "kind": "system",
+        "name": "identity",
+        "revision": 1,
+        "contract": 1,
+        "title": "Identity",
+        "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/identity/context.go",
+            "target": "internal/identity/context.go",
+            "class": "go",
+            "sha256": "724bb4282c7555412baa887c9529a2da5fcb4364954c3e22e5b46564bf53d3f0",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/identity/deleter.go",
+            "target": "internal/identity/deleter.go",
+            "class": "go",
+            "sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/identity/fetcher.go",
+            "target": "internal/identity/fetcher.go",
+            "class": "go",
+            "sha256": "698b68b71e891e53b09f4d2503fa827c6d22bdf13232a9f72b1657cb9e6a3fb8",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/identity/module.go",
+            "target": "internal/identity/module.go",
+            "class": "go",
+            "sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/identity/sync.go",
+            "target": "internal/identity/sync.go",
+            "class": "go",
+            "sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/identity/verifier.go",
+            "target": "internal/identity/verifier.go",
+            "class": "go",
+            "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/identity"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/identity",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Deleter",
+                "capability": "identity.deleter",
+                "type": "identity.Deleter"
+              },
+              {
+                "field": "Fetcher",
+                "capability": "identity.fetcher",
+                "type": "identity.UserFetcher"
+              },
+              {
+                "field": "Verifier",
+                "capability": "identity.verifier",
+                "type": "identity.Verifier"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "CLERK_FRONTEND_API_URL",
+            "field": "ClerkFrontendAPIURL",
+            "description": "Clerk Frontend API origin; feeds CSP connect-src"
+          },
+          {
+            "key": "CLERK_PORTAL_URL",
+            "field": "ClerkPortalURL",
+            "description": "Clerk Account Portal base URL",
+            "production_required": true
+          },
+          {
+            "key": "CLERK_PUBLISHABLE_KEY",
+            "field": "ClerkPublishableKey",
+            "description": "Clerk frontend publishable key",
+            "production_required": true
+          },
+          {
+            "key": "CLERK_SECRET_KEY",
+            "field": "ClerkSecretKey",
+            "description": "Clerk backend API key",
+            "production_required": true,
+            "secret": true
+          },
+          {
+            "key": "CLERK_WEBHOOK_SECRET",
+            "field": "ClerkWebhookSecret",
+            "description": "Clerk webhook signing secret",
+            "production_required": true,
+            "secret": true
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/identity"
+          ]
+        },
+        "data": [],
+        "removal_policy": "major-version-only"
+      },
+      "files": [
+        {
+          "path": "internal/identity/context.go",
+          "source": "internal/identity/context.go",
+          "base_sha256": "724bb4282c7555412baa887c9529a2da5fcb4364954c3e22e5b46564bf53d3f0",
+          "local_sha256": "724bb4282c7555412baa887c9529a2da5fcb4364954c3e22e5b46564bf53d3f0",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/deleter.go",
+          "source": "internal/identity/deleter.go",
+          "base_sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
+          "local_sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/fetcher.go",
+          "source": "internal/identity/fetcher.go",
+          "base_sha256": "698b68b71e891e53b09f4d2503fa827c6d22bdf13232a9f72b1657cb9e6a3fb8",
+          "local_sha256": "698b68b71e891e53b09f4d2503fa827c6d22bdf13232a9f72b1657cb9e6a3fb8",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/module.go",
+          "source": "internal/identity/module.go",
+          "base_sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
+          "local_sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/sync.go",
+          "source": "internal/identity/sync.go",
+          "base_sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
+          "local_sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/verifier.go",
+          "source": "internal/identity/verifier.go",
+          "base_sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
+          "local_sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/llm",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/llm",
+        "kind": "system",
+        "name": "llm",
+        "revision": 1,
+        "contract": 1,
+        "title": "Language model",
+        "description": "Completer port backed by any OpenAI-compatible API. Unconfigured leaves the port nil so AI routes answer 503.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/llm/llm.go",
+            "target": "internal/llm/llm.go",
+            "class": "go",
+            "sha256": "2901ad52d8ef60022dda313c05e3619a8e25ef6c29a3c89b6034a1059a4d50d7",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/llm/module.go",
+            "target": "internal/llm/module.go",
+            "class": "go",
+            "sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/llm"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/llm",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Completer",
+                "capability": "llm.completer",
+                "type": "llm.Completer"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "LLM_API_KEY",
+            "field": "LLMAPIKey",
+            "description": "OpenAI-compatible API key",
+            "secret": true
+          },
+          {
+            "key": "LLM_BASE_URL",
+            "field": "LLMBaseURL",
+            "description": "OpenAI-compatible base URL",
+            "default": "https://api.openai.com/v1"
+          },
+          {
+            "key": "LLM_MODEL",
+            "field": "LLMModel",
+            "description": "Model identifier"
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/llm"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/llm/llm.go",
+          "source": "internal/llm/llm.go",
+          "base_sha256": "2901ad52d8ef60022dda313c05e3619a8e25ef6c29a3c89b6034a1059a4d50d7",
+          "local_sha256": "2901ad52d8ef60022dda313c05e3619a8e25ef6c29a3c89b6034a1059a4d50d7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/llm/module.go",
+          "source": "internal/llm/module.go",
+          "base_sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
+          "local_sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/mail",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/mail",
+        "kind": "system",
+        "name": "mail",
+        "revision": 1,
+        "contract": 1,
+        "title": "Transactional mail",
+        "description": "Sender port with a Resend adapter and a development sender that writes to disk.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/mail/mail.go",
+            "target": "internal/mail/mail.go",
+            "class": "go",
+            "sha256": "46f077b5a151571a4cacaf2bbe2472b29a81cc2fcea6fed9e4ac413a3724d346",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/mail/module.go",
+            "target": "internal/mail/module.go",
+            "class": "go",
+            "sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/mail"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/mail",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Sender",
+                "capability": "mail.sender",
+                "type": "mail.Sender"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "EMAIL_FROM",
+            "field": "EmailFrom",
+            "description": "From header for outbound mail",
+            "default": "GoGoGadget \u003chello@example.com\u003e"
+          },
+          {
+            "key": "RESEND_API_KEY",
+            "field": "ResendAPIKey",
+            "description": "Resend API key; unset uses the dev sender",
+            "secret": true
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/mail"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/mail/mail.go",
+          "source": "internal/mail/mail.go",
+          "base_sha256": "46f077b5a151571a4cacaf2bbe2472b29a81cc2fcea6fed9e4ac413a3724d346",
+          "local_sha256": "46f077b5a151571a4cacaf2bbe2472b29a81cc2fcea6fed9e4ac413a3724d346",
+          "state": "clean"
+        },
+        {
+          "path": "internal/mail/module.go",
+          "source": "internal/mail/module.go",
+          "base_sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
+          "local_sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/observability",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/observability",
+        "kind": "system",
+        "name": "observability",
+        "revision": 1,
+        "contract": 1,
+        "title": "Error reporting",
+        "description": "Reporter port with a Sentry adapter and a no-op default so call sites never nil-check.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/observability/module.go",
+            "target": "internal/observability/module.go",
+            "class": "go",
+            "sha256": "1417237428d07289c6d975368002cbd65c702b6e3ffe5a9de657a8cac7429963",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/observability/observability.go",
+            "target": "internal/observability/observability.go",
+            "class": "go",
+            "sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/observability/sentry.go",
+            "target": "internal/observability/sentry.go",
+            "class": "go",
+            "sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/observability"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/observability",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Reporter",
+                "capability": "observability.reporter",
+                "type": "observability.Reporter"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "SENTRY_DSN",
+            "field": "SentryDSN",
+            "description": "Sentry DSN; unset uses the no-op reporter",
+            "secret": true
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/observability"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/observability/module.go",
+          "source": "internal/observability/module.go",
+          "base_sha256": "1417237428d07289c6d975368002cbd65c702b6e3ffe5a9de657a8cac7429963",
+          "local_sha256": "1417237428d07289c6d975368002cbd65c702b6e3ffe5a9de657a8cac7429963",
+          "state": "clean"
+        },
+        {
+          "path": "internal/observability/observability.go",
+          "source": "internal/observability/observability.go",
+          "base_sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
+          "local_sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/observability/sentry.go",
+          "source": "internal/observability/sentry.go",
+          "base_sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
+          "local_sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "system/storage",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f816a39dd9a633ce30f1640f297bcd3c130725c1771cd10bede628174b6292c3",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "system/storage",
+        "kind": "system",
+        "name": "storage",
+        "revision": 1,
+        "contract": 1,
+        "title": "Object storage",
+        "description": "Store port with an R2/S3-compatible adapter and a development store rooted in tmp/uploads.",
+        "requires": [
+          "system/apphost",
+          "system/config"
+        ],
+        "files": [
+          {
+            "source": "internal/storage/dev.go",
+            "target": "internal/storage/dev.go",
+            "class": "go",
+            "sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/storage/module.go",
+            "target": "internal/storage/module.go",
+            "class": "go",
+            "sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/storage/r2.go",
+            "target": "internal/storage/r2.go",
+            "class": "go",
+            "sha256": "c4c10fdd2f04b40254c59aa04a2a4ced8cf84569a7a9b58f62f4fb672175478f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/storage/storage.go",
+            "target": "internal/storage/storage.go",
+            "class": "go",
+            "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {
+          "packages": [
+            "internal/storage"
+          ]
+        },
+        "runtime": {
+          "system": {
+            "package": "internal/storage",
+            "constructor": "NewModule",
+            "needs": [
+              {
+                "field": "Config",
+                "capability": "config",
+                "type": "*config.Config",
+                "optional": false
+              }
+            ],
+            "provides": [
+              {
+                "field": "Store",
+                "capability": "storage.store",
+                "type": "storage.Store"
+              }
+            ],
+            "start": false,
+            "stop": false
+          }
+        },
+        "migrations": [],
+        "environment": [
+          {
+            "key": "STORAGE_R2_ACCESS_KEY_ID",
+            "field": "StorageR2AccessKeyID",
+            "description": "R2 access key id",
+            "secret": true
+          },
+          {
+            "key": "STORAGE_R2_ACCOUNT_ID",
+            "field": "StorageR2AccountID",
+            "description": "R2 account id"
+          },
+          {
+            "key": "STORAGE_R2_BUCKET",
+            "field": "StorageR2Bucket",
+            "description": "R2 bucket name"
+          },
+          {
+            "key": "STORAGE_R2_ENDPOINT",
+            "field": "StorageR2Endpoint",
+            "description": "Endpoint override for S3/MinIO compatibility"
+          },
+          {
+            "key": "STORAGE_R2_SECRET_ACCESS_KEY",
+            "field": "StorageR2SecretAccessKey",
+            "description": "R2 secret access key",
+            "secret": true
+          }
+        ],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/storage"
+          ]
+        },
+        "data": [],
+        "removal_policy": "retain-data"
+      },
+      "files": [
+        {
+          "path": "internal/storage/dev.go",
+          "source": "internal/storage/dev.go",
+          "base_sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
+          "local_sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
+          "state": "clean"
+        },
+        {
+          "path": "internal/storage/module.go",
+          "source": "internal/storage/module.go",
+          "base_sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
+          "local_sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
+          "state": "clean"
+        },
+        {
+          "path": "internal/storage/r2.go",
+          "source": "internal/storage/r2.go",
+          "base_sha256": "c4c10fdd2f04b40254c59aa04a2a4ced8cf84569a7a9b58f62f4fb672175478f",
+          "local_sha256": "c4c10fdd2f04b40254c59aa04a2a4ced8cf84569a7a9b58f62f4fb672175478f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/storage/storage.go",
+          "source": "internal/storage/storage.go",
+          "base_sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+          "local_sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    }
+  ]
+}

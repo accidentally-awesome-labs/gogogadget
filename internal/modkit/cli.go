@@ -177,6 +177,19 @@ func (c CLI) engine(offline bool) (*Engine, error) {
 	if c.Engine != nil {
 		return c.Engine, nil
 	}
+	// A tree that carries its own registry.json is a self-hosting registry: the
+	// upstream repository, or a derivative that vendors the catalog. Resolving
+	// from the tree keeps `make check` working in a fresh clone with no network
+	// and no credentials.
+	if _, statErr := os.Stat(filepath.Join(c.root(), "registry.json")); statErr == nil {
+		return New(Options{
+			Source:    DirectorySource{Root: c.root()},
+			Generator: RegistryGenerator{},
+		}), nil
+	} else if !errors.Is(statErr, fs.ErrNotExist) {
+		return nil, runtimeError(statErr)
+	}
+
 	cache, err := os.UserCacheDir()
 	if err != nil {
 		return nil, runtimeError(fmt.Errorf("locate registry cache: %w", err))
@@ -316,13 +329,14 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 	ref := set.String("ref", "main", "registry ref to pin")
 	repository := set.String("repository", DefaultRegistryRepository, "registry repository")
 	adopt := set.Bool("adopt", false, "produce the initial lock from what is already installed")
+	offline := set.Bool("offline", false, "resolve only from a self-hosted or cached registry")
 	asJSON := set.Bool("json", false, "emit the machine envelope")
 	positional, err := parseFlags(set, args)
 	if err != nil {
 		return usageError(err.Error())
 	}
 	if len(positional) != 0 {
-		return usageError("usage: ggg init [--ref REF] [--repository REPO] [--adopt] [--json]")
+		return usageError("usage: ggg init [--ref REF] [--repository REPO] [--adopt] [--offline] [--json]")
 	}
 
 	path := filepath.Join(c.root(), ProjectFileName)
@@ -349,7 +363,7 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 	if !*adopt {
 		return c.emit("init", *asJSON, Envelope{OK: true, Exit: exitOK})
 	}
-	return c.applyOperation(ctx, "init", *asJSON, Operation{Kind: OpSync}, false)
+	return c.applyOperation(ctx, "init", *asJSON, Operation{Kind: OpSync, Offline: *offline}, false)
 }
 
 // runGraphMutation drives add/remove/update. All three edit intent and converge
@@ -431,15 +445,22 @@ func (c CLI) applyOperation(ctx context.Context, command string, asJSON bool, op
 
 	if readOnly {
 		exit := exitOK
-		if planHasDrift(plan) {
+		drift := countDrift(plan)
+		generatedDrift, err := generatedDriftDiagnostics(ctx, engine, plan)
+		if err != nil {
+			return c.failure(command, asJSON, runtimeError(err))
+		}
+		if drift > 0 || len(generatedDrift) > 0 {
 			exit = exitConflict
 		}
 		env := planEnvelope(plan, exit)
+		env.Diagnostics = append(env.Diagnostics, generatedDrift...)
 		if err := c.emit(command, asJSON, env); err != nil {
 			return err
 		}
 		if exit != exitOK {
-			return conflictExit(fmt.Errorf("%s: %d pending change(s)", command, countDrift(plan)))
+			return conflictExit(fmt.Errorf("%s: %d pending change(s), %d generated drift(s)",
+				command, drift, len(generatedDrift)))
 		}
 		return nil
 	}
@@ -468,6 +489,76 @@ func (c CLI) applyOperation(ctx context.Context, command string, asJSON bool, op
 		return conflictExit(fmt.Errorf("%s: %d staged conflict(s) remain; run `ggg resolve`", command, len(plan.Conflicts)))
 	}
 	return nil
+}
+
+// generatedDriftDiagnostics renders the aggregates the plan implies and compares
+// them byte-for-byte with the tree. Planner changes alone cannot detect this:
+// the generator, not the planner, produces generated output, so a hand-edited or
+// deleted aggregate would otherwise pass the gate.
+func generatedDriftDiagnostics(ctx context.Context, engine *Engine, plan Plan) ([]Diagnostic, error) {
+	if engine.generator == nil {
+		return nil, nil
+	}
+	rendered, err := engine.generator.Render(ctx, plan)
+	if err != nil {
+		return nil, err
+	}
+	diagnostics := make([]Diagnostic, 0)
+	expected := make(map[string]struct{}, len(rendered))
+	for _, file := range rendered {
+		expected[file.Path] = struct{}{}
+		current, readErr := os.ReadFile(filepath.Join(plan.Root, filepath.FromSlash(file.Path)))
+		switch {
+		case errors.Is(readErr, fs.ErrNotExist):
+			diagnostics = append(diagnostics, Diagnostic{
+				Code: "generated_missing", Severity: "error", Path: file.Path,
+				Message: "generated output is missing; run ggg sync",
+			})
+		case readErr != nil:
+			return nil, readErr
+		case string(current) != file.Content:
+			diagnostics = append(diagnostics, Diagnostic{
+				Code: "generated_drift", Severity: "error", Path: file.Path,
+				Message: "generated output does not match the lock; run ggg sync and do not edit generated files",
+			})
+		}
+	}
+
+	// A stale aggregate left behind by a removed module is drift too: it still
+	// compiles into the project while nothing owns it any more.
+	for _, path := range staleGeneratedAggregates(plan.Root, expected) {
+		diagnostics = append(diagnostics, Diagnostic{
+			Code: "generated_stale", Severity: "error", Path: path,
+			Message: "generated output is no longer owned by the selected graph; run ggg sync",
+		})
+	}
+	sort.Slice(diagnostics, func(i, j int) bool { return diagnostics[i].Path < diagnostics[j].Path })
+	return diagnostics, nil
+}
+
+// staleGeneratedAggregates finds registry aggregates on disk that the current
+// selection no longer renders.
+func staleGeneratedAggregates(root string, expected map[string]struct{}) []string {
+	stale := make([]string, 0)
+	_ = filepath.WalkDir(root, func(full string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(root, full)
+		if relErr != nil {
+			return nil
+		}
+		slashed := filepath.ToSlash(rel)
+		if !strings.Contains(slashed, "_registry_gen.") {
+			return nil
+		}
+		if _, ok := expected[slashed]; !ok {
+			stale = append(stale, slashed)
+		}
+		return nil
+	})
+	sort.Strings(stale)
+	return stale
 }
 
 // planHasDrift reports whether the plan would change anything on disk.
@@ -933,61 +1024,98 @@ func (c CLI) runRegistry(ctx context.Context, args []string) error {
 		return usageError("usage: ggg registry " + subcommand + " [--json]")
 	}
 
+	if subcommand == "build" {
+		built, discovered, err := buildRegistryIndexes(c.root())
+		if err != nil {
+			return c.failure("registry build", *asJSON, runtimeError(err))
+		}
+		return c.emit("registry build", *asJSON, Envelope{
+			OK: true, Resolved: discovered, Generated: built, Exit: exitOK,
+		})
+	}
+
 	catalog, err := LoadCatalog(os.DirFS(c.root()))
 	if err != nil {
-		return c.failure("registry "+subcommand, *asJSON, usageError(err.Error()))
+		return c.failure("registry validate", *asJSON, usageError(err.Error()))
 	}
 	ids := make([]string, 0, len(catalog.Modules))
 	for _, module := range catalog.Modules {
 		ids = append(ids, module.ID)
 	}
+	for _, profile := range catalog.Profiles {
+		ids = append(ids, profile.ID)
+	}
 	sort.Strings(ids)
-
-	if subcommand == "validate" {
-		return c.emit("registry validate", *asJSON, Envelope{OK: true, Resolved: ids, Exit: exitOK})
-	}
-	built, err := buildRegistryIndexes(c.root(), catalog)
-	if err != nil {
-		return c.failure("registry build", *asJSON, runtimeError(err))
-	}
-	return c.emit("registry build", *asJSON, Envelope{
-		OK: true, Resolved: ids, Generated: built, Exit: exitOK,
-	})
+	return c.emit("registry validate", *asJSON, Envelope{OK: true, Resolved: ids, Exit: exitOK})
 }
 
-// buildRegistryIndexes rewrites each kind index from the module documents present
-// on disk, so a newly authored module is discovered without hand-editing an
-// index. Item order is sorted, making the output byte-stable.
-func buildRegistryIndexes(root string, catalog Catalog) ([]string, error) {
+// buildRegistryIndexes rewrites each kind index from the documents actually
+// present under registry/. It scans the tree rather than reading the indexes it
+// writes: deriving the index from itself would make a newly authored module
+// permanently invisible. Item order is sorted, so output is byte-stable.
+func buildRegistryIndexes(root string) (written []string, discovered []string, err error) {
 	byKind := make(map[CatalogKind][]string)
-	for _, module := range catalog.Modules {
-		kind := CatalogKind(module.Kind)
-		_, name, _ := splitModuleID(module.ID)
-		byKind[kind] = append(byKind[kind], "registry/modules/"+string(kind)+"/"+name+"/module.json")
-	}
-	for _, profile := range catalog.Profiles {
-		byKind[CatalogProfile] = append(byKind[CatalogProfile], "registry/profiles/"+profile.Name+".json")
+	for _, include := range catalogIncludes {
+		if include.kind == CatalogProfile {
+			continue
+		}
+		dir := filepath.Join(root, "registry", "modules", string(include.kind))
+		entries, readErr := os.ReadDir(dir)
+		if errors.Is(readErr, fs.ErrNotExist) {
+			continue
+		}
+		if readErr != nil {
+			return nil, nil, fmt.Errorf("scan %s: %w", dir, readErr)
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			item := "registry/modules/" + string(include.kind) + "/" + entry.Name() + "/module.json"
+			if _, statErr := os.Stat(filepath.Join(root, filepath.FromSlash(item))); statErr != nil {
+				continue
+			}
+			byKind[include.kind] = append(byKind[include.kind], item)
+			discovered = append(discovered, string(include.kind)+"/"+entry.Name())
+		}
 	}
 
-	written := make([]string, 0, len(catalogIncludes))
+	profileDir := filepath.Join(root, "registry", "profiles")
+	profileEntries, readErr := os.ReadDir(profileDir)
+	if readErr != nil && !errors.Is(readErr, fs.ErrNotExist) {
+		return nil, nil, fmt.Errorf("scan %s: %w", profileDir, readErr)
+	}
+	for _, entry := range profileEntries {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
+			continue
+		}
+		byKind[CatalogProfile] = append(byKind[CatalogProfile], "registry/profiles/"+entry.Name())
+		discovered = append(discovered, "profile/"+strings.TrimSuffix(entry.Name(), ".json"))
+	}
+
 	for _, include := range catalogIncludes {
 		items := byKind[include.kind]
 		if items == nil {
 			items = []string{}
 		}
 		sort.Strings(items)
-		data, err := json.MarshalIndent(CatalogIndex{
+		data, marshalErr := json.MarshalIndent(CatalogIndex{
 			Schema: 1, Kind: include.kind, Items: items,
 		}, "", "  ")
-		if err != nil {
-			return nil, err
+		if marshalErr != nil {
+			return nil, nil, marshalErr
 		}
-		if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(include.path)), append(data, '\n'), 0o644); err != nil {
-			return nil, err
+		target := filepath.Join(root, filepath.FromSlash(include.path))
+		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+			return nil, nil, err
+		}
+		if err := os.WriteFile(target, append(data, '\n'), 0o644); err != nil {
+			return nil, nil, err
 		}
 		written = append(written, include.path)
 	}
-	return written, nil
+	sort.Strings(discovered)
+	return written, discovered, nil
 }
 
 type usageError string

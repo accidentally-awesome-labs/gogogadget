@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/observability",
+    "kind": "system",
+    "name": "observability",
+    "revision": 1,
+    "contract": 1,
+    "title": "Error reporting",
+    "description": "Reporter port with a Sentry adapter and a no-op default so call sites never nil-check.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/observability/module.go",
+        "target": "internal/observability/module.go",
+        "class": "go",
+        "sha256": "1417237428d07289c6d975368002cbd65c702b6e3ffe5a9de657a8cac7429963",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/observability/observability.go",
+        "target": "internal/observability/observability.go",
+        "class": "go",
+        "sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/observability/sentry.go",
+        "target": "internal/observability/sentry.go",
+        "class": "go",
+        "sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/observability"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/observability",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Reporter",
+            "capability": "observability.reporter",
+            "type": "observability.Reporter"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "SENTRY_DSN",
+        "field": "SentryDSN",
+        "description": "Sentry DSN; unset uses the no-op reporter",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/observability"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

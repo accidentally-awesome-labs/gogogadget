@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/identity",
+    "kind": "system",
+    "name": "identity",
+    "revision": 1,
+    "contract": 1,
+    "title": "Identity",
+    "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/identity/context.go",
+        "target": "internal/identity/context.go",
+        "class": "go",
+        "sha256": "724bb4282c7555412baa887c9529a2da5fcb4364954c3e22e5b46564bf53d3f0",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/deleter.go",
+        "target": "internal/identity/deleter.go",
+        "class": "go",
+        "sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/fetcher.go",
+        "target": "internal/identity/fetcher.go",
+        "class": "go",
+        "sha256": "698b68b71e891e53b09f4d2503fa827c6d22bdf13232a9f72b1657cb9e6a3fb8",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/module.go",
+        "target": "internal/identity/module.go",
+        "class": "go",
+        "sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/sync.go",
+        "target": "internal/identity/sync.go",
+        "class": "go",
+        "sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/identity/verifier.go",
+        "target": "internal/identity/verifier.go",
+        "class": "go",
+        "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/identity"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/identity",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Deleter",
+            "capability": "identity.deleter",
+            "type": "identity.Deleter"
+          },
+          {
+            "field": "Fetcher",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher"
+          },
+          {
+            "field": "Verifier",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "CLERK_FRONTEND_API_URL",
+        "field": "ClerkFrontendAPIURL",
+        "description": "Clerk Frontend API origin; feeds CSP connect-src"
+      },
+      {
+        "key": "CLERK_PORTAL_URL",
+        "field": "ClerkPortalURL",
+        "description": "Clerk Account Portal base URL",
+        "production_required": true
+      },
+      {
+        "key": "CLERK_PUBLISHABLE_KEY",
+        "field": "ClerkPublishableKey",
+        "description": "Clerk frontend publishable key",
+        "production_required": true
+      },
+      {
+        "key": "CLERK_SECRET_KEY",
+        "field": "ClerkSecretKey",
+        "description": "Clerk backend API key",
+        "production_required": true,
+        "secret": true
+      },
+      {
+        "key": "CLERK_WEBHOOK_SECRET",
+        "field": "ClerkWebhookSecret",
+        "description": "Clerk webhook signing secret",
+        "production_required": true,
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/identity"
+      ]
+    },
+    "data": [],
+    "removal_policy": "major-version-only"
+  }
+}

@@ -5,9 +5,26 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"go/format"
 	"sort"
 	"strings"
 )
+
+// formatGo renders emitted Go through the standard formatter. Emitters build
+// source by string concatenation; running the formatter once here means a
+// generated file can never disagree with gofmt, and a syntax error is caught
+// inside the transaction instead of at the next build.
+func formatGo(file *GeneratedFile) (*GeneratedFile, error) {
+	if !strings.HasSuffix(file.Path, ".go") {
+		return file, nil
+	}
+	formatted, err := format.Source([]byte(file.Content))
+	if err != nil {
+		return nil, fmt.Errorf("%s: generated Go does not parse: %w", file.Path, err)
+	}
+	file.Content = string(formatted)
+	return file, nil
+}
 
 // GeneratedFile is one deterministic registry-owned output emitted by the
 // generator pipeline. Every path is tool-owned; authored modules never claim
@@ -85,14 +102,47 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 			if !isGeneratedOutput(file.Path) {
 				return nil, fmt.Errorf("emitter %s produced non-generated path %s", emitter.name, file.Path)
 			}
-			files = append(files, *file)
+			formatted, err := formatGo(file)
+			if err != nil {
+				return nil, fmt.Errorf("generate %s: %w", emitter.name, err)
+			}
+			files = append(files, *formatted)
 		}
 	}
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 	return files, nil
 }
 
-// goImportName returns the base package identifier for an import path.
+// qualifyPackage turns a module-relative package path from a manifest into an
+// import path in the target module. Manifests never carry absolute import paths:
+// a derivative's Go module path differs from the canonical one, so an absolute
+// path baked into distributed data would not compile once installed.
+func qualifyPackage(modulePath, pkg string) string {
+	return modulePath + "/" + strings.Trim(pkg, "/")
+}
+
+// capabilityField turns a capability name into the exported Runtime field that
+// carries it. Capabilities are globally unique (the namespace preflight enforces
+// it), so deriving the field from the capability — not from the module's own
+// field name — keeps two modules that both provide a "Client" from colliding.
+func capabilityField(capability string) string {
+	var b strings.Builder
+	upper := true
+	for _, r := range capability {
+		if r == '.' || r == '-' || r == '_' || r == '/' {
+			upper = true
+			continue
+		}
+		if upper {
+			b.WriteString(strings.ToUpper(string(r)))
+			upper = false
+			continue
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
+}
+
 func goImportName(pkg string) string {
 	base := pkg
 	if i := strings.LastIndex(pkg, "/"); i >= 0 {
@@ -182,11 +232,11 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("\t\"fmt\"\n")
 	b.WriteString("\t\"net/http\"\n")
 	b.WriteString("\n")
-	b.WriteString("\tapphost \"" + modulePath + "/internal/apphost\"\n")
-	imports := make([]string, 0)
+	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n"}
 	for _, m := range modules {
 		if m.Runtime.System != nil && m.Runtime.System.Package != "" {
-			imports = append(imports, "\t"+goImportName(m.Runtime.System.Package)+" \""+m.Runtime.System.Package+"\"\n")
+			qualified := qualifyPackage(modulePath, m.Runtime.System.Package)
+			imports = append(imports, "\t"+goImportName(qualified)+" \""+qualified+"\"\n")
 		}
 	}
 	sort.Strings(imports)
@@ -201,10 +251,32 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		fmt.Fprintf(&b, "\t%s %s\n", need.Field, need.Type)
 	}
 	b.WriteString("}\n\n")
-	b.WriteString("// Runtime is the booted module closure.\n")
+	b.WriteString("// Runtime is the booted module closure. Every capability the selected\n")
+	b.WriteString("// graph provides is reachable here, so consumers take typed values rather\n")
+	b.WriteString("// than reconstructing providers.\n")
 	b.WriteString("type Runtime struct {\n")
 	b.WriteString("\thandler http.Handler\n")
 	b.WriteString("\tstop    []apphost.Stop\n")
+	provided := make([]string, 0)
+	for _, m := range modules {
+		if m.Runtime.System == nil {
+			continue
+		}
+		for _, provide := range m.Runtime.System.Provides {
+			field := capabilityField(provide.Capability)
+			if !validIdentifier(field) {
+				return nil, fmt.Errorf("module %s: capability %q does not yield a Go field", m.ID, provide.Capability)
+			}
+			provided = append(provided, fmt.Sprintf("\t%s %s\n", field, provide.Type))
+		}
+	}
+	sort.Strings(provided)
+	if len(provided) > 0 {
+		b.WriteString("\n")
+		for _, line := range provided {
+			b.WriteString(line)
+		}
+	}
 	b.WriteString("}\n\n")
 
 	b.WriteString("// Boot validates the selected closure and constructs typed dependencies in\n")
@@ -222,9 +294,14 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		if err := validateIdentifiers(sys); err != nil {
 			return nil, fmt.Errorf("module %s: %w", m.ID, err)
 		}
-		pkg := goImportName(sys.Package)
+		pkg := goImportName(qualifyPackage(modulePath, sys.Package))
 		varName := goVar(m.ID)
-		fmt.Fprintf(&b, "\t%s, err := %s.%s(ctx, h, %s.Deps{\n", varName, pkg, sys.Constructor, pkg)
+		target := varName
+		if len(sys.Provides) == 0 && !sys.Stop {
+			// Nothing consumes the result, so binding it would not compile.
+			target = "_"
+		}
+		fmt.Fprintf(&b, "\t%s, err := %s.%s(ctx, h, %s.Deps{\n", target, pkg, sys.Constructor, pkg)
 		for _, need := range sys.Needs {
 			if !validIdentifier(need.Field) {
 				return nil, fmt.Errorf("module %s: invalid need field %q", m.ID, need.Field)
@@ -250,13 +327,14 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			if !validIdentifier(provide.Field) {
 				return nil, fmt.Errorf("module %s: invalid provide field %q", m.ID, provide.Field)
 			}
-			provider[provide.Capability] = varName + "." + provide.Field
+			field := capabilityField(provide.Capability)
+			fmt.Fprintf(&b, "\tr.%s = %s.%s\n", field, varName, provide.Field)
+			provider[provide.Capability] = "r." + field
 		}
 		if sys.Stop {
 			stoppers = append(stoppers, varName)
 		}
 	}
-	b.WriteString("\t_ = r\n")
 	b.WriteString("\treturn r, nil\n")
 	b.WriteString("}\n\n")
 
@@ -327,6 +405,11 @@ func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph
 		return routes[i].contrib.ID < routes[j].contrib.ID
 	})
 
+	if len(routes) == 0 {
+		// Nothing contributes a route, so the project has no reason to define the
+		// route type this table would reference.
+		return nil, nil
+	}
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package web\n\n")
@@ -607,6 +690,12 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 		}
 		return jobs[i].contrib.Kind < jobs[j].contrib.Kind
 	})
+	if len(jobs) == 0 {
+		// Nothing declares a job, so the project has no reason to define the
+		// definition type this table would reference. Emitting it anyway would
+		// break the build through a DO-NOT-EDIT file.
+		return nil, nil
+	}
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package jobs\n\n")

@@ -72,6 +72,14 @@ func (s DirectorySource) Resolve(ctx context.Context, _, _ string) (Snapshot, er
 			}
 			return nil
 		}
+		// A self-hosting registry resolves from the tree it installs into, so the
+		// snapshot must contain only what the registry can distribute. Project
+		// state and tool-owned output are excluded: including them would let
+		// writing the lock invalidate the lock that was just written, and
+		// `sync --check` could never be clean.
+		if !entry.IsDir() && (name == ProjectFileName || name == LockFileName || isGeneratedOutput(name)) {
+			return nil
+		}
 		if !fs.ValidPath(name) {
 			return fmt.Errorf("validate directory source path %q: must be a valid relative slash path", name)
 		}

@@ -11,8 +11,9 @@ setup:
 	@echo ''
 	@echo 'Next: docker compose up -d db && make seed && make dev'
 
-## generate: regenerate ALL generated code (templ, sqlc, tailwind). Never edit generated files.
+## generate: regenerate ALL generated code (registry aggregates, templ, sqlc, tailwind). Never edit generated files.
 generate:
+	go run ./cmd/ggg sync --offline
 	go tool templ generate
 	go tool sqlc generate
 	bin/tailwindcss -i input.css -o static/app.css --minify
@@ -21,8 +22,9 @@ generate:
 dev:
 	./scripts/dev.sh
 
-## check: THE one-command gate — generate + vet + test + build
+## check: THE one-command gate — generate + no-drift + vet + test + build
 check: generate
+	go run ./cmd/ggg sync --check --offline
 	go vet ./...
 	go test ./...
 	go build ./...

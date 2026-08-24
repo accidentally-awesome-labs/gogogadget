@@ -20,7 +20,8 @@ type scriptedGenerator struct {
 	writes map[string][]byte
 }
 
-func (g *scriptedGenerator) Generate(_ context.Context, root string) error {
+func (g *scriptedGenerator) Generate(_ context.Context, plan Plan) error {
+	root := plan.Root
 	g.calls++
 	for path, content := range g.writes {
 		full := filepath.Join(root, filepath.FromSlash(path))
@@ -34,13 +35,22 @@ func (g *scriptedGenerator) Generate(_ context.Context, root string) error {
 	return g.err
 }
 
-func (g *scriptedGenerator) GeneratedPaths(_ string) []string {
+func (g *scriptedGenerator) GeneratedPaths(_ Plan) []string {
 	paths := make([]string, 0, len(g.writes))
 	for path := range g.writes {
 		paths = append(paths, path)
 	}
 	sort.Strings(paths)
 	return paths
+}
+
+func (g *scriptedGenerator) Render(_ context.Context, _ Plan) ([]GeneratedFile, error) {
+	files := make([]GeneratedFile, 0, len(g.writes))
+	for path, content := range g.writes {
+		files = append(files, GeneratedFile{Path: path, Content: string(content)})
+	}
+	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
+	return files, g.err
 }
 
 func applyEngineWith(gen Generator) *Engine {

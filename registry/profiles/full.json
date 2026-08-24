@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "profile": {
+    "id": "profile/full",
+    "kind": "profile",
+    "name": "full",
+    "revision": 1,
+    "contract": 1,
+    "title": "Full GoGoGadget",
+    "description": "Every module the GoGoGadget catalog publishes. A project selects this and lists removable modules under exclude.",
+    "members": [
+      "system/analytics",
+      "system/apphost",
+      "system/billing",
+      "system/config",
+      "system/identity",
+      "system/llm",
+      "system/mail",
+      "system/observability",
+      "system/storage"
+    ]
+  }
+}

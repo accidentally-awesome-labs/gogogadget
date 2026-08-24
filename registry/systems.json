@@ -1,5 +1,15 @@
 {
   "schema": 1,
   "kind": "system",
-  "items": []
+  "items": [
+    "registry/modules/system/analytics/module.json",
+    "registry/modules/system/apphost/module.json",
+    "registry/modules/system/billing/module.json",
+    "registry/modules/system/config/module.json",
+    "registry/modules/system/identity/module.json",
+    "registry/modules/system/llm/module.json",
+    "registry/modules/system/mail/module.json",
+    "registry/modules/system/observability/module.json",
+    "registry/modules/system/storage/module.json"
+  ]
 }

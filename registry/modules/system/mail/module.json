@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/mail",
+    "kind": "system",
+    "name": "mail",
+    "revision": 1,
+    "contract": 1,
+    "title": "Transactional mail",
+    "description": "Sender port with a Resend adapter and a development sender that writes to disk.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/mail/mail.go",
+        "target": "internal/mail/mail.go",
+        "class": "go",
+        "sha256": "46f077b5a151571a4cacaf2bbe2472b29a81cc2fcea6fed9e4ac413a3724d346",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/mail/module.go",
+        "target": "internal/mail/module.go",
+        "class": "go",
+        "sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/mail"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/mail",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Sender",
+            "capability": "mail.sender",
+            "type": "mail.Sender"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "EMAIL_FROM",
+        "field": "EmailFrom",
+        "description": "From header for outbound mail",
+        "default": "GoGoGadget <hello@example.com>"
+      },
+      {
+        "key": "RESEND_API_KEY",
+        "field": "ResendAPIKey",
+        "description": "Resend API key; unset uses the dev sender",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/mail"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

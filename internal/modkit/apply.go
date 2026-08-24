@@ -13,10 +13,18 @@ import (
 // error as a transaction failure and restores pre-run bytes, including any
 // generator-owned paths the pipeline dirtied before failing.
 type Generator interface {
-	Generate(ctx context.Context, root string) error
-	// GeneratedPaths returns every generated path the pipeline owns at root,
-	// relative to root, so the journal can snapshot them before generation.
-	GeneratedPaths(root string) []string
+	// Render returns every generated output the plan implies without writing
+	// anything, so `sync --check` can compare bytes against the tree.
+	Render(ctx context.Context, plan Plan) ([]GeneratedFile, error)
+	// Generate renders every generated output the plan implies and writes it. It
+	// takes the plan, not the root, because the first sync has no lock on disk
+	// yet: Apply writes the lock last, so a generator that read the tree would
+	// emit nothing exactly when a fresh install needs the aggregates.
+	Generate(ctx context.Context, plan Plan) error
+	// GeneratedPaths returns every generated path the pipeline owns for this
+	// plan, relative to the plan root, so the journal can snapshot them before
+	// generation.
+	GeneratedPaths(plan Plan) []string
 }
 
 // Result is the outcome of applying one plan.
@@ -99,7 +107,7 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 	if _, err := snapshot("gogogadget.lock.json"); err != nil {
 		return Result{}, err
 	}
-	for _, path := range e.generator.GeneratedPaths(plan.Root) {
+	for _, path := range e.generator.GeneratedPaths(plan) {
 		if _, err := snapshot(path); err != nil {
 			return Result{}, err
 		}
@@ -136,7 +144,7 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 	}
 
 	// 3. Run the fixed generator pipeline once. Any failure restores the tree.
-	if err := e.generator.Generate(ctx, plan.Root); err != nil {
+	if err := e.generator.Generate(ctx, plan); err != nil {
 		rollback()
 		return Result{Exit: 5, RolledBack: true}, fmt.Errorf("generation failed, restored pre-run bytes: %w", err)
 	}

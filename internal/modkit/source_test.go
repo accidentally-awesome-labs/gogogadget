@@ -267,3 +267,46 @@ func TestGitHubSourceRejectsInvalidResponsesAndOfflineMisses(t *testing.T) {
 		}
 	})
 }
+
+// A self-hosting registry resolves from the same tree it installs into, so the
+// snapshot commit must depend only on what the registry can distribute. If
+// project state or tool-owned output moved the commit, writing the lock would
+// invalidate the lock that was just written and `sync --check` could never be
+// clean.
+func TestDirectorySourceCommitIgnoresProjectStateAndGeneratedOutput(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "internal/widget/widget.go", []byte("package widget\n"))
+
+	source := DirectorySource{Root: root}
+	before, err := source.Resolve(context.Background(), "", "")
+	if err != nil {
+		t.Fatalf("Resolve(before): %v", err)
+	}
+
+	// Everything below is project state or tool-owned output.
+	writeTestFile(t, root, "gogogadget.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "internal/modules/bootstrap_registry_gen.go", []byte("package modules\n"))
+	writeTestFile(t, root, "internal/web/templates/page_templ.go", []byte("package templates\n"))
+	writeTestFile(t, root, "static/app.css", []byte(".a{}\n"))
+
+	after, err := source.Resolve(context.Background(), "", "")
+	if err != nil {
+		t.Fatalf("Resolve(after): %v", err)
+	}
+	if before.Commit != after.Commit {
+		t.Fatalf("commit moved on project state/generated output: %s -> %s", before.Commit, after.Commit)
+	}
+
+	// A real module payload change must still move the commit.
+	writeTestFile(t, root, "internal/widget/widget.go", []byte("package widget\n\nconst V = 2\n"))
+	changed, err := source.Resolve(context.Background(), "", "")
+	if err != nil {
+		t.Fatalf("Resolve(changed): %v", err)
+	}
+	if changed.Commit == after.Commit {
+		t.Fatal("commit did not move when a module payload changed")
+	}
+}

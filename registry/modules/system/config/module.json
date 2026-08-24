@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/config",
+    "kind": "system",
+    "name": "config",
+    "revision": 1,
+    "contract": 1,
+    "title": "Configuration",
+    "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",
+    "requires": [
+      "system/apphost"
+    ],
+    "files": [
+      {
+        "source": "internal/config/config.go",
+        "target": "internal/config/config.go",
+        "class": "go",
+        "sha256": "dc9f2eea2e71acb062f871df582d29bc2ddef0b9c0ee2f8b39bb0f09a6fbc1c8",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/config/module.go",
+        "target": "internal/config/module.go",
+        "class": "go",
+        "sha256": "1f7a0fb63e4d156b9459e0d6fffb94d7a2d4d8dd61e76376edf33c16cc1d8f43",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/config"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/config",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "API_RATE_LIMIT_RPM",
+        "field": "APIRateLimitPerMinute",
+        "description": "Per-API-token budget per minute"
+      },
+      {
+        "key": "APP_ENV",
+        "field": "Env",
+        "description": "development | test | production",
+        "default": "development"
+      },
+      {
+        "key": "APP_URL",
+        "field": "AppURL",
+        "description": "Public base URL",
+        "default": "http://localhost:8080"
+      },
+      {
+        "key": "AUDIT_RETENTION_DAYS",
+        "field": "AuditRetentionDays",
+        "description": "Audit janitor retention; 0 retains forever"
+      },
+      {
+        "key": "DATABASE_URL",
+        "field": "DatabaseURL",
+        "description": "Postgres DSN; required in production",
+        "production_required": true,
+        "secret": true
+      },
+      {
+        "key": "DEV_AUTH_BYPASS",
+        "field": "DevAuthBypass",
+        "description": "Synthetic e2e sessions; refused in production"
+      },
+      {
+        "key": "LOG_LEVEL",
+        "field": "LogLevel",
+        "description": "debug | info | warn | error"
+      },
+      {
+        "key": "MAINTENANCE_MODE",
+        "field": "MaintenanceMode",
+        "description": "Shed all traffic except probes and static"
+      },
+      {
+        "key": "METRICS_TOKEN",
+        "field": "MetricsToken",
+        "description": "Bearer gate for /metrics; required in production",
+        "production_required": true,
+        "secret": true
+      },
+      {
+        "key": "PORT",
+        "field": "Port",
+        "description": "HTTP listen port",
+        "default": "8080"
+      },
+      {
+        "key": "RATE_LIMIT_RPM",
+        "field": "RateLimitPerMinute",
+        "description": "Per-IP request budget per minute"
+      },
+      {
+        "key": "TEST_NOW",
+        "field": "testNow",
+        "description": "Freezes the render clock under APP_ENV=test"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/config"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

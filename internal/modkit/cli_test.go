@@ -239,3 +239,130 @@ func mustCLIEngine(t *testing.T) *Engine {
 	_, engine, _ := installedRemovalProject(t)
 	return engine
 }
+
+// `registry build` must discover module documents by scanning the registry tree.
+// Deriving the indexes from the indexes it is supposed to write would make a
+// newly authored module permanently invisible.
+func TestCLIRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":1,"includes":[`+
+		`"registry/elements.json","registry/components.json","registry/pages.json",`+
+		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
+	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
+		singular := strings.TrimSuffix(kind, "s")
+		writeTestFile(t, root, "registry/"+kind+".json",
+			[]byte(`{"schema":1,"kind":"`+singular+`","items":[]}`))
+	}
+	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":1,"kind":"profile","items":[]}`))
+
+	// A module document that no index mentions yet.
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1,"module":{
+		"id":"system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+		"title":"Widget","description":"A widget system.","requires":[],"files":[],
+		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
+		"data":[],"removal_policy":"free"}}`))
+
+	cli := CLI{Out: &bytes.Buffer{}, Root: root}
+	if err := cli.Run(context.Background(), []string{"registry", "build"}); err != nil {
+		t.Fatalf("registry build: %v", err)
+	}
+
+	index, err := os.ReadFile(filepath.Join(root, "registry", "systems.json"))
+	if err != nil {
+		t.Fatalf("read systems index: %v", err)
+	}
+	if !strings.Contains(string(index), "registry/modules/system/widget/module.json") {
+		t.Fatalf("build did not discover the new module document:\n%s", index)
+	}
+
+	// The rebuilt index must load, proving build and validate agree.
+	if err := cli.Run(context.Background(), []string{"registry", "validate"}); err != nil {
+		t.Fatalf("registry validate after build: %v", err)
+	}
+}
+
+// A tree that contains its own registry.json is a self-hosting registry: the
+// upstream repository itself, and any derivative that vendors the catalog. It
+// must resolve from its own tree, never the network, so `make check` works in a
+// fresh clone with no credentials.
+func TestCLIResolvesSelfHostedRegistryFromTree(t *testing.T) {
+	root := t.TempDir()
+	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":1,"includes":[`+
+		`"registry/elements.json","registry/components.json","registry/pages.json",`+
+		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
+	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
+		writeTestFile(t, root, "registry/"+kind+".json",
+			[]byte(`{"schema":1,"kind":"`+strings.TrimSuffix(kind, "s")+`","items":[]}`))
+	}
+	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":1,"kind":"profile","items":[]}`))
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1,"module":{
+		"id":"system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+		"title":"Widget","description":"A widget system.","requires":[],"files":[],
+		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
+		"data":[],"removal_policy":"free"}}`))
+
+	// No Engine injected: the CLI must build one that resolves locally.
+	cli := CLI{Out: &bytes.Buffer{}, Root: root}
+	if err := cli.Run(context.Background(), []string{"registry", "build"}); err != nil {
+		t.Fatalf("registry build: %v", err)
+	}
+	if err := cli.Run(context.Background(), []string{"init", "--adopt", "--offline"}); err != nil {
+		t.Fatalf("init --adopt --offline: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, LockFileName)); err != nil {
+		t.Fatalf("self-hosted adopt wrote no lock: %v", err)
+	}
+}
+
+// `sync --check` is the gate that proves a clone has no generated drift. It must
+// render the aggregates and compare bytes: relying on planner changes alone
+// misses generated output entirely, because the generator — not the planner —
+// produces it.
+func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
+	root, engine := cliProject(t)
+	cli := CLI{Out: &bytes.Buffer{}, Root: root, Engine: engine}
+	if err := cli.Run(context.Background(), []string{"init", "--adopt"}); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	if err := cli.Run(context.Background(), []string{"sync", "--check", "--offline"}); err != nil {
+		t.Fatalf("check on a clean tree: %v", err)
+	}
+
+	generated := filepath.Join(root, "internal", "modules", "bootstrap_registry_gen.go")
+	original, err := os.ReadFile(generated)
+	if err != nil {
+		t.Fatalf("read generated: %v", err)
+	}
+
+	t.Run("tampered bytes", func(t *testing.T) {
+		if err := os.WriteFile(generated, append(original, []byte("\n// drift\n")...), 0o644); err != nil {
+			t.Fatalf("tamper: %v", err)
+		}
+		t.Cleanup(func() { _ = os.WriteFile(generated, original, 0o644) })
+
+		err := cli.Run(context.Background(), []string{"sync", "--check", "--offline"})
+		if err == nil {
+			t.Fatal("check passed on tampered generated output")
+		}
+		if got := exitOf(t, err); got != 4 {
+			t.Fatalf("tampered check exit = %d, want 4", got)
+		}
+	})
+
+	t.Run("missing output", func(t *testing.T) {
+		if err := os.Remove(generated); err != nil {
+			t.Fatalf("remove: %v", err)
+		}
+		t.Cleanup(func() { _ = os.WriteFile(generated, original, 0o644) })
+
+		err := cli.Run(context.Background(), []string{"sync", "--check", "--offline"})
+		if err == nil {
+			t.Fatal("check passed with a missing generated output")
+		}
+		if got := exitOf(t, err); got != 4 {
+			t.Fatalf("missing check exit = %d, want 4", got)
+		}
+	})
+}

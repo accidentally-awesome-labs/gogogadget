@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/analytics",
+    "kind": "system",
+    "name": "analytics",
+    "revision": 1,
+    "contract": 1,
+    "title": "Product analytics",
+    "description": "Capturer port with a PostHog adapter and a no-op default so every call site can fire and forget.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/analytics/analytics.go",
+        "target": "internal/analytics/analytics.go",
+        "class": "go",
+        "sha256": "d1de5361a3f7e85136709c275051b86d288aa6922fac7ae56221f743b4d8c0c5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/analytics/module.go",
+        "target": "internal/analytics/module.go",
+        "class": "go",
+        "sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/analytics"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/analytics",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Capturer",
+            "capability": "analytics.capturer",
+            "type": "analytics.Capturer"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "POSTHOG_API_KEY",
+        "field": "PostHogAPIKey",
+        "description": "PostHog project API key",
+        "secret": true
+      },
+      {
+        "key": "POSTHOG_HOST",
+        "field": "PostHogHost",
+        "description": "PostHog ingestion host",
+        "default": "https://us.i.posthog.com"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/analytics"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}
