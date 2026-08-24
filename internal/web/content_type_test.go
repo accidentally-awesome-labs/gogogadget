@@ -20,26 +20,30 @@ import (
 // sitemap membership — with no migration, no table, no handler and no
 // template written for it.
 //
+// The type is no longer hand-built here. It is owned by the test-only module
+// page/test-content-guide (registry/testdata), declared in a non-test file, and
+// its routes come from the same expansion a shipped content type gets. Building
+// the fixture in the test would have proved only that the test can construct a
+// struct; going through the module path proves the mechanism.
+//
 // Label keys are borrowed from the built-in types so this test needs no
 // catalog entries; that a REAL new type needs them is asserted by
 // TestContentTypeKeysExistInCatalogs.
-func guideType() content.Type {
-	return content.Type{
-		Kind: "guide", LabelKey: "content.type.post", PluralKey: "content.type.posts",
-		Path: "/guides", Mode: content.ModePages, Slug: content.SlugFromTitle, Sitemap: true,
-		Fields: []content.Field{{Key: "level", LabelKey: "content.field.author",
-			Kind: content.FieldSelect, Required: true, Options: []string{"intro", "advanced"}}},
-	}
-}
+func guideType() content.Type { return testOnlyGuideType() }
 
 func guideServer(t *testing.T, mutate func(*content.Type)) (*Server, *http.Cookie) {
 	t.Helper()
-	guide := guideType()
-	if mutate != nil {
-		mutate(&guide)
-	}
 	s := integrationServer(t, func(d *Deps) {
+		d.TestOnlyModules = true
+		if mutate == nil {
+			return
+		}
+		// A caller that wants a variant still gets one, but it has to travel as
+		// an explicit content-type override rather than as the only way in.
+		guide := testOnlyGuideType()
+		mutate(&guide)
 		d.ContentTypes = append(content.DefaultTypes(), guide)
+		d.TestOnlyModules = false
 	})
 	return s, staffUser(t, s, "user_guide", "org_guide", identity.RoleAdmin)
 }

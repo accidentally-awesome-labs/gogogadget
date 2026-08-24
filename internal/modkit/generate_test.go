@@ -621,3 +621,84 @@ func TestRoutesRegistryRejectsUnexplainedExemption(t *testing.T) {
 		t.Fatalf("error %v does not name the exemption", err)
 	}
 }
+
+// Content types generate concrete routes. Until they do, the router has to walk
+// a registry at boot, which means the generator cannot know every pattern and
+// reserved prefix ahead of time — the whole point of the table.
+func TestRoutesRegistryGeneratesContentTypeRoutes(t *testing.T) {
+	module := Manifest{
+		ID: "page/blog", Kind: ModulePage, Name: "blog",
+		Revision: 1, Contract: 1, Title: "Blog", Description: "Blog pages.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{ContentTypes: []ContentTypeContribution{
+			{ID: "post", Mode: ContentModePages, Paths: []string{"/blog"},
+				Package: "internal/web", Handler: "handleContent"},
+			{ID: "release", Mode: ContentModeSingle, Paths: []string{"/changelog"},
+				Package: "internal/web", Handler: "handleContent"},
+		}},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"page/blog"},
+		Modules: []LockedModule{{
+			ID: "page/blog", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: module,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+	registry := routesRegistry(t, lock, []Manifest{module})
+
+	// ModePages yields an index and a detail route; the detail handler must
+	// receive the content type id so it can resolve the type without a registry
+	// walk at request time.
+	for _, want := range []string{
+		`ID: "content.post.index", Method: "GET", Pattern: "/blog"`,
+		`ID: "content.post.detail", Method: "GET", Pattern: "/blog/{slug}"`,
+		`s.handleContentIndex("post")`,
+		`s.handleContentDetail("post")`,
+		// ModeSingle has no per-entry page, so no {slug} route exists at all.
+		`ID: "content.release.index", Method: "GET", Pattern: "/changelog"`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("routes registry missing %s:\n%s", want, registry)
+		}
+	}
+	if strings.Contains(registry, `/changelog/{slug}`) {
+		t.Fatalf("single-page content type produced a detail route:\n%s", registry)
+	}
+}
+
+// A content type whose public path collides with a route is a shadowing bug that
+// Go's mux resolves silently in favour of the literal pattern, so the page just
+// stops working. It must be a generation failure.
+func TestRoutesRegistryRejectsContentPathCollidingWithRoute(t *testing.T) {
+	page := Manifest{
+		ID: "page/pricing", Kind: ModulePage, Name: "pricing",
+		Revision: 1, Contract: 1, Title: "Pricing", Description: "Pricing page.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{Routes: []RouteContribution{
+			{ID: "pricing.show", Method: "GET", Pattern: "/pricing", Scope: RoutePublic,
+				Package: "internal/web", Handler: "handlePricing"},
+		}},
+	}
+	blog := Manifest{
+		ID: "page/blog", Kind: ModulePage, Name: "blog",
+		Revision: 1, Contract: 1, Title: "Blog", Description: "Blog pages.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{ContentTypes: []ContentTypeContribution{
+			{ID: "post", Mode: ContentModeSingle, Paths: []string{"/pricing"},
+				Package: "internal/web", Handler: "handleContent"},
+		}},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"page/blog", "page/pricing"},
+		Modules: []LockedModule{
+			{ID: "page/blog", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: blog, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+			{ID: "page/pricing", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: page, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+		},
+	}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{blog, page}); err == nil {
+		t.Fatal("GenerateAll accepted a content path that collides with a route pattern")
+	}
+}

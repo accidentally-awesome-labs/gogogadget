@@ -198,3 +198,25 @@ func TestBootedRuntimeServesRequests(t *testing.T) {
 		t.Fatalf("GET / = %d, want %d", page.Code, http.StatusOK)
 	}
 }
+
+// Test-only modules exist so a fixture can travel the same path a shipped module
+// does. The whole design is only safe if a booted production runtime cannot
+// reach them, so that is asserted directly rather than assumed from the fact
+// that nothing sets the flag.
+func TestBootedRuntimeCannotReachTestOnlySurfaces(t *testing.T) {
+	runtime, err := Boot(context.Background(), bootHost(t, "boot_testonly", nil), Options{})
+	if err != nil {
+		t.Fatalf("Boot: %v", err)
+	}
+	t.Cleanup(func() { closeRuntime(t, runtime) })
+
+	handler := runtime.Handler()
+	for _, path := range []string{"/guides", "/guides/anything"} {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, path, nil))
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("GET %s = %d on a production runtime, want %d; a test-only surface is reachable",
+				path, recorder.Code, http.StatusNotFound)
+		}
+	}
+}

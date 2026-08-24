@@ -62,7 +62,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "4d1fe724fabfd7855e2c72164ee9bd5c5af0a596b3690362d54b2c5174a9f22f",
+        "sha256": "3efbf521a39f42bdc9c4816455ffe359243a4c190d8f955c54f7ad8cfa5cad9d",
         "rewrite_module": true,
         "contract": false
       },

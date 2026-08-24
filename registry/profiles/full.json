@@ -22,6 +22,8 @@
       "page/admin-overview",
       "page/admin-schedules",
       "page/admin-users",
+      "page/blog",
+      "page/changelog",
       "page/dashboard",
       "page/dev-gallery",
       "page/files",

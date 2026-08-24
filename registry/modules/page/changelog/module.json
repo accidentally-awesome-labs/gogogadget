@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/changelog",
+    "kind": "page",
+    "name": "changelog",
+    "revision": 1,
+    "contract": 1,
+    "title": "Changelog",
+    "description": "The changelog, rendered as every release on one anchored page.",
+    "requires": [
+      "system/content",
+      "system/content-assets",
+      "system/i18n",
+      "system/server"
+    ],
+    "files": [],
+    "claims": {
+      "content_types": [
+        "release"
+      ]
+    },
+    "runtime": {
+      "content_types": [
+        {
+          "id": "release",
+          "mode": "single",
+          "paths": [
+            "/changelog"
+          ],
+          "package": "internal/web",
+          "handler": "handleContent"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

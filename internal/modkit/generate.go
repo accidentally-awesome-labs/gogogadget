@@ -516,11 +516,32 @@ func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	type route struct {
 		moduleID string
 		contrib  RouteContribution
+		// contentType is non-empty for a route expanded from a content type
+		// declaration; its handler resolves the type by id.
+		contentType string
 	}
 	routes := make([]route, 0)
 	for _, m := range orderedModules(lock, graph) {
 		for _, r := range m.Runtime.Routes {
 			routes = append(routes, route{moduleID: m.ID, contrib: r})
+		}
+		// A content type declares public paths, not routes. Expanding them here
+		// is what lets the generator know every pattern and reserved prefix
+		// before boot, instead of the router walking a registry at startup.
+		for _, ct := range m.Runtime.ContentTypes {
+			for _, path := range ct.Paths {
+				routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
+					ID: "content." + ct.ID + ".index", Method: "GET", Pattern: path,
+					Scope: RoutePublic, Package: ct.Package, Handler: "handleContentIndex",
+				}, contentType: ct.ID})
+				if ct.Mode != ContentModePages {
+					continue
+				}
+				routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
+					ID: "content." + ct.ID + ".detail", Method: "GET", Pattern: path + "/{slug}",
+					Scope: RoutePublic, Package: ct.Package, Handler: "handleContentDetail",
+				}, contentType: ct.ID})
+			}
 		}
 	}
 	sort.Slice(routes, func(i, j int) bool {
@@ -585,7 +606,12 @@ func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph
 			goString(c.ID), goString(c.Method), goString(c.Pattern))
 		fmt.Fprintf(&b, "\t\tScope: %s,\n", scope)
 		fmt.Fprintf(&b, "\t\tPolicy: %s,\n", routePolicyLiteral(c.Policy))
-		fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return http.HandlerFunc(s.%s) },\n", c.Handler)
+		if r.contentType != "" {
+			fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return s.%s(%s) },\n",
+				c.Handler, goString(r.contentType))
+		} else {
+			fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return http.HandlerFunc(s.%s) },\n", c.Handler)
+		}
 		if c.Enabled != "" {
 			fmt.Fprintf(&b, "\t\tEnabled: func(s *Server) bool { return s.%s() },\n", c.Enabled)
 		}

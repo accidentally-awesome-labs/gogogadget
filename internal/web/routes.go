@@ -6,7 +6,6 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/api"
-	"github.com/gogogadget/gogogadget/internal/content"
 )
 
 func (s *Server) routes() error {
@@ -21,17 +20,6 @@ func (s *Server) routes() error {
 	s.mux.Handle("GET /static/", s.serveStatic())
 	s.mux.HandleFunc("GET /favicon.ico", s.faviconRedirect)
 
-	// Content: one index (and, for paged types, one detail) route per
-	// registered content type. Registered before the /{rest...} catch-all.
-	for _, t := range s.types.All() {
-		if t.Path == "" {
-			continue // admin-managed, read programmatically
-		}
-		s.mux.HandleFunc("GET "+t.Path, s.handleContentIndex(t))
-		if t.Mode == content.ModePages {
-			s.mux.HandleFunc("GET "+t.Path+"/{slug}", s.handleContentDetail(t))
-		}
-	}
 	s.mux.HandleFunc("GET /media/{id}/{filename}", s.handleMedia)
 	s.mux.HandleFunc("GET /rss.xml", s.handleRSS)
 	s.mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
@@ -129,7 +117,13 @@ func (s *Server) routes() error {
 	// and before the catch-all, so a generated pattern still wins over it.
 	// ServeMux panics on a duplicate pattern, so a route that also has a
 	// hand-written registration above fails loudly instead of shadowing.
-	if err := registerRoutes(s, RouteRegistry, scopeTargets{
+	registry := RouteRegistry
+	if s.testOnlyModules {
+		// Opt-in only. Nothing in the production boot path sets this, so these
+		// patterns cannot be reached by a deployed runtime.
+		registry = append(append([]Route{}, registry...), testOnlyRoutes()...)
+	}
+	if err := registerRoutes(s, registry, scopeTargets{
 		public: s.mux,
 		app:    appMux,
 		admin:  adminMux,

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/blog",
+    "kind": "page",
+    "name": "blog",
+    "revision": 1,
+    "contract": 1,
+    "title": "Blog",
+    "description": "The blog index and post pages, backed by the content type declaration.",
+    "requires": [
+      "system/content",
+      "system/content-assets",
+      "system/i18n",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/handlers_content.go",
+        "target": "internal/web/handlers_content.go",
+        "class": "go",
+        "sha256": "c07401e37041f2e095ed06886550d4e83f5057bda90132020f54d547b3554f77",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "content_types": [
+        "post"
+      ]
+    },
+    "runtime": {
+      "content_types": [
+        {
+          "id": "post",
+          "mode": "pages",
+          "paths": [
+            "/blog"
+          ],
+          "package": "internal/web",
+          "handler": "handleContent"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

@@ -54,6 +54,9 @@ type Server struct {
 
 	// metrics is the process-local Prometheus registry (see metrics.go).
 	metrics metricsRegistry
+
+	// testOnlyModules mirrors Deps.TestOnlyModules; see that field.
+	testOnlyModules bool
 }
 
 // Deps is the server wiring bag: every external service enters here, behind
@@ -69,6 +72,10 @@ type Deps struct {
 	// (blog posts and changelog releases). Appending one Type is all it takes
 	// to add a collection: no migration, no table, no handler, no template.
 	ContentTypes []content.Type
+	// TestOnlyModules enables surfaces owned by test-only modules under
+	// registry/testdata. web.NewModule — the constructor the generated bootstrap
+	// calls — never sets it, so a booted production runtime cannot reach them.
+	TestOnlyModules bool
 
 	Verifier        identity.Verifier
 	Fetcher         identity.UserFetcher
@@ -83,22 +90,23 @@ type Deps struct {
 
 func NewServer(d Deps) (*Server, error) {
 	s := &Server{
-		cfg:           *d.Config,
-		log:           d.Log,
-		db:            d.DB,
-		q:             d.Queries,
-		version:       d.Version,
-		docs:          d.Docs,
-		verifier:      d.Verifier,
-		fetcher:       d.Fetcher,
-		deleter:       d.IdentityDeleter,
-		billingClient: d.Billing,
-		analytics:     analytics.NoopCapturer{},
-		store:         d.Storage,
-		llm:           d.LLM,
-		flags:         d.Flags,
-		reporter:      d.Reporter,
-		mux:           http.NewServeMux(),
+		cfg:             *d.Config,
+		log:             d.Log,
+		db:              d.DB,
+		q:               d.Queries,
+		version:         d.Version,
+		testOnlyModules: d.TestOnlyModules,
+		docs:            d.Docs,
+		verifier:        d.Verifier,
+		fetcher:         d.Fetcher,
+		deleter:         d.IdentityDeleter,
+		billingClient:   d.Billing,
+		analytics:       analytics.NoopCapturer{},
+		store:           d.Storage,
+		llm:             d.LLM,
+		flags:           d.Flags,
+		reporter:        d.Reporter,
+		mux:             http.NewServeMux(),
 	}
 	if s.store == nil {
 		s.store = storage.NewDevStore("tmp/uploads")
@@ -131,10 +139,16 @@ func NewServer(d Deps) (*Server, error) {
 // contentTypesOf returns the declared collections, defaulting to the built-in
 // blog and changelog.
 func contentTypesOf(d Deps) []content.Type {
-	if d.ContentTypes == nil {
-		return content.DefaultTypes()
+	types := d.ContentTypes
+	if types == nil {
+		types = content.DefaultTypes()
 	}
-	return d.ContentTypes
+	if d.TestOnlyModules {
+		// Test-only modules contribute their collections here so the fixture
+		// travels the same path a shipped module does.
+		types = append(append([]content.Type{}, types...), testOnlyContentTypes()...)
+	}
+	return types
 }
 
 // currentAnnouncement returns the active platform announcement, cached for
