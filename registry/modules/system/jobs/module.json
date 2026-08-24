@@ -21,7 +21,7 @@
         "source": "internal/db/queries/jobs.sql",
         "target": "internal/db/queries/jobs.sql",
         "class": "query",
-        "sha256": "4d858d189186ed33f013b7de6259146e974e4a441b7552f607093f90c1246f9f",
+        "sha256": "78ce2a214540207da708bae3c77dd0cd2a8cdddbbcdf8ebfa9f384fde2ae7010",
         "rewrite_module": false,
         "contract": false
       },
@@ -29,7 +29,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "800e7c9579265ae3e1b2085e5df1d3d5a8c0595a8a836575dbeaa61d535b2aea",
+        "sha256": "261c7ae871827331e9e1f1f334ab2f9a8c05f97dab486317499daa730699f743",
         "rewrite_module": true,
         "contract": true
       },

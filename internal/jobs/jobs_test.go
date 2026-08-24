@@ -62,12 +62,18 @@ func TestEnqueueProcessComplete(t *testing.T) {
 	assert.Contains(t, string(raw), "<h1>hi</h1>")
 }
 
+// A poison job is a KNOWN kind whose handler keeps failing — a malformed payload
+// makes the email arm fail on unmarshal every attempt. It deliberately does not
+// use an unknown kind any more: an unknown kind is an uninstalled module and now
+// dies on the first claim, which is a different contract (see
+// TestUnknownKindDeadLettersImmediately).
 func TestPoisonJobFailsWithBackoff(t *testing.T) {
 	pool, q := testSetup(t)
 	ctx := context.Background()
 	w := testWorker(q, t.TempDir())
 
-	require.NoError(t, Enqueue(ctx, q, "unknown.kind", map[string]string{"x": "y"}))
+	// org_id is a string in EmailPayload, so a number fails to unmarshal.
+	require.NoError(t, Enqueue(ctx, q, KindWelcome, map[string]any{"org_id": 12345}))
 
 	done, err := w.ProcessOne(ctx)
 	require.NoError(t, err)
@@ -80,7 +86,7 @@ func TestPoisonJobFailsWithBackoff(t *testing.T) {
 	require.NoError(t, pool.QueryRow(ctx,
 		`SELECT attempts, COALESCE(last_error,''), run_at FROM jobs`).Scan(&attempts, &lastError, &runAt))
 	assert.Equal(t, int32(1), attempts)
-	assert.Contains(t, lastError, "unknown job kind")
+	assert.Contains(t, lastError, "cannot unmarshal")
 	assert.True(t, runAt.After(time.Now().Add(time.Minute)), "backoff must push run_at into the future")
 
 	// So an immediate re-claim finds nothing.
@@ -97,7 +103,7 @@ func TestDeadLetterAtMaxAttempts(t *testing.T) {
 	var deadLettered string
 	w.OnDeadLetter = func(kind string, err error) { deadLettered = kind }
 
-	require.NoError(t, Enqueue(ctx, q, "unknown.kind", nil))
+	require.NoError(t, Enqueue(ctx, q, KindWelcome, map[string]any{"org_id": 12345}))
 	for i := 0; i < 8; i++ {
 		done, err := w.ProcessOne(ctx)
 		require.NoError(t, err)
@@ -106,7 +112,7 @@ func TestDeadLetterAtMaxAttempts(t *testing.T) {
 		_, err = pool.Exec(ctx, `UPDATE jobs SET run_at = now() WHERE done_at IS NULL`)
 		require.NoError(t, err)
 	}
-	assert.Equal(t, "unknown.kind", deadLettered)
+	assert.Equal(t, KindWelcome, deadLettered)
 
 	// Dead-lettered: done_at set, last_error='exhausted', never claimable again.
 	var lastError string

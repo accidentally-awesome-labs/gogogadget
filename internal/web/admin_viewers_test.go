@@ -85,7 +85,7 @@ func TestAdminJobsPageAndRequeue(t *testing.T) {
 	adminUser(t, s, "user_jv", "org_jv")
 	deadID, err := s.q.EnqueueJob(t.Context(), sqlc.EnqueueJobParams{Kind: "email.digest", Payload: []byte(`{}`)})
 	require.NoError(t, err)
-	require.NoError(t, s.q.DeadLetterJob(t.Context(), deadID))
+	require.NoError(t, s.q.DeadLetterJob(t.Context(), sqlc.DeadLetterJobParams{ID: deadID, Reason: pgtype.Text{String: "exhausted", Valid: true}}))
 	doneID, err := s.q.EnqueueJob(t.Context(), sqlc.EnqueueJobParams{Kind: "email.welcome", Payload: []byte(`{}`)})
 	require.NoError(t, err)
 	require.NoError(t, s.q.CompleteJob(t.Context(), doneID))

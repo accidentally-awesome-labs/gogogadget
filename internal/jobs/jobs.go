@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"math/rand/v2"
 	"net/http"
@@ -251,8 +252,20 @@ func (w *Worker) ProcessOne(ctx context.Context) (bool, error) {
 
 	if err := w.dispatch(ctx, job); err != nil {
 		w.log.Error("job failed", "id", job.ID, "kind", job.Kind, "attempts", job.Attempts, "error", err)
-		if job.Attempts >= job.MaxAttempts {
-			if derr := w.q.DeadLetterJob(ctx, job.ID); derr != nil {
+
+		// An uninstalled module's queued rows die on the first claim. Retrying a
+		// handler that cannot exist would burn the full backoff schedule — hours
+		// of queue capacity — and bury the real signal behind repeated failures.
+		reason := deadLetterReasonExhausted
+		terminal := job.Attempts >= job.MaxAttempts
+		if errors.Is(err, errUnknownKind) {
+			reason, terminal = deadLetterReasonUninstalled, true
+		}
+
+		if terminal {
+			if derr := w.q.DeadLetterJob(ctx, sqlc.DeadLetterJobParams{
+				ID: job.ID, Reason: pgtype.Text{String: reason, Valid: true},
+			}); derr != nil {
 				return true, derr
 			}
 			if w.OnDeadLetter != nil {
@@ -283,6 +296,18 @@ func (w *Worker) schedulerPass(ctx context.Context) error {
 	}
 	return nil
 }
+
+// deadLetterReasonExhausted and deadLetterReasonUninstalled are the terminal
+// reasons a job can carry. They are literals shared with the admin status view
+// and the requeue guard, so they are named once here.
+const (
+	deadLetterReasonExhausted   = "exhausted"
+	deadLetterReasonUninstalled = "module_uninstalled"
+)
+
+// errUnknownKind marks a persisted row whose kind no installed module provides.
+// It is not a handler failure, so it never retries.
+var errUnknownKind = errors.New("no installed module provides this job kind")
 
 func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 	switch job.Kind {
@@ -325,7 +350,10 @@ func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
 		}
 		return w.sender.Send(ctx, mail.Message{To: p.To, Subject: p.Subject, HTML: p.HTML, Text: p.Text})
 	default:
-		return errors.New("unknown job kind: " + job.Kind)
+		// No installed module provides this kind. Wrapping the sentinel keeps the
+		// kind in the message for the operator while letting ProcessOne recognise
+		// that retrying cannot help.
+		return fmt.Errorf("%w: %s", errUnknownKind, job.Kind)
 	}
 }
 

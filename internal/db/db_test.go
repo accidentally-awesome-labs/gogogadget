@@ -205,7 +205,7 @@ func TestRoundtripEveryTable(t *testing.T) {
 	assert.Equal(t, "done", jobRows[0].Status)
 	jid2, err := q.EnqueueJob(ctx, sqlc.EnqueueJobParams{Kind: "email.digest", Payload: []byte(`{}`)})
 	require.NoError(t, err)
-	require.NoError(t, q.DeadLetterJob(ctx, jid2))
+	require.NoError(t, q.DeadLetterJob(ctx, sqlc.DeadLetterJobParams{ID: jid2, Reason: pgtype.Text{String: "exhausted", Valid: true}}))
 	jobRows, err = q.ListJobs(ctx, sqlc.ListJobsParams{Filter: "digest", Off: 0, Lim: 10})
 	require.NoError(t, err)
 	require.Len(t, jobRows, 1)
