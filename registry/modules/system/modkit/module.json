@@ -206,7 +206,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
+        "sha256": "170553d127037660146847928fc89a114b52a1cf058b6d25bb52dd0c29a87c18",
         "rewrite_module": true,
         "contract": false
       }

@@ -3,8 +3,6 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"os"
-	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -36,14 +34,18 @@ func loadSpec(t *testing.T) openAPIDoc {
 
 // registeredAPIRoutes scans routes.go for the /api/v1 patterns the mux is
 // given. Go's ServeMux exposes no route list, and the source IS the registry.
+// registeredAPIRoutes reads the generated route table rather than grepping
+// routes.go. The table IS the registration, so this compares the spec against
+// what the server actually serves; a source regex could pass while the route was
+// renamed, moved, or never registered at all.
 func registeredAPIRoutes(t *testing.T) []string {
 	t.Helper()
-	src, err := os.ReadFile("routes.go")
-	require.NoError(t, err)
-	re := regexp.MustCompile(`"(GET|POST|PUT|PATCH|DELETE) (/api/v1/[^"]*)"`)
 	var out []string
-	for _, m := range re.FindAllStringSubmatch(string(src), -1) {
-		out = append(out, strings.ToLower(m[1])+" "+m[2])
+	for _, route := range RouteRegistry {
+		if !strings.HasPrefix(route.Pattern, "/api/v1/") {
+			continue
+		}
+		out = append(out, strings.ToLower(route.Method)+" "+route.Pattern)
 	}
 	sort.Strings(out)
 	return out

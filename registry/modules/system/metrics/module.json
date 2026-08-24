@@ -21,8 +21,33 @@
         "contract": true
       }
     ],
-    "claims": {},
-    "runtime": {},
+    "claims": {
+      "routes": [
+        "metrics.scrape"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "metrics.scrape",
+          "method": "GET",
+          "pattern": "/metrics",
+          "scope": "probe",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleMetrics",
+          "enabled": "metricsEnabled"
+        }
+      ]
+    },
     "migrations": [],
     "environment": [
       {

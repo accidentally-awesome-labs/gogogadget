@@ -393,3 +393,22 @@ func TestLockRewrittenBaseDigestInvariant(t *testing.T) {
 		t.Fatalf("ParseLock(non-rewritten mismatch) error = %v, want base/source mismatch rejection", err)
 	}
 }
+
+// A trailing slash is Go's subtree pattern, and real surfaces need it:
+// "/static/" serves an asset tree and "/debug/pprof/" serves the profiler index.
+// Rejecting it would make those routes undeclarable, which pushes them back into
+// hand-written registration and out of the policy matcher.
+func TestValidateRoutePathAcceptsSubtreePatterns(t *testing.T) {
+	valid := []string{"/", "/static/", "/debug/pprof/", "/app/", "/api/v1/projects", "/thing/{id}"}
+	for _, path := range valid {
+		if err := validateRoutePath(path); err != nil {
+			t.Errorf("validateRoutePath(%q) = %v, want nil", path, err)
+		}
+	}
+	invalid := []string{"", "static/", "/a//b", "/../etc", "/a/./b", "//host/path"}
+	for _, path := range invalid {
+		if err := validateRoutePath(path); err == nil {
+			t.Errorf("validateRoutePath(%q) = nil, want an error", path)
+		}
+	}
+}

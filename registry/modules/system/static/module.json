@@ -22,11 +22,49 @@
       }
     ],
     "claims": {
-      "packages": [
-        "static"
+      "routes": [
+        "static.assets",
+        "static.favicon"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "routes": [
+        {
+          "id": "static.assets",
+          "method": "GET",
+          "pattern": "/static/",
+          "scope": "static",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "immutable asset transport with no session and no mutation",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "serveStaticAssets"
+        },
+        {
+          "id": "static.favicon",
+          "method": "GET",
+          "pattern": "/favicon.ico",
+          "scope": "static",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "static redirect with no session and no mutation",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "faviconRedirect"
+        }
+      ]
+    },
     "migrations": [],
     "environment": [],
     "docs": [],

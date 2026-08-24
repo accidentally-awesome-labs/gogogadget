@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/api-projects",
+    "kind": "workflow",
+    "name": "api-projects",
+    "revision": 1,
+    "contract": 1,
+    "title": "Projects API",
+    "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
+    "requires": [
+      "system/api",
+      "system/server",
+      "workflow/openapi-contract"
+    ],
+    "files": [],
+    "claims": {
+      "routes": [
+        "api.projects.create",
+        "api.projects.list"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.projects.create",
+          "method": "POST",
+          "pattern": "/api/v1/projects",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPICreateProject"
+        },
+        {
+          "id": "api.projects.list",
+          "method": "GET",
+          "pattern": "/api/v1/projects",
+          "scope": "api-read",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIListProjects"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

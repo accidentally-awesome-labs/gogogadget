@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/docs-search",
+    "kind": "page",
+    "name": "docs-search",
+    "revision": 1,
+    "contract": 1,
+    "title": "Documentation search",
+    "description": "Full-text search across the embedded documentation corpus.",
+    "requires": [
+      "page/docs-index",
+      "system/content-assets",
+      "system/server"
+    ],
+    "files": [],
+    "claims": {
+      "routes": [
+        "docs.search"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "docs.search",
+          "method": "GET",
+          "pattern": "/docs/search",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDocsSearch"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

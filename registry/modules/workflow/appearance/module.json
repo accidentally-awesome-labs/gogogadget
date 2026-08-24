@@ -22,15 +22,41 @@
         "sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/handlers_locale.go",
+        "target": "internal/web/handlers_locale.go",
+        "class": "go",
+        "sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
       "routes": [
+        "appearance.locale",
         "appearance.set-theme"
       ]
     },
     "runtime": {
       "routes": [
+        {
+          "id": "appearance.locale",
+          "method": "POST",
+          "pattern": "/set-locale",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSetLocale"
+        },
         {
           "id": "appearance.set-theme",
           "method": "POST",

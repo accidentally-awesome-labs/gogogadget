@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/api-ai-chat",
+    "kind": "workflow",
+    "name": "api-ai-chat",
+    "revision": 1,
+    "contract": 1,
+    "title": "AI chat API",
+    "description": "The JSON API for model completions, behind bearer-token auth.",
+    "requires": [
+      "system/api",
+      "system/llm",
+      "system/server",
+      "workflow/openapi-contract"
+    ],
+    "files": [],
+    "claims": {
+      "routes": [
+        "api.ai.chat"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.ai.chat",
+          "method": "POST",
+          "pattern": "/api/v1/ai/chat",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 131072,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIAIChat"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

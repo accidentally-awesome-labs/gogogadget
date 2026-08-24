@@ -57,6 +57,12 @@ type Server struct {
 
 	// testOnlyModules mirrors Deps.TestOnlyModules; see that field.
 	testOnlyModules bool
+
+	// api is the /api/v1 transport, composed once (see api_transport.go).
+	api apiSurface
+
+	// staticAssets is the embedded-asset handler, built once at construction.
+	staticAssets http.Handler
 }
 
 // Deps is the server wiring bag: every external service enters here, behind
@@ -130,6 +136,8 @@ func NewServer(d Deps) (*Server, error) {
 	if d.Analytics != nil {
 		s.analytics = d.Analytics
 	}
+	s.api = newAPISurface(s)
+	s.staticAssets = s.serveStatic()
 	if err := s.routes(); err != nil {
 		return nil, err
 	}

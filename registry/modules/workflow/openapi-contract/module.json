@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/openapi-contract",
+    "kind": "workflow",
+    "name": "openapi-contract",
+    "revision": 1,
+    "contract": 1,
+    "title": "OpenAPI description",
+    "description": "Serves the generated OpenAPI description of the JSON API.",
+    "requires": [
+      "system/api",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/api_transport.go",
+        "target": "internal/web/api_transport.go",
+        "class": "go",
+        "sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "api.openapi"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.openapi",
+          "method": "GET",
+          "pattern": "/api/v1/openapi.yaml",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "public contract document; a client needs it before it has a token",
+            "rate_exempt": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIOpenAPISpec"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

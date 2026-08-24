@@ -32,7 +32,8 @@
     "claims": {
       "routes": [
         "admin.media.delete",
-        "admin.media.upload"
+        "admin.media.upload",
+        "media.serve"
       ]
     },
     "runtime": {
@@ -70,6 +71,23 @@
           },
           "package": "internal/web",
           "handler": "handleAdminMediaUpload"
+        },
+        {
+          "id": "media.serve",
+          "method": "GET",
+          "pattern": "/media/{id}/{filename}",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "public object transport with no session and no mutation",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleMedia"
         }
       ]
     },

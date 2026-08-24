@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-jobs",
+    "kind": "page",
+    "name": "admin-jobs",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin job queue",
+    "description": "The background job queue with state, attempt count, and dead-letter detail.",
+    "requires": [
+      "system/jobs",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/handlers_admin_jobs.go",
+        "target": "internal/web/handlers_admin_jobs.go",
+        "class": "go",
+        "sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.jobs.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.jobs.index",
+          "method": "GET",
+          "pattern": "/admin/jobs",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminJobs"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/settings-webhooks",
+    "kind": "page",
+    "name": "settings-webhooks",
+    "revision": 1,
+    "contract": 1,
+    "title": "Webhook settings",
+    "description": "The organization's outbound webhook endpoints, their secrets, and recent delivery attempts.",
+    "requires": [
+      "system/security",
+      "system/server",
+      "system/webhooks"
+    ],
+    "files": [
+      {
+        "source": "internal/web/handlers_webhooks_settings.go",
+        "target": "internal/web/handlers_webhooks_settings.go",
+        "class": "go",
+        "sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "settings-webhooks.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-webhooks.index",
+          "method": "GET",
+          "pattern": "/app/settings/webhooks",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsWebhooks"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

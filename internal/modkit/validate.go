@@ -1112,7 +1112,16 @@ func validateRoutePath(value string) error {
 	if value == "" || value[0] != '/' {
 		return fmt.Errorf("must be a safe absolute slash path")
 	}
-	for _, segment := range strings.Split(value[1:], "/") {
+	// A single trailing slash is Go's subtree pattern, and real surfaces need it:
+	// "/static/" serves an asset tree, "/debug/pprof/" serves the profiler index.
+	// Strip it before checking segments so the empty tail is not mistaken for an
+	// empty segment; "//" is still rejected because that leaves a genuine empty
+	// segment behind.
+	trimmed := strings.TrimSuffix(value, "/")
+	if trimmed == "" {
+		return fmt.Errorf("must be a safe absolute slash path")
+	}
+	for _, segment := range strings.Split(trimmed[1:], "/") {
 		if !validRoutePathSegment(segment) {
 			return fmt.Errorf("must be a safe absolute slash path")
 		}

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+  "registry_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
   "order": [
     "system/apphost",
     "system/config",
@@ -30,6 +30,9 @@
     "system/server",
     "page/blog",
     "page/changelog",
+    "page/docs-index",
+    "page/docs",
+    "page/docs-search",
     "page/home",
     "page/pricing",
     "page/privacy",
@@ -42,6 +45,7 @@
     "page/admin-content",
     "page/admin-flag-detail",
     "page/admin-flags",
+    "page/admin-jobs",
     "page/admin-media",
     "page/admin-organizations",
     "page/admin-overview",
@@ -60,12 +64,14 @@
     "system/usage",
     "page/settings-billing",
     "system/webhooks",
+    "page/settings-webhooks",
     "workflow/account-export",
     "workflow/admin-announcements",
     "workflow/admin-content",
     "page/admin-content-editor",
     "page/admin-content-preview",
     "workflow/admin-flags",
+    "workflow/admin-job-requeue",
     "workflow/admin-media",
     "workflow/admin-schedules",
     "workflow/admin-user-governance",
@@ -79,21 +85,27 @@
     "workflow/dev-session",
     "page/dev-gallery",
     "workflow/files",
+    "workflow/identity-webhook-sync",
     "workflow/impersonation",
     "workflow/notification-inbox",
     "workflow/notification-preferences",
+    "workflow/openapi-contract",
+    "workflow/api-ai-chat",
+    "workflow/api-projects",
     "workflow/organization-export",
     "page/settings-organization",
+    "workflow/outbound-webhooks",
     "workflow/project-export",
     "workflow/projects",
-    "page/project-edit"
+    "page/project-edit",
+    "workflow/seo-discovery"
   ],
   "modules": [
     {
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -187,7 +199,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -268,7 +280,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -362,7 +374,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -441,7 +453,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -539,7 +551,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -618,7 +630,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -698,7 +710,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -776,10 +788,90 @@
       "migrations": []
     },
     {
+      "id": "page/admin-jobs",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [
+        "workflow/admin-job-requeue"
+      ],
+      "manifest": {
+        "id": "page/admin-jobs",
+        "kind": "page",
+        "name": "admin-jobs",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin job queue",
+        "description": "The background job queue with state, attempt count, and dead-letter detail.",
+        "requires": [
+          "system/jobs",
+          "system/security",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/handlers_admin_jobs.go",
+            "target": "internal/web/handlers_admin_jobs.go",
+            "class": "go",
+            "sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "admin.jobs.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.jobs.index",
+              "method": "GET",
+              "pattern": "/admin/jobs",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAdminJobs"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/handlers_admin_jobs.go",
+          "source": "internal/web/handlers_admin_jobs.go",
+          "base_sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+          "local_sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -860,7 +952,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -939,7 +1031,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1020,7 +1112,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -1103,7 +1195,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1182,7 +1274,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1253,7 +1345,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1307,7 +1399,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1402,7 +1494,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1495,10 +1587,213 @@
       "migrations": []
     },
     {
+      "id": "page/docs",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/docs",
+        "kind": "page",
+        "name": "docs",
+        "revision": 1,
+        "contract": 1,
+        "title": "Documentation page",
+        "description": "One rendered documentation page, versioned with the binary.",
+        "requires": [
+          "page/docs-index",
+          "system/content-assets",
+          "system/server"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "docs.show"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "docs.show",
+              "method": "GET",
+              "pattern": "/docs/{slug}",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDocsPage"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
+      "id": "page/docs-index",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [
+        "page/docs",
+        "page/docs-search"
+      ],
+      "manifest": {
+        "id": "page/docs-index",
+        "kind": "page",
+        "name": "docs-index",
+        "revision": 1,
+        "contract": 1,
+        "title": "Documentation index",
+        "description": "The documentation landing page listing every section.",
+        "requires": [
+          "system/content-assets",
+          "system/i18n",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/handlers_docs.go",
+            "target": "internal/web/handlers_docs.go",
+            "class": "go",
+            "sha256": "30a31e2cd3b2f96c7db4fb841484d3f62816cce2751940f6aff54891f689ec3f",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "docs.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "docs.index",
+              "method": "GET",
+              "pattern": "/docs",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDocsIndex"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/handlers_docs.go",
+          "source": "internal/web/handlers_docs.go",
+          "base_sha256": "30a31e2cd3b2f96c7db4fb841484d3f62816cce2751940f6aff54891f689ec3f",
+          "local_sha256": "30a31e2cd3b2f96c7db4fb841484d3f62816cce2751940f6aff54891f689ec3f",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "page/docs-search",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "page/docs-search",
+        "kind": "page",
+        "name": "docs-search",
+        "revision": 1,
+        "contract": 1,
+        "title": "Documentation search",
+        "description": "Full-text search across the embedded documentation corpus.",
+        "requires": [
+          "page/docs-index",
+          "system/content-assets",
+          "system/server"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "docs.search"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "docs.search",
+              "method": "GET",
+              "pattern": "/docs/search",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleDocsSearch"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -1580,7 +1875,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1672,7 +1967,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -1754,7 +2049,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1846,7 +2141,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1938,7 +2233,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2018,7 +2313,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2097,7 +2392,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2177,7 +2472,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -2259,7 +2554,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -2341,7 +2636,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -2424,7 +2719,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -2506,7 +2801,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2585,10 +2880,90 @@
       "migrations": []
     },
     {
+      "id": "page/settings-webhooks",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [
+        "workflow/outbound-webhooks"
+      ],
+      "manifest": {
+        "id": "page/settings-webhooks",
+        "kind": "page",
+        "name": "settings-webhooks",
+        "revision": 1,
+        "contract": 1,
+        "title": "Webhook settings",
+        "description": "The organization's outbound webhook endpoints, their secrets, and recent delivery attempts.",
+        "requires": [
+          "system/security",
+          "system/server",
+          "system/webhooks"
+        ],
+        "files": [
+          {
+            "source": "internal/web/handlers_webhooks_settings.go",
+            "target": "internal/web/handlers_webhooks_settings.go",
+            "class": "go",
+            "sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "settings-webhooks.index"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "settings-webhooks.index",
+              "method": "GET",
+              "pattern": "/app/settings/webhooks",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSettingsWebhooks"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/handlers_webhooks_settings.go",
+          "source": "internal/web/handlers_webhooks_settings.go",
+          "base_sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
+          "local_sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2680,7 +3055,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -2790,7 +3165,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -2867,11 +3242,14 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
+        "workflow/api-ai-chat",
+        "workflow/api-projects",
         "workflow/api-token-lifecycle",
+        "workflow/openapi-contract",
         "workflow/projects"
       ],
       "manifest": {
@@ -3105,7 +3483,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -3174,7 +3552,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -3184,12 +3562,14 @@
         "workflow/account-export",
         "workflow/admin-content",
         "workflow/admin-flags",
+        "workflow/admin-job-requeue",
         "workflow/admin-media",
         "workflow/admin-schedules",
         "workflow/admin-user-governance",
         "workflow/files",
         "workflow/impersonation",
         "workflow/organization-export",
+        "workflow/outbound-webhooks",
         "workflow/project-export",
         "workflow/projects"
       ],
@@ -3279,7 +3659,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -3484,7 +3864,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -3605,7 +3985,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -3617,7 +3997,8 @@
         "system/content-assets",
         "system/server",
         "workflow/admin-content",
-        "workflow/admin-media"
+        "workflow/admin-media",
+        "workflow/seo-discovery"
       ],
       "manifest": {
         "id": "system/content",
@@ -3935,11 +4316,14 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/blog",
         "page/changelog",
+        "page/docs",
+        "page/docs-index",
+        "page/docs-search",
         "system/server"
       ],
       "manifest": {
@@ -4576,7 +4960,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -4723,7 +5107,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -4866,7 +5250,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -4885,6 +5269,7 @@
         "page/changelog",
         "page/dashboard",
         "page/dev-gallery",
+        "page/docs-index",
         "page/files",
         "page/home",
         "page/notifications",
@@ -5032,7 +5417,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -5061,6 +5446,7 @@
         "workflow/billing-checkout",
         "workflow/dev-session",
         "workflow/files",
+        "workflow/identity-webhook-sync",
         "workflow/impersonation",
         "workflow/notification-inbox",
         "workflow/notification-preferences",
@@ -5266,7 +5652,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -5356,10 +5742,12 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
+        "page/admin-jobs",
         "page/admin-schedules",
+        "workflow/admin-job-requeue",
         "workflow/admin-schedules",
         "workflow/organization-export",
         "workflow/project-export"
@@ -5518,10 +5906,11 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
-        "system/server"
+        "system/server",
+        "workflow/api-ai-chat"
       ],
       "manifest": {
         "id": "system/llm",
@@ -5632,7 +6021,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -5741,7 +6130,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5765,8 +6154,33 @@
             "contract": true
           }
         ],
-        "claims": {},
-        "runtime": {},
+        "claims": {
+          "routes": [
+            "metrics.scrape"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "metrics.scrape",
+              "method": "GET",
+              "pattern": "/metrics",
+              "scope": "probe",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleMetrics",
+              "enabled": "metricsEnabled"
+            }
+          ]
+        },
         "migrations": [],
         "environment": [
           {
@@ -5801,7 +6215,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6010,7 +6424,7 @@
             "source": "internal/modkit/validate.go",
             "target": "internal/modkit/validate.go",
             "class": "go",
-            "sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
+            "sha256": "170553d127037660146847928fc89a114b52a1cf058b6d25bb52dd0c29a87c18",
             "rewrite_module": true,
             "contract": false
           }
@@ -6206,8 +6620,8 @@
         {
           "path": "internal/modkit/validate.go",
           "source": "internal/modkit/validate.go",
-          "base_sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
-          "local_sha256": "1172d2f5d13404c9b376fab246bec9e3677d83ea56845f5cf859b8349c3b1099",
+          "base_sha256": "170553d127037660146847928fc89a114b52a1cf058b6d25bb52dd0c29a87c18",
+          "local_sha256": "170553d127037660146847928fc89a114b52a1cf058b6d25bb52dd0c29a87c18",
           "state": "clean"
         }
       ],
@@ -6217,7 +6631,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -6367,7 +6781,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -6486,7 +6900,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -6508,6 +6922,7 @@
         "workflow/admin-flags",
         "workflow/billing-webhook",
         "workflow/dev-session",
+        "workflow/identity-webhook-sync",
         "workflow/impersonation",
         "workflow/organization-export"
       ],
@@ -6640,7 +7055,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -6744,7 +7159,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -6843,7 +7258,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -6854,6 +7269,7 @@
         "page/admin-content-preview",
         "page/admin-flag-detail",
         "page/admin-flags",
+        "page/admin-jobs",
         "page/admin-media",
         "page/admin-organizations",
         "page/admin-overview",
@@ -6871,6 +7287,7 @@
         "page/settings-billing",
         "page/settings-notifications",
         "page/settings-organization",
+        "page/settings-webhooks",
         "workflow/account-delete",
         "workflow/account-export",
         "workflow/admin-announcements",
@@ -6889,6 +7306,7 @@
         "workflow/notification-inbox",
         "workflow/notification-preferences",
         "workflow/organization-export",
+        "workflow/outbound-webhooks",
         "workflow/project-export",
         "workflow/projects"
       ],
@@ -6965,7 +7383,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7047,9 +7465,11 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "workflow/seo-discovery"
+      ],
       "manifest": {
         "id": "system/seo",
         "kind": "system",
@@ -7099,7 +7519,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -7110,6 +7530,7 @@
         "page/admin-content-preview",
         "page/admin-flag-detail",
         "page/admin-flags",
+        "page/admin-jobs",
         "page/admin-media",
         "page/admin-organizations",
         "page/admin-overview",
@@ -7119,6 +7540,9 @@
         "page/changelog",
         "page/dashboard",
         "page/dev-gallery",
+        "page/docs",
+        "page/docs-index",
+        "page/docs-search",
         "page/files",
         "page/home",
         "page/notifications",
@@ -7132,6 +7556,7 @@
         "page/settings-billing",
         "page/settings-notifications",
         "page/settings-organization",
+        "page/settings-webhooks",
         "page/terms",
         "system/metrics",
         "system/security",
@@ -7142,9 +7567,12 @@
         "workflow/admin-announcements",
         "workflow/admin-content",
         "workflow/admin-flags",
+        "workflow/admin-job-requeue",
         "workflow/admin-media",
         "workflow/admin-schedules",
         "workflow/admin-user-governance",
+        "workflow/api-ai-chat",
+        "workflow/api-projects",
         "workflow/api-token-lifecycle",
         "workflow/appearance",
         "workflow/auth-session",
@@ -7152,12 +7580,16 @@
         "workflow/billing-webhook",
         "workflow/dev-session",
         "workflow/files",
+        "workflow/identity-webhook-sync",
         "workflow/impersonation",
         "workflow/notification-inbox",
         "workflow/notification-preferences",
+        "workflow/openapi-contract",
         "workflow/organization-export",
+        "workflow/outbound-webhooks",
         "workflow/project-export",
-        "workflow/projects"
+        "workflow/projects",
+        "workflow/seo-discovery"
       ],
       "manifest": {
         "id": "system/server",
@@ -7232,10 +7664,18 @@
             "contract": true
           },
           {
+            "source": "internal/web/route_adapters.go",
+            "target": "internal/web/route_adapters.go",
+            "class": "go",
+            "sha256": "daddd2185cd2de8a503ba59a45fce9af071922e569d90e7a0f8612d4f468c2aa",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/routes.go",
             "target": "internal/web/routes.go",
             "class": "go",
-            "sha256": "13d687574eceeb1134e22205214ed5cbf2435d64d98daaa937229419adddbbd9",
+            "sha256": "a1b0110f53760c6eb847cafd6a07b146e707d92f1fc922866d7003bd0282e4d8",
             "rewrite_module": true,
             "contract": false
           },
@@ -7243,7 +7683,7 @@
             "source": "internal/web/server.go",
             "target": "internal/web/server.go",
             "class": "go",
-            "sha256": "ce2913518c2a75bca46bfd8d3494812954e2917742f73e00507385c341c52da9",
+            "sha256": "72d3d63ebafc0418f2d07c6c34b6d0b9a1f5d69337f4de612178633fa64cebc4",
             "rewrite_module": true,
             "contract": true
           }
@@ -7251,6 +7691,15 @@
         "claims": {
           "packages": [
             "internal/web"
+          ],
+          "routes": [
+            "debug.pprof.cmdline",
+            "debug.pprof.index",
+            "debug.pprof.profile",
+            "debug.pprof.symbol",
+            "debug.pprof.trace",
+            "probe.healthz",
+            "probe.readyz"
           ]
         },
         "runtime": {
@@ -7345,7 +7794,133 @@
             ],
             "start": false,
             "stop": false
-          }
+          },
+          "routes": [
+            {
+              "id": "debug.pprof.cmdline",
+              "method": "GET",
+              "pattern": "/debug/pprof/cmdline",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "developer profiling surface, never registered in production",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePprofCmdline",
+              "enabled": "debugProfilingEnabled"
+            },
+            {
+              "id": "debug.pprof.index",
+              "method": "GET",
+              "pattern": "/debug/pprof/",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "developer profiling surface, never registered in production",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePprofIndex",
+              "enabled": "debugProfilingEnabled"
+            },
+            {
+              "id": "debug.pprof.profile",
+              "method": "GET",
+              "pattern": "/debug/pprof/profile",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "developer profiling surface, never registered in production",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePprofProfile",
+              "enabled": "debugProfilingEnabled"
+            },
+            {
+              "id": "debug.pprof.symbol",
+              "method": "GET",
+              "pattern": "/debug/pprof/symbol",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "developer profiling surface, never registered in production",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePprofSymbol",
+              "enabled": "debugProfilingEnabled"
+            },
+            {
+              "id": "debug.pprof.trace",
+              "method": "GET",
+              "pattern": "/debug/pprof/trace",
+              "scope": "dev",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "developer profiling surface, never registered in production",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handlePprofTrace",
+              "enabled": "debugProfilingEnabled"
+            },
+            {
+              "id": "probe.healthz",
+              "method": "GET",
+              "pattern": "/healthz",
+              "scope": "probe",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleHealthz"
+            },
+            {
+              "id": "probe.readyz",
+              "method": "GET",
+              "pattern": "/readyz",
+              "scope": "probe",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleReadyz"
+            }
+          ]
         },
         "migrations": [],
         "environment": [
@@ -7409,17 +7984,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/route_adapters.go",
+          "source": "internal/web/route_adapters.go",
+          "base_sha256": "daddd2185cd2de8a503ba59a45fce9af071922e569d90e7a0f8612d4f468c2aa",
+          "local_sha256": "daddd2185cd2de8a503ba59a45fce9af071922e569d90e7a0f8612d4f468c2aa",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/routes.go",
           "source": "internal/web/routes.go",
-          "base_sha256": "13d687574eceeb1134e22205214ed5cbf2435d64d98daaa937229419adddbbd9",
-          "local_sha256": "13d687574eceeb1134e22205214ed5cbf2435d64d98daaa937229419adddbbd9",
+          "base_sha256": "a1b0110f53760c6eb847cafd6a07b146e707d92f1fc922866d7003bd0282e4d8",
+          "local_sha256": "a1b0110f53760c6eb847cafd6a07b146e707d92f1fc922866d7003bd0282e4d8",
           "state": "clean"
         },
         {
           "path": "internal/web/server.go",
           "source": "internal/web/server.go",
-          "base_sha256": "ce2913518c2a75bca46bfd8d3494812954e2917742f73e00507385c341c52da9",
-          "local_sha256": "ce2913518c2a75bca46bfd8d3494812954e2917742f73e00507385c341c52da9",
+          "base_sha256": "72d3d63ebafc0418f2d07c6c34b6d0b9a1f5d69337f4de612178633fa64cebc4",
+          "local_sha256": "72d3d63ebafc0418f2d07c6c34b6d0b9a1f5d69337f4de612178633fa64cebc4",
           "state": "clean"
         }
       ],
@@ -7429,7 +8011,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7454,11 +8036,49 @@
           }
         ],
         "claims": {
-          "packages": [
-            "static"
+          "routes": [
+            "static.assets",
+            "static.favicon"
           ]
         },
-        "runtime": {},
+        "runtime": {
+          "routes": [
+            {
+              "id": "static.assets",
+              "method": "GET",
+              "pattern": "/static/",
+              "scope": "static",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "immutable asset transport with no session and no mutation",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "serveStaticAssets"
+            },
+            {
+              "id": "static.favicon",
+              "method": "GET",
+              "pattern": "/favicon.ico",
+              "scope": "static",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "static redirect with no session and no mutation",
+                "rate_exempt": true,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "faviconRedirect"
+            }
+          ]
+        },
         "migrations": [],
         "environment": [],
         "docs": [],
@@ -7481,7 +8101,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -7638,7 +8258,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7694,7 +8314,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -7793,9 +8413,11 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
+        "page/settings-webhooks",
+        "workflow/outbound-webhooks",
         "workflow/projects"
       ],
       "manifest": {
@@ -7944,7 +8566,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8028,7 +8650,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8109,7 +8731,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8243,7 +8865,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -8436,7 +9058,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8605,10 +9227,72 @@
       "migrations": []
     },
     {
+      "id": "workflow/admin-job-requeue",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/admin-job-requeue",
+        "kind": "workflow",
+        "name": "admin-job-requeue",
+        "revision": 1,
+        "contract": 1,
+        "title": "Admin job requeue",
+        "description": "Requeues a dead-lettered job for another attempt.",
+        "requires": [
+          "page/admin-jobs",
+          "system/audit",
+          "system/jobs",
+          "system/server"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "admin.jobs.requeue"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "admin.jobs.requeue",
+              "method": "POST",
+              "pattern": "/admin/jobs/{id}/requeue",
+              "scope": "admin",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": true
+              },
+              "package": "internal/web",
+              "handler": "handleAdminJobRequeue"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8643,7 +9327,8 @@
         "claims": {
           "routes": [
             "admin.media.delete",
-            "admin.media.upload"
+            "admin.media.upload",
+            "media.serve"
           ]
         },
         "runtime": {
@@ -8681,6 +9366,23 @@
               },
               "package": "internal/web",
               "handler": "handleAdminMediaUpload"
+            },
+            {
+              "id": "media.serve",
+              "method": "GET",
+              "pattern": "/media/{id}/{filename}",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "public object transport with no session and no mutation",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleMedia"
             }
           ]
         },
@@ -8710,7 +9412,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8846,7 +9548,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8941,10 +9643,151 @@
       "migrations": []
     },
     {
+      "id": "workflow/api-ai-chat",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/api-ai-chat",
+        "kind": "workflow",
+        "name": "api-ai-chat",
+        "revision": 1,
+        "contract": 1,
+        "title": "AI chat API",
+        "description": "The JSON API for model completions, behind bearer-token auth.",
+        "requires": [
+          "system/api",
+          "system/llm",
+          "system/server",
+          "workflow/openapi-contract"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "api.ai.chat"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "api.ai.chat",
+              "method": "POST",
+              "pattern": "/api/v1/ai/chat",
+              "scope": "api-write",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 131072,
+                "idempotent": true,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAPIAIChat"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
+      "id": "workflow/api-projects",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/api-projects",
+        "kind": "workflow",
+        "name": "api-projects",
+        "revision": 1,
+        "contract": 1,
+        "title": "Projects API",
+        "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
+        "requires": [
+          "system/api",
+          "system/server",
+          "workflow/openapi-contract"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "api.projects.create",
+            "api.projects.list"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "api.projects.create",
+              "method": "POST",
+              "pattern": "/api/v1/projects",
+              "scope": "api-write",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 65536,
+                "idempotent": true,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAPICreateProject"
+            },
+            {
+              "id": "api.projects.list",
+              "method": "GET",
+              "pattern": "/api/v1/projects",
+              "scope": "api-read",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAPIListProjects"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9043,7 +9886,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9068,15 +9911,41 @@
             "sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/handlers_locale.go",
+            "target": "internal/web/handlers_locale.go",
+            "class": "go",
+            "sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
           "routes": [
+            "appearance.locale",
             "appearance.set-theme"
           ]
         },
         "runtime": {
           "routes": [
+            {
+              "id": "appearance.locale",
+              "method": "POST",
+              "pattern": "/set-locale",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSetLocale"
+            },
             {
               "id": "appearance.set-theme",
               "method": "POST",
@@ -9114,6 +9983,13 @@
           "base_sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
           "local_sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/handlers_locale.go",
+          "source": "internal/web/handlers_locale.go",
+          "base_sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+          "local_sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -9122,7 +9998,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -9241,7 +10117,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9358,7 +10234,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9437,7 +10313,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -9538,7 +10414,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9654,10 +10530,88 @@
       "migrations": []
     },
     {
+      "id": "workflow/identity-webhook-sync",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/identity-webhook-sync",
+        "kind": "workflow",
+        "name": "identity-webhook-sync",
+        "revision": 1,
+        "contract": 1,
+        "title": "Identity provider sync",
+        "description": "Receives Clerk user and organization events and mirrors them into the local tables.",
+        "requires": [
+          "system/identity",
+          "system/organizations",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/handlers_webhooks.go",
+            "target": "internal/web/handlers_webhooks.go",
+            "class": "go",
+            "sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "identity.webhook.receive"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "identity.webhook.receive",
+              "method": "POST",
+              "pattern": "/webhooks/clerk",
+              "scope": "webhook",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "svix signature verified with CLERK_WEBHOOK_SECRET; not a browser form",
+                "rate_exempt": false,
+                "maintenance_exempt": true,
+                "max_body_bytes": 1048576,
+                "idempotent": true,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleClerkWebhook"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/handlers_webhooks.go",
+          "source": "internal/web/handlers_webhooks.go",
+          "base_sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
+          "local_sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9790,7 +10744,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9925,7 +10879,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10003,10 +10957,90 @@
       "migrations": []
     },
     {
+      "id": "workflow/openapi-contract",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [
+        "workflow/api-ai-chat",
+        "workflow/api-projects"
+      ],
+      "manifest": {
+        "id": "workflow/openapi-contract",
+        "kind": "workflow",
+        "name": "openapi-contract",
+        "revision": 1,
+        "contract": 1,
+        "title": "OpenAPI description",
+        "description": "Serves the generated OpenAPI description of the JSON API.",
+        "requires": [
+          "system/api",
+          "system/server"
+        ],
+        "files": [
+          {
+            "source": "internal/web/api_transport.go",
+            "target": "internal/web/api_transport.go",
+            "class": "go",
+            "sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {
+          "routes": [
+            "api.openapi"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "api.openapi",
+              "method": "GET",
+              "pattern": "/api/v1/openapi.yaml",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "public contract document; a client needs it before it has a token",
+                "rate_exempt": false,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleAPIOpenAPISpec"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/api_transport.go",
+          "source": "internal/web/api_transport.go",
+          "base_sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
+          "local_sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -10087,10 +11121,145 @@
       "migrations": []
     },
     {
+      "id": "workflow/outbound-webhooks",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/outbound-webhooks",
+        "kind": "workflow",
+        "name": "outbound-webhooks",
+        "revision": 1,
+        "contract": 1,
+        "title": "Outbound webhook management",
+        "description": "Creating, enabling, disabling, and rotating customer webhook endpoints, and replaying a delivery.",
+        "requires": [
+          "page/settings-webhooks",
+          "system/audit",
+          "system/security",
+          "system/server",
+          "system/webhooks"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "webhooks.delivery.replay",
+            "webhooks.endpoint.create",
+            "webhooks.endpoint.disable",
+            "webhooks.endpoint.enable",
+            "webhooks.endpoint.rotate"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "webhooks.delivery.replay",
+              "method": "POST",
+              "pattern": "/app/settings/webhooks/deliveries/{id}/replay",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": true,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleWebhookDeliveryReplay"
+            },
+            {
+              "id": "webhooks.endpoint.create",
+              "method": "POST",
+              "pattern": "/app/settings/webhooks/endpoints",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 65536,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleWebhookEndpointCreate"
+            },
+            {
+              "id": "webhooks.endpoint.disable",
+              "method": "POST",
+              "pattern": "/app/settings/webhooks/endpoints/{id}/disable",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleWebhookEndpointToggle"
+            },
+            {
+              "id": "webhooks.endpoint.enable",
+              "method": "POST",
+              "pattern": "/app/settings/webhooks/endpoints/{id}/enable",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleWebhookEndpointToggle"
+            },
+            {
+              "id": "webhooks.endpoint.rotate",
+              "method": "POST",
+              "pattern": "/app/settings/webhooks/endpoints/{id}/rotate",
+              "scope": "app",
+              "policy": {
+                "csrf_exempt": false,
+                "csrf_reason": "",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleWebhookEndpointRotate"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "retain-data"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10171,7 +11340,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "97d434facfeee7b67a443d3493864061db4a86f99a1fc9cea8db4b07eba379f8",
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -10305,6 +11474,103 @@
           "state": "clean"
         }
       ],
+      "migrations": []
+    },
+    {
+      "id": "workflow/seo-discovery",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "fe361bb538cc860297edcff1f92cf1504112b47615c4a85139a0020a192f9cc1",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "workflow/seo-discovery",
+        "kind": "workflow",
+        "name": "seo-discovery",
+        "revision": 1,
+        "contract": 1,
+        "title": "Search discovery surfaces",
+        "description": "robots.txt, the sitemap, and the RSS feed that let crawlers and readers discover content.",
+        "requires": [
+          "system/content",
+          "system/seo",
+          "system/server"
+        ],
+        "files": [],
+        "claims": {
+          "routes": [
+            "seo.robots",
+            "seo.rss",
+            "seo.sitemap"
+          ]
+        },
+        "runtime": {
+          "routes": [
+            {
+              "id": "seo.robots",
+              "method": "GET",
+              "pattern": "/robots.txt",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "crawler transport with no session and no mutation",
+                "rate_exempt": false,
+                "maintenance_exempt": true,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleRobots"
+            },
+            {
+              "id": "seo.rss",
+              "method": "GET",
+              "pattern": "/rss.xml",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "feed reader transport with no session and no mutation",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleRSS"
+            },
+            {
+              "id": "seo.sitemap",
+              "method": "GET",
+              "pattern": "/sitemap.xml",
+              "scope": "public",
+              "policy": {
+                "csrf_exempt": true,
+                "csrf_reason": "crawler transport with no session and no mutation",
+                "rate_exempt": false,
+                "maintenance_exempt": false,
+                "max_body_bytes": 0,
+                "idempotent": false,
+                "admin_write": false
+              },
+              "package": "internal/web",
+              "handler": "handleSitemap"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
       "migrations": []
     }
   ]
