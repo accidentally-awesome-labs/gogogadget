@@ -1,0 +1,214 @@
+package ui
+
+import "fmt"
+
+// CardOpts configures a card container.
+type CardOpts struct {
+	Attrs Attrs
+}
+
+// Card is the bordered container every panel sits in.
+templ Card(o CardOpts) {
+	<div class={ mergeClasses("card", o.Attrs.Class) } data-testid={ o.Attrs.TestID }>
+		{ children... }
+	</div>
+}
+
+// CardHeaderOpts configures a card header row.
+type CardHeaderOpts struct {
+	Title string
+	Attrs Attrs
+}
+
+// CardHeader renders a title row with optional trailing actions.
+templ CardHeader(o CardHeaderOpts) {
+	<div class="flex items-center justify-between mb-4">
+		<h3 class="section-title">{ o.Title }</h3>
+		{ children... }
+	</div>
+}
+
+// CardFooterOpts configures a card footer row.
+type CardFooterOpts struct {
+	Attrs Attrs
+}
+
+// CardFooter renders a trailing action row.
+templ CardFooter(o CardFooterOpts) {
+	<div class={ mergeClasses("flex items-center gap-2 mt-4", o.Attrs.Class) }>
+		{ children... }
+	</div>
+}
+
+// Column is one column in a table.
+type Column struct {
+	Key, Label, Width string
+	Align             string
+	Sortable, Numeric bool
+}
+
+// TableOpts configures a semantic table.
+type TableOpts struct {
+	Caption       string
+	HiddenCaption bool
+	Density       string
+	Attrs         Attrs
+}
+
+// Table renders a semantic table with a caption and responsive overflow.
+templ Table(o TableOpts) {
+	<div class="table-card">
+		<table class={ tableClasses(o) }>
+			if o.Caption != "" {
+				<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
+			}
+			{ children... }
+		</table>
+	</div>
+}
+
+func tableClasses(o TableOpts) string {
+	cls := "table"
+	if o.Density == "compact" {
+		cls += " table-compact"
+	}
+	return mergeClasses(cls, o.Attrs.Class)
+}
+
+func captionClass(hidden bool) string {
+	if hidden {
+		return "sr-only"
+	}
+	return "text-left text-sm text-fg-muted mb-2"
+}
+
+// KeyValueOpts configures one key/value row.
+type KeyValueOpts struct {
+	Key, Value string
+	Attrs      Attrs
+}
+
+// KeyValue renders one definition row.
+templ KeyValue(o KeyValueOpts) {
+	<div class={ mergeClasses("flex items-center justify-between py-2", o.Attrs.Class) }>
+		<dt class="text-fg-muted">{ o.Key }</dt>
+		<dd class="font-medium">{ o.Value }</dd>
+	</div>
+}
+
+// ListOpts configures a generic list.
+type ListOpts struct {
+	Attrs Attrs
+}
+
+// List renders an unordered list.
+templ List(o ListOpts) {
+	<ul class={ mergeClasses("space-y-2", o.Attrs.Class) } data-testid={ o.Attrs.TestID }>
+		{ children... }
+	</ul>
+}
+
+// Item renders one list entry.
+templ Item() {
+	<li>{ children... }</li>
+}
+
+// ContainerOpts configures a layout container.
+type ContainerOpts struct {
+	Width string
+	Attrs Attrs
+}
+
+// Container renders a width-constrained wrapper.
+templ Container(o ContainerOpts) {
+	<div class={ containerClasses(o) } data-testid={ o.Attrs.TestID }>
+		{ children... }
+	</div>
+}
+
+func containerClasses(o ContainerOpts) string {
+	cls := "mx-auto px-4"
+	switch o.Width {
+	case "narrow":
+		cls += " max-w-narrow"
+	case "page", "":
+		cls += " max-w-page"
+	}
+	return mergeClasses(cls, o.Attrs.Class)
+}
+
+// StackOpts configures a vertical stack.
+type StackOpts struct {
+	Gap   string
+	Attrs Attrs
+}
+
+// Stack renders children in a vertical stack.
+templ Stack(o StackOpts) {
+	<div class={ stackClasses(o) } data-testid={ o.Attrs.TestID }>
+		{ children... }
+	</div>
+}
+
+func stackClasses(o StackOpts) string {
+	return mergeClasses("flex flex-col "+gapClass(o.Gap), o.Attrs.Class)
+}
+
+func gapClass(gap string) string {
+	switch gap {
+	case "xs":
+		return "gap-1"
+	case "sm":
+		return "gap-2"
+	case "md", "":
+		return "gap-4"
+	case "lg":
+		return "gap-6"
+	case "xl":
+		return "gap-8"
+	}
+	return "gap-4"
+}
+
+// InlineOpts configures a horizontal row.
+type InlineOpts struct {
+	Gap   string
+	Attrs Attrs
+}
+
+// Inline renders children in a horizontal row.
+templ Inline(o InlineOpts) {
+	<div class={ inlineClasses(o) } data-testid={ o.Attrs.TestID }>
+		{ children... }
+	</div>
+}
+
+func inlineClasses(o InlineOpts) string {
+	return mergeClasses("flex items-center "+gapClass(o.Gap), o.Attrs.Class)
+}
+
+// GridOpts configures a grid.
+type GridOpts struct {
+	Cols  int
+	Attrs Attrs
+}
+
+// Grid renders children in a responsive grid.
+templ Grid(o GridOpts) {
+	<div class={ gridClasses(o) } data-testid={ o.Attrs.TestID }>
+		{ children... }
+	</div>
+}
+
+func gridClasses(o GridOpts) string {
+	cols := o.Cols
+	if cols <= 0 {
+		cols = 3
+	}
+	return mergeClasses("grid grid-cols-1 gap-4 sm:grid-cols-"+fmt.Sprint(cols), o.Attrs.Class)
+}
+
+// Divider renders a horizontal rule.
+templ Divider() {
+	<hr class="border-t border-border my-4"/>
+}

@@ -1,0 +1,112 @@
+package ui
+
+// DialogOpts configures a native dialog.
+type DialogOpts struct {
+	ID, Title string
+	Attrs     Attrs
+}
+
+// Dialog renders a native <dialog> with a title and children content. Alpine
+// `uiOverlay` provides open/close with Escape and focus return.
+templ Dialog(o DialogOpts) {
+	<dialog id={ o.ID } class="dialog card max-w-lg w-full" data-ui="dialog" data-testid={ o.Attrs.TestID }>
+		<form method="dialog" class="flex flex-col gap-4">
+			<div class="flex items-center justify-between">
+				<h2 class="section-title">{ o.Title }</h2>
+				<button type="submit" class="btn btn-ghost btn-icon" aria-label="Close" data-ui-dialog-close>
+					@Icon(IconClose, "w-4 h-4")
+				</button>
+			</div>
+			{ children... }
+		</form>
+	</dialog>
+}
+
+// AlertDialogOpts configures an alert dialog requiring confirmation.
+type AlertDialogOpts struct {
+	ID, Title, Message, ConfirmLabel, CancelLabel string
+	Kind                                          Kind
+	Attrs                                         Attrs
+}
+
+// AlertDialog renders a modal requiring an explicit confirm or cancel.
+templ AlertDialog(o AlertDialogOpts) {
+	<dialog id={ o.ID } class="dialog card max-w-md w-full" data-ui="alert-dialog" data-testid={ o.Attrs.TestID }>
+		<div class="flex flex-col gap-4">
+			<h2 class={ "section-title text-" + string(o.Kind) + "-text" }>{ o.Title }</h2>
+			<p class="text-sm text-fg-muted">{ o.Message }</p>
+			<div class="flex justify-end gap-2">
+				<button type="button" class="btn btn-ghost" data-ui-dialog-cancel>{ o.CancelLabel }</button>
+				<button type="button" class={ "btn btn-" + dialogButtonClass(o.Kind) } data-ui-dialog-confirm>{ o.ConfirmLabel }</button>
+			</div>
+		</div>
+	</dialog>
+}
+
+func dialogButtonClass(kind Kind) string {
+	if kind == KindDanger {
+		return "danger"
+	}
+	return "primary"
+}
+
+// DropdownMenuOpts configures a trigger + menu.
+type DropdownMenuOpts struct {
+	ID, Label string
+	Items     []MenuItem
+	Attrs     Attrs
+}
+
+// MenuItem is one entry in a menu.
+type MenuItem struct {
+	Label, Href string
+	Kind        Kind
+	Disabled    bool
+	Attrs       Attrs
+}
+
+// DropdownMenu renders a button that toggles a menu. Alpine `uiMenu` provides
+// open/close, Escape, and roving focus.
+templ DropdownMenu(o DropdownMenuOpts) {
+	<div class="relative inline-block" x-data="uiMenu" data-ui="dropdown-menu" data-testid={ o.Attrs.TestID }>
+		<button type="button" class="btn btn-ghost btn-icon" :aria-expanded="open.toString()" @click="toggle">
+			@Icon(IconMore, "w-4 h-4")
+			<span class="sr-only">{ o.Label }</span>
+		</button>
+		<div x-show="open" x-cloak @click.outside="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">
+			for _, item := range o.Items {
+				<a href={ templ.SafeURL(item.Href) } class={ "block px-3 py-2 rounded-lg text-sm hover:bg-surface-raised", templ.KV("text-fg-muted", item.Disabled) }>{ item.Label }</a>
+			}
+		</div>
+	</div>
+}
+
+// PopoverOpts configures a trigger + popover panel.
+type PopoverOpts struct {
+	ID, Label string
+	Attrs     Attrs
+}
+
+// Popover renders a trigger with a positioned panel.
+templ Popover(o PopoverOpts) {
+	<div class="relative inline-block" x-data="uiMenu" data-ui="popover" data-testid={ o.Attrs.TestID }>
+		<button type="button" class="btn btn-ghost btn-sm" :aria-expanded="open.toString()" @click="toggle">{ o.Label }</button>
+		<div x-show="open" x-cloak @click.outside="close" class="absolute left-0 mt-1 card p-3 z-(--z-overlay)">
+			{ children... }
+		</div>
+	</div>
+}
+
+// TooltipOpts configures a hover/focus tooltip.
+type TooltipOpts struct {
+	Text string
+	Attrs Attrs
+}
+
+// Tooltip renders an inline tooltip on hover/focus.
+templ Tooltip(o TooltipOpts) {
+	<span class="relative group inline-flex" data-ui="tooltip">
+		{ children... }
+		<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs rounded-lg bg-fg text-surface opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none whitespace-nowrap z-(--z-overlay)">{ o.Text }</span>
+	</span>
+}

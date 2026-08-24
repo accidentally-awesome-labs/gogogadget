@@ -1,0 +1,146 @@
+package ui
+
+import "fmt"
+
+// Option is one entry shared by select, checkbox-group and radio-group.
+type Option struct {
+	Value    string
+	Label    string
+	Group    string
+	Disabled bool
+	Selected bool
+}
+
+// FieldIDs returns the stable input/hint/error IDs for a field name.
+func FieldIDs(name string) (input, hint, error string) {
+	return name, name + "-hint", name + "-error"
+}
+
+// FieldARIA returns the aria attributes for a field name/error/required state.
+func FieldARIA(name, err string, required bool) templ.Attributes {
+	attrs := templ.Attributes{}
+	if err != "" {
+		attrs["aria-invalid"] = "true"
+	}
+	if required {
+		attrs["aria-required"] = "true"
+	}
+	attrs["aria-describedby"] = FieldAriaDescribedBy(name, err)
+	return attrs
+}
+
+// FieldAriaDescribedBy names the hint/error element describing a field.
+func FieldAriaDescribedBy(name, err string) string {
+	if err != "" {
+		return name + "-error"
+	}
+	return name + "-hint"
+}
+
+// Form renders a form wrapper; children are the fields.
+templ Form(method, action, target, swap string) {
+	<form method={ method } action={ action } hx-target={ target } hx-swap={ swap }>
+		{ children... }
+	</form>
+}
+
+// Fieldset groups related fields under a legend.
+templ Fieldset(legend string) {
+	<fieldset>
+		if legend != "" {
+			<legend class="label">{ legend }</legend>
+		}
+		{ children... }
+	</fieldset>
+}
+
+// TextareaOpts configures a multi-line input.
+type TextareaOpts struct {
+	Name, Value, Placeholder string
+	Rows                     int
+	Required                 bool
+	Attrs                    Attrs
+}
+
+// Textarea is a multi-line text input.
+templ Textarea(o TextareaOpts) {
+	<textarea
+		id={ o.Name } name={ o.Name } rows={ fmt.Sprint(o.Rows) }
+		class={ mergeClasses("input", o.Attrs.Class) }
+		placeholder={ o.Placeholder }
+		required?={ o.Required }
+		data-testid={ o.Attrs.TestID }
+	>{ o.Value }</textarea>
+}
+
+// SelectOpts configures a select control.
+type SelectOpts struct {
+	Name     string
+	Options  []Option
+	Required bool
+	Attrs    Attrs
+}
+
+// Select is a native select.
+templ Select(o SelectOpts) {
+	<select
+		id={ o.Name } name={ o.Name }
+		class={ mergeClasses("input", o.Attrs.Class) }
+		required?={ o.Required }
+		data-testid={ o.Attrs.TestID }
+	>
+		for _, opt := range o.Options {
+			<option value={ opt.Value } selected?={ opt.Selected } disabled?={ opt.Disabled }>{ opt.Label }</option>
+		}
+	</select>
+}
+
+// CheckboxOpts configures a single checkbox.
+type CheckboxOpts struct {
+	Name, Label, Value string
+	Checked            bool
+	Attrs              Attrs
+}
+
+// Checkbox is a labelled checkbox.
+templ Checkbox(o CheckboxOpts) {
+	<label class="flex items-center gap-2 text-sm">
+		<input type="checkbox" name={ o.Name } value={ o.Value } checked?={ o.Checked } class="h-4 w-4" data-testid={ o.Attrs.TestID }/>
+		{ o.Label }
+	</label>
+}
+
+// RadioGroupOpts configures a radio group.
+type RadioGroupOpts struct {
+	Name     string
+	Options  []Option
+	Required bool
+	Attrs    Attrs
+}
+
+// RadioGroup renders a group of radios sharing a name.
+templ RadioGroup(o RadioGroupOpts) {
+	<div class="space-y-2" role="radiogroup" data-testid={ o.Attrs.TestID }>
+		for _, opt := range o.Options {
+			<label class="flex items-center gap-2 text-sm">
+				<input type="radio" name={ o.Name } value={ opt.Value } checked?={ opt.Selected } disabled?={ opt.Disabled } class="h-4 w-4"/>
+				{ opt.Label }
+			</label>
+		}
+	</div>
+}
+
+// SwitchOpts configures a toggle switch.
+type SwitchOpts struct {
+	Name, Label string
+	On          bool
+	Attrs       Attrs
+}
+
+// Switch is a labelled toggle.
+templ Switch(o SwitchOpts) {
+	<label class="flex items-center gap-2 text-sm">
+		<input type="checkbox" name={ o.Name } checked?={ o.On } class="h-4 w-4" data-testid={ o.Attrs.TestID }/>
+		{ o.Label }
+	</label>
+}
