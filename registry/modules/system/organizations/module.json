@@ -37,6 +37,22 @@
         "contract": false
       },
       {
+        "source": "internal/db/testdata/seed/dev/organizations.sql",
+        "target": "internal/db/testdata/seed/dev/organizations.sql",
+        "class": "seed",
+        "sha256": "1f6461a477fb0d46afbe7dbb84e402340badc63c0e15db00674d5dc186cd3b79",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/organizations.sql",
+        "target": "internal/db/testdata/seed/e2e/organizations.sql",
+        "class": "seed",
+        "sha256": "12d9cda663239a21718fea87ea1e51d0d4985072ee5ba83e1aba454e07336477",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/roles_test.go",
         "target": "internal/web/roles_test.go",
         "class": "test",

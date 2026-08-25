@@ -23,6 +23,22 @@
         "contract": false
       },
       {
+        "source": "internal/db/testdata/seed/dev/flags.sql",
+        "target": "internal/db/testdata/seed/dev/flags.sql",
+        "class": "seed",
+        "sha256": "e74755395db54d64af51004f54ac61841b8bc767436423fc55ac518cfb699371",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/flags.sql",
+        "target": "internal/db/testdata/seed/e2e/flags.sql",
+        "class": "seed",
+        "sha256": "d6c1b091cea91e7db7c0211cab25d5907f239f23ffbb2f6644c1fe756203e66d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/flags/flags.go",
         "target": "internal/flags/flags.go",
         "class": "go",

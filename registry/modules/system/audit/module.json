@@ -30,6 +30,14 @@
         "contract": false
       },
       {
+        "source": "internal/db/testdata/seed/e2e/audit.sql",
+        "target": "internal/db/testdata/seed/e2e/audit.sql",
+        "class": "seed",
+        "sha256": "96e4f5595e2311e32bff4b4eff122a812e325c32f72e173dbe69ef0b7ba552e4",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/jobs/janitor_audit.go",
         "target": "internal/jobs/janitor_audit.go",
         "class": "go",

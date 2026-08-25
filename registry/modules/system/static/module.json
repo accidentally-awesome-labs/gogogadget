@@ -80,7 +80,7 @@
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "2aef08423f908b8fe451723198000774012538fad61ecd2e250dd1833d7b72da",
+        "sha256": "5fd5ac521fcc28d9cde6007c171785a38cb977ff807778db6cb2b105509a6d83",
         "rewrite_module": false,
         "contract": false
       },

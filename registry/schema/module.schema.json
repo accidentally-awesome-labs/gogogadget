@@ -378,6 +378,12 @@
         "openapi": {
           "$ref": "#/$defs/OpenAPIContribution"
         },
+        "personas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PersonaContribution"
+          }
+        },
         "removal_policy": {
           "type": "string",
           "enum": [
@@ -798,6 +804,32 @@
       "required": [
         "name",
         "description"
+      ]
+    },
+    "PersonaContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "user": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "org": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "org",
+        "role",
+        "user"
       ]
     },
     "Profile": {

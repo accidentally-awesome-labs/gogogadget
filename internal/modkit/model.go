@@ -203,12 +203,16 @@ type Manifest struct {
 	// other modules happen to be installed.
 	Locales map[string]map[string]string `json:"locales,omitempty"`
 	// OpenAPI is this module's slice of the /api/v1 contract, when it serves any.
-	OpenAPI       *OpenAPIContribution `json:"openapi,omitempty"`
-	Docs          []DocumentationRef   `json:"docs"`
-	Tests         TestMetadata         `json:"tests"`
-	Data          []DataDeclaration    `json:"data"`
-	RemovalPolicy RemovalPolicy        `json:"removal_policy"`
-	TestOnly      bool                 `json:"test_only,omitempty"`
+	OpenAPI *OpenAPIContribution `json:"openapi,omitempty"`
+	// Personas are the synthetic actors fixtures and e2e share: one declaration
+	// feeds the session-cookie helper and the parity check that keeps the
+	// seeded rows and the specs agreeing about who an actor is.
+	Personas      []PersonaContribution `json:"personas,omitempty"`
+	Docs          []DocumentationRef    `json:"docs"`
+	Tests         TestMetadata          `json:"tests"`
+	Data          []DataDeclaration     `json:"data"`
+	RemovalPolicy RemovalPolicy         `json:"removal_policy"`
+	TestOnly      bool                  `json:"test_only,omitempty"`
 }
 
 // ManifestFile maps one verified registry payload to one project-owned target.
@@ -324,6 +328,16 @@ type JanitorContribution struct {
 	Name    string `json:"name"`
 	Package string `json:"package"`
 	Handler string `json:"handler"`
+}
+
+// PersonaContribution is one synthetic actor. The session cookie format is
+// derived from these fields, so a spec and a fixture cannot disagree about who
+// an actor is.
+type PersonaContribution struct {
+	ID   string `json:"id"`
+	User string `json:"user"`
+	Org  string `json:"org"`
+	Role string `json:"role"`
 }
 
 // QueryContribution declares one sqlc method this module owns and the table it

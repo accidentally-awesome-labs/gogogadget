@@ -22,11 +22,6 @@ degradation behave.
 | `TEST_NOW` | `system/config` |  |  | RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic |
 | `POSTHOG_API_KEY` | `system/analytics` |  |  | PostHog project key. Empty disables capture entirely: no client script, no `/ingest` proxy, server capture no-ops. Secret: ships blank in `.env.example` |
 | `POSTHOG_HOST` | `system/analytics` |  | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
-| `POLAR_ACCESS_TOKEN` | `system/billing` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
-| `POLAR_PRODUCT_PRO` | `system/billing` |  |  | Polar product id for the Pro plan |
-| `POLAR_PRODUCT_TEAM` | `system/billing` |  |  | Polar product id for the Team plan |
-| `POLAR_SERVER` | `system/billing` |  | `sandbox` | sandbox \| production |
-| `POLAR_WEBHOOK_SECRET` | `system/billing` |  |  | Verifies `webhook-*` signatures on `/webhooks/polar`. Secret: ships blank in `.env.example` |
 | `DATABASE_URL` | `system/database` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
 | `ADMIN_EMAIL` | `system/identity` |  |  | First sign-in with this address is granted the full admin role. Empty means nobody is staff |
 | `CLERK_FRONTEND_API_URL` | `system/identity` |  |  | Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise |
@@ -42,6 +37,11 @@ degradation behave.
 | `RESEND_API_KEY` | `system/mail` |  |  | Resend API key. Empty selects DevSender, which logs mail and writes rendered HTML to `tmp/emails/`. Secret: ships blank in `.env.example` |
 | `SENTRY_DSN` | `system/observability` |  |  | Sentry DSN. Empty selects the no-op reporter. Secret: ships blank in `.env.example` |
 | `AUDIT_RETENTION_DAYS` | `system/audit` |  |  | The daily janitor deletes audit rows older than this many days; 0 retains forever. Integer >= 0 |
+| `POLAR_ACCESS_TOKEN` | `system/billing` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
+| `POLAR_PRODUCT_PRO` | `system/billing` |  |  | Polar product id for the Pro plan |
+| `POLAR_PRODUCT_TEAM` | `system/billing` |  |  | Polar product id for the Team plan |
+| `POLAR_SERVER` | `system/billing` |  | `sandbox` | sandbox \| production |
+| `POLAR_WEBHOOK_SECRET` | `system/billing` |  |  | Verifies `webhook-*` signatures on `/webhooks/polar`. Secret: ships blank in `.env.example` |
 | `RATE_LIMIT_RPM` | `system/rate-limit` |  | `100` | Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard. Integer >= 1 |
 | `API_RATE_LIMIT_RPM` | `system/api` |  | `60` | Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated. Integer >= 1 |
 | `STORAGE_R2_ACCESS_KEY_ID` | `system/storage` |  |  | R2 API token with Object Read & Write. Secret: ships blank in `.env.example` |

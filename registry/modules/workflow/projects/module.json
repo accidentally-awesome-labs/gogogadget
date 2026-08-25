@@ -15,6 +15,7 @@
       "system/database",
       "system/i18n",
       "system/identity",
+      "system/organizations",
       "system/security",
       "system/server",
       "system/webhooks"
@@ -25,6 +26,22 @@
         "target": "internal/db/queries/projects.sql",
         "class": "query",
         "sha256": "71e6ce903ef3f6fc0c37c617270cb165c3e6fbe1aeac1f383b111674e24db86a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/dev/projects.sql",
+        "target": "internal/db/testdata/seed/dev/projects.sql",
+        "class": "seed",
+        "sha256": "cb7beec9d2632c8fa4a323a6341ee819dca15716f2c01a69708c919d77c6efbd",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/projects.sql",
+        "target": "internal/db/testdata/seed/e2e/projects.sql",
+        "class": "seed",
+        "sha256": "c4e2e645560b0b1c959a1519fa62717d372fc26b8ba95f3c4cf05b766b5774df",
         "rewrite_module": false,
         "contract": false
       },

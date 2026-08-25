@@ -21,6 +21,14 @@
         "contract": false
       },
       {
+        "source": "internal/db/testdata/seed/dev/schedules.sql",
+        "target": "internal/db/testdata/seed/dev/schedules.sql",
+        "class": "seed",
+        "sha256": "60eed745467ce4b0540bd59ad22594b4b5146cd22b22aadf4f041281134b3ccb",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/schedules/schedules.go",
         "target": "internal/schedules/schedules.go",
         "class": "go",

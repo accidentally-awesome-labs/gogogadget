@@ -19,6 +19,14 @@
         "sha256": "4f97cb345d3095a23933fbaa9594f7ba613a222feb0f7baf8b8008a4aba23c50",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/dev/announcements.sql",
+        "target": "internal/db/testdata/seed/dev/announcements.sql",
+        "class": "seed",
+        "sha256": "d4f456bea303e6b99126c7171bec494d7b8b1e55cd3126514859bdf12d5daf32",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {

@@ -52,14 +52,14 @@ visual-update:
 
 ## seed: load demo data (demo@gogogadget.dev / org_demo / 4 projects)
 seed:
-	go run ./cmd/seed internal/db/testdata/seed_dev.sql
+	go run ./cmd/seed -registry dev
 
 ## db-reset: destroy and recreate the local database
 db-reset:
 	docker compose down -v
 	docker compose up -d db
 	@sleep 2
-	go run ./cmd/seed -reset internal/db/testdata/seed_dev.sql
+	go run ./cmd/seed -reset -registry dev
 
 ## build: compile the server binary
 build:

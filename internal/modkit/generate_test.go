@@ -1700,3 +1700,116 @@ func TestDataLifecycleRegistryEmitsDeclarations(t *testing.T) {
 		}
 	}
 }
+
+// Seed order is generated from declarations, so a module's fixture loads with
+// the module and a removed module's fixture stops loading — instead of a
+// monolithic SQL file nobody could attribute.
+func TestSeedRegistryEmitsOrderedFragments(t *testing.T) {
+	orgs := Manifest{
+		ID: "system/organizations", Kind: ModuleSystem, Name: "organizations",
+		Revision: 1, Contract: 1, Title: "Orgs", Description: "x.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Files: []ManifestFile{
+			{Source: "internal/db/testdata/seed/dev/organizations.sql",
+				Target: "internal/db/testdata/seed/dev/organizations.sql",
+				Class:  FileClassSeed, SHA256: testDigest, RewriteModule: false},
+			{Source: "internal/db/testdata/seed/e2e/organizations.sql",
+				Target: "internal/db/testdata/seed/e2e/organizations.sql",
+				Class:  FileClassSeed, SHA256: testDigest, RewriteModule: false},
+		},
+	}
+	flags := Manifest{
+		ID: "system/feature-flags", Kind: ModuleSystem, Name: "feature-flags",
+		Revision: 1, Contract: 1, Title: "Flags", Description: "x.",
+		Requires: []string{"system/organizations"}, RemovalPolicy: RemovalFree,
+		Files: []ManifestFile{
+			{Source: "internal/db/testdata/seed/dev/flags.sql",
+				Target: "internal/db/testdata/seed/dev/flags.sql",
+				Class:  FileClassSeed, SHA256: testDigest, RewriteModule: false},
+		},
+	}
+
+	// Declaration order is deliberately scrambled; the lock order reflects
+	// the dependency edge, as a real lock does (sync writes a topological order).
+	mods := []Manifest{flags, orgs}
+	lock := localeLockOf([]Manifest{orgs, flags})
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/db/seed_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("seed registry was not emitted")
+	}
+	for _, want := range []string{
+		"var SeedFragments = map[string][]string{",
+		`"dev": {`,
+		// Organizations precedes flags because the org rows must exist before
+		// anything referencing them loads, and lock order says so regardless of
+		// the order the fragments were declared in.
+		strings.Join(strings.Fields(`"internal/db/testdata/seed/dev/organizations.sql", "internal/db/testdata/seed/dev/flags.sql"`), " "),
+		`"internal/db/testdata/seed/e2e/organizations.sql"`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("seed registry missing %q:\n%s", want, registry)
+		}
+	}
+}
+
+// Personas are declared once, next to the identity records they exercise, and
+// both the e2e helper and the fixture-parity check read the same declaration.
+func TestPersonasRegistryEmitsTypeScript(t *testing.T) {
+	identity := Manifest{
+		ID: "system/identity", Kind: ModuleSystem, Name: "identity",
+		Revision: 1, Contract: 1, Title: "Identity", Description: "x.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Personas: []PersonaContribution{
+			{ID: "pro", User: "user_pro", Org: "org_pro", Role: "org:admin"},
+			{ID: "noorg", User: "user_noorg", Org: "", Role: ""},
+		},
+	}
+	mods := []Manifest{identity}
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var ts string
+	for _, file := range files {
+		if file.Path == "e2e/generated/personas.ts" {
+			ts = file.Content
+		}
+	}
+	if ts == "" {
+		t.Fatal("personas.ts was not emitted")
+	}
+	for _, want := range []string{
+		"export type PersonaId = 'pro' | 'noorg';",
+		"{ id: 'pro', user: 'user_pro', org: 'org_pro', role: 'org:admin' },",
+		"export function sessionFor(p: PersonaId): string",
+	} {
+		if !strings.Contains(ts, want) {
+			t.Fatalf("personas.ts missing %q:\n%s", want, ts)
+		}
+	}
+}
+
+// Two personas with one id means two specs silently share an actor.
+func TestPersonasRegistryRejectsDuplicateIDs(t *testing.T) {
+	a := Manifest{ID: "system/identity", Kind: ModuleSystem, Name: "identity",
+		Revision: 1, Contract: 1, Title: "Identity", Description: "x.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Personas: []PersonaContribution{{ID: "pro", User: "u1", Org: "o1", Role: "org:admin"}}}
+	b := Manifest{ID: "workflow/x", Kind: ModuleWorkflow, Name: "x",
+		Revision: 1, Contract: 1, Title: "X", Description: "x.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Personas: []PersonaContribution{{ID: "pro", User: "u2", Org: "o2", Role: "org:admin"}}}
+	mods := []Manifest{a, b}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted a duplicate persona id")
+	}
+}

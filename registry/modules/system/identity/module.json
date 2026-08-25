@@ -611,6 +611,62 @@
         "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
         "settings.disabled_title": "Cuenta deshabilitada"
       }
-    }
+    },
+    "personas": [
+      {
+        "id": "free",
+        "user": "user_free",
+        "org": "org_free",
+        "role": "org:member"
+      },
+      {
+        "id": "pro",
+        "user": "user_pro",
+        "org": "org_pro",
+        "role": "org:admin"
+      },
+      {
+        "id": "admin",
+        "user": "user_admin",
+        "org": "org_free",
+        "role": "org:admin"
+      },
+      {
+        "id": "support",
+        "user": "user_support",
+        "org": "org_free",
+        "role": "org:admin"
+      },
+      {
+        "id": "disabled",
+        "user": "user_disabled",
+        "org": "org_free",
+        "role": "org:member"
+      },
+      {
+        "id": "noorg",
+        "user": "user_noorg",
+        "org": "",
+        "role": ""
+      },
+      {
+        "id": "noactive",
+        "user": "user_noactive",
+        "org": "",
+        "role": ""
+      },
+      {
+        "id": "toggle",
+        "user": "user_toggle",
+        "org": "org_free",
+        "role": "org:member"
+      },
+      {
+        "id": "deleteme",
+        "user": "user_deleteme",
+        "org": "org_deleteme",
+        "role": "org:admin"
+      }
+    ]
   }
 }

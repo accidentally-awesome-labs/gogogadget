@@ -10,7 +10,8 @@
     "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
     "requires": [
       "system/apphost",
-      "system/config"
+      "system/config",
+      "system/organizations"
     ],
     "files": [
       {
@@ -74,6 +75,14 @@
         "target": "internal/db/queries/subscriptions.sql",
         "class": "query",
         "sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/billing.sql",
+        "target": "internal/db/testdata/seed/e2e/billing.sql",
+        "class": "seed",
+        "sha256": "4609de70d17e99531e9f0d2dd91895db147754bfa4caf6ce973f2b3dccaedc41",
         "rewrite_module": false,
         "contract": false
       },

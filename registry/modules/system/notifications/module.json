@@ -30,6 +30,22 @@
         "contract": false
       },
       {
+        "source": "internal/db/testdata/seed/dev/notifications.sql",
+        "target": "internal/db/testdata/seed/dev/notifications.sql",
+        "class": "seed",
+        "sha256": "fc108fcee8f029f4a75e141a1f894514d844ba4987eee16937529c0ad27e5623",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/notifications.sql",
+        "target": "internal/db/testdata/seed/e2e/notifications.sql",
+        "class": "seed",
+        "sha256": "278a3c63b17fda8a5ed9e2d30d11318535ef7a737a502860306b7fca8e733cae",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/notify/notify.go",
         "target": "internal/notify/notify.go",
         "class": "go",
