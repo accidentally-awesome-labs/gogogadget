@@ -5,15 +5,22 @@ import (
 	"strings"
 )
 
-// PageURL appends the page parameter with the right separator: callers pass a
-// base that already carries their filters ("/admin/content?kind=post"), and
-// hardcoding "?" would bury those in the value of the last one.
-func PageURL(baseURL string, page int) string {
+// PageURL builds a paged URL. The parameter name is a caller decision: a page
+// listing projects and a page listing its files can appear on the same screen,
+// and two pagers both writing "page" would move each other.
+func PageURL(baseURL, param string, page int) string {
 	sep := "?"
 	if strings.Contains(baseURL, "?") {
 		sep = "&"
 	}
-	return fmt.Sprintf("%s%spage=%d", baseURL, sep, page)
+	return fmt.Sprintf("%s%s%s=%d", baseURL, sep, pageParam(param), page)
+}
+
+func pageParam(param string) string {
+	if param == "" {
+		return "page"
+	}
+	return param
 }
 
 // PagerLabels carries the pager's strings so ui never imports i18n.
@@ -25,6 +32,9 @@ func PageURL(baseURL string, page int) string {
 // outage.
 type PagerLabels struct {
 	Aria, Prev, Next, PageOf func(page, totalPages int) string
+	// Page names a numbered link, e.g. "Page 3". Without it a screen reader
+	// hears only the digit, which is ambiguous in a row of numbers.
+	Page func(page int) string
 }
 
 func (l PagerLabels) aria(page, totalPages int) string {
@@ -57,6 +67,13 @@ func (l PagerLabels) pageOf(page, totalPages int) string {
 	return l.PageOf(page, totalPages)
 }
 
+func (l PagerLabels) pageLabel(page int) string {
+	if l.Page == nil {
+		return fmt.Sprintf("Page %d", page)
+	}
+	return l.Page(page)
+}
+
 // PaginationOpts renders hx-get pager links. Target is the box the pager
 // morphs; Labels carries the localized strings so ui never imports i18n.
 //
@@ -66,31 +83,95 @@ type PaginationOpts struct {
 	Page       int
 	TotalPages int
 	BaseURL    string
-	Target     string
-	Labels     PagerLabels
-	Attrs      Attrs
+	// Param is the query parameter this pager writes. Defaults to "page".
+	Param  string
+	Target string
+	// Numbered adds page-number links with ellipses. Off by default: on a
+	// hundred-page table the numbers are noise, and prev/next plus a position
+	// readout is the honest interface.
+	Numbered bool
+	Labels   PagerLabels
+	Attrs    Attrs
 }
 
 templ Pagination(o PaginationOpts) {
 	if o.TotalPages > 1 {
-		<nav { rootWith("pagination", "flex items-center justify-between mt-4 text-sm", o.Attrs, "aria-label", o.Labels.aria(o.Page, o.TotalPages))... }>
+		<nav { rootWith("pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", o.Labels.aria(o.Page, o.TotalPages))... }>
 			if o.Page > 1 {
-				<a href={ templ.SafeURL(PageURL(o.BaseURL, o.Page-1)) }
-					hx-get={ PageURL(o.BaseURL, o.Page-1) }
-					hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
-					class="btn btn-ghost">{ o.Labels.prev(o.Page, o.TotalPages) }</a>
+				@pageLink(o, o.Page-1, o.Labels.prev(o.Page, o.TotalPages), "btn btn-ghost")
 			} else {
 				<span></span>
 			}
-			<span class="text-fg-muted">{ o.Labels.pageOf(o.Page, o.TotalPages) }</span>
+			if o.Numbered {
+				<span class="flex items-center gap-1">
+					for _, entry := range PageWindow(o.Page, o.TotalPages) {
+						if entry == 0 {
+							// The gap is decorative: the surrounding links
+							// already state where the user is, so announcing
+							// "ellipsis" adds nothing.
+							<span class="px-2 text-fg-muted" aria-hidden="true">…</span>
+						} else if entry == o.Page {
+							<span class="px-3 py-1 rounded-lg bg-selected text-selected-fg font-semibold" aria-current="page">{ fmt.Sprint(entry) }</span>
+						} else {
+							@pageLink(o, entry, fmt.Sprint(entry), "px-3 py-1 rounded-lg hover:bg-surface-raised")
+						}
+					}
+				</span>
+			} else {
+				<span class="text-fg-muted">{ o.Labels.pageOf(o.Page, o.TotalPages) }</span>
+			}
 			if o.Page < o.TotalPages {
-				<a href={ templ.SafeURL(PageURL(o.BaseURL, o.Page+1)) }
-					hx-get={ PageURL(o.BaseURL, o.Page+1) }
-					hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
-					class="btn btn-ghost">{ o.Labels.next(o.Page, o.TotalPages) }</a>
+				@pageLink(o, o.Page+1, o.Labels.next(o.Page, o.TotalPages), "btn btn-ghost")
 			} else {
 				<span></span>
 			}
 		</nav>
 	}
+}
+
+// pageLink is a real anchor with a real href as well as the hx-get, so the
+// pager works with JavaScript disabled, middle-clicks into a new tab, and can
+// be copied out of the address bar after an htmx swap pushes the URL.
+templ pageLink(o PaginationOpts, page int, label, class string) {
+	<a
+		href={ templ.SafeURL(PageURL(o.BaseURL, o.Param, page)) }
+		hx-get={ PageURL(o.BaseURL, o.Param, page) }
+		hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+		aria-label={ o.Labels.pageLabel(page) }
+		class={ class }
+	>{ label }</a>
+}
+
+// PageWindow returns the page numbers to render, using 0 for an ellipsis gap.
+//
+// The first and last page are always present because they are the two
+// destinations a user reaches for most; the window around the current page is
+// what makes a hundred-page pager usable without a hundred links.
+func PageWindow(page, totalPages int) []int {
+	if totalPages <= 7 {
+		out := make([]int, 0, totalPages)
+		for i := 1; i <= totalPages; i++ {
+			out = append(out, i)
+		}
+		return out
+	}
+	window := map[int]bool{1: true, totalPages: true, page: true}
+	for _, near := range []int{page - 1, page + 1} {
+		if near >= 1 && near <= totalPages {
+			window[near] = true
+		}
+	}
+	out := make([]int, 0, len(window)+2)
+	prev := 0
+	for i := 1; i <= totalPages; i++ {
+		if !window[i] {
+			continue
+		}
+		if prev != 0 && i-prev > 1 {
+			out = append(out, 0)
+		}
+		out = append(out, i)
+		prev = i
+	}
+	return out
 }

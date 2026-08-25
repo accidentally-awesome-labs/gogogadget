@@ -16,9 +16,17 @@
         "source": "internal/web/templates/ui/pagination.templ",
         "target": "internal/web/templates/ui/pagination.templ",
         "class": "templ",
-        "sha256": "d7df2f2b5e4feb9cdb40940a3af15f71fef04bad0a7299d05119caaedeba030a",
+        "sha256": "8ac2cbef0ba2a2c06c451494fde59dc4e876cdb9d7fca1f12a96b1ff5abec9e1",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/pagination_test.go",
+        "target": "internal/web/templates/ui/pagination_test.go",
+        "class": "test",
+        "sha256": "f16ebd3cf786f66a66b977ffaf163a8e0f14f36f8d329f49e892d2ccd4be922f",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},
@@ -33,7 +41,11 @@
     "migrations": [],
     "environment": [],
     "docs": [],
-    "tests": {},
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
     "data": [],
     "removal_policy": "free"
   }

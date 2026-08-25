@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/tab-panels",
+    "kind": "component",
+    "name": "tab-panels",
+    "revision": 1,
+    "contract": 1,
+    "title": "TabPanels",
+    "description": "The TabPanels renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tab-panels.templ",
+        "target": "internal/web/templates/ui/tab-panels.templ",
+        "class": "templ",
+        "sha256": "a6cee4a69137c60623d4c1efc64424d550f7a772ae402a14f36c37e292e334b1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/tab-panels_test.go",
+        "target": "internal/web/templates/ui/tab-panels_test.go",
+        "class": "test",
+        "sha256": "8f3d3b921cd63eb0b648ce65f4dde5722a24d0238e4227eb925590b43a95edd5",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "tab-panels",
+          "family": "navigation",
+          "engine": "alpine",
+          "alpine": "uiTabs",
+          "native_fallback": "sequential panels"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

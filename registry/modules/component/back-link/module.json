@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/back-link",
+    "kind": "component",
+    "name": "back-link",
+    "revision": 1,
+    "contract": 1,
+    "title": "BackLink",
+    "description": "The BackLink renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/back-link.templ",
+        "target": "internal/web/templates/ui/back-link.templ",
+        "class": "templ",
+        "sha256": "dd6eaacb198dffb4c847a20f1c98b45decfcc5a67e1030f04c3077e1a65b4343",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "back-link",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

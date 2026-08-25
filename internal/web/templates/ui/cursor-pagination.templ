@@ -1,0 +1,39 @@
+package ui
+
+// CursorPaginationOpts configures keyset pagination.
+type CursorPaginationOpts struct {
+	// PrevURL and NextURL are empty at the ends of the sequence. Cursor paging
+	// has no total and no page numbers by design: counting rows to offer a
+	// last page is the expensive query keyset paging exists to avoid.
+	PrevURL, NextURL string
+	PrevLabel        string
+	NextLabel        string
+	Label            string
+	Target           string
+	Attrs            Attrs
+}
+
+// CursorPagination renders previous/next controls for a keyset-paged list.
+templ CursorPagination(o CursorPaginationOpts) {
+	if o.PrevURL != "" || o.NextURL != "" {
+		<nav { rootWith("cursor-pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", breadcrumbOrDefault(o.Label, "Pagination"))... }>
+			if o.PrevURL != "" {
+				<a href={ templ.SafeURL(o.PrevURL) } hx-get={ o.PrevURL } hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true" class="btn btn-ghost">{ breadcrumbOrDefault(o.PrevLabel, "Previous") }</a>
+			} else {
+				<span></span>
+			}
+			if o.NextURL != "" {
+				<a href={ templ.SafeURL(o.NextURL) } hx-get={ o.NextURL } hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true" class="btn btn-ghost">{ breadcrumbOrDefault(o.NextLabel, "Next") }</a>
+			} else {
+				<span></span>
+			}
+		</nav>
+	}
+}
+
+func breadcrumbOrDefault(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
+}

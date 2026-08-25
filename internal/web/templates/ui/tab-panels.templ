@@ -1,0 +1,73 @@
+package ui
+
+// TabPanel is one tab and its associated panel content.
+type TabPanel struct {
+	ID    string
+	Label string
+	Body  string
+}
+
+// TabPanelsOpts configures an in-page tab widget.
+type TabPanelsOpts struct {
+	// Label names the tablist for assistive technology.
+	Label  string
+	Panels []TabPanel
+	// Selected is the 0-based initially selected tab.
+	Selected int
+	Attrs    Attrs
+}
+
+// TabPanels renders the ARIA tab widget.
+//
+// This is the one navigation component that genuinely needs script, and it
+// claims role="tablist" only because it implements the whole contract: a single
+// tab stop for the set (roving tabindex), Left/Right to move between tabs,
+// Home/End to jump to the ends, and aria-selected plus aria-controls wiring the
+// tab to its panel. NavTabs is the alternative for navigation between URLs -
+// tabs that are really links should stay links.
+templ TabPanels(o TabPanelsOpts) {
+	<div { rootWith("tab-panels", "", o.Attrs, "x-data", "uiTabs")... }>
+		<div role="tablist" aria-label={ o.Label } class="tab-bar">
+			for i, panel := range o.Panels {
+				<button
+					type="button"
+					role="tab"
+					id={ panel.ID + "-tab" }
+					aria-controls={ panel.ID }
+					aria-selected={ tabSelected(i, o.Selected) }
+					tabindex={ tabIndex(i, o.Selected) }
+					class="tab"
+					data-ui-tab
+				>{ panel.Label }</button>
+			}
+		</div>
+		for i, panel := range o.Panels {
+			<div
+				role="tabpanel"
+				id={ panel.ID }
+				aria-labelledby={ panel.ID + "-tab" }
+				tabindex="0"
+				class="pt-4"
+				data-ui-tabpanel
+				hidden?={ i != o.Selected }
+			>{ panel.Body }</div>
+		}
+	</div>
+}
+
+func tabSelected(index, selected int) string {
+	if index == selected {
+		return "true"
+	}
+	return "false"
+}
+
+// tabIndex implements the roving tab stop: exactly one tab is reachable with
+// Tab, and the arrow keys move the selection. A tablist where every tab is
+// tabbable makes a keyboard user press Tab once per tab to leave the set.
+func tabIndex(index, selected int) string {
+	if index == selected {
+		return "0"
+	}
+	return "-1"
+}

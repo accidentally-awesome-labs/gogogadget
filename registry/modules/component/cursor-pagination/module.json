@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/cursor-pagination",
+    "kind": "component",
+    "name": "cursor-pagination",
+    "revision": 1,
+    "contract": 1,
+    "title": "CursorPagination",
+    "description": "The CursorPagination renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/cursor-pagination.templ",
+        "target": "internal/web/templates/ui/cursor-pagination.templ",
+        "class": "templ",
+        "sha256": "3aba1a88514777a907235ddc0db877cec56553e2d3f46d9d224c784b9f4d3a27",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "cursor-pagination",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

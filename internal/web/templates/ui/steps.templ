@@ -1,0 +1,53 @@
+package ui
+
+import "fmt"
+
+// Step is one stage in a multi-step flow.
+type Step struct {
+	Label string
+	// Href makes a completed step revisitable. A future step has none: letting
+	// the user jump ahead into a stage whose prerequisites are unmet produces
+	// an error they cannot act on.
+	Href string
+	Done bool
+}
+
+// StepsOpts configures a progress trail.
+type StepsOpts struct {
+	Label string
+	Steps []Step
+	// Current is the 1-based active step.
+	Current int
+	Attrs   Attrs
+}
+
+// Steps renders an ordered progress trail.
+//
+// The position is stated in text ("Step 2 of 4") rather than left to the
+// styling: colour and a filled circle are invisible to a screen reader and
+// ambiguous to anyone who cannot distinguish the two shades.
+templ Steps(o StepsOpts) {
+	<nav { rootWith("steps", "", o.Attrs, "aria-label", breadcrumbOrDefault(o.Label, "Progress"))... }>
+		<ol class="flex flex-wrap items-center gap-3 text-sm">
+			for i, step := range o.Steps {
+				<li class="flex items-center gap-2">
+					if i > 0 {
+						<span class="text-fg-muted" aria-hidden="true">→</span>
+					}
+					if i+1 == o.Current {
+						<span class="font-semibold" aria-current="step">{ step.Label }</span>
+					} else if step.Done && step.Href != "" {
+						<a href={ templ.SafeURL(step.Href) } class="link">{ step.Label }</a>
+					} else {
+						<span class="text-fg-muted">{ step.Label }</span>
+					}
+				</li>
+			}
+		</ol>
+		<p class="sr-only">{ stepPosition(o) }</p>
+	</nav>
+}
+
+func stepPosition(o StepsOpts) string {
+	return fmt.Sprintf("Step %d of %d", o.Current, len(o.Steps))
+}

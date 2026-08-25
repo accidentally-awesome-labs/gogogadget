@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/menubar",
+    "kind": "component",
+    "name": "menubar",
+    "revision": 1,
+    "contract": 1,
+    "title": "Menubar",
+    "description": "The Menubar renderer and its options.",
+    "requires": [
+      "component/dropdown-menu",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/menubar.templ",
+        "target": "internal/web/templates/ui/menubar.templ",
+        "class": "templ",
+        "sha256": "0cbfdc22ff5165b22646dfc2e05a419b1978b224971a2695c9e89d2944950fb3",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "menubar",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

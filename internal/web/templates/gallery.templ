@@ -542,6 +542,63 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Navigation — trails and pagers") {
+			<div class="space-y-6">
+				@ui.Breadcrumbs(ui.BreadcrumbsOpts{Crumbs: []ui.Crumb{
+					{Label: "Projects", Href: "/app/projects"},
+					{Label: "Apollo", Href: "/app/projects/apollo"},
+					{Label: "Settings"},
+				}})
+				@ui.BackLink(ui.BackLinkOpts{Href: "/app/projects", Label: "Back to projects"})
+				@ui.Steps(ui.StepsOpts{Current: 2, Steps: []ui.Step{
+					{Label: "Account", Done: true, Href: "/dev/gallery"},
+					{Label: "Organization"},
+					{Label: "Billing"},
+					{Label: "Done"},
+				}})
+				@ui.Pagination(ui.PaginationOpts{Page: 4, TotalPages: 12, BaseURL: "/dev/gallery", Target: "#content", Numbered: true, Labels: pagerLabels(ctx)})
+				@ui.CursorPagination(ui.CursorPaginationOpts{
+					PrevURL: "/dev/gallery?before=abc", NextURL: "/dev/gallery?after=xyz",
+					Target: "#content",
+				})
+				@ui.TableOfContents(ui.TableOfContentsOpts{Entries: []ui.TocEntry{
+					{Label: "Overview", Anchor: "overview"},
+					{Label: "Tokens", Anchor: "tokens", Depth: 2},
+					{Label: "Components", Anchor: "components", Depth: 2},
+				}})
+				@ui.NavigationMenu(ui.NavigationMenuOpts{Label: "Workspace", ActivePath: "/dev/gallery", Items: []ui.NavItem{
+					{Label: "Gallery", Href: "/dev/gallery"},
+					{Label: "Pricing", Href: "/pricing"},
+				}})
+				@ui.Menubar(ui.MenubarOpts{Label: "Editor", Menus: []ui.MenubarMenu{
+					{Label: "File", Items: []ui.MenuItem{{Label: "New", Href: "/dev/gallery"}, {Label: "Open", Href: "/dev/gallery"}}},
+					{Label: "Edit", Items: []ui.MenuItem{{Label: "Undo", Href: "/dev/gallery"}, {Separator: true}, {Label: "Delete", Kind: ui.KindDanger, Confirm: "Delete?", HX: ui.HX{Delete: "/dev/gallery"}}}},
+				}})
+			</div>
+		}
+
+		@gallerySection("Navigation — disclosure and tabs") {
+			<div class="space-y-6">
+				@ui.Disclosure(ui.DisclosureOpts{Summary: "What does native details give us?"}) {
+					<p>Toggle, button semantics, keyboard activation, expanded-state announcement, in-page search and print expansion — with no JavaScript.</p>
+				}
+				@ui.Accordion(ui.AccordionOpts{Exclusive: true, Name: "gallery-faq", Panels: []ui.AccordionPanel{
+					{Summary: "Is this exclusive?", Body: "Yes — the native name attribute closes the others.", Open: true},
+					{Summary: "Does it need script?", Body: "No. Exclusivity survives with JavaScript disabled."},
+					{Summary: "Can two accordions coexist?", Body: "Only if each declares its own Name."},
+				}})
+				@ui.Collapsible(ui.CollapsibleOpts{ID: "gallery-filters", Label: "Filters"}) {
+					<div class="card text-sm">A region toggled from a control elsewhere in the layout.</div>
+				}
+				@ui.TabPanels(ui.TabPanelsOpts{Label: "Environment", Panels: []ui.TabPanel{
+					{ID: "tab-dev", Label: "Development", Body: "Arrow keys move between tabs; Home and End jump to the ends."},
+					{ID: "tab-staging", Label: "Staging", Body: "Exactly one tab is in the tab order."},
+					{ID: "tab-prod", Label: "Production", Body: "Each panel is labelled by its tab."},
+				}})
+				@ui.SkipLink(ui.SkipLinkOpts{Label: "Skip to demo content (focus me with Tab)"})
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/accordion",
+    "kind": "component",
+    "name": "accordion",
+    "revision": 1,
+    "contract": 1,
+    "title": "Accordion",
+    "description": "The Accordion renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/accordion.templ",
+        "target": "internal/web/templates/ui/accordion.templ",
+        "class": "templ",
+        "sha256": "1767fe4bb73266917db042f5579ecc333c18887c8444c0bf09bee5c41cd22c61",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/accordion_test.go",
+        "target": "internal/web/templates/ui/accordion_test.go",
+        "class": "test",
+        "sha256": "dbae9db34fd26ca467778dcbfeb3e44fd594763f9e509b703d7b046e0cb48b27",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "accordion",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

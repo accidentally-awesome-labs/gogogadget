@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/table-of-contents",
+    "kind": "component",
+    "name": "table-of-contents",
+    "revision": 1,
+    "contract": 1,
+    "title": "TableOfContents",
+    "description": "The TableOfContents renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/table-of-contents.templ",
+        "target": "internal/web/templates/ui/table-of-contents.templ",
+        "class": "templ",
+        "sha256": "dce41b158b679c9406b8f33d48dbb94a58ae51ca8b712f263d543fa51f3da3d5",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "table-of-contents",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,49 @@
+package ui
+
+// Crumb is one step in a breadcrumb trail.
+type Crumb struct {
+	Label string
+	// Href empty marks the current page: the last crumb is where the user
+	// already is, and linking it invites a pointless navigation.
+	Href string
+}
+
+// BreadcrumbsOpts configures a breadcrumb trail.
+type BreadcrumbsOpts struct {
+	// Label names the landmark. Several navs can share a page and an unnamed
+	// one is indistinguishable in a screen reader's landmark list.
+	Label  string
+	Crumbs []Crumb
+	Attrs  Attrs
+}
+
+// Breadcrumbs renders an ordered trail to the current page.
+//
+// It is an <ol> because the order is the meaning, and the separators are
+// aria-hidden: a screen reader announces list position already, so reading a
+// slash between every item is noise.
+templ Breadcrumbs(o BreadcrumbsOpts) {
+	<nav { rootWith("breadcrumbs", "text-sm", o.Attrs, "aria-label", breadcrumbLabel(o.Label))... }>
+		<ol class="flex items-center gap-2 flex-wrap">
+			for i, crumb := range o.Crumbs {
+				<li class="flex items-center gap-2">
+					if i > 0 {
+						<span class="text-fg-muted" aria-hidden="true">/</span>
+					}
+					if crumb.Href != "" && i < len(o.Crumbs)-1 {
+						<a href={ templ.SafeURL(crumb.Href) } class="link" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }>{ crumb.Label }</a>
+					} else {
+						<span class="text-fg-muted" aria-current="page">{ crumb.Label }</span>
+					}
+				</li>
+			}
+		</ol>
+	</nav>
+}
+
+func breadcrumbLabel(label string) string {
+	if label == "" {
+		return "Breadcrumb"
+	}
+	return label
+}

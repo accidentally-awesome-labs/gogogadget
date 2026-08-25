@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/disclosure",
+    "kind": "component",
+    "name": "disclosure",
+    "revision": 1,
+    "contract": 1,
+    "title": "Disclosure",
+    "description": "The Disclosure renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/disclosure.templ",
+        "target": "internal/web/templates/ui/disclosure.templ",
+        "class": "templ",
+        "sha256": "257f297170eba695dab169ae6058bc6022fb571daec0b3cb34f0be3747052140",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "disclosure",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

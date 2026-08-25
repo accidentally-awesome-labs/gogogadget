@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "ab3a1f272d255d667accef9623b4889395f8a2335efa84df3e75165d830eecaa",
+        "sha256": "82c6cf9df897868f47246cefa5e42ccc61bbe7f135a5bf092e89f9872aae5319",
         "rewrite_module": true,
         "contract": false
       },
@@ -107,6 +107,14 @@
         "contract": false
       },
       {
+        "source": "static/ui/navigation.js",
+        "target": "static/ui/navigation.js",
+        "class": "asset",
+        "sha256": "c87d51297fa6bd0dada46399e90931ba417e195f2ff1c73335e29ce248b26028",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "static/ui/overlays.js",
         "target": "static/ui/overlays.js",
         "class": "asset",
@@ -121,6 +129,11 @@
         {
           "id": "ui-forms",
           "path": "static/ui/forms.js",
+          "kind": "script"
+        },
+        {
+          "id": "ui-navigation",
+          "path": "static/ui/navigation.js",
           "kind": "script"
         },
         {
