@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 // BannerOpts is a full-bleed shell notice (impersonation, billing).
 type BannerOpts struct {
 	Kind  Kind
-	Role  string
+	Live  Live
 	Attrs Attrs
 }
 
@@ -40,7 +40,7 @@ func Banner(o BannerOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("banner", "banner banner-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", noticeRole(o.Role)))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("banner", "banner banner-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", o.Live.Role()))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

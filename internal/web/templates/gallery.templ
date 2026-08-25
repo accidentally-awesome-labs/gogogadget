@@ -138,16 +138,16 @@ templ Gallery() {
 
 		@gallerySection("Alerts") {
 			<div class="space-y-2 max-w-narrow">
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Info — a neutral notice.
 				}
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Role: "status", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Success — the thing you asked for happened.
 				}
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Warning — this will need attention.
 				}
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Danger — the request was refused.
 				}
 			</div>
@@ -155,13 +155,13 @@ templ Gallery() {
 
 		@gallerySection("Banners") {
 			<div class="space-y-2">
-				@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{TestID: ""}}) {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Live: ui.LivePolite, Attrs: ui.Attrs{TestID: ""}}) {
 					Info banner — full bleed inside the shell.
 				}
-				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: ""}}) {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: ""}}) {
 					Warning banner — impersonation and past-due use this.
 				}
-				@ui.Banner(ui.BannerOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{TestID: ""}}) {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: ""}}) {
 					Danger banner — a critical platform announcement.
 				}
 			</div>
@@ -232,7 +232,7 @@ templ Gallery() {
 			}
 			<div class="mt-4">
 				@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "gallery-table-empty"}}) {
-					@ui.TableEmpty(ui.TableEmptyOpts{Text: "Nothing here yet — this is table-empty."})
+					@ui.EmptyState(ui.EmptyStateOpts{Body: "Nothing here yet — this is table-empty.", Variant: ui.EmptyInline})
 				}
 			</div>
 		}
@@ -311,7 +311,11 @@ templ Gallery() {
 				for _, pct := range []int{0, 50, 100} {
 					<div>
 						<p class="text-sm text-fg-muted">{ fmt.Sprintf("%d%%", pct) }</p>
-						@ui.Meter(ui.MeterOpts{Percent: pct, Attrs: ui.Attrs{TestID: fmt.Sprintf("gallery-meter-%d", pct)}})
+						@ui.Meter(ui.MeterOpts{
+							Percent: pct,
+							Label:   fmt.Sprintf("Storage used, %d percent", pct),
+							Attrs:   ui.Attrs{TestID: fmt.Sprintf("gallery-meter-%d", pct)},
+						})
 					</div>
 				}
 			</div>
@@ -596,6 +600,56 @@ templ Gallery() {
 					{ID: "tab-prod", Label: "Production", Body: "Each panel is labelled by its tab."},
 				}})
 				@ui.SkipLink(ui.SkipLinkOpts{Label: "Skip to demo content (focus me with Tab)"})
+			</div>
+		}
+
+		@gallerySection("Feedback — state and progress") {
+			<div class="space-y-6">
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindSuccess, Label: "Healthy"})
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindWarn, Label: "Degraded"})
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindDanger, Label: "Failing"})
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindNeutral, Label: "Unknown"})
+				</div>
+				<div class="space-y-3 max-w-md">
+					@ui.ProgressBar(ui.ProgressBarOpts{Value: 63, Max: 100, Label: "Storage used"})
+					@ui.ProgressBar(ui.ProgressBarOpts{Value: 3, Max: 8, Label: "Files uploaded", ValueText: "3 of 8 files"})
+					@ui.ProgressBar(ui.ProgressBarOpts{Value: -1, Label: "Importing"})
+				</div>
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.ProgressCircle(ui.ProgressCircleOpts{Value: 25, Max: 100, Label: "Quota", Size: ui.SizeSM})
+					@ui.ProgressCircle(ui.ProgressCircleOpts{Value: 75, Max: 100, Label: "Quota"})
+					@ui.ProgressCircle(ui.ProgressCircleOpts{Value: -1, Label: "Working", Size: ui.SizeLG})
+				</div>
+				<div class="flex flex-wrap items-start gap-4">
+					@ui.Toast(ui.ToastOpts{Kind: ui.KindSuccess, Text: "Project created."})
+					@ui.Toast(ui.ToastOpts{Kind: ui.KindDanger, Text: "Upload failed.", Live: ui.LiveAssertive, Dismissible: true})
+				</div>
+				<div class="max-w-md">
+					@ui.Skeleton(ui.SkeletonOpts{Lines: 3})
+				</div>
+			</div>
+		}
+
+		@gallerySection("Feedback — empty and error states") {
+			<div class="space-y-6">
+				@ui.TableCard(ui.TableCardOpts{}) {
+					@ui.EmptyState(ui.EmptyStateOpts{Body: "Nothing here yet — the inline variant sits inside the table card.", Variant: ui.EmptyInline})
+				}
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Title: "No projects yet", Body: "Create one to get started.", Variant: ui.EmptyCard,
+				}) {
+					@ui.Button(ui.ButtonOpts{Label: "New project", Action: ui.ActionPrimary, Attrs: ui.Attrs{Class: "mt-4"}})
+				}
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Title: "No results", Body: "No project matches that search.",
+					Variant: ui.EmptyCard, Filtered: true,
+					ClearURL: "/dev/gallery", Target: "#content",
+				})
+				@ui.ErrorState(ui.ErrorStateOpts{
+					Title: "Could not load activity", Body: "The request failed before it reached the server.",
+					RetryURL: "/dev/gallery", Target: "#content",
+				})
 			</div>
 		}
 

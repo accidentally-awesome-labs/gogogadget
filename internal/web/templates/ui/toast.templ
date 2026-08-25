@@ -1,0 +1,50 @@
+package ui
+
+// ToastOpts is a transient message.
+type ToastOpts struct {
+	Kind Kind
+	Text string
+	// Live defaults to polite: a toast confirms something the user just did, so
+	// interrupting them assertively is disproportionate. A failure the user
+	// must act on is the case for LiveAssertive.
+	Live Live
+	// Dismissible adds a close control. A toast that can only time out gives a
+	// user who reads slowly no way to keep it, and one that never times out
+	// with no close control cannot be dismissed at all.
+	Dismissible bool
+	CloseLabel  string
+	Attrs       Attrs
+}
+
+// Toast renders a transient message.
+templ Toast(o ToastOpts) {
+	<div
+		{ rootWith("toast", "toast toast-"+string(NormalizeKind(o.Kind)), o.Attrs,
+			"role", toastRole(o.Live))... }
+	>
+		<span>{ o.Text }</span>
+		if o.Dismissible {
+			@IconButton(IconButtonOpts{
+				Icon: IconClose, Label: toastCloseLabel(o.CloseLabel), Size: SizeXS,
+				Attrs: Attrs{Class: "ml-auto"},
+			})
+		}
+	</div>
+}
+
+// toastRole defaults an unset urgency to polite rather than off. Unlike a
+// notice rendered with the page, a toast appears after the fact - if it is not
+// announced at all, a screen reader user never learns the action succeeded.
+func toastRole(live Live) string {
+	if live.Value() == LiveOff {
+		return LivePolite.Role()
+	}
+	return live.Role()
+}
+
+func toastCloseLabel(label string) string {
+	if label == "" {
+		return "Dismiss"
+	}
+	return label
+}

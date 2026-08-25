@@ -26,7 +26,7 @@
         "source": "internal/web/templates/webhooks.templ",
         "target": "internal/web/templates/webhooks.templ",
         "class": "templ",
-        "sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
+        "sha256": "8d80c5c7333f1d60e6c9e4b8b0c1a930761036d0a823da4346f3a7b159002cbb",
         "rewrite_module": true,
         "contract": false
       },

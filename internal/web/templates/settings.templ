@@ -102,7 +102,7 @@ templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.danger_body") }</p>
 		<form hx-post="/app/settings/account/delete" hx-target="#danger-zone" hx-swap="outerHTML" novalidate hx-disable="this" class="mt-4 space-y-3">
 			if dangerErr != "" {
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: "delete-account-error"}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: "delete-account-error"}}) {
 					{ dangerErr }
 				}
 			}

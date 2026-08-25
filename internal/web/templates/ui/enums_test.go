@@ -50,6 +50,16 @@ func TestEveryEnumNormalizesInvalidValues(t *testing.T) {
 	assert.Equal(t, HeightAuto, Height("").Value())
 	assert.Equal(t, RatioAuto, Ratio("").Value())
 	assert.Equal(t, SideTop, Side("").Value())
+	// LiveOff is a meaningful empty: most regions are not live, and announcing
+	// every one of them would make a screen reader unusable.
+	assert.Equal(t, EmptyCard, EmptyVariant("").Value(),
+		"an unset empty state is the standalone card: inline would render "+
+			"without the border its container expects to supply")
+	assert.Equal(t, EmptyCard, EmptyVariant("banner").Value())
+	assert.Equal(t, LiveOff, Live("").Value())
+	assert.Equal(t, LiveOff, Live("aggressive").Value(),
+		"an unrecognised urgency must not become assertive: interrupting a "+
+			"screen reader mid-sentence is the most disruptive default available")
 	assert.Equal(t, InputTypeText, InputType("").Value(),
 		"an unset input type must be text, which is what HTML itself falls back to")
 	assert.Equal(t, InputTypeText, InputType("datetime").Value(),
@@ -127,6 +137,14 @@ func TestDeclaredEnumValuesRoundTrip(t *testing.T) {
 		assert.True(t, v.Valid())
 	}
 	for _, v := range Sides {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
+	for _, v := range EmptyVariants {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
+	for _, v := range Lives {
 		assert.Equal(t, v, v.Value())
 		assert.True(t, v.Valid())
 	}

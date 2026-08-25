@@ -28,7 +28,7 @@
         "source": "internal/web/templates/api_tokens.templ",
         "target": "internal/web/templates/api_tokens.templ",
         "class": "templ",
-        "sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
+        "sha256": "c4e5b63745c9bcaedbb781a08df6d3423acad621a0c895a11afc3f2bacabcc98",
         "rewrite_module": true,
         "contract": false
       }

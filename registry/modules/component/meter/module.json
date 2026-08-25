@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/meter.templ",
         "target": "internal/web/templates/ui/meter.templ",
         "class": "templ",
-        "sha256": "1f6dcd3da57a923dd800b4b5278e4e248575e06907f0dfca2b7d74a089d818f7",
+        "sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
         "rewrite_module": true,
         "contract": true
       }

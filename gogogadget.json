@@ -8,6 +8,7 @@
     "profile/full"
   ],
   "exclude": [
+    "component/table-empty",
     "element/divider"
   ]
 }

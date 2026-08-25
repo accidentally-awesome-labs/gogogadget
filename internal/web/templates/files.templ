@@ -37,7 +37,7 @@ templ FilesQuota(d FilesData) {
 templ FilesTable(d FilesData) {
 	<div id="table-container">
 		if d.LimitHit {
-			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-4", TestID: "storage-limit"}}) {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4", TestID: "storage-limit"}}) {
 				{ i18n.T(ctx, "files.limit_hit", fmt.Sprint(d.Plan.MaxStorageMB)) }
 				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
 			}

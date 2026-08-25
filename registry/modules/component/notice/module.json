@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/notice.templ",
         "target": "internal/web/templates/ui/notice.templ",
         "class": "templ",
-        "sha256": "cf586d6f7e25af6eff9a8afef05aa9a84324aabf632323c7b1e26329e1f71945",
+        "sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
         "rewrite_module": true,
         "contract": true
       }

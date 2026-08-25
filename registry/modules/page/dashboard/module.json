@@ -28,7 +28,7 @@
         "source": "internal/web/templates/dashboard.templ",
         "target": "internal/web/templates/dashboard.templ",
         "class": "templ",
-        "sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
+        "sha256": "a18b51dcb10bb28680089b0cc3f8a3ada2225b41ed53908be0d25c6452138d8f",
         "rewrite_module": true,
         "contract": false
       }

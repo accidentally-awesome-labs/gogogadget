@@ -67,18 +67,6 @@ func defaultTestID(a Attrs, fallback string) Attrs {
 	return a
 }
 
-// noticeRole falls back to the accessible default rather than emitting an empty
-// role attribute. "status" is the safe default: it announces politely, where a
-// wrong "alert" interrupts a screen-reader user mid-sentence.
-func noticeRole(role string) string {
-	switch role {
-	case "alert", "status":
-		return role
-	default:
-		return "status"
-	}
-}
-
 // clampPercent keeps a meter inside its track. An out-of-range value is a
 // caller bug, but rendering a bar wider than its container is a visual break in
 // production, so it is clamped rather than trusted.

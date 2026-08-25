@@ -932,7 +932,7 @@ func AppLayout(page Page, content templ.Component) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: "impersonation-banner"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var39), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "impersonation-banner"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var39), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1199,7 +1199,7 @@ func billingBanner(page Page) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var52), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var52), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1258,7 +1258,7 @@ func billingBanner(page Page) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var56), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Live: ui.LivePolite, Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var56), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

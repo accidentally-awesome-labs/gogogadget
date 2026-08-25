@@ -183,7 +183,7 @@ func WebhooksSection(d WebhooksData) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-3", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-3", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -73,13 +73,13 @@ templ ProjectsTable(d ProjectListData) {
 templ ProjectForm(d ProjectFormData) {
 	<div id="project-form">
 		if d.LimitHit {
-			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-4", TestID: "plan-limit"}}) {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4", TestID: "plan-limit"}}) {
 				{ i18n.T(ctx, "projects.limit_hit", d.Plan.Name, fmt.Sprint(d.Plan.MaxProjects)) }
 				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
 			}
 		}
 		if d.NameErr != "" {
-			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-4", TestID: ""}}) {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4", TestID: ""}}) {
 				{ i18n.T(ctx, "projects.fix_error") }
 			}
 		}

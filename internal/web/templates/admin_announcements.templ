@@ -27,7 +27,7 @@ templ AdminAnnouncementsPage(d AnnouncementsData) {
 	}
 	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "announcements-table"}}) {
 		if len(d.Items) == 0 {
-			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.announcements.empty")})
+			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.announcements.empty"), Variant: ui.EmptyInline})
 		} else {
 			<table class="table">
 				<thead>
@@ -89,7 +89,7 @@ templ AnnouncementForm(d AnnouncementsData) {
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.announcements.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
 		<form hx-post="/admin/announcements" hx-target="#announcement-form-wrap" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="announcement-create-form" class="space-y-4">
 			if d.Invalid {
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					{ i18n.T(ctx, "admin.announcements.invalid") }
 				}
 			}

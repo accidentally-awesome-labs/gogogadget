@@ -1,0 +1,20 @@
+package ui
+
+// StatusDotOpts is a small state indicator beside a label.
+type StatusDotOpts struct {
+	Kind Kind
+	// Label is required and rendered as text, not as a tooltip. A coloured dot
+	// alone encodes meaning in hue only: invisible to a screen reader and
+	// ambiguous to the ~8% of men with red-green colour blindness, for whom a
+	// red "failing" dot and a green "healthy" one look the same.
+	Label string
+	Attrs Attrs
+}
+
+// StatusDot renders a state dot with its label.
+templ StatusDot(o StatusDotOpts) {
+	<span { root("status-dot", "inline-flex items-center gap-2 text-sm", o.Attrs)... }>
+		<span class={ "w-2 h-2 rounded-full shrink-0 bg-" + string(NormalizeKind(o.Kind)) } aria-hidden="true"></span>
+		{ o.Label }
+	</span>
+}

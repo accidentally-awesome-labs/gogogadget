@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/status-dot",
+    "kind": "component",
+    "name": "status-dot",
+    "revision": 1,
+    "contract": 1,
+    "title": "StatusDot",
+    "description": "The StatusDot renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/status-dot.templ",
+        "target": "internal/web/templates/ui/status-dot.templ",
+        "class": "templ",
+        "sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/status-dot_test.go",
+        "target": "internal/web/templates/ui/status-dot_test.go",
+        "class": "test",
+        "sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "status-dot",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

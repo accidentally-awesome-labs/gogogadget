@@ -8,12 +8,16 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// NoticeOpts is an in-page notice inside a form or card. Role is "alert" for
-// actionable failures and "status" for confirmations; the component owns the
-// attribute so a caller cannot silently downgrade an error to a status.
+// NoticeOpts is an in-page notice inside a form or card.
+//
+// Live decides how the message is announced, and the component owns the mapping
+// so a caller cannot silently downgrade an actionable failure to a status. The
+// default is LiveOff: a notice rendered as part of the page on first paint has
+// nothing to announce, and marking it live makes a screen reader read it again
+// on every unrelated update.
 type NoticeOpts struct {
 	Kind  Kind
-	Role  string
+	Live  Live
 	Attrs Attrs
 }
 
@@ -42,7 +46,7 @@ func Notice(o NoticeOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("notice", "alert alert-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", noticeRole(o.Role)))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("notice", "alert alert-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", o.Live.Role()))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

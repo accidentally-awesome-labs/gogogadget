@@ -181,7 +181,7 @@ templ AppLayout(page Page, content templ.Component) {
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
 			if page.Impersonator != nil {
-				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: "impersonation-banner"}}) {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "impersonation-banner"}}) {
 					<div class="flex items-center justify-center gap-3">
 						<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
 						<form hx-post="/app/impersonation/exit" hx-disable="this">
@@ -248,12 +248,12 @@ templ announcementBanner(page Page) {
 // billingBanner is the persistent past_due / ending-plan nudge in the shell.
 templ billingBanner(page Page) {
 	if page.Sub != nil && page.Sub.Status == "past_due" {
-		@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: ""}}) {
+		@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: ""}}) {
 			{ i18n.T(ctx, "layout.banner_past_due_prefix") } <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_past_due_link") }</a> { i18n.T(ctx, "layout.banner_past_due_suffix") }
 		}
 	}
 	if page.Sub != nil && page.Sub.Status == "canceled" && page.Sub.CurrentPeriodEnd.Valid && page.Sub.CurrentPeriodEnd.Time.After(page.NowOrDefault()) {
-		@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{TestID: ""}}) {
+		@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Live: ui.LivePolite, Attrs: ui.Attrs{TestID: ""}}) {
 			{ i18n.T(ctx, "layout.banner_ending_prefix") } { page.Sub.CurrentPeriodEnd.Time.Format("January 2, 2006") } — <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_ending_link") }</a>.
 		}
 	}

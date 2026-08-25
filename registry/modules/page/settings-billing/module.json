@@ -37,7 +37,7 @@
         "source": "internal/web/templates/billing.templ",
         "target": "internal/web/templates/billing.templ",
         "class": "templ",
-        "sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
+        "sha256": "78e4588eac56a0bf578e1ebc9f20eee80f31b4fbdde5e50dff80a0be763858cd",
         "rewrite_module": true,
         "contract": false
       }

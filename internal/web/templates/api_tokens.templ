@@ -28,7 +28,7 @@ templ APITokensSection(d APITokensData) {
 	<div class="card max-w-lg mb-6">
 		<h2 class="font-semibold mb-3">{ i18n.T(ctx, "api.create_title") }</h2>
 		if d.NameErr != "" {
-			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-3", TestID: ""}}) {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-3", TestID: ""}}) {
 				{ d.NameErr }
 			}
 		}

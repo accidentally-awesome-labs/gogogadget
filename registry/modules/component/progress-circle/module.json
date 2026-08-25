@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/progress-circle",
+    "kind": "component",
+    "name": "progress-circle",
+    "revision": 1,
+    "contract": 1,
+    "title": "ProgressCircle",
+    "description": "The ProgressCircle renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/progress-circle.templ",
+        "target": "internal/web/templates/ui/progress-circle.templ",
+        "class": "templ",
+        "sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "progress-circle",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -44,7 +44,7 @@ templ flagCreateCard(d FlagsData) {
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
 		<form hx-post="/admin/flags" hx-target="#flag-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="flag-create-form" class="space-y-4">
 			if d.CreateErr != "" {
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					{ d.CreateErr }
 				}
 			}
@@ -159,7 +159,7 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.overrides_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 	<div class="table-card max-w-3xl mb-6" data-testid="flag-overrides">
 		if len(overrides) == 0 {
-			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "flags.overrides_empty")})
+			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "flags.overrides_empty"), Variant: ui.EmptyInline})
 		} else {
 			<table class="table">
 				<thead>

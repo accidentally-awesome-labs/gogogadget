@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/progress-bar",
+    "kind": "component",
+    "name": "progress-bar",
+    "revision": 1,
+    "contract": 1,
+    "title": "ProgressBar",
+    "description": "The ProgressBar renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/progress-bar.templ",
+        "target": "internal/web/templates/ui/progress-bar.templ",
+        "class": "templ",
+        "sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/progress-bar_test.go",
+        "target": "internal/web/templates/ui/progress-bar_test.go",
+        "class": "test",
+        "sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "progress-bar",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

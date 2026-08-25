@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/error-state",
+    "kind": "component",
+    "name": "error-state",
+    "revision": 1,
+    "contract": 1,
+    "title": "ErrorState",
+    "description": "The ErrorState renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/error-state.templ",
+        "target": "internal/web/templates/ui/error-state.templ",
+        "class": "templ",
+        "sha256": "3ef0036e95319f1aa5949ad2fd6c6c87953c6ddcb2fb3cdf62b3203c60501d0b",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "error-state",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

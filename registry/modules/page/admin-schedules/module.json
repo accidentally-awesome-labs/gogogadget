@@ -37,7 +37,7 @@
         "source": "internal/web/templates/admin_schedules.templ",
         "target": "internal/web/templates/admin_schedules.templ",
         "class": "templ",
-        "sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
+        "sha256": "3636d931b2f0ee076247d85424e765815cc1434e8e20c3f701203d788cbd9e39",
         "rewrite_module": true,
         "contract": false
       }

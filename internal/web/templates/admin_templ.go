@@ -83,7 +83,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 			if len(d.RecentSignups) == 0 {
-				templ_7745c5c3_Err = ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.signups_empty")}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.signups_empty"), Variant: ui.EmptyInline}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

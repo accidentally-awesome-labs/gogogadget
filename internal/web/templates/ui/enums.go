@@ -190,6 +190,38 @@ var Ratios = []Ratio{RatioAuto, RatioSquare, RatioVideo, RatioWide, RatioPortrai
 func (r Ratio) Value() Ratio { return normalize(r, Ratios, RatioAuto) }
 func (r Ratio) Valid() bool  { return contains(r, Ratios) }
 
+// Live is how urgently a region's changes are announced. LiveOff is a declared
+// member, not a missing value: most regions are not live, and a product where
+// every update is announced is one a screen reader user cannot work in.
+type Live string
+
+const (
+	LiveOff       Live = ""
+	LivePolite    Live = "polite"
+	LiveAssertive Live = "assertive"
+)
+
+var Lives = []Live{LiveOff, LivePolite, LiveAssertive}
+
+// Value normalizes to LiveOff. Defaulting to assertive would interrupt a screen
+// reader mid-sentence for a typo in a component option.
+func (l Live) Value() Live { return normalize(l, Lives, LiveOff) }
+func (l Live) Valid() bool { return contains(l, Lives) }
+
+// Role maps urgency onto the ARIA role that carries it. role="status" is a
+// polite live region and role="alert" is an assertive one, so a component sets
+// the role rather than aria-live plus aria-atomic by hand.
+func (l Live) Role() string {
+	switch l.Value() {
+	case LivePolite:
+		return "status"
+	case LiveAssertive:
+		return "alert"
+	default:
+		return ""
+	}
+}
+
 // InputType is the HTML input type a text field renders. It is closed because
 // an unrecognised type silently degrades to text in the browser while dropping
 // the validation and mobile keyboard the caller asked for.

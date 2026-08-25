@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/banner.templ",
         "target": "internal/web/templates/ui/banner.templ",
         "class": "templ",
-        "sha256": "3ca212ad0f4133b938b1f34c7217037157b17bb7004fac4c1ad858dd307869d8",
+        "sha256": "ffb60468c9c8df47986c1005a78b86573f769fae16e41053cb7028c63c92fd70",
         "rewrite_module": true,
         "contract": true
       }

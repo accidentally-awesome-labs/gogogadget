@@ -488,3 +488,36 @@ func readInputCSS(t *testing.T) string {
 	require.NoError(t, err)
 	return string(css)
 }
+
+// A progressbar or meter with no accessible name reports a number with no
+// subject. The gallery is the one page that renders every component, so it is
+// where an unnamed one shows up - and it did: three meters shipped nameless.
+func TestEveryProgressAndMeterInTheGalleryIsNamed(t *testing.T) {
+	html := renderComponent(t, Gallery())
+	for _, role := range []string{"progressbar", "meter"} {
+		for _, tag := range findRoleTags(html, role) {
+			assert.Contains(t, tag, "aria-label=",
+				"a %s with no accessible name announces a number with no subject", role)
+		}
+	}
+}
+
+// findRoleTags returns the opening tags carrying a given role.
+func findRoleTags(html, role string) []string {
+	var out []string
+	needle := `role="` + role + `"`
+	for i := 0; i < len(html); {
+		at := strings.Index(html[i:], needle)
+		if at < 0 {
+			break
+		}
+		at += i
+		start := strings.LastIndex(html[:at], "<")
+		end := strings.Index(html[at:], ">")
+		if start >= 0 && end >= 0 {
+			out = append(out, html[start:at+end])
+		}
+		i = at + len(needle)
+	}
+	return out
+}

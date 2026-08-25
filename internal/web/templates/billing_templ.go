@@ -234,7 +234,7 @@ func BillingError(msg string) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "max-w-lg", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "max-w-lg", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -455,7 +455,7 @@ func SettingsBilling(d BillingData) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Role: "status", Attrs: ui.Attrs{Class: "mb-4 max-w-lg", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "mb-4 max-w-lg", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var19), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

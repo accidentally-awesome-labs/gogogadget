@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/skeleton",
+    "kind": "component",
+    "name": "skeleton",
+    "revision": 1,
+    "contract": 1,
+    "title": "Skeleton",
+    "description": "The Skeleton renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/skeleton.templ",
+        "target": "internal/web/templates/ui/skeleton.templ",
+        "class": "templ",
+        "sha256": "577d0906ef8e5364ff81daabb0bc03a509a50c45e9c20aa4566dc952a00efbca",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/skeleton_test.go",
+        "target": "internal/web/templates/ui/skeleton_test.go",
+        "class": "test",
+        "sha256": "4e2e9b4e94b82df161dd9fa281a6aab9bd9c5bb246b233f0903caa9aed83a252",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "skeleton",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

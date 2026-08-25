@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+  "registry_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
   "order": [
     "element/ui-core",
     "component/accordion",
@@ -54,21 +54,24 @@
     "component/password-input",
     "component/plan-card",
     "component/popover",
+    "component/progress-bar",
+    "component/progress-circle",
     "component/radio-group",
     "component/range-input",
     "component/search-input",
     "component/secret-reveal",
     "component/section-header",
     "component/select",
+    "component/skeleton",
     "component/skip-link",
     "component/slug-input",
     "component/stack",
+    "component/status-dot",
     "component/steps",
     "component/switch",
     "component/tab-panels",
     "component/table",
     "component/table-card",
-    "component/table-empty",
     "component/table-of-contents",
     "component/tags-input",
     "component/terminal-page",
@@ -86,7 +89,9 @@
     "element/heading",
     "element/icon",
     "component/back-link",
+    "component/error-state",
     "element/icon-button",
+    "component/toast",
     "element/kbd",
     "element/link",
     "element/prose",
@@ -194,6 +199,7 @@
     "workflow/projects",
     "page/project-edit",
     "workflow/seo-discovery",
+    "component/table-empty",
     "element/divider"
   ],
   "modules": [
@@ -201,7 +207,7 @@
       "id": "component/accordion",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -275,7 +281,7 @@
       "id": "component/alert-dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -333,7 +339,7 @@
       "id": "component/back-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -389,7 +395,7 @@
       "id": "component/badge",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -444,7 +450,7 @@
       "id": "component/banner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -463,7 +469,7 @@
             "source": "internal/web/templates/ui/banner.templ",
             "target": "internal/web/templates/ui/banner.templ",
             "class": "templ",
-            "sha256": "3ca212ad0f4133b938b1f34c7217037157b17bb7004fac4c1ad858dd307869d8",
+            "sha256": "ffb60468c9c8df47986c1005a78b86573f769fae16e41053cb7028c63c92fd70",
             "rewrite_module": true,
             "contract": true
           }
@@ -488,8 +494,8 @@
         {
           "path": "internal/web/templates/ui/banner.templ",
           "source": "internal/web/templates/ui/banner.templ",
-          "base_sha256": "3ca212ad0f4133b938b1f34c7217037157b17bb7004fac4c1ad858dd307869d8",
-          "local_sha256": "3ca212ad0f4133b938b1f34c7217037157b17bb7004fac4c1ad858dd307869d8",
+          "base_sha256": "ffb60468c9c8df47986c1005a78b86573f769fae16e41053cb7028c63c92fd70",
+          "local_sha256": "ffb60468c9c8df47986c1005a78b86573f769fae16e41053cb7028c63c92fd70",
           "state": "clean"
         }
       ],
@@ -499,7 +505,7 @@
       "id": "component/breadcrumbs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -573,7 +579,7 @@
       "id": "component/card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -636,7 +642,7 @@
       "id": "component/char-counter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -713,7 +719,7 @@
       "id": "component/checkbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -768,7 +774,7 @@
       "id": "component/checkbox-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -842,7 +848,7 @@
       "id": "component/collapsible",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -900,7 +906,7 @@
       "id": "component/color-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -955,7 +961,7 @@
       "id": "component/combobox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1029,7 +1035,7 @@
       "id": "component/container",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1084,7 +1090,7 @@
       "id": "component/cursor-pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1139,7 +1145,7 @@
       "id": "component/date-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1194,7 +1200,7 @@
       "id": "component/date-range-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1252,7 +1258,7 @@
       "id": "component/date-time-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1307,7 +1313,7 @@
       "id": "component/description-list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1362,7 +1368,7 @@
       "id": "component/dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1420,7 +1426,7 @@
       "id": "component/disclosure",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1475,7 +1481,7 @@
       "id": "component/dropdown-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "component/menubar"
@@ -1535,7 +1541,7 @@
       "id": "component/empty-state",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1554,9 +1560,17 @@
             "source": "internal/web/templates/ui/empty-state.templ",
             "target": "internal/web/templates/ui/empty-state.templ",
             "class": "templ",
-            "sha256": "408d20f405bc927d48ed27c5fbfbf568d3059ad8157728c89b749e76cb84f843",
+            "sha256": "cde2516f73be8d5f08f6d8d296ee47f3abca968d8d3e4fe69c8ed8ffc426a614",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/empty-state_test.go",
+            "target": "internal/web/templates/ui/empty-state_test.go",
+            "class": "test",
+            "sha256": "2bd206c01bc213e30e58237ad4be08fe9fabb3a628418de61c3b11f68605e871",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {},
@@ -1571,7 +1585,11 @@
         "migrations": [],
         "environment": [],
         "docs": [],
-        "tests": {},
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
         "data": [],
         "removal_policy": "free"
       },
@@ -1579,8 +1597,71 @@
         {
           "path": "internal/web/templates/ui/empty-state.templ",
           "source": "internal/web/templates/ui/empty-state.templ",
-          "base_sha256": "408d20f405bc927d48ed27c5fbfbf568d3059ad8157728c89b749e76cb84f843",
-          "local_sha256": "408d20f405bc927d48ed27c5fbfbf568d3059ad8157728c89b749e76cb84f843",
+          "base_sha256": "cde2516f73be8d5f08f6d8d296ee47f3abca968d8d3e4fe69c8ed8ffc426a614",
+          "local_sha256": "cde2516f73be8d5f08f6d8d296ee47f3abca968d8d3e4fe69c8ed8ffc426a614",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/empty-state_test.go",
+          "source": "internal/web/templates/ui/empty-state_test.go",
+          "base_sha256": "2bd206c01bc213e30e58237ad4be08fe9fabb3a628418de61c3b11f68605e871",
+          "local_sha256": "2bd206c01bc213e30e58237ad4be08fe9fabb3a628418de61c3b11f68605e871",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "component/error-state",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/error-state",
+        "kind": "component",
+        "name": "error-state",
+        "revision": 1,
+        "contract": 1,
+        "title": "ErrorState",
+        "description": "The ErrorState renderer and its options.",
+        "requires": [
+          "element/icon",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/error-state.templ",
+            "target": "internal/web/templates/ui/error-state.templ",
+            "class": "templ",
+            "sha256": "3ef0036e95319f1aa5949ad2fd6c6c87953c6ddcb2fb3cdf62b3203c60501d0b",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "error-state",
+              "family": "feedback"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/error-state.templ",
+          "source": "internal/web/templates/ui/error-state.templ",
+          "base_sha256": "3ef0036e95319f1aa5949ad2fd6c6c87953c6ddcb2fb3cdf62b3203c60501d0b",
+          "local_sha256": "3ef0036e95319f1aa5949ad2fd6c6c87953c6ddcb2fb3cdf62b3203c60501d0b",
           "state": "clean"
         }
       ],
@@ -1590,7 +1671,7 @@
       "id": "component/field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1664,7 +1745,7 @@
       "id": "component/field-error",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1719,7 +1800,7 @@
       "id": "component/fieldset",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1774,7 +1855,7 @@
       "id": "component/file-dropzone",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1851,7 +1932,7 @@
       "id": "component/file-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1906,7 +1987,7 @@
       "id": "component/form",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1961,7 +2042,7 @@
       "id": "component/form-actions",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2035,7 +2116,7 @@
       "id": "component/grid",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2090,7 +2171,7 @@
       "id": "component/hint",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2145,7 +2226,7 @@
       "id": "component/inline",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2200,7 +2281,7 @@
       "id": "component/input-addon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2274,7 +2355,7 @@
       "id": "component/input-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2329,7 +2410,7 @@
       "id": "component/key-value",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2384,7 +2465,7 @@
       "id": "component/label",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2439,7 +2520,7 @@
       "id": "component/list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2498,7 +2579,7 @@
       "id": "component/menubar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2554,7 +2635,7 @@
       "id": "component/meter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2573,7 +2654,7 @@
             "source": "internal/web/templates/ui/meter.templ",
             "target": "internal/web/templates/ui/meter.templ",
             "class": "templ",
-            "sha256": "1f6dcd3da57a923dd800b4b5278e4e248575e06907f0dfca2b7d74a089d818f7",
+            "sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
             "rewrite_module": true,
             "contract": true
           }
@@ -2598,8 +2679,8 @@
         {
           "path": "internal/web/templates/ui/meter.templ",
           "source": "internal/web/templates/ui/meter.templ",
-          "base_sha256": "1f6dcd3da57a923dd800b4b5278e4e248575e06907f0dfca2b7d74a089d818f7",
-          "local_sha256": "1f6dcd3da57a923dd800b4b5278e4e248575e06907f0dfca2b7d74a089d818f7",
+          "base_sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
+          "local_sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
           "state": "clean"
         }
       ],
@@ -2609,7 +2690,7 @@
       "id": "component/metric",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2664,7 +2745,7 @@
       "id": "component/multi-select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2719,7 +2800,7 @@
       "id": "component/nav-tabs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2774,7 +2855,7 @@
       "id": "component/navigation-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2829,7 +2910,7 @@
       "id": "component/notice",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2848,7 +2929,7 @@
             "source": "internal/web/templates/ui/notice.templ",
             "target": "internal/web/templates/ui/notice.templ",
             "class": "templ",
-            "sha256": "cf586d6f7e25af6eff9a8afef05aa9a84324aabf632323c7b1e26329e1f71945",
+            "sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
             "rewrite_module": true,
             "contract": true
           }
@@ -2873,8 +2954,8 @@
         {
           "path": "internal/web/templates/ui/notice.templ",
           "source": "internal/web/templates/ui/notice.templ",
-          "base_sha256": "cf586d6f7e25af6eff9a8afef05aa9a84324aabf632323c7b1e26329e1f71945",
-          "local_sha256": "cf586d6f7e25af6eff9a8afef05aa9a84324aabf632323c7b1e26329e1f71945",
+          "base_sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
+          "local_sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
           "state": "clean"
         }
       ],
@@ -2884,7 +2965,7 @@
       "id": "component/number-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2958,7 +3039,7 @@
       "id": "component/otp-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3032,7 +3113,7 @@
       "id": "component/page-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3087,7 +3168,7 @@
       "id": "component/pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3161,7 +3242,7 @@
       "id": "component/password-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3235,7 +3316,7 @@
       "id": "component/plan-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3290,7 +3371,7 @@
       "id": "component/popover",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3345,10 +3426,139 @@
       "migrations": []
     },
     {
+      "id": "component/progress-bar",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/progress-bar",
+        "kind": "component",
+        "name": "progress-bar",
+        "revision": 1,
+        "contract": 1,
+        "title": "ProgressBar",
+        "description": "The ProgressBar renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/progress-bar.templ",
+            "target": "internal/web/templates/ui/progress-bar.templ",
+            "class": "templ",
+            "sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/progress-bar_test.go",
+            "target": "internal/web/templates/ui/progress-bar_test.go",
+            "class": "test",
+            "sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "progress-bar",
+              "family": "feedback"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/progress-bar.templ",
+          "source": "internal/web/templates/ui/progress-bar.templ",
+          "base_sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+          "local_sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/progress-bar_test.go",
+          "source": "internal/web/templates/ui/progress-bar_test.go",
+          "base_sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
+          "local_sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "component/progress-circle",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/progress-circle",
+        "kind": "component",
+        "name": "progress-circle",
+        "revision": 1,
+        "contract": 1,
+        "title": "ProgressCircle",
+        "description": "The ProgressCircle renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/progress-circle.templ",
+            "target": "internal/web/templates/ui/progress-circle.templ",
+            "class": "templ",
+            "sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "progress-circle",
+              "family": "feedback"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/progress-circle.templ",
+          "source": "internal/web/templates/ui/progress-circle.templ",
+          "base_sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+          "local_sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/radio-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3403,7 +3613,7 @@
       "id": "component/range-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3458,7 +3668,7 @@
       "id": "component/search-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3513,7 +3723,7 @@
       "id": "component/secret-reveal",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3568,7 +3778,7 @@
       "id": "component/section-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3623,7 +3833,7 @@
       "id": "component/select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3675,10 +3885,84 @@
       "migrations": []
     },
     {
+      "id": "component/skeleton",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/skeleton",
+        "kind": "component",
+        "name": "skeleton",
+        "revision": 1,
+        "contract": 1,
+        "title": "Skeleton",
+        "description": "The Skeleton renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/skeleton.templ",
+            "target": "internal/web/templates/ui/skeleton.templ",
+            "class": "templ",
+            "sha256": "577d0906ef8e5364ff81daabb0bc03a509a50c45e9c20aa4566dc952a00efbca",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/skeleton_test.go",
+            "target": "internal/web/templates/ui/skeleton_test.go",
+            "class": "test",
+            "sha256": "4e2e9b4e94b82df161dd9fa281a6aab9bd9c5bb246b233f0903caa9aed83a252",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "skeleton",
+              "family": "feedback"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/skeleton.templ",
+          "source": "internal/web/templates/ui/skeleton.templ",
+          "base_sha256": "577d0906ef8e5364ff81daabb0bc03a509a50c45e9c20aa4566dc952a00efbca",
+          "local_sha256": "577d0906ef8e5364ff81daabb0bc03a509a50c45e9c20aa4566dc952a00efbca",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/skeleton_test.go",
+          "source": "internal/web/templates/ui/skeleton_test.go",
+          "base_sha256": "4e2e9b4e94b82df161dd9fa281a6aab9bd9c5bb246b233f0903caa9aed83a252",
+          "local_sha256": "4e2e9b4e94b82df161dd9fa281a6aab9bd9c5bb246b233f0903caa9aed83a252",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/skip-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3752,7 +4036,7 @@
       "id": "component/slug-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3810,7 +4094,7 @@
       "id": "component/stack",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3862,10 +4146,84 @@
       "migrations": []
     },
     {
+      "id": "component/status-dot",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/status-dot",
+        "kind": "component",
+        "name": "status-dot",
+        "revision": 1,
+        "contract": 1,
+        "title": "StatusDot",
+        "description": "The StatusDot renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/status-dot.templ",
+            "target": "internal/web/templates/ui/status-dot.templ",
+            "class": "templ",
+            "sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/status-dot_test.go",
+            "target": "internal/web/templates/ui/status-dot_test.go",
+            "class": "test",
+            "sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "status-dot",
+              "family": "feedback"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/status-dot.templ",
+          "source": "internal/web/templates/ui/status-dot.templ",
+          "base_sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
+          "local_sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/status-dot_test.go",
+          "source": "internal/web/templates/ui/status-dot_test.go",
+          "base_sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+          "local_sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/steps",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3939,7 +4297,7 @@
       "id": "component/switch",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3994,7 +4352,7 @@
       "id": "component/tab-panels",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4071,7 +4429,7 @@
       "id": "component/table",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4126,7 +4484,7 @@
       "id": "component/table-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4179,41 +4537,23 @@
     },
     {
       "id": "component/table-empty",
-      "revision": 1,
+      "revision": 2,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
-      "reason": "profile",
+      "source_commit": "e9f013e204f57a0e802895e9e75e2698128d551b2a6369bd421eca2273e782d6",
+      "reason": "removed",
       "required_by": [],
       "manifest": {
         "id": "component/table-empty",
         "kind": "component",
         "name": "table-empty",
-        "revision": 1,
+        "revision": 2,
         "contract": 1,
         "title": "TableEmpty",
-        "description": "The TableEmpty renderer and its options.",
-        "requires": [
-          "element/ui-core"
-        ],
-        "files": [
-          {
-            "source": "internal/web/templates/ui/table-empty.templ",
-            "target": "internal/web/templates/ui/table-empty.templ",
-            "class": "templ",
-            "sha256": "47cebdd9308e61d5af0fbee8dac194226b16f17c645afe8ec16bf9e7151420f7",
-            "rewrite_module": true,
-            "contract": true
-          }
-        ],
+        "description": "Superseded by component/empty-state's inline variant.",
+        "requires": [],
+        "files": [],
         "claims": {},
-        "runtime": {
-          "ui": [
-            {
-              "name": "table-empty",
-              "family": "data"
-            }
-          ]
-        },
+        "runtime": {},
         "migrations": [],
         "environment": [],
         "docs": [],
@@ -4221,22 +4561,14 @@
         "data": [],
         "removal_policy": "free"
       },
-      "files": [
-        {
-          "path": "internal/web/templates/ui/table-empty.templ",
-          "source": "internal/web/templates/ui/table-empty.templ",
-          "base_sha256": "47cebdd9308e61d5af0fbee8dac194226b16f17c645afe8ec16bf9e7151420f7",
-          "local_sha256": "47cebdd9308e61d5af0fbee8dac194226b16f17c645afe8ec16bf9e7151420f7",
-          "state": "clean"
-        }
-      ],
+      "files": [],
       "migrations": []
     },
     {
       "id": "component/table-of-contents",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4291,7 +4623,7 @@
       "id": "component/tags-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4349,7 +4681,7 @@
       "id": "component/terminal-page",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4404,7 +4736,7 @@
       "id": "component/text-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4459,7 +4791,7 @@
       "id": "component/textarea",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4514,7 +4846,7 @@
       "id": "component/time-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4566,10 +4898,86 @@
       "migrations": []
     },
     {
+      "id": "component/toast",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/toast",
+        "kind": "component",
+        "name": "toast",
+        "revision": 1,
+        "contract": 1,
+        "title": "Toast",
+        "description": "The Toast renderer and its options.",
+        "requires": [
+          "element/icon",
+          "element/icon-button",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/toast.templ",
+            "target": "internal/web/templates/ui/toast.templ",
+            "class": "templ",
+            "sha256": "28571370896c6d75591915632675009a7356a90a2a290da13526244a6b37c1dc",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/toast_test.go",
+            "target": "internal/web/templates/ui/toast_test.go",
+            "class": "test",
+            "sha256": "caeba7117e69e21f28a1c77e142f17d86ae00ea611960583b573010a0635592d",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "toast",
+              "family": "feedback"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/toast.templ",
+          "source": "internal/web/templates/ui/toast.templ",
+          "base_sha256": "28571370896c6d75591915632675009a7356a90a2a290da13526244a6b37c1dc",
+          "local_sha256": "28571370896c6d75591915632675009a7356a90a2a290da13526244a6b37c1dc",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/toast_test.go",
+          "source": "internal/web/templates/ui/toast_test.go",
+          "base_sha256": "caeba7117e69e21f28a1c77e142f17d86ae00ea611960583b573010a0635592d",
+          "local_sha256": "caeba7117e69e21f28a1c77e142f17d86ae00ea611960583b573010a0635592d",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/tooltip",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4624,7 +5032,7 @@
       "id": "element/avatar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4698,7 +5106,7 @@
       "id": "element/avatar-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4772,7 +5180,7 @@
       "id": "element/button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4846,7 +5254,7 @@
       "id": "element/button-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4901,7 +5309,7 @@
       "id": "element/button-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4975,7 +5383,7 @@
       "id": "element/code",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5030,7 +5438,7 @@
       "id": "element/copy-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5133,7 +5541,7 @@
       "id": "element/heading",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5207,10 +5615,12 @@
       "id": "element/icon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
-        "component/back-link"
+        "component/back-link",
+        "component/error-state",
+        "component/toast"
       ],
       "manifest": {
         "id": "element/icon",
@@ -5264,9 +5674,11 @@
       "id": "element/icon-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/toast"
+      ],
       "manifest": {
         "id": "element/icon-button",
         "kind": "element",
@@ -5338,7 +5750,7 @@
       "id": "element/kbd",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5412,7 +5824,7 @@
       "id": "element/link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5467,7 +5879,7 @@
       "id": "element/prose",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5522,7 +5934,7 @@
       "id": "element/separator",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5596,7 +6008,7 @@
       "id": "element/spinner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5651,7 +6063,7 @@
       "id": "element/text",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5706,7 +6118,7 @@
       "id": "element/toggle-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5761,7 +6173,7 @@
       "id": "element/toggle-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5835,7 +6247,7 @@
       "id": "element/truncate",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5909,7 +6321,7 @@
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "component/accordion",
@@ -5935,6 +6347,7 @@
         "component/disclosure",
         "component/dropdown-menu",
         "component/empty-state",
+        "component/error-state",
         "component/field",
         "component/field-error",
         "component/fieldset",
@@ -5964,27 +6377,31 @@
         "component/password-input",
         "component/plan-card",
         "component/popover",
+        "component/progress-bar",
+        "component/progress-circle",
         "component/radio-group",
         "component/range-input",
         "component/search-input",
         "component/secret-reveal",
         "component/section-header",
         "component/select",
+        "component/skeleton",
         "component/skip-link",
         "component/slug-input",
         "component/stack",
+        "component/status-dot",
         "component/steps",
         "component/switch",
         "component/tab-panels",
         "component/table",
         "component/table-card",
-        "component/table-empty",
         "component/table-of-contents",
         "component/tags-input",
         "component/terminal-page",
         "component/text-input",
         "component/textarea",
         "component/time-field",
+        "component/toast",
         "component/tooltip",
         "element/avatar",
         "element/avatar-group",
@@ -6037,7 +6454,7 @@
             "source": "internal/web/templates/ui/contract_test.go",
             "target": "internal/web/templates/ui/contract_test.go",
             "class": "test",
-            "sha256": "82c6cf9df897868f47246cefa5e42ccc61bbe7f135a5bf092e89f9872aae5319",
+            "sha256": "2a7a42d485f6354c6bd3429a5710e5df062237f38fd412c06a2ed41f6f8ff690",
             "rewrite_module": true,
             "contract": false
           },
@@ -6045,7 +6462,7 @@
             "source": "internal/web/templates/ui/enums.go",
             "target": "internal/web/templates/ui/enums.go",
             "class": "go",
-            "sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
+            "sha256": "f34d17d61319d9fb86f29eca140541cd45101c5023a5de14a33be764fce15b01",
             "rewrite_module": true,
             "contract": true
           },
@@ -6053,7 +6470,7 @@
             "source": "internal/web/templates/ui/enums_test.go",
             "target": "internal/web/templates/ui/enums_test.go",
             "class": "test",
-            "sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
+            "sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
             "rewrite_module": true,
             "contract": false
           },
@@ -6085,7 +6502,7 @@
             "source": "internal/web/templates/ui/root.go",
             "target": "internal/web/templates/ui/root.go",
             "class": "go",
-            "sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
+            "sha256": "62ecafd18abf67a6186654e1f3a896522e7cbcff4e3714753d4d2b4adb2af51f",
             "rewrite_module": true,
             "contract": true
           },
@@ -6175,22 +6592,22 @@
         {
           "path": "internal/web/templates/ui/contract_test.go",
           "source": "internal/web/templates/ui/contract_test.go",
-          "base_sha256": "82c6cf9df897868f47246cefa5e42ccc61bbe7f135a5bf092e89f9872aae5319",
-          "local_sha256": "82c6cf9df897868f47246cefa5e42ccc61bbe7f135a5bf092e89f9872aae5319",
+          "base_sha256": "2a7a42d485f6354c6bd3429a5710e5df062237f38fd412c06a2ed41f6f8ff690",
+          "local_sha256": "2a7a42d485f6354c6bd3429a5710e5df062237f38fd412c06a2ed41f6f8ff690",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/enums.go",
           "source": "internal/web/templates/ui/enums.go",
-          "base_sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
-          "local_sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
+          "base_sha256": "f34d17d61319d9fb86f29eca140541cd45101c5023a5de14a33be764fce15b01",
+          "local_sha256": "f34d17d61319d9fb86f29eca140541cd45101c5023a5de14a33be764fce15b01",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/enums_test.go",
           "source": "internal/web/templates/ui/enums_test.go",
-          "base_sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
-          "local_sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
+          "base_sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
+          "local_sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
           "state": "clean"
         },
         {
@@ -6217,8 +6634,8 @@
         {
           "path": "internal/web/templates/ui/root.go",
           "source": "internal/web/templates/ui/root.go",
-          "base_sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
-          "local_sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
+          "base_sha256": "62ecafd18abf67a6186654e1f3a896522e7cbcff4e3714753d4d2b4adb2af51f",
+          "local_sha256": "62ecafd18abf67a6186654e1f3a896522e7cbcff4e3714753d4d2b4adb2af51f",
           "state": "clean"
         },
         {
@@ -6263,7 +6680,7 @@
       "id": "element/visually-hidden",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6337,7 +6754,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6487,7 +6904,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -6527,7 +6944,7 @@
             "source": "internal/web/templates/admin_announcements.templ",
             "target": "internal/web/templates/admin_announcements.templ",
             "class": "templ",
-            "sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
+            "sha256": "4a7450a96c08866811b232e8c13103e53c3c3a07b0a67b1c377b6f0cf477b7e7",
             "rewrite_module": true,
             "contract": false
           }
@@ -6662,8 +7079,8 @@
         {
           "path": "internal/web/templates/admin_announcements.templ",
           "source": "internal/web/templates/admin_announcements.templ",
-          "base_sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
-          "local_sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
+          "base_sha256": "4a7450a96c08866811b232e8c13103e53c3c3a07b0a67b1c377b6f0cf477b7e7",
+          "local_sha256": "4a7450a96c08866811b232e8c13103e53c3c3a07b0a67b1c377b6f0cf477b7e7",
           "state": "clean"
         }
       ],
@@ -6673,7 +7090,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6794,7 +7211,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6824,7 +7241,7 @@
             "source": "internal/web/templates/admin_content.templ",
             "target": "internal/web/templates/admin_content.templ",
             "class": "templ",
-            "sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
+            "sha256": "a0607197bdcbeb4eb5c8cc13591053e760f41fd8d7ea46c13e1519ee21c35880",
             "rewrite_module": true,
             "contract": false
           }
@@ -7008,8 +7425,8 @@
         {
           "path": "internal/web/templates/admin_content.templ",
           "source": "internal/web/templates/admin_content.templ",
-          "base_sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
-          "local_sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
+          "base_sha256": "a0607197bdcbeb4eb5c8cc13591053e760f41fd8d7ea46c13e1519ee21c35880",
+          "local_sha256": "a0607197bdcbeb4eb5c8cc13591053e760f41fd8d7ea46c13e1519ee21c35880",
           "state": "clean"
         }
       ],
@@ -7019,7 +7436,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7117,7 +7534,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7196,7 +7613,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7276,7 +7693,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -7316,7 +7733,7 @@
             "source": "internal/web/templates/admin_flags.templ",
             "target": "internal/web/templates/admin_flags.templ",
             "class": "templ",
-            "sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
+            "sha256": "839e5d3356032e97bd2da177c49eb98fdb641c3876736696ec125836cd120359",
             "rewrite_module": true,
             "contract": false
           }
@@ -7465,8 +7882,8 @@
         {
           "path": "internal/web/templates/admin_flags.templ",
           "source": "internal/web/templates/admin_flags.templ",
-          "base_sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
-          "local_sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
+          "base_sha256": "839e5d3356032e97bd2da177c49eb98fdb641c3876736696ec125836cd120359",
+          "local_sha256": "839e5d3356032e97bd2da177c49eb98fdb641c3876736696ec125836cd120359",
           "state": "clean"
         }
       ],
@@ -7476,7 +7893,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -7639,7 +8056,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -7771,7 +8188,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7879,7 +8296,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7919,7 +8336,7 @@
             "source": "internal/web/templates/admin.templ",
             "target": "internal/web/templates/admin.templ",
             "class": "templ",
-            "sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
+            "sha256": "871167f003e1441806fa2293c38f496c11adb53c5a4343d756522f57dc80c876",
             "rewrite_module": true,
             "contract": false
           }
@@ -8011,8 +8428,8 @@
         {
           "path": "internal/web/templates/admin.templ",
           "source": "internal/web/templates/admin.templ",
-          "base_sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
-          "local_sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
+          "base_sha256": "871167f003e1441806fa2293c38f496c11adb53c5a4343d756522f57dc80c876",
+          "local_sha256": "871167f003e1441806fa2293c38f496c11adb53c5a4343d756522f57dc80c876",
           "state": "clean"
         }
       ],
@@ -8022,7 +8439,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -8064,7 +8481,7 @@
             "source": "internal/web/templates/admin_schedules.templ",
             "target": "internal/web/templates/admin_schedules.templ",
             "class": "templ",
-            "sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
+            "sha256": "3636d931b2f0ee076247d85424e765815cc1434e8e20c3f701203d788cbd9e39",
             "rewrite_module": true,
             "contract": false
           }
@@ -8199,8 +8616,8 @@
         {
           "path": "internal/web/templates/admin_schedules.templ",
           "source": "internal/web/templates/admin_schedules.templ",
-          "base_sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
-          "local_sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
+          "base_sha256": "3636d931b2f0ee076247d85424e765815cc1434e8e20c3f701203d788cbd9e39",
+          "local_sha256": "3636d931b2f0ee076247d85424e765815cc1434e8e20c3f701203d788cbd9e39",
           "state": "clean"
         }
       ],
@@ -8210,7 +8627,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8346,7 +8763,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8466,7 +8883,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8571,7 +8988,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8602,7 +9019,7 @@
             "source": "internal/web/templates/dashboard.templ",
             "target": "internal/web/templates/dashboard.templ",
             "class": "templ",
-            "sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
+            "sha256": "a18b51dcb10bb28680089b0cc3f8a3ada2225b41ed53908be0d25c6452138d8f",
             "rewrite_module": true,
             "contract": false
           }
@@ -8695,8 +9112,8 @@
         {
           "path": "internal/web/templates/dashboard.templ",
           "source": "internal/web/templates/dashboard.templ",
-          "base_sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
-          "local_sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
+          "base_sha256": "a18b51dcb10bb28680089b0cc3f8a3ada2225b41ed53908be0d25c6452138d8f",
+          "local_sha256": "a18b51dcb10bb28680089b0cc3f8a3ada2225b41ed53908be0d25c6452138d8f",
           "state": "clean"
         }
       ],
@@ -8706,7 +9123,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8737,7 +9154,7 @@
             "source": "internal/web/templates/gallery.templ",
             "target": "internal/web/templates/gallery.templ",
             "class": "templ",
-            "sha256": "7aa639f2715e4e480b800bf3ba03d6d123c2552b5b23314a4e55e8a3dd4cf5d5",
+            "sha256": "3b70bfad5fc49028e34df7d95fa4bc6521565e6fbf1d53733c4f2b14e4344ffd",
             "rewrite_module": true,
             "contract": false
           }
@@ -8791,8 +9208,8 @@
         {
           "path": "internal/web/templates/gallery.templ",
           "source": "internal/web/templates/gallery.templ",
-          "base_sha256": "7aa639f2715e4e480b800bf3ba03d6d123c2552b5b23314a4e55e8a3dd4cf5d5",
-          "local_sha256": "7aa639f2715e4e480b800bf3ba03d6d123c2552b5b23314a4e55e8a3dd4cf5d5",
+          "base_sha256": "3b70bfad5fc49028e34df7d95fa4bc6521565e6fbf1d53733c4f2b14e4344ffd",
+          "local_sha256": "3b70bfad5fc49028e34df7d95fa4bc6521565e6fbf1d53733c4f2b14e4344ffd",
           "state": "clean"
         }
       ],
@@ -8802,7 +9219,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8903,7 +9320,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -9025,7 +9442,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9104,7 +9521,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -9145,7 +9562,7 @@
             "source": "internal/web/templates/files.templ",
             "target": "internal/web/templates/files.templ",
             "class": "templ",
-            "sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
+            "sha256": "e0e043ced881345aeb73c451e56e5dcf48fa154dfc1509a012edf59605c773c1",
             "rewrite_module": true,
             "contract": false
           }
@@ -9246,8 +9663,8 @@
         {
           "path": "internal/web/templates/files.templ",
           "source": "internal/web/templates/files.templ",
-          "base_sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
-          "local_sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
+          "base_sha256": "e0e043ced881345aeb73c451e56e5dcf48fa154dfc1509a012edf59605c773c1",
+          "local_sha256": "e0e043ced881345aeb73c451e56e5dcf48fa154dfc1509a012edf59605c773c1",
           "state": "clean"
         }
       ],
@@ -9257,7 +9674,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9475,7 +9892,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -9615,7 +10032,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9728,7 +10145,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9844,7 +10261,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9924,7 +10341,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10003,7 +10420,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10042,7 +10459,7 @@
             "source": "internal/web/templates/projects.templ",
             "target": "internal/web/templates/projects.templ",
             "class": "templ",
-            "sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
+            "sha256": "e5da60ffd19a54786df636154b2a4eac1a621965d2e0ae580ea7af9c7f8d3193",
             "rewrite_module": true,
             "contract": false
           }
@@ -10167,8 +10584,8 @@
         {
           "path": "internal/web/templates/projects.templ",
           "source": "internal/web/templates/projects.templ",
-          "base_sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
-          "local_sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
+          "base_sha256": "e5da60ffd19a54786df636154b2a4eac1a621965d2e0ae580ea7af9c7f8d3193",
+          "local_sha256": "e5da60ffd19a54786df636154b2a4eac1a621965d2e0ae580ea7af9c7f8d3193",
           "state": "clean"
         }
       ],
@@ -10178,7 +10595,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -10211,7 +10628,7 @@
             "source": "internal/web/templates/settings.templ",
             "target": "internal/web/templates/settings.templ",
             "class": "templ",
-            "sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
+            "sha256": "c58ed71ffaba3b14af8439ea713fd6b56c8de3fe049b742add4026e1e164cb4e",
             "rewrite_module": true,
             "contract": false
           }
@@ -10338,8 +10755,8 @@
         {
           "path": "internal/web/templates/settings.templ",
           "source": "internal/web/templates/settings.templ",
-          "base_sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
-          "local_sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
+          "base_sha256": "c58ed71ffaba3b14af8439ea713fd6b56c8de3fe049b742add4026e1e164cb4e",
+          "local_sha256": "c58ed71ffaba3b14af8439ea713fd6b56c8de3fe049b742add4026e1e164cb4e",
           "state": "clean"
         }
       ],
@@ -10349,7 +10766,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -10382,7 +10799,7 @@
             "source": "internal/web/templates/api_tokens.templ",
             "target": "internal/web/templates/api_tokens.templ",
             "class": "templ",
-            "sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
+            "sha256": "c4e5b63745c9bcaedbb781a08df6d3423acad621a0c895a11afc3f2bacabcc98",
             "rewrite_module": true,
             "contract": false
           }
@@ -10490,8 +10907,8 @@
         {
           "path": "internal/web/templates/api_tokens.templ",
           "source": "internal/web/templates/api_tokens.templ",
-          "base_sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
-          "local_sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
+          "base_sha256": "c4e5b63745c9bcaedbb781a08df6d3423acad621a0c895a11afc3f2bacabcc98",
+          "local_sha256": "c4e5b63745c9bcaedbb781a08df6d3423acad621a0c895a11afc3f2bacabcc98",
           "state": "clean"
         }
       ],
@@ -10501,7 +10918,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -10543,7 +10960,7 @@
             "source": "internal/web/templates/billing.templ",
             "target": "internal/web/templates/billing.templ",
             "class": "templ",
-            "sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
+            "sha256": "78e4588eac56a0bf578e1ebc9f20eee80f31b4fbdde5e50dff80a0be763858cd",
             "rewrite_module": true,
             "contract": false
           }
@@ -10658,8 +11075,8 @@
         {
           "path": "internal/web/templates/billing.templ",
           "source": "internal/web/templates/billing.templ",
-          "base_sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
-          "local_sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
+          "base_sha256": "78e4588eac56a0bf578e1ebc9f20eee80f31b4fbdde5e50dff80a0be763858cd",
+          "local_sha256": "78e4588eac56a0bf578e1ebc9f20eee80f31b4fbdde5e50dff80a0be763858cd",
           "state": "clean"
         }
       ],
@@ -10669,7 +11086,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -10816,7 +11233,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10945,7 +11362,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -10976,7 +11393,7 @@
             "source": "internal/web/templates/webhooks.templ",
             "target": "internal/web/templates/webhooks.templ",
             "class": "templ",
-            "sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
+            "sha256": "8d80c5c7333f1d60e6c9e4b8b0c1a930761036d0a823da4346f3a7b159002cbb",
             "rewrite_module": true,
             "contract": false
           },
@@ -11119,8 +11536,8 @@
         {
           "path": "internal/web/templates/webhooks.templ",
           "source": "internal/web/templates/webhooks.templ",
-          "base_sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
-          "local_sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
+          "base_sha256": "8d80c5c7333f1d60e6c9e4b8b0c1a930761036d0a823da4346f3a7b159002cbb",
+          "local_sha256": "8d80c5c7333f1d60e6c9e4b8b0c1a930761036d0a823da4346f3a7b159002cbb",
           "state": "clean"
         },
         {
@@ -11137,7 +11554,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11253,7 +11670,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -11410,7 +11827,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -11539,7 +11956,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -11982,7 +12399,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -12081,7 +12498,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -12277,7 +12694,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -12727,7 +13144,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -12888,7 +13305,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -13387,7 +13804,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -14031,7 +14448,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -14226,7 +14643,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -14478,7 +14895,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -14645,7 +15062,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -15846,7 +16263,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -16000,7 +16417,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -16280,7 +16697,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -16444,7 +16861,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -16647,7 +17064,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16747,7 +17164,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17388,7 +17805,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -17685,7 +18102,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -17865,7 +18282,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -18182,7 +18599,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -18318,7 +18735,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -18478,7 +18895,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -18619,7 +19036,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18671,7 +19088,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -18725,7 +19142,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -18977,7 +19394,7 @@
             "source": "internal/web/templates/designsystem_test.go",
             "target": "internal/web/templates/designsystem_test.go",
             "class": "test",
-            "sha256": "4d7e0b9c1b5f2c6636ab0dc4a4d9c51ad2f119775821ec1a3a6a1b2698a4ec6d",
+            "sha256": "4bae2bbc2004057b4d25d4e78d497faf3130499639a44f60bc1deea373b6a370",
             "rewrite_module": true,
             "contract": false
           },
@@ -19001,7 +19418,7 @@
             "source": "internal/web/templates/layouts.templ",
             "target": "internal/web/templates/layouts.templ",
             "class": "templ",
-            "sha256": "3d18644b3eaf41da7b3a264b12d4027d3d5697cfb58b440d3d4153983ba0f5df",
+            "sha256": "7ce00176dbf01133c5f4215e6a440613cb608cc70c1941664e11d60e97ff2e4a",
             "rewrite_module": true,
             "contract": false
           },
@@ -19606,8 +20023,8 @@
         {
           "path": "internal/web/templates/designsystem_test.go",
           "source": "internal/web/templates/designsystem_test.go",
-          "base_sha256": "4d7e0b9c1b5f2c6636ab0dc4a4d9c51ad2f119775821ec1a3a6a1b2698a4ec6d",
-          "local_sha256": "4d7e0b9c1b5f2c6636ab0dc4a4d9c51ad2f119775821ec1a3a6a1b2698a4ec6d",
+          "base_sha256": "4bae2bbc2004057b4d25d4e78d497faf3130499639a44f60bc1deea373b6a370",
+          "local_sha256": "4bae2bbc2004057b4d25d4e78d497faf3130499639a44f60bc1deea373b6a370",
           "state": "clean"
         },
         {
@@ -19627,8 +20044,8 @@
         {
           "path": "internal/web/templates/layouts.templ",
           "source": "internal/web/templates/layouts.templ",
-          "base_sha256": "3d18644b3eaf41da7b3a264b12d4027d3d5697cfb58b440d3d4153983ba0f5df",
-          "local_sha256": "3d18644b3eaf41da7b3a264b12d4027d3d5697cfb58b440d3d4153983ba0f5df",
+          "base_sha256": "7ce00176dbf01133c5f4215e6a440613cb608cc70c1941664e11d60e97ff2e4a",
+          "local_sha256": "7ce00176dbf01133c5f4215e6a440613cb608cc70c1941664e11d60e97ff2e4a",
           "state": "clean"
         },
         {
@@ -19694,7 +20111,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19729,7 +20146,7 @@
             "source": "static/app.css",
             "target": "static/app.css",
             "class": "generated",
-            "sha256": "14d25114509e19d930a5f5b0dc904d7efc2f346529011abc0a3caded83730777",
+            "sha256": "0ceb286b7620f3a2dd3d842b5bad45a423e1a1727b64b91f74841d0f14b7eff2",
             "rewrite_module": false,
             "contract": false
           },
@@ -19793,7 +20210,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "b75a798fd70bce426a9d2ba8215920d1d9bf85901015c28bf503f10c6435c08a",
+            "sha256": "01a1593280327d2d26df4d61a4ad27d145f3c8b2c8288aca694046f7acf39c2c",
             "rewrite_module": false,
             "contract": false
           },
@@ -19979,7 +20396,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -20187,7 +20604,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20243,7 +20660,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -20419,7 +20836,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -20688,7 +21105,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20772,7 +21189,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20868,7 +21285,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21002,7 +21419,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -21195,7 +21612,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21367,7 +21784,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21452,7 +21869,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21572,7 +21989,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21708,7 +22125,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21806,7 +22223,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22040,7 +22457,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22376,7 +22793,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22475,7 +22892,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22602,7 +23019,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -22736,7 +23153,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22853,7 +23270,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22932,7 +23349,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -23048,7 +23465,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23233,7 +23650,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23340,7 +23757,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23373,7 +23790,7 @@
             "source": "internal/web/templates/admin_impersonate.templ",
             "target": "internal/web/templates/admin_impersonate.templ",
             "class": "templ",
-            "sha256": "dbfe9805dffbfc5de6d7285c0277752a377518ce49a483d749f10d6b9e92c8e3",
+            "sha256": "e71886768c29134d1d3140571e6ff221696e8b60ef97fbfe49503fe8b2b635fe",
             "rewrite_module": true,
             "contract": false
           }
@@ -23462,8 +23879,8 @@
         {
           "path": "internal/web/templates/admin_impersonate.templ",
           "source": "internal/web/templates/admin_impersonate.templ",
-          "base_sha256": "dbfe9805dffbfc5de6d7285c0277752a377518ce49a483d749f10d6b9e92c8e3",
-          "local_sha256": "dbfe9805dffbfc5de6d7285c0277752a377518ce49a483d749f10d6b9e92c8e3",
+          "base_sha256": "e71886768c29134d1d3140571e6ff221696e8b60ef97fbfe49503fe8b2b635fe",
+          "local_sha256": "e71886768c29134d1d3140571e6ff221696e8b60ef97fbfe49503fe8b2b635fe",
           "state": "clean"
         }
       ],
@@ -23473,7 +23890,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23608,7 +24025,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23689,7 +24106,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -23830,7 +24247,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -23953,7 +24370,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24129,7 +24546,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24249,7 +24666,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -24499,7 +24916,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "6d266279262b2146d8974ae6460caacb559974cdb1989e4cb88161354cfbb452",
+      "source_commit": "f9464facea40ba3f2ca7a94e0edf96af8cd8d396faf6b6e516071223e8ae2970",
       "reason": "profile",
       "required_by": [],
       "manifest": {

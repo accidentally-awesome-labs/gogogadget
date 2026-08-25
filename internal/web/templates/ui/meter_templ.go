@@ -12,13 +12,32 @@ import (
 	"fmt"
 )
 
-// MeterOpts is a usage bar. Percent is clamped, so an over-quota caller cannot
-// render a bar wider than its track.
+// MeterOpts is a usage bar for a quota or a measurement within a known range.
+//
+// Percent is clamped, so an over-quota caller cannot render a bar wider than
+// its track.
 type MeterOpts struct {
 	Percent int
-	Attrs   Attrs
+	// Label names what is measured. Required for the same reason a progress bar
+	// needs one: "84%" with no subject tells a screen-reader user nothing.
+	Label string
+	// ValueText overrides the announced value for quotas measured in something
+	// other than percent ("8.4 GB of 10 GB").
+	ValueText string
+	Attrs     Attrs
 }
 
+// Meter renders a quota bar with meter semantics.
+//
+// role="meter" rather than the native <meter> element: the native element's
+// rendering is controlled by vendor pseudo-elements that differ per browser, so
+// styling it from the token layer is not possible without per-engine hacks. The
+// role gives the same semantics with full control over presentation.
+//
+// It is deliberately not a progressbar. A meter is a measurement inside a range
+// - disk used, seats filled - while a progress bar is a task advancing towards
+// completion. Screen readers announce them differently, and calling a quota a
+// progress bar implies it will finish.
 func Meter(o MeterOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -44,7 +63,13 @@ func Meter(o MeterOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("meter", "meter", o.Attrs))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("meter", "meter", o.Attrs,
+			"role", "meter",
+			"aria-label", o.Label,
+			"aria-valuemin", "0",
+			"aria-valuemax", "100",
+			"aria-valuenow", fmt.Sprint(clampPercent(o.Percent)),
+			"aria-valuetext", o.ValueText))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -55,7 +80,7 @@ func Meter(o MeterOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("width: %d%%", clampPercent(o.Percent)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/meter.templ`, Line: 16, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/meter.templ`, Line: 43, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

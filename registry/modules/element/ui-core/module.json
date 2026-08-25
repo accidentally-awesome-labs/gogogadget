@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "82c6cf9df897868f47246cefa5e42ccc61bbe7f135a5bf092e89f9872aae5319",
+        "sha256": "2a7a42d485f6354c6bd3429a5710e5df062237f38fd412c06a2ed41f6f8ff690",
         "rewrite_module": true,
         "contract": false
       },
@@ -38,7 +38,7 @@
         "source": "internal/web/templates/ui/enums.go",
         "target": "internal/web/templates/ui/enums.go",
         "class": "go",
-        "sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
+        "sha256": "f34d17d61319d9fb86f29eca140541cd45101c5023a5de14a33be764fce15b01",
         "rewrite_module": true,
         "contract": true
       },
@@ -46,7 +46,7 @@
         "source": "internal/web/templates/ui/enums_test.go",
         "target": "internal/web/templates/ui/enums_test.go",
         "class": "test",
-        "sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
+        "sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
         "rewrite_module": true,
         "contract": false
       },
@@ -78,7 +78,7 @@
         "source": "internal/web/templates/ui/root.go",
         "target": "internal/web/templates/ui/root.go",
         "class": "go",
-        "sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
+        "sha256": "62ecafd18abf67a6186654e1f3a896522e7cbcff4e3714753d4d2b4adb2af51f",
         "rewrite_module": true,
         "contract": true
       },

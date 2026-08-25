@@ -32,7 +32,7 @@
         "source": "static/app.css",
         "target": "static/app.css",
         "class": "generated",
-        "sha256": "14d25114509e19d930a5f5b0dc904d7efc2f346529011abc0a3caded83730777",
+        "sha256": "0ceb286b7620f3a2dd3d842b5bad45a423e1a1727b64b91f74841d0f14b7eff2",
         "rewrite_module": false,
         "contract": false
       },
@@ -96,7 +96,7 @@
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "b75a798fd70bce426a9d2ba8215920d1d9bf85901015c28bf503f10c6435c08a",
+        "sha256": "01a1593280327d2d26df4d61a4ad27d145f3c8b2c8288aca694046f7acf39c2c",
         "rewrite_module": false,
         "contract": false
       },

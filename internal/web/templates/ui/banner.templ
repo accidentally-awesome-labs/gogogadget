@@ -3,12 +3,12 @@ package ui
 // BannerOpts is a full-bleed shell notice (impersonation, billing).
 type BannerOpts struct {
 	Kind  Kind
-	Role  string
+	Live  Live
 	Attrs Attrs
 }
 
 templ Banner(o BannerOpts) {
-	<div { rootWith("banner", "banner banner-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", noticeRole(o.Role))... }>
+	<div { rootWith("banner", "banner banner-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", o.Live.Role())... }>
 		{ children... }
 	</div>
 }

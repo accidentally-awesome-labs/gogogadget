@@ -36,7 +36,7 @@
         "source": "internal/web/templates/projects.templ",
         "target": "internal/web/templates/projects.templ",
         "class": "templ",
-        "sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
+        "sha256": "e5da60ffd19a54786df636154b2a4eac1a621965d2e0ae580ea7af9c7f8d3193",
         "rewrite_module": true,
         "contract": false
       }

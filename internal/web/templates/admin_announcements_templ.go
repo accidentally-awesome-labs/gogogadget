@@ -78,7 +78,7 @@ func AdminAnnouncementsPage(d AnnouncementsData) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 			if len(d.Items) == 0 {
-				templ_7745c5c3_Err = ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.announcements.empty")}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.announcements.empty"), Variant: ui.EmptyInline}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -468,7 +468,7 @@ func AnnouncementForm(d AnnouncementsData) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

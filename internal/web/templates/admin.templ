@@ -21,7 +21,7 @@ templ AdminHome(d AdminHomeData) {
 	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.signups_heading"), Attrs: ui.Attrs{Class: "mt-10 mb-3"}})
 	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 		if len(d.RecentSignups) == 0 {
-			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.signups_empty")})
+			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.signups_empty"), Variant: ui.EmptyInline})
 		} else {
 			<table class="table">
 				<tbody>

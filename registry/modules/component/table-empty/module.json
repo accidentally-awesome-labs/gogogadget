@@ -4,32 +4,16 @@
     "id": "component/table-empty",
     "kind": "component",
     "name": "table-empty",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "TableEmpty",
-    "description": "The TableEmpty renderer and its options.",
+    "description": "Superseded by component/empty-state's inline variant.",
     "requires": [
       "element/ui-core"
     ],
-    "files": [
-      {
-        "source": "internal/web/templates/ui/table-empty.templ",
-        "target": "internal/web/templates/ui/table-empty.templ",
-        "class": "templ",
-        "sha256": "47cebdd9308e61d5af0fbee8dac194226b16f17c645afe8ec16bf9e7151420f7",
-        "rewrite_module": true,
-        "contract": true
-      }
-    ],
+    "files": [],
     "claims": {},
-    "runtime": {
-      "ui": [
-        {
-          "name": "table-empty",
-          "family": "data"
-        }
-      ]
-    },
+    "runtime": {},
     "migrations": [],
     "environment": [],
     "docs": [],

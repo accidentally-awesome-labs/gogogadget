@@ -135,7 +135,7 @@ func flagCreateCard(d FlagsData) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -789,7 +789,7 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 			return templ_7745c5c3_Err
 		}
 		if len(overrides) == 0 {
-			templ_7745c5c3_Err = ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "flags.overrides_empty")}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "flags.overrides_empty"), Variant: ui.EmptyInline}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

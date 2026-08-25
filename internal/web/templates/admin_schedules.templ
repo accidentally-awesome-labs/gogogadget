@@ -42,7 +42,7 @@ templ AdminSchedulesPage(d SchedulesData) {
 			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.schedules.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
 			<form hx-post="/admin/schedules" hx-target="#schedule-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="schedule-create-form" class="space-y-4">
 				if d.Invalid {
-					@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+					@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 						{ i18n.T(ctx, "admin.schedules.invalid") }
 					}
 				}
@@ -88,7 +88,7 @@ templ AdminSchedulesPage(d SchedulesData) {
 	}
 	<div class="table-card max-w-4xl" data-testid="schedules-table">
 		if len(d.Items) == 0 {
-			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.schedules.empty")})
+			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.schedules.empty"), Variant: ui.EmptyInline})
 		} else {
 			<table class="table">
 				<thead>

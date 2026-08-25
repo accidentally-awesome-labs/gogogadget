@@ -1,18 +1,82 @@
 package ui
 
-// EmptyStateOpts is the zero-data pattern for tables and lists.
+// EmptyVariant is how an empty state is presented.
+//
+// The three cases are genuinely different: a table's empty row must sit inside
+// the table's own box, a card is the standalone resting state of a region, and a
+// page fills the viewport. One variant styled three ways by callers is how ad
+// hoc colspan rows appear in the first place.
+type EmptyVariant string
+
+const (
+	EmptyInline EmptyVariant = "inline"
+	EmptyCard   EmptyVariant = "card"
+	EmptyPage   EmptyVariant = "page"
+)
+
+var EmptyVariants = []EmptyVariant{EmptyInline, EmptyCard, EmptyPage}
+
+func (v EmptyVariant) Value() EmptyVariant { return normalize(v, EmptyVariants, EmptyCard) }
+func (v EmptyVariant) Valid() bool         { return contains(v, EmptyVariants) }
+
+// EmptyStateOpts is the zero-data pattern for tables, lists and pages.
 type EmptyStateOpts struct {
 	Title string
 	Body  string
-	Attrs Attrs
+	// Variant selects inline (inside a table card), card, or page presentation.
+	Variant EmptyVariant
+	// Filtered marks "no results for this filter" rather than "nothing exists
+	// yet". They are different messages and need different actions: one offers
+	// to clear the filter, the other offers to create the first record. Showing
+	// "create your first project" to someone whose search missed is wrong.
+	Filtered bool
+	// ClearURL is the escape from a filter that matched nothing.
+	ClearURL   string
+	ClearLabel string
+	Target     string
+	Attrs      Attrs
 }
 
+// EmptyState renders the resting state of a region with no data.
+//
+// It carries no role and no live region: an empty list is not news. ErrorState
+// is the announced counterpart for a region that failed.
 templ EmptyState(o EmptyStateOpts) {
-	<div { root("empty-state", "card text-center py-12", o.Attrs)... }>
-		<h3 class="font-semibold">{ o.Title }</h3>
-		<p class="text-sm text-fg-muted mt-1">{ o.Body }</p>
-		<div class="mt-4">
-			{ children... }
-		</div>
+	<div { root("empty-state", emptyStateClass(o.Variant), o.Attrs)... }>
+		if o.Title != "" {
+			<h3 class="font-semibold">{ o.Title }</h3>
+		}
+		<p class={ emptyBodyClass(o.Variant) }>{ o.Body }</p>
+		if o.Filtered && o.ClearURL != "" {
+			<a
+				href={ templ.SafeURL(o.ClearURL) }
+				hx-get={ o.ClearURL }
+				hx-target={ o.Target }
+				hx-swap="innerMorph"
+				hx-push-url="true"
+				class="btn btn-ghost btn-sm mt-3"
+			>{ breadcrumbOrDefault(o.ClearLabel, "Clear filters") }</a>
+		}
+		{ children... }
 	</div>
+}
+
+func emptyStateClass(variant EmptyVariant) string {
+	switch variant.Value() {
+	case EmptyInline:
+		// Inline sits inside a TableCard, which already draws the border and
+		// background; a nested card here would double both.
+		return "table-empty text-center"
+	case EmptyPage:
+		return "page-narrow text-center"
+	default:
+		return "card text-center py-12"
+	}
+}
+
+func emptyBodyClass(variant EmptyVariant) string {
+	if variant.Value() == EmptyInline {
+		return "text-sm text-fg-muted"
+	}
+	return "text-sm text-fg-muted mt-1"
 }

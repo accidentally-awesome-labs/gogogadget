@@ -568,7 +568,7 @@ templ MediaUploadCard(d MediaData) {
 			data-testid="media-upload-form"
 		>
 			if d.Err != "" {
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: "media-error"}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: "media-error"}}) {
 					{ d.Err }
 				}
 			}
