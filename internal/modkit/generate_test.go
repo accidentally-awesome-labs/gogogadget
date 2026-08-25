@@ -957,3 +957,76 @@ func TestConfigRegistryRejectsDuplicateKeys(t *testing.T) {
 		t.Fatal("GenerateAll accepted one env key declared by two modules")
 	}
 }
+
+// .env.example and the configuration reference are rendered from the same
+// declarations as the parse, so neither can omit a key the code reads. The five
+// keys this repo shipped without were exactly that kind of drift.
+func TestEnvExampleAndReferenceCoverEveryDeclaredKey(t *testing.T) {
+	module := Manifest{
+		ID: "system/example", Kind: ModuleSystem, Name: "example",
+		Revision: 1, Contract: 1, Title: "Example", Description: "Example system.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Environment: []EnvironmentVariable{
+			{Key: "APP_ENV", Field: "Env", Type: EnvString, Description: "the environment",
+				Default: "development", Enum: []string{"development", "production"}},
+			{Key: "DATABASE_URL", Field: "DatabaseURL", Type: EnvString, Description: "connection string",
+				Default: "postgres://localhost", ProductionRequired: true, Secret: true},
+			{Key: "RATE_LIMIT_RPM", Field: "RateLimit", Type: EnvInt, Description: "per-IP budget",
+				Default: "100", Min: intp(1)},
+			{Key: "MAINTENANCE_MODE", Field: "MaintenanceMode", Type: EnvBool, Description: "shed traffic"},
+		},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"system/example"},
+		Modules: []LockedModule{{
+			ID: "system/example", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: module,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{module})
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	emitted := map[string]string{}
+	for _, file := range files {
+		emitted[file.Path] = file.Content
+	}
+
+	example, ok := emitted[".env.example"]
+	if !ok {
+		t.Fatal(".env.example was not emitted")
+	}
+	reference, ok := emitted["content/docs/configuration-reference.md"]
+	if !ok {
+		t.Fatal("configuration reference was not emitted")
+	}
+
+	for _, key := range []string{"APP_ENV", "DATABASE_URL", "RATE_LIMIT_RPM", "MAINTENANCE_MODE"} {
+		if !strings.Contains(example, key+"=") {
+			t.Fatalf(".env.example omits %s:\n%s", key, example)
+		}
+		if !strings.Contains(reference, "`"+key+"`") {
+			t.Fatalf("reference omits %s:\n%s", key, reference)
+		}
+	}
+
+	// A secret ships as an empty assignment: a plausible-looking fake value is
+	// the kind of thing that reaches production.
+	if !strings.Contains(example, "DATABASE_URL=\n") && !strings.HasSuffix(strings.TrimRight(example, "\n"), "DATABASE_URL=") {
+		t.Fatalf("secret DATABASE_URL must ship with no value:\n%s", example)
+	}
+	// A non-secret default is filled in, so a fresh clone runs.
+	if !strings.Contains(example, "APP_ENV=development") {
+		t.Fatalf(".env.example must carry non-secret defaults:\n%s", example)
+	}
+	// The reference states what production refuses to boot without.
+	if !strings.Contains(reference, "| `DATABASE_URL` | `system/example` | **production** |") {
+		t.Fatalf("reference must mark production-required keys:\n%s", reference)
+	}
+	// Bounds reach the reader rather than living only in the error message.
+	if !strings.Contains(reference, ">= 1") {
+		t.Fatalf("reference must state declared bounds:\n%s", reference)
+	}
+}

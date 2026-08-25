@@ -64,7 +64,7 @@
         "key": "RATE_LIMIT_RPM",
         "field": "RateLimitPerMinute",
         "type": "int",
-        "description": "Per-IP request budget per minute (burst is 2x)",
+        "description": "Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard",
         "default": "100",
         "min": 1
       }

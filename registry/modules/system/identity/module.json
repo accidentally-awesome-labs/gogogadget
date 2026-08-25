@@ -106,19 +106,19 @@
         "key": "ADMIN_EMAIL",
         "field": "AdminEmail",
         "type": "string",
-        "description": "Address granted the staff role on first sight"
+        "description": "First sign-in with this address is granted the full admin role. Empty means nobody is staff"
       },
       {
         "key": "CLERK_FRONTEND_API_URL",
         "field": "ClerkFrontendAPIURL",
         "type": "string",
-        "description": "Clerk Frontend API origin; feeds CSP connect-src (default derived from APP_URL)"
+        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise"
       },
       {
         "key": "CLERK_PORTAL_URL",
         "field": "ClerkPortalURL",
         "type": "string",
-        "description": "Clerk Account Portal base URL",
+        "description": "Hosted Account Portal base, e.g. `https://accounts.your-app.com`",
         "trim_slash": true,
         "production_required": true
       },
@@ -126,14 +126,14 @@
         "key": "CLERK_PUBLISHABLE_KEY",
         "field": "ClerkPublishableKey",
         "type": "string",
-        "description": "Clerk publishable key (browser-safe)",
+        "description": "Drives the vendored clerk-js that keeps the `__session` JWT fresh",
         "production_required": true
       },
       {
         "key": "CLERK_SECRET_KEY",
         "field": "ClerkSecretKey",
         "type": "string",
-        "description": "Clerk API secret key",
+        "description": "Clerk API secret. Empty means auth is not configured and `/app` renders 503 (unless the dev bypass is on)",
         "production_required": true,
         "secret": true
       },
@@ -141,7 +141,7 @@
         "key": "CLERK_WEBHOOK_SECRET",
         "field": "ClerkWebhookSecret",
         "type": "string",
-        "description": "Clerk webhook signing secret (svix)",
+        "description": "Verifies `svix-*` signatures on `/webhooks/clerk`",
         "production_required": true,
         "secret": true
       },
@@ -149,8 +149,9 @@
         "key": "DEV_AUTH_BYPASS",
         "field": "DevAuthBypass",
         "type": "bool",
-        "description": "Synthetic sessions for dev and e2e; refused when APP_ENV=production",
-        "default": "false"
+        "description": "Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error",
+        "default": "false",
+        "example": "true"
       }
     ],
     "docs": [],

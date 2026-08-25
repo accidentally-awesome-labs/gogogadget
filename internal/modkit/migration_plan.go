@@ -251,6 +251,13 @@ func isGeneratedOutput(path string) bool {
 	if strings.HasPrefix(path, "internal/db/sqlc/") || path == "static/app.css" || path == "static/ui-components.js" {
 		return true
 	}
+	// Rendered from the same declarations as the code that reads them. Listed
+	// explicitly rather than matched by pattern: this predicate is what stops an
+	// emitter from overwriting authored source, so widening it stays deliberate.
+	switch path {
+	case ".env.example", "content/docs/configuration-reference.md":
+		return true
+	}
 	return false
 }
 

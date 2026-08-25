@@ -2,7 +2,7 @@
 title: Testing
 description: Four test layers, the decision rule, and the fixtures that make them deterministic.
 section: Guides
-weight: 22
+weight: 23
 ---
 
 Four layers, one decision rule:

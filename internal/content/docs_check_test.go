@@ -43,7 +43,7 @@ func TestDocsInternalLinksResolve(t *testing.T) {
 func TestDocsInventory(t *testing.T) {
 	docs, err := LoadDocs(contentfs.FS, true)
 	require.NoError(t, err)
-	require.Len(t, docs.Pages, 28, "the docs section ships exactly 28 pages")
+	require.Len(t, docs.Pages, 29, "the docs section ships exactly 29 pages")
 
 	// Weights strictly increase; sections are in order.
 	lastWeight := 0
@@ -55,7 +55,7 @@ func TestDocsInventory(t *testing.T) {
 		sectionSeen[p.Section]++
 	}
 	assert.Equal(t, 2, sectionSeen["Start"])
-	assert.Equal(t, 3, sectionSeen["Core"])
+	assert.Equal(t, 4, sectionSeen["Core"])
 	assert.Equal(t, 16, sectionSeen["Features"])
 	assert.Equal(t, 7, sectionSeen["Guides"])
 	require.Len(t, docs.Sections, 4)

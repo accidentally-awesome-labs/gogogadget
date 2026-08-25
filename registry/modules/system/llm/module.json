@@ -64,14 +64,14 @@
         "key": "LLM_API_KEY",
         "field": "LLMAPIKey",
         "type": "string",
-        "description": "OpenAI-compatible API key; unset returns 503 from AI routes",
+        "description": "With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured",
         "secret": true
       },
       {
         "key": "LLM_BASE_URL",
         "field": "LLMBaseURL",
         "type": "string",
-        "description": "OpenAI-compatible base URL",
+        "description": "Any OpenAI-compatible API base",
         "default": "https://api.openai.com/v1",
         "trim_slash": true
       },
@@ -79,7 +79,7 @@
         "key": "LLM_MODEL",
         "field": "LLMModel",
         "type": "string",
-        "description": "Model identifier passed to the provider"
+        "description": "Forced server-side, so callers cannot pick a model"
       }
     ],
     "docs": [],

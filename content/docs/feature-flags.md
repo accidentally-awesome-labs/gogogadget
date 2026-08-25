@@ -2,7 +2,7 @@
 title: Feature flags
 description: DB-backed flags with per-org overrides, admin UI, and the gate pattern.
 section: Features
-weight: 21
+weight: 22
 ---
 
 Feature flags are two tables (`feature_flags`, `flag_overrides`), a 30-second

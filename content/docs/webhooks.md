@@ -2,7 +2,7 @@
 title: Outbound webhooks
 description: Customer-facing webhooks — endpoints, standard-webhooks signatures, retries, replay.
 section: Features
-weight: 19
+weight: 20
 ---
 
 Your customers can receive GoGoGadget events at their own HTTPS endpoints.

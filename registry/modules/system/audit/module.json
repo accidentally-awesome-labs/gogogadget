@@ -61,7 +61,7 @@
         "key": "AUDIT_RETENTION_DAYS",
         "field": "AuditRetentionDays",
         "type": "int",
-        "description": "Janitor deletes audit rows older than this; 0 retains forever",
+        "description": "The daily janitor deletes audit rows older than this many days; 0 retains forever",
         "min": 0
       }
     ],

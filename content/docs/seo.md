@@ -2,7 +2,7 @@
 title: SEO
 description: Canonicals, hreflang, structured data, sitemap, and feed discovery.
 section: Features
-weight: 14
+weight: 15
 ---
 
 The marketing surface (`/`, `/pricing`, `/terms`, `/privacy`, `/blog`, `/docs`)

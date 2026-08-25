@@ -141,7 +141,7 @@
         "key": "POLAR_ACCESS_TOKEN",
         "field": "PolarAccessToken",
         "type": "string",
-        "description": "Polar API access token",
+        "description": "Polar API token. Empty means billing routes render 503 not-configured",
         "secret": true
       },
       {
@@ -171,7 +171,7 @@
         "key": "POLAR_WEBHOOK_SECRET",
         "field": "PolarWebhookSecret",
         "type": "string",
-        "description": "Polar webhook signing secret (standard-webhooks)",
+        "description": "Verifies `webhook-*` signatures on `/webhooks/polar`",
         "secret": true
       }
     ],

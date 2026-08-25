@@ -40,7 +40,7 @@
         "key": "MAINTENANCE_MODE",
         "field": "MaintenanceMode",
         "type": "bool",
-        "description": "Shed all traffic except probes and static assets with a 503"
+        "description": "true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/`"
       }
     ],
     "docs": [],

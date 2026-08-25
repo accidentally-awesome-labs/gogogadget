@@ -2,7 +2,7 @@
 title: Organizations
 description: Clerk organizations, mirror sync, roles, and the org switcher.
 section: Features
-weight: 7
+weight: 8
 ---
 
 Organizations (Clerk's name for teams) are the tenancy boundary: every

@@ -2,7 +2,7 @@
 title: AI / LLM access
 description: The llm.Completer seam — any OpenAI-compatible API, forced model, metered tokens.
 section: Features
-weight: 20
+weight: 21
 ---
 
 LLM access is one interface, `llm.Completer`, over the OpenAI-compatible

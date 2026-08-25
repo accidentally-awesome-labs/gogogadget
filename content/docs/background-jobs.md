@@ -2,7 +2,7 @@
 title: Background jobs
 description: The Postgres job queue — SKIP LOCKED claims, backoff, dead-letters.
 section: Features
-weight: 10
+weight: 11
 ---
 
 Anything that shouldn't block a request — every email today — goes through a

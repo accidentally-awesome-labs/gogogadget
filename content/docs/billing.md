@@ -2,7 +2,7 @@
 title: Billing
 description: Plans, Polar checkout and webhooks, entitlements, and dunning.
 section: Features
-weight: 8
+weight: 9
 ---
 
 Billing is [Polar](https://polar.sh) as **merchant of record** (sales tax and

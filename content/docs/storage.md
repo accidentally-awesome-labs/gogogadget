@@ -2,7 +2,7 @@
 title: File storage
 description: The storage.Store seam — Cloudflare R2 or the zero-account DevStore, quotas, and the upload pattern.
 section: Features
-weight: 18
+weight: 19
 ---
 
 File uploads live behind one interface, `storage.Store` — the same seam shape

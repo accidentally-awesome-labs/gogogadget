@@ -54,7 +54,7 @@
         "key": "METRICS_TOKEN",
         "field": "MetricsToken",
         "type": "string",
-        "description": "Bearer token gating /metrics; required in production or the route is unregistered",
+        "description": "Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default",
         "secret": true
       }
     ],

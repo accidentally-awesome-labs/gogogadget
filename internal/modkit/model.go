@@ -373,6 +373,13 @@ type EnvironmentVariable struct {
 	Type        EnvType `json:"type"`
 	Description string  `json:"description"`
 	Default     string  `json:"default,omitempty"`
+	// Example is what .env.example ships, when that differs from the default.
+	// The two are not the same question: Default is what the code assumes when a
+	// key is absent, Example is what makes a fresh clone work. DEV_AUTH_BYPASS
+	// defaults to false because forged sessions must never be the fallback, and
+	// ships true because /dev/login is how a developer with no Clerk account
+	// signs in.
+	Example string `json:"example,omitempty"`
 	// Min and Max bound an int. Pointers because zero is a meaningful bound:
 	// AUDIT_RETENTION_DAYS accepts 0 (retain forever) while RATE_LIMIT_RPM does
 	// not, and a plain int cannot tell "0" from "unset".

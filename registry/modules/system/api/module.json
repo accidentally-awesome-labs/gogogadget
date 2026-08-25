@@ -134,7 +134,7 @@
         "key": "API_RATE_LIMIT_RPM",
         "field": "APIRateLimitPerMinute",
         "type": "int",
-        "description": "Per-API-token request budget per minute on /api/v1 (burst is 2x)",
+        "description": "Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated",
         "default": "60",
         "min": 1
       }

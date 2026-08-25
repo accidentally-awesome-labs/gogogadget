@@ -2,7 +2,7 @@
 title: Authentication
 description: Clerk-hosted auth, the 60-second session JWT, and the Verifier seam.
 section: Features
-weight: 6
+weight: 7
 ---
 
 GoGoGadget does not implement authentication. **Clerk's hosted Account Portal

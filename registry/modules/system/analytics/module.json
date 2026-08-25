@@ -64,14 +64,14 @@
         "key": "POSTHOG_API_KEY",
         "field": "PostHogAPIKey",
         "type": "string",
-        "description": "PostHog project API key; unset disables capture",
+        "description": "PostHog project key. Empty disables capture entirely: no client script, no `/ingest` proxy, server capture no-ops",
         "secret": true
       },
       {
         "key": "POSTHOG_HOST",
         "field": "PostHogHost",
         "type": "string",
-        "description": "PostHog ingestion host",
+        "description": "Target of the `/ingest` reverse proxy",
         "default": "https://us.i.posthog.com"
       }
     ],

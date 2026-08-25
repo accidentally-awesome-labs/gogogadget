@@ -199,6 +199,9 @@
             "minLength": 1
           }
         },
+        "example": {
+          "type": "string"
+        },
         "field": {
           "type": "string",
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"

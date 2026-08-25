@@ -1,58 +1,34 @@
 ---
 title: Configuration
-description: Every environment variable, what requires it, and what happens when it is missing.
+description: How environment configuration is declared, loaded, and validated.
 section: Core
 weight: 4
 ---
 
-All configuration is environment variables, parsed and validated by
-`internal/config/config.go` (`Load()`). Stdlib only — no env library. All
-validation problems are reported together at boot, never one at a time.
+All configuration is environment variables. Every key is **declared by the
+module that consumes it**, in that module's manifest, and both the parser
+(`internal/config/config_registry_gen.go`) and the
+[Configuration reference](/docs/configuration-reference) are generated from
+those declarations. A module cannot read a setting it has not declared, and a
+declared setting cannot be missing from the reference or from `.env.example`.
+
+What stays hand-written in `internal/config/config.go` is behaviour over those
+values: the environment predicates, the render clock, the `.env` reader, and the
+few cross-field derivations described below.
+
+All validation problems are reported together at boot, never one at a time.
 
 `.env` is auto-loaded in **development only**, via a tiny inline parser that
 never overrides variables already set in the real environment. In test and
-production the process environment is the only source.
+production the process environment is the only source. `.env.example` is
+generated and ships a working zero-account development setup.
 
 ## The full table
 
-| Key | Required | Default | Notes |
-|---|---|---|---|
-| `APP_ENV` | | `development` | `development` \| `test` \| `production` |
-| `APP_URL` | | `http://localhost:8080` | Public base URL; trailing slash trimmed. Feeds auth/checkout redirects |
-| `PORT` | | `8080` | Must parse as 1–65535 |
-| `DATABASE_URL` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Dev default matches `docker compose up -d db`. No fallback in production — boot refuses to guess |
-| `CLERK_SECRET_KEY` | **production** | | Empty → auth not configured; `/app` renders 503 (unless dev bypass, below) |
-| `CLERK_WEBHOOK_SECRET` | **production** | | Verifies `svix-*` signatures on `/webhooks/clerk` |
-| `CLERK_PORTAL_URL` | **production** | | Hosted Account Portal base, e.g. `https://accounts.your-app.com` |
-| `CLERK_PUBLISHABLE_KEY` | **production** | | Drives the vendored clerk-js that keeps the `__session` JWT fresh |
-| `CLERK_FRONTEND_API_URL` | | dev: `https://*.clerk.accounts.dev`; prod: `https://clerk.<APP_URL host>` | Clerk Frontend API origin — feeds CSP `connect-src` |
-| `ADMIN_EMAIL` | | | First sign-in with this email is granted the full `admin` role. Empty → nobody is staff |
-| `POLAR_ACCESS_TOKEN` | | | Empty → billing routes render 503 "not configured" |
-| `POLAR_WEBHOOK_SECRET` | | | Verifies `webhook-*` signatures on `/webhooks/polar` |
-| `POLAR_PRODUCT_PRO` | | | Polar product ID for the Pro plan |
-| `POLAR_PRODUCT_TEAM` | | | Polar product ID for the Team plan |
-| `POLAR_SERVER` | | `sandbox` | `sandbox` \| `production` — anything else is a boot error |
-| `RESEND_API_KEY` | | | Empty → DevSender: logs mail + writes rendered HTML to `tmp/emails/` |
-| `EMAIL_FROM` | | `GoGoGadget <hello@example.com>` | |
-| `POSTHOG_API_KEY` | | | Empty → disabled: no client script, no `/ingest` proxy, server capture no-ops |
-| `POSTHOG_HOST` | | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
-| `RATE_LIMIT_RPM` | | `100` | Per-IP request budget per minute (burst 2×). Raise for load tests and e2e harnesses, which drive one IP |
-| `API_RATE_LIMIT_RPM` | | `60` | Per-API-token request budget per minute (burst 2×) on `/api/v1`. Independent of the per-IP shield |
-| `METRICS_TOKEN` | | | Bearer token for `GET /metrics`. Empty outside production → open scrape; empty in production → `/metrics` is not registered (internal stats never public by default) |
-| `AUDIT_RETENTION_DAYS` | | `0` | Daily janitor deletes audit rows older than N days; 0 = retain forever |
-| `MAINTENANCE_MODE` | | | `true` → 503 for everything except `/healthz`, `/readyz`, `/static/`, `/favicon.ico`; JSON 503 under `/api/` |
-| `SENTRY_DSN` | | | Empty → disabled |
-| `STORAGE_R2_ACCOUNT_ID` | | | With the three below, enables R2 file storage; any missing → DevStore (`tmp/uploads/`) |
-| `STORAGE_R2_ACCESS_KEY_ID` | | | R2 API token (Object Read & Write) |
-| `STORAGE_R2_SECRET_ACCESS_KEY` | | | |
-| `STORAGE_R2_BUCKET` | | | Bucket name |
-| `STORAGE_R2_ENDPOINT` | | R2 default for the account | Override for AWS S3 / MinIO |
-| `LLM_API_KEY` | | | With `LLM_MODEL`, enables `/api/v1/ai/chat`; empty → 503 `not_configured` |
-| `LLM_BASE_URL` | | `https://api.openai.com/v1` | Any OpenAI-compatible API |
-| `LLM_MODEL` | | | Forced server-side (callers cannot pick) |
-| `TEST_NOW` | | | RFC3339. Freezes the render clock — honored **only** when `APP_ENV=test` (visual-test determinism) |
-| `DEV_AUTH_BYPASS` | | `false` | Enables synthetic `e2e:` session tokens. `true` + `APP_ENV=production` is a hard boot error |
-| `LOG_LEVEL` | | `debug` in development, `info` otherwise | `debug` \| `info` \| `warn` \| `error` |
+See the generated [Configuration reference](/docs/configuration-reference) for
+every key, its owning module, whether production requires it, its default, and
+its notes. It is rendered from the same records the parser is, so it cannot
+drift from what the code actually reads.
 
 Two more variables matter but are **not** read by `config.Load()`:
 

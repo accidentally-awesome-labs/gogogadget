@@ -2,7 +2,7 @@
 title: Frontend
 description: HTMX fragments, Alpine CSP components, and the design-token system.
 section: Features
-weight: 11
+weight: 12
 ---
 
 The frontend is server-rendered templ with htmx for partial updates and ~5 KB

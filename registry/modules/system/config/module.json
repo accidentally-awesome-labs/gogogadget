@@ -68,7 +68,7 @@
         "key": "APP_URL",
         "field": "AppURL",
         "type": "string",
-        "description": "Public base URL used in emails and webhook links",
+        "description": "Public base URL; trailing slash trimmed. Feeds auth and checkout redirects, email links, and webhook targets",
         "default": "http://localhost:8080",
         "trim_slash": true
       },
@@ -76,13 +76,13 @@
         "key": "LOG_LEVEL",
         "field": "LogLevel",
         "type": "string",
-        "description": "debug | info | warn | error (default: debug in development, info otherwise)"
+        "description": "debug | info | warn | error. Defaults to debug in development and info otherwise"
       },
       {
         "key": "TEST_NOW",
         "field": "testNow",
         "type": "time",
-        "description": "RFC3339 instant that freezes the render clock; honored only when APP_ENV=test"
+        "description": "RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic"
       }
     ],
     "docs": [],

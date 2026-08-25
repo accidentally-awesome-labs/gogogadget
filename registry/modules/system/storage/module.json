@@ -80,33 +80,33 @@
         "key": "STORAGE_R2_ACCESS_KEY_ID",
         "field": "StorageR2AccessKeyID",
         "type": "string",
-        "description": "R2/S3 access key id",
+        "description": "R2 API token with Object Read & Write",
         "secret": true
       },
       {
         "key": "STORAGE_R2_ACCOUNT_ID",
         "field": "StorageR2AccountID",
         "type": "string",
-        "description": "Cloudflare account id for R2"
+        "description": "Cloudflare account id. With the three keys below this enables R2 storage; any one missing selects DevStore (`tmp/uploads/`)"
       },
       {
         "key": "STORAGE_R2_BUCKET",
         "field": "StorageR2Bucket",
         "type": "string",
-        "description": "Object storage bucket name"
+        "description": "Bucket name"
       },
       {
         "key": "STORAGE_R2_ENDPOINT",
         "field": "StorageR2Endpoint",
         "type": "string",
-        "description": "Override endpoint for S3/MinIO compatibility; empty uses the R2 default",
+        "description": "Override for AWS S3 or MinIO compatibility; empty uses the R2 endpoint for the account",
         "trim_slash": true
       },
       {
         "key": "STORAGE_R2_SECRET_ACCESS_KEY",
         "field": "StorageR2SecretAccessKey",
         "type": "string",
-        "description": "R2/S3 secret access key",
+        "description": "Secret half of the R2 API token",
         "secret": true
       }
     ],
