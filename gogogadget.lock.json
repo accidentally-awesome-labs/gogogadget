@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+  "registry_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
   "order": [
     "element/ui-core",
     "system/apphost",
@@ -106,7 +106,7 @@
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -139,7 +139,7 @@
             "source": "internal/web/templates/ui/components_core.templ",
             "target": "internal/web/templates/ui/components_core.templ",
             "class": "templ",
-            "sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+            "sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
             "rewrite_module": true,
             "contract": false
           },
@@ -147,7 +147,7 @@
             "source": "internal/web/templates/ui/components_nav.templ",
             "target": "internal/web/templates/ui/components_nav.templ",
             "class": "templ",
-            "sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+            "sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
             "rewrite_module": true,
             "contract": false
           },
@@ -155,7 +155,7 @@
             "source": "internal/web/templates/ui/data.templ",
             "target": "internal/web/templates/ui/data.templ",
             "class": "templ",
-            "sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+            "sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
             "rewrite_module": true,
             "contract": false
           },
@@ -163,7 +163,7 @@
             "source": "internal/web/templates/ui/forms.templ",
             "target": "internal/web/templates/ui/forms.templ",
             "class": "templ",
-            "sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+            "sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
             "rewrite_module": true,
             "contract": false
           },
@@ -179,7 +179,7 @@
             "source": "internal/web/templates/ui/icons.templ",
             "target": "internal/web/templates/ui/icons.templ",
             "class": "templ",
-            "sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+            "sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
             "rewrite_module": true,
             "contract": false
           },
@@ -187,7 +187,7 @@
             "source": "internal/web/templates/ui/icons_test.go",
             "target": "internal/web/templates/ui/icons_test.go",
             "class": "test",
-            "sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+            "sha256": "48f7e2ce37529f96d20bb58d9185d7a374185073edfd907e9b0c2b00c621aaab",
             "rewrite_module": true,
             "contract": false
           },
@@ -195,7 +195,7 @@
             "source": "internal/web/templates/ui/overlays.templ",
             "target": "internal/web/templates/ui/overlays.templ",
             "class": "templ",
-            "sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+            "sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
             "rewrite_module": true,
             "contract": false
           },
@@ -235,29 +235,29 @@
         {
           "path": "internal/web/templates/ui/components_core.templ",
           "source": "internal/web/templates/ui/components_core.templ",
-          "base_sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
-          "local_sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+          "base_sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
+          "local_sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/components_nav.templ",
           "source": "internal/web/templates/ui/components_nav.templ",
-          "base_sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
-          "local_sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+          "base_sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
+          "local_sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/data.templ",
           "source": "internal/web/templates/ui/data.templ",
-          "base_sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
-          "local_sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+          "base_sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
+          "local_sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/forms.templ",
           "source": "internal/web/templates/ui/forms.templ",
-          "base_sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
-          "local_sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+          "base_sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
+          "local_sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
           "state": "clean"
         },
         {
@@ -270,22 +270,22 @@
         {
           "path": "internal/web/templates/ui/icons.templ",
           "source": "internal/web/templates/ui/icons.templ",
-          "base_sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
-          "local_sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+          "base_sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
+          "local_sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/icons_test.go",
           "source": "internal/web/templates/ui/icons_test.go",
-          "base_sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
-          "local_sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+          "base_sha256": "48f7e2ce37529f96d20bb58d9185d7a374185073edfd907e9b0c2b00c621aaab",
+          "local_sha256": "48f7e2ce37529f96d20bb58d9185d7a374185073edfd907e9b0c2b00c621aaab",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/overlays.templ",
           "source": "internal/web/templates/ui/overlays.templ",
-          "base_sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
-          "local_sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+          "base_sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
+          "local_sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
           "state": "clean"
         },
         {
@@ -302,7 +302,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -452,7 +452,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -638,7 +638,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -759,7 +759,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -984,7 +984,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1082,7 +1082,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1161,7 +1161,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1241,7 +1241,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -1441,7 +1441,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -1472,7 +1472,7 @@
             "source": "internal/web/handlers_admin_jobs.go",
             "target": "internal/web/handlers_admin_jobs.go",
             "class": "go",
-            "sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+            "sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
             "rewrite_module": true,
             "contract": false
           },
@@ -1586,8 +1586,8 @@
         {
           "path": "internal/web/handlers_admin_jobs.go",
           "source": "internal/web/handlers_admin_jobs.go",
-          "base_sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
-          "local_sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+          "base_sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
+          "local_sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
           "state": "clean"
         },
         {
@@ -1604,7 +1604,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -1736,7 +1736,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1844,7 +1844,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1987,7 +1987,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -2175,7 +2175,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2311,7 +2311,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2431,7 +2431,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2536,7 +2536,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2671,7 +2671,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2767,7 +2767,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2868,7 +2868,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -2990,7 +2990,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3069,7 +3069,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -3222,7 +3222,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3440,7 +3440,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -3580,7 +3580,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3693,7 +3693,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3809,7 +3809,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3889,7 +3889,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3968,7 +3968,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4143,7 +4143,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -4314,7 +4314,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -4466,7 +4466,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -4634,7 +4634,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -4781,7 +4781,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4910,7 +4910,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -5102,7 +5102,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5218,7 +5218,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -5375,7 +5375,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -5504,7 +5504,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -5947,7 +5947,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6046,7 +6046,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -6242,7 +6242,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -6692,7 +6692,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6853,7 +6853,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -7352,7 +7352,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -7996,7 +7996,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -8191,7 +8191,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -8443,7 +8443,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -8610,7 +8610,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -9811,7 +9811,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -9965,7 +9965,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -10156,10 +10156,6 @@
             {
               "name": "ListJobs",
               "table": "jobs"
-            },
-            {
-              "name": "RequeueDeadJob",
-              "table": "jobs"
             }
           ]
         },
@@ -10249,7 +10245,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -10413,7 +10409,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -10616,7 +10612,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10716,7 +10712,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10902,6 +10898,14 @@
             "target": "internal/modkit/operation.go",
             "class": "go",
             "sha256": "eec01224b400f3b4ea761e962a18f62a6566c6769a6cdaeb6170f26285dfd5a6",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/ownership_test.go",
+            "target": "internal/modkit/ownership_test.go",
+            "class": "test",
+            "sha256": "f980c3342f5ee298e1f93acbf21b3522be0616d9c1df1f1f00ca3ac424a0f6b4",
             "rewrite_module": true,
             "contract": false
           },
@@ -11217,6 +11221,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/modkit/ownership_test.go",
+          "source": "internal/modkit/ownership_test.go",
+          "base_sha256": "f980c3342f5ee298e1f93acbf21b3522be0616d9c1df1f1f00ca3ac424a0f6b4",
+          "local_sha256": "f980c3342f5ee298e1f93acbf21b3522be0616d9c1df1f1f00ca3ac424a0f6b4",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/plan.go",
           "source": "internal/modkit/plan.go",
           "base_sha256": "7f25dd0ff1216a86decd47f282b002decda001158b69126c2e8bcfd95121200d",
@@ -11342,7 +11353,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -11639,7 +11650,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -11819,7 +11830,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -12136,7 +12147,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -12272,7 +12283,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -12432,7 +12443,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -12573,7 +12584,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12625,7 +12636,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -12679,7 +12690,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -13648,7 +13659,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13747,7 +13758,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "5101473f344013612656e218c1bd919614222b177f1f42a796d6d516243c7df6",
+            "sha256": "a903943967b5628308ae9a0f6b28b9d228e71b1127f8dab1f400d6c03ea99775",
             "rewrite_module": false,
             "contract": false
           },
@@ -13933,7 +13944,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -14141,7 +14152,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14197,7 +14208,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -14373,7 +14384,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -14642,7 +14653,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14726,7 +14737,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14822,7 +14833,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14956,7 +14967,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -15149,7 +15160,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15321,7 +15332,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15338,7 +15349,16 @@
           "system/jobs",
           "system/server"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/web/workflow_admin_job_requeue.go",
+            "target": "internal/web/workflow_admin_job_requeue.go",
+            "class": "go",
+            "sha256": "90f14122a3d6acacef974c9d0b8022a87705590a1f0cd495fddc869f5ba0c79e",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "routes": [
             "admin.jobs.requeue"
@@ -15363,6 +15383,12 @@
               "package": "internal/web",
               "handler": "handleAdminJobRequeue"
             }
+          ],
+          "queries": [
+            {
+              "name": "RequeueDeadJob",
+              "table": "jobs"
+            }
           ]
         },
         "migrations": [],
@@ -15376,14 +15402,22 @@
         "data": [],
         "removal_policy": "free"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/web/workflow_admin_job_requeue.go",
+          "source": "internal/web/workflow_admin_job_requeue.go",
+          "base_sha256": "90f14122a3d6acacef974c9d0b8022a87705590a1f0cd495fddc869f5ba0c79e",
+          "local_sha256": "90f14122a3d6acacef974c9d0b8022a87705590a1f0cd495fddc869f5ba0c79e",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     },
     {
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15503,7 +15537,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15639,7 +15673,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15737,7 +15771,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15971,7 +16005,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16307,7 +16341,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16406,7 +16440,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16533,7 +16567,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -16667,7 +16701,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16784,7 +16818,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16863,7 +16897,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -16979,7 +17013,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17164,7 +17198,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17271,7 +17305,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17404,7 +17438,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17539,7 +17573,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17620,7 +17654,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -17761,7 +17795,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -17884,7 +17918,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18060,7 +18094,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18180,7 +18214,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -18430,7 +18464,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
       "reason": "profile",
       "required_by": [],
       "manifest": {

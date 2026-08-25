@@ -181,10 +181,6 @@
         {
           "name": "ListJobs",
           "table": "jobs"
-        },
-        {
-          "name": "RequeueDeadJob",
-          "table": "jobs"
         }
       ]
     },

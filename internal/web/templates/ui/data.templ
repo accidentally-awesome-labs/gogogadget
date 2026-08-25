@@ -108,9 +108,11 @@ templ List(o ListOpts) {
 	</ul>
 }
 
-// Item renders one list entry.
-templ Item() {
-	<li>{ children... }</li>
+// ItemOpts renders one list entry.
+type ItemOpts struct{ Attrs Attrs }
+
+templ Item(o ItemOpts) {
+	<li { root("item", "", o.Attrs)... }>{ children... }</li>
 }
 
 // ContainerOpts configures a layout container.
@@ -208,7 +210,9 @@ func gridClasses(o GridOpts) string {
 	return mergeClasses("grid grid-cols-1 gap-4 sm:grid-cols-"+fmt.Sprint(cols), o.Attrs.Class)
 }
 
-// Divider renders a horizontal rule.
-templ Divider() {
-	<hr class="border-t border-border my-4"/>
+// DividerOpts renders a horizontal rule.
+type DividerOpts struct{ Attrs Attrs }
+
+templ Divider(o DividerOpts) {
+	<hr { root("divider", "border-t border-border my-4", o.Attrs)... }/>
 }

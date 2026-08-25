@@ -8,11 +8,20 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// Icon renders one registry icon. class carries sizing and colour; the svg is
-// colour-agnostic (currentColor) so it inherits from its parent. An unknown
+// IconOpts renders one registry icon. Class carries sizing and colour; the svg
+// is colour-agnostic (currentColor) so it inherits from its parent. An unknown
 // name renders nothing, which reads as a visible bug rather than a silent
 // placeholder.
-func Icon(name IconName, class string, attrs ...templ.Attributes) templ.Component {
+//
+// The old variadic templ.Attributes parameter is gone: it was an
+// arbitrary-attribute escape hatch, so any caller could set role or aria-hidden
+// on an icon and quietly change what a screen reader announced.
+type IconOpts struct {
+	Name  IconName
+	Attrs Attrs
+}
+
+func Icon(o IconOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -33,7 +42,7 @@ func Icon(name IconName, class string, attrs ...templ.Attributes) templ.Componen
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = iconSwitch(name, class, iconAttrs(attrs)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = iconSwitch(o.Name, o.Attrs.Class, iconRootAttrs(o)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,20 +50,15 @@ func Icon(name IconName, class string, attrs ...templ.Attributes) templ.Componen
 	})
 }
 
-func iconAttrs(attrs []templ.Attributes) templ.Attributes {
-	switch len(attrs) {
-	case 0:
-		return nil
-	case 1:
-		return attrs[0]
-	}
-	merged := templ.Attributes{}
-	for _, a := range attrs {
-		for k, v := range a {
-			merged[k] = v
-		}
-	}
-	return merged
+// iconRootAttrs gives every icon the component marker and an aria-hidden the
+// caller cannot override: an icon is decoration, and its label belongs on the
+// control that contains it.
+func iconRootAttrs(o IconOpts) templ.Attributes {
+	out := attributes(o.Attrs)
+	delete(out, "class")
+	out["data-ui"] = "icon"
+	out["aria-hidden"] = "true"
+	return out
 }
 
 func iconSwitch(name IconName, class string, extra templ.Attributes) templ.Component {
@@ -221,7 +225,7 @@ func svgFill(class, d string, extra templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 139, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 143, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -289,7 +293,7 @@ func svgStroke(class, d string, extra templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 145, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 149, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -368,7 +372,7 @@ func svgMulti(class string, paths []string, withCircle bool, extra templ.Attribu
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 155, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 159, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {

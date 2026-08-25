@@ -21,26 +21,37 @@ type PagerLabels struct {
 	Aria, Prev, Next, PageOf func(page, totalPages int) string
 }
 
-// Pagination renders hx-get pager links. target is the box the pager morphs.
-// prevLabel/nextLabel are the localized link texts; pageOf renders the
-// "Page X of Y" caption.
-templ Pagination(page, totalPages int, baseURL, target string, labels PagerLabels) {
-	if totalPages > 1 {
-		<nav class="flex items-center justify-between mt-4 text-sm" aria-label={ labels.Aria(page, totalPages) }>
-			if page > 1 {
-				<a href={ templ.SafeURL(PageURL(baseURL, page-1)) }
-					hx-get={ PageURL(baseURL, page-1) }
-					hx-target={ target } hx-swap="innerMorph" hx-push-url="true"
-					class="btn btn-ghost">{ labels.Prev(page, totalPages) }</a>
+// PaginationOpts renders hx-get pager links. Target is the box the pager
+// morphs; Labels carries the localized strings so ui never imports i18n.
+//
+// A single page renders nothing at all: a pager with both arrows dead is noise
+// that still occupies layout.
+type PaginationOpts struct {
+	Page       int
+	TotalPages int
+	BaseURL    string
+	Target     string
+	Labels     PagerLabels
+	Attrs      Attrs
+}
+
+templ Pagination(o PaginationOpts) {
+	if o.TotalPages > 1 {
+		<nav { rootWith("pagination", "flex items-center justify-between mt-4 text-sm", o.Attrs, "aria-label", o.Labels.Aria(o.Page, o.TotalPages))... }>
+			if o.Page > 1 {
+				<a href={ templ.SafeURL(PageURL(o.BaseURL, o.Page-1)) }
+					hx-get={ PageURL(o.BaseURL, o.Page-1) }
+					hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+					class="btn btn-ghost">{ o.Labels.Prev(o.Page, o.TotalPages) }</a>
 			} else {
 				<span></span>
 			}
-			<span class="text-fg-muted">{ labels.PageOf(page, totalPages) }</span>
-			if page < totalPages {
-				<a href={ templ.SafeURL(PageURL(baseURL, page+1)) }
-					hx-get={ PageURL(baseURL, page+1) }
-					hx-target={ target } hx-swap="innerMorph" hx-push-url="true"
-					class="btn btn-ghost">{ labels.Next(page, totalPages) }</a>
+			<span class="text-fg-muted">{ o.Labels.PageOf(o.Page, o.TotalPages) }</span>
+			if o.Page < o.TotalPages {
+				<a href={ templ.SafeURL(PageURL(o.BaseURL, o.Page+1)) }
+					hx-get={ PageURL(o.BaseURL, o.Page+1) }
+					hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+					class="btn btn-ghost">{ o.Labels.Next(o.Page, o.TotalPages) }</a>
 			} else {
 				<span></span>
 			}
@@ -74,36 +85,50 @@ func MatchCurrent(path, match string) string {
 	return ""
 }
 
-// NavTabs is the boosted sub-navigation inside a page (settings). activePath
-// is the current path.
-templ NavTabs(items []NavItem, activePath string) {
-	<nav class="tab-bar">
-		for _, item := range items {
+// NavTabsOpts is the boosted sub-navigation inside a page (settings).
+// ActivePath is the current request path.
+type NavTabsOpts struct {
+	Items      []NavItem
+	ActivePath string
+	Attrs      Attrs
+}
+
+templ NavTabs(o NavTabsOpts) {
+	<nav { root("nav-tabs", "tab-bar", o.Attrs)... }>
+		for _, item := range o.Items {
 			<a
 				href={ templ.SafeURL(item.Href) }
 				hx-boost="true"
 				hx-target={ NavTarget }
 				hx-select={ NavTarget }
 				hx-swap={ NavSwap }
-				aria-current={ MatchCurrent(activePath, item.MatchPath()) }
+				aria-current={ MatchCurrent(o.ActivePath, item.MatchPath()) }
 				class="tab"
 			>{ item.Label }</a>
 		}
 	</nav>
 }
 
-// TerminalPage is the one shape every terminal page takes: a big code or
-// title, a sentence, optional detail, optional way home. backHomeLabel is the
-// localized "back home" text; pass "" to suppress the link.
-templ TerminalPage(code, message, detail, backHomeLabel string) {
-	<section class="page-narrow text-center">
-		<h1 class={ errorHeadingClass(code) }>{ code }</h1>
-		<p class="mt-4 text-lg text-fg-muted">{ message }</p>
-		if detail != "" {
-			<pre class="mt-8 card text-xs overflow-auto whitespace-pre-wrap text-left">{ detail }</pre>
+// TerminalPageOpts is the one shape every terminal page takes: a big code or
+// title, a sentence, optional detail, optional way home. An empty BackHomeLabel
+// suppresses the link.
+type TerminalPageOpts struct {
+	Code          string
+	Message       string
+	Detail        string
+	BackHomeLabel string
+	Attrs         Attrs
+}
+
+templ TerminalPage(o TerminalPageOpts) {
+	<section { root("terminal-page", "page-narrow text-center", o.Attrs)... }>
+		<h1 class={ errorHeadingClass(o.Code) }>{ o.Code }</h1>
+		<p class="mt-4 text-lg text-fg-muted">{ o.Message }</p>
+		if o.Detail != "" {
+			<pre class="mt-8 card text-xs overflow-auto whitespace-pre-wrap text-left">{ o.Detail }</pre>
 		}
-		if backHomeLabel != "" {
-			<a href="/" class="btn btn-primary mt-8">{ backHomeLabel }</a>
+		if o.BackHomeLabel != "" {
+			<a href="/" class="btn btn-primary mt-8">{ o.BackHomeLabel }</a>
 		}
 	</section>
 }

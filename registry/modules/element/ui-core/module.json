@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/components_core.templ",
         "target": "internal/web/templates/ui/components_core.templ",
         "class": "templ",
-        "sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+        "sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
         "rewrite_module": true,
         "contract": false
       },
@@ -38,7 +38,7 @@
         "source": "internal/web/templates/ui/components_nav.templ",
         "target": "internal/web/templates/ui/components_nav.templ",
         "class": "templ",
-        "sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+        "sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
         "rewrite_module": true,
         "contract": false
       },
@@ -46,7 +46,7 @@
         "source": "internal/web/templates/ui/data.templ",
         "target": "internal/web/templates/ui/data.templ",
         "class": "templ",
-        "sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+        "sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
         "rewrite_module": true,
         "contract": false
       },
@@ -54,7 +54,7 @@
         "source": "internal/web/templates/ui/forms.templ",
         "target": "internal/web/templates/ui/forms.templ",
         "class": "templ",
-        "sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+        "sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
         "rewrite_module": true,
         "contract": false
       },
@@ -70,7 +70,7 @@
         "source": "internal/web/templates/ui/icons.templ",
         "target": "internal/web/templates/ui/icons.templ",
         "class": "templ",
-        "sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+        "sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
         "rewrite_module": true,
         "contract": false
       },
@@ -78,7 +78,7 @@
         "source": "internal/web/templates/ui/icons_test.go",
         "target": "internal/web/templates/ui/icons_test.go",
         "class": "test",
-        "sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+        "sha256": "48f7e2ce37529f96d20bb58d9185d7a374185073edfd907e9b0c2b00c621aaab",
         "rewrite_module": true,
         "contract": false
       },
@@ -86,7 +86,7 @@
         "source": "internal/web/templates/ui/overlays.templ",
         "target": "internal/web/templates/ui/overlays.templ",
         "class": "templ",
-        "sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+        "sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
         "rewrite_module": true,
         "contract": false
       },

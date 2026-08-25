@@ -26,7 +26,7 @@
         "source": "internal/web/handlers_admin_jobs.go",
         "target": "internal/web/handlers_admin_jobs.go",
         "class": "go",
-        "sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+        "sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
         "rewrite_module": true,
         "contract": false
       },
@@ -78,14 +78,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "admin.jobs.col_actions": "Actions",
@@ -127,6 +119,14 @@
         "admin.jobs.status_running": "en ejecución",
         "admin.jobs.title": "Trabajos"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

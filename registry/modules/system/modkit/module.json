@@ -187,6 +187,14 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/ownership_test.go",
+        "target": "internal/modkit/ownership_test.go",
+        "class": "test",
+        "sha256": "f980c3342f5ee298e1f93acbf21b3522be0616d9c1df1f1f00ca3ac424a0f6b4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",

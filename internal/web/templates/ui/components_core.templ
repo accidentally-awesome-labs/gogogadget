@@ -2,156 +2,175 @@ package ui
 
 import "fmt"
 
-// Spinner is htmx's request indicator.
-templ Spinner(class string) {
-	@Icon(IconSpinner, mergeClasses("htmx-indicator w-4 h-4 animate-spin", class))
+// Every renderer in this package takes exactly one options struct that embeds
+// Attrs, and spreads one merged attribute map on its root element. That is what
+// keeps a component's own semantics (role, aria-*, type, base class) out of
+// caller reach: there is no arbitrary-attribute escape hatch to override them
+// with, and a caller's Class is additive rather than replacing.
+
+// SpinnerOpts renders htmx's request indicator.
+type SpinnerOpts struct{ Attrs Attrs }
+
+templ Spinner(o SpinnerOpts) {
+	@Icon(IconOpts{Name: IconSpinner, Attrs: withClass(o.Attrs, "htmx-indicator w-4 h-4 animate-spin")})
 }
 
-// Badge is a small state pill. kind picks the colour; text is the label.
-templ Badge(text string, kind Kind, attrs Attrs) {
-	<span class={ badgeClasses(kind, attrs.Class) } data-testid={ attrs.TestID }>{ text }</span>
+// BadgeOpts is a small state pill: Kind picks the semantic colour.
+type BadgeOpts struct {
+	Text  string
+	Kind  Kind
+	Attrs Attrs
 }
 
-func badgeClasses(kind Kind, extra string) string {
-	return mergeClasses("badge badge-"+string(kind), extra)
+templ Badge(o BadgeOpts) {
+	<span { root("badge", "badge badge-"+string(NormalizeKind(o.Kind)), o.Attrs)... }>{ o.Text }</span>
 }
 
-// Notice is an in-page notice inside a form or card. role is "alert" for
-// actionable failures and "status" for confirmations.
-templ Notice(kind Kind, role, class, testID string) {
-	<div class={ mergeClasses("alert alert-"+string(kind), class) } role={ role } data-testid={ testID }>
+// NoticeOpts is an in-page notice inside a form or card. Role is "alert" for
+// actionable failures and "status" for confirmations; the component owns the
+// attribute so a caller cannot silently downgrade an error to a status.
+type NoticeOpts struct {
+	Kind  Kind
+	Role  string
+	Attrs Attrs
+}
+
+templ Notice(o NoticeOpts) {
+	<div { rootWith("notice", "alert alert-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", noticeRole(o.Role))... }>
 		{ children... }
 	</div>
 }
 
-// Banner is a full-bleed shell notice (impersonation, billing).
-templ Banner(kind Kind, role, testID string) {
-	<div class={ "banner banner-" + string(kind) } role={ role } data-testid={ testID }>
+// BannerOpts is a full-bleed shell notice (impersonation, billing).
+type BannerOpts struct {
+	Kind  Kind
+	Role  string
+	Attrs Attrs
+}
+
+templ Banner(o BannerOpts) {
+	<div { rootWith("banner", "banner banner-"+string(NormalizeKind(o.Kind)), o.Attrs, "role", noticeRole(o.Role))... }>
 		{ children... }
 	</div>
 }
 
-// PageHeader is the title row every page opens with; children are the
+// PageHeaderOpts is the title row every page opens with; children are the
 // right-hand actions.
-templ PageHeader(title string) {
-	<div class="page-header">
-		<h1 class="page-title">{ title }</h1>
+type PageHeaderOpts struct {
+	Title string
+	Attrs Attrs
+}
+
+templ PageHeader(o PageHeaderOpts) {
+	<div { root("page-header", "page-header", o.Attrs)... }>
+		<h1 class="page-title">{ o.Title }</h1>
 		{ children... }
 	</div>
 }
 
-// SectionHeader is a sub-heading inside a page. class carries margins.
-templ SectionHeader(text, class string) {
-	<h2 class={ mergeClasses("section-title", class) }>{ text }</h2>
+// SectionHeaderOpts is a sub-heading inside a page.
+type SectionHeaderOpts struct {
+	Text  string
+	Attrs Attrs
 }
 
-// TableCard is the bordered, clipped box every table sits in.
-templ TableCard(testID string) {
-	<div class="table-card" data-testid={ testID }>
+templ SectionHeader(o SectionHeaderOpts) {
+	<h2 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h2>
+}
+
+// TableCardOpts is the bordered, clipped box every table sits in.
+type TableCardOpts struct{ Attrs Attrs }
+
+templ TableCard(o TableCardOpts) {
+	<div { root("table-card", "table-card", o.Attrs)... }>
 		{ children... }
 	</div>
 }
 
-// TableEmpty is the zero-row message inside a TableCard.
-templ TableEmpty(text string) {
-	<p class="table-empty">{ text }</p>
+// TableEmptyOpts is the zero-row message inside a TableCard.
+type TableEmptyOpts struct {
+	Text  string
+	Attrs Attrs
 }
 
-// Metric is one number on a dashboard. Default data-testid is "stat-card".
-templ Metric(title, value, sub string, testID string) {
-	<div class="card" data-testid={ metricTestID(testID) }>
-		<p class="text-sm text-fg-muted">{ title }</p>
-		<p class="text-3xl font-bold mt-1">{ value }</p>
-		if sub != "" {
-			<p class="text-sm text-fg-muted mt-1">{ sub }</p>
+templ TableEmpty(o TableEmptyOpts) {
+	<p { root("table-empty", "table-empty", o.Attrs)... }>{ o.Text }</p>
+}
+
+// MetricOpts is one number on a dashboard.
+type MetricOpts struct {
+	Title string
+	Value string
+	Sub   string
+	Attrs Attrs
+}
+
+templ Metric(o MetricOpts) {
+	<div { root("metric", "card", defaultTestID(o.Attrs, "stat-card"))... }>
+		<p class="text-sm text-fg-muted">{ o.Title }</p>
+		<p class="text-3xl font-bold mt-1">{ o.Value }</p>
+		if o.Sub != "" {
+			<p class="text-sm text-fg-muted mt-1">{ o.Sub }</p>
 		}
 	</div>
 }
 
-func metricTestID(testID string) string {
-	if testID != "" {
-		return testID
-	}
-	return "stat-card"
+// EmptyStateOpts is the zero-data pattern for tables and lists.
+type EmptyStateOpts struct {
+	Title string
+	Body  string
+	Attrs Attrs
 }
 
-// EmptyState is the zero-data pattern for tables.
-templ EmptyState(title, body string) {
-	<div class="card text-center py-12">
-		<h3 class="font-semibold">{ title }</h3>
-		<p class="text-sm text-fg-muted mt-1">{ body }</p>
+templ EmptyState(o EmptyStateOpts) {
+	<div { root("empty-state", "card text-center py-12", o.Attrs)... }>
+		<h3 class="font-semibold">{ o.Title }</h3>
+		<p class="text-sm text-fg-muted mt-1">{ o.Body }</p>
 		<div class="mt-4">
 			{ children... }
 		</div>
 	</div>
 }
 
-// FieldError is the per-field validation message under an input. Default
-// data-testid is "form-error".
-templ FieldError(err string, testID string) {
-	<p class="field-error" data-testid={ fieldErrorTestID(testID) }>{ err }</p>
+// FieldErrorOpts is the per-field validation message under an input.
+type FieldErrorOpts struct {
+	Error string
+	Attrs Attrs
 }
 
-func fieldErrorTestID(testID string) string {
-	if testID != "" {
-		return testID
-	}
-	return "form-error"
+templ FieldError(o FieldErrorOpts) {
+	<p { root("field-error", "field-error", defaultTestID(o.Attrs, "form-error"))... }>{ o.Error }</p>
 }
 
-// Field renders label + control + field-level error. The control is passed as
-// children so any input type composes.
-templ Field(name, label, err string, required bool) {
-	<div>
-		<label for={ name } class="label">{ label }</label>
-		{ children... }
-		if err != "" {
-			@FieldError(err, "")
-		}
+// MeterOpts is a usage bar. Percent is clamped, so an over-quota caller cannot
+// render a bar wider than its track.
+type MeterOpts struct {
+	Percent int
+	Attrs   Attrs
+}
+
+templ Meter(o MeterOpts) {
+	<div { root("meter", "meter", o.Attrs)... }>
+		<div class="meter-fill" style={ fmt.Sprintf("width: %d%%", clampPercent(o.Percent)) }></div>
 	</div>
 }
 
-// TextInput is a single-line text input.
-templ TextInput(name, value, placeholder, inputType string, required bool) {
-	<input id={ name } name={ name } type={ inputType } value={ value } class="input" placeholder={ placeholder } required?={ required }/>
+// SecretRevealOpts is the reveal-once secret pattern: the value in a code box
+// and a copy button carrying it on data-copy. The value never reaches an Alpine
+// expression, so a secret containing quotes cannot break out of one.
+type SecretRevealOpts struct {
+	Value        string
+	CopyLabel    string
+	CopiedLabel  string
+	Attrs        Attrs
 }
 
-// SearchInput is the debounced table search. The input morphs target and
-// pushes the URL so a search is shareable and the Back button works.
-templ SearchInput(name, value, placeholder, ariaLabel, getURL, target, indicatorID, testID string) {
-	<div class="toolbar">
-		<input
-			type="search" name={ name } value={ value } placeholder={ placeholder }
-			class="input max-w-sm"
-			hx-get={ getURL } hx-trigger="input changed delay:300ms, search"
-			hx-target={ target } hx-swap="innerMorph" hx-push-url="true" hx-include="this"
-			hx-sync="this:replace"
-			hx-indicator={ "#" + indicatorID }
-			aria-label={ ariaLabel }
-			data-testid={ testID }
-		/>
-		<span id={ indicatorID } class="text-fg-muted">
-			@Spinner("")
-		</span>
-	</div>
-}
-
-// Meter is a usage bar: pct is clamped to 0..100 by the caller.
-templ Meter(pct int, testID string) {
-	<div class="meter" data-testid={ testID }>
-		<div class="meter-fill" style={ fmt.Sprintf("width: %d%%", pct) }></div>
-	</div>
-}
-
-// SecretReveal is the reveal-once secret pattern: the value in a code box and
-// a copy button carrying it on data-copy. The value never reaches an Alpine
-// expression.
-templ SecretReveal(value, copyLabel, copiedLabel string) {
-	<div class="mt-3 flex items-center gap-2">
-		<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ value }</code>
-		<button type="button" x-data="copy" data-copy={ value } @click="copy()" class="btn btn-ghost btn-xs">
-			<span x-show="!copied">{ copyLabel }</span>
-			<span x-show="copied" x-cloak>{ copiedLabel }</span>
+templ SecretReveal(o SecretRevealOpts) {
+	<div { root("secret-reveal", "mt-3 flex items-center gap-2", o.Attrs)... }>
+		<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ o.Value }</code>
+		<button type="button" x-data="copy" data-copy={ o.Value } @click="copy()" class="btn btn-ghost btn-xs">
+			<span x-show="!copied">{ o.CopyLabel }</span>
+			<span x-show="copied" x-cloak>{ o.CopiedLabel }</span>
 		</button>
 	</div>
 }
@@ -159,22 +178,19 @@ templ SecretReveal(value, copyLabel, copiedLabel string) {
 // DescriptionItem is one term/value pair in a DescriptionList.
 type DescriptionItem struct{ Term, Value string }
 
-// DescriptionList is the read-only detail pattern (account, org).
-templ DescriptionList(items []DescriptionItem) {
-	<dl class="space-y-4 text-sm">
-		for _, item := range items {
+// DescriptionListOpts is the read-only detail pattern (account, org).
+type DescriptionListOpts struct {
+	Items []DescriptionItem
+	Attrs Attrs
+}
+
+templ DescriptionList(o DescriptionListOpts) {
+	<dl { root("description-list", "space-y-4 text-sm", o.Attrs)... }>
+		for _, item := range o.Items {
 			<div>
 				<dt class="text-fg-muted">{ item.Term }</dt>
 				<dd class="font-medium">{ item.Value }</dd>
 			</div>
 		}
 	</dl>
-}
-
-// mergeClasses joins component classes with caller-supplied classes.
-func mergeClasses(base, extra string) string {
-	if extra == "" {
-		return base
-	}
-	return base + " " + extra
 }

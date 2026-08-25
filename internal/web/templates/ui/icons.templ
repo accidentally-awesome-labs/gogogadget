@@ -1,27 +1,31 @@
 package ui
 
-// Icon renders one registry icon. class carries sizing and colour; the svg is
-// colour-agnostic (currentColor) so it inherits from its parent. An unknown
+// IconOpts renders one registry icon. Class carries sizing and colour; the svg
+// is colour-agnostic (currentColor) so it inherits from its parent. An unknown
 // name renders nothing, which reads as a visible bug rather than a silent
 // placeholder.
-templ Icon(name IconName, class string, attrs ...templ.Attributes) {
-	@iconSwitch(name, class, iconAttrs(attrs))
+//
+// The old variadic templ.Attributes parameter is gone: it was an
+// arbitrary-attribute escape hatch, so any caller could set role or aria-hidden
+// on an icon and quietly change what a screen reader announced.
+type IconOpts struct {
+	Name  IconName
+	Attrs Attrs
 }
 
-func iconAttrs(attrs []templ.Attributes) templ.Attributes {
-	switch len(attrs) {
-	case 0:
-		return nil
-	case 1:
-		return attrs[0]
-	}
-	merged := templ.Attributes{}
-	for _, a := range attrs {
-		for k, v := range a {
-			merged[k] = v
-		}
-	}
-	return merged
+templ Icon(o IconOpts) {
+	@iconSwitch(o.Name, o.Attrs.Class, iconRootAttrs(o))
+}
+
+// iconRootAttrs gives every icon the component marker and an aria-hidden the
+// caller cannot override: an icon is decoration, and its label belongs on the
+// control that contains it.
+func iconRootAttrs(o IconOpts) templ.Attributes {
+	out := attributes(o.Attrs)
+	delete(out, "class")
+	out["data-ui"] = "icon"
+	out["aria-hidden"] = "true"
+	return out
 }
 
 func iconSwitch(name IconName, class string, extra templ.Attributes) templ.Component {

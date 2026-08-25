@@ -14,7 +14,7 @@ templ Dialog(o DialogOpts) {
 			<div class="flex items-center justify-between">
 				<h2 class="section-title">{ o.Title }</h2>
 				<button type="submit" class="btn btn-ghost btn-icon" aria-label="Close" data-ui-dialog-close>
-					@Icon(IconClose, "w-4 h-4")
+					@Icon(IconOpts{Name: IconClose, Attrs: Attrs{Class: "w-4 h-4"}})
 				</button>
 			</div>
 			{ children... }
@@ -70,7 +70,7 @@ type MenuItem struct {
 templ DropdownMenu(o DropdownMenuOpts) {
 	<div class="relative inline-block" x-data="uiMenu" data-ui="dropdown-menu" data-testid={ o.Attrs.TestID }>
 		<button type="button" class="btn btn-ghost btn-icon" :aria-expanded="open.toString()" @click="toggle">
-			@Icon(IconMore, "w-4 h-4")
+			@Icon(IconOpts{Name: IconMore, Attrs: Attrs{Class: "w-4 h-4"}})
 			<span class="sr-only">{ o.Label }</span>
 		</button>
 		<div x-show="open" x-cloak @click.outside="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">

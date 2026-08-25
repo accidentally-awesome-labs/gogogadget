@@ -37,21 +37,128 @@ func FieldAriaDescribedBy(name, err string) string {
 	return name + "-hint"
 }
 
-// Form renders a form wrapper; children are the fields.
-templ Form(method, action, target, swap string) {
-	<form method={ method } action={ action } hx-target={ target } hx-swap={ swap }>
+// FormOpts renders a form wrapper; children are the fields. novalidate is
+// always set: server validation is authoritative, and letting the browser block
+// submission first means the server's rules never run.
+type FormOpts struct {
+	Method string
+	Action string
+	Target string
+	Swap   string
+	Attrs  Attrs
+}
+
+templ Form(o FormOpts) {
+	<form
+		{ root("form", "", o.Attrs)... }
+		method={ o.Method } action={ o.Action }
+		hx-target={ o.Target } hx-swap={ o.Swap }
+		novalidate
+	>
 		{ children... }
 	</form>
 }
 
-// Fieldset groups related fields under a legend.
-templ Fieldset(legend string) {
-	<fieldset>
-		if legend != "" {
-			<legend class="label">{ legend }</legend>
+// FieldsetOpts groups related fields under a legend.
+type FieldsetOpts struct {
+	Legend string
+	Attrs  Attrs
+}
+
+templ Fieldset(o FieldsetOpts) {
+	<fieldset { root("fieldset", "", o.Attrs)... }>
+		if o.Legend != "" {
+			<legend class="label">{ o.Legend }</legend>
 		}
 		{ children... }
 	</fieldset>
+}
+
+// FieldOpts renders label + control + field-level error. The control arrives as
+// children so any input type composes, and the hint/error ids come from
+// FieldIDs so a custom control can wire the same aria-describedby.
+type FieldOpts struct {
+	Name        string
+	Label       string
+	Hint        string
+	Error       string
+	Required    bool
+	Optional    bool
+	HiddenLabel bool
+	Attrs       Attrs
+}
+
+templ Field(o FieldOpts) {
+	<div { root("field", "", o.Attrs)... }>
+		if o.HiddenLabel {
+			<label for={ o.Name } class="sr-only">{ o.Label }</label>
+		} else {
+			<label for={ o.Name } class="label">
+				{ o.Label }
+				if o.Optional {
+					<span class="text-fg-muted"> ({ "optional" })</span>
+				}
+			</label>
+		}
+		{ children... }
+		if o.Hint != "" && o.Error == "" {
+			<p id={ o.Name + "-hint" } class="text-sm text-fg-muted mt-1">{ o.Hint }</p>
+		}
+		if o.Error != "" {
+			@FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: o.Name + "-error"}})
+		}
+	</div>
+}
+
+// TextInputOpts is a single-line text input.
+type TextInputOpts struct {
+	Name        string
+	Value       string
+	Placeholder string
+	Type        string
+	Required    bool
+	Error       string
+	Attrs       Attrs
+}
+
+templ TextInput(o TextInputOpts) {
+	<input
+		{ root("text-input", "input", o.Attrs)... }
+		{ FieldARIA(o.Name, o.Error, o.Required)... }
+		id={ o.Name } name={ o.Name } type={ inputType(o.Type) }
+		value={ o.Value } placeholder={ o.Placeholder } required?={ o.Required }
+	/>
+}
+
+// SearchInputOpts is the debounced table search. It morphs Target and pushes
+// the URL, so a search is shareable and the Back button works.
+type SearchInputOpts struct {
+	Name        string
+	Value       string
+	Placeholder string
+	AriaLabel   string
+	GetURL      string
+	Target      string
+	IndicatorID string
+	Attrs       Attrs
+}
+
+templ SearchInput(o SearchInputOpts) {
+	<div { root("search-input", "toolbar", Attrs{})... }>
+		<input
+			{ attributes(o.Attrs)... }
+			type="search" name={ o.Name } value={ o.Value } placeholder={ o.Placeholder }
+			class={ mergeClasses("input max-w-sm", o.Attrs.Class) }
+			hx-get={ o.GetURL } hx-trigger="input changed delay:300ms, search"
+			hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true" hx-include="this"
+			hx-sync="this:replace"
+			hx-indicator={ "#" + o.IndicatorID }
+			aria-label={ o.AriaLabel }
+		/>
+		<span id={ o.IndicatorID } class="text-fg-muted">
+			@Spinner(SpinnerOpts{})
+		</span>
+	</div>
 }
 
 // TextareaOpts configures a multi-line input.

@@ -14,7 +14,16 @@
       "system/jobs",
       "system/server"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_job_requeue.go",
+        "target": "internal/web/workflow_admin_job_requeue.go",
+        "class": "go",
+        "sha256": "90f14122a3d6acacef974c9d0b8022a87705590a1f0cd495fddc869f5ba0c79e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "admin.jobs.requeue"
@@ -38,6 +47,12 @@
           },
           "package": "internal/web",
           "handler": "handleAdminJobRequeue"
+        }
+      ],
+      "queries": [
+        {
+          "name": "RequeueDeadJob",
+          "table": "jobs"
         }
       ]
     },

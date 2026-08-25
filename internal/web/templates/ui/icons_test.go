@@ -25,7 +25,7 @@ func TestIconRegistryIsComplete(t *testing.T) {
 		t.Fatal("IconNames is empty")
 	}
 	for _, name := range IconNames {
-		html := renderComponent(t, Icon(name, "w-4 h-4"))
+		html := renderComponent(t, Icon(IconOpts{Name: name, Attrs: Attrs{Class: "w-4 h-4"}}))
 		if html == "" {
 			t.Errorf("icon %q has a const but no switch arm in icons.templ", name)
 			continue

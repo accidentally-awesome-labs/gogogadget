@@ -80,7 +80,7 @@ func Dialog(o DialogOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Icon(IconClose, "w-4 h-4").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Icon(IconOpts{Name: IconClose, Attrs: Attrs{Class: "w-4 h-4"}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -321,7 +321,7 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Icon(IconMore, "w-4 h-4").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Icon(IconOpts{Name: IconMore, Attrs: Attrs{Class: "w-4 h-4"}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
