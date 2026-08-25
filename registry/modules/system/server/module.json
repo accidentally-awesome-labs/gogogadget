@@ -180,7 +180,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "c0a3ab0bfcafde5caffdfa25ce351f0ba2b2a885a7c5c40805ff969ab494953b",
+        "sha256": "fae1d8b517d4dcfbfcdb083a165169863f11834859c7382d5f47049487542b73",
         "rewrite_module": true,
         "contract": false
       },

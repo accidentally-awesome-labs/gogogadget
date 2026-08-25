@@ -204,38 +204,73 @@
     @apply text-brand-text underline underline-offset-4 hover:no-underline;
   }
 
-  .badge, .badge-brand, .badge-info, .badge-success, .badge-warn, .badge-danger, .badge-neutral {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  /* The semantic colour matrix. Each kind defines the same six variables once,
+     on one selector list shared by the kind class and every family alias, and
+     each family reads those variables — so a family supports all six kinds by
+     construction instead of needing a rule per family-kind pair.
+     
+     That combinatorial gap was real: `alert-brand`, `alert-neutral`,
+     `banner-brand`, `banner-success` and `banner-neutral` did not exist, so a
+     Notice or Banner rendered with one of those kinds came out unstyled. */
+  .k-brand, .badge-brand, .alert-brand, .banner-brand, .toast-brand {
+    --ui-solid: var(--color-brand-600);      --ui-solid-fg: #ffffff;
+    --ui-tint: var(--color-brand-subtle);    --ui-tint-fg: var(--color-brand-subtle-fg);
+    --ui-line: var(--color-brand-200);       --ui-text: var(--color-brand-text);
   }
-  .badge-brand   { @apply bg-brand-subtle text-brand-subtle-fg; }
-  .badge-info    { @apply bg-info-subtle text-info-subtle-fg; }
-  .badge-success { @apply bg-success-subtle text-success-subtle-fg; }
-  .badge-warn    { @apply bg-warn-subtle text-warn-subtle-fg; }
-  .badge-danger  { @apply bg-danger-subtle text-danger-subtle-fg; }
-  .badge-neutral { @apply bg-surface-raised text-fg-muted; }
+  .k-info, .badge-info, .alert-info, .banner-info, .toast-info {
+    --ui-solid: var(--color-info);            --ui-solid-fg: var(--color-info-fg);
+    --ui-tint: var(--color-info-subtle);      --ui-tint-fg: var(--color-info-subtle-fg);
+    --ui-line: var(--color-info-border);      --ui-text: var(--color-info-text);
+  }
+  .k-success, .badge-success, .alert-success, .banner-success, .toast-success {
+    --ui-solid: var(--color-success);         --ui-solid-fg: var(--color-success-fg);
+    --ui-tint: var(--color-success-subtle);   --ui-tint-fg: var(--color-success-subtle-fg);
+    --ui-line: var(--color-success-border);   --ui-text: var(--color-success-text);
+  }
+  .k-warn, .badge-warn, .alert-warn, .banner-warn, .toast-warn {
+    --ui-solid: var(--color-warn);            --ui-solid-fg: var(--color-warn-fg);
+    --ui-tint: var(--color-warn-subtle);      --ui-tint-fg: var(--color-warn-subtle-fg);
+    --ui-line: var(--color-warn-border);      --ui-text: var(--color-warn-text);
+  }
+  .k-danger, .badge-danger, .alert-danger, .banner-danger, .toast-danger {
+    --ui-solid: var(--color-danger);          --ui-solid-fg: var(--color-danger-fg);
+    --ui-tint: var(--color-danger-subtle);    --ui-tint-fg: var(--color-danger-subtle-fg);
+    --ui-line: var(--color-danger-border);    --ui-text: var(--color-danger-text);
+  }
+  .k-neutral, .badge-neutral, .alert-neutral, .banner-neutral, .toast-neutral {
+    --ui-solid: var(--color-fg-muted);        --ui-solid-fg: var(--color-surface);
+    --ui-tint: var(--color-surface-raised);   --ui-tint-fg: var(--color-fg-muted);
+    --ui-line: var(--color-border);           --ui-text: var(--color-fg-muted);
+  }
 
-  .alert, .alert-info, .alert-success, .alert-warn, .alert-danger {
-    @apply rounded-lg border p-3 text-sm;
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    background-color: var(--ui-tint);
+    color: var(--ui-tint-fg);
   }
-  .alert-info    { @apply border-info-border bg-info-subtle text-info-subtle-fg; }
-  .alert-success { @apply border-success-border bg-success-subtle text-success-subtle-fg; }
-  .alert-warn    { @apply border-warn-border bg-warn-subtle text-warn-subtle-fg; }
-  .alert-danger  { @apply border-danger-border bg-danger-subtle text-danger-subtle-fg; }
+
+  .alert {
+    @apply rounded-lg border p-3 text-sm;
+    border-color: var(--ui-line);
+    background-color: var(--ui-tint);
+    color: var(--ui-tint-fg);
+  }
 
   /* Full-bleed shell notices (impersonation, announcement, billing). */
-  .banner, .banner-info, .banner-warn, .banner-danger {
+  .banner {
     @apply border-b px-4 py-2 text-sm;
+    border-color: var(--ui-line);
+    background-color: var(--ui-tint);
+    color: var(--ui-tint-fg);
   }
-  .banner-info   { @apply border-info-border bg-info-subtle text-info-subtle-fg; }
-  .banner-warn   { @apply border-warn-border bg-warn-subtle text-warn-subtle-fg; }
-  .banner-danger { @apply border-danger-border bg-danger-subtle text-danger-subtle-fg; }
 
-  .toast, .toast-info, .toast-success, .toast-danger {
+  /* The toast keeps a neutral surface and carries its kind on the left edge, so
+     a stack of toasts reads as one component with a status rather than four
+     differently-coloured boxes. */
+  .toast {
     @apply rounded-xl border border-border bg-surface px-4 py-3 text-sm shadow-lg border-l-4;
+    border-left-color: var(--ui-solid);
   }
-  .toast-info    { @apply border-l-brand; }
-  .toast-success { @apply border-l-success; }
-  .toast-danger  { @apply border-l-danger; }
 
   /* Structure and typography. One class per recurring shape, so a page is
      composed from named ideas rather than retyped utility strings. */

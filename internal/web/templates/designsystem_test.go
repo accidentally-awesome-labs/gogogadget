@@ -129,29 +129,6 @@ func TestIconRegistryIsComplete(t *testing.T) {
 
 // Every semantic kind must resolve to a real component class, in every family
 // that takes a ui.Kind. A typo'd or unregistered kind renders "badge-" and no
-// colour, which this catches at build time instead of in a screenshot.
-func TestKindsRenderComponentClasses(t *testing.T) {
-	css, err := os.ReadFile(filepath.Join("..", "..", "..", "input.css"))
-	require.NoError(t, err)
-	sheet := string(css)
-
-	require.NotEmpty(t, ui.Kinds)
-	for _, kind := range ui.Kinds {
-		assert.Contains(t, sheet, ".badge-"+string(kind)+" ",
-			"Kind %q has no .badge- rule in input.css", kind)
-	}
-	// Alerts, banners and toasts cover a narrower set on purpose: there is no
-	// neutral alert and no brand-coloured banner.
-	for _, kind := range []ui.Kind{ui.KindInfo, ui.KindSuccess, ui.KindWarn, ui.KindDanger} {
-		assert.Contains(t, sheet, ".alert-"+string(kind)+" ",
-			"Kind %q has no .alert- rule in input.css", kind)
-	}
-	for _, kind := range []ui.Kind{ui.KindInfo, ui.KindWarn, ui.KindDanger} {
-		assert.Contains(t, sheet, ".banner-"+string(kind)+" ",
-			"Kind %q has no .banner- rule in input.css", kind)
-	}
-}
-
 func templFiles(t *testing.T) map[string]string {
 	t.Helper()
 	// go test runs with cwd = the package directory.
@@ -178,4 +155,64 @@ func renderComponent(t *testing.T, c templ.Component) string {
 
 func lineOf(src string, offset int) int {
 	return strings.Count(src[:offset], "\n") + 1
+}
+
+// Every semantic kind must be styled for every state family. The typed API
+// accepts all six kinds on Badge, Notice, Banner and the toast, so a missing
+// family-kind pair is reachable from ordinary code and renders an unstyled box
+// — no border, no background, no colour.
+//
+// This gap was real before the matrix was restructured: alert-brand,
+// alert-neutral, banner-brand, banner-success and banner-neutral had no rules
+// at all.
+func TestEveryKindIsStyledForEveryStateFamily(t *testing.T) {
+	css, err := os.ReadFile(filepath.Join("..", "..", "..", "input.css"))
+	require.NoError(t, err)
+	source := string(css)
+
+	for _, family := range []string{"badge", "alert", "banner", "toast"} {
+		for _, kind := range ui.Kinds {
+			selector := "." + family + "-" + string(kind)
+			assert.Contains(t, source, selector,
+				"%s has no rule, so a %s rendered with kind %q is unstyled", selector, family, kind)
+		}
+	}
+
+	// The six variables each kind must define, which the families consume.
+	for _, kind := range ui.Kinds {
+		block := kindBlock(t, source, string(kind))
+		for _, variable := range []string{
+			"--ui-solid:", "--ui-solid-fg:", "--ui-tint:", "--ui-tint-fg:", "--ui-line:", "--ui-text:",
+		} {
+			assert.Contains(t, block, variable,
+				"kind %q does not define %s, so a family reading it renders with no value", kind, variable)
+		}
+	}
+}
+
+// The built stylesheet must actually carry the variables: a rule that exists in
+// input.css but is dropped by the build is still an unstyled component.
+func TestBuiltStylesheetCarriesKindVariables(t *testing.T) {
+	css, err := os.ReadFile(filepath.Join("..", "..", "..", "static", "app.css"))
+	require.NoError(t, err)
+	built := string(css)
+
+	for _, variable := range []string{"--ui-tint", "--ui-line", "--ui-solid"} {
+		assert.Contains(t, built, variable, "%s never reached the built stylesheet", variable)
+	}
+	for _, kind := range ui.Kinds {
+		assert.Contains(t, built, "badge-"+string(kind),
+			"badge-%s never reached the built stylesheet", kind)
+	}
+}
+
+// kindBlock returns the declaration block for one kind's selector list.
+func kindBlock(t *testing.T, source, kind string) string {
+	t.Helper()
+	marker := ".k-" + kind + ","
+	start := strings.Index(source, marker)
+	require.GreaterOrEqual(t, start, 0, "no .k-%s selector", kind)
+	end := strings.Index(source[start:], "}")
+	require.Greater(t, end, 0, "unterminated .k-%s block", kind)
+	return source[start : start+end]
 }
