@@ -113,6 +113,12 @@ func readPlannedPayloads(ctx context.Context, registryFS fs.FS, modules []Manife
 			if err := ctx.Err(); err != nil {
 				return nil, err
 			}
+			// A generated file is produced by the build, not distributed by the
+			// registry: the snapshot deliberately excludes generated outputs, so
+			// there is nothing to read or verify here.
+			if file.Class == FileClassGenerated {
+				continue
+			}
 			content, err := fs.ReadFile(registryFS, file.Source)
 			if err != nil {
 				return nil, fmt.Errorf("module %s payload %s: %w", module.ID, file.Source, err)
@@ -168,6 +174,15 @@ func reconcilePlannedState(
 		changes := make([]Change, 0, len(payloads))
 		for _, module := range graph.modules {
 			files[module.ID] = []LockedFile{}
+			// A generated output has no distributed bytes to pin: it is recorded
+			// so the lock covers every declared target, but with no digests.
+			for _, file := range module.Files {
+				if file.Class == FileClassGenerated {
+					files[module.ID] = append(files[module.ID], LockedFile{
+						Path: file.Target, Source: file.Source, State: FileGenerated,
+					})
+				}
+			}
 		}
 		for _, payload := range payloads {
 			upstream := digestBytes(payload.content)
@@ -387,6 +402,15 @@ func reconcilePlannedState(
 			}
 		}
 		lockedFiles := make([]LockedFile, 0, len(module.Files))
+		// Generated targets carry no payload: recorded so the lock covers every
+		// declared target, with no digests to compare.
+		for _, file := range module.Files {
+			if file.Class == FileClassGenerated {
+				lockedFiles = append(lockedFiles, LockedFile{
+					Path: file.Target, Source: file.Source, State: FileGenerated,
+				})
+			}
+		}
 		for _, payload := range payloadsForModule(payloadByModule, module.ID) {
 			newDigest := digestBytes(payload.content)
 			if oldFile, ok := oldFiles[payload.file.Target]; ok {

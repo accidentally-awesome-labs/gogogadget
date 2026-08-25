@@ -1034,6 +1034,8 @@ func TestEnvExampleAndReferenceCoverEveryDeclaredKey(t *testing.T) {
 	}
 }
 
+const testDigest = "0000000000000000000000000000000000000000000000000000000000000000"
+
 func localeModule(id, name string, locales map[string]map[string]string) Manifest {
 	return Manifest{
 		ID: id, Kind: ModulePage, Name: name,
@@ -1581,5 +1583,80 @@ func TestQueriesRegistryRejectsUnknownTable(t *testing.T) {
 	mods := []Manifest{mod}
 	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
 		t.Fatal("GenerateAll accepted a query against an undeclared table")
+	}
+}
+
+// The embed set is derived from declarations, so every static asset a module
+// ships is compiled into the binary because the Go compiler itself refuses an
+// embed pattern that matches no file — coverage is not a test, it is the build.
+func TestStaticRegistryEmitsEmbedAndOwnership(t *testing.T) {
+	shell := Manifest{
+		ID: "system/static", Kind: ModuleSystem, Name: "static",
+		Revision: 1, Contract: 1, Title: "Static", Description: "Static shell assets.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Files: []ManifestFile{
+			{Source: "static/app.js", Target: "static/app.js", Class: FileClassAsset, SHA256: testDigest, RewriteModule: false},
+			{Source: "static/fonts/inter-var.woff2", Target: "static/fonts/inter-var.woff2", Class: FileClassAsset, SHA256: testDigest, RewriteModule: false},
+		},
+	}
+	identity := Manifest{
+		ID: "system/identity", Kind: ModuleSystem, Name: "identity",
+		Revision: 1, Contract: 1, Title: "Identity", Description: "Identity.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Files: []ManifestFile{
+			{Source: "static/vendor/clerk.js", Target: "static/vendor/clerk.js", Class: FileClassAsset, SHA256: testDigest, RewriteModule: false},
+		},
+	}
+	// A Go file under static/ is source, not an asset: embed patterns must not
+	// include it, or the compiler refuses the glob.
+	shell.Files = append(shell.Files, ManifestFile{
+		Source: "static/static.go", Target: "static/static.go", Class: FileClassGo, SHA256: testDigest, RewriteModule: true,
+	})
+
+	mods := []Manifest{shell, identity}
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "static/embed_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("static registry was not emitted")
+	}
+	for _, want := range []string{
+		"//go:embed app.js fonts/inter-var.woff2 vendor/clerk.js",
+		"var FS embed.FS",
+		`"static/app.js": "system/static"`,
+		`"static/vendor/clerk.js": "system/identity"`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("static registry missing %q:\n%s", want, registry)
+		}
+	}
+	// static.go itself is source and must appear in neither the embed nor the map.
+	if strings.Contains(registry, "static.go") {
+		t.Fatalf("Go source leaked into the embed set:\n%s", registry)
+	}
+}
+
+// static.go is legitimately Go source under static/, and assets are class
+// asset — but any other class there is a declaration bug that would produce a
+// broken embed pattern, so it is refused rather than guessed at.
+func TestStaticRegistryRejectsNonAssetNonGoClass(t *testing.T) {
+	bad := Manifest{
+		ID: "system/static", Kind: ModuleSystem, Name: "static",
+		Revision: 1, Contract: 1, Title: "Static", Description: "x.",
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Files: []ManifestFile{
+			{Source: "static/theme.css", Target: "static/theme.css", Class: FileClassStyle, SHA256: testDigest, RewriteModule: false},
+		},
+	}
+	mods := []Manifest{bad}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted a style-classed file under static/")
 	}
 }

@@ -1718,18 +1718,84 @@ func emitQueriesRegistry(ctx context.Context, modulePath string, lock Lock, grap
 	return &GeneratedFile{Path: "internal/db/queries_registry_gen.go", Content: b.String()}, nil
 }
 
+// generatedOwner marks a static file the build produces. The snapshot excludes
+// generated outputs, so it is embedded but never installed or verified.
+const generatedOwner = "(generated)"
+
+// emitStaticRegistry renders the embed set and ownership for static assets.
+// The embed patterns come from declarations, so a declared asset that is missing
+// from the tree is a compile error and an undeclared asset is invisible to the
+// binary — the Go compiler enforces coverage rather than a test.
 func emitStaticRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	assets := make([]struct {
+		path   string
+		module string
+	}, 0)
+	owner := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		for _, f := range m.Files {
+			if !strings.HasPrefix(f.Target, "static/") {
+				continue
+			}
+			switch f.Class {
+			case FileClassGenerated:
+				// Built output, not distributed source: embedded so the binary
+				// ships it, owned by the build step rather than a module.
+				owner[f.Target] = generatedOwner
+				assets = append(assets, struct {
+					path   string
+					module string
+				}{strings.TrimPrefix(f.Target, "static/"), generatedOwner})
+			case FileClassAsset:
+				if previous, clash := owner[f.Target]; clash {
+					return nil, fmt.Errorf("static asset %s is owned by both %s and %s", f.Target, previous, m.ID)
+				}
+				owner[f.Target] = m.ID
+				assets = append(assets, struct {
+					path   string
+					module string
+				}{strings.TrimPrefix(f.Target, "static/"), m.ID})
+			case FileClassGo:
+				// Source, not an asset: embed patterns must not include it, or
+				// the compiler refuses the pattern.
+			default:
+				return nil, fmt.Errorf("static file %s has class %q; a file under static/ is an asset, a generated output, or Go source",
+					f.Target, f.Class)
+			}
+		}
+	}
+	sort.Slice(assets, func(i, j int) bool { return assets[i].path < assets[j].path })
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package static\n\n")
+	b.WriteString("import \"embed\"\n\n")
+	b.WriteString("// FS embeds every static asset a selected module declares. The patterns are\n")
+	b.WriteString("// generated from those declarations, so the compiler itself refuses a declared\n")
+	b.WriteString("// asset that is missing from the tree — coverage is the build, not a test.\n")
+	b.WriteString("//\n//go:embed ")
+	paths := make([]string, 0, len(assets))
+	for _, a := range assets {
+		paths = append(paths, a.path)
+	}
+	b.WriteString(strings.Join(paths, " "))
+	b.WriteString("\nvar FS embed.FS\n\n")
+
+	b.WriteString("// AssetOwners maps each static asset to the module that ships it, so removal\n")
+	b.WriteString("// knows which files go with a module.\n")
+	b.WriteString("var AssetOwners = map[string]string{\n")
+	for _, a := range assets {
+		fmt.Fprintf(&b, "\t%s: %s,\n", goString("static/"+a.path), goString(a.module))
+	}
+	b.WriteString("}\n\n")
+
 	b.WriteString("// StaticRegistry lists module-owned static assets in load order.\n")
 	b.WriteString("var StaticRegistry = []string{\n")
-	for _, m := range orderedModules(lock, graph) {
-		for _, a := range m.Runtime.Assets {
-			fmt.Fprintf(&b, "\t%s,\n", goString(a.Path))
-		}
+	for _, a := range assets {
+		fmt.Fprintf(&b, "\t%s,\n", goString("static/"+a.path))
 	}
 	b.WriteString("}\n")
+
 	_ = ctx
 	return &GeneratedFile{Path: "static/embed_registry_gen.go", Content: b.String()}, nil
 }

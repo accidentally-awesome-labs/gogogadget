@@ -7,18 +7,106 @@
     "revision": 1,
     "contract": 1,
     "title": "Static asset serving",
-    "description": "The embedded static file set \u2014 built CSS, client JavaScript, fonts, icons, and the vendored browser assets \u2014 served with content-addressed caching.",
+    "description": "The embedded static file set — built CSS, client JavaScript, fonts, icons, and the vendored browser assets — served with content-addressed caching.",
     "requires": [
       "system/server"
     ],
     "files": [
       {
+        "source": "static/analytics.js",
+        "target": "static/analytics.js",
+        "class": "asset",
+        "sha256": "cf50dd90a1c75c36b0cfae421904342cbc374528a14f3b4c27e7b3fd7be78316",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/app.css",
+        "target": "static/app.css",
+        "class": "generated",
+        "sha256": "81e156e88bd3dd51c7c5e3acef629a3250ddf957c9bae3e5642c4db54b7b89fc",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/app.js",
+        "target": "static/app.js",
+        "class": "asset",
+        "sha256": "1cb16fd8eb150c3eb07e2e00eb7281f83fcf2da5010f31324e00401847359b69",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/favicon.svg",
+        "target": "static/favicon.svg",
+        "class": "asset",
+        "sha256": "533ee38982aa471d21f2c81920c6db205177ce0fec377b374c60035b5cff0c7b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/fonts/inter-var.woff2",
+        "target": "static/fonts/inter-var.woff2",
+        "class": "asset",
+        "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/og.png",
+        "target": "static/og.png",
+        "class": "asset",
+        "sha256": "f5e3a40dccbd7de822866bebf8934e698f17fdd5b8402b0e8147c11596fea93c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/site.webmanifest",
+        "target": "static/site.webmanifest",
+        "class": "asset",
+        "sha256": "742aab42ce40963c23418bc41bf8dd19447d0516df8901eaba7a60aaba6fc9cd",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "static/static.go",
         "target": "static/static.go",
         "class": "go",
-        "sha256": "81c93bbf9d4f9945b167aad850ed81c51532a44b75e774d011c981f3222fdaf9",
+        "sha256": "a853f4a028473e00edbf573349533b5b24a4f8c0e7086892255c0f53c9412431",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "static/ui-components.js",
+        "target": "static/ui-components.js",
+        "class": "generated",
+        "sha256": "25b3c5352b9b00533e712426825f7cea7bededd4f7b50c1d273f29f44e96d0e6",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/alpine-csp.min.js",
+        "target": "static/vendor/alpine-csp.min.js",
+        "class": "asset",
+        "sha256": "566167134bb2347110904e2ced6e816d2e8d837200c158f98b72372b3bb0b9a6",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/alpine-focus.min.js",
+        "target": "static/vendor/alpine-focus.min.js",
+        "class": "asset",
+        "sha256": "ea7e215444f5110619549621cd0760cedfe273f708b144d4e658a87b702555f9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/htmx.min.js",
+        "target": "static/vendor/htmx.min.js",
+        "class": "asset",
+        "sha256": "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {

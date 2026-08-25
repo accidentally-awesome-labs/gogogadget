@@ -60,6 +60,446 @@
         "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "916f930ffb94a362e9591e3af48b8be3ebb5ea1e1b717c0fd0da022f3b3c3aaa",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "dddb4af77af0aecc80e4ad518f0c7028e9bee93018c37da93b2de779266b71b8",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "4f0432108c1271e73913cb10f5d8e8e8ebf007894a1a83482db090b0f1cf8bd5",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "2baee3cb8ccebfbff51f72322b2f8064b5082178c6a7fe3fbfb740fc89b2fab2",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "646f981c51c2b3a814848b3e27d351746cbbb536678d1aed02f3224f49709eda",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "3ed67ee1c2c544a5e395c2806b8c770220dad0241521b4c0e64347b2c7f7f295",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "7c32c090568bdb930f938de88aef618b89672d86ecae5b43ba7fbffab2640f9c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "1d744d8e1597a940d957975e5e6ef24a9ff0242f946546f57dece5e0dd84eec0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "465ccb422630060b6769b076acc53c644d6c896e1eb93201e221732d40ed0157",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "324e0adc9e21caefd908bbfc1690058ee1be5acb3852de4ed929fc8528bcdf93",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/clerk.browser.js",
+        "target": "static/vendor/clerk.browser.js",
+        "class": "asset",
+        "sha256": "d92e69c91eeb10ec1558b79376a35520ead6e358811319366c6c28a4fb88d5a0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "3c7ea5aa2a7deef9ff116efacafcf6c3dd629cce6bb7d919452cc2dfeef53bdc",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "c86561760035abbebeb3014bcdb7fa3fd825083697a8bc0993bef488d5ec593e",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "e3dc6ef912779925c4962f87a93305e7d3c27f12c4f67820253d7a6488a2659a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "14e20e9911465ecb728f124c36a4ee904338d90470e2743e87534426f943ea55",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "f4cef545f77a3cb6bce8466ff70ab699d7631f4f388398f60206394776a13cf7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "2836ab217b40db69b67ced179d04727fbd1f099e48608b15da409439a41ad7df",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "cd91602f0eb261cdd596c9b255ca8d40b4760b6f7f3eb1599cd17af59bee36e7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "eff117abda6ca0b8cc40c95607b8334af246643951633f0e17af219e7c57affc",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "a7b9f5ac327dc085665b65414e2dbc38a8832f0a22090e95bd694599d8407059",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "6a8451042b82e36fcf4f789796aac6c8f9b50e9370c42aef4151694631172869",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "8f38532d9cb4af9694682c6811dc463bff860cc001cb5734604a4fd1913406e5",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "91b762eade20badc1e57b1410c336c2038ddbe0c1cef3085b094733db683e17a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "ab8fe46367e6e93982a05381d890b04be8ac0b9175fbd14b63bf4e71bd74bb7a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "54e91ecbc784313ea9eabdc77032a8ef09464464901e69dea299047a67e27990",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "cea5cf371afd6f2e2b8e14d8b542c5542fa9781443c9c53ec052f0e522fb56ec",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "b3d0a2d4e3e3c3b903511cdb914b88b784f37bc95e35919c61cca418a77be821",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "e5abf101e93d624f96e9397a068d57341c5170e29ef7bea0dadfdc373a20e14b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "14053cf5a433b75d7c49f956486a111b1337e5fa3a525c8ff13a9400f0666d83",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "618d9788a5c8ea990ea7f452386698258273aed4582e39e823ea3ac5b3679332",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "f3819cc8a3eb3666444d1dea353255a7a137bb4a6adf1fd04a9e43f541ff164f",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "ab2980ce8264feffe67e37b002cd3679ca6822cdadd1b2f1ca3e330f3b5b7781",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "96b717bde9f29d99397a7607dc7534b2ef01a27ad5a66f1edcbf4cee5ea57d07",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "a347342ff63c3a1322494ae037f98b527cb249ba7f25c78def8fe4eaecb207fb",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "e0d6d26d6687c6472290045316637e300dc5d73b917f5a62f7ca7d623eb78d49",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "e0eff5cb69e6f5810e26779868ef67d821b349b55f7b43c25f612bf7be3ceebb",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "c978b6ba6d3d955425f879e9687ca378225395328e38fb9b860e911edba4ce9f",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "40f0fb24138029634cca3ec5afee64d4f379ac1b3fd7d2ffc6bcc7e90f604199",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "bde9daae14c6daca721c33351876beb0298c8f2a2ddfe8af8ddca31c64d7f8ae",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "7930426f21930a239334a5021628eecdbe5a7ba771aa5690208e239c8e818572",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "93a875eeb8becfe468e94e0dda69e4e27bd009c169caf1360fd7375c1dc38e81",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "96f722d38b4963bafc8fe96fde550a77c1f56175b3d97e2e2004de82be53c597",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "5f3aa62f390a95e0305c4fb6ed6b11bdb09a69da8ba334db3437c42e48a91997",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "7bf78a12d6b97d235b272389e1ed03890a32bc20de45fb8e80785187f188b6d7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "3962faa07beddb56ce813e62f694bd3a63973a11f5dae7c4d7d3ebb18ce9075d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "5b6f9f6a6def6aeae904899e2d7edc22b1e25b8b26bec916f9ca32bb72fb1e8c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "2295f1b77fd26b01266781f83d1511c9a0b0b6702078a7a64ad41597f9b5b221",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "0329692a0a36859ad4d4e1a583fd81acfbb333b52342995152e2df72de088bf1",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "b1e426d5667943764ce739a231ac1de6192ac5cbbb50643519480f58ace0c44f",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "5c7a9558b60e1950a7b3c09c5a0ca3e222d3efaa964596df2dd55ad78992d9ee",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "7815e1a4287c67528b9ebd966b22499041e637158573b52476d6d801f2572cf7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "3352ddf2516675fe6a3a8f3d03f08f59951a478ebcd2364fed08b97daf3d8302",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "5527aa95afb32b902504f5bdd67098ed738655c95a706218a1eb809421a4fa47",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "9ee042f6cf8bcb1cbcdf5b9ad1131ad1e3ba6940bb045014df2a32dfa85271f0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
+        "class": "asset",
+        "sha256": "06ec41cbc1c41d9db68b33704b67a1e8e247e98709d52186aa4df9630ee5ad9d",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {

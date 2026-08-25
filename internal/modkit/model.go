@@ -46,6 +46,10 @@ const (
 	FileModified   FileState = "modified"
 	FileMissing    FileState = "missing"
 	FileConflicted FileState = "conflicted"
+	// FileGenerated marks a target the build produces. It has no base digest:
+	// the snapshot excludes generated outputs, so there are no canonical bytes
+	// to compare against and no modification to track.
+	FileGenerated FileState = "generated"
 )
 
 // FileClass determines how a registry payload participates in generation.
@@ -59,6 +63,12 @@ const (
 	FileClassAsset     FileClass = "asset"
 	FileClassQuery     FileClass = "query"
 	FileClassMigration FileClass = "migration"
+	// FileClassGenerated marks a file the build produces rather than the
+	// registry distributes: built CSS, aggregated scripts, generated tables.
+	// It carries no payload digest — the snapshot excludes generated outputs on
+	// purpose (including one would let writing it invalidate the lock), so a
+	// generated file can never be verified or installed as source.
+	FileClassGenerated FileClass = "generated"
 	FileClassI18n      FileClass = "i18n"
 	FileClassContent   FileClass = "content"
 	FileClassSeed      FileClass = "seed"
