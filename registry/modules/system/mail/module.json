@@ -72,13 +72,15 @@
       {
         "key": "EMAIL_FROM",
         "field": "EmailFrom",
+        "type": "string",
         "description": "From header for outbound mail",
         "default": "GoGoGadget <hello@example.com>"
       },
       {
         "key": "RESEND_API_KEY",
         "field": "ResendAPIKey",
-        "description": "Resend API key; unset uses the dev sender",
+        "type": "string",
+        "description": "Resend API key; unset writes mail to tmp/emails",
         "secret": true
       }
     ],

@@ -8,6 +8,7 @@ import (
 	"go/format"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -924,21 +925,190 @@ func emitContentRegistry(ctx context.Context, modulePath string, lock Lock, grap
 }
 
 func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	declarations, err := declaredEnvironment(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package config\n\n")
+
+	needsTime := false
+	for _, e := range declarations {
+		if e.Type == EnvTime {
+			needsTime = true
+		}
+	}
+	b.WriteString("import (\n\t\"errors\"\n\t\"fmt\"\n\t\"strconv\"\n\t\"strings\"\n")
+	if needsTime {
+		b.WriteString("\t\"time\"\n")
+	}
+	b.WriteString(")\n\n")
+
 	b.WriteString("// ConfigRegistry lists module-owned environment declarations in manifest order.\n")
 	b.WriteString("var ConfigRegistry = []string{\n")
+	for _, e := range declarations {
+		fmt.Fprintf(&b, "\t%s,\n", goString(e.Key))
+	}
+	b.WriteString("}\n\n")
+
+	// The struct is generated so a key and its Go field have exactly one owner:
+	// a module cannot add a setting without also declaring where it lands.
+	b.WriteString("// Config is the parsed environment. Every field is declared by the module\n")
+	b.WriteString("// that consumes it; behaviour over these values lives in config.go.\n")
+	b.WriteString("type Config struct {\n")
+	for _, e := range declarations {
+		fmt.Fprintf(&b, "\t// %s: %s\n", e.Key, e.Description)
+		fmt.Fprintf(&b, "\t%s %s\n", e.Field, goEnvType(e.Type))
+	}
+	b.WriteString("}\n\n")
+
+	b.WriteString("// parseDeclared reads every declared key and reports every problem it finds,\n")
+	b.WriteString("// in declaration order. It never returns early: an operator fixing one bad\n")
+	b.WriteString("// value should not have to re-run to discover the next.\n")
+	b.WriteString("func parseDeclared(lookup func(string) string) (Config, []error) {\n")
+	b.WriteString("\tvar cfg Config\n\tvar errs []error\n")
+	for _, e := range declarations {
+		if err := writeEnvParse(&b, e); err != nil {
+			return nil, err
+		}
+	}
+	b.WriteString("\treturn cfg, errs\n}\n\n")
+
+	// Production requirements are data: the module that needs a key in
+	// production is the module that declares it.
+	b.WriteString("// requireProductionKeys reports every declared key that production cannot\n")
+	b.WriteString("// boot without. Absent here means the dev fallback is genuinely safe.\n")
+	b.WriteString("func requireProductionKeys(lookup func(string) string) []error {\n")
+	b.WriteString("\tvar errs []error\n")
+	for _, e := range declarations {
+		if e.ProductionRequired {
+			fmt.Fprintf(&b, "\tif lookup(%s) == \"\" {\n", goString(e.Key))
+			fmt.Fprintf(&b, "\t\terrs = append(errs, errors.New(%s))\n",
+				goString(e.Key+" is required when APP_ENV=production"))
+			b.WriteString("\t}\n")
+		}
+	}
+	b.WriteString("\treturn errs\n}\n")
+
+	_ = ctx
+	return &GeneratedFile{Path: "internal/config/config_registry_gen.go", Content: b.String()}, nil
+}
+
+// declaredEnvironment is every selected module's env declarations in manifest
+// order, keys sorted within a module, with one owner per key.
+func declaredEnvironment(lock Lock, graph []Manifest) ([]EnvironmentVariable, error) {
+	out := make([]EnvironmentVariable, 0)
+	keyOwner := make(map[string]string)
+	fieldOwner := make(map[string]string)
 	for _, m := range orderedModules(lock, graph) {
 		envs := append([]EnvironmentVariable{}, m.Environment...)
 		sort.Slice(envs, func(i, j int) bool { return envs[i].Key < envs[j].Key })
 		for _, e := range envs {
-			fmt.Fprintf(&b, "\t%s,\n", goString(e.Key))
+			if previous, clash := keyOwner[e.Key]; clash {
+				return nil, fmt.Errorf("env key %q is declared by both %s and %s", e.Key, previous, m.ID)
+			}
+			if previous, clash := fieldOwner[e.Field]; clash {
+				return nil, fmt.Errorf("config field %q is declared by both %s and %s", e.Field, previous, m.ID)
+			}
+			if !e.Type.Valid() {
+				return nil, fmt.Errorf("env key %s: type %q is not one of string, int, bool, time", e.Key, e.Type)
+			}
+			if !validIdentifier(e.Field) {
+				return nil, fmt.Errorf("env key %s: field %q is not a Go identifier", e.Key, e.Field)
+			}
+			keyOwner[e.Key], fieldOwner[e.Field] = m.ID, m.ID
+			out = append(out, e)
 		}
 	}
-	b.WriteString("}\n")
-	_ = ctx
-	return &GeneratedFile{Path: "internal/config/config_registry_gen.go", Content: b.String()}, nil
+	return out, nil
+}
+
+func goEnvType(t EnvType) string {
+	switch t {
+	case EnvInt:
+		return "int"
+	case EnvBool:
+		return "bool"
+	case EnvTime:
+		return "time.Time"
+	default:
+		return "string"
+	}
+}
+
+// writeEnvParse emits the parse for one declaration. Each parse appends to errs
+// and leaves the field at its default on failure, so a later key is still read.
+func writeEnvParse(b *strings.Builder, e EnvironmentVariable) error {
+	key := goString(e.Key)
+	switch e.Type {
+	case EnvString:
+		read := fmt.Sprintf("pick(lookup, %s, %s)", key, goString(e.Default))
+		if e.TrimSlash {
+			read = fmt.Sprintf("strings.TrimRight(%s, \"/\")", read)
+		}
+		fmt.Fprintf(b, "\tcfg.%s = %s\n", e.Field, read)
+		if len(e.Enum) > 0 {
+			fmt.Fprintf(b, "\tswitch cfg.%s {\n\tcase ", e.Field)
+			for i, v := range e.Enum {
+				if i > 0 {
+					b.WriteString(", ")
+				}
+				b.WriteString(goString(v))
+			}
+			b.WriteString(":\n\tdefault:\n")
+			fmt.Fprintf(b, "\t\terrs = append(errs, fmt.Errorf(\"%s: %%q must be one of %s\", cfg.%s))\n",
+				e.Key, strings.Join(e.Enum, ", "), e.Field)
+			b.WriteString("\t}\n")
+		}
+		if e.Required {
+			fmt.Fprintf(b, "\tif cfg.%s == \"\" {\n", e.Field)
+			fmt.Fprintf(b, "\t\terrs = append(errs, errors.New(%s))\n\t}\n", goString(e.Key+" is required"))
+		}
+	case EnvBool:
+		fmt.Fprintf(b, "\tcfg.%s = parseBool(pick(lookup, %s, %s))\n", e.Field, key, goString(e.Default))
+	case EnvInt:
+		if e.Default != "" {
+			if _, err := strconv.Atoi(e.Default); err != nil {
+				return fmt.Errorf("env key %s: default %q is not an integer", e.Key, e.Default)
+			}
+			fmt.Fprintf(b, "\tcfg.%s = %s\n", e.Field, e.Default)
+		}
+		fmt.Fprintf(b, "\tif raw := pick(lookup, %s, \"\"); raw != \"\" {\n", key)
+		b.WriteString("\t\tvalue, err := strconv.Atoi(raw)\n")
+		condition, explanation := intBound(e)
+		fmt.Fprintf(b, "\t\tif err != nil%s {\n", condition)
+		fmt.Fprintf(b, "\t\t\terrs = append(errs, fmt.Errorf(\"%s: %%q %s\", raw))\n", e.Key, explanation)
+		b.WriteString("\t\t} else {\n")
+		fmt.Fprintf(b, "\t\t\tcfg.%s = value\n", e.Field)
+		b.WriteString("\t\t}\n\t}\n")
+	case EnvTime:
+		fmt.Fprintf(b, "\tif raw := pick(lookup, %s, \"\"); raw != \"\" {\n", key)
+		b.WriteString("\t\tvalue, err := time.Parse(time.RFC3339, raw)\n\t\tif err != nil {\n")
+		fmt.Fprintf(b, "\t\t\terrs = append(errs, fmt.Errorf(\"%s: %%v\", err))\n\t\t} else {\n", e.Key)
+		fmt.Fprintf(b, "\t\t\tcfg.%s = value\n", e.Field)
+		b.WriteString("\t\t}\n\t}\n")
+	}
+	return nil
+}
+
+// intBound turns declared bounds into a condition and the message an operator
+// reads. A one-sided bound says only what it means.
+func intBound(e EnvironmentVariable) (condition, explanation string) {
+	switch {
+	case e.Min != nil && e.Max != nil:
+		return fmt.Sprintf(" || value < %d || value > %d", *e.Min, *e.Max),
+			fmt.Sprintf("must be an integer between %d and %d", *e.Min, *e.Max)
+	case e.Min != nil:
+		return fmt.Sprintf(" || value < %d", *e.Min),
+			fmt.Sprintf("must be an integer >= %d", *e.Min)
+	case e.Max != nil:
+		return fmt.Sprintf(" || value > %d", *e.Max),
+			fmt.Sprintf("must be an integer <= %d", *e.Max)
+	default:
+		return "", "must be an integer"
+	}
 }
 
 func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {

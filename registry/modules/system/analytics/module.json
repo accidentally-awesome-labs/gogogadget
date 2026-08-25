@@ -63,12 +63,14 @@
       {
         "key": "POSTHOG_API_KEY",
         "field": "PostHogAPIKey",
-        "description": "PostHog project API key",
+        "type": "string",
+        "description": "PostHog project API key; unset disables capture",
         "secret": true
       },
       {
         "key": "POSTHOG_HOST",
         "field": "PostHogHost",
+        "type": "string",
         "description": "PostHog ingestion host",
         "default": "https://us.i.posthog.com"
       }

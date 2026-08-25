@@ -103,40 +103,54 @@
     "migrations": [],
     "environment": [
       {
+        "key": "ADMIN_EMAIL",
+        "field": "AdminEmail",
+        "type": "string",
+        "description": "Address granted the staff role on first sight"
+      },
+      {
         "key": "CLERK_FRONTEND_API_URL",
         "field": "ClerkFrontendAPIURL",
-        "description": "Clerk Frontend API origin; feeds CSP connect-src"
+        "type": "string",
+        "description": "Clerk Frontend API origin; feeds CSP connect-src (default derived from APP_URL)"
       },
       {
         "key": "CLERK_PORTAL_URL",
         "field": "ClerkPortalURL",
+        "type": "string",
         "description": "Clerk Account Portal base URL",
+        "trim_slash": true,
         "production_required": true
       },
       {
         "key": "CLERK_PUBLISHABLE_KEY",
         "field": "ClerkPublishableKey",
-        "description": "Clerk frontend publishable key",
+        "type": "string",
+        "description": "Clerk publishable key (browser-safe)",
         "production_required": true
       },
       {
         "key": "CLERK_SECRET_KEY",
         "field": "ClerkSecretKey",
-        "description": "Clerk backend API key",
+        "type": "string",
+        "description": "Clerk API secret key",
         "production_required": true,
         "secret": true
       },
       {
         "key": "CLERK_WEBHOOK_SECRET",
         "field": "ClerkWebhookSecret",
-        "description": "Clerk webhook signing secret",
+        "type": "string",
+        "description": "Clerk webhook signing secret (svix)",
         "production_required": true,
         "secret": true
       },
       {
         "key": "DEV_AUTH_BYPASS",
         "field": "DevAuthBypass",
-        "description": "Synthetic e2e sessions; refused in production"
+        "type": "bool",
+        "description": "Synthetic sessions for dev and e2e; refused when APP_ENV=production",
+        "default": "false"
       }
     ],
     "docs": [],

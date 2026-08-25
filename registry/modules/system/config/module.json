@@ -16,7 +16,7 @@
         "source": "internal/config/config.go",
         "target": "internal/config/config.go",
         "class": "go",
-        "sha256": "dc9f2eea2e71acb062f871df582d29bc2ddef0b9c0ee2f8b39bb0f09a6fbc1c8",
+        "sha256": "75600d2183674de895f57436585613839fefb76fe5e99d6d9119946157fb5ae0",
         "rewrite_module": true,
         "contract": true
       },
@@ -55,24 +55,34 @@
       {
         "key": "APP_ENV",
         "field": "Env",
+        "type": "string",
         "description": "development | test | production",
-        "default": "development"
+        "default": "development",
+        "enum": [
+          "development",
+          "test",
+          "production"
+        ]
       },
       {
         "key": "APP_URL",
         "field": "AppURL",
-        "description": "Public base URL",
-        "default": "http://localhost:8080"
+        "type": "string",
+        "description": "Public base URL used in emails and webhook links",
+        "default": "http://localhost:8080",
+        "trim_slash": true
       },
       {
         "key": "LOG_LEVEL",
         "field": "LogLevel",
-        "description": "debug | info | warn | error"
+        "type": "string",
+        "description": "debug | info | warn | error (default: debug in development, info otherwise)"
       },
       {
         "key": "TEST_NOW",
         "field": "testNow",
-        "description": "Freezes the render clock under APP_ENV=test"
+        "type": "time",
+        "description": "RFC3339 instant that freezes the render clock; honored only when APP_ENV=test"
       }
     ],
     "docs": [],

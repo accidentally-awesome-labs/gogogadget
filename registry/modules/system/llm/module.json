@@ -63,19 +63,23 @@
       {
         "key": "LLM_API_KEY",
         "field": "LLMAPIKey",
-        "description": "OpenAI-compatible API key",
+        "type": "string",
+        "description": "OpenAI-compatible API key; unset returns 503 from AI routes",
         "secret": true
       },
       {
         "key": "LLM_BASE_URL",
         "field": "LLMBaseURL",
+        "type": "string",
         "description": "OpenAI-compatible base URL",
-        "default": "https://api.openai.com/v1"
+        "default": "https://api.openai.com/v1",
+        "trim_slash": true
       },
       {
         "key": "LLM_MODEL",
         "field": "LLMModel",
-        "description": "Model identifier"
+        "type": "string",
+        "description": "Model identifier passed to the provider"
       }
     ],
     "docs": [],

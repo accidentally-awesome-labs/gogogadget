@@ -7,7 +7,7 @@
     "revision": 1,
     "contract": 1,
     "title": "Middleware and request security",
-    "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards.",
+    "description": "The load-bearing middleware chain \u2014 recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF \u2014 and the route-group guards.",
     "requires": [
       "system/identity",
       "system/organizations",
@@ -39,7 +39,8 @@
       {
         "key": "MAINTENANCE_MODE",
         "field": "MaintenanceMode",
-        "description": "Shed all traffic except probes and static with a 503"
+        "type": "bool",
+        "description": "Shed all traffic except probes and static assets with a 503"
       }
     ],
     "docs": [],

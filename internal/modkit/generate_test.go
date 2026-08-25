@@ -859,3 +859,101 @@ func TestJobsRegistryRejectsDuplicateJanitorNames(t *testing.T) {
 		t.Fatal("GenerateAll accepted two modules declaring the same janitor name")
 	}
 }
+
+func intp(n int) *int { return &n }
+
+// The config parse is generated from declarations so a module's key and its Go
+// field have one owner. This asserts the shape of each parse the generator
+// supports, and that bounds and enums become refusals rather than silent
+// fallbacks to the default.
+func TestConfigRegistryEmitsTypedParse(t *testing.T) {
+	module := Manifest{
+		ID: "system/example", Kind: ModuleSystem, Name: "example",
+		Revision: 1, Contract: 1, Title: "Example", Description: "Example system.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Environment: []EnvironmentVariable{
+			{Key: "APP_ENV", Field: "Env", Type: EnvString, Description: "environment",
+				Default: "development", Enum: []string{"development", "test", "production"}},
+			{Key: "APP_URL", Field: "AppURL", Type: EnvString, Description: "base URL",
+				Default: "http://localhost:8080", TrimSlash: true},
+			{Key: "PORT", Field: "Port", Type: EnvInt, Description: "listen port",
+				Default: "8080", Min: intp(1), Max: intp(65535)},
+			{Key: "RETAIN_DAYS", Field: "RetainDays", Type: EnvInt, Description: "retention",
+				Min: intp(0)},
+			{Key: "MAINTENANCE_MODE", Field: "MaintenanceMode", Type: EnvBool, Description: "shed traffic"},
+			{Key: "TEST_NOW", Field: "testNow", Type: EnvTime, Description: "frozen clock"},
+			{Key: "SECRET_KEY", Field: "SecretKey", Type: EnvString, Description: "a secret",
+				Secret: true, ProductionRequired: true},
+		},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"system/example"},
+		Modules: []LockedModule{{
+			ID: "system/example", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: module,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{module})
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/config/config_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("config registry was not emitted")
+	}
+
+	for _, want := range []string{
+		// The struct carries the declared fields, including an unexported one.
+		"Env string", "Port int", "MaintenanceMode bool", "testNow time.Time",
+		// Errors accumulate; nothing returns early.
+		"func parseDeclared(lookup func(string) string) (Config, []error)",
+		// A bounded int names its bounds rather than failing vaguely.
+		`must be an integer between 1 and 65535`,
+		// A one-sided bound says only what it means.
+		`must be an integer >= 0`,
+		// A closed string names the accepted set.
+		`must be one of development, test, production`,
+		// Trailing slashes are stripped where declared.
+		`strings.TrimRight(pick(lookup, "APP_URL", "http://localhost:8080"), "/")`,
+		// Production requirements are declared data, not an authored list.
+		`SECRET_KEY is required when APP_ENV=production`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("config registry missing %q:\n%s", want, registry)
+		}
+	}
+}
+
+// One key declared by two modules means two owners for one Go field.
+func TestConfigRegistryRejectsDuplicateKeys(t *testing.T) {
+	mk := func(id, name string) Manifest {
+		return Manifest{
+			ID: id, Kind: ModuleSystem, Name: name,
+			Revision: 1, Contract: 1, Title: name, Description: name + " system.",
+			Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+			Environment: []EnvironmentVariable{
+				{Key: "SHARED", Field: "Shared", Type: EnvString, Description: "shared"},
+			},
+		}
+	}
+	a, b := mk("system/a", "a"), mk("system/b", "b")
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"system/a", "system/b"},
+		Modules: []LockedModule{
+			{ID: "system/a", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: a, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+			{ID: "system/b", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: b, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+		},
+	}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{a, b}); err == nil {
+		t.Fatal("GenerateAll accepted one env key declared by two modules")
+	}
+}

@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -243,5 +244,63 @@ func TestAPIRateLimitRPMParsing(t *testing.T) {
 		_, err = Load()
 		require.Error(t, err, "%q must be rejected at boot, not silently become a zero budget", bad)
 		assert.Contains(t, err.Error(), "API_RATE_LIMIT_RPM")
+	}
+}
+
+// Every validation problem is reported together. Fixing one misconfiguration,
+// re-running, and discovering the next is the failure mode this prevents — and
+// it is exactly what an early return produces.
+func TestLoadFromAggregatesEveryValidationError(t *testing.T) {
+	env := map[string]string{
+		"APP_ENV":              "staging", // not a known environment
+		"PORT":                 "abc",     // not a number
+		"RATE_LIMIT_RPM":       "0",       // below the minimum
+		"API_RATE_LIMIT_RPM":   "-5",      // below the minimum
+		"AUDIT_RETENTION_DAYS": "-1",      // below the minimum
+		"POLAR_SERVER":         "staging", // not a known server
+	}
+	_, err := LoadFrom(func(k string) string { return env[k] })
+	if err == nil {
+		t.Fatal("LoadFrom accepted six invalid values")
+	}
+	message := err.Error()
+	for key := range env {
+		if !strings.Contains(message, key) {
+			t.Fatalf("error omits %s, so fixing the others would not be enough:\n%s", key, message)
+		}
+	}
+}
+
+// Reported in declaration order, so the same broken environment always produces
+// the same message — a diffable one.
+func TestLoadFromReportsErrorsInDeclarationOrder(t *testing.T) {
+	env := map[string]string{"PORT": "abc", "RATE_LIMIT_RPM": "0", "APP_ENV": "staging"}
+	first, err := LoadFrom(func(k string) string { return env[k] })
+	if err == nil {
+		t.Fatal("expected errors")
+	}
+	second, err2 := LoadFrom(func(k string) string { return env[k] })
+	if err2 == nil || err.Error() != err2.Error() {
+		t.Fatalf("error order is unstable:\n%s\n---\n%v", err.Error(), err2)
+	}
+	_, _ = first, second
+
+	order := []string{}
+	for _, key := range ConfigRegistry {
+		if idx := strings.Index(err.Error(), key); idx >= 0 {
+			order = append(order, key)
+		}
+	}
+	if len(order) < 3 {
+		t.Fatalf("expected all three keys named, got %v", order)
+	}
+	positions := []int{}
+	for _, key := range order {
+		positions = append(positions, strings.Index(err.Error(), key))
+	}
+	for i := 1; i < len(positions); i++ {
+		if positions[i] < positions[i-1] {
+			t.Fatalf("errors are not in declaration order: %v at %v", order, positions)
+		}
 	}
 }

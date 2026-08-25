@@ -140,29 +140,38 @@
       {
         "key": "POLAR_ACCESS_TOKEN",
         "field": "PolarAccessToken",
+        "type": "string",
         "description": "Polar API access token",
         "secret": true
       },
       {
         "key": "POLAR_PRODUCT_PRO",
         "field": "PolarProductPro",
-        "description": "Polar product id for the pro plan"
+        "type": "string",
+        "description": "Polar product id for the Pro plan"
       },
       {
         "key": "POLAR_PRODUCT_TEAM",
         "field": "PolarProductTeam",
-        "description": "Polar product id for the team plan"
+        "type": "string",
+        "description": "Polar product id for the Team plan"
       },
       {
         "key": "POLAR_SERVER",
         "field": "PolarServer",
+        "type": "string",
         "description": "sandbox | production",
-        "default": "sandbox"
+        "default": "sandbox",
+        "enum": [
+          "sandbox",
+          "production"
+        ]
       },
       {
         "key": "POLAR_WEBHOOK_SECRET",
         "field": "PolarWebhookSecret",
-        "description": "Polar webhook signing secret",
+        "type": "string",
+        "description": "Polar webhook signing secret (standard-webhooks)",
         "secret": true
       }
     ],

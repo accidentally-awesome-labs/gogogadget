@@ -63,8 +63,10 @@
       {
         "key": "RATE_LIMIT_RPM",
         "field": "RateLimitPerMinute",
-        "description": "Per-IP request budget per minute; bursts to twice this",
-        "default": "100"
+        "type": "int",
+        "description": "Per-IP request budget per minute (burst is 2x)",
+        "default": "100",
+        "min": 1
       }
     ],
     "docs": [],

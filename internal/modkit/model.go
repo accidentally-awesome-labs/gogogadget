@@ -365,13 +365,53 @@ type ManifestMigration struct {
 
 // EnvironmentVariable is one generated configuration declaration.
 type EnvironmentVariable struct {
-	Key                string `json:"key"`
-	Field              string `json:"field"`
-	Description        string `json:"description"`
-	Default            string `json:"default,omitempty"`
-	Required           bool   `json:"required,omitempty"`
-	ProductionRequired bool   `json:"production_required,omitempty"`
-	Secret             bool   `json:"secret,omitempty"`
+	Key   string `json:"key"`
+	Field string `json:"field"`
+	// Type is closed: the generator must know how to parse a value before it can
+	// generate a parse for it, and an unrecognised type is a manifest bug rather
+	// than something to guess a string for.
+	Type        EnvType `json:"type"`
+	Description string  `json:"description"`
+	Default     string  `json:"default,omitempty"`
+	// Min and Max bound an int. Pointers because zero is a meaningful bound:
+	// AUDIT_RETENTION_DAYS accepts 0 (retain forever) while RATE_LIMIT_RPM does
+	// not, and a plain int cannot tell "0" from "unset".
+	Min *int `json:"min,omitempty"`
+	Max *int `json:"max,omitempty"`
+	// Enum closes a string to a known set. An unknown value is refused rather
+	// than silently behaving like the default.
+	Enum []string `json:"enum,omitempty"`
+	// TrimSlash strips a trailing slash so a URL joins predictably whether or
+	// not the operator typed one.
+	TrimSlash          bool `json:"trim_slash,omitempty"`
+	Required           bool `json:"required,omitempty"`
+	ProductionRequired bool `json:"production_required,omitempty"`
+	Secret             bool `json:"secret,omitempty"`
+}
+
+// EnvType is the parse a declared key needs.
+type EnvType string
+
+const (
+	EnvString EnvType = "string"
+	EnvInt    EnvType = "int"
+	EnvBool   EnvType = "bool"
+	// EnvTime is RFC3339. Whether a parsed time is honoured is behaviour, not
+	// data, so it stays with the code that reads the field.
+	EnvTime EnvType = "time"
+)
+
+// EnvTypes is every parse the generator can emit.
+var EnvTypes = []EnvType{EnvString, EnvInt, EnvBool, EnvTime}
+
+// Valid reports whether the generator knows how to parse this type.
+func (t EnvType) Valid() bool {
+	for _, known := range EnvTypes {
+		if t == known {
+			return true
+		}
+	}
+	return false
 }
 
 // DocumentationRef links a module to hand-owned explanatory documentation.

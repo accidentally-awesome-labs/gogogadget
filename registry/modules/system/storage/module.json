@@ -79,28 +79,34 @@
       {
         "key": "STORAGE_R2_ACCESS_KEY_ID",
         "field": "StorageR2AccessKeyID",
-        "description": "R2 access key id",
+        "type": "string",
+        "description": "R2/S3 access key id",
         "secret": true
       },
       {
         "key": "STORAGE_R2_ACCOUNT_ID",
         "field": "StorageR2AccountID",
-        "description": "R2 account id"
+        "type": "string",
+        "description": "Cloudflare account id for R2"
       },
       {
         "key": "STORAGE_R2_BUCKET",
         "field": "StorageR2Bucket",
-        "description": "R2 bucket name"
+        "type": "string",
+        "description": "Object storage bucket name"
       },
       {
         "key": "STORAGE_R2_ENDPOINT",
         "field": "StorageR2Endpoint",
-        "description": "Endpoint override for S3/MinIO compatibility"
+        "type": "string",
+        "description": "Override endpoint for S3/MinIO compatibility; empty uses the R2 default",
+        "trim_slash": true
       },
       {
         "key": "STORAGE_R2_SECRET_ACCESS_KEY",
         "field": "StorageR2SecretAccessKey",
-        "description": "R2 secret access key",
+        "type": "string",
+        "description": "R2/S3 secret access key",
         "secret": true
       }
     ],

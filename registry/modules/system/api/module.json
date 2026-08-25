@@ -133,8 +133,10 @@
       {
         "key": "API_RATE_LIMIT_RPM",
         "field": "APIRateLimitPerMinute",
-        "description": "Per-API-token request budget per minute; bursts to twice this",
-        "default": "60"
+        "type": "int",
+        "description": "Per-API-token request budget per minute on /api/v1 (burst is 2x)",
+        "default": "60",
+        "min": 1
       }
     ],
     "docs": [],

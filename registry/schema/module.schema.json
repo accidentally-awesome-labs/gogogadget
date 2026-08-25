@@ -185,35 +185,61 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "key": {
-          "type": "string",
-          "pattern": "^[A-Z][A-Z0-9_]*$"
-        },
-        "field": {
-          "type": "string",
-          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        "default": {
+          "type": "string"
         },
         "description": {
           "type": "string",
           "minLength": 1
         },
-        "default": {
-          "type": "string"
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
-        "required": {
-          "type": "boolean"
+        "field": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "max": {
+          "type": "integer"
+        },
+        "min": {
+          "type": "integer"
         },
         "production_required": {
           "type": "boolean"
         },
+        "required": {
+          "type": "boolean"
+        },
         "secret": {
           "type": "boolean"
+        },
+        "trim_slash": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "int",
+            "bool",
+            "time"
+          ]
         }
       },
       "required": [
-        "key",
+        "description",
         "field",
-        "description"
+        "key",
+        "type"
       ]
     },
     "JanitorContribution": {

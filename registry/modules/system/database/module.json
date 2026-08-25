@@ -80,7 +80,9 @@
       {
         "key": "DATABASE_URL",
         "field": "DatabaseURL",
-        "description": "Postgres DSN; required in production",
+        "type": "string",
+        "description": "Postgres connection string",
+        "default": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
         "production_required": true,
         "secret": true
       }

@@ -71,6 +71,7 @@
       {
         "key": "SENTRY_DSN",
         "field": "SentryDSN",
+        "type": "string",
         "description": "Sentry DSN; unset uses the no-op reporter",
         "secret": true
       }

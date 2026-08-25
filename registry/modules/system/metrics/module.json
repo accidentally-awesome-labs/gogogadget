@@ -53,8 +53,8 @@
       {
         "key": "METRICS_TOKEN",
         "field": "MetricsToken",
-        "description": "Bearer token gating /metrics; required in production",
-        "production_required": true,
+        "type": "string",
+        "description": "Bearer token gating /metrics; required in production or the route is unregistered",
         "secret": true
       }
     ],
