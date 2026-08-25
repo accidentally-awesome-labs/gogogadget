@@ -1,0 +1,33 @@
+package ui
+
+// HoverCardOpts configures a preview panel shown on hover and focus.
+type HoverCardOpts struct {
+	// ID links the trigger to the panel with aria-describedby, so the preview
+	// is available to a screen reader instead of being hover-only.
+	ID    string
+	Label string
+	Attrs Attrs
+}
+
+// HoverCard renders a preview that opens on hover *and* focus.
+//
+// Focus is not optional: a panel that only opens on hover is unreachable by
+// keyboard and on touch, where there is no hover state at all. The content is a
+// description rather than a label, because the trigger already has a name and
+// replacing it with a paragraph of preview text would make the link unreadable
+// in a screen reader's link list.
+templ HoverCard(o HoverCardOpts) {
+	<span { rootWith("hover-card", "relative inline-flex", o.Attrs, "x-data", "uiHoverCard")... }>
+		<span data-ui-hovercard-trigger aria-describedby={ o.ID } tabindex="0" class="link">{ o.Label }</span>
+		<span
+			id={ o.ID }
+			data-ui-hovercard-panel
+			x-show="open"
+			x-cloak
+			role="tooltip"
+			class="absolute left-0 top-full mt-1 w-64 card p-3 text-sm z-(--z-overlay)"
+		>
+			{ children... }
+		</span>
+	</span>
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/confirm-action",
+    "kind": "component",
+    "name": "confirm-action",
+    "revision": 1,
+    "contract": 1,
+    "title": "ConfirmAction",
+    "description": "The ConfirmAction renderer and its options.",
+    "requires": [
+      "component/alert-dialog",
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/confirm-action.templ",
+        "target": "internal/web/templates/ui/confirm-action.templ",
+        "class": "templ",
+        "sha256": "529f2d59ab7f9d45aa9c1ee27a4da8301953c552ce39fbf9473db633fe9b4778",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/confirm-action_test.go",
+        "target": "internal/web/templates/ui/confirm-action_test.go",
+        "class": "test",
+        "sha256": "1152c43a0281d8e6c5a0c6d20bb40b48d80db65b07deec21254e1457b5d0466a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "confirm-action",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiDialog",
+          "native_fallback": "dialog element"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

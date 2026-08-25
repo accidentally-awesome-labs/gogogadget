@@ -252,6 +252,7 @@ func renderers() map[string]any {
 		"CharCounter": CharCounter, "CheckboxGroup": CheckboxGroup, "ColorInput": ColorInput, "Combobox": Combobox, "DateField": DateField, "DateRangeField": DateRangeField, "DateTimeField": DateTimeField, "FileDropzone": FileDropzone, "FileInput": FileInput, "FormActions": FormActions, "Hint": Hint, "InputAddon": InputAddon, "InputGroup": InputGroup, "Label": Label, "MultiSelect": MultiSelect, "NumberInput": NumberInput, "OTPInput": OTPInput, "PasswordInput": PasswordInput, "RangeInput": RangeInput, "SlugInput": SlugInput, "TagsInput": TagsInput, "TimeField": TimeField,
 		"Accordion": Accordion, "BackLink": BackLink, "Breadcrumbs": Breadcrumbs, "Collapsible": Collapsible, "CursorPagination": CursorPagination, "Disclosure": Disclosure, "Menubar": Menubar, "NavigationMenu": NavigationMenu, "SkipLink": SkipLink, "Steps": Steps, "TabPanels": TabPanels, "TableOfContents": TableOfContents,
 		"ErrorState": ErrorState, "ProgressBar": ProgressBar, "ProgressCircle": ProgressCircle, "Skeleton": Skeleton, "StatusDot": StatusDot, "Toast": Toast,
+		"ConfirmAction": ConfirmAction, "ContextMenu": ContextMenu, "Drawer": Drawer, "HoverCard": HoverCard,
 	}
 }
 

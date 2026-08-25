@@ -1,0 +1,29 @@
+package ui
+
+// ContextMenuOpts configures a menu opened from a region.
+type ContextMenuOpts struct {
+	// Label names the menu for the keyboard trigger, which is not optional:
+	// right-click is unreachable by keyboard, so a context menu without a
+	// visible, focusable trigger is a set of commands a keyboard user cannot
+	// invoke at all.
+	Label string
+	Items []MenuItem
+	Attrs Attrs
+}
+
+// ContextMenu renders a region whose commands are reachable by right-click and
+// by an explicit trigger.
+//
+// The trigger is a real DropdownMenu, so the keyboard path is the same
+// well-tested one every other menu uses; right-click is the addition, not the
+// mechanism.
+templ ContextMenu(o ContextMenuOpts) {
+	<div { rootWith("context-menu", "relative", o.Attrs, "x-data", "uiContextMenu")... }>
+		<div data-ui-context-region>
+			{ children... }
+		</div>
+		<div class="absolute top-2 right-2" data-ui-context-trigger>
+			@DropdownMenu(DropdownMenuOpts{Label: o.Label, Items: o.Items})
+		</div>
+	</div>
+}

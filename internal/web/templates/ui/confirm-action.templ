@@ -1,0 +1,59 @@
+package ui
+
+// ConfirmActionOpts configures a confirmed destructive action.
+type ConfirmActionOpts struct {
+	// ID names the dialog; the trigger opens it by this id.
+	ID string
+	// TriggerLabel is the control the user clicks first.
+	TriggerLabel string
+	TriggerIcon  IconName
+	// Title and Message are the confirmation copy. They are real template
+	// strings, which is the whole point: hx-confirm puts the copy in an
+	// attribute, where it cannot be translated, styled, or asserted on.
+	Title        string
+	Message      string
+	ConfirmLabel string
+	CancelLabel  string
+	// HX carries the actual request. It rides on the confirm control, so the
+	// existing targeted empty-200 delete contract is unchanged - the dialog
+	// only decides whether the request is issued.
+	HX    HX
+	Kind  Kind
+	Attrs Attrs
+}
+
+// ConfirmAction renders a trigger plus the dialog that gates its request.
+//
+// This replaces hx-confirm, which calls window.confirm: an OS dialog that
+// cannot be translated, cannot be styled, cannot be tested through the DOM, and
+// on some platforms offers a "prevent further dialogs" checkbox that silently
+// disables every subsequent confirmation on the page.
+templ ConfirmAction(o ConfirmActionOpts) {
+	<span { root("confirm-action", "inline-flex", o.Attrs)... }>
+		<button
+			type="button"
+			class={ buttonClass(confirmTriggerAction(o.Kind), SizeSM) }
+			x-data="uiDialog"
+			x-on:click={ "open('" + o.ID + "')" }
+		>
+			if o.TriggerIcon != "" {
+				@Icon(IconOpts{Name: o.TriggerIcon, Attrs: Attrs{Class: "w-4 h-4"}})
+			}
+			{ o.TriggerLabel }
+		</button>
+		@AlertDialog(AlertDialogOpts{
+			ID: o.ID, Title: o.Title, Message: o.Message,
+			ConfirmLabel: o.ConfirmLabel, CancelLabel: o.CancelLabel,
+			Kind: o.Kind, ConfirmHX: o.HX,
+		})
+	</span>
+}
+
+// confirmTriggerAction keeps a destructive confirmation looking destructive at
+// the trigger, not only inside the dialog.
+func confirmTriggerAction(kind Kind) Action {
+	if NormalizeKind(kind) == KindDanger {
+		return ActionDanger
+	}
+	return ActionGhost
+}

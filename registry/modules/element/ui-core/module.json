@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "2a7a42d485f6354c6bd3429a5710e5df062237f38fd412c06a2ed41f6f8ff690",
+        "sha256": "474466749ca9b84f310e06c51e534c6002f0ba69da637fc0b6c9ee0f638c8845",
         "rewrite_module": true,
         "contract": false
       },
@@ -118,7 +118,7 @@
         "source": "static/ui/overlays.js",
         "target": "static/ui/overlays.js",
         "class": "asset",
-        "sha256": "d77fb2b5207201ccc1637723dc55c5d8d7f80bead0b423345f0352a7ef843110",
+        "sha256": "9a272abaf6a4aca67d27c92ddcca538cc299b5b504c472fb61072b5e6b5dbf3c",
         "rewrite_module": false,
         "contract": false
       }

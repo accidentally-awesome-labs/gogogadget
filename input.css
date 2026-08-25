@@ -287,6 +287,15 @@
     outline-offset: 2px;
   }
 
+  /* Drawer geometry. A drawer is a dialog anchored to an edge, so only the
+     position and radius differ from a centred one. */
+  .drawer-right, .drawer-left { @apply h-full max-w-sm w-full rounded-none; }
+  .drawer-right { margin-left: auto; margin-right: 0; }
+  .drawer-left  { margin-left: 0; margin-right: auto; }
+  .drawer-top, .drawer-bottom { @apply w-full max-w-none rounded-none; }
+  .drawer-top    { margin-top: 0; margin-bottom: auto; }
+  .drawer-bottom { margin-top: auto; margin-bottom: 0; }
+
   /* The scrim is a token so light and dark separate the dialog equally. */
   .dialog::backdrop {
     background-color: var(--color-overlay-scrim);

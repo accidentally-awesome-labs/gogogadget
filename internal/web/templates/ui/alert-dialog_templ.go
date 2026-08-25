@@ -12,7 +12,12 @@ import templruntime "github.com/a-h/templ/runtime"
 type AlertDialogOpts struct {
 	ID, Title, Message, ConfirmLabel, CancelLabel string
 	Kind                                          Kind
-	Attrs                                         Attrs
+	// ConfirmHX puts the request on the confirm control, so the dialog decides
+	// whether a request is issued rather than reimplementing it. This is what
+	// lets ConfirmAction replace hx-confirm without changing the delete
+	// contract the server already honours.
+	ConfirmHX HX
+	Attrs     Attrs
 }
 
 // AlertDialog renders a modal requiring an explicit confirm or cancel.
@@ -25,6 +30,10 @@ type AlertDialogOpts struct {
 //
 // role="alertdialog" with a described message is what makes a screen reader
 // announce the consequence rather than just the title.
+//
+// Cancel is first in the DOM, so the platform's own initial focus lands on the
+// safe choice. A destructive dialog that opens with Delete focused turns a
+// stray Enter - the key the user just pressed to open it - into the deletion.
 func AlertDialog(o AlertDialogOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -53,7 +62,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 22, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 31, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -86,7 +95,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID + "-title")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 29, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 38, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -112,7 +121,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(o.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 29, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 38, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -125,7 +134,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID + "-message")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 30, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 39, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 		if templ_7745c5c3_Err != nil {
@@ -138,7 +147,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(o.Message)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 30, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 39, Col: 72}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -151,7 +160,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(o.CancelLabel)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 32, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 41, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -179,20 +188,28 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" data-ui-dialog-confirm>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" data-ui-dialog-confirm")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, applyHXAttrs(o.ConfirmHX))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(o.ConfirmLabel)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 33, Col: 130}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/alert-dialog.templ`, Line: 48, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</button></div></form></dialog>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</button></div></form></dialog>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -205,6 +222,14 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 // nothing and renders an uncoloured heading.
 func alertTitleClass(kind Kind) string {
 	return "section-title text-" + string(NormalizeKind(kind)) + "-text"
+}
+
+// applyHXAttrs renders the confirm control's request attributes, or nothing at
+// all when the caller only wants the returnValue.
+func applyHXAttrs(hx HX) templ.Attributes {
+	out := templ.Attributes{}
+	applyHX(out, hx)
+	return out
 }
 
 func dialogButtonClass(kind Kind) string {

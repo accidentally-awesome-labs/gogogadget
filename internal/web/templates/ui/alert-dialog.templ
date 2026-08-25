@@ -4,7 +4,12 @@ package ui
 type AlertDialogOpts struct {
 	ID, Title, Message, ConfirmLabel, CancelLabel string
 	Kind                                          Kind
-	Attrs                                         Attrs
+	// ConfirmHX puts the request on the confirm control, so the dialog decides
+	// whether a request is issued rather than reimplementing it. This is what
+	// lets ConfirmAction replace hx-confirm without changing the delete
+	// contract the server already honours.
+	ConfirmHX HX
+	Attrs     Attrs
 }
 
 // AlertDialog renders a modal requiring an explicit confirm or cancel.
@@ -17,6 +22,10 @@ type AlertDialogOpts struct {
 //
 // role="alertdialog" with a described message is what makes a screen reader
 // announce the consequence rather than just the title.
+//
+// Cancel is first in the DOM, so the platform's own initial focus lands on the
+// safe choice. A destructive dialog that opens with Delete focused turns a
+// stray Enter - the key the user just pressed to open it - into the deletion.
 templ AlertDialog(o AlertDialogOpts) {
 	<dialog
 		id={ o.ID }
@@ -30,7 +39,13 @@ templ AlertDialog(o AlertDialogOpts) {
 			<p id={ o.ID + "-message" } class="text-sm text-fg-muted">{ o.Message }</p>
 			<div class="flex justify-end gap-2">
 				<button type="submit" value="cancel" class="btn btn-ghost" data-ui-dialog-cancel>{ o.CancelLabel }</button>
-				<button type="submit" value="confirm" class={ "btn btn-" + dialogButtonClass(o.Kind) } data-ui-dialog-confirm>{ o.ConfirmLabel }</button>
+				<button
+					type="submit"
+					value="confirm"
+					class={ "btn btn-" + dialogButtonClass(o.Kind) }
+					data-ui-dialog-confirm
+					{ applyHXAttrs(o.ConfirmHX)... }
+				>{ o.ConfirmLabel }</button>
 			</div>
 		</form>
 	</dialog>
@@ -41,6 +56,14 @@ templ AlertDialog(o AlertDialogOpts) {
 // nothing and renders an uncoloured heading.
 func alertTitleClass(kind Kind) string {
 	return "section-title text-" + string(NormalizeKind(kind)) + "-text"
+}
+
+// applyHXAttrs renders the confirm control's request attributes, or nothing at
+// all when the caller only wants the returnValue.
+func applyHXAttrs(hx HX) templ.Attributes {
+	out := templ.Attributes{}
+	applyHX(out, hx)
+	return out
 }
 
 func dialogButtonClass(kind Kind) string {

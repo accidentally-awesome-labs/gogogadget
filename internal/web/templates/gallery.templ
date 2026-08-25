@@ -653,6 +653,39 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Overlays — drawer, context menu, hover card, confirm") {
+			<div class="space-y-6">
+				<div class="flex flex-wrap items-center gap-4">
+					<button type="button" class="btn btn-ghost btn-sm" x-data="uiDialog" x-on:click="open('gallery-drawer')">Open drawer</button>
+					@ui.HoverCard(ui.HoverCardOpts{ID: "gallery-hovercard", Label: "Hover or focus me"}) {
+						<p>The panel opens on hover <em>and</em> focus, and is wired as a description rather than replacing the trigger's name.</p>
+					}
+					@ui.ConfirmAction(ui.ConfirmActionOpts{
+						ID: "gallery-confirm", TriggerLabel: "Delete project", TriggerIcon: ui.IconDelete,
+						Title: "Delete project?", Message: "This removes the project and its files. It cannot be undone.",
+						ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+						HX: ui.HX{Delete: "/dev/gallery", Target: "closest span", Swap: "outerHTML"},
+					})
+				</div>
+				@ui.ContextMenu(ui.ContextMenuOpts{Label: "Row actions", Items: []ui.MenuItem{
+					{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+					{Label: "Duplicate", Href: "/dev/gallery", Icon: ui.IconCopy},
+					{Separator: true},
+					{Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger, HX: ui.HX{Delete: "/dev/gallery"}},
+				}}) {
+					<div class="card text-sm">Right-click this region, or use the visible trigger in its corner. Arrow keys and typeahead work in the menu.</div>
+				}
+			</div>
+			@ui.Drawer(ui.DrawerOpts{ID: "gallery-drawer", Title: "Filters", Side: ui.SideRight}) {
+				@ui.Field(ui.FieldOpts{Name: "drawer_status", Label: "Status"}) {
+					@ui.Select(ui.SelectOpts{Name: "drawer_status", Options: []ui.Option{
+						{Value: "active", Label: "Active", Selected: true},
+						{Value: "archived", Label: "Archived"},
+					}})
+				}
+			}
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {
