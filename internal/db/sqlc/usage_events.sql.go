@@ -91,6 +91,48 @@ func (q *Queries) InsertUsageEvent(ctx context.Context, arg InsertUsageEventPara
 	return i, err
 }
 
+const listUsageEventsByOrg = `-- name: ListUsageEventsByOrg :many
+SELECT id, name, value, created_at FROM usage_events
+WHERE clerk_org_id = $1 ORDER BY created_at DESC LIMIT $2
+`
+
+type ListUsageEventsByOrgParams struct {
+	ClerkOrgID string `json:"clerk_org_id"`
+	Limit      int32  `json:"limit"`
+}
+
+type ListUsageEventsByOrgRow struct {
+	ID        int64              `json:"id"`
+	Name      string             `json:"name"`
+	Value     int64              `json:"value"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) ListUsageEventsByOrg(ctx context.Context, arg ListUsageEventsByOrgParams) ([]ListUsageEventsByOrgRow, error) {
+	rows, err := q.db.Query(ctx, listUsageEventsByOrg, arg.ClerkOrgID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsageEventsByOrgRow
+	for rows.Next() {
+		var i ListUsageEventsByOrgRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Value,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const sumUsageByNameSince = `-- name: SumUsageByNameSince :one
 SELECT COALESCE(sum(value), 0)::bigint FROM usage_events
 WHERE clerk_org_id = $1 AND name = $2 AND created_at >= $3

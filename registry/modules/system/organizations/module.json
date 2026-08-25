@@ -197,14 +197,14 @@
         "table": "orgs",
         "scope": "org",
         "export": true,
-        "account_delete": "retain",
-        "organization_delete": "cascade"
+        "account_delete": "manual",
+        "organization_delete": "manual"
       },
       {
         "table": "users",
         "scope": "user",
         "export": true,
-        "account_delete": "cascade",
+        "account_delete": "manual",
         "organization_delete": "retain"
       }
     ],

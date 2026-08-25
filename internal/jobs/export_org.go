@@ -44,8 +44,19 @@ type orgExport struct {
 	Webhooks   []exportWebhook     `json:"webhook_endpoints"`
 	Audit      []exportAuditEntry  `json:"audit_log"`
 	Sub        *exportSubscription `json:"subscription"`
+	Usage      []exportUsageEvent  `json:"usage_events"`
 	Truncated  map[string]bool     `json:"truncated"`
 	Notice     string              `json:"notice"`
+}
+
+// exportUsageEvent is the org's metered consumption record — part of the
+// portable answer to "what do you hold about my company". No metadata blob:
+// it is provider request JSON of no value to the customer, and the field is
+// where a future meter could accidentally put something sensitive.
+type exportUsageEvent struct {
+	Name      string    `json:"meter"`
+	Value     int64     `json:"value"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type exportOrg struct {
@@ -161,6 +172,7 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 		APITokens:  []exportAPIToken{},
 		Webhooks:   []exportWebhook{},
 		Audit:      []exportAuditEntry{},
+		Usage:      []exportUsageEvent{},
 		Truncated:  map[string]bool{},
 		Notice: "Secrets are excluded by design: API token hashes and webhook signing " +
 			"secrets are never exported. Rotate a webhook secret from Settings → Webhooks.",
@@ -239,6 +251,19 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 		out.Audit = append(out.Audit, exportAuditEntry{
 			Action: a.Action, ActorID: a.ClerkUserID.String,
 			Metadata: json.RawMessage(a.Metadata), CreatedAt: a.CreatedAt.Time.UTC(),
+		})
+	}
+
+	usage, err := w.q.ListUsageEventsByOrg(ctx, sqlc.ListUsageEventsByOrgParams{
+		ClerkOrgID: orgID, Limit: exportRowCap + 1,
+	})
+	if err != nil {
+		return out, err
+	}
+	out.Truncated["usage_events"] = len(usage) > exportRowCap
+	for _, u := range cap2(usage) {
+		out.Usage = append(out.Usage, exportUsageEvent{
+			Name: u.Name, Value: u.Value, CreatedAt: u.CreatedAt.Time.UTC(),
 		})
 	}
 

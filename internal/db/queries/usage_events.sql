@@ -25,3 +25,7 @@ RETURNING *;
 -- The flush FAILED (Polar down etc.) — return the batch to the pool so the
 -- next tick retries (at-least-once; Polar dedups on external_id).
 UPDATE usage_events SET flushed_at = NULL WHERE id = ANY($1::bigint[]);
+
+-- name: ListUsageEventsByOrg :many
+SELECT id, name, value, created_at FROM usage_events
+WHERE clerk_org_id = $1 ORDER BY created_at DESC LIMIT $2;

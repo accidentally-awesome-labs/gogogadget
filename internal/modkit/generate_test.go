@@ -1660,3 +1660,43 @@ func TestStaticRegistryRejectsNonAssetNonGoClass(t *testing.T) {
 		t.Fatal("GenerateAll accepted a style-classed file under static/")
 	}
 }
+
+// The lifecycle registry is what turns a data declaration into an obligation
+// the repository can check: deletion expects the declared FK behaviour, and an
+// export declaration must correspond to a collection somewhere. Without it a
+// newly installed data module is omitted silently — exactly what the item
+// forbids.
+func TestDataLifecycleRegistryEmitsDeclarations(t *testing.T) {
+	mod := queryModule("system/widgets", "widgets", []string{"widgets"},
+		nil, nil)
+	mod.Data[0].Export = true
+	mod.Data[0].AccountDelete = DeleteRetain
+	mod.Data[0].OrganizationDelete = DeleteCascade
+	other := queryModule("system/gadgets", "gadgets", []string{"gadgets"}, nil, nil)
+	other.Data[0].Scope = DataScopeUser
+	other.Data[0].Export = false
+	other.Data[0].AccountDelete = DeleteManual
+
+	mods := []Manifest{mod, other}
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/db/data_lifecycle_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("data lifecycle registry was not emitted")
+	}
+	for _, want := range []string{
+		`{Table: "gadgets", Module: "system/gadgets", Scope: "user", Export: false, AccountDelete: "manual", OrganizationDelete: "retain"}`,
+		`{Table: "widgets", Module: "system/widgets", Scope: "org", Export: true, AccountDelete: "retain", OrganizationDelete: "cascade"}`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("lifecycle registry missing %s:\n%s", want, registry)
+		}
+	}
+}

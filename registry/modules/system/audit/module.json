@@ -111,7 +111,7 @@
         "scope": "org",
         "export": true,
         "account_delete": "retain",
-        "organization_delete": "cascade"
+        "organization_delete": "retain"
       }
     ],
     "removal_policy": "retain-data"

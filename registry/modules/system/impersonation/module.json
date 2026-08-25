@@ -77,7 +77,7 @@
         "table": "impersonation_sessions",
         "scope": "user",
         "export": false,
-        "account_delete": "cascade",
+        "account_delete": "manual",
         "organization_delete": "retain"
       }
     ],

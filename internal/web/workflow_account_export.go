@@ -14,11 +14,12 @@ import (
 // accountExport is the GDPR self-serve payload: everything the platform
 // holds about one user, across orgs.
 type accountExport struct {
-	ExportedAt    time.Time                 `json:"exported_at"`
-	User          sqlc.User                 `json:"user"`
-	Memberships   []exportMembership        `json:"memberships"`
-	Notifications []sqlc.Notification       `json:"notifications"`
-	Audit         []sqlc.ListAuditByUserRow `json:"audit"`
+	ExportedAt    time.Time                     `json:"exported_at"`
+	User          sqlc.User                     `json:"user"`
+	Memberships   []exportMembership            `json:"memberships"`
+	Notifications []sqlc.Notification           `json:"notifications"`
+	Preferences   []sqlc.NotificationPreference `json:"notification_preferences"`
+	Audit         []sqlc.ListAuditByUserRow     `json:"audit"`
 }
 
 type exportMembership struct {
@@ -44,6 +45,7 @@ func (s *Server) handleAccountExport(w http.ResponseWriter, r *http.Request) {
 		User:          *user,
 		Memberships:   []exportMembership{},
 		Notifications: []sqlc.Notification{},
+		Preferences:   []sqlc.NotificationPreference{},
 		Audit:         []sqlc.ListAuditByUserRow{},
 	}
 	for _, o := range orgs {
@@ -63,6 +65,13 @@ func (s *Server) handleAccountExport(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		export.Notifications = append(export.Notifications, notes...)
+	}
+	// Declared preferences are part of the portable record: they are data the
+	// person entered, not derived state.
+	export.Preferences, err = s.q.ListNotificationPreferencesByUser(ctx, user.ClerkUserID)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
 	}
 	export.Audit, err = s.q.ListAuditByUser(ctx, sqlc.ListAuditByUserParams{
 		UserID: pgtype.Text{String: user.ClerkUserID, Valid: true}, Lim: 10000,

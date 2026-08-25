@@ -16,6 +16,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"fmt"
+	"github.com/gogogadget/gogogadget/internal/db"
+	"reflect"
 )
 
 const (
@@ -191,4 +195,41 @@ func TestExportKeysAreUniqueWithinASecond(t *testing.T) {
 	assert.NotEqual(t, first, second, "same-second exports must not collide")
 	assert.Contains(t, first, "exports/org_x/", "still namespaced per organization")
 	assert.Contains(t, first, "projects-20260820-120000.csv", "the human filename survives in the key")
+}
+
+// Every table a module declares as org-scoped and exportable must appear as a
+// collection in the org export. The export's DTOs are hand-written — the
+// redaction decisions are the whole point — but the coverage list is generated
+// from the same declarations, so a newly installed data module that declares
+// exportable rows cannot be omitted silently.
+//
+// This exact gap existed: usage_events was declared exportable and collected
+// by nothing.
+func TestOrgExportCoversEveryDeclaredExportableTable(t *testing.T) {
+	collections := map[string]bool{
+		"orgs": true, "org_members": true, "projects": true, "files": true,
+		"api_tokens": true, "webhook_endpoints": true, "audit_log": true,
+		"subscriptions": true, "usage_events": true,
+	}
+	out := orgExport{}
+	value := reflect.ValueOf(&out).Elem()
+	for _, field := range reflect.VisibleFields(value.Type()) {
+		tag := field.Tag.Get("json")
+		name := strings.Split(tag, ",")[0]
+		if name == "" || name == "-" {
+			continue
+		}
+		collections[name] = true
+	}
+	var missing []string
+	for _, d := range db.DataLifecycleRegistry {
+		if d.Scope != "org" || !d.Export {
+			continue
+		}
+		if !collections[d.Table] {
+			missing = append(missing, fmt.Sprintf("%s (declared by %s)", d.Table, d.Module))
+		}
+	}
+	require.Empty(t, missing,
+		"org export omits tables declared exportable; a data module was installed into silence: %v", missing)
 }

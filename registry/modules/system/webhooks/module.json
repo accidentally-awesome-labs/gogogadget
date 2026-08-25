@@ -183,10 +183,10 @@
       },
       {
         "table": "webhook_events",
-        "scope": "org",
+        "scope": "platform",
         "export": false,
         "account_delete": "retain",
-        "organization_delete": "cascade"
+        "organization_delete": "retain"
       }
     ],
     "removal_policy": "retain-data"

@@ -10,6 +10,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"fmt"
+	"github.com/gogogadget/gogogadget/internal/db"
+	"reflect"
 )
 
 type exportShape struct {
@@ -188,4 +192,34 @@ func TestOrgExportCardOnlyForAdmins(t *testing.T) {
 	_, _, adminBody := serve(t, s, "GET", "/app/settings/org", nil, nil,
 		sessionCookie("user_oexp_va", "org_oexp3", "org:admin"))
 	assert.Contains(t, adminBody, `data-testid="org-export"`)
+}
+
+// The account export must carry every user-scoped table a module declares
+// exportable. Same shape as the org-export guard: the DTO choices are hand
+// work, the coverage list is generated, and a new data module cannot be
+// installed into silence.
+func TestAccountExportCoversEveryDeclaredExportableTable(t *testing.T) {
+	collections := map[string]bool{
+		"users": true, "org_members": true, "notifications": true,
+		"notification_preferences": true, "audit_log": true,
+	}
+	value := reflect.TypeOf(accountExport{})
+	for _, field := range reflect.VisibleFields(value) {
+		name := strings.Split(field.Tag.Get("json"), ",")[0]
+		if name != "" && name != "-" {
+			collections[name] = true
+		}
+	}
+
+	var missing []string
+	for _, d := range db.DataLifecycleRegistry {
+		if d.Scope != "user" || !d.Export {
+			continue
+		}
+		if !collections[d.Table] {
+			missing = append(missing, fmt.Sprintf("%s (declared by %s)", d.Table, d.Module))
+		}
+	}
+	require.Empty(t, missing,
+		"account export omits tables declared exportable: %v", missing)
 }

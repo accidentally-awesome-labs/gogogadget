@@ -17,7 +17,7 @@
         "source": "internal/db/queries/usage_events.sql",
         "target": "internal/db/queries/usage_events.sql",
         "class": "query",
-        "sha256": "0a939d710ea536d7ca723dc37102002051ab9d23461995acc51ff9e311c513a1",
+        "sha256": "6bf1b67f1a6d80ad80adeb5032ecaf479bdce7111e384faaf3b5000b52cefdfe",
         "rewrite_module": false,
         "contract": false
       },
@@ -55,6 +55,10 @@
         },
         {
           "name": "InsertUsageEvent",
+          "table": "usage_events"
+        },
+        {
+          "name": "ListUsageEventsByOrg",
           "table": "usage_events"
         },
         {

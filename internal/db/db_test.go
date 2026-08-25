@@ -504,3 +504,87 @@ func TestDeclaredQueriesMatchGeneratedMethods(t *testing.T) {
 		assert.True(t, declared, "sqlc method %q is generated but no module declares it", method)
 	}
 }
+
+// A table declared to cascade on account or organization delete must actually
+// be reachable by cascading FKs. The declaration is what the deletion flow
+// trusts; if the schema disagrees, rows silently survive a deletion — the
+// compliance failure nobody notices until a data subject asks again.
+//
+// Reachability is transitive and two-rooted on purpose: an org deletion
+// cascades through webhook_endpoints to webhook_events, and an account
+// deletion removes sole-member organizations, whose cascade removes the org's
+// rows. A direct-FK-only check would call those gaps when they are the design.
+func TestDeclaredDeleteBehaviourMatchesSchema(t *testing.T) {
+	pool, _ := testdb.Open(t, "lifecycle_fk")
+	defer pool.Close()
+	ctx := context.Background()
+
+	type fk struct {
+		table      string
+		references string
+		deleteRule string
+	}
+	// pg_constraint is authoritative here; an information_schema join by
+	// constraint name alone mis-joins and silently drops edges.
+	rows, err := pool.Query(ctx, `
+		SELECT conrelid::regclass::text, confrelid::regclass::text
+		FROM pg_constraint
+		WHERE contype = 'f' AND confdeltype = 'c' AND connamespace = 'public'::regnamespace`)
+	require.NoError(t, err)
+	defer rows.Close()
+
+	// parent -> children it cascades to, so a deletion walk follows the
+	// direction the database actually deletes in.
+	direct := map[string]map[string]bool{}
+	for rows.Next() {
+		var table, references string
+		require.NoError(t, rows.Scan(&table, &references))
+		if direct[references] == nil {
+			direct[references] = map[string]bool{}
+		}
+		direct[references][table] = true
+	}
+	require.NoError(t, rows.Err())
+
+	// reaches resolves whether deleting `root` cascades to `table`, following
+	// ON DELETE CASCADE edges transitively.
+	reaches := func(root, table string) bool {
+		visited := map[string]bool{}
+		var walk func(string) bool
+		walk = func(current string) bool {
+			if current == table {
+				return true
+			}
+			if visited[current] {
+				return false
+			}
+			visited[current] = true
+			for next := range direct[current] {
+				if next == table || walk(next) {
+					return true
+				}
+			}
+			return false
+		}
+		// A cascade edge from root's dependents; start from root itself so a
+		// self-edge is not required.
+		return walk(root)
+	}
+
+	for _, d := range db.DataLifecycleRegistry {
+		if d.AccountDelete == "cascade" {
+			// Either a direct user cascade, or the sole-member org deletion
+			// path: the account takes its single-member organizations, whose
+			// cascade removes the org's rows.
+			ok := reaches("users", d.Table) || reaches("orgs", d.Table)
+			assert.True(t, ok,
+				"%s declares account_delete=cascade but no cascade path from users or orgs reaches it; its rows survive an account deletion",
+				d.Table)
+		}
+		if d.OrganizationDelete == "cascade" {
+			assert.True(t, reaches("orgs", d.Table),
+				"%s declares organization_delete=cascade but no cascade path from orgs reaches it; its rows survive an organization deletion",
+				d.Table)
+		}
+	}
+}

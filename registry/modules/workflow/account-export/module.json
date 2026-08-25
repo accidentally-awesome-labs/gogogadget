@@ -21,7 +21,7 @@
         "source": "internal/web/account_data_test.go",
         "target": "internal/web/account_data_test.go",
         "class": "test",
-        "sha256": "a0e79fb98583ab8c04de988e2b90d140368bdea24b26e7eef5eef1184c891301",
+        "sha256": "500fef0243a92f2784508ddf7996fc4a549171993abf5c66b49d362ecd78e0bc",
         "rewrite_module": true,
         "contract": false
       },
@@ -29,7 +29,7 @@
         "source": "internal/web/workflow_account_export.go",
         "target": "internal/web/workflow_account_export.go",
         "class": "go",
-        "sha256": "fce2d29d6767e96de19522734a79c63ba5b94df184d2194d05c2b5b9efb4e689",
+        "sha256": "f021ea1653a15497947fc07e14bd8296c9b6469a10f57b47a8dad4c41db7b645",
         "rewrite_module": true,
         "contract": false
       }

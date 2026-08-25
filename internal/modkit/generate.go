@@ -98,6 +98,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"env-example", one(emitEnvExample)},
 		{"config-reference", one(emitConfigReference)},
 		{"jobs", one(emitJobsRegistry)},
+		{"data-lifecycle", one(emitDataLifecycleRegistry)},
 	}
 	files := make([]GeneratedFile, 0, len(emitters))
 	for _, emitter := range emitters {
@@ -2038,6 +2039,49 @@ func intBound(e EnvironmentVariable) (condition, explanation string) {
 // defaults are filled in so `make dev` works with no accounts; secrets ship
 // empty, because a plausible-looking fake value is the kind of thing that
 // reaches production.
+// emitDataLifecycleRegistry renders the stateful-data obligations every
+// selected module declares: what a table's delete behaviour is supposed to be
+// and whether its rows are exportable. Deletion paths and export collectors
+// are hand-written where the work is genuine (redaction DTOs, sole-admin
+// guards); what is generated is the obligation those paths are checked against,
+// so a module that declares data cannot be installed into silence.
+func emitDataLifecycleRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	declared := make([]DataDeclaration, 0)
+	tableOwner := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		for _, d := range m.Data {
+			if previous, clash := tableOwner[d.Table]; clash {
+				return nil, fmt.Errorf("table %q is declared by both %s and %s", d.Table, previous, m.ID)
+			}
+			tableOwner[d.Table] = m.ID
+			declared = append(declared, d)
+		}
+	}
+	if len(declared) == 0 {
+		return nil, nil
+	}
+
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package db\n\n")
+	b.WriteString("// DataLifecycle is one declared data obligation: the delete behaviour the\n")
+	b.WriteString("// schema is expected to provide and whether the rows are exportable.\n")
+	b.WriteString("type DataLifecycle struct {\n")
+	b.WriteString("\tTable string\n\tModule string\n\tScope string\n\tExport bool\n")
+	b.WriteString("\tAccountDelete string\n\tOrganizationDelete string\n}\n\n")
+	b.WriteString("// DataLifecycleRegistry lists every declared table in module order. Export\n")
+	b.WriteString("// collectors and deletion paths are checked against this list, so a module\n")
+	b.WriteString("// that declares data cannot be omitted from either silently.\n")
+	b.WriteString("var DataLifecycleRegistry = []DataLifecycle{\n")
+	for _, d := range declared {
+		fmt.Fprintf(&b, "\t{Table: %s, Module: %s, Scope: %q, Export: %v, AccountDelete: %q, OrganizationDelete: %q},\n",
+			goString(d.Table), goString(tableOwner[d.Table]), d.Scope, d.Export, d.AccountDelete, d.OrganizationDelete)
+	}
+	b.WriteString("}\n")
+	_ = ctx
+	return &GeneratedFile{Path: "internal/db/data_lifecycle_registry_gen.go", Content: b.String()}, nil
+}
+
 func emitEnvExample(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	declarations, err := declaredEnvironment(lock, graph)
 	if err != nil {
