@@ -13,7 +13,24 @@
       "system/content-assets",
       "system/server"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/web/docs_test.go",
+        "target": "internal/web/docs_test.go",
+        "class": "test",
+        "sha256": "04ed5bbd65d024ab1bbb0cf84f85f209ccf391c74d752e0154ca14d19e7cf833",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/docs.templ",
+        "target": "internal/web/templates/docs.templ",
+        "class": "templ",
+        "sha256": "e8c6e32b009447f92c786cd54999290e619109bc75b08c8d16f2ec03ca2adfb1",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "docs.show"

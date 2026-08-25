@@ -33,10 +33,26 @@
         "contract": false
       },
       {
+        "source": "internal/web/email_sink.go",
+        "target": "internal/web/email_sink.go",
+        "class": "go",
+        "sha256": "fabc7fafab0e720b1970f58b4e4ffb8e01f60566818c4efd67bc66fd8b8aaee1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/form.go",
         "target": "internal/web/form.go",
         "class": "go",
         "sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/handlers_public.go",
+        "target": "internal/web/handlers_public.go",
+        "class": "go",
+        "sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
         "rewrite_module": true,
         "contract": false
       },
@@ -49,6 +65,14 @@
         "contract": true
       },
       {
+        "source": "internal/web/i18n_test.go",
+        "target": "internal/web/i18n_test.go",
+        "class": "test",
+        "sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/module.go",
         "target": "internal/web/module.go",
         "class": "go",
@@ -57,12 +81,28 @@
         "contract": true
       },
       {
+        "source": "internal/web/module_test.go",
+        "target": "internal/web/module_test.go",
+        "class": "test",
+        "sha256": "333b1b7e15615f2d89685ccfb576a8e333a78b04d1bded79db9f27cb262a0a20",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/params.go",
         "target": "internal/web/params.go",
         "class": "go",
         "sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/public_routes_test.go",
+        "target": "internal/web/public_routes_test.go",
+        "class": "test",
+        "sha256": "b3a13fb7cede20ac65952b7dd822f73b25fce6410d5ea202018da2b57c741e3a",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/web/route.go",
@@ -81,6 +121,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/route_test.go",
+        "target": "internal/web/route_test.go",
+        "class": "test",
+        "sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/routes.go",
         "target": "internal/web/routes.go",
         "class": "go",
@@ -95,6 +143,38 @@
         "sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/designsystem_test.go",
+        "target": "internal/web/templates/designsystem_test.go",
+        "class": "test",
+        "sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/testhelpers_test.go",
+        "target": "internal/web/testhelpers_test.go",
+        "class": "test",
+        "sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/testonly_content_guide.go",
+        "target": "internal/web/testonly_content_guide.go",
+        "class": "go",
+        "sha256": "a33983f45ead47abef66e76641a72dd208ad733bdff43bb1261aca8773080ea9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/web_test.go",
+        "target": "internal/web/web_test.go",
+        "class": "test",
+        "sha256": "064a39b2209a40b0dda949eba514cf4a176feb23e4334f4c439f145f86df08b6",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

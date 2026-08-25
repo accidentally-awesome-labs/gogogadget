@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+  "registry_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
   "order": [
     "system/apphost",
     "system/config",
@@ -105,7 +105,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -123,6 +123,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/web/activity_test.go",
+            "target": "internal/web/activity_test.go",
+            "class": "test",
+            "sha256": "e3b9066d1c3891fecd947e2284a8f266d5621ce161f4b77d9e0eb71c775239c9",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/handlers_activity.go",
             "target": "internal/web/handlers_activity.go",
@@ -220,6 +228,13 @@
       },
       "files": [
         {
+          "path": "internal/web/activity_test.go",
+          "source": "internal/web/activity_test.go",
+          "base_sha256": "e3b9066d1c3891fecd947e2284a8f266d5621ce161f4b77d9e0eb71c775239c9",
+          "local_sha256": "e3b9066d1c3891fecd947e2284a8f266d5621ce161f4b77d9e0eb71c775239c9",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/handlers_activity.go",
           "source": "internal/web/handlers_activity.go",
           "base_sha256": "c4c33e1d804b57e9b10eaf98f03f9cd1917dab99606389d6fc77f6a0bf1cd098",
@@ -240,7 +255,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -261,10 +276,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/announcements_test.go",
+            "target": "internal/web/announcements_test.go",
+            "class": "test",
+            "sha256": "e99d1009ffbb8d71faeb4db7598236e182debda7029908f676e46b489432fa2a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_admin_announcements.go",
             "target": "internal/web/page_admin_announcements.go",
             "class": "go",
             "sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin_announcements.templ",
+            "target": "internal/web/templates/admin_announcements.templ",
+            "class": "templ",
+            "sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
             "rewrite_module": true,
             "contract": false
           }
@@ -383,10 +414,24 @@
       },
       "files": [
         {
+          "path": "internal/web/announcements_test.go",
+          "source": "internal/web/announcements_test.go",
+          "base_sha256": "e99d1009ffbb8d71faeb4db7598236e182debda7029908f676e46b489432fa2a",
+          "local_sha256": "e99d1009ffbb8d71faeb4db7598236e182debda7029908f676e46b489432fa2a",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_admin_announcements.go",
           "source": "internal/web/page_admin_announcements.go",
           "base_sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
           "local_sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin_announcements.templ",
+          "source": "internal/web/templates/admin_announcements.templ",
+          "base_sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
+          "local_sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
           "state": "clean"
         }
       ],
@@ -396,7 +441,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -517,7 +562,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -540,6 +585,14 @@
             "target": "internal/web/page_admin_content.go",
             "class": "go",
             "sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin_content.templ",
+            "target": "internal/web/templates/admin_content.templ",
+            "class": "templ",
+            "sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
             "rewrite_module": true,
             "contract": false
           }
@@ -719,6 +772,13 @@
           "base_sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
           "local_sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin_content.templ",
+          "source": "internal/web/templates/admin_content.templ",
+          "base_sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
+          "local_sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -727,7 +787,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -825,7 +885,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -904,7 +964,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -984,7 +1044,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -1005,10 +1065,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/flags_test.go",
+            "target": "internal/web/flags_test.go",
+            "class": "test",
+            "sha256": "2011cb5c6964e880f4f1cfb9d2e892c718efbb6b95068e433478468c02e7ddb4",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_admin_flags.go",
             "target": "internal/web/page_admin_flags.go",
             "class": "go",
             "sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin_flags.templ",
+            "target": "internal/web/templates/admin_flags.templ",
+            "class": "templ",
+            "sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
             "rewrite_module": true,
             "contract": false
           }
@@ -1141,10 +1217,24 @@
       },
       "files": [
         {
+          "path": "internal/web/flags_test.go",
+          "source": "internal/web/flags_test.go",
+          "base_sha256": "2011cb5c6964e880f4f1cfb9d2e892c718efbb6b95068e433478468c02e7ddb4",
+          "local_sha256": "2011cb5c6964e880f4f1cfb9d2e892c718efbb6b95068e433478468c02e7ddb4",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_admin_flags.go",
           "source": "internal/web/page_admin_flags.go",
           "base_sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
           "local_sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin_flags.templ",
+          "source": "internal/web/templates/admin_flags.templ",
+          "base_sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
+          "local_sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
           "state": "clean"
         }
       ],
@@ -1154,7 +1244,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -1174,10 +1264,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/admin_viewers_test.go",
+            "target": "internal/web/admin_viewers_test.go",
+            "class": "test",
+            "sha256": "f7c61ae70a40c9e6486710b26bf0fc361c39d71803f1bcd6062ef3208cf74a3b",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/handlers_admin_jobs.go",
             "target": "internal/web/handlers_admin_jobs.go",
             "class": "go",
             "sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin_jobs.templ",
+            "target": "internal/web/templates/admin_jobs.templ",
+            "class": "templ",
+            "sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
             "rewrite_module": true,
             "contract": false
           }
@@ -1274,10 +1380,24 @@
       },
       "files": [
         {
+          "path": "internal/web/admin_viewers_test.go",
+          "source": "internal/web/admin_viewers_test.go",
+          "base_sha256": "f7c61ae70a40c9e6486710b26bf0fc361c39d71803f1bcd6062ef3208cf74a3b",
+          "local_sha256": "f7c61ae70a40c9e6486710b26bf0fc361c39d71803f1bcd6062ef3208cf74a3b",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/handlers_admin_jobs.go",
           "source": "internal/web/handlers_admin_jobs.go",
           "base_sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
           "local_sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin_jobs.templ",
+          "source": "internal/web/templates/admin_jobs.templ",
+          "base_sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
+          "local_sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
           "state": "clean"
         }
       ],
@@ -1287,7 +1407,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -1307,6 +1427,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/web/media_test.go",
+            "target": "internal/web/media_test.go",
+            "class": "test",
+            "sha256": "1a37e1e9c8a9d4d2db7b3cc6e9b54c1495db8ad4ef16441c7164dbb4e28a3b81",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/page_admin_media.go",
             "target": "internal/web/page_admin_media.go",
@@ -1391,6 +1519,13 @@
       },
       "files": [
         {
+          "path": "internal/web/media_test.go",
+          "source": "internal/web/media_test.go",
+          "base_sha256": "1a37e1e9c8a9d4d2db7b3cc6e9b54c1495db8ad4ef16441c7164dbb4e28a3b81",
+          "local_sha256": "1a37e1e9c8a9d4d2db7b3cc6e9b54c1495db8ad4ef16441c7164dbb4e28a3b81",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_admin_media.go",
           "source": "internal/web/page_admin_media.go",
           "base_sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
@@ -1404,7 +1539,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1512,7 +1647,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1533,10 +1668,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/admin_test.go",
+            "target": "internal/web/admin_test.go",
+            "class": "test",
+            "sha256": "331f565a0038ca51859915ec9b260d2fe9206b3f43ef481218e9f9dc2714582f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_admin_overview.go",
             "target": "internal/web/page_admin_overview.go",
             "class": "go",
             "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin.templ",
+            "target": "internal/web/templates/admin.templ",
+            "class": "templ",
+            "sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
             "rewrite_module": true,
             "contract": false
           }
@@ -1612,10 +1763,24 @@
       },
       "files": [
         {
+          "path": "internal/web/admin_test.go",
+          "source": "internal/web/admin_test.go",
+          "base_sha256": "331f565a0038ca51859915ec9b260d2fe9206b3f43ef481218e9f9dc2714582f",
+          "local_sha256": "331f565a0038ca51859915ec9b260d2fe9206b3f43ef481218e9f9dc2714582f",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_admin_overview.go",
           "source": "internal/web/page_admin_overview.go",
           "base_sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
           "local_sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin.templ",
+          "source": "internal/web/templates/admin.templ",
+          "base_sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
+          "local_sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
           "state": "clean"
         }
       ],
@@ -1625,7 +1790,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -1652,6 +1817,22 @@
             "target": "internal/web/page_admin_schedules.go",
             "class": "go",
             "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/schedules_admin_test.go",
+            "target": "internal/web/schedules_admin_test.go",
+            "class": "test",
+            "sha256": "fedd3c9be9f55c1a606ca00179ba395c13ee32b403e3b2844c4ab7fa7e5f018e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/admin_schedules.templ",
+            "target": "internal/web/templates/admin_schedules.templ",
+            "class": "templ",
+            "sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
             "rewrite_module": true,
             "contract": false
           }
@@ -1775,6 +1956,20 @@
           "base_sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
           "local_sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/schedules_admin_test.go",
+          "source": "internal/web/schedules_admin_test.go",
+          "base_sha256": "fedd3c9be9f55c1a606ca00179ba395c13ee32b403e3b2844c4ab7fa7e5f018e",
+          "local_sha256": "fedd3c9be9f55c1a606ca00179ba395c13ee32b403e3b2844c4ab7fa7e5f018e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/admin_schedules.templ",
+          "source": "internal/web/templates/admin_schedules.templ",
+          "base_sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
+          "local_sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -1783,7 +1978,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1919,7 +2114,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1944,6 +2139,14 @@
             "sha256": "c07401e37041f2e095ed06886550d4e83f5057bda90132020f54d547b3554f77",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/templates/blog.templ",
+            "target": "internal/web/templates/blog.templ",
+            "class": "templ",
+            "sha256": "d68a8e811476783995fa9594600ebb8b3bb5c9ae4864793934d954399ebf40da",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -2016,6 +2219,13 @@
           "base_sha256": "c07401e37041f2e095ed06886550d4e83f5057bda90132020f54d547b3554f77",
           "local_sha256": "c07401e37041f2e095ed06886550d4e83f5057bda90132020f54d547b3554f77",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/blog.templ",
+          "source": "internal/web/templates/blog.templ",
+          "base_sha256": "d68a8e811476783995fa9594600ebb8b3bb5c9ae4864793934d954399ebf40da",
+          "local_sha256": "d68a8e811476783995fa9594600ebb8b3bb5c9ae4864793934d954399ebf40da",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -2024,7 +2234,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2041,7 +2251,16 @@
           "system/i18n",
           "system/server"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/web/templates/changelog.templ",
+            "target": "internal/web/templates/changelog.templ",
+            "class": "templ",
+            "sha256": "30af1bcf10a5cff8eb7d3061a0afafe64ed91a3e844f4521a4d957ff60cb6705",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "content_types": [
             "release"
@@ -2105,14 +2324,22 @@
         "data": [],
         "removal_policy": "retain-data"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/web/templates/changelog.templ",
+          "source": "internal/web/templates/changelog.templ",
+          "base_sha256": "30af1bcf10a5cff8eb7d3061a0afafe64ed91a3e844f4521a4d957ff60cb6705",
+          "local_sha256": "30af1bcf10a5cff8eb7d3061a0afafe64ed91a3e844f4521a4d957ff60cb6705",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     },
     {
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2247,7 +2474,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2343,7 +2570,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2359,7 +2586,24 @@
           "system/content-assets",
           "system/server"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/web/docs_test.go",
+            "target": "internal/web/docs_test.go",
+            "class": "test",
+            "sha256": "04ed5bbd65d024ab1bbb0cf84f85f209ccf391c74d752e0154ca14d19e7cf833",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/docs.templ",
+            "target": "internal/web/templates/docs.templ",
+            "class": "templ",
+            "sha256": "e8c6e32b009447f92c786cd54999290e619109bc75b08c8d16f2ec03ca2adfb1",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "routes": [
             "docs.show"
@@ -2405,14 +2649,29 @@
         "data": [],
         "removal_policy": "free"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/web/docs_test.go",
+          "source": "internal/web/docs_test.go",
+          "base_sha256": "04ed5bbd65d024ab1bbb0cf84f85f209ccf391c74d752e0154ca14d19e7cf833",
+          "local_sha256": "04ed5bbd65d024ab1bbb0cf84f85f209ccf391c74d752e0154ca14d19e7cf833",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/docs.templ",
+          "source": "internal/web/templates/docs.templ",
+          "base_sha256": "e8c6e32b009447f92c786cd54999290e619109bc75b08c8d16f2ec03ca2adfb1",
+          "local_sha256": "e8c6e32b009447f92c786cd54999290e619109bc75b08c8d16f2ec03ca2adfb1",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     },
     {
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -2534,7 +2793,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2613,7 +2872,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -2635,10 +2894,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/files_test.go",
+            "target": "internal/web/files_test.go",
+            "class": "test",
+            "sha256": "97a421555bfe8f5f4d662a318f32743ea66da7020a38c7df045cafb5a31eb0b3",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_files.go",
             "target": "internal/web/page_files.go",
             "class": "go",
             "sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/files.templ",
+            "target": "internal/web/templates/files.templ",
+            "class": "templ",
+            "sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
             "rewrite_module": true,
             "contract": false
           }
@@ -2723,10 +2998,24 @@
       },
       "files": [
         {
+          "path": "internal/web/files_test.go",
+          "source": "internal/web/files_test.go",
+          "base_sha256": "97a421555bfe8f5f4d662a318f32743ea66da7020a38c7df045cafb5a31eb0b3",
+          "local_sha256": "97a421555bfe8f5f4d662a318f32743ea66da7020a38c7df045cafb5a31eb0b3",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_files.go",
           "source": "internal/web/page_files.go",
           "base_sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
           "local_sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/files.templ",
+          "source": "internal/web/templates/files.templ",
+          "base_sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
+          "local_sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
           "state": "clean"
         }
       ],
@@ -2736,7 +3025,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2954,7 +3243,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -2976,10 +3265,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/notifications_test.go",
+            "target": "internal/web/notifications_test.go",
+            "class": "test",
+            "sha256": "fdd48b18ead1921b448409c9e94acc48345b90c8af2e4b8cfc689b43deabf747",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_notifications.go",
             "target": "internal/web/page_notifications.go",
             "class": "go",
             "sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/notifications.templ",
+            "target": "internal/web/templates/notifications.templ",
+            "class": "templ",
+            "sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
             "rewrite_module": true,
             "contract": false
           }
@@ -3051,10 +3356,24 @@
       },
       "files": [
         {
+          "path": "internal/web/notifications_test.go",
+          "source": "internal/web/notifications_test.go",
+          "base_sha256": "fdd48b18ead1921b448409c9e94acc48345b90c8af2e4b8cfc689b43deabf747",
+          "local_sha256": "fdd48b18ead1921b448409c9e94acc48345b90c8af2e4b8cfc689b43deabf747",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_notifications.go",
           "source": "internal/web/page_notifications.go",
           "base_sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
           "local_sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/notifications.templ",
+          "source": "internal/web/templates/notifications.templ",
+          "base_sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
+          "local_sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
           "state": "clean"
         }
       ],
@@ -3064,7 +3383,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3177,7 +3496,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3293,7 +3612,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3373,7 +3692,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3452,7 +3771,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3476,6 +3795,22 @@
             "target": "internal/web/page_projects.go",
             "class": "go",
             "sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/projects_test.go",
+            "target": "internal/web/projects_test.go",
+            "class": "test",
+            "sha256": "babccc36983945ff1c3579b8d3fa522af450c829c79b744884e949051e713953",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/projects.templ",
+            "target": "internal/web/templates/projects.templ",
+            "class": "templ",
+            "sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
             "rewrite_module": true,
             "contract": false
           }
@@ -3589,6 +3924,20 @@
           "base_sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
           "local_sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/projects_test.go",
+          "source": "internal/web/projects_test.go",
+          "base_sha256": "babccc36983945ff1c3579b8d3fa522af450c829c79b744884e949051e713953",
+          "local_sha256": "babccc36983945ff1c3579b8d3fa522af450c829c79b744884e949051e713953",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/projects.templ",
+          "source": "internal/web/templates/projects.templ",
+          "base_sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
+          "local_sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -3597,7 +3946,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -3623,6 +3972,14 @@
             "target": "internal/web/page_settings_account.go",
             "class": "go",
             "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/settings.templ",
+            "target": "internal/web/templates/settings.templ",
+            "class": "templ",
+            "sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
             "rewrite_module": true,
             "contract": false
           }
@@ -3745,6 +4102,13 @@
           "base_sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
           "local_sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/settings.templ",
+          "source": "internal/web/templates/settings.templ",
+          "base_sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
+          "local_sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -3753,7 +4117,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -3779,6 +4143,14 @@
             "target": "internal/web/page_settings_api_tokens.go",
             "class": "go",
             "sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/api_tokens.templ",
+            "target": "internal/web/templates/api_tokens.templ",
+            "class": "templ",
+            "sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
             "rewrite_module": true,
             "contract": false
           }
@@ -3882,6 +4254,13 @@
           "base_sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
           "local_sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/api_tokens.templ",
+          "source": "internal/web/templates/api_tokens.templ",
+          "base_sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
+          "local_sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -3890,7 +4269,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -3913,10 +4292,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/billing_test.go",
+            "target": "internal/web/billing_test.go",
+            "class": "test",
+            "sha256": "29d0ecae19034bb2958966cb69584414880aee9703f35847711fd7520e731e0a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_settings_billing.go",
             "target": "internal/web/page_settings_billing.go",
             "class": "go",
             "sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/billing.templ",
+            "target": "internal/web/templates/billing.templ",
+            "class": "templ",
+            "sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
             "rewrite_module": true,
             "contract": false
           }
@@ -4015,10 +4410,24 @@
       },
       "files": [
         {
+          "path": "internal/web/billing_test.go",
+          "source": "internal/web/billing_test.go",
+          "base_sha256": "29d0ecae19034bb2958966cb69584414880aee9703f35847711fd7520e731e0a",
+          "local_sha256": "29d0ecae19034bb2958966cb69584414880aee9703f35847711fd7520e731e0a",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_settings_billing.go",
           "source": "internal/web/page_settings_billing.go",
           "base_sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
           "local_sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/billing.templ",
+          "source": "internal/web/templates/billing.templ",
+          "base_sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
+          "local_sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
           "state": "clean"
         }
       ],
@@ -4028,7 +4437,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -4050,10 +4459,26 @@
         ],
         "files": [
           {
+            "source": "internal/web/notifications_prefs_test.go",
+            "target": "internal/web/notifications_prefs_test.go",
+            "class": "test",
+            "sha256": "abbbec1ab73cf0a10a34b03fcf93bf8176073686910b8400e31e5a88846ebbde",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/page_settings_notifications.go",
             "target": "internal/web/page_settings_notifications.go",
             "class": "go",
             "sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/settings_notifications.templ",
+            "target": "internal/web/templates/settings_notifications.templ",
+            "class": "templ",
+            "sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
             "rewrite_module": true,
             "contract": false
           }
@@ -4132,10 +4557,24 @@
       },
       "files": [
         {
+          "path": "internal/web/notifications_prefs_test.go",
+          "source": "internal/web/notifications_prefs_test.go",
+          "base_sha256": "abbbec1ab73cf0a10a34b03fcf93bf8176073686910b8400e31e5a88846ebbde",
+          "local_sha256": "abbbec1ab73cf0a10a34b03fcf93bf8176073686910b8400e31e5a88846ebbde",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/page_settings_notifications.go",
           "source": "internal/web/page_settings_notifications.go",
           "base_sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
           "local_sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/settings_notifications.templ",
+          "source": "internal/web/templates/settings_notifications.templ",
+          "base_sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
+          "local_sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
           "state": "clean"
         }
       ],
@@ -4145,7 +4584,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4274,7 +4713,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -4298,6 +4737,22 @@
             "target": "internal/web/handlers_webhooks_settings.go",
             "class": "go",
             "sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/webhooks.templ",
+            "target": "internal/web/templates/webhooks.templ",
+            "class": "templ",
+            "sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/webhooks_settings_test.go",
+            "target": "internal/web/webhooks_settings_test.go",
+            "class": "test",
+            "sha256": "12c7928b4664f767a18b29dca18947d36cdaf6543bee07b9010b0022cf08edd2",
             "rewrite_module": true,
             "contract": false
           }
@@ -4428,6 +4883,20 @@
           "base_sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
           "local_sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/webhooks.templ",
+          "source": "internal/web/templates/webhooks.templ",
+          "base_sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+          "local_sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/webhooks_settings_test.go",
+          "source": "internal/web/webhooks_settings_test.go",
+          "base_sha256": "12c7928b4664f767a18b29dca18947d36cdaf6543bee07b9010b0022cf08edd2",
+          "local_sha256": "12c7928b4664f767a18b29dca18947d36cdaf6543bee07b9010b0022cf08edd2",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -4436,7 +4905,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4552,7 +5021,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -4664,7 +5133,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -4778,7 +5247,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -4887,6 +5356,14 @@
             "target": "internal/jobs/janitor_api.go",
             "class": "go",
             "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/idempotency_test.go",
+            "target": "internal/web/idempotency_test.go",
+            "class": "test",
+            "sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
             "rewrite_module": true,
             "contract": false
           }
@@ -5191,6 +5668,13 @@
           "base_sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
           "local_sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/idempotency_test.go",
+          "source": "internal/web/idempotency_test.go",
+          "base_sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
+          "local_sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -5206,7 +5690,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -5275,7 +5759,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -5441,7 +5925,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -5526,6 +6010,14 @@
             "class": "query",
             "sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
             "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/web/dunning_test.go",
+            "target": "internal/web/dunning_test.go",
+            "class": "test",
+            "sha256": "e214aa1ee6ae6ef6c97fbd7776dcf96994a5986ced227e7e7f8d51ae9053db81",
+            "rewrite_module": true,
             "contract": false
           }
         ],
@@ -5777,6 +6269,13 @@
           "base_sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
           "local_sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/dunning_test.go",
+          "source": "internal/web/dunning_test.go",
+          "base_sha256": "e214aa1ee6ae6ef6c97fbd7776dcf96994a5986ced227e7e7f8d51ae9053db81",
+          "local_sha256": "e214aa1ee6ae6ef6c97fbd7776dcf96994a5986ced227e7e7f8d51ae9053db81",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -5785,7 +6284,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -5916,7 +6415,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -6070,6 +6569,38 @@
             "class": "query",
             "sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
             "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/web/content_cms_test.go",
+            "target": "internal/web/content_cms_test.go",
+            "class": "test",
+            "sha256": "ea05eaa1a1c8d6e1904c9979ecf1e4d732e87f8c3f0ae781e1ac14c3a67cd4c2",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/content_locale_test.go",
+            "target": "internal/web/content_locale_test.go",
+            "class": "test",
+            "sha256": "8d25d0643de4ee147f55970b1b45e3755cdd471e698657bbe932bb3614ae9adf",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/content_type_test.go",
+            "target": "internal/web/content_type_test.go",
+            "class": "test",
+            "sha256": "1b1a1caa5fad09fa8437bcc0e15a62a60643bed7f3e77a3b910c81a14b25c087",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/content.templ",
+            "target": "internal/web/templates/content.templ",
+            "class": "templ",
+            "sha256": "0bf7311256db6072fe2eb26fefb38a136beb5fc306357a217c297c154b06158b",
+            "rewrite_module": true,
             "contract": false
           }
         ],
@@ -6340,6 +6871,34 @@
           "base_sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
           "local_sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/content_cms_test.go",
+          "source": "internal/web/content_cms_test.go",
+          "base_sha256": "ea05eaa1a1c8d6e1904c9979ecf1e4d732e87f8c3f0ae781e1ac14c3a67cd4c2",
+          "local_sha256": "ea05eaa1a1c8d6e1904c9979ecf1e4d732e87f8c3f0ae781e1ac14c3a67cd4c2",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/content_locale_test.go",
+          "source": "internal/web/content_locale_test.go",
+          "base_sha256": "8d25d0643de4ee147f55970b1b45e3755cdd471e698657bbe932bb3614ae9adf",
+          "local_sha256": "8d25d0643de4ee147f55970b1b45e3755cdd471e698657bbe932bb3614ae9adf",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/content_type_test.go",
+          "source": "internal/web/content_type_test.go",
+          "base_sha256": "1b1a1caa5fad09fa8437bcc0e15a62a60643bed7f3e77a3b910c81a14b25c087",
+          "local_sha256": "1b1a1caa5fad09fa8437bcc0e15a62a60643bed7f3e77a3b910c81a14b25c087",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/content.templ",
+          "source": "internal/web/templates/content.templ",
+          "base_sha256": "0bf7311256db6072fe2eb26fefb38a136beb5fc306357a217c297c154b06158b",
+          "local_sha256": "0bf7311256db6072fe2eb26fefb38a136beb5fc306357a217c297c154b06158b",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -6355,7 +6914,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -6999,7 +7558,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -7149,7 +7708,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -7341,7 +7900,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -7478,7 +8037,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -8563,7 +9122,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -8588,6 +9147,14 @@
             "class": "query",
             "sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
             "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/web/impersonation_test.go",
+            "target": "internal/web/impersonation_test.go",
+            "class": "test",
+            "sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+            "rewrite_module": true,
             "contract": false
           }
         ],
@@ -8681,6 +9248,13 @@
           "base_sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
           "local_sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/impersonation_test.go",
+          "source": "internal/web/impersonation_test.go",
+          "base_sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+          "local_sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -8702,7 +9276,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -8911,7 +9485,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -9030,7 +9604,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -9158,7 +9732,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9180,6 +9754,14 @@
             "sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/metrics_test.go",
+            "target": "internal/web/metrics_test.go",
+            "class": "test",
+            "sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -9235,6 +9817,13 @@
           "base_sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
           "local_sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/metrics_test.go",
+          "source": "internal/web/metrics_test.go",
+          "base_sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
+          "local_sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -9243,7 +9832,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9659,7 +10248,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -9881,7 +10470,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -9921,6 +10510,14 @@
             "target": "internal/observability/sentry.go",
             "class": "go",
             "sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/observability_test.go",
+            "target": "internal/web/observability_test.go",
+            "class": "test",
+            "sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
             "rewrite_module": true,
             "contract": false
           }
@@ -9993,6 +10590,13 @@
           "base_sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
           "local_sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/observability_test.go",
+          "source": "internal/web/observability_test.go",
+          "base_sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
+          "local_sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -10001,7 +10605,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -10061,6 +10665,14 @@
             "class": "query",
             "sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
             "rewrite_module": false,
+            "contract": false
+          },
+          {
+            "source": "internal/web/roles_test.go",
+            "target": "internal/web/roles_test.go",
+            "class": "test",
+            "sha256": "777cafa60dc2d05252983ac8ee451c3b20c6c0506be3c5c93e3d5d38bf28759e",
+            "rewrite_module": true,
             "contract": false
           }
         ],
@@ -10250,6 +10862,13 @@
           "base_sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
           "local_sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/roles_test.go",
+          "source": "internal/web/roles_test.go",
+          "base_sha256": "777cafa60dc2d05252983ac8ee451c3b20c6c0506be3c5c93e3d5d38bf28759e",
+          "local_sha256": "777cafa60dc2d05252983ac8ee451c3b20c6c0506be3c5c93e3d5d38bf28759e",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -10271,7 +10890,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -10377,7 +10996,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -10507,7 +11126,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -10583,6 +11202,14 @@
             "contract": true
           },
           {
+            "source": "internal/web/maintenance_test.go",
+            "target": "internal/web/maintenance_test.go",
+            "class": "test",
+            "sha256": "9c8f27f47036954c5bffdc6b5e50fb2e593481f8af574497a3680c27de702e5d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/middleware.go",
             "target": "internal/web/middleware.go",
             "class": "go",
@@ -10620,6 +11247,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/maintenance_test.go",
+          "source": "internal/web/maintenance_test.go",
+          "base_sha256": "9c8f27f47036954c5bffdc6b5e50fb2e593481f8af574497a3680c27de702e5d",
+          "local_sha256": "9c8f27f47036954c5bffdc6b5e50fb2e593481f8af574497a3680c27de702e5d",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/middleware.go",
           "source": "internal/web/middleware.go",
           "base_sha256": "a8e52bdb9c858ab98a8c27dfba936da43d0172e1cf31436116ac5c04f4adf5f8",
@@ -10633,7 +11267,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10715,7 +11349,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -10769,7 +11403,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -10874,10 +11508,26 @@
             "contract": false
           },
           {
+            "source": "internal/web/email_sink.go",
+            "target": "internal/web/email_sink.go",
+            "class": "go",
+            "sha256": "fabc7fafab0e720b1970f58b4e4ffb8e01f60566818c4efd67bc66fd8b8aaee1",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/form.go",
             "target": "internal/web/form.go",
             "class": "go",
             "sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/handlers_public.go",
+            "target": "internal/web/handlers_public.go",
+            "class": "go",
+            "sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
             "rewrite_module": true,
             "contract": false
           },
@@ -10890,6 +11540,14 @@
             "contract": true
           },
           {
+            "source": "internal/web/i18n_test.go",
+            "target": "internal/web/i18n_test.go",
+            "class": "test",
+            "sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/module.go",
             "target": "internal/web/module.go",
             "class": "go",
@@ -10898,12 +11556,28 @@
             "contract": true
           },
           {
+            "source": "internal/web/module_test.go",
+            "target": "internal/web/module_test.go",
+            "class": "test",
+            "sha256": "333b1b7e15615f2d89685ccfb576a8e333a78b04d1bded79db9f27cb262a0a20",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/params.go",
             "target": "internal/web/params.go",
             "class": "go",
             "sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/public_routes_test.go",
+            "target": "internal/web/public_routes_test.go",
+            "class": "test",
+            "sha256": "b3a13fb7cede20ac65952b7dd822f73b25fce6410d5ea202018da2b57c741e3a",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/web/route.go",
@@ -10922,6 +11596,14 @@
             "contract": false
           },
           {
+            "source": "internal/web/route_test.go",
+            "target": "internal/web/route_test.go",
+            "class": "test",
+            "sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/routes.go",
             "target": "internal/web/routes.go",
             "class": "go",
@@ -10936,6 +11618,38 @@
             "sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/templates/designsystem_test.go",
+            "target": "internal/web/templates/designsystem_test.go",
+            "class": "test",
+            "sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/testhelpers_test.go",
+            "target": "internal/web/testhelpers_test.go",
+            "class": "test",
+            "sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/testonly_content_guide.go",
+            "target": "internal/web/testonly_content_guide.go",
+            "class": "go",
+            "sha256": "a33983f45ead47abef66e76641a72dd208ad733bdff43bb1261aca8773080ea9",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/web_test.go",
+            "target": "internal/web/web_test.go",
+            "class": "test",
+            "sha256": "064a39b2209a40b0dda949eba514cf4a176feb23e4334f4c439f145f86df08b6",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -11346,10 +12060,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/email_sink.go",
+          "source": "internal/web/email_sink.go",
+          "base_sha256": "fabc7fafab0e720b1970f58b4e4ffb8e01f60566818c4efd67bc66fd8b8aaee1",
+          "local_sha256": "fabc7fafab0e720b1970f58b4e4ffb8e01f60566818c4efd67bc66fd8b8aaee1",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/form.go",
           "source": "internal/web/form.go",
           "base_sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
           "local_sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/handlers_public.go",
+          "source": "internal/web/handlers_public.go",
+          "base_sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
+          "local_sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
           "state": "clean"
         },
         {
@@ -11360,6 +12088,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/i18n_test.go",
+          "source": "internal/web/i18n_test.go",
+          "base_sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+          "local_sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/module.go",
           "source": "internal/web/module.go",
           "base_sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
@@ -11367,10 +12102,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/module_test.go",
+          "source": "internal/web/module_test.go",
+          "base_sha256": "333b1b7e15615f2d89685ccfb576a8e333a78b04d1bded79db9f27cb262a0a20",
+          "local_sha256": "333b1b7e15615f2d89685ccfb576a8e333a78b04d1bded79db9f27cb262a0a20",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/params.go",
           "source": "internal/web/params.go",
           "base_sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
           "local_sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/public_routes_test.go",
+          "source": "internal/web/public_routes_test.go",
+          "base_sha256": "b3a13fb7cede20ac65952b7dd822f73b25fce6410d5ea202018da2b57c741e3a",
+          "local_sha256": "b3a13fb7cede20ac65952b7dd822f73b25fce6410d5ea202018da2b57c741e3a",
           "state": "clean"
         },
         {
@@ -11388,6 +12137,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/route_test.go",
+          "source": "internal/web/route_test.go",
+          "base_sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+          "local_sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/routes.go",
           "source": "internal/web/routes.go",
           "base_sha256": "ae50b9f7d6f8c2dc939f5e1ed3953c9145dfbfc848ccb89146bded8beea0661f",
@@ -11400,6 +12156,34 @@
           "base_sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
           "local_sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/designsystem_test.go",
+          "source": "internal/web/templates/designsystem_test.go",
+          "base_sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+          "local_sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/testhelpers_test.go",
+          "source": "internal/web/testhelpers_test.go",
+          "base_sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
+          "local_sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/testonly_content_guide.go",
+          "source": "internal/web/testonly_content_guide.go",
+          "base_sha256": "a33983f45ead47abef66e76641a72dd208ad733bdff43bb1261aca8773080ea9",
+          "local_sha256": "a33983f45ead47abef66e76641a72dd208ad733bdff43bb1261aca8773080ea9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/web_test.go",
+          "source": "internal/web/web_test.go",
+          "base_sha256": "064a39b2209a40b0dda949eba514cf4a176feb23e4334f4c439f145f86df08b6",
+          "local_sha256": "064a39b2209a40b0dda949eba514cf4a176feb23e4334f4c439f145f86df08b6",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -11408,7 +12192,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11491,7 +12275,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "25b3c5352b9b00533e712426825f7cea7bededd4f7b50c1d273f29f44e96d0e6",
+            "sha256": "1740d4969131f8a802b9af480a33296d7b9ac4dafa9e49ad02c0d7f382645089",
             "rewrite_module": false,
             "contract": false
           },
@@ -11663,7 +12447,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -11826,7 +12610,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11882,7 +12666,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -12009,7 +12793,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -12263,7 +13047,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12347,7 +13131,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12367,6 +13151,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/web/account_data_test.go",
+            "target": "internal/web/account_data_test.go",
+            "class": "test",
+            "sha256": "a0e79fb98583ab8c04de988e2b90d140368bdea24b26e7eef5eef1184c891301",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/workflow_account_export.go",
             "target": "internal/web/workflow_account_export.go",
@@ -12415,6 +13207,13 @@
       },
       "files": [
         {
+          "path": "internal/web/account_data_test.go",
+          "source": "internal/web/account_data_test.go",
+          "base_sha256": "a0e79fb98583ab8c04de988e2b90d140368bdea24b26e7eef5eef1184c891301",
+          "local_sha256": "a0e79fb98583ab8c04de988e2b90d140368bdea24b26e7eef5eef1184c891301",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/workflow_account_export.go",
           "source": "internal/web/workflow_account_export.go",
           "base_sha256": "fce2d29d6767e96de19522734a79c63ba5b94df184d2194d05c2b5b9efb4e689",
@@ -12428,7 +13227,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12562,7 +13361,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -12755,7 +13554,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12927,7 +13726,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12989,7 +13788,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13109,7 +13908,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13245,7 +14044,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13343,7 +14142,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13360,7 +14159,16 @@
           "system/server",
           "workflow/openapi-contract"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/web/ai_test.go",
+            "target": "internal/web/ai_test.go",
+            "class": "test",
+            "sha256": "35888f39a5a2c90004d06698fbafb9fc3ea39b702983782dde53529f83a412f2",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "routes": [
             "api.ai.chat"
@@ -13553,14 +14361,22 @@
         "data": [],
         "removal_policy": "free"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/web/ai_test.go",
+          "source": "internal/web/ai_test.go",
+          "base_sha256": "35888f39a5a2c90004d06698fbafb9fc3ea39b702983782dde53529f83a412f2",
+          "local_sha256": "35888f39a5a2c90004d06698fbafb9fc3ea39b702983782dde53529f83a412f2",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     },
     {
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13576,7 +14392,16 @@
           "system/server",
           "workflow/openapi-contract"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/web/api_test.go",
+            "target": "internal/web/api_test.go",
+            "class": "test",
+            "sha256": "e6adf3b0cfd0ec0dbe8b53c350ac6558eab17d0c564c223034155f50e0a73f35",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "routes": [
             "api.projects.create",
@@ -13872,14 +14697,22 @@
         "data": [],
         "removal_policy": "free"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/web/api_test.go",
+          "source": "internal/web/api_test.go",
+          "base_sha256": "e6adf3b0cfd0ec0dbe8b53c350ac6558eab17d0c564c223034155f50e0a73f35",
+          "local_sha256": "e6adf3b0cfd0ec0dbe8b53c350ac6558eab17d0c564c223034155f50e0a73f35",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     },
     {
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13978,7 +14811,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14003,6 +14836,14 @@
             "sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/web/appearance_test.go",
+            "target": "internal/web/appearance_test.go",
+            "class": "test",
+            "sha256": "9e5049267c0dbeb682ee44a7a9fd4a04793499e5ae7b56795fae5e51e61cd32d",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/web/handlers_locale.go",
@@ -14077,6 +14918,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/appearance_test.go",
+          "source": "internal/web/appearance_test.go",
+          "base_sha256": "9e5049267c0dbeb682ee44a7a9fd4a04793499e5ae7b56795fae5e51e61cd32d",
+          "local_sha256": "9e5049267c0dbeb682ee44a7a9fd4a04793499e5ae7b56795fae5e51e61cd32d",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/handlers_locale.go",
           "source": "internal/web/handlers_locale.go",
           "base_sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
@@ -14090,7 +14938,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -14112,6 +14960,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/web/auth_test.go",
+            "target": "internal/web/auth_test.go",
+            "class": "test",
+            "sha256": "c353e79d33eec7407b3e73479a1b5c142abc586fd0c199b796f879d29062264e",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/workflow_auth_session.go",
             "target": "internal/web/workflow_auth_session.go",
@@ -14196,6 +15052,13 @@
       },
       "files": [
         {
+          "path": "internal/web/auth_test.go",
+          "source": "internal/web/auth_test.go",
+          "base_sha256": "c353e79d33eec7407b3e73479a1b5c142abc586fd0c199b796f879d29062264e",
+          "local_sha256": "c353e79d33eec7407b3e73479a1b5c142abc586fd0c199b796f879d29062264e",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/workflow_auth_session.go",
           "source": "internal/web/workflow_auth_session.go",
           "base_sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
@@ -14209,7 +15072,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14326,7 +15189,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14405,7 +15268,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -14425,6 +15288,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/web/webhook_bypass_test.go",
+            "target": "internal/web/webhook_bypass_test.go",
+            "class": "test",
+            "sha256": "1abdbf33cb793afe8ccb918d6883dc33a4d171b3b195d07ee7bc00f9616da8d9",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/workflow_dev_session.go",
             "target": "internal/web/workflow_dev_session.go",
@@ -14493,6 +15364,13 @@
       },
       "files": [
         {
+          "path": "internal/web/webhook_bypass_test.go",
+          "source": "internal/web/webhook_bypass_test.go",
+          "base_sha256": "1abdbf33cb793afe8ccb918d6883dc33a4d171b3b195d07ee7bc00f9616da8d9",
+          "local_sha256": "1abdbf33cb793afe8ccb918d6883dc33a4d171b3b195d07ee7bc00f9616da8d9",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/workflow_dev_session.go",
           "source": "internal/web/workflow_dev_session.go",
           "base_sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
@@ -14506,7 +15384,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14677,7 +15555,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14694,6 +15572,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/web/clerk_webhook_test.go",
+            "target": "internal/web/clerk_webhook_test.go",
+            "class": "test",
+            "sha256": "f91157a6ab1e89035738f821018670dae341c64f1bf3d8da279aba27834fadaa",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/handlers_webhooks.go",
             "target": "internal/web/handlers_webhooks.go",
@@ -14756,6 +15642,13 @@
       },
       "files": [
         {
+          "path": "internal/web/clerk_webhook_test.go",
+          "source": "internal/web/clerk_webhook_test.go",
+          "base_sha256": "f91157a6ab1e89035738f821018670dae341c64f1bf3d8da279aba27834fadaa",
+          "local_sha256": "f91157a6ab1e89035738f821018670dae341c64f1bf3d8da279aba27834fadaa",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/handlers_webhooks.go",
           "source": "internal/web/handlers_webhooks.go",
           "base_sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
@@ -14769,7 +15662,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14902,7 +15795,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15037,7 +15930,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15118,7 +16011,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -15142,6 +16035,14 @@
             "target": "internal/web/api_transport.go",
             "class": "go",
             "sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/openapi_test.go",
+            "target": "internal/web/openapi_test.go",
+            "class": "test",
+            "sha256": "295a161b6b26171818daa6cc41fd3f93b70693660ef5463f458f00a6422a10b3",
             "rewrite_module": true,
             "contract": false
           }
@@ -15236,6 +16137,13 @@
           "base_sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
           "local_sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
           "state": "clean"
+        },
+        {
+          "path": "internal/web/openapi_test.go",
+          "source": "internal/web/openapi_test.go",
+          "base_sha256": "295a161b6b26171818daa6cc41fd3f93b70693660ef5463f458f00a6422a10b3",
+          "local_sha256": "295a161b6b26171818daa6cc41fd3f93b70693660ef5463f458f00a6422a10b3",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -15244,7 +16152,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -15337,7 +16245,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15481,7 +16389,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15571,7 +16479,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -15776,7 +16684,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "9552cf495d3661b4773a645544aa636eefbac06cabdb2e38a3f30cc7617687b3",
+      "source_commit": "8c10ae2b7a11a9dd228cec87ec5b48d9c3bca8340e4bb26c41d39d879864661e",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15792,7 +16700,16 @@
           "system/seo",
           "system/server"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/web/seo_test.go",
+            "target": "internal/web/seo_test.go",
+            "class": "test",
+            "sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "routes": [
             "seo.robots",
@@ -15878,7 +16795,15 @@
         "data": [],
         "removal_policy": "free"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/web/seo_test.go",
+          "source": "internal/web/seo_test.go",
+          "base_sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
+          "local_sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     }
   ]

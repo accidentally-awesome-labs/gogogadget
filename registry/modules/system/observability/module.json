@@ -36,6 +36,14 @@
         "sha256": "b85644630d3ea2b6e9c977238011086a512f0812bc432cab74daf8ff661ebb9b",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/observability_test.go",
+        "target": "internal/web/observability_test.go",
+        "class": "test",
+        "sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

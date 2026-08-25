@@ -20,6 +20,14 @@
         "sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/web/impersonation_test.go",
+        "target": "internal/web/impersonation_test.go",
+        "class": "test",
+        "sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

@@ -17,10 +17,26 @@
     ],
     "files": [
       {
+        "source": "internal/web/notifications_test.go",
+        "target": "internal/web/notifications_test.go",
+        "class": "test",
+        "sha256": "fdd48b18ead1921b448409c9e94acc48345b90c8af2e4b8cfc689b43deabf747",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_notifications.go",
         "target": "internal/web/page_notifications.go",
         "class": "go",
         "sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/notifications.templ",
+        "target": "internal/web/templates/notifications.templ",
+        "class": "templ",
+        "sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
         "rewrite_module": true,
         "contract": false
       }

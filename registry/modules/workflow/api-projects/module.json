@@ -13,7 +13,16 @@
       "system/server",
       "workflow/openapi-contract"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/web/api_test.go",
+        "target": "internal/web/api_test.go",
+        "class": "test",
+        "sha256": "e6adf3b0cfd0ec0dbe8b53c350ac6558eab17d0c564c223034155f50e0a73f35",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "api.projects.create",

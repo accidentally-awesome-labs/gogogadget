@@ -18,10 +18,26 @@
     ],
     "files": [
       {
+        "source": "internal/web/billing_test.go",
+        "target": "internal/web/billing_test.go",
+        "class": "test",
+        "sha256": "29d0ecae19034bb2958966cb69584414880aee9703f35847711fd7520e731e0a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_settings_billing.go",
         "target": "internal/web/page_settings_billing.go",
         "class": "go",
         "sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/billing.templ",
+        "target": "internal/web/templates/billing.templ",
+        "class": "templ",
+        "sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
         "rewrite_module": true,
         "contract": false
       }

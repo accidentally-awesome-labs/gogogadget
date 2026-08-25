@@ -20,6 +20,14 @@
         "sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/openapi_test.go",
+        "target": "internal/web/openapi_test.go",
+        "class": "test",
+        "sha256": "295a161b6b26171818daa6cc41fd3f93b70693660ef5463f458f00a6422a10b3",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

@@ -23,6 +23,22 @@
         "sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/projects_test.go",
+        "target": "internal/web/projects_test.go",
+        "class": "test",
+        "sha256": "babccc36983945ff1c3579b8d3fa522af450c829c79b744884e949051e713953",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/projects.templ",
+        "target": "internal/web/templates/projects.templ",
+        "class": "templ",
+        "sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

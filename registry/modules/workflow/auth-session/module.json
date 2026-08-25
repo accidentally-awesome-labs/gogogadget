@@ -16,6 +16,14 @@
     ],
     "files": [
       {
+        "source": "internal/web/auth_test.go",
+        "target": "internal/web/auth_test.go",
+        "class": "test",
+        "sha256": "c353e79d33eec7407b3e73479a1b5c142abc586fd0c199b796f879d29062264e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_auth_session.go",
         "target": "internal/web/workflow_auth_session.go",
         "class": "go",

@@ -16,6 +16,14 @@
     ],
     "files": [
       {
+        "source": "internal/web/activity_test.go",
+        "target": "internal/web/activity_test.go",
+        "class": "test",
+        "sha256": "e3b9066d1c3891fecd947e2284a8f266d5621ce161f4b77d9e0eb71c775239c9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/handlers_activity.go",
         "target": "internal/web/handlers_activity.go",
         "class": "go",

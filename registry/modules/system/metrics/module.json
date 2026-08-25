@@ -19,6 +19,14 @@
         "sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/metrics_test.go",
+        "target": "internal/web/metrics_test.go",
+        "class": "test",
+        "sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

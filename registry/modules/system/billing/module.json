@@ -76,6 +76,14 @@
         "sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/web/dunning_test.go",
+        "target": "internal/web/dunning_test.go",
+        "class": "test",
+        "sha256": "e214aa1ee6ae6ef6c97fbd7776dcf96994a5986ced227e7e7f8d51ae9053db81",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

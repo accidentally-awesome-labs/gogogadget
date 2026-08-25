@@ -24,6 +24,22 @@
         "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/schedules_admin_test.go",
+        "target": "internal/web/schedules_admin_test.go",
+        "class": "test",
+        "sha256": "fedd3c9be9f55c1a606ca00179ba395c13ee32b403e3b2844c4ab7fa7e5f018e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_schedules.templ",
+        "target": "internal/web/templates/admin_schedules.templ",
+        "class": "templ",
+        "sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

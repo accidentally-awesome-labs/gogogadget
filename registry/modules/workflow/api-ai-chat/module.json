@@ -14,7 +14,16 @@
       "system/server",
       "workflow/openapi-contract"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/web/ai_test.go",
+        "target": "internal/web/ai_test.go",
+        "class": "test",
+        "sha256": "35888f39a5a2c90004d06698fbafb9fc3ea39b702983782dde53529f83a412f2",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "api.ai.chat"

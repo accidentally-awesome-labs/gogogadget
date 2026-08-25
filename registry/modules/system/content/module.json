@@ -140,6 +140,38 @@
         "sha256": "96d7dc33a6ae40ad698f2dd416e1a297c24351bd409b2177b2b9ddd068a2a926",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/web/content_cms_test.go",
+        "target": "internal/web/content_cms_test.go",
+        "class": "test",
+        "sha256": "ea05eaa1a1c8d6e1904c9979ecf1e4d732e87f8c3f0ae781e1ac14c3a67cd4c2",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/content_locale_test.go",
+        "target": "internal/web/content_locale_test.go",
+        "class": "test",
+        "sha256": "8d25d0643de4ee147f55970b1b45e3755cdd471e698657bbe932bb3614ae9adf",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/content_type_test.go",
+        "target": "internal/web/content_type_test.go",
+        "class": "test",
+        "sha256": "1b1a1caa5fad09fa8437bcc0e15a62a60643bed7f3e77a3b910c81a14b25c087",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/content.templ",
+        "target": "internal/web/templates/content.templ",
+        "class": "templ",
+        "sha256": "0bf7311256db6072fe2eb26fefb38a136beb5fc306357a217c297c154b06158b",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

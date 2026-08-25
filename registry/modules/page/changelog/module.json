@@ -14,7 +14,16 @@
       "system/i18n",
       "system/server"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/web/templates/changelog.templ",
+        "target": "internal/web/templates/changelog.templ",
+        "class": "templ",
+        "sha256": "30af1bcf10a5cff8eb7d3061a0afafe64ed91a3e844f4521a4d957ff60cb6705",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "content_types": [
         "release"

@@ -35,6 +35,14 @@
         "sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/web/roles_test.go",
+        "target": "internal/web/roles_test.go",
+        "class": "test",
+        "sha256": "777cafa60dc2d05252983ac8ee451c3b20c6c0506be3c5c93e3d5d38bf28759e",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

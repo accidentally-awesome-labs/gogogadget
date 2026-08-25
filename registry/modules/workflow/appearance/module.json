@@ -24,6 +24,14 @@
         "contract": true
       },
       {
+        "source": "internal/web/appearance_test.go",
+        "target": "internal/web/appearance_test.go",
+        "class": "test",
+        "sha256": "9e5049267c0dbeb682ee44a7a9fd4a04793499e5ae7b56795fae5e51e61cd32d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/handlers_locale.go",
         "target": "internal/web/handlers_locale.go",
         "class": "go",

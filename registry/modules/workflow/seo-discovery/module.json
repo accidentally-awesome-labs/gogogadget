@@ -13,7 +13,16 @@
       "system/seo",
       "system/server"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/web/seo_test.go",
+        "target": "internal/web/seo_test.go",
+        "class": "test",
+        "sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "seo.robots",

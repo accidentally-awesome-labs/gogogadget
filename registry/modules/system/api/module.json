@@ -101,6 +101,14 @@
         "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/idempotency_test.go",
+        "target": "internal/web/idempotency_test.go",
+        "class": "test",
+        "sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

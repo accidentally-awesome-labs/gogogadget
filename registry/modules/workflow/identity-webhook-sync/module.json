@@ -15,6 +15,14 @@
     ],
     "files": [
       {
+        "source": "internal/web/clerk_webhook_test.go",
+        "target": "internal/web/clerk_webhook_test.go",
+        "class": "test",
+        "sha256": "f91157a6ab1e89035738f821018670dae341c64f1bf3d8da279aba27834fadaa",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/handlers_webhooks.go",
         "target": "internal/web/handlers_webhooks.go",
         "class": "go",

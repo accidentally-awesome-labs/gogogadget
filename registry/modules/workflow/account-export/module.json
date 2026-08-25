@@ -18,6 +18,14 @@
     ],
     "files": [
       {
+        "source": "internal/web/account_data_test.go",
+        "target": "internal/web/account_data_test.go",
+        "class": "test",
+        "sha256": "a0e79fb98583ab8c04de988e2b90d140368bdea24b26e7eef5eef1184c891301",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_account_export.go",
         "target": "internal/web/workflow_account_export.go",
         "class": "go",

@@ -18,10 +18,26 @@
     ],
     "files": [
       {
+        "source": "internal/web/admin_test.go",
+        "target": "internal/web/admin_test.go",
+        "class": "test",
+        "sha256": "331f565a0038ca51859915ec9b260d2fe9206b3f43ef481218e9f9dc2714582f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_admin_overview.go",
         "target": "internal/web/page_admin_overview.go",
         "class": "go",
         "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin.templ",
+        "target": "internal/web/templates/admin.templ",
+        "class": "templ",
+        "sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
         "rewrite_module": true,
         "contract": false
       }

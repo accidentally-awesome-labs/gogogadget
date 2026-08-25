@@ -16,6 +16,14 @@
     ],
     "files": [
       {
+        "source": "internal/web/media_test.go",
+        "target": "internal/web/media_test.go",
+        "class": "test",
+        "sha256": "1a37e1e9c8a9d4d2db7b3cc6e9b54c1495db8ad4ef16441c7164dbb4e28a3b81",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_admin_media.go",
         "target": "internal/web/page_admin_media.go",
         "class": "go",

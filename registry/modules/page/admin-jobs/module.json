@@ -15,10 +15,26 @@
     ],
     "files": [
       {
+        "source": "internal/web/admin_viewers_test.go",
+        "target": "internal/web/admin_viewers_test.go",
+        "class": "test",
+        "sha256": "f7c61ae70a40c9e6486710b26bf0fc361c39d71803f1bcd6062ef3208cf74a3b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/handlers_admin_jobs.go",
         "target": "internal/web/handlers_admin_jobs.go",
         "class": "go",
         "sha256": "07b59d6b3b4bd929b26c315ad47d12067ef9b7aabb4e635a7d31d5c5dd4fb794",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_jobs.templ",
+        "target": "internal/web/templates/admin_jobs.templ",
+        "class": "templ",
+        "sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
         "rewrite_module": true,
         "contract": false
       }

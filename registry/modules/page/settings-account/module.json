@@ -23,6 +23,14 @@
         "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/templates/settings.templ",
+        "target": "internal/web/templates/settings.templ",
+        "class": "templ",
+        "sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

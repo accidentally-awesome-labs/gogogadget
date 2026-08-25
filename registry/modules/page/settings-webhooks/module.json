@@ -21,6 +21,22 @@
         "sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/templates/webhooks.templ",
+        "target": "internal/web/templates/webhooks.templ",
+        "class": "templ",
+        "sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/webhooks_settings_test.go",
+        "target": "internal/web/webhooks_settings_test.go",
+        "class": "test",
+        "sha256": "12c7928b4664f767a18b29dca18947d36cdaf6543bee07b9010b0022cf08edd2",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
