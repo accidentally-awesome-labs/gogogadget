@@ -108,6 +108,44 @@
           "package": "internal/jobs",
           "handler": "janitorOldJobs"
         }
+      ],
+      "queries": [
+        {
+          "name": "ClaimJob",
+          "table": "jobs"
+        },
+        {
+          "name": "CompleteJob",
+          "table": "jobs"
+        },
+        {
+          "name": "CountJobs",
+          "table": "jobs"
+        },
+        {
+          "name": "DeadLetterJob",
+          "table": "jobs"
+        },
+        {
+          "name": "DeleteOldJobs",
+          "table": "jobs"
+        },
+        {
+          "name": "EnqueueJob",
+          "table": "jobs"
+        },
+        {
+          "name": "FailJob",
+          "table": "jobs"
+        },
+        {
+          "name": "ListJobs",
+          "table": "jobs"
+        },
+        {
+          "name": "RequeueDeadJob",
+          "table": "jobs"
+        }
       ]
     },
     "migrations": [],

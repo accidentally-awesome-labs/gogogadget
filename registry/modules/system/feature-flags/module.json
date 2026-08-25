@@ -71,7 +71,49 @@
         ],
         "start": false,
         "stop": false
-      }
+      },
+      "queries": [
+        {
+          "name": "DeleteFeatureFlag",
+          "table": "feature_flags"
+        },
+        {
+          "name": "DeleteFlagOverride",
+          "table": "flag_overrides"
+        },
+        {
+          "name": "GetFeatureFlag",
+          "table": "feature_flags"
+        },
+        {
+          "name": "GetFlagOverride",
+          "table": "flag_overrides"
+        },
+        {
+          "name": "ListFeatureFlags",
+          "table": "feature_flags"
+        },
+        {
+          "name": "ListFlagOverridesByFlag",
+          "table": "flag_overrides"
+        },
+        {
+          "name": "SetFeatureFlagEnabled",
+          "table": "feature_flags"
+        },
+        {
+          "name": "SetFeatureFlagRollout",
+          "table": "feature_flags"
+        },
+        {
+          "name": "UpsertFeatureFlag",
+          "table": "feature_flags"
+        },
+        {
+          "name": "UpsertFlagOverride",
+          "table": "flag_overrides"
+        }
+      ]
     },
     "migrations": [
       {
@@ -95,6 +137,13 @@
         "export": false,
         "account_delete": "retain",
         "organization_delete": "retain"
+      },
+      {
+        "table": "flag_overrides",
+        "scope": "org",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
       }
     ],
     "removal_policy": "retain-data"

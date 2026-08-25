@@ -152,7 +152,86 @@
         "content_revisions"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "queries": [
+        {
+          "name": "CountEntriesAdmin",
+          "table": "content_entries"
+        },
+        {
+          "name": "CountMedia",
+          "table": "content_media"
+        },
+        {
+          "name": "CreateEntry",
+          "table": "content_entries"
+        },
+        {
+          "name": "DeleteEntry",
+          "table": "content_entries"
+        },
+        {
+          "name": "DeleteMedia",
+          "table": "content_media"
+        },
+        {
+          "name": "GetEntry",
+          "table": "content_entries"
+        },
+        {
+          "name": "GetEntryByKindSlugLocale",
+          "table": "content_entries"
+        },
+        {
+          "name": "GetLiveEntry",
+          "table": "content_entries"
+        },
+        {
+          "name": "GetMedia",
+          "table": "content_media"
+        },
+        {
+          "name": "GetRevision",
+          "table": "content_revisions"
+        },
+        {
+          "name": "InsertMedia",
+          "table": "content_media"
+        },
+        {
+          "name": "InsertRevision",
+          "table": "content_revisions"
+        },
+        {
+          "name": "LatestLiveEntry",
+          "table": "content_entries"
+        },
+        {
+          "name": "ListEntriesAdmin",
+          "table": "content_entries"
+        },
+        {
+          "name": "ListLiveEntries",
+          "table": "content_entries"
+        },
+        {
+          "name": "ListMedia",
+          "table": "content_media"
+        },
+        {
+          "name": "ListRevisionsByEntry",
+          "table": "content_revisions"
+        },
+        {
+          "name": "SetEntryStatus",
+          "table": "content_entries"
+        },
+        {
+          "name": "UpdateEntry",
+          "table": "content_entries"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0019_content_cms",
@@ -185,6 +264,13 @@
         "external_objects": [
           "storage"
         ]
+      },
+      {
+        "table": "content_revisions",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
       }
     ],
     "removal_policy": "retain-data",

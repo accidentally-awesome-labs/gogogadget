@@ -76,6 +76,72 @@
           "package": "internal/jobs",
           "handler": "janitorWebhookSecrets"
         }
+      ],
+      "queries": [
+        {
+          "name": "ClearExpiredPreviousSecrets",
+          "table": "webhook_endpoints"
+        },
+        {
+          "name": "DeleteOldWebhookEvents",
+          "table": "webhook_events"
+        },
+        {
+          "name": "GetWebhookDelivery",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "GetWebhookEndpoint",
+          "table": "webhook_endpoints"
+        },
+        {
+          "name": "InsertWebhookDelivery",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "InsertWebhookEndpoint",
+          "table": "webhook_endpoints"
+        },
+        {
+          "name": "InsertWebhookEvent",
+          "table": "webhook_events"
+        },
+        {
+          "name": "ListActiveEndpointsForEvent",
+          "table": "webhook_endpoints"
+        },
+        {
+          "name": "ListDeliveriesByOrg",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "ListWebhookEndpointsByOrg",
+          "table": "webhook_endpoints"
+        },
+        {
+          "name": "MarkDeliveryDead",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "MarkDeliverySuccess",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "RecordDeliveryAttempt",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "ResetWebhookDelivery",
+          "table": "webhook_deliveries"
+        },
+        {
+          "name": "RotateWebhookEndpointSecret",
+          "table": "webhook_endpoints"
+        },
+        {
+          "name": "SetWebhookEndpointDisabled",
+          "table": "webhook_endpoints"
+        }
       ]
     },
     "migrations": [
@@ -112,6 +178,13 @@
         "scope": "org",
         "export": true,
         "secret_redaction_owner": "system/webhooks",
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      },
+      {
+        "table": "webhook_events",
+        "scope": "org",
+        "export": false,
         "account_delete": "retain",
         "organization_delete": "cascade"
       }

@@ -233,6 +233,7 @@ type RuntimeContributions struct {
 	Routes       []RouteContribution       `json:"routes,omitempty"`
 	Jobs         []JobContribution         `json:"jobs,omitempty"`
 	Janitors     []JanitorContribution     `json:"janitors,omitempty"`
+	Queries      []QueryContribution       `json:"queries,omitempty"`
 	ContentTypes []ContentTypeContribution `json:"content_types,omitempty"`
 	Navigation   []NavigationContribution  `json:"navigation,omitempty"`
 	Slots        []SlotContribution        `json:"slots,omitempty"`
@@ -313,6 +314,21 @@ type JanitorContribution struct {
 	Name    string `json:"name"`
 	Package string `json:"package"`
 	Handler string `json:"handler"`
+}
+
+// QueryContribution declares one sqlc method this module owns and the table it
+// reads or writes. The generated sqlc package is one flat namespace shared by
+// every module, so without declarations two modules can collide on a method
+// name, and a module can quietly depend on a table that disappears when another
+// module is removed.
+type QueryContribution struct {
+	// Name is the sqlc method name, which is the `-- name:` annotation in the
+	// query file and the Go method it generates.
+	Name string `json:"name"`
+	// Table is the table the query reads or writes. It must be declared by some
+	// module's data records; reading a table owned by another module requires a
+	// dependency on that module.
+	Table string `json:"table"`
 }
 
 // ContentTypeContribution declares generated content routes and their handler.

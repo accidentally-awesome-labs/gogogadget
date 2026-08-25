@@ -56,6 +56,52 @@
           "schedulable": true,
           "max_attempts": 0
         }
+      ],
+      "queries": [
+        {
+          "name": "CountNotificationsByUser",
+          "table": "notifications"
+        },
+        {
+          "name": "CountUnreadByUser",
+          "table": "notifications"
+        },
+        {
+          "name": "DeleteOldReadNotifications",
+          "table": "notifications"
+        },
+        {
+          "name": "GetNotificationPreference",
+          "table": "notification_preferences"
+        },
+        {
+          "name": "InsertNotification",
+          "table": "notifications"
+        },
+        {
+          "name": "ListNotificationPreferencesByUser",
+          "table": "notification_preferences"
+        },
+        {
+          "name": "ListNotificationsByUser",
+          "table": "notifications"
+        },
+        {
+          "name": "ListNotificationsSince",
+          "table": "notifications"
+        },
+        {
+          "name": "MarkAllRead",
+          "table": "notifications"
+        },
+        {
+          "name": "MarkNotificationRead",
+          "table": "notifications"
+        },
+        {
+          "name": "UpsertNotificationPreference",
+          "table": "notification_preferences"
+        }
       ]
     },
     "migrations": [

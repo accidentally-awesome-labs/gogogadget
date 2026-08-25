@@ -37,7 +37,38 @@
         "schedules"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "queries": [
+        {
+          "name": "ClaimDueSchedules",
+          "table": "schedules"
+        },
+        {
+          "name": "CreateSchedule",
+          "table": "schedules"
+        },
+        {
+          "name": "DeleteSchedule",
+          "table": "schedules"
+        },
+        {
+          "name": "GetSchedule",
+          "table": "schedules"
+        },
+        {
+          "name": "ListSchedules",
+          "table": "schedules"
+        },
+        {
+          "name": "RunScheduleNow",
+          "table": "schedules"
+        },
+        {
+          "name": "SetScheduleEnabled",
+          "table": "schedules"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0004_schedules",

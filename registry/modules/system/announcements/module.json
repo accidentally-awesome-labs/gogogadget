@@ -26,7 +26,34 @@
         "announcements"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "queries": [
+        {
+          "name": "CreateAnnouncement",
+          "table": "announcements"
+        },
+        {
+          "name": "DeactivateAnnouncements",
+          "table": "announcements"
+        },
+        {
+          "name": "DeleteAnnouncement",
+          "table": "announcements"
+        },
+        {
+          "name": "GetActiveAnnouncement",
+          "table": "announcements"
+        },
+        {
+          "name": "ListAnnouncements",
+          "table": "announcements"
+        },
+        {
+          "name": "SetAnnouncementActive",
+          "table": "announcements"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0011_announcements",

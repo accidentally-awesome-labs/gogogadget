@@ -2,6 +2,7 @@ package db_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
@@ -435,4 +436,71 @@ func TestProjectSearchFTS(t *testing.T) {
 	n, err := q.CountProjectsByOrgSearch(ctx, sqlc.CountProjectsByOrgSearchParams{ClerkOrgID: "org_s", Column2: "Quarterly"})
 	require.NoError(t, err)
 	assert.Equal(t, int64(2), n)
+}
+
+// Table declarations drive account/organization delete behaviour and the export
+// collectors, so a declared table that does not exist means deletion silently
+// skips nothing while an undeclared table means it silently skips real rows.
+// Neither is visible without asking the database.
+//
+// This caught two phantom declarations (`organizations`, `memberships` — the
+// real tables are `orgs` and `org_members`) and six real tables nobody declared.
+func TestDeclaredTablesMatchTheDatabase(t *testing.T) {
+	pool, _ := testdb.Open(t, "table_parity")
+	defer pool.Close()
+	ctx := context.Background()
+
+	rows, err := pool.Query(ctx, `
+		SELECT table_name FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`)
+	require.NoError(t, err)
+	defer rows.Close()
+
+	actual := map[string]bool{}
+	for rows.Next() {
+		var name string
+		require.NoError(t, rows.Scan(&name))
+		// goose's own bookkeeping is not application data.
+		if name == "goose_db_version" {
+			continue
+		}
+		actual[name] = true
+	}
+	require.NoError(t, rows.Err())
+	require.NotEmpty(t, actual)
+
+	for table := range db.TableOwners {
+		assert.True(t, actual[table],
+			"table %q is declared by %s but does not exist", table, db.TableOwners[table])
+	}
+	for table := range actual {
+		_, declared := db.TableOwners[table]
+		assert.True(t, declared,
+			"table %q exists but no module declares it, so delete and export behaviour is undefined for it", table)
+	}
+}
+
+// Every declared sqlc method must exist on the generated Queries type, and every
+// generated method must be declared. Ownership drives removal, so an undeclared
+// method would survive its module's removal.
+func TestDeclaredQueriesMatchGeneratedMethods(t *testing.T) {
+	generated := map[string]bool{}
+	queriesType := reflect.TypeOf(&sqlc.Queries{})
+	for i := range queriesType.NumMethod() {
+		generated[queriesType.Method(i).Name] = true
+	}
+	require.NotEmpty(t, generated)
+
+	for method, owner := range db.QueryOwners {
+		assert.True(t, generated[method],
+			"query %q is declared by %s but sqlc generated no such method", method, owner)
+	}
+	for method := range generated {
+		// WithTx is sqlc's own plumbing on the Queries type, not a query.
+		if method == "WithTx" {
+			continue
+		}
+		_, declared := db.QueryOwners[method]
+		assert.True(t, declared, "sqlc method %q is generated but no module declares it", method)
+	}
 }

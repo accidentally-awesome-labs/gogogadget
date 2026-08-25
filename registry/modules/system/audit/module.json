@@ -53,6 +53,40 @@
           "package": "internal/jobs",
           "handler": "janitorAuditLog"
         }
+      ],
+      "queries": [
+        {
+          "name": "CountAuditAll",
+          "table": "audit_log"
+        },
+        {
+          "name": "CountAuditByOrg",
+          "table": "audit_log"
+        },
+        {
+          "name": "DeleteOldAuditRows",
+          "table": "audit_log"
+        },
+        {
+          "name": "InsertAuditLog",
+          "table": "audit_log"
+        },
+        {
+          "name": "ListAuditAll",
+          "table": "audit_log"
+        },
+        {
+          "name": "ListAuditByOrg",
+          "table": "audit_log"
+        },
+        {
+          "name": "ListAuditByUser",
+          "table": "audit_log"
+        },
+        {
+          "name": "RecentAuditByOrg",
+          "table": "audit_log"
+        }
       ]
     },
     "migrations": [],

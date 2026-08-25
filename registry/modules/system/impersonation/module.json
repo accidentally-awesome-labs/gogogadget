@@ -27,7 +27,26 @@
         "impersonation"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "queries": [
+        {
+          "name": "DeleteImpersonationSessionsForUser",
+          "table": "impersonation_sessions"
+        },
+        {
+          "name": "EndImpersonationSession",
+          "table": "impersonation_sessions"
+        },
+        {
+          "name": "GetImpersonationSession",
+          "table": "impersonation_sessions"
+        },
+        {
+          "name": "InsertImpersonationSession",
+          "table": "impersonation_sessions"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0009_impersonation",

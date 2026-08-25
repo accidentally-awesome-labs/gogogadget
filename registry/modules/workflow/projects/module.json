@@ -21,6 +21,14 @@
     ],
     "files": [
       {
+        "source": "internal/db/queries/projects.sql",
+        "target": "internal/db/queries/projects.sql",
+        "class": "query",
+        "sha256": "71e6ce903ef3f6fc0c37c617270cb165c3e6fbe1aeac1f383b111674e24db86a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_projects.go",
         "target": "internal/web/workflow_projects.go",
         "class": "go",
@@ -107,6 +115,48 @@
           "package": "internal/web",
           "handler": "handleProjectUpdate"
         }
+      ],
+      "queries": [
+        {
+          "name": "ArchiveProject",
+          "table": "projects"
+        },
+        {
+          "name": "CountProjectsByOrg",
+          "table": "projects"
+        },
+        {
+          "name": "CountProjectsByOrgSearch",
+          "table": "projects"
+        },
+        {
+          "name": "CreateProject",
+          "table": "projects"
+        },
+        {
+          "name": "DeleteProject",
+          "table": "projects"
+        },
+        {
+          "name": "GetProjectByID",
+          "table": "projects"
+        },
+        {
+          "name": "ListAllProjectsByOrg",
+          "table": "projects"
+        },
+        {
+          "name": "ListProjectsByOrg",
+          "table": "projects"
+        },
+        {
+          "name": "ListProjectsByOrgCursor",
+          "table": "projects"
+        },
+        {
+          "name": "UpdateProject",
+          "table": "projects"
+        }
       ]
     },
     "migrations": [],
@@ -117,7 +167,15 @@
         "internal/web"
       ]
     },
-    "data": [],
+    "data": [
+      {
+        "table": "projects",
+        "scope": "org",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      }
+    ],
     "removal_policy": "free"
   }
 }

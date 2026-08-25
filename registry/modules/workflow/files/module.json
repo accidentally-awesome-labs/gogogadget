@@ -20,6 +20,14 @@
     ],
     "files": [
       {
+        "source": "internal/db/queries/files.sql",
+        "target": "internal/db/queries/files.sql",
+        "class": "query",
+        "sha256": "6d420370621e851d8587117736cfe40f79be8c26bec2db5ec5d5a22fa17ff9bf",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_files.go",
         "target": "internal/web/workflow_files.go",
         "class": "go",
@@ -88,6 +96,32 @@
           "package": "internal/web",
           "handler": "handleFileUpload"
         }
+      ],
+      "queries": [
+        {
+          "name": "CountFilesByOrg",
+          "table": "files"
+        },
+        {
+          "name": "DeleteFile",
+          "table": "files"
+        },
+        {
+          "name": "GetFileByID",
+          "table": "files"
+        },
+        {
+          "name": "InsertFile",
+          "table": "files"
+        },
+        {
+          "name": "ListFilesByOrg",
+          "table": "files"
+        },
+        {
+          "name": "SumBytesByOrg",
+          "table": "files"
+        }
       ]
     },
     "migrations": [],
@@ -98,7 +132,18 @@
         "internal/web"
       ]
     },
-    "data": [],
+    "data": [
+      {
+        "table": "files",
+        "scope": "org",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade",
+        "external_objects": [
+          "object-storage"
+        ]
+      }
+    ],
     "removal_policy": "free"
   }
 }

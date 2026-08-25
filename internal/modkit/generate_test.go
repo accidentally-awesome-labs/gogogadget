@@ -1486,3 +1486,100 @@ func TestOpenAPIRegistryRejectsDuplicateIdentifiers(t *testing.T) {
 		t.Fatal("GenerateAll accepted a duplicate schema id")
 	}
 }
+
+func queryModule(id, name string, tables []string, queries []QueryContribution, requires []string) Manifest {
+	data := make([]DataDeclaration, 0, len(tables))
+	for _, table := range tables {
+		data = append(data, DataDeclaration{
+			Table: table, Scope: DataScopeOrg, Export: false,
+			AccountDelete: DeleteRetain, OrganizationDelete: DeleteRetain,
+		})
+	}
+	if requires == nil {
+		requires = []string{}
+	}
+	return Manifest{
+		ID: id, Kind: ModuleSystem, Name: name,
+		Revision: 1, Contract: 1, Title: name, Description: name + " system.",
+		Files: []ManifestFile{}, Requires: requires, RemovalPolicy: RemovalFree,
+		Data: data, Runtime: RuntimeContributions{Queries: queries},
+	}
+}
+
+// Query ownership is declared so a method name has one owner and a module
+// reading another module's table has to say so. Both are invisible in a shared
+// sqlc package otherwise.
+func TestQueriesRegistryEmitsOwnership(t *testing.T) {
+	projects := queryModule("system/projects", "projects", []string{"projects"},
+		[]QueryContribution{
+			{Name: "ListProjects", Table: "projects"},
+			{Name: "CreateProject", Table: "projects"},
+		}, nil)
+	export := queryModule("workflow/project-export", "project-export", nil,
+		[]QueryContribution{{Name: "ExportProjectRows", Table: "projects"}},
+		[]string{"system/projects"})
+
+	mods := []Manifest{projects, export}
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/db/queries_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("query registry was not emitted")
+	}
+	for _, want := range []string{
+		`"CreateProject": "system/projects"`,
+		`"ListProjects": "system/projects"`,
+		// A declared dependency is what makes reading another owner's table legal.
+		`"ExportProjectRows": "workflow/project-export"`,
+		`"projects": "system/projects"`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("query registry missing %s:\n%s", want, registry)
+		}
+	}
+}
+
+// One method name owned twice means the sqlc package has two definitions, or
+// silently keeps one.
+func TestQueriesRegistryRejectsDuplicateMethod(t *testing.T) {
+	a := queryModule("system/a", "a", []string{"ta"}, []QueryContribution{{Name: "Same", Table: "ta"}}, nil)
+	b := queryModule("system/b", "b", []string{"tb"}, []QueryContribution{{Name: "Same", Table: "tb"}}, nil)
+	mods := []Manifest{a, b}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted one sqlc method name owned twice")
+	}
+}
+
+// Reading another module's table without declaring the dependency means the
+// query silently breaks when that module is removed.
+func TestQueriesRegistryRejectsUndeclaredCrossOwnerAccess(t *testing.T) {
+	owner := queryModule("system/owner", "owner", []string{"secrets"},
+		[]QueryContribution{{Name: "GetSecret", Table: "secrets"}}, nil)
+	peeker := queryModule("system/peeker", "peeker", nil,
+		[]QueryContribution{{Name: "PeekSecret", Table: "secrets"}}, nil)
+	mods := []Manifest{owner, peeker}
+	_, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err == nil {
+		t.Fatal("GenerateAll accepted cross-owner table access with no declared dependency")
+	}
+	if !strings.Contains(err.Error(), "system/owner") {
+		t.Fatalf("error must name the owning module: %v", err)
+	}
+}
+
+// A query against a table nobody declares has no owner to depend on, and no
+// declared delete or export behaviour either.
+func TestQueriesRegistryRejectsUnknownTable(t *testing.T) {
+	mod := queryModule("system/a", "a", nil, []QueryContribution{{Name: "Q", Table: "ghost"}}, nil)
+	mods := []Manifest{mod}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted a query against an undeclared table")
+	}
+}

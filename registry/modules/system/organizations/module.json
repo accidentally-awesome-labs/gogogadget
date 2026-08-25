@@ -44,7 +44,122 @@
         "users"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "queries": [
+        {
+          "name": "CountAdminsByOrg",
+          "table": "org_members"
+        },
+        {
+          "name": "CountFullAdmins",
+          "table": "users"
+        },
+        {
+          "name": "CountMembersByOrg",
+          "table": "org_members"
+        },
+        {
+          "name": "CountOrgs",
+          "table": "orgs"
+        },
+        {
+          "name": "CountUsers",
+          "table": "users"
+        },
+        {
+          "name": "CountUsersSince",
+          "table": "users"
+        },
+        {
+          "name": "DeleteMembership",
+          "table": "org_members"
+        },
+        {
+          "name": "DeleteOrg",
+          "table": "orgs"
+        },
+        {
+          "name": "DeleteUser",
+          "table": "users"
+        },
+        {
+          "name": "GetMembership",
+          "table": "org_members"
+        },
+        {
+          "name": "GetOrgByClerkID",
+          "table": "orgs"
+        },
+        {
+          "name": "GetOrgsForUser",
+          "table": "orgs"
+        },
+        {
+          "name": "GetUserByClerkID",
+          "table": "users"
+        },
+        {
+          "name": "ListMembersByOrg",
+          "table": "org_members"
+        },
+        {
+          "name": "ListOrgs",
+          "table": "orgs"
+        },
+        {
+          "name": "ListOrgsWithStats",
+          "table": "org_members"
+        },
+        {
+          "name": "ListUsers",
+          "table": "users"
+        },
+        {
+          "name": "ListUsersDueForDigest",
+          "table": "users"
+        },
+        {
+          "name": "MarkUserDigestSent",
+          "table": "users"
+        },
+        {
+          "name": "SetUserAdminRole",
+          "table": "users"
+        },
+        {
+          "name": "SetUserAdminRoleByEmail",
+          "table": "users"
+        },
+        {
+          "name": "SetUserDigestFrequency",
+          "table": "users"
+        },
+        {
+          "name": "SetUserDisabled",
+          "table": "users"
+        },
+        {
+          "name": "SetUserLocale",
+          "table": "users"
+        },
+        {
+          "name": "SetUserTheme",
+          "table": "users"
+        },
+        {
+          "name": "UpsertMembership",
+          "table": "org_members"
+        },
+        {
+          "name": "UpsertOrg",
+          "table": "orgs"
+        },
+        {
+          "name": "UpsertUser",
+          "table": "users"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0001_init",
@@ -64,14 +179,14 @@
     "tests": {},
     "data": [
       {
-        "table": "memberships",
+        "table": "org_members",
         "scope": "org",
         "export": true,
         "account_delete": "cascade",
         "organization_delete": "cascade"
       },
       {
-        "table": "organizations",
+        "table": "orgs",
         "scope": "org",
         "export": true,
         "account_delete": "retain",

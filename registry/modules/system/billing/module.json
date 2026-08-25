@@ -68,6 +68,14 @@
         "sha256": "48f7295089c996511d51da44b49893b4359afc836f34186a557f30a9b2f815c7",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/db/queries/subscriptions.sql",
+        "target": "internal/db/queries/subscriptions.sql",
+        "class": "query",
+        "sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {
@@ -133,6 +141,24 @@
           "schedulable": false,
           "max_attempts": 0
         }
+      ],
+      "queries": [
+        {
+          "name": "CountActiveSubscriptions",
+          "table": "subscriptions"
+        },
+        {
+          "name": "GetSubscriptionByOrg",
+          "table": "subscriptions"
+        },
+        {
+          "name": "ListRevenueSubscriptions",
+          "table": "subscriptions"
+        },
+        {
+          "name": "UpsertSubscription",
+          "table": "subscriptions"
+        }
       ]
     },
     "migrations": [],
@@ -181,7 +207,15 @@
         "internal/billing"
       ]
     },
-    "data": [],
+    "data": [
+      {
+        "table": "subscriptions",
+        "scope": "org",
+        "export": true,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
     "removal_policy": "major-version-only",
     "locales": {
       "en": {

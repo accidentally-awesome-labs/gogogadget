@@ -1646,20 +1646,76 @@ func checkLocalRef(ref string, defined map[string]map[string]string) error {
 	return nil
 }
 
+// emitQueriesRegistry renders query and table ownership. The generated sqlc
+// package is one flat namespace shared by every module, so ownership is the only
+// thing that makes a method name unambiguous and makes a cross-module read
+// visible instead of accidental.
 func emitQueriesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
-	var b strings.Builder
-	b.WriteString(genHeader(modulePath, lock))
-	b.WriteString("package queries\n\n")
-	b.WriteString("// QueryRegistry lists module-owned query fragments by table.\n")
-	b.WriteString("var QueryRegistry = []string{\n")
+	tableOwner := make(map[string]string)
 	for _, m := range orderedModules(lock, graph) {
-		for _, q := range m.Claims.Queries {
-			fmt.Fprintf(&b, "\t%s,\n", goString(q))
+		for _, d := range m.Data {
+			if previous, clash := tableOwner[d.Table]; clash {
+				return nil, fmt.Errorf("table %q is declared by both %s and %s", d.Table, previous, m.ID)
+			}
+			tableOwner[d.Table] = m.ID
 		}
 	}
+
+	methodOwner := make(map[string]string)
+	methodTable := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		dependencies := make(map[string]bool, len(m.Requires))
+		for _, id := range m.Requires {
+			dependencies[id] = true
+		}
+		for _, q := range m.Runtime.Queries {
+			if previous, clash := methodOwner[q.Name]; clash {
+				return nil, fmt.Errorf("sqlc method %q is declared by both %s and %s", q.Name, previous, m.ID)
+			}
+			owner, known := tableOwner[q.Table]
+			if !known {
+				return nil, fmt.Errorf("query %s reads table %q, which no module declares", q.Name, q.Table)
+			}
+			// Reading someone else's table is legal, but it has to be declared:
+			// otherwise the query breaks silently when that module is removed.
+			if owner != m.ID && !dependencies[owner] {
+				return nil, fmt.Errorf("query %s (%s) reads table %q owned by %s without depending on it",
+					q.Name, m.ID, q.Table, owner)
+			}
+			methodOwner[q.Name] = m.ID
+			methodTable[q.Name] = q.Table
+		}
+	}
+
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package db\n\n")
+	b.WriteString("// QueryOwners maps each sqlc method to the module that owns it. The sqlc\n")
+	b.WriteString("// package is one flat namespace, so this is what makes a method name\n")
+	b.WriteString("// unambiguous and lets removal know which methods go with a module.\n")
+	b.WriteString("var QueryOwners = map[string]string{\n")
+	for _, name := range sortedKeys(methodOwner) {
+		fmt.Fprintf(&b, "\t%s: %s,\n", goString(name), goString(methodOwner[name]))
+	}
+	b.WriteString("}\n\n")
+
+	b.WriteString("// QueryTables maps each sqlc method to the table it reads or writes.\n")
+	b.WriteString("var QueryTables = map[string]string{\n")
+	for _, name := range sortedKeys(methodTable) {
+		fmt.Fprintf(&b, "\t%s: %s,\n", goString(name), goString(methodTable[name]))
+	}
+	b.WriteString("}\n\n")
+
+	b.WriteString("// TableOwners maps each table to the module that declares it. A module that\n")
+	b.WriteString("// reads a table it does not own must depend on the owner.\n")
+	b.WriteString("var TableOwners = map[string]string{\n")
+	for _, table := range sortedKeys(tableOwner) {
+		fmt.Fprintf(&b, "\t%s: %s,\n", goString(table), goString(tableOwner[table]))
+	}
 	b.WriteString("}\n")
+
 	_ = ctx
-	return &GeneratedFile{Path: "internal/db/queries/queries_registry_gen.go", Content: b.String()}, nil
+	return &GeneratedFile{Path: "internal/db/queries_registry_gen.go", Content: b.String()}, nil
 }
 
 func emitStaticRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {

@@ -47,6 +47,24 @@
           "schedulable": true,
           "max_attempts": 0
         }
+      ],
+      "queries": [
+        {
+          "name": "ClaimUsageBatch",
+          "table": "usage_events"
+        },
+        {
+          "name": "InsertUsageEvent",
+          "table": "usage_events"
+        },
+        {
+          "name": "SumUsageByNameSince",
+          "table": "usage_events"
+        },
+        {
+          "name": "UnflushUsageBatch",
+          "table": "usage_events"
+        }
       ]
     },
     "migrations": [

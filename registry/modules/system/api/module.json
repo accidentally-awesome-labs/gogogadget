@@ -119,6 +119,48 @@
           "package": "internal/jobs",
           "handler": "janitorIdempotencyKeys"
         }
+      ],
+      "queries": [
+        {
+          "name": "ClaimIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "CompleteIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "DeleteOldIdempotencyKeys",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "GetAPITokenByHash",
+          "table": "api_tokens"
+        },
+        {
+          "name": "GetIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "InsertAPIToken",
+          "table": "api_tokens"
+        },
+        {
+          "name": "ListAPITokensByOrg",
+          "table": "api_tokens"
+        },
+        {
+          "name": "ReleaseIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "RevokeAPIToken",
+          "table": "api_tokens"
+        },
+        {
+          "name": "TouchAPIToken",
+          "table": "api_tokens"
+        }
       ]
     },
     "migrations": [
