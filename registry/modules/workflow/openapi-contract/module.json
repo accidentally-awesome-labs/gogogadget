@@ -57,6 +57,52 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "openapi": {
+      "info": {
+        "title": "GoGoGadget API",
+        "version": "1.0.0",
+        "summary": "Bearer-authenticated JSON API for projects and metered AI chat.",
+        "description": "The second transport. Every rule the HTML app enforces (plan limits,\nvalidation, org scoping) applies identically here — the handlers share\nthe same query layer and plan logic, they only differ in how they answer.\n\nAuthentication is a Bearer token minted at `/app/settings/api`\n(`ggg_…`, SHA-256 hashed at rest, shown once). Tokens carry a scope:\n`read` satisfies read operations, `write` satisfies both.\n\nThe token determines the organization — there is no org parameter, and a\ntoken can never read another org's rows.\n",
+        "license": {
+          "name": "MIT"
+        }
+      },
+      "servers": [
+        {
+          "url": "/",
+          "description": "Same origin as the app."
+        }
+      ],
+      "tags": [
+        {
+          "name": "meta",
+          "description": "Machine-readable description of this API."
+        }
+      ],
+      "operations": [
+        {
+          "route_id": "api.openapi",
+          "operation_id": "getOpenAPISpec",
+          "summary": "This document.",
+          "responses": {
+            "200": {
+              "description": "The OpenAPI document.",
+              "content": {
+                "application/yaml": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Unauthenticated so tooling can fetch the contract before holding a token.",
+          "tags": [
+            "meta"
+          ]
+        }
+      ]
+    }
   }
 }

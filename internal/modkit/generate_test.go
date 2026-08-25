@@ -2,7 +2,10 @@ package modkit
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"go/format"
+	"gopkg.in/yaml.v3"
 	"strings"
 	"testing"
 )
@@ -1292,5 +1295,194 @@ func TestChromeRegistryRejectsOrderingCycle(t *testing.T) {
 	mods := []Manifest{a, b}
 	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
 		t.Fatal("GenerateAll accepted a navigation ordering cycle")
+	}
+}
+
+func apiModule(id, name string, routes []RouteContribution, api *OpenAPIContribution) Manifest {
+	return Manifest{
+		ID: id, Kind: ModuleWorkflow, Name: name,
+		Revision: 1, Contract: 1, Title: name, Description: name + " workflow.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{Routes: routes}, OpenAPI: api,
+	}
+}
+
+// The spec is generated from route declarations, so a documented operation and
+// a served endpoint are the same list. Security and the idempotency parameter
+// are derived from the route's declared scope and policy rather than restated,
+// because a document that disagrees with middleware is worse than no document.
+func TestOpenAPIRegistryDerivesSecurityAndIdempotency(t *testing.T) {
+	projects := apiModule("workflow/api-projects", "api-projects",
+		[]RouteContribution{
+			{ID: "api.projects.list", Method: "GET", Pattern: "/api/v1/projects",
+				Scope: RouteAPIRead, Package: "internal/web", Handler: "handleAPIProjectsList"},
+			{ID: "api.projects.create", Method: "POST", Pattern: "/api/v1/projects",
+				Scope: RouteAPIWrite, Package: "internal/web", Handler: "handleAPIProjectsCreate",
+				Policy: RoutePolicy{Idempotent: true}},
+		},
+		&OpenAPIContribution{
+			Info:    json.RawMessage(`{"title":"Acme API","version":"1.0.0"}`),
+			Servers: json.RawMessage(`[{"url":"/"}]`),
+			Tags:    []OpenAPITag{{Name: "projects", Description: "The CRUD resource."}},
+			Components: map[string]map[string]json.RawMessage{
+				"schemas": {"Project": json.RawMessage(`{"type":"object"}`)},
+			},
+			Operations: []OpenAPIOperation{
+				{RouteID: "api.projects.list", OperationID: "listProjects", Summary: "List projects.",
+					Tags:      []string{"projects"},
+					Responses: json.RawMessage(`{"200":{"description":"ok","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Project"}}}}}`)},
+				{RouteID: "api.projects.create", OperationID: "createProject", Summary: "Create a project.",
+					Tags:        []string{"projects"},
+					RequestBody: json.RawMessage(`{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/Project"}}}}`),
+					Responses:   json.RawMessage(`{"201":{"description":"created"}}`)},
+			},
+		})
+
+	mods := []Manifest{projects}
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var spec string
+	for _, file := range files {
+		if file.Path == "internal/api/openapi_registry_gen.yaml" {
+			spec = file.Content
+		}
+	}
+	if spec == "" {
+		t.Fatal("spec was not emitted")
+	}
+
+	var doc map[string]any
+	if err := yaml.Unmarshal([]byte(spec), &doc); err != nil {
+		t.Fatalf("emitted spec is not valid YAML: %v\n%s", err, spec)
+	}
+	if doc["openapi"] != "3.1.0" {
+		t.Fatalf("spec version = %v", doc["openapi"])
+	}
+
+	paths, _ := doc["paths"].(map[string]any)
+	projectsPath, ok := paths["/api/v1/projects"].(map[string]any)
+	if !ok {
+		t.Fatalf("path missing from spec:\n%s", spec)
+	}
+
+	// A read route requires the read scope; a write route requires write.
+	get, _ := projectsPath["get"].(map[string]any)
+	if fmt.Sprint(get["security"]) != `[map[bearerAuth:[read]]]` {
+		t.Fatalf("read security = %v", get["security"])
+	}
+	post, _ := projectsPath["post"].(map[string]any)
+	if fmt.Sprint(post["security"]) != `[map[bearerAuth:[write]]]` {
+		t.Fatalf("write security = %v", post["security"])
+	}
+
+	// The idempotency header is derived from the route policy, so a route that
+	// accepts the key always documents it and one that does not never claims to.
+	if !strings.Contains(fmt.Sprint(post["parameters"]), "#/components/parameters/IdempotencyKey") {
+		t.Fatalf("idempotent route must reference the generated parameter: %v", post["parameters"])
+	}
+	if strings.Contains(fmt.Sprint(get["parameters"]), "IdempotencyKey") {
+		t.Fatalf("non-idempotent route must not reference it: %v", get["parameters"])
+	}
+	// The referenced component is generated too, so the reference resolves.
+	generatedParams, _ := doc["components"].(map[string]any)["parameters"].(map[string]any)
+	if _, ok := generatedParams["IdempotencyKey"]; !ok {
+		t.Fatalf("the generated parameter component is missing:\n%s", spec)
+	}
+
+	// The security scheme is emitted for the document, not hand-declared.
+	components, _ := doc["components"].(map[string]any)
+	if _, ok := components["securitySchemes"]; !ok {
+		t.Fatalf("securitySchemes missing:\n%s", spec)
+	}
+}
+
+// An API route with no operation ships an undocumented endpoint; that is the
+// drift the parity test used to catch after the fact.
+func TestOpenAPIRegistryRejectsUndocumentedRoute(t *testing.T) {
+	mod := apiModule("workflow/api-x", "api-x",
+		[]RouteContribution{{ID: "api.x.list", Method: "GET", Pattern: "/api/v1/x",
+			Scope: RouteAPIRead, Package: "internal/web", Handler: "handleX"}},
+		&OpenAPIContribution{Info: json.RawMessage(`{"title":"x","version":"1"}`)})
+	mods := []Manifest{mod}
+	_, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err == nil {
+		t.Fatal("GenerateAll accepted an undocumented API route")
+	}
+	if !strings.Contains(err.Error(), "api.x.list") {
+		t.Fatalf("error must name the route: %v", err)
+	}
+}
+
+// An operation for a route nobody serves documents an endpoint that 404s.
+func TestOpenAPIRegistryRejectsOrphanOperation(t *testing.T) {
+	mod := apiModule("workflow/api-x", "api-x", nil, &OpenAPIContribution{
+		Info: json.RawMessage(`{"title":"x","version":"1"}`),
+		Operations: []OpenAPIOperation{{
+			RouteID: "api.ghost", OperationID: "ghost", Summary: "Nope.",
+			Responses: json.RawMessage(`{"200":{"description":"ok"}}`),
+		}},
+	})
+	mods := []Manifest{mod}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted an operation for an unserved route")
+	}
+}
+
+// A $ref that resolves to nothing makes the document unusable by a generator or
+// validator, and it is invisible until someone runs one.
+func TestOpenAPIRegistryRejectsDanglingRef(t *testing.T) {
+	mod := apiModule("workflow/api-x", "api-x",
+		[]RouteContribution{{ID: "api.x.list", Method: "GET", Pattern: "/api/v1/x",
+			Scope: RouteAPIRead, Package: "internal/web", Handler: "handleX"}},
+		&OpenAPIContribution{
+			Info: json.RawMessage(`{"title":"x","version":"1"}`),
+			Operations: []OpenAPIOperation{{
+				RouteID: "api.x.list", OperationID: "listX", Summary: "List.",
+				Responses: json.RawMessage(`{"200":{"description":"ok","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Missing"}}}}}`),
+			}},
+		})
+	mods := []Manifest{mod}
+	_, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err == nil {
+		t.Fatal("GenerateAll accepted a dangling $ref")
+	}
+	if !strings.Contains(err.Error(), "Missing") {
+		t.Fatalf("error must name the unresolved ref: %v", err)
+	}
+}
+
+// Two modules claiming one operationId or one schema id makes the winner depend
+// on install order.
+func TestOpenAPIRegistryRejectsDuplicateIdentifiers(t *testing.T) {
+	mk := func(id, routeID, pattern, opID, schemaID string) Manifest {
+		return apiModule(id, strings.TrimPrefix(id, "workflow/"),
+			[]RouteContribution{{ID: routeID, Method: "GET", Pattern: pattern,
+				Scope: RouteAPIRead, Package: "internal/web", Handler: "handleX"}},
+			&OpenAPIContribution{
+				Components: map[string]map[string]json.RawMessage{
+					"schemas": {schemaID: json.RawMessage(`{"type":"object"}`)},
+				},
+				Operations: []OpenAPIOperation{{
+					RouteID: routeID, OperationID: opID, Summary: "List.",
+					Responses: json.RawMessage(`{"200":{"description":"ok"}}`),
+				}},
+			})
+	}
+	info := json.RawMessage(`{"title":"x","version":"1"}`)
+
+	dupOp := []Manifest{mk("workflow/a", "api.a", "/api/v1/a", "same", "A"),
+		mk("workflow/b", "api.b", "/api/v1/b", "same", "B")}
+	dupOp[0].OpenAPI.Info = info
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(dupOp), dupOp); err == nil {
+		t.Fatal("GenerateAll accepted a duplicate operationId")
+	}
+
+	dupSchema := []Manifest{mk("workflow/a", "api.a", "/api/v1/a", "opA", "Same"),
+		mk("workflow/b", "api.b", "/api/v1/b", "opB", "Same")}
+	dupSchema[0].OpenAPI.Info = info
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(dupSchema), dupSchema); err == nil {
+		t.Fatal("GenerateAll accepted a duplicate schema id")
 	}
 }

@@ -181,6 +181,16 @@ func requireJSONValue(data []byte, typ reflect.Type, field string) error {
 		return fmt.Errorf("%s must not be null", field)
 	}
 
+	// A json.RawMessage is deliberately shape-free: it carries an OpenAPI
+	// fragment whose structure the schema, not this walker, defines. Walking it
+	// as the byte slice it is would demand a JSON array.
+	if typ == reflect.TypeOf(json.RawMessage{}) {
+		if !json.Valid(data) {
+			return fmt.Errorf("%s is not valid JSON", field)
+		}
+		return nil
+	}
+
 	switch typ.Kind() {
 	case reflect.Struct:
 		var object map[string]json.RawMessage

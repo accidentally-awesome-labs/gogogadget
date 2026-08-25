@@ -50,7 +50,7 @@
         "source": "internal/api/openapi.go",
         "target": "internal/api/openapi.go",
         "class": "go",
-        "sha256": "86ec22a0d69d87a214a8f45f4bc4a5f9a27df2c2ed456df4931ad9e67b3ca149",
+        "sha256": "5ef8579194aed2eda52a7d439edafee044a560bd396e291524c1d61aca84c059",
         "rewrite_module": true,
         "contract": true
       },
@@ -139,6 +139,126 @@
         "min": 1
       }
     ],
+    "openapi": {
+      "components": {
+        "responses": {
+          "Forbidden": {
+            "description": "The token's scope cannot perform this operation (`forbidden`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "IdempotencyConflict": {
+            "description": "The key was already used for a different request (`idempotency_conflict`),\nor an earlier request with this key is still running\n(`idempotency_in_progress`). Neither case executes the operation.\n",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "InternalError": {
+            "description": "Something failed server-side (`internal_error`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "InvalidJSON": {
+            "description": "The body is not valid JSON for this endpoint (`invalid_json`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "PlanLimit": {
+            "description": "The organization's plan limit or meter cap was reached (`plan_limit`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "RateLimited": {
+            "description": "The token exceeded its per-token request budget (`rate_limited`).\nBudgets are per API token, not per IP, so one token cannot spend\nanother's allowance. Honour `Retry-After`.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "Unauthorized": {
+            "description": "Missing, malformed, unknown, revoked, or expired token (`unauthorized`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "ValidationError": {
+            "description": "The request parsed but failed validation (`validation_error`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "schemas": {
+          "Error": {
+            "type": "object",
+            "required": [
+              "error"
+            ],
+            "properties": {
+              "error": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Stable machine-readable code; the message is for humans and may change."
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "docs": [],
     "tests": {
       "go_packages": [

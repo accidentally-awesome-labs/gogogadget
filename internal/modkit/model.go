@@ -1,5 +1,7 @@
 package modkit
 
+import "encoding/json"
+
 // Project is the hand-owned declaration of registry intent.
 type Project struct {
 	Schema   int             `json:"schema"`
@@ -189,12 +191,14 @@ type Manifest struct {
 	// its strings and removing it removes them. Ownership is exclusive: two
 	// modules declaring one key would make the rendered string depend on which
 	// other modules happen to be installed.
-	Locales       map[string]map[string]string `json:"locales,omitempty"`
-	Docs          []DocumentationRef           `json:"docs"`
-	Tests         TestMetadata                 `json:"tests"`
-	Data          []DataDeclaration            `json:"data"`
-	RemovalPolicy RemovalPolicy                `json:"removal_policy"`
-	TestOnly      bool                         `json:"test_only,omitempty"`
+	Locales map[string]map[string]string `json:"locales,omitempty"`
+	// OpenAPI is this module's slice of the /api/v1 contract, when it serves any.
+	OpenAPI       *OpenAPIContribution `json:"openapi,omitempty"`
+	Docs          []DocumentationRef   `json:"docs"`
+	Tests         TestMetadata         `json:"tests"`
+	Data          []DataDeclaration    `json:"data"`
+	RemovalPolicy RemovalPolicy        `json:"removal_policy"`
+	TestOnly      bool                 `json:"test_only,omitempty"`
 }
 
 // ManifestFile maps one verified registry payload to one project-owned target.
@@ -343,6 +347,42 @@ type NavigationContribution struct {
 	After  []string `json:"after,omitempty"`
 	Roles  []string `json:"roles,omitempty"`
 	Flags  []string `json:"flags,omitempty"`
+}
+
+// OpenAPIContribution is a module's slice of the API contract. Operations are
+// keyed by route id, so an operation cannot describe an endpoint the router does
+// not serve and an endpoint cannot ship undocumented.
+type OpenAPIContribution struct {
+	// Info and Servers are document-level and must be supplied by exactly one
+	// module; two would be an unresolvable disagreement about the same document.
+	Info    json.RawMessage `json:"info,omitempty"`
+	Servers json.RawMessage `json:"servers,omitempty"`
+	Tags    []OpenAPITag    `json:"tags,omitempty"`
+	// Components is section -> id -> definition, merged across modules with
+	// duplicate ids refused: two schemas under one name means callers get
+	// whichever module happened to win.
+	Components map[string]map[string]json.RawMessage `json:"components,omitempty"`
+	Operations []OpenAPIOperation                    `json:"operations,omitempty"`
+}
+
+// OpenAPITag is a document-level tag description.
+type OpenAPITag struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// OpenAPIOperation documents one declared route. Security and the idempotency
+// parameter are derived from the route's declared scope and policy rather than
+// restated here, so the document cannot disagree with what middleware enforces.
+type OpenAPIOperation struct {
+	RouteID     string          `json:"route_id"`
+	OperationID string          `json:"operation_id"`
+	Summary     string          `json:"summary"`
+	Description string          `json:"description,omitempty"`
+	Tags        []string        `json:"tags,omitempty"`
+	Parameters  json.RawMessage `json:"parameters,omitempty"`
+	RequestBody json.RawMessage `json:"request_body,omitempty"`
+	Responses   json.RawMessage `json:"responses"`
 }
 
 // SlotContribution declares a typed renderer in a generated shell slot.
