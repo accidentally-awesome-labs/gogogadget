@@ -47,12 +47,28 @@
         "contract": true
       },
       {
+        "source": "internal/flags/flags_test.go",
+        "target": "internal/flags/flags_test.go",
+        "class": "test",
+        "sha256": "2cac146c84f4220ea4464cf95971bf34e8aba19ec2918361f06f89e138537e31",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/flags/module.go",
         "target": "internal/flags/module.go",
         "class": "go",
         "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/flags/module_test.go",
+        "target": "internal/flags/module_test.go",
+        "class": "test",
+        "sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

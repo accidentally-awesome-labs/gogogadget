@@ -26,6 +26,30 @@
         "contract": false
       },
       {
+        "source": "internal/jobs/define.go",
+        "target": "internal/jobs/define.go",
+        "class": "go",
+        "sha256": "c7b1de8f9843f76b5a58d6940b6a438c6741182f753604270f6a950dbfa06cae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/definitions.go",
+        "target": "internal/jobs/definitions.go",
+        "class": "go",
+        "sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/dispatch_test.go",
+        "target": "internal/jobs/dispatch_test.go",
+        "class": "test",
+        "sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
@@ -34,12 +58,28 @@
         "contract": true
       },
       {
+        "source": "internal/jobs/jobs_test.go",
+        "target": "internal/jobs/jobs_test.go",
+        "class": "test",
+        "sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/jobs/module.go",
         "target": "internal/jobs/module.go",
         "class": "go",
         "sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/jobs/module_test.go",
+        "target": "internal/jobs/module_test.go",
+        "class": "test",
+        "sha256": "3fdb95cdfe80fece4522b7055c4d270d9ea719d4eb6c77f49d9726c97e25f41e",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

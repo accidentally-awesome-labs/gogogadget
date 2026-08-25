@@ -22,6 +22,14 @@
         "contract": true
       },
       {
+        "source": "internal/identity/contract_test.go",
+        "target": "internal/identity/contract_test.go",
+        "class": "test",
+        "sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/identity/deleter.go",
         "target": "internal/identity/deleter.go",
         "class": "go",
@@ -38,12 +46,28 @@
         "contract": true
       },
       {
+        "source": "internal/identity/fuzz_test.go",
+        "target": "internal/identity/fuzz_test.go",
+        "class": "test",
+        "sha256": "40235d31f108366bda781fefafc3036809f086e29eb699c27a7e0d18470cbff2",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/identity/module.go",
         "target": "internal/identity/module.go",
         "class": "go",
         "sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/identity/module_test.go",
+        "target": "internal/identity/module_test.go",
+        "class": "test",
+        "sha256": "f0d86d2ed64c827f229ee0d7be208bc491818f34175c4d5388c4156a03553622",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/identity/sync.go",
@@ -60,6 +84,14 @@
         "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/identity/verifier_test.go",
+        "target": "internal/identity/verifier_test.go",
+        "class": "test",
+        "sha256": "b100610390baf7283297912e6b5625bda891ca0b6ceda25035262d10fecc1e54",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",

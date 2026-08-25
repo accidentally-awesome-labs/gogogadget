@@ -35,6 +35,14 @@
         "sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/schedules/schedules_test.go",
+        "target": "internal/schedules/schedules_test.go",
+        "class": "test",
+        "sha256": "7f6e70e4d067070a1bd1dfa66e0d1b063fc940ada455038b003cf12f1513964e",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

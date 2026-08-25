@@ -14,6 +14,14 @@
     ],
     "files": [
       {
+        "source": "internal/storage/contract_test.go",
+        "target": "internal/storage/contract_test.go",
+        "class": "test",
+        "sha256": "1e83906feeeeeb7ad95c67fa562887cc52c527919778ab1b49b9491e6feb2efe",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/storage/dev.go",
         "target": "internal/storage/dev.go",
         "class": "go",
@@ -30,6 +38,14 @@
         "contract": true
       },
       {
+        "source": "internal/storage/module_test.go",
+        "target": "internal/storage/module_test.go",
+        "class": "test",
+        "sha256": "f62ac33b5b26f6ebcc730a3426cf04d3458df037fe4e4fc109543a9ed7ddb76a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/storage/r2.go",
         "target": "internal/storage/r2.go",
         "class": "go",
@@ -44,6 +60,14 @@
         "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/storage/storage_test.go",
+        "target": "internal/storage/storage_test.go",
+        "class": "test",
+        "sha256": "49bf3efe6ec2eb1e3500d22fa951be7cf92941241dd543f1d777768fd5be1b32",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

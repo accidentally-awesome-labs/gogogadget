@@ -22,12 +22,36 @@
         "contract": false
       },
       {
+        "source": "internal/jobs/usage_flush.go",
+        "target": "internal/jobs/usage_flush.go",
+        "class": "go",
+        "sha256": "2197146eacdc5b8b63283d4405a6757e9f8aef72b59887aa271b8c362f56adee",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/usage_flush_test.go",
+        "target": "internal/jobs/usage_flush_test.go",
+        "class": "test",
+        "sha256": "1095ddd913ee17f7dfb1f11561f39166eec36d572f517f1e8e0378591eb4067c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/usage/usage.go",
         "target": "internal/usage/usage.go",
         "class": "go",
         "sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/usage/usage_test.go",
+        "target": "internal/usage/usage_test.go",
+        "class": "test",
+        "sha256": "a2c80413e0384696a35d6037bd6b577bfe1f541656a28bc58fc1b63903c2fd29",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

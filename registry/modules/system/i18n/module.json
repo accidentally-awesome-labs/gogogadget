@@ -19,6 +19,22 @@
         "sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/i18n/i18n_test.go",
+        "target": "internal/i18n/i18n_test.go",
+        "class": "test",
+        "sha256": "72622aa75b20d82ee154ab49f883b582de5a3bb16d4776406c9c8b13a26f7925",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/locale.templ",
+        "target": "internal/web/templates/locale.templ",
+        "class": "templ",
+        "sha256": "2ff7e2119384444497a35347fa88d1c4768afa24f8edaeeacfe0faca2638028a",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

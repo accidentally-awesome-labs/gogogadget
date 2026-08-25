@@ -18,6 +18,22 @@
     ],
     "files": [
       {
+        "source": "internal/jobs/export_csv.go",
+        "target": "internal/jobs/export_csv.go",
+        "class": "go",
+        "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/export_csv_test.go",
+        "target": "internal/jobs/export_csv_test.go",
+        "class": "test",
+        "sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_project_export.go",
         "target": "internal/web/workflow_project_export.go",
         "class": "go",

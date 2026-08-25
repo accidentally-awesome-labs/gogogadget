@@ -9,6 +9,7 @@
     "title": "Full GoGoGadget",
     "description": "Every module the GoGoGadget catalog publishes. A project selects this and lists removable modules under exclude.",
     "members": [
+      "element/ui-core",
       "page/activity",
       "page/admin-announcements",
       "page/admin-audit",

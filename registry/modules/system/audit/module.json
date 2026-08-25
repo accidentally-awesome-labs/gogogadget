@@ -22,6 +22,14 @@
         "contract": true
       },
       {
+        "source": "internal/audit/audit_test.go",
+        "target": "internal/audit/audit_test.go",
+        "class": "test",
+        "sha256": "521f4b65da047bc71d48a35c56e2b6eb884fed05159b2d63366afc106d551395",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/db/queries/audit.sql",
         "target": "internal/db/queries/audit.sql",
         "class": "query",

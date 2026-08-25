@@ -176,7 +176,14 @@
         }
       ]
     },
-    "migrations": [],
+    "migrations": [
+      {
+        "id": "0010_projects_search",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0010_projects_search.sql",
+        "sha256": "c1a90a9308dcac278d49c2215ee402c1d5207fbdf369c48517f025ad8296c15c"
+      }
+    ],
     "environment": [],
     "docs": [],
     "tests": {

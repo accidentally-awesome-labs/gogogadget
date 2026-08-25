@@ -1,7 +1,8 @@
 {
   "schema": 1,
-  "registry_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+  "registry_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
   "order": [
+    "element/ui-core",
     "system/apphost",
     "system/config",
     "system/analytics",
@@ -102,10 +103,206 @@
   ],
   "modules": [
     {
+      "id": "element/ui-core",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/ui-core",
+        "kind": "element",
+        "name": "ui-core",
+        "revision": 1,
+        "contract": 1,
+        "title": "UI core",
+        "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
+        "requires": [],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/attrs.go",
+            "target": "internal/web/templates/ui/attrs.go",
+            "class": "go",
+            "sha256": "182e7374071b2803481174215338c94bb3089897bb14eacadda8c6fbbdbf44c1",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/attrs_build.go",
+            "target": "internal/web/templates/ui/attrs_build.go",
+            "class": "go",
+            "sha256": "0eb8fc098aafffabc38203e54125f2774e9374d52513f7da1d640088fa0e6b8d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/components_core.templ",
+            "target": "internal/web/templates/ui/components_core.templ",
+            "class": "templ",
+            "sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/components_nav.templ",
+            "target": "internal/web/templates/ui/components_nav.templ",
+            "class": "templ",
+            "sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/data.templ",
+            "target": "internal/web/templates/ui/data.templ",
+            "class": "templ",
+            "sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/forms.templ",
+            "target": "internal/web/templates/ui/forms.templ",
+            "class": "templ",
+            "sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/icons.go",
+            "target": "internal/web/templates/ui/icons.go",
+            "class": "go",
+            "sha256": "a8cb43b212550a6712f247466a063947fadbafe2f7ee6f1a08a6141a2eb6df7d",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/icons.templ",
+            "target": "internal/web/templates/ui/icons.templ",
+            "class": "templ",
+            "sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/icons_test.go",
+            "target": "internal/web/templates/ui/icons_test.go",
+            "class": "test",
+            "sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/overlays.templ",
+            "target": "internal/web/templates/ui/overlays.templ",
+            "class": "templ",
+            "sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/ui.go",
+            "target": "internal/web/templates/ui/ui.go",
+            "class": "go",
+            "sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "replacement-required"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/attrs.go",
+          "source": "internal/web/templates/ui/attrs.go",
+          "base_sha256": "182e7374071b2803481174215338c94bb3089897bb14eacadda8c6fbbdbf44c1",
+          "local_sha256": "182e7374071b2803481174215338c94bb3089897bb14eacadda8c6fbbdbf44c1",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/attrs_build.go",
+          "source": "internal/web/templates/ui/attrs_build.go",
+          "base_sha256": "0eb8fc098aafffabc38203e54125f2774e9374d52513f7da1d640088fa0e6b8d",
+          "local_sha256": "0eb8fc098aafffabc38203e54125f2774e9374d52513f7da1d640088fa0e6b8d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/components_core.templ",
+          "source": "internal/web/templates/ui/components_core.templ",
+          "base_sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+          "local_sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/components_nav.templ",
+          "source": "internal/web/templates/ui/components_nav.templ",
+          "base_sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+          "local_sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/data.templ",
+          "source": "internal/web/templates/ui/data.templ",
+          "base_sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+          "local_sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/forms.templ",
+          "source": "internal/web/templates/ui/forms.templ",
+          "base_sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+          "local_sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/icons.go",
+          "source": "internal/web/templates/ui/icons.go",
+          "base_sha256": "a8cb43b212550a6712f247466a063947fadbafe2f7ee6f1a08a6141a2eb6df7d",
+          "local_sha256": "a8cb43b212550a6712f247466a063947fadbafe2f7ee6f1a08a6141a2eb6df7d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/icons.templ",
+          "source": "internal/web/templates/ui/icons.templ",
+          "base_sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+          "local_sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/icons_test.go",
+          "source": "internal/web/templates/ui/icons_test.go",
+          "base_sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+          "local_sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/overlays.templ",
+          "source": "internal/web/templates/ui/overlays.templ",
+          "base_sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+          "local_sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/ui.go",
+          "source": "internal/web/templates/ui/ui.go",
+          "base_sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
+          "local_sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -255,7 +452,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -441,7 +638,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -562,7 +759,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -787,7 +984,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -885,7 +1082,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -964,7 +1161,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1044,7 +1241,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -1244,7 +1441,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -1407,7 +1604,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -1539,7 +1736,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1647,7 +1844,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1790,7 +1987,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -1978,7 +2175,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2114,7 +2311,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2234,7 +2431,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2339,7 +2536,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2474,7 +2671,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2570,7 +2767,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2671,7 +2868,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -2793,7 +2990,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2872,7 +3069,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -3025,7 +3222,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3243,7 +3440,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -3383,7 +3580,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3496,7 +3693,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3612,7 +3809,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3692,7 +3889,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3771,7 +3968,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3946,7 +4143,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -4117,7 +4314,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -4269,7 +4466,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -4437,7 +4634,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -4584,7 +4781,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4713,7 +4910,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -4905,7 +5102,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5021,7 +5218,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -5049,12 +5246,36 @@
             "contract": true
           },
           {
+            "source": "internal/analytics/analytics_test.go",
+            "target": "internal/analytics/analytics_test.go",
+            "class": "test",
+            "sha256": "e65ac6157126bf2e619e1667f581bc88ee855e0c0da6912c666a93e483485572",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/analytics/contract_test.go",
+            "target": "internal/analytics/contract_test.go",
+            "class": "test",
+            "sha256": "c5d2692ac52f67114b23efd9aa01082bde92105d10e3b9cfdc04a740352b936d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/analytics/module.go",
             "target": "internal/analytics/module.go",
             "class": "go",
             "sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/analytics/module_test.go",
+            "target": "internal/analytics/module_test.go",
+            "class": "test",
+            "sha256": "05f780814dccbd9f9ef7acf80c638c674708061132a4361a8a00614bb244eb79",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -5120,10 +5341,31 @@
           "state": "clean"
         },
         {
+          "path": "internal/analytics/analytics_test.go",
+          "source": "internal/analytics/analytics_test.go",
+          "base_sha256": "e65ac6157126bf2e619e1667f581bc88ee855e0c0da6912c666a93e483485572",
+          "local_sha256": "e65ac6157126bf2e619e1667f581bc88ee855e0c0da6912c666a93e483485572",
+          "state": "clean"
+        },
+        {
+          "path": "internal/analytics/contract_test.go",
+          "source": "internal/analytics/contract_test.go",
+          "base_sha256": "c5d2692ac52f67114b23efd9aa01082bde92105d10e3b9cfdc04a740352b936d",
+          "local_sha256": "c5d2692ac52f67114b23efd9aa01082bde92105d10e3b9cfdc04a740352b936d",
+          "state": "clean"
+        },
+        {
           "path": "internal/analytics/module.go",
           "source": "internal/analytics/module.go",
           "base_sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
           "local_sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/analytics/module_test.go",
+          "source": "internal/analytics/module_test.go",
+          "base_sha256": "05f780814dccbd9f9ef7acf80c638c674708061132a4361a8a00614bb244eb79",
+          "local_sha256": "05f780814dccbd9f9ef7acf80c638c674708061132a4361a8a00614bb244eb79",
           "state": "clean"
         }
       ],
@@ -5133,7 +5375,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -5262,7 +5504,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -5705,7 +5947,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -5740,6 +5982,22 @@
             "sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/apphost/apphost_test.go",
+            "target": "internal/apphost/apphost_test.go",
+            "class": "test",
+            "sha256": "9b17becf61ebc418a66906eb92ca8ea0090d80d33d9d43c945a6968a26ec383d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modules/boot_test.go",
+            "target": "internal/modules/boot_test.go",
+            "class": "test",
+            "sha256": "499b159cccc040804ec661c6e92d37375c47544fda95101eac646bb4ff18e540",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -5766,6 +6024,20 @@
           "base_sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
           "local_sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
           "state": "clean"
+        },
+        {
+          "path": "internal/apphost/apphost_test.go",
+          "source": "internal/apphost/apphost_test.go",
+          "base_sha256": "9b17becf61ebc418a66906eb92ca8ea0090d80d33d9d43c945a6968a26ec383d",
+          "local_sha256": "9b17becf61ebc418a66906eb92ca8ea0090d80d33d9d43c945a6968a26ec383d",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modules/boot_test.go",
+          "source": "internal/modules/boot_test.go",
+          "base_sha256": "499b159cccc040804ec661c6e92d37375c47544fda95101eac646bb4ff18e540",
+          "local_sha256": "499b159cccc040804ec661c6e92d37375c47544fda95101eac646bb4ff18e540",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -5774,7 +6046,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -5815,6 +6087,14 @@
             "sha256": "6058348c53afe64a6a19e00859fe801cfdd4cb49b98abba53d7a579730471894",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/audit/audit_test.go",
+            "target": "internal/audit/audit_test.go",
+            "class": "test",
+            "sha256": "521f4b65da047bc71d48a35c56e2b6eb884fed05159b2d63366afc106d551395",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/db/queries/audit.sql",
@@ -5928,6 +6208,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/audit/audit_test.go",
+          "source": "internal/audit/audit_test.go",
+          "base_sha256": "521f4b65da047bc71d48a35c56e2b6eb884fed05159b2d63366afc106d551395",
+          "local_sha256": "521f4b65da047bc71d48a35c56e2b6eb884fed05159b2d63366afc106d551395",
+          "state": "clean"
+        },
+        {
           "path": "internal/db/queries/audit.sql",
           "source": "internal/db/queries/audit.sql",
           "base_sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
@@ -5955,7 +6242,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -5988,12 +6275,28 @@
             "contract": true
           },
           {
+            "source": "internal/billing/contract_test.go",
+            "target": "internal/billing/contract_test.go",
+            "class": "test",
+            "sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/billing/entitlements.go",
             "target": "internal/billing/entitlements.go",
             "class": "go",
             "sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/billing/entitlements_test.go",
+            "target": "internal/billing/entitlements_test.go",
+            "class": "test",
+            "sha256": "ee3216f422e41b8a748219a50a0c6c4019fabc6a5eef12f375fa84d3f1c04617",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/billing/mock.go",
@@ -6012,6 +6315,22 @@
             "contract": true
           },
           {
+            "source": "internal/billing/module_test.go",
+            "target": "internal/billing/module_test.go",
+            "class": "test",
+            "sha256": "72026abe266096f059c3777b31fe63310b003ddd3254da2dc72a6b8b978baab8",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/billing/mrr_test.go",
+            "target": "internal/billing/mrr_test.go",
+            "class": "test",
+            "sha256": "74da08f94bf65cadd0c853bf9cac9ab85e036bd74fd14bba258eb36617af5718",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/billing/plans.go",
             "target": "internal/billing/plans.go",
             "class": "go",
@@ -6024,6 +6343,14 @@
             "target": "internal/billing/polar.go",
             "class": "go",
             "sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/billing/polar_test.go",
+            "target": "internal/billing/polar_test.go",
+            "class": "test",
+            "sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
             "rewrite_module": true,
             "contract": false
           },
@@ -6261,10 +6588,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/billing/contract_test.go",
+          "source": "internal/billing/contract_test.go",
+          "base_sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
+          "local_sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
+          "state": "clean"
+        },
+        {
           "path": "internal/billing/entitlements.go",
           "source": "internal/billing/entitlements.go",
           "base_sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
           "local_sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/entitlements_test.go",
+          "source": "internal/billing/entitlements_test.go",
+          "base_sha256": "ee3216f422e41b8a748219a50a0c6c4019fabc6a5eef12f375fa84d3f1c04617",
+          "local_sha256": "ee3216f422e41b8a748219a50a0c6c4019fabc6a5eef12f375fa84d3f1c04617",
           "state": "clean"
         },
         {
@@ -6282,6 +6623,20 @@
           "state": "clean"
         },
         {
+          "path": "internal/billing/module_test.go",
+          "source": "internal/billing/module_test.go",
+          "base_sha256": "72026abe266096f059c3777b31fe63310b003ddd3254da2dc72a6b8b978baab8",
+          "local_sha256": "72026abe266096f059c3777b31fe63310b003ddd3254da2dc72a6b8b978baab8",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/mrr_test.go",
+          "source": "internal/billing/mrr_test.go",
+          "base_sha256": "74da08f94bf65cadd0c853bf9cac9ab85e036bd74fd14bba258eb36617af5718",
+          "local_sha256": "74da08f94bf65cadd0c853bf9cac9ab85e036bd74fd14bba258eb36617af5718",
+          "state": "clean"
+        },
+        {
           "path": "internal/billing/plans.go",
           "source": "internal/billing/plans.go",
           "base_sha256": "87b44bcdd25160de9efdef17aaefa3a5eb57defa169910b898382914a4481c9f",
@@ -6293,6 +6648,13 @@
           "source": "internal/billing/polar.go",
           "base_sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
           "local_sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+          "state": "clean"
+        },
+        {
+          "path": "internal/billing/polar_test.go",
+          "source": "internal/billing/polar_test.go",
+          "base_sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
+          "local_sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
           "state": "clean"
         },
         {
@@ -6330,7 +6692,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6366,12 +6728,28 @@
             "contract": true
           },
           {
+            "source": "internal/config/config_test.go",
+            "target": "internal/config/config_test.go",
+            "class": "test",
+            "sha256": "5d1d068cc3491f0a7b122d813e36872fae833be7e6adf9ec87616f4ed3006fc9",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/config/module.go",
             "target": "internal/config/module.go",
             "class": "go",
             "sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/config/module_test.go",
+            "target": "internal/config/module_test.go",
+            "class": "test",
+            "sha256": "49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -6448,10 +6826,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/config/config_test.go",
+          "source": "internal/config/config_test.go",
+          "base_sha256": "5d1d068cc3491f0a7b122d813e36872fae833be7e6adf9ec87616f4ed3006fc9",
+          "local_sha256": "5d1d068cc3491f0a7b122d813e36872fae833be7e6adf9ec87616f4ed3006fc9",
+          "state": "clean"
+        },
+        {
           "path": "internal/config/module.go",
           "source": "internal/config/module.go",
           "base_sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
           "local_sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
+          "state": "clean"
+        },
+        {
+          "path": "internal/config/module_test.go",
+          "source": "internal/config/module_test.go",
+          "base_sha256": "49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9",
+          "local_sha256": "49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9",
           "state": "clean"
         }
       ],
@@ -6461,7 +6853,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -6960,7 +7352,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -7604,7 +7996,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -7650,12 +8042,36 @@
             "contract": true
           },
           {
+            "source": "internal/db/db_test.go",
+            "target": "internal/db/db_test.go",
+            "class": "test",
+            "sha256": "18df25340a9430e8adb080e25854c22150caea6ce0f51f6bd617bbe056d15801",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/db/module.go",
             "target": "internal/db/module.go",
             "class": "go",
             "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/db/module_test.go",
+            "target": "internal/db/module_test.go",
+            "class": "test",
+            "sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/db/seed_registry_test.go",
+            "target": "internal/db/seed_registry_test.go",
+            "class": "test",
+            "sha256": "ce6b67cb5e0aa0cc7cae9d5bacf4fe0b2b5665c8d9abe4368d96d4785484ebc6",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "sqlc.yaml",
@@ -7734,10 +8150,31 @@
           "state": "clean"
         },
         {
+          "path": "internal/db/db_test.go",
+          "source": "internal/db/db_test.go",
+          "base_sha256": "18df25340a9430e8adb080e25854c22150caea6ce0f51f6bd617bbe056d15801",
+          "local_sha256": "18df25340a9430e8adb080e25854c22150caea6ce0f51f6bd617bbe056d15801",
+          "state": "clean"
+        },
+        {
           "path": "internal/db/module.go",
           "source": "internal/db/module.go",
           "base_sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
           "local_sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/module_test.go",
+          "source": "internal/db/module_test.go",
+          "base_sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+          "local_sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/db/seed_registry_test.go",
+          "source": "internal/db/seed_registry_test.go",
+          "base_sha256": "ce6b67cb5e0aa0cc7cae9d5bacf4fe0b2b5665c8d9abe4368d96d4785484ebc6",
+          "local_sha256": "ce6b67cb5e0aa0cc7cae9d5bacf4fe0b2b5665c8d9abe4368d96d4785484ebc6",
           "state": "clean"
         },
         {
@@ -7754,7 +8191,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -7809,12 +8246,28 @@
             "contract": true
           },
           {
+            "source": "internal/flags/flags_test.go",
+            "target": "internal/flags/flags_test.go",
+            "class": "test",
+            "sha256": "2cac146c84f4220ea4464cf95971bf34e8aba19ec2918361f06f89e138537e31",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/flags/module.go",
             "target": "internal/flags/module.go",
             "class": "go",
             "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/flags/module_test.go",
+            "target": "internal/flags/module_test.go",
+            "class": "test",
+            "sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -7956,10 +8409,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/flags/flags_test.go",
+          "source": "internal/flags/flags_test.go",
+          "base_sha256": "2cac146c84f4220ea4464cf95971bf34e8aba19ec2918361f06f89e138537e31",
+          "local_sha256": "2cac146c84f4220ea4464cf95971bf34e8aba19ec2918361f06f89e138537e31",
+          "state": "clean"
+        },
+        {
           "path": "internal/flags/module.go",
           "source": "internal/flags/module.go",
           "base_sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
           "local_sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+          "state": "clean"
+        },
+        {
+          "path": "internal/flags/module_test.go",
+          "source": "internal/flags/module_test.go",
+          "base_sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
+          "local_sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
           "state": "clean"
         }
       ],
@@ -7976,7 +8443,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -8049,6 +8516,22 @@
             "sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/i18n/i18n_test.go",
+            "target": "internal/i18n/i18n_test.go",
+            "class": "test",
+            "sha256": "72622aa75b20d82ee154ab49f883b582de5a3bb16d4776406c9c8b13a26f7925",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/locale.templ",
+            "target": "internal/web/templates/locale.templ",
+            "class": "templ",
+            "sha256": "2ff7e2119384444497a35347fa88d1c4768afa24f8edaeeacfe0faca2638028a",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -8092,6 +8575,20 @@
           "base_sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
           "local_sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
           "state": "clean"
+        },
+        {
+          "path": "internal/i18n/i18n_test.go",
+          "source": "internal/i18n/i18n_test.go",
+          "base_sha256": "72622aa75b20d82ee154ab49f883b582de5a3bb16d4776406c9c8b13a26f7925",
+          "local_sha256": "72622aa75b20d82ee154ab49f883b582de5a3bb16d4776406c9c8b13a26f7925",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/locale.templ",
+          "source": "internal/web/templates/locale.templ",
+          "base_sha256": "2ff7e2119384444497a35347fa88d1c4768afa24f8edaeeacfe0faca2638028a",
+          "local_sha256": "2ff7e2119384444497a35347fa88d1c4768afa24f8edaeeacfe0faca2638028a",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -8113,7 +8610,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -8172,6 +8669,14 @@
             "contract": true
           },
           {
+            "source": "internal/identity/contract_test.go",
+            "target": "internal/identity/contract_test.go",
+            "class": "test",
+            "sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/identity/deleter.go",
             "target": "internal/identity/deleter.go",
             "class": "go",
@@ -8188,12 +8693,28 @@
             "contract": true
           },
           {
+            "source": "internal/identity/fuzz_test.go",
+            "target": "internal/identity/fuzz_test.go",
+            "class": "test",
+            "sha256": "40235d31f108366bda781fefafc3036809f086e29eb699c27a7e0d18470cbff2",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/identity/module.go",
             "target": "internal/identity/module.go",
             "class": "go",
             "sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/identity/module_test.go",
+            "target": "internal/identity/module_test.go",
+            "class": "test",
+            "sha256": "f0d86d2ed64c827f229ee0d7be208bc491818f34175c4d5388c4156a03553622",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/identity/sync.go",
@@ -8210,6 +8731,14 @@
             "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/identity/verifier_test.go",
+            "target": "internal/identity/verifier_test.go",
+            "class": "test",
+            "sha256": "b100610390baf7283297912e6b5625bda891ca0b6ceda25035262d10fecc1e54",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
@@ -8828,6 +9357,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/identity/contract_test.go",
+          "source": "internal/identity/contract_test.go",
+          "base_sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
+          "local_sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
+          "state": "clean"
+        },
+        {
           "path": "internal/identity/deleter.go",
           "source": "internal/identity/deleter.go",
           "base_sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
@@ -8842,10 +9378,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/identity/fuzz_test.go",
+          "source": "internal/identity/fuzz_test.go",
+          "base_sha256": "40235d31f108366bda781fefafc3036809f086e29eb699c27a7e0d18470cbff2",
+          "local_sha256": "40235d31f108366bda781fefafc3036809f086e29eb699c27a7e0d18470cbff2",
+          "state": "clean"
+        },
+        {
           "path": "internal/identity/module.go",
           "source": "internal/identity/module.go",
           "base_sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
           "local_sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/module_test.go",
+          "source": "internal/identity/module_test.go",
+          "base_sha256": "f0d86d2ed64c827f229ee0d7be208bc491818f34175c4d5388c4156a03553622",
+          "local_sha256": "f0d86d2ed64c827f229ee0d7be208bc491818f34175c4d5388c4156a03553622",
           "state": "clean"
         },
         {
@@ -8860,6 +9410,13 @@
           "source": "internal/identity/verifier.go",
           "base_sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
           "local_sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
+          "state": "clean"
+        },
+        {
+          "path": "internal/identity/verifier_test.go",
+          "source": "internal/identity/verifier_test.go",
+          "base_sha256": "b100610390baf7283297912e6b5625bda891ca0b6ceda25035262d10fecc1e54",
+          "local_sha256": "b100610390baf7283297912e6b5625bda891ca0b6ceda25035262d10fecc1e54",
           "state": "clean"
         },
         {
@@ -9254,7 +9811,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -9408,7 +9965,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -9444,6 +10001,30 @@
             "contract": false
           },
           {
+            "source": "internal/jobs/define.go",
+            "target": "internal/jobs/define.go",
+            "class": "go",
+            "sha256": "c7b1de8f9843f76b5a58d6940b6a438c6741182f753604270f6a950dbfa06cae",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/definitions.go",
+            "target": "internal/jobs/definitions.go",
+            "class": "go",
+            "sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/dispatch_test.go",
+            "target": "internal/jobs/dispatch_test.go",
+            "class": "test",
+            "sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/jobs/jobs.go",
             "target": "internal/jobs/jobs.go",
             "class": "go",
@@ -9452,12 +10033,28 @@
             "contract": true
           },
           {
+            "source": "internal/jobs/jobs_test.go",
+            "target": "internal/jobs/jobs_test.go",
+            "class": "test",
+            "sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/jobs/module.go",
             "target": "internal/jobs/module.go",
             "class": "go",
             "sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/jobs/module_test.go",
+            "target": "internal/jobs/module_test.go",
+            "class": "test",
+            "sha256": "3fdb95cdfe80fece4522b7055c4d270d9ea719d4eb6c77f49d9726c97e25f41e",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -9597,6 +10194,27 @@
           "state": "clean"
         },
         {
+          "path": "internal/jobs/define.go",
+          "source": "internal/jobs/define.go",
+          "base_sha256": "c7b1de8f9843f76b5a58d6940b6a438c6741182f753604270f6a950dbfa06cae",
+          "local_sha256": "c7b1de8f9843f76b5a58d6940b6a438c6741182f753604270f6a950dbfa06cae",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/definitions.go",
+          "source": "internal/jobs/definitions.go",
+          "base_sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
+          "local_sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/dispatch_test.go",
+          "source": "internal/jobs/dispatch_test.go",
+          "base_sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
+          "local_sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
+          "state": "clean"
+        },
+        {
           "path": "internal/jobs/jobs.go",
           "source": "internal/jobs/jobs.go",
           "base_sha256": "59c036807164c98760f08d2fb6e570d5d3d6d941d768a7f230735168bcec67ba",
@@ -9604,10 +10222,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/jobs/jobs_test.go",
+          "source": "internal/jobs/jobs_test.go",
+          "base_sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
+          "local_sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
+          "state": "clean"
+        },
+        {
           "path": "internal/jobs/module.go",
           "source": "internal/jobs/module.go",
           "base_sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
           "local_sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/module_test.go",
+          "source": "internal/jobs/module_test.go",
+          "base_sha256": "3fdb95cdfe80fece4522b7055c4d270d9ea719d4eb6c77f49d9726c97e25f41e",
+          "local_sha256": "3fdb95cdfe80fece4522b7055c4d270d9ea719d4eb6c77f49d9726c97e25f41e",
           "state": "clean"
         }
       ],
@@ -9617,7 +10249,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -9637,6 +10269,14 @@
         ],
         "files": [
           {
+            "source": "internal/llm/contract_test.go",
+            "target": "internal/llm/contract_test.go",
+            "class": "test",
+            "sha256": "1fe5f816eaee4651e8472f3c99c904bc097a752633d4450ec4788c387f2c4332",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/llm/llm.go",
             "target": "internal/llm/llm.go",
             "class": "go",
@@ -9645,12 +10285,28 @@
             "contract": true
           },
           {
+            "source": "internal/llm/llm_test.go",
+            "target": "internal/llm/llm_test.go",
+            "class": "test",
+            "sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/llm/module.go",
             "target": "internal/llm/module.go",
             "class": "go",
             "sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/llm/module_test.go",
+            "target": "internal/llm/module_test.go",
+            "class": "test",
+            "sha256": "89eeb2d0c81c8b45c052d2f831c06b9bef04f7af487ecd4f1c472f3ff9f8b28e",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -9716,6 +10372,13 @@
       },
       "files": [
         {
+          "path": "internal/llm/contract_test.go",
+          "source": "internal/llm/contract_test.go",
+          "base_sha256": "1fe5f816eaee4651e8472f3c99c904bc097a752633d4450ec4788c387f2c4332",
+          "local_sha256": "1fe5f816eaee4651e8472f3c99c904bc097a752633d4450ec4788c387f2c4332",
+          "state": "clean"
+        },
+        {
           "path": "internal/llm/llm.go",
           "source": "internal/llm/llm.go",
           "base_sha256": "2901ad52d8ef60022dda313c05e3619a8e25ef6c29a3c89b6034a1059a4d50d7",
@@ -9723,10 +10386,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/llm/llm_test.go",
+          "source": "internal/llm/llm_test.go",
+          "base_sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
+          "local_sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
+          "state": "clean"
+        },
+        {
           "path": "internal/llm/module.go",
           "source": "internal/llm/module.go",
           "base_sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
           "local_sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
+          "state": "clean"
+        },
+        {
+          "path": "internal/llm/module_test.go",
+          "source": "internal/llm/module_test.go",
+          "base_sha256": "89eeb2d0c81c8b45c052d2f831c06b9bef04f7af487ecd4f1c472f3ff9f8b28e",
+          "local_sha256": "89eeb2d0c81c8b45c052d2f831c06b9bef04f7af487ecd4f1c472f3ff9f8b28e",
           "state": "clean"
         }
       ],
@@ -9736,7 +10413,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -9755,6 +10432,22 @@
         ],
         "files": [
           {
+            "source": "internal/mail/contract_test.go",
+            "target": "internal/mail/contract_test.go",
+            "class": "test",
+            "sha256": "fd26bd2b395e7e0ff9c7ce966c8077296816704d0484b2ac2d4293ea80e2f4fa",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/mail/fuzz_test.go",
+            "target": "internal/mail/fuzz_test.go",
+            "class": "test",
+            "sha256": "8dfcafe44aef85572313c90d1995e926627360e8aa3dfffeb3884d21a290fe0a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/mail/mail.go",
             "target": "internal/mail/mail.go",
             "class": "go",
@@ -9763,12 +10456,36 @@
             "contract": true
           },
           {
+            "source": "internal/mail/mail_test.go",
+            "target": "internal/mail/mail_test.go",
+            "class": "test",
+            "sha256": "041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/mail/module.go",
             "target": "internal/mail/module.go",
             "class": "go",
             "sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/mail/module_test.go",
+            "target": "internal/mail/module_test.go",
+            "class": "test",
+            "sha256": "a1725eab07f5f9dd43883a9ec1210980e173c59b2fa8d25b1dbc7f7e261bdf7f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/emails.templ",
+            "target": "internal/web/templates/emails.templ",
+            "class": "templ",
+            "sha256": "d21151f6e4358639d581453e033b0567f0cc2b3e4687147001fafeb0b301a9ca",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -9844,6 +10561,20 @@
       },
       "files": [
         {
+          "path": "internal/mail/contract_test.go",
+          "source": "internal/mail/contract_test.go",
+          "base_sha256": "fd26bd2b395e7e0ff9c7ce966c8077296816704d0484b2ac2d4293ea80e2f4fa",
+          "local_sha256": "fd26bd2b395e7e0ff9c7ce966c8077296816704d0484b2ac2d4293ea80e2f4fa",
+          "state": "clean"
+        },
+        {
+          "path": "internal/mail/fuzz_test.go",
+          "source": "internal/mail/fuzz_test.go",
+          "base_sha256": "8dfcafe44aef85572313c90d1995e926627360e8aa3dfffeb3884d21a290fe0a",
+          "local_sha256": "8dfcafe44aef85572313c90d1995e926627360e8aa3dfffeb3884d21a290fe0a",
+          "state": "clean"
+        },
+        {
           "path": "internal/mail/mail.go",
           "source": "internal/mail/mail.go",
           "base_sha256": "46f077b5a151571a4cacaf2bbe2472b29a81cc2fcea6fed9e4ac413a3724d346",
@@ -9851,10 +10582,31 @@
           "state": "clean"
         },
         {
+          "path": "internal/mail/mail_test.go",
+          "source": "internal/mail/mail_test.go",
+          "base_sha256": "041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6",
+          "local_sha256": "041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6",
+          "state": "clean"
+        },
+        {
           "path": "internal/mail/module.go",
           "source": "internal/mail/module.go",
           "base_sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
           "local_sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
+          "state": "clean"
+        },
+        {
+          "path": "internal/mail/module_test.go",
+          "source": "internal/mail/module_test.go",
+          "base_sha256": "a1725eab07f5f9dd43883a9ec1210980e173c59b2fa8d25b1dbc7f7e261bdf7f",
+          "local_sha256": "a1725eab07f5f9dd43883a9ec1210980e173c59b2fa8d25b1dbc7f7e261bdf7f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/emails.templ",
+          "source": "internal/web/templates/emails.templ",
+          "base_sha256": "d21151f6e4358639d581453e033b0567f0cc2b3e4687147001fafeb0b301a9ca",
+          "local_sha256": "d21151f6e4358639d581453e033b0567f0cc2b3e4687147001fafeb0b301a9ca",
           "state": "clean"
         }
       ],
@@ -9864,7 +10616,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9964,7 +10716,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9986,12 +10738,28 @@
             "contract": true
           },
           {
+            "source": "cmd/ggg/main_test.go",
+            "target": "cmd/ggg/main_test.go",
+            "class": "test",
+            "sha256": "8bf3b958bb75940ade3525b01dda6122ada725ec022f189b74f1fcabd318a163",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/modkit/apply.go",
             "target": "internal/modkit/apply.go",
             "class": "go",
             "sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/modkit/apply_test.go",
+            "target": "internal/modkit/apply_test.go",
+            "class": "test",
+            "sha256": "d9dc14460a139411b0043bf8093cdb6ad34783ebe706fff37e7a7bf1303c75cd",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/modkit/catalog.go",
@@ -10008,6 +10776,14 @@
             "sha256": "81a002915c94df57d3726337683b2325b84cace7b6e129bb67db7fcf8c05b0e8",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/modkit/cli_test.go",
+            "target": "internal/modkit/cli_test.go",
+            "class": "test",
+            "sha256": "e72afac5ebd70b234161d8ca01212c579a518e279930340b95f2b89c4efb8387",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/modkit/codec.go",
@@ -10029,7 +10805,23 @@
             "source": "internal/modkit/generate.go",
             "target": "internal/modkit/generate.go",
             "class": "go",
-            "sha256": "1a03697a29c5008902e61b339a8cdf51a53d75b5c137d49623e2f27903a081d9",
+            "sha256": "a85e258e78c45234837cc5efd660dee1959845489983eeba5175fd647c0e3a31",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/generate_test.go",
+            "target": "internal/modkit/generate_test.go",
+            "class": "test",
+            "sha256": "69c46d46aca926c338e922d8c384c15b15bcaa6fa29da95049c95dba3553e51e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/generated_test.go",
+            "target": "internal/modkit/generated_test.go",
+            "class": "test",
+            "sha256": "212e8ee762272f1887b73e76329f295314539c2f772857fb61975b5fa4d32633",
             "rewrite_module": true,
             "contract": false
           },
@@ -10042,6 +10834,14 @@
             "contract": false
           },
           {
+            "source": "internal/modkit/generator_test.go",
+            "target": "internal/modkit/generator_test.go",
+            "class": "test",
+            "sha256": "8e7edac0846a9769ec0bf5faa554e428a91551f074d2714b87463e8b9f917c22",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/modkit/health.go",
             "target": "internal/modkit/health.go",
             "class": "go",
@@ -10050,10 +10850,18 @@
             "contract": false
           },
           {
+            "source": "internal/modkit/health_test.go",
+            "target": "internal/modkit/health_test.go",
+            "class": "test",
+            "sha256": "096688cc366f505cd497e168cf79e5d8d66a855b2dbafe3a840d70626de8fd71",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/modkit/migration_plan.go",
             "target": "internal/modkit/migration_plan.go",
             "class": "go",
-            "sha256": "42c942de4ba23d536bb8aec67d5f6a7e159eed5a23584033c2bf03b84bffed3f",
+            "sha256": "0e92b27a105e456cfb3655fa8a12f8fe2ef6a2983964900b9466e59a4cba8ba4",
             "rewrite_module": true,
             "contract": false
           },
@@ -10064,6 +10872,22 @@
             "sha256": "f8d926998f37d73da214bd2c9af57c9262c531beff37e51e560dd1628d54e2e3",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/modkit/model_regression_test.go",
+            "target": "internal/modkit/model_regression_test.go",
+            "class": "test",
+            "sha256": "c725e2ace1c372edf5124f3566c830f43d74b1c4535fadd50c57f4739a35d4f5",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/model_test.go",
+            "target": "internal/modkit/model_test.go",
+            "class": "test",
+            "sha256": "490718929a5cdadb161ec8be259258d73e0a746df8a7c1afbb02e8f763dbb31d",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/modkit/namespace.go",
@@ -10090,10 +10914,26 @@
             "contract": true
           },
           {
+            "source": "internal/modkit/plan_test.go",
+            "target": "internal/modkit/plan_test.go",
+            "class": "test",
+            "sha256": "3847cee678fe12e4a32f173207396196e1ca75e42f4307b2054b719f77384999",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/modkit/reconcile.go",
             "target": "internal/modkit/reconcile.go",
             "class": "go",
             "sha256": "20ee25266074031606b8bb7192edcd47015d9aece6762794e1f334c1aa43cb09",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/reconcile_test.go",
+            "target": "internal/modkit/reconcile_test.go",
+            "class": "test",
+            "sha256": "6815ce61787fbd0293a5f64eacb6feb1ab5f61155bedc789de99af79c0bc5d1a",
             "rewrite_module": true,
             "contract": false
           },
@@ -10106,10 +10946,26 @@
             "contract": false
           },
           {
+            "source": "internal/modkit/registry_test.go",
+            "target": "internal/modkit/registry_test.go",
+            "class": "test",
+            "sha256": "511b98aa61738c8fdd0b1fb19099bf7458437989d7c43deb33f660c771f00962",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/modkit/remove.go",
             "target": "internal/modkit/remove.go",
             "class": "go",
             "sha256": "30eeeb5b85f23914464d3f0f2cd87356c5df2bf8cd9eb9400d601b8c5c39f5f0",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/modkit/remove_test.go",
+            "target": "internal/modkit/remove_test.go",
+            "class": "test",
+            "sha256": "1949ed100dfb199d445a28162cd1620d2e504d55fd907885ffecac519ef7c268",
             "rewrite_module": true,
             "contract": false
           },
@@ -10162,6 +11018,14 @@
             "contract": false
           },
           {
+            "source": "internal/modkit/source_test.go",
+            "target": "internal/modkit/source_test.go",
+            "class": "test",
+            "sha256": "5a6cdb8a22aa55afc131be314a34dd4544f3e7dd9207e5d1a1e2ac2b67d9ae70",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/modkit/target_plan.go",
             "target": "internal/modkit/target_plan.go",
             "class": "go",
@@ -10206,10 +11070,24 @@
           "state": "clean"
         },
         {
+          "path": "cmd/ggg/main_test.go",
+          "source": "cmd/ggg/main_test.go",
+          "base_sha256": "8bf3b958bb75940ade3525b01dda6122ada725ec022f189b74f1fcabd318a163",
+          "local_sha256": "8bf3b958bb75940ade3525b01dda6122ada725ec022f189b74f1fcabd318a163",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/apply.go",
           "source": "internal/modkit/apply.go",
           "base_sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
           "local_sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/apply_test.go",
+          "source": "internal/modkit/apply_test.go",
+          "base_sha256": "d9dc14460a139411b0043bf8093cdb6ad34783ebe706fff37e7a7bf1303c75cd",
+          "local_sha256": "d9dc14460a139411b0043bf8093cdb6ad34783ebe706fff37e7a7bf1303c75cd",
           "state": "clean"
         },
         {
@@ -10224,6 +11102,13 @@
           "source": "internal/modkit/cli.go",
           "base_sha256": "81a002915c94df57d3726337683b2325b84cace7b6e129bb67db7fcf8c05b0e8",
           "local_sha256": "81a002915c94df57d3726337683b2325b84cace7b6e129bb67db7fcf8c05b0e8",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/cli_test.go",
+          "source": "internal/modkit/cli_test.go",
+          "base_sha256": "e72afac5ebd70b234161d8ca01212c579a518e279930340b95f2b89c4efb8387",
+          "local_sha256": "e72afac5ebd70b234161d8ca01212c579a518e279930340b95f2b89c4efb8387",
           "state": "clean"
         },
         {
@@ -10243,8 +11128,22 @@
         {
           "path": "internal/modkit/generate.go",
           "source": "internal/modkit/generate.go",
-          "base_sha256": "1a03697a29c5008902e61b339a8cdf51a53d75b5c137d49623e2f27903a081d9",
-          "local_sha256": "1a03697a29c5008902e61b339a8cdf51a53d75b5c137d49623e2f27903a081d9",
+          "base_sha256": "a85e258e78c45234837cc5efd660dee1959845489983eeba5175fd647c0e3a31",
+          "local_sha256": "a85e258e78c45234837cc5efd660dee1959845489983eeba5175fd647c0e3a31",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/generate_test.go",
+          "source": "internal/modkit/generate_test.go",
+          "base_sha256": "69c46d46aca926c338e922d8c384c15b15bcaa6fa29da95049c95dba3553e51e",
+          "local_sha256": "69c46d46aca926c338e922d8c384c15b15bcaa6fa29da95049c95dba3553e51e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/generated_test.go",
+          "source": "internal/modkit/generated_test.go",
+          "base_sha256": "212e8ee762272f1887b73e76329f295314539c2f772857fb61975b5fa4d32633",
+          "local_sha256": "212e8ee762272f1887b73e76329f295314539c2f772857fb61975b5fa4d32633",
           "state": "clean"
         },
         {
@@ -10255,6 +11154,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/modkit/generator_test.go",
+          "source": "internal/modkit/generator_test.go",
+          "base_sha256": "8e7edac0846a9769ec0bf5faa554e428a91551f074d2714b87463e8b9f917c22",
+          "local_sha256": "8e7edac0846a9769ec0bf5faa554e428a91551f074d2714b87463e8b9f917c22",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/health.go",
           "source": "internal/modkit/health.go",
           "base_sha256": "96f654bd642f1168fbdf571066914b9943bde2971ca6317c1943e98eef05959f",
@@ -10262,10 +11168,17 @@
           "state": "clean"
         },
         {
+          "path": "internal/modkit/health_test.go",
+          "source": "internal/modkit/health_test.go",
+          "base_sha256": "096688cc366f505cd497e168cf79e5d8d66a855b2dbafe3a840d70626de8fd71",
+          "local_sha256": "096688cc366f505cd497e168cf79e5d8d66a855b2dbafe3a840d70626de8fd71",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/migration_plan.go",
           "source": "internal/modkit/migration_plan.go",
-          "base_sha256": "42c942de4ba23d536bb8aec67d5f6a7e159eed5a23584033c2bf03b84bffed3f",
-          "local_sha256": "42c942de4ba23d536bb8aec67d5f6a7e159eed5a23584033c2bf03b84bffed3f",
+          "base_sha256": "0e92b27a105e456cfb3655fa8a12f8fe2ef6a2983964900b9466e59a4cba8ba4",
+          "local_sha256": "0e92b27a105e456cfb3655fa8a12f8fe2ef6a2983964900b9466e59a4cba8ba4",
           "state": "clean"
         },
         {
@@ -10273,6 +11186,20 @@
           "source": "internal/modkit/model.go",
           "base_sha256": "f8d926998f37d73da214bd2c9af57c9262c531beff37e51e560dd1628d54e2e3",
           "local_sha256": "f8d926998f37d73da214bd2c9af57c9262c531beff37e51e560dd1628d54e2e3",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/model_regression_test.go",
+          "source": "internal/modkit/model_regression_test.go",
+          "base_sha256": "c725e2ace1c372edf5124f3566c830f43d74b1c4535fadd50c57f4739a35d4f5",
+          "local_sha256": "c725e2ace1c372edf5124f3566c830f43d74b1c4535fadd50c57f4739a35d4f5",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/model_test.go",
+          "source": "internal/modkit/model_test.go",
+          "base_sha256": "490718929a5cdadb161ec8be259258d73e0a746df8a7c1afbb02e8f763dbb31d",
+          "local_sha256": "490718929a5cdadb161ec8be259258d73e0a746df8a7c1afbb02e8f763dbb31d",
           "state": "clean"
         },
         {
@@ -10297,10 +11224,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/modkit/plan_test.go",
+          "source": "internal/modkit/plan_test.go",
+          "base_sha256": "3847cee678fe12e4a32f173207396196e1ca75e42f4307b2054b719f77384999",
+          "local_sha256": "3847cee678fe12e4a32f173207396196e1ca75e42f4307b2054b719f77384999",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/reconcile.go",
           "source": "internal/modkit/reconcile.go",
           "base_sha256": "20ee25266074031606b8bb7192edcd47015d9aece6762794e1f334c1aa43cb09",
           "local_sha256": "20ee25266074031606b8bb7192edcd47015d9aece6762794e1f334c1aa43cb09",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/reconcile_test.go",
+          "source": "internal/modkit/reconcile_test.go",
+          "base_sha256": "6815ce61787fbd0293a5f64eacb6feb1ab5f61155bedc789de99af79c0bc5d1a",
+          "local_sha256": "6815ce61787fbd0293a5f64eacb6feb1ab5f61155bedc789de99af79c0bc5d1a",
           "state": "clean"
         },
         {
@@ -10311,10 +11252,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/modkit/registry_test.go",
+          "source": "internal/modkit/registry_test.go",
+          "base_sha256": "511b98aa61738c8fdd0b1fb19099bf7458437989d7c43deb33f660c771f00962",
+          "local_sha256": "511b98aa61738c8fdd0b1fb19099bf7458437989d7c43deb33f660c771f00962",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/remove.go",
           "source": "internal/modkit/remove.go",
           "base_sha256": "30eeeb5b85f23914464d3f0f2cd87356c5df2bf8cd9eb9400d601b8c5c39f5f0",
           "local_sha256": "30eeeb5b85f23914464d3f0f2cd87356c5df2bf8cd9eb9400d601b8c5c39f5f0",
+          "state": "clean"
+        },
+        {
+          "path": "internal/modkit/remove_test.go",
+          "source": "internal/modkit/remove_test.go",
+          "base_sha256": "1949ed100dfb199d445a28162cd1620d2e504d55fd907885ffecac519ef7c268",
+          "local_sha256": "1949ed100dfb199d445a28162cd1620d2e504d55fd907885ffecac519ef7c268",
           "state": "clean"
         },
         {
@@ -10360,6 +11315,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/modkit/source_test.go",
+          "source": "internal/modkit/source_test.go",
+          "base_sha256": "5a6cdb8a22aa55afc131be314a34dd4544f3e7dd9207e5d1a1e2ac2b67d9ae70",
+          "local_sha256": "5a6cdb8a22aa55afc131be314a34dd4544f3e7dd9207e5d1a1e2ac2b67d9ae70",
+          "state": "clean"
+        },
+        {
           "path": "internal/modkit/target_plan.go",
           "source": "internal/modkit/target_plan.go",
           "base_sha256": "a19e0a003ced95c5a11e285d5aafaca083430bfa9d359f7ddb313edf684e40d9",
@@ -10380,7 +11342,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -10435,12 +11397,36 @@
             "contract": false
           },
           {
+            "source": "internal/jobs/digest.go",
+            "target": "internal/jobs/digest.go",
+            "class": "go",
+            "sha256": "fd3596068b438ae8e7279d7b183bde8d6e588d75b98471e9d875a4c300b02a82",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/digest_test.go",
+            "target": "internal/jobs/digest_test.go",
+            "class": "test",
+            "sha256": "44ba7e6ca971a1309878a960835e036f75986c059bdc14456467efc14903d992",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/notify/notify.go",
             "target": "internal/notify/notify.go",
             "class": "go",
             "sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/notify/notify_test.go",
+            "target": "internal/notify/notify_test.go",
+            "class": "test",
+            "sha256": "f9b0760690b6a7bc9c0e121af6ce5fee6812344c3946b908a1e233a0bb2aa0aa",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -10600,10 +11586,31 @@
           "state": "clean"
         },
         {
+          "path": "internal/jobs/digest.go",
+          "source": "internal/jobs/digest.go",
+          "base_sha256": "fd3596068b438ae8e7279d7b183bde8d6e588d75b98471e9d875a4c300b02a82",
+          "local_sha256": "fd3596068b438ae8e7279d7b183bde8d6e588d75b98471e9d875a4c300b02a82",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/digest_test.go",
+          "source": "internal/jobs/digest_test.go",
+          "base_sha256": "44ba7e6ca971a1309878a960835e036f75986c059bdc14456467efc14903d992",
+          "local_sha256": "44ba7e6ca971a1309878a960835e036f75986c059bdc14456467efc14903d992",
+          "state": "clean"
+        },
+        {
           "path": "internal/notify/notify.go",
           "source": "internal/notify/notify.go",
           "base_sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
           "local_sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
+          "state": "clean"
+        },
+        {
+          "path": "internal/notify/notify_test.go",
+          "source": "internal/notify/notify_test.go",
+          "base_sha256": "f9b0760690b6a7bc9c0e121af6ce5fee6812344c3946b908a1e233a0bb2aa0aa",
+          "local_sha256": "f9b0760690b6a7bc9c0e121af6ce5fee6812344c3946b908a1e233a0bb2aa0aa",
           "state": "clean"
         }
       ],
@@ -10632,7 +11639,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -10652,6 +11659,14 @@
         ],
         "files": [
           {
+            "source": "internal/observability/contract_test.go",
+            "target": "internal/observability/contract_test.go",
+            "class": "test",
+            "sha256": "c6108cabc092d9ee3e3084097588cc903d2c9335d5b6ffbefde74787f6cd7856",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/observability/module.go",
             "target": "internal/observability/module.go",
             "class": "go",
@@ -10660,12 +11675,28 @@
             "contract": true
           },
           {
+            "source": "internal/observability/module_test.go",
+            "target": "internal/observability/module_test.go",
+            "class": "test",
+            "sha256": "d506e430a9360ca7e06dc1f879057c7f69cdfa35c484709224b414d97fab01b4",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/observability/observability.go",
             "target": "internal/observability/observability.go",
             "class": "go",
             "sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/observability/observability_test.go",
+            "target": "internal/observability/observability_test.go",
+            "class": "test",
+            "sha256": "da50a28bccad99d31b68c31439addfc1b49112a54af6f46508fc7da12902b59b",
+            "rewrite_module": true,
+            "contract": false
           },
           {
             "source": "internal/observability/sentry.go",
@@ -10733,6 +11764,13 @@
       },
       "files": [
         {
+          "path": "internal/observability/contract_test.go",
+          "source": "internal/observability/contract_test.go",
+          "base_sha256": "c6108cabc092d9ee3e3084097588cc903d2c9335d5b6ffbefde74787f6cd7856",
+          "local_sha256": "c6108cabc092d9ee3e3084097588cc903d2c9335d5b6ffbefde74787f6cd7856",
+          "state": "clean"
+        },
+        {
           "path": "internal/observability/module.go",
           "source": "internal/observability/module.go",
           "base_sha256": "1417237428d07289c6d975368002cbd65c702b6e3ffe5a9de657a8cac7429963",
@@ -10740,10 +11778,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/observability/module_test.go",
+          "source": "internal/observability/module_test.go",
+          "base_sha256": "d506e430a9360ca7e06dc1f879057c7f69cdfa35c484709224b414d97fab01b4",
+          "local_sha256": "d506e430a9360ca7e06dc1f879057c7f69cdfa35c484709224b414d97fab01b4",
+          "state": "clean"
+        },
+        {
           "path": "internal/observability/observability.go",
           "source": "internal/observability/observability.go",
           "base_sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
           "local_sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/observability/observability_test.go",
+          "source": "internal/observability/observability_test.go",
+          "base_sha256": "da50a28bccad99d31b68c31439addfc1b49112a54af6f46508fc7da12902b59b",
+          "local_sha256": "da50a28bccad99d31b68c31439addfc1b49112a54af6f46508fc7da12902b59b",
           "state": "clean"
         },
         {
@@ -10767,7 +11819,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -11084,7 +12136,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -11112,12 +12164,28 @@
             "contract": true
           },
           {
+            "source": "internal/ratelimit/module_test.go",
+            "target": "internal/ratelimit/module_test.go",
+            "class": "test",
+            "sha256": "58430e389219fde41f1381d777c38f485100e0ebf0765e5309d17f5aedc37da7",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/ratelimit/ratelimit.go",
             "target": "internal/ratelimit/ratelimit.go",
             "class": "go",
             "sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/ratelimit/ratelimit_test.go",
+            "target": "internal/ratelimit/ratelimit_test.go",
+            "class": "test",
+            "sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -11177,10 +12245,24 @@
           "state": "clean"
         },
         {
+          "path": "internal/ratelimit/module_test.go",
+          "source": "internal/ratelimit/module_test.go",
+          "base_sha256": "58430e389219fde41f1381d777c38f485100e0ebf0765e5309d17f5aedc37da7",
+          "local_sha256": "58430e389219fde41f1381d777c38f485100e0ebf0765e5309d17f5aedc37da7",
+          "state": "clean"
+        },
+        {
           "path": "internal/ratelimit/ratelimit.go",
           "source": "internal/ratelimit/ratelimit.go",
           "base_sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
           "local_sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/ratelimit/ratelimit_test.go",
+          "source": "internal/ratelimit/ratelimit_test.go",
+          "base_sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
+          "local_sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
           "state": "clean"
         }
       ],
@@ -11190,7 +12272,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -11231,6 +12313,14 @@
             "sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/schedules/schedules_test.go",
+            "target": "internal/schedules/schedules_test.go",
+            "class": "test",
+            "sha256": "7f6e70e4d067070a1bd1dfa66e0d1b063fc940ada455038b003cf12f1513964e",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -11320,6 +12410,13 @@
           "base_sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
           "local_sha256": "ed93d7611f152a76c213ac3d6d3fe6cdc4aa536edae3ae57870c2f7bbcb88bfc",
           "state": "clean"
+        },
+        {
+          "path": "internal/schedules/schedules_test.go",
+          "source": "internal/schedules/schedules_test.go",
+          "base_sha256": "7f6e70e4d067070a1bd1dfa66e0d1b063fc940ada455038b003cf12f1513964e",
+          "local_sha256": "7f6e70e4d067070a1bd1dfa66e0d1b063fc940ada455038b003cf12f1513964e",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -11335,7 +12432,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -11476,7 +12573,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11528,7 +12625,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -11582,7 +12679,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -11678,6 +12775,14 @@
           "system/storage"
         ],
         "files": [
+          {
+            "source": "cmd/server/main.go",
+            "target": "cmd/server/main.go",
+            "class": "go",
+            "sha256": "2aabbbfd390ab8a9f5da594ae09068f8ee01013aca2a9ce0e3c5e798e78c8431",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/admin_shared.go",
             "target": "internal/web/admin_shared.go",
@@ -11799,10 +12904,98 @@
             "contract": true
           },
           {
+            "source": "internal/web/templates/chrome.go",
+            "target": "internal/web/templates/chrome.go",
+            "class": "go",
+            "sha256": "a00dcbdb2eeb4f26d6e15135e3f0602cdb4f951e45f1ee2d346f310919b6492e",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/chrome_test.go",
+            "target": "internal/web/templates/chrome_test.go",
+            "class": "test",
+            "sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/components.templ",
+            "target": "internal/web/templates/components.templ",
+            "class": "templ",
+            "sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/data.go",
+            "target": "internal/web/templates/data.go",
+            "class": "go",
+            "sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/web/templates/designsystem_test.go",
             "target": "internal/web/templates/designsystem_test.go",
             "class": "test",
             "sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/errors.templ",
+            "target": "internal/web/templates/errors.templ",
+            "class": "templ",
+            "sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/icons.templ",
+            "target": "internal/web/templates/icons.templ",
+            "class": "templ",
+            "sha256": "4f88232ea6ae4cace270c917185ef8fb9e51a1e2a6e46f0b624a11c811577bba",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/layouts.templ",
+            "target": "internal/web/templates/layouts.templ",
+            "class": "templ",
+            "sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/nav.templ",
+            "target": "internal/web/templates/nav.templ",
+            "class": "templ",
+            "sha256": "cd7abfff9f0e45434a53873df18f11eb62b7e36fc86940fcee2f11a00e097e6a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/page.go",
+            "target": "internal/web/templates/page.go",
+            "class": "go",
+            "sha256": "34e7098c68c59f3562a8081d0d333529d27fe92c4a0f007b3cde90ab5f6c3260",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/sidebar.templ",
+            "target": "internal/web/templates/sidebar.templ",
+            "class": "templ",
+            "sha256": "39dc670ccf2e0ac5eafcb6b20c0be1bb4dfb999ae6efd739e574924a861dc6f7",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/theme.go",
+            "target": "internal/web/templates/theme.go",
+            "class": "go",
+            "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
             "rewrite_module": true,
             "contract": false
           },
@@ -12232,6 +13425,13 @@
       },
       "files": [
         {
+          "path": "cmd/server/main.go",
+          "source": "cmd/server/main.go",
+          "base_sha256": "2aabbbfd390ab8a9f5da594ae09068f8ee01013aca2a9ce0e3c5e798e78c8431",
+          "local_sha256": "2aabbbfd390ab8a9f5da594ae09068f8ee01013aca2a9ce0e3c5e798e78c8431",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/admin_shared.go",
           "source": "internal/web/admin_shared.go",
           "base_sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
@@ -12337,10 +13537,87 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/templates/chrome.go",
+          "source": "internal/web/templates/chrome.go",
+          "base_sha256": "a00dcbdb2eeb4f26d6e15135e3f0602cdb4f951e45f1ee2d346f310919b6492e",
+          "local_sha256": "a00dcbdb2eeb4f26d6e15135e3f0602cdb4f951e45f1ee2d346f310919b6492e",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/chrome_test.go",
+          "source": "internal/web/templates/chrome_test.go",
+          "base_sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
+          "local_sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/components.templ",
+          "source": "internal/web/templates/components.templ",
+          "base_sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
+          "local_sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/data.go",
+          "source": "internal/web/templates/data.go",
+          "base_sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
+          "local_sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/templates/designsystem_test.go",
           "source": "internal/web/templates/designsystem_test.go",
           "base_sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
           "local_sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/errors.templ",
+          "source": "internal/web/templates/errors.templ",
+          "base_sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+          "local_sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/icons.templ",
+          "source": "internal/web/templates/icons.templ",
+          "base_sha256": "4f88232ea6ae4cace270c917185ef8fb9e51a1e2a6e46f0b624a11c811577bba",
+          "local_sha256": "4f88232ea6ae4cace270c917185ef8fb9e51a1e2a6e46f0b624a11c811577bba",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/layouts.templ",
+          "source": "internal/web/templates/layouts.templ",
+          "base_sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+          "local_sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/nav.templ",
+          "source": "internal/web/templates/nav.templ",
+          "base_sha256": "cd7abfff9f0e45434a53873df18f11eb62b7e36fc86940fcee2f11a00e097e6a",
+          "local_sha256": "cd7abfff9f0e45434a53873df18f11eb62b7e36fc86940fcee2f11a00e097e6a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/page.go",
+          "source": "internal/web/templates/page.go",
+          "base_sha256": "34e7098c68c59f3562a8081d0d333529d27fe92c4a0f007b3cde90ab5f6c3260",
+          "local_sha256": "34e7098c68c59f3562a8081d0d333529d27fe92c4a0f007b3cde90ab5f6c3260",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/sidebar.templ",
+          "source": "internal/web/templates/sidebar.templ",
+          "base_sha256": "39dc670ccf2e0ac5eafcb6b20c0be1bb4dfb999ae6efd739e574924a861dc6f7",
+          "local_sha256": "39dc670ccf2e0ac5eafcb6b20c0be1bb4dfb999ae6efd739e574924a861dc6f7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/theme.go",
+          "source": "internal/web/templates/theme.go",
+          "base_sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
+          "local_sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
           "state": "clean"
         },
         {
@@ -12371,7 +13648,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12386,6 +13663,14 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "input.css",
+            "target": "input.css",
+            "class": "style",
+            "sha256": "9bcb26af57ddff3c356b021ddd3b9fdaaf90ee7f14f2896b6efa8a0aa38178c7",
+            "rewrite_module": false,
+            "contract": false
+          },
           {
             "source": "static/analytics.js",
             "target": "static/analytics.js",
@@ -12451,10 +13736,18 @@
             "contract": true
           },
           {
+            "source": "static/static_test.go",
+            "target": "static/static_test.go",
+            "class": "test",
+            "sha256": "94f6b728e0f531aa3af91ac255277a2efca6d94836b503e7a0d6c0b3bd7b0a22",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "5fd5ac521fcc28d9cde6007c171785a38cb977ff807778db6cb2b105509a6d83",
+            "sha256": "5101473f344013612656e218c1bd919614222b177f1f42a796d6d516243c7df6",
             "rewrite_module": false,
             "contract": false
           },
@@ -12536,6 +13829,13 @@
       },
       "files": [
         {
+          "path": "input.css",
+          "source": "input.css",
+          "base_sha256": "9bcb26af57ddff3c356b021ddd3b9fdaaf90ee7f14f2896b6efa8a0aa38178c7",
+          "local_sha256": "9bcb26af57ddff3c356b021ddd3b9fdaaf90ee7f14f2896b6efa8a0aa38178c7",
+          "state": "clean"
+        },
+        {
           "path": "static/analytics.js",
           "source": "static/analytics.js",
           "base_sha256": "cf50dd90a1c75c36b0cfae421904342cbc374528a14f3b4c27e7b3fd7be78316",
@@ -12592,6 +13892,13 @@
           "state": "clean"
         },
         {
+          "path": "static/static_test.go",
+          "source": "static/static_test.go",
+          "base_sha256": "94f6b728e0f531aa3af91ac255277a2efca6d94836b503e7a0d6c0b3bd7b0a22",
+          "local_sha256": "94f6b728e0f531aa3af91ac255277a2efca6d94836b503e7a0d6c0b3bd7b0a22",
+          "state": "clean"
+        },
+        {
           "path": "static/ui-components.js",
           "source": "static/ui-components.js",
           "base_sha256": "",
@@ -12626,7 +13933,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -12648,6 +13955,14 @@
         ],
         "files": [
           {
+            "source": "internal/storage/contract_test.go",
+            "target": "internal/storage/contract_test.go",
+            "class": "test",
+            "sha256": "1e83906feeeeeb7ad95c67fa562887cc52c527919778ab1b49b9491e6feb2efe",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/storage/dev.go",
             "target": "internal/storage/dev.go",
             "class": "go",
@@ -12664,6 +13979,14 @@
             "contract": true
           },
           {
+            "source": "internal/storage/module_test.go",
+            "target": "internal/storage/module_test.go",
+            "class": "test",
+            "sha256": "f62ac33b5b26f6ebcc730a3426cf04d3458df037fe4e4fc109543a9ed7ddb76a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/storage/r2.go",
             "target": "internal/storage/r2.go",
             "class": "go",
@@ -12678,6 +14001,14 @@
             "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/storage/storage_test.go",
+            "target": "internal/storage/storage_test.go",
+            "class": "test",
+            "sha256": "49bf3efe6ec2eb1e3500d22fa951be7cf92941241dd543f1d777768fd5be1b32",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -12755,6 +14086,13 @@
       },
       "files": [
         {
+          "path": "internal/storage/contract_test.go",
+          "source": "internal/storage/contract_test.go",
+          "base_sha256": "1e83906feeeeeb7ad95c67fa562887cc52c527919778ab1b49b9491e6feb2efe",
+          "local_sha256": "1e83906feeeeeb7ad95c67fa562887cc52c527919778ab1b49b9491e6feb2efe",
+          "state": "clean"
+        },
+        {
           "path": "internal/storage/dev.go",
           "source": "internal/storage/dev.go",
           "base_sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
@@ -12766,6 +14104,13 @@
           "source": "internal/storage/module.go",
           "base_sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
           "local_sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
+          "state": "clean"
+        },
+        {
+          "path": "internal/storage/module_test.go",
+          "source": "internal/storage/module_test.go",
+          "base_sha256": "f62ac33b5b26f6ebcc730a3426cf04d3458df037fe4e4fc109543a9ed7ddb76a",
+          "local_sha256": "f62ac33b5b26f6ebcc730a3426cf04d3458df037fe4e4fc109543a9ed7ddb76a",
           "state": "clean"
         },
         {
@@ -12781,6 +14126,13 @@
           "base_sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
           "local_sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
           "state": "clean"
+        },
+        {
+          "path": "internal/storage/storage_test.go",
+          "source": "internal/storage/storage_test.go",
+          "base_sha256": "49bf3efe6ec2eb1e3500d22fa951be7cf92941241dd543f1d777768fd5be1b32",
+          "local_sha256": "49bf3efe6ec2eb1e3500d22fa951be7cf92941241dd543f1d777768fd5be1b32",
+          "state": "clean"
         }
       ],
       "migrations": []
@@ -12789,7 +14141,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12845,7 +14197,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -12872,12 +14224,36 @@
             "contract": false
           },
           {
+            "source": "internal/jobs/usage_flush.go",
+            "target": "internal/jobs/usage_flush.go",
+            "class": "go",
+            "sha256": "2197146eacdc5b8b63283d4405a6757e9f8aef72b59887aa271b8c362f56adee",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/usage_flush_test.go",
+            "target": "internal/jobs/usage_flush_test.go",
+            "class": "test",
+            "sha256": "1095ddd913ee17f7dfb1f11561f39166eec36d572f517f1e8e0378591eb4067c",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
             "source": "internal/usage/usage.go",
             "target": "internal/usage/usage.go",
             "class": "go",
             "sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/usage/usage_test.go",
+            "target": "internal/usage/usage_test.go",
+            "class": "test",
+            "sha256": "a2c80413e0384696a35d6037bd6b577bfe1f541656a28bc58fc1b63903c2fd29",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -12956,10 +14332,31 @@
           "state": "clean"
         },
         {
+          "path": "internal/jobs/usage_flush.go",
+          "source": "internal/jobs/usage_flush.go",
+          "base_sha256": "2197146eacdc5b8b63283d4405a6757e9f8aef72b59887aa271b8c362f56adee",
+          "local_sha256": "2197146eacdc5b8b63283d4405a6757e9f8aef72b59887aa271b8c362f56adee",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/usage_flush_test.go",
+          "source": "internal/jobs/usage_flush_test.go",
+          "base_sha256": "1095ddd913ee17f7dfb1f11561f39166eec36d572f517f1e8e0378591eb4067c",
+          "local_sha256": "1095ddd913ee17f7dfb1f11561f39166eec36d572f517f1e8e0378591eb4067c",
+          "state": "clean"
+        },
+        {
           "path": "internal/usage/usage.go",
           "source": "internal/usage/usage.go",
           "base_sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
           "local_sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
+          "state": "clean"
+        },
+        {
+          "path": "internal/usage/usage_test.go",
+          "source": "internal/usage/usage_test.go",
+          "base_sha256": "a2c80413e0384696a35d6037bd6b577bfe1f541656a28bc58fc1b63903c2fd29",
+          "local_sha256": "a2c80413e0384696a35d6037bd6b577bfe1f541656a28bc58fc1b63903c2fd29",
           "state": "clean"
         }
       ],
@@ -12976,7 +14373,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -13035,6 +14432,14 @@
             "sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "internal/webhooks/webhooks_test.go",
+            "target": "internal/webhooks/webhooks_test.go",
+            "class": "test",
+            "sha256": "fab2cc64cc37f2740e929e035501139da8dc839135170896b114b37401231a42",
+            "rewrite_module": true,
+            "contract": false
           }
         ],
         "claims": {
@@ -13209,6 +14614,13 @@
           "base_sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
           "local_sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
           "state": "clean"
+        },
+        {
+          "path": "internal/webhooks/webhooks_test.go",
+          "source": "internal/webhooks/webhooks_test.go",
+          "base_sha256": "fab2cc64cc37f2740e929e035501139da8dc839135170896b114b37401231a42",
+          "local_sha256": "fab2cc64cc37f2740e929e035501139da8dc839135170896b114b37401231a42",
+          "state": "clean"
         }
       ],
       "migrations": [
@@ -13230,7 +14642,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13314,7 +14726,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13410,7 +14822,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13544,7 +14956,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -13737,7 +15149,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13909,7 +15321,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13971,7 +15383,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14091,7 +15503,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14227,7 +15639,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14325,7 +15737,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14559,7 +15971,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14895,7 +16307,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14994,7 +16406,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15121,7 +16533,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -15255,7 +16667,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15372,7 +16784,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15451,7 +16863,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -15567,7 +16979,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15694,7 +17106,14 @@
             }
           ]
         },
-        "migrations": [],
+        "migrations": [
+          {
+            "id": "0003_files",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0003_files.sql",
+            "sha256": "5c361c8d9c9aed9fa7dd0d366ef1789278fd4922a4d6ed873771e3b1137987c6"
+          }
+        ],
         "environment": [],
         "docs": [],
         "tests": {
@@ -15732,13 +17151,20 @@
           "state": "clean"
         }
       ],
-      "migrations": []
+      "migrations": [
+        {
+          "id": "0003_files",
+          "number": 3,
+          "path": "internal/db/migrations/0003_files.sql",
+          "sha256": "5c361c8d9c9aed9fa7dd0d366ef1789278fd4922a4d6ed873771e3b1137987c6"
+        }
+      ]
     },
     {
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15845,7 +17271,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15978,7 +17404,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16113,7 +17539,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16194,7 +17620,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -16335,7 +17761,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -16358,6 +17784,22 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/jobs/export_org.go",
+            "target": "internal/jobs/export_org.go",
+            "class": "go",
+            "sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/export_org_test.go",
+            "target": "internal/jobs/export_org_test.go",
+            "class": "test",
+            "sha256": "abe8799fee875e5c81065ddf5cb6dad931c1eec814648040c0497096a10341f1",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/workflow_organization_export.go",
             "target": "internal/web/workflow_organization_export.go",
@@ -16415,6 +17857,20 @@
       },
       "files": [
         {
+          "path": "internal/jobs/export_org.go",
+          "source": "internal/jobs/export_org.go",
+          "base_sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
+          "local_sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/export_org_test.go",
+          "source": "internal/jobs/export_org_test.go",
+          "base_sha256": "abe8799fee875e5c81065ddf5cb6dad931c1eec814648040c0497096a10341f1",
+          "local_sha256": "abe8799fee875e5c81065ddf5cb6dad931c1eec814648040c0497096a10341f1",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/workflow_organization_export.go",
           "source": "internal/web/workflow_organization_export.go",
           "base_sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
@@ -16428,7 +17884,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16446,7 +17902,24 @@
           "system/server",
           "system/webhooks"
         ],
-        "files": [],
+        "files": [
+          {
+            "source": "internal/jobs/webhooks_deliver.go",
+            "target": "internal/jobs/webhooks_deliver.go",
+            "class": "go",
+            "sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/webhooks_deliver_test.go",
+            "target": "internal/jobs/webhooks_deliver_test.go",
+            "class": "test",
+            "sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
         "claims": {
           "routes": [
             "webhooks.delivery.replay",
@@ -16565,14 +18038,29 @@
         "data": [],
         "removal_policy": "retain-data"
       },
-      "files": [],
+      "files": [
+        {
+          "path": "internal/jobs/webhooks_deliver.go",
+          "source": "internal/jobs/webhooks_deliver.go",
+          "base_sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+          "local_sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/webhooks_deliver_test.go",
+          "source": "internal/jobs/webhooks_deliver_test.go",
+          "base_sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+          "local_sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+          "state": "clean"
+        }
+      ],
       "migrations": []
     },
     {
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16592,6 +18080,22 @@
           "system/server"
         ],
         "files": [
+          {
+            "source": "internal/jobs/export_csv.go",
+            "target": "internal/jobs/export_csv.go",
+            "class": "go",
+            "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/jobs/export_csv_test.go",
+            "target": "internal/jobs/export_csv_test.go",
+            "class": "test",
+            "sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
+            "rewrite_module": true,
+            "contract": false
+          },
           {
             "source": "internal/web/workflow_project_export.go",
             "target": "internal/web/workflow_project_export.go",
@@ -16649,6 +18153,20 @@
       },
       "files": [
         {
+          "path": "internal/jobs/export_csv.go",
+          "source": "internal/jobs/export_csv.go",
+          "base_sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
+          "local_sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
+          "state": "clean"
+        },
+        {
+          "path": "internal/jobs/export_csv_test.go",
+          "source": "internal/jobs/export_csv_test.go",
+          "base_sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
+          "local_sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/workflow_project_export.go",
           "source": "internal/web/workflow_project_export.go",
           "base_sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
@@ -16662,7 +18180,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -16843,7 +18361,14 @@
             }
           ]
         },
-        "migrations": [],
+        "migrations": [
+          {
+            "id": "0010_projects_search",
+            "kind": "immutable",
+            "source": "internal/db/migrations/0010_projects_search.sql",
+            "sha256": "c1a90a9308dcac278d49c2215ee402c1d5207fbdf369c48517f025ad8296c15c"
+          }
+        ],
         "environment": [],
         "docs": [],
         "tests": {
@@ -16892,13 +18417,20 @@
           "state": "clean"
         }
       ],
-      "migrations": []
+      "migrations": [
+        {
+          "id": "0010_projects_search",
+          "number": 10,
+          "path": "internal/db/migrations/0010_projects_search.sql",
+          "sha256": "c1a90a9308dcac278d49c2215ee402c1d5207fbdf369c48517f025ad8296c15c"
+        }
+      ]
     },
     {
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "797b42b8de3ba7fb7aefcf1631063405f2b8efe734bf463762c979f081a09b20",
+      "source_commit": "b33d729612aa64242d2fb25b3e4bfbc563ff87cdc247f71484a4d178b22c625c",
       "reason": "profile",
       "required_by": [],
       "manifest": {

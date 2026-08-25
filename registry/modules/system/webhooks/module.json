@@ -52,6 +52,14 @@
         "sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/webhooks/webhooks_test.go",
+        "target": "internal/webhooks/webhooks_test.go",
+        "class": "test",
+        "sha256": "fab2cc64cc37f2740e929e035501139da8dc839135170896b114b37401231a42",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

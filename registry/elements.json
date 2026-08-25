@@ -1,5 +1,7 @@
 {
   "schema": 1,
   "kind": "element",
-  "items": []
+  "items": [
+    "registry/modules/element/ui-core/module.json"
+  ]
 }

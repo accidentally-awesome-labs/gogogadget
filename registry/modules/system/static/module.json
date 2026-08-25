@@ -13,6 +13,14 @@
     ],
     "files": [
       {
+        "source": "input.css",
+        "target": "input.css",
+        "class": "style",
+        "sha256": "9bcb26af57ddff3c356b021ddd3b9fdaaf90ee7f14f2896b6efa8a0aa38178c7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "static/analytics.js",
         "target": "static/analytics.js",
         "class": "asset",
@@ -77,10 +85,18 @@
         "contract": true
       },
       {
+        "source": "static/static_test.go",
+        "target": "static/static_test.go",
+        "class": "test",
+        "sha256": "94f6b728e0f531aa3af91ac255277a2efca6d94836b503e7a0d6c0b3bd7b0a22",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "5fd5ac521fcc28d9cde6007c171785a38cb977ff807778db6cb2b105509a6d83",
+        "sha256": "5101473f344013612656e218c1bd919614222b177f1f42a796d6d516243c7df6",
         "rewrite_module": false,
         "contract": false
       },

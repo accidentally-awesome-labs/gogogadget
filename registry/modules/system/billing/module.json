@@ -23,12 +23,28 @@
         "contract": true
       },
       {
+        "source": "internal/billing/contract_test.go",
+        "target": "internal/billing/contract_test.go",
+        "class": "test",
+        "sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/billing/entitlements.go",
         "target": "internal/billing/entitlements.go",
         "class": "go",
         "sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/billing/entitlements_test.go",
+        "target": "internal/billing/entitlements_test.go",
+        "class": "test",
+        "sha256": "ee3216f422e41b8a748219a50a0c6c4019fabc6a5eef12f375fa84d3f1c04617",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/billing/mock.go",
@@ -47,6 +63,22 @@
         "contract": true
       },
       {
+        "source": "internal/billing/module_test.go",
+        "target": "internal/billing/module_test.go",
+        "class": "test",
+        "sha256": "72026abe266096f059c3777b31fe63310b003ddd3254da2dc72a6b8b978baab8",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/mrr_test.go",
+        "target": "internal/billing/mrr_test.go",
+        "class": "test",
+        "sha256": "74da08f94bf65cadd0c853bf9cac9ab85e036bd74fd14bba258eb36617af5718",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/billing/plans.go",
         "target": "internal/billing/plans.go",
         "class": "go",
@@ -59,6 +91,14 @@
         "target": "internal/billing/polar.go",
         "class": "go",
         "sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/polar_test.go",
+        "target": "internal/billing/polar_test.go",
+        "class": "test",
+        "sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
         "rewrite_module": true,
         "contract": false
       },

@@ -22,12 +22,28 @@
         "contract": true
       },
       {
+        "source": "internal/ratelimit/module_test.go",
+        "target": "internal/ratelimit/module_test.go",
+        "class": "test",
+        "sha256": "58430e389219fde41f1381d777c38f485100e0ebf0765e5309d17f5aedc37da7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/ratelimit/ratelimit.go",
         "target": "internal/ratelimit/ratelimit.go",
         "class": "go",
         "sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/ratelimit/ratelimit_test.go",
+        "target": "internal/ratelimit/ratelimit_test.go",
+        "class": "test",
+        "sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

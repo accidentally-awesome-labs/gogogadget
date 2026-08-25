@@ -14,6 +14,22 @@
     ],
     "files": [
       {
+        "source": "internal/mail/contract_test.go",
+        "target": "internal/mail/contract_test.go",
+        "class": "test",
+        "sha256": "fd26bd2b395e7e0ff9c7ce966c8077296816704d0484b2ac2d4293ea80e2f4fa",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/mail/fuzz_test.go",
+        "target": "internal/mail/fuzz_test.go",
+        "class": "test",
+        "sha256": "8dfcafe44aef85572313c90d1995e926627360e8aa3dfffeb3884d21a290fe0a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/mail/mail.go",
         "target": "internal/mail/mail.go",
         "class": "go",
@@ -22,12 +38,36 @@
         "contract": true
       },
       {
+        "source": "internal/mail/mail_test.go",
+        "target": "internal/mail/mail_test.go",
+        "class": "test",
+        "sha256": "041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/mail/module.go",
         "target": "internal/mail/module.go",
         "class": "go",
         "sha256": "8433bbffbf3f4bcf5d90a09c92d9fefb73256b21be2c326e47028dd6a781f8ea",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/mail/module_test.go",
+        "target": "internal/mail/module_test.go",
+        "class": "test",
+        "sha256": "a1725eab07f5f9dd43883a9ec1210980e173c59b2fa8d25b1dbc7f7e261bdf7f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/emails.templ",
+        "target": "internal/web/templates/emails.templ",
+        "class": "templ",
+        "sha256": "d21151f6e4358639d581453e033b0567f0cc2b3e4687147001fafeb0b301a9ca",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

@@ -17,6 +17,22 @@
         "sha256": "82ef6496b3e7df96ed8c86bc4d3c2e48562920564ea0556efe4f62cc25daae42",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/apphost/apphost_test.go",
+        "target": "internal/apphost/apphost_test.go",
+        "class": "test",
+        "sha256": "9b17becf61ebc418a66906eb92ca8ea0090d80d33d9d43c945a6968a26ec383d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/modules/boot_test.go",
+        "target": "internal/modules/boot_test.go",
+        "class": "test",
+        "sha256": "499b159cccc040804ec661c6e92d37375c47544fda95101eac646bb4ff18e540",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

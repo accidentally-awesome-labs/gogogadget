@@ -14,6 +14,14 @@
     ],
     "files": [
       {
+        "source": "internal/observability/contract_test.go",
+        "target": "internal/observability/contract_test.go",
+        "class": "test",
+        "sha256": "c6108cabc092d9ee3e3084097588cc903d2c9335d5b6ffbefde74787f6cd7856",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/observability/module.go",
         "target": "internal/observability/module.go",
         "class": "go",
@@ -22,12 +30,28 @@
         "contract": true
       },
       {
+        "source": "internal/observability/module_test.go",
+        "target": "internal/observability/module_test.go",
+        "class": "test",
+        "sha256": "d506e430a9360ca7e06dc1f879057c7f69cdfa35c484709224b414d97fab01b4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/observability/observability.go",
         "target": "internal/observability/observability.go",
         "class": "go",
         "sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/observability/observability_test.go",
+        "target": "internal/observability/observability_test.go",
+        "class": "test",
+        "sha256": "da50a28bccad99d31b68c31439addfc1b49112a54af6f46508fc7da12902b59b",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/observability/sentry.go",

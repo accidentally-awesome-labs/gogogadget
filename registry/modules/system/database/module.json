@@ -22,12 +22,36 @@
         "contract": true
       },
       {
+        "source": "internal/db/db_test.go",
+        "target": "internal/db/db_test.go",
+        "class": "test",
+        "sha256": "18df25340a9430e8adb080e25854c22150caea6ce0f51f6bd617bbe056d15801",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/db/module.go",
         "target": "internal/db/module.go",
         "class": "go",
         "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/db/module_test.go",
+        "target": "internal/db/module_test.go",
+        "class": "test",
+        "sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/db/seed_registry_test.go",
+        "target": "internal/db/seed_registry_test.go",
+        "class": "test",
+        "sha256": "ce6b67cb5e0aa0cc7cae9d5bacf4fe0b2b5665c8d9abe4368d96d4785484ebc6",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "sqlc.yaml",

@@ -19,6 +19,22 @@
     ],
     "files": [
       {
+        "source": "internal/jobs/export_org.go",
+        "target": "internal/jobs/export_org.go",
+        "class": "go",
+        "sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/export_org_test.go",
+        "target": "internal/jobs/export_org_test.go",
+        "class": "test",
+        "sha256": "abe8799fee875e5c81065ddf5cb6dad931c1eec814648040c0497096a10341f1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_organization_export.go",
         "target": "internal/web/workflow_organization_export.go",
         "class": "go",

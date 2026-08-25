@@ -15,7 +15,24 @@
       "system/server",
       "system/webhooks"
     ],
-    "files": [],
+    "files": [
+      {
+        "source": "internal/jobs/webhooks_deliver.go",
+        "target": "internal/jobs/webhooks_deliver.go",
+        "class": "go",
+        "sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/webhooks_deliver_test.go",
+        "target": "internal/jobs/webhooks_deliver_test.go",
+        "class": "test",
+        "sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "webhooks.delivery.replay",

@@ -21,12 +21,28 @@
         "contract": true
       },
       {
+        "source": "internal/config/config_test.go",
+        "target": "internal/config/config_test.go",
+        "class": "test",
+        "sha256": "5d1d068cc3491f0a7b122d813e36872fae833be7e6adf9ec87616f4ed3006fc9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/config/module.go",
         "target": "internal/config/module.go",
         "class": "go",
         "sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/config/module_test.go",
+        "target": "internal/config/module_test.go",
+        "class": "test",
+        "sha256": "49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

@@ -25,6 +25,14 @@
     ],
     "files": [
       {
+        "source": "cmd/server/main.go",
+        "target": "cmd/server/main.go",
+        "class": "go",
+        "sha256": "2aabbbfd390ab8a9f5da594ae09068f8ee01013aca2a9ce0e3c5e798e78c8431",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/admin_shared.go",
         "target": "internal/web/admin_shared.go",
         "class": "go",
@@ -145,10 +153,98 @@
         "contract": true
       },
       {
+        "source": "internal/web/templates/chrome.go",
+        "target": "internal/web/templates/chrome.go",
+        "class": "go",
+        "sha256": "a00dcbdb2eeb4f26d6e15135e3f0602cdb4f951e45f1ee2d346f310919b6492e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/chrome_test.go",
+        "target": "internal/web/templates/chrome_test.go",
+        "class": "test",
+        "sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/components.templ",
+        "target": "internal/web/templates/components.templ",
+        "class": "templ",
+        "sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/data.go",
+        "target": "internal/web/templates/data.go",
+        "class": "go",
+        "sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
         "sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/errors.templ",
+        "target": "internal/web/templates/errors.templ",
+        "class": "templ",
+        "sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/icons.templ",
+        "target": "internal/web/templates/icons.templ",
+        "class": "templ",
+        "sha256": "4f88232ea6ae4cace270c917185ef8fb9e51a1e2a6e46f0b624a11c811577bba",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/layouts.templ",
+        "target": "internal/web/templates/layouts.templ",
+        "class": "templ",
+        "sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/nav.templ",
+        "target": "internal/web/templates/nav.templ",
+        "class": "templ",
+        "sha256": "cd7abfff9f0e45434a53873df18f11eb62b7e36fc86940fcee2f11a00e097e6a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/page.go",
+        "target": "internal/web/templates/page.go",
+        "class": "go",
+        "sha256": "34e7098c68c59f3562a8081d0d333529d27fe92c4a0f007b3cde90ab5f6c3260",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/sidebar.templ",
+        "target": "internal/web/templates/sidebar.templ",
+        "class": "templ",
+        "sha256": "39dc670ccf2e0ac5eafcb6b20c0be1bb4dfb999ae6efd739e574924a861dc6f7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/theme.go",
+        "target": "internal/web/templates/theme.go",
+        "class": "go",
+        "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
         "rewrite_module": true,
         "contract": false
       },

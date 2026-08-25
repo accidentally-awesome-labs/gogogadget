@@ -244,6 +244,12 @@ func sanitizeMigrationID(id string) string {
 
 // isGeneratedOutput reports whether a target path is a tool-owned generated
 // output. Authored module targets must never claim these.
+// IsGeneratedOutputPath reports whether a path is build output rather than
+// distributed source. Exported because the ownership guard needs the same
+// answer the snapshot and the emitters use — a second copy of this rule would
+// drift from the one that matters.
+func IsGeneratedOutputPath(path string) bool { return isGeneratedOutput(path) }
+
 func isGeneratedOutput(path string) bool {
 	if strings.HasSuffix(path, "_templ.go") || strings.Contains(path, "_registry_gen.") {
 		return true

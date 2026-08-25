@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/ui-core",
+    "kind": "element",
+    "name": "ui-core",
+    "revision": 1,
+    "contract": 1,
+    "title": "UI core",
+    "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
+    "requires": [],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/attrs.go",
+        "target": "internal/web/templates/ui/attrs.go",
+        "class": "go",
+        "sha256": "182e7374071b2803481174215338c94bb3089897bb14eacadda8c6fbbdbf44c1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/attrs_build.go",
+        "target": "internal/web/templates/ui/attrs_build.go",
+        "class": "go",
+        "sha256": "0eb8fc098aafffabc38203e54125f2774e9374d52513f7da1d640088fa0e6b8d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/components_core.templ",
+        "target": "internal/web/templates/ui/components_core.templ",
+        "class": "templ",
+        "sha256": "73715e10f747672c09e5bcb47cf4f906422887fe114300c6bd4a567a062d5b8a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/components_nav.templ",
+        "target": "internal/web/templates/ui/components_nav.templ",
+        "class": "templ",
+        "sha256": "f6978833e06328db3754f05ad5da2b7940009b2fa107dac7d6f41f06dad76084",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/data.templ",
+        "target": "internal/web/templates/ui/data.templ",
+        "class": "templ",
+        "sha256": "c204be814f82a3435696c3abb3f55673e642a77e454d32c9e7fcc59829d9b754",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/forms.templ",
+        "target": "internal/web/templates/ui/forms.templ",
+        "class": "templ",
+        "sha256": "83d615b7f4ba21763798b0c2cda6e45f218513ba074451bf563db4cdaa106d31",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/icons.go",
+        "target": "internal/web/templates/ui/icons.go",
+        "class": "go",
+        "sha256": "a8cb43b212550a6712f247466a063947fadbafe2f7ee6f1a08a6141a2eb6df7d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/icons.templ",
+        "target": "internal/web/templates/ui/icons.templ",
+        "class": "templ",
+        "sha256": "6a269b074d7eb77c074359d0bb2fe89ac293817b722a31337bc99a4f42549bf1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/icons_test.go",
+        "target": "internal/web/templates/ui/icons_test.go",
+        "class": "test",
+        "sha256": "c9077c61dfe7bdf55f50c59f9ab11649f27fa37ff43709a2ac0d4746e19a98bc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/overlays.templ",
+        "target": "internal/web/templates/ui/overlays.templ",
+        "class": "templ",
+        "sha256": "2ebaab5bb3b9a33679db572816cbc02e0b88ffb7680c1f97cdd52f1c11953565",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/ui.go",
+        "target": "internal/web/templates/ui/ui.go",
+        "class": "go",
+        "sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

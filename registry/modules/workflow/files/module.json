@@ -124,7 +124,14 @@
         }
       ]
     },
-    "migrations": [],
+    "migrations": [
+      {
+        "id": "0003_files",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0003_files.sql",
+        "sha256": "5c361c8d9c9aed9fa7dd0d366ef1789278fd4922a4d6ed873771e3b1137987c6"
+      }
+    ],
     "environment": [],
     "docs": [],
     "tests": {

@@ -46,12 +46,36 @@
         "contract": false
       },
       {
+        "source": "internal/jobs/digest.go",
+        "target": "internal/jobs/digest.go",
+        "class": "go",
+        "sha256": "fd3596068b438ae8e7279d7b183bde8d6e588d75b98471e9d875a4c300b02a82",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/digest_test.go",
+        "target": "internal/jobs/digest_test.go",
+        "class": "test",
+        "sha256": "44ba7e6ca971a1309878a960835e036f75986c059bdc14456467efc14903d992",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/notify/notify.go",
         "target": "internal/notify/notify.go",
         "class": "go",
         "sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/notify/notify_test.go",
+        "target": "internal/notify/notify_test.go",
+        "class": "test",
+        "sha256": "f9b0760690b6a7bc9c0e121af6ce5fee6812344c3946b908a1e233a0bb2aa0aa",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

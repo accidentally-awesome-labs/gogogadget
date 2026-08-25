@@ -1758,9 +1758,9 @@ func emitStaticRegistry(ctx context.Context, modulePath string, lock Lock, graph
 					path   string
 					module string
 				}{strings.TrimPrefix(f.Target, "static/"), m.ID})
-			case FileClassGo:
-				// Source, not an asset: embed patterns must not include it, or
-				// the compiler refuses the pattern.
+			case FileClassGo, FileClassTest:
+				// Source, not an asset: embed patterns must not include Go files,
+				// or the compiler refuses the pattern.
 			default:
 				return nil, fmt.Errorf("static file %s has class %q; a file under static/ is an asset, a generated output, or Go source",
 					f.Target, f.Class)
