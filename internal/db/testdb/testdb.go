@@ -108,6 +108,28 @@ func DSN(t *testing.T, name string) string {
 		t.Fatalf("create %s: %v", dbName, err)
 	}
 
+	// Drop the database again when the test finishes, but only if it passed.
+	// Without this every package that ever ran leaves one database behind
+	// forever, and a few dozen idle databases competing for a fixed
+	// max_connections is what makes unrelated integration tests fail
+	// intermittently under full parallel load.
+	//
+	// A failed test keeps its database on purpose: that is the one occasion the
+	// rows are worth inspecting, and the next run drops it before recreating.
+	t.Cleanup(func() {
+		if t.Failed() {
+			return
+		}
+		dropCtx, cancelDrop := context.WithTimeout(context.Background(), connectTimeout)
+		defer cancelDrop()
+		cleanupConn, err := pgx.Connect(dropCtx, admin.String())
+		if err != nil {
+			return
+		}
+		defer func() { _ = cleanupConn.Close(context.Background()) }()
+		_ = execDDL(cleanupConn, `DROP DATABASE IF EXISTS `+q+` WITH (FORCE)`)
+	})
+
 	u.Path = "/" + dbName
 	return u.String()
 }

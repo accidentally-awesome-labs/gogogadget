@@ -16,7 +16,7 @@
         "source": "internal/db/testdb/testdb.go",
         "target": "internal/db/testdb/testdb.go",
         "class": "go",
-        "sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
+        "sha256": "51e81f8e2d3d6003e5f0861b1cbd7e964e1fc9c66b56a006b220189306679821",
         "rewrite_module": true,
         "contract": true
       }

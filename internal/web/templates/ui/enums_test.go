@@ -52,6 +52,13 @@ func TestEveryEnumNormalizesInvalidValues(t *testing.T) {
 	assert.Equal(t, SideTop, Side("").Value())
 	// LiveOff is a meaningful empty: most regions are not live, and announcing
 	// every one of them would make a screen reader unusable.
+	assert.Equal(t, ChatRoleAssistant, ChatRole("").Value(),
+		"an unattributed message is the assistant's: attributing it to the user "+
+			"would put words in their mouth in a transcript")
+	assert.Equal(t, DeliveryPending, DeliveryState("").Value(),
+		"an unrecognised delivery state must never read as delivered: claiming "+
+			"a webhook arrived when nobody knows is the one wrong answer")
+	assert.Equal(t, DeliveryPending, DeliveryState("bounced").Value())
 	assert.Equal(t, EmptyCard, EmptyVariant("").Value(),
 		"an unset empty state is the standalone card: inline would render "+
 			"without the border its container expects to supply")
@@ -137,6 +144,14 @@ func TestDeclaredEnumValuesRoundTrip(t *testing.T) {
 		assert.True(t, v.Valid())
 	}
 	for _, v := range Sides {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
+	for _, v := range ChatRoles {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
+	for _, v := range DeliveryStates {
 		assert.Equal(t, v, v.Value())
 		assert.True(t, v.Valid())
 	}

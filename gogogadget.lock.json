@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+  "registry_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
   "order": [
     "element/ui-core",
     "component/accordion",
@@ -12,11 +12,14 @@
     "component/card",
     "component/center",
     "component/char-counter",
+    "component/chat-log",
+    "component/chat-message",
     "component/checkbox",
     "component/checkbox-group",
     "component/collapsible",
     "component/color-input",
     "component/combobox",
+    "component/comment-thread",
     "component/container",
     "component/cursor-pagination",
     "component/date-field",
@@ -42,6 +45,7 @@
     "component/key-value",
     "component/label",
     "component/list",
+    "component/mention-chip",
     "component/menubar",
     "component/meter",
     "component/metric",
@@ -67,6 +71,7 @@
     "component/section-header",
     "component/select",
     "component/selection-bar",
+    "component/settings-section",
     "component/skeleton",
     "component/skip-link",
     "component/slug-input",
@@ -74,6 +79,8 @@
     "component/stack",
     "component/stat-group",
     "component/status-dot",
+    "component/delivery-status",
+    "component/notification-item",
     "component/steps",
     "component/sticky-bar",
     "component/switch",
@@ -87,11 +94,16 @@
     "component/text-input",
     "component/textarea",
     "component/time-field",
+    "component/timeline",
     "component/toolbar",
     "component/tooltip",
+    "component/usage-card",
     "element/avatar",
+    "component/comment",
+    "component/member-item",
     "element/avatar-group",
     "element/button",
+    "component/composer",
     "element/button-group",
     "element/button-link",
     "element/code",
@@ -99,6 +111,7 @@
     "element/heading",
     "component/section",
     "element/icon",
+    "component/activity-item",
     "component/attachment",
     "component/back-link",
     "component/column-header",
@@ -108,6 +121,7 @@
     "component/drawer",
     "component/error-state",
     "component/hover-card",
+    "component/onboarding-checklist",
     "component/tile",
     "element/icon-button",
     "component/toast",
@@ -226,7 +240,7 @@
       "id": "component/accordion",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -297,10 +311,66 @@
       "migrations": []
     },
     {
+      "id": "component/activity-item",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/activity-item",
+        "kind": "component",
+        "name": "activity-item",
+        "revision": 1,
+        "contract": 1,
+        "title": "ActivityItem",
+        "description": "The ActivityItem renderer and its options.",
+        "requires": [
+          "element/icon",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/activity-item.templ",
+            "target": "internal/web/templates/ui/activity-item.templ",
+            "class": "templ",
+            "sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "activity-item",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/activity-item.templ",
+          "source": "internal/web/templates/ui/activity-item.templ",
+          "base_sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
+          "local_sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/alert-dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "component/confirm-action"
@@ -360,7 +430,7 @@
       "id": "component/aspect-ratio",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -415,7 +485,7 @@
       "id": "component/attachment",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -471,7 +541,7 @@
       "id": "component/back-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -527,9 +597,11 @@
       "id": "component/badge",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/member-item"
+      ],
       "manifest": {
         "id": "component/badge",
         "kind": "component",
@@ -582,7 +654,7 @@
       "id": "component/banner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -637,7 +709,7 @@
       "id": "component/breadcrumbs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -711,7 +783,7 @@
       "id": "component/card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -774,7 +846,7 @@
       "id": "component/center",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -829,7 +901,7 @@
       "id": "component/char-counter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -903,10 +975,139 @@
       "migrations": []
     },
     {
+      "id": "component/chat-log",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/chat-log",
+        "kind": "component",
+        "name": "chat-log",
+        "revision": 1,
+        "contract": 1,
+        "title": "ChatLog",
+        "description": "The ChatLog renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/chat-log.templ",
+            "target": "internal/web/templates/ui/chat-log.templ",
+            "class": "templ",
+            "sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/chat-log_test.go",
+            "target": "internal/web/templates/ui/chat-log_test.go",
+            "class": "test",
+            "sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "chat-log",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/chat-log.templ",
+          "source": "internal/web/templates/ui/chat-log.templ",
+          "base_sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
+          "local_sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/chat-log_test.go",
+          "source": "internal/web/templates/ui/chat-log_test.go",
+          "base_sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
+          "local_sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "component/chat-message",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/chat-message",
+        "kind": "component",
+        "name": "chat-message",
+        "revision": 1,
+        "contract": 1,
+        "title": "ChatMessage",
+        "description": "The ChatMessage renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/chat-message.templ",
+            "target": "internal/web/templates/ui/chat-message.templ",
+            "class": "templ",
+            "sha256": "8fbe1bc28613f8f6dce4e89072086239ecf377e67582e9535a39e95cad5de423",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "chat-message",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/chat-message.templ",
+          "source": "internal/web/templates/ui/chat-message.templ",
+          "base_sha256": "8fbe1bc28613f8f6dce4e89072086239ecf377e67582e9535a39e95cad5de423",
+          "local_sha256": "8fbe1bc28613f8f6dce4e89072086239ecf377e67582e9535a39e95cad5de423",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/checkbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -961,7 +1162,7 @@
       "id": "component/checkbox-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1035,7 +1236,7 @@
       "id": "component/collapsible",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1093,7 +1294,7 @@
       "id": "component/color-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1148,7 +1349,7 @@
       "id": "component/column-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "component/data-table"
@@ -1225,7 +1426,7 @@
       "id": "component/combobox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1296,10 +1497,180 @@
       "migrations": []
     },
     {
+      "id": "component/comment",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/comment",
+        "kind": "component",
+        "name": "comment",
+        "revision": 1,
+        "contract": 1,
+        "title": "Comment",
+        "description": "The Comment renderer and its options.",
+        "requires": [
+          "element/avatar",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/comment.templ",
+            "target": "internal/web/templates/ui/comment.templ",
+            "class": "templ",
+            "sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "comment",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/comment.templ",
+          "source": "internal/web/templates/ui/comment.templ",
+          "base_sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
+          "local_sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "component/comment-thread",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/comment-thread",
+        "kind": "component",
+        "name": "comment-thread",
+        "revision": 1,
+        "contract": 1,
+        "title": "CommentThread",
+        "description": "The CommentThread renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/comment-thread.templ",
+            "target": "internal/web/templates/ui/comment-thread.templ",
+            "class": "templ",
+            "sha256": "4dc287b6c3d53b591e5610e956c1efd2db9a875cb3ad11225bd514168849514d",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "comment-thread",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/comment-thread.templ",
+          "source": "internal/web/templates/ui/comment-thread.templ",
+          "base_sha256": "4dc287b6c3d53b591e5610e956c1efd2db9a875cb3ad11225bd514168849514d",
+          "local_sha256": "4dc287b6c3d53b591e5610e956c1efd2db9a875cb3ad11225bd514168849514d",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "component/composer",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/composer",
+        "kind": "component",
+        "name": "composer",
+        "revision": 1,
+        "contract": 1,
+        "title": "Composer",
+        "description": "The Composer renderer and its options.",
+        "requires": [
+          "component/field-error",
+          "component/form-actions",
+          "component/textarea",
+          "element/button",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/composer.templ",
+            "target": "internal/web/templates/ui/composer.templ",
+            "class": "templ",
+            "sha256": "3cb08be38a13c9001018ea3126e72ffc46d7d8b52c631c55f1e7926acb216bdc",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "composer",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/composer.templ",
+          "source": "internal/web/templates/ui/composer.templ",
+          "base_sha256": "3cb08be38a13c9001018ea3126e72ffc46d7d8b52c631c55f1e7926acb216bdc",
+          "local_sha256": "3cb08be38a13c9001018ea3126e72ffc46d7d8b52c631c55f1e7926acb216bdc",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/confirm-action",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1378,7 +1749,7 @@
       "id": "component/container",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1433,7 +1804,7 @@
       "id": "component/context-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1493,7 +1864,7 @@
       "id": "component/cursor-pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1548,7 +1919,7 @@
       "id": "component/data-table",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1604,7 +1975,7 @@
       "id": "component/date-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1659,7 +2030,7 @@
       "id": "component/date-range-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1717,7 +2088,7 @@
       "id": "component/date-time-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1769,10 +2140,66 @@
       "migrations": []
     },
     {
+      "id": "component/delivery-status",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/delivery-status",
+        "kind": "component",
+        "name": "delivery-status",
+        "revision": 1,
+        "contract": 1,
+        "title": "DeliveryStatus",
+        "description": "The DeliveryStatus renderer and its options.",
+        "requires": [
+          "component/status-dot",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/delivery-status.templ",
+            "target": "internal/web/templates/ui/delivery-status.templ",
+            "class": "templ",
+            "sha256": "4d9d401ed820b16a4083cea255abb3f55cd6e6d9866369ca4da27f4a7fa10bf2",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "delivery-status",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/delivery-status.templ",
+          "source": "internal/web/templates/ui/delivery-status.templ",
+          "base_sha256": "4d9d401ed820b16a4083cea255abb3f55cd6e6d9866369ca4da27f4a7fa10bf2",
+          "local_sha256": "4d9d401ed820b16a4083cea255abb3f55cd6e6d9866369ca4da27f4a7fa10bf2",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/description-list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1827,7 +2254,7 @@
       "id": "component/dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1885,7 +2312,7 @@
       "id": "component/disclosure",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1940,7 +2367,7 @@
       "id": "component/drawer",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1996,7 +2423,7 @@
       "id": "component/dropdown-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "component/context-menu",
@@ -2058,7 +2485,7 @@
       "id": "component/empty-state",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2132,7 +2559,7 @@
       "id": "component/error-state",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2188,7 +2615,7 @@
       "id": "component/field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2262,9 +2689,11 @@
       "id": "component/field-error",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/composer"
+      ],
       "manifest": {
         "id": "component/field-error",
         "kind": "component",
@@ -2317,7 +2746,7 @@
       "id": "component/fieldset",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2372,7 +2801,7 @@
       "id": "component/file-dropzone",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2449,7 +2878,7 @@
       "id": "component/file-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2504,7 +2933,7 @@
       "id": "component/form",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2559,9 +2988,11 @@
       "id": "component/form-actions",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/composer"
+      ],
       "manifest": {
         "id": "component/form-actions",
         "kind": "component",
@@ -2633,7 +3064,7 @@
       "id": "component/grid",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2688,7 +3119,7 @@
       "id": "component/hint",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2743,7 +3174,7 @@
       "id": "component/hover-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2821,7 +3252,7 @@
       "id": "component/inline",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2876,7 +3307,7 @@
       "id": "component/input-addon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2950,7 +3381,7 @@
       "id": "component/input-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3005,7 +3436,7 @@
       "id": "component/key-value",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3060,7 +3491,7 @@
       "id": "component/label",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3115,7 +3546,7 @@
       "id": "component/list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3171,10 +3602,122 @@
       "migrations": []
     },
     {
+      "id": "component/member-item",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/member-item",
+        "kind": "component",
+        "name": "member-item",
+        "revision": 1,
+        "contract": 1,
+        "title": "MemberItem",
+        "description": "The MemberItem renderer and its options.",
+        "requires": [
+          "component/badge",
+          "element/avatar",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/member-item.templ",
+            "target": "internal/web/templates/ui/member-item.templ",
+            "class": "templ",
+            "sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "member-item",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/member-item.templ",
+          "source": "internal/web/templates/ui/member-item.templ",
+          "base_sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
+          "local_sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "component/mention-chip",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/mention-chip",
+        "kind": "component",
+        "name": "mention-chip",
+        "revision": 1,
+        "contract": 1,
+        "title": "MentionChip",
+        "description": "The MentionChip renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/mention-chip.templ",
+            "target": "internal/web/templates/ui/mention-chip.templ",
+            "class": "templ",
+            "sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "mention-chip",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/mention-chip.templ",
+          "source": "internal/web/templates/ui/mention-chip.templ",
+          "base_sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+          "local_sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/menubar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3230,9 +3773,11 @@
       "id": "component/meter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/usage-card"
+      ],
       "manifest": {
         "id": "component/meter",
         "kind": "component",
@@ -3285,7 +3830,7 @@
       "id": "component/metric",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3340,7 +3885,7 @@
       "id": "component/multi-select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3395,7 +3940,7 @@
       "id": "component/nav-tabs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3450,7 +3995,7 @@
       "id": "component/navigation-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3505,7 +4050,7 @@
       "id": "component/notice",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3557,10 +4102,66 @@
       "migrations": []
     },
     {
+      "id": "component/notification-item",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/notification-item",
+        "kind": "component",
+        "name": "notification-item",
+        "revision": 1,
+        "contract": 1,
+        "title": "NotificationItem",
+        "description": "The NotificationItem renderer and its options.",
+        "requires": [
+          "component/status-dot",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/notification-item.templ",
+            "target": "internal/web/templates/ui/notification-item.templ",
+            "class": "templ",
+            "sha256": "126d8fe82603acdfb0ac7af42c495c25e1f26463cd5edd979d4805084029ca1b",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "notification-item",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/notification-item.templ",
+          "source": "internal/web/templates/ui/notification-item.templ",
+          "base_sha256": "126d8fe82603acdfb0ac7af42c495c25e1f26463cd5edd979d4805084029ca1b",
+          "local_sha256": "126d8fe82603acdfb0ac7af42c495c25e1f26463cd5edd979d4805084029ca1b",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/number-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3631,10 +4232,67 @@
       "migrations": []
     },
     {
+      "id": "component/onboarding-checklist",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/onboarding-checklist",
+        "kind": "component",
+        "name": "onboarding-checklist",
+        "revision": 1,
+        "contract": 1,
+        "title": "OnboardingChecklist",
+        "description": "The OnboardingChecklist renderer and its options.",
+        "requires": [
+          "component/progress-bar",
+          "element/icon",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/onboarding-checklist.templ",
+            "target": "internal/web/templates/ui/onboarding-checklist.templ",
+            "class": "templ",
+            "sha256": "7cc8bf68e4733d7eb2dfb4b6461178a4147e2157627e31358b924c42eafa0d9c",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "onboarding-checklist",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/onboarding-checklist.templ",
+          "source": "internal/web/templates/ui/onboarding-checklist.templ",
+          "base_sha256": "7cc8bf68e4733d7eb2dfb4b6461178a4147e2157627e31358b924c42eafa0d9c",
+          "local_sha256": "7cc8bf68e4733d7eb2dfb4b6461178a4147e2157627e31358b924c42eafa0d9c",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/otp-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3708,7 +4366,7 @@
       "id": "component/page-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3763,7 +4421,7 @@
       "id": "component/pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3837,7 +4495,7 @@
       "id": "component/password-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3911,7 +4569,7 @@
       "id": "component/plan-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3966,7 +4624,7 @@
       "id": "component/popover",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4024,9 +4682,11 @@
       "id": "component/progress-bar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/onboarding-checklist"
+      ],
       "manifest": {
         "id": "component/progress-bar",
         "kind": "component",
@@ -4098,7 +4758,7 @@
       "id": "component/progress-circle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4153,7 +4813,7 @@
       "id": "component/radio-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4208,7 +4868,7 @@
       "id": "component/range-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4263,7 +4923,7 @@
       "id": "component/row-actions",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4319,7 +4979,7 @@
       "id": "component/scroll-area",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4393,7 +5053,7 @@
       "id": "component/search-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4448,7 +5108,7 @@
       "id": "component/secret-reveal",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4503,7 +5163,7 @@
       "id": "component/section",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4559,7 +5219,7 @@
       "id": "component/section-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4614,7 +5274,7 @@
       "id": "component/select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4669,7 +5329,7 @@
       "id": "component/selection-bar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4721,10 +5381,65 @@
       "migrations": []
     },
     {
+      "id": "component/settings-section",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/settings-section",
+        "kind": "component",
+        "name": "settings-section",
+        "revision": 1,
+        "contract": 1,
+        "title": "SettingsSection",
+        "description": "The SettingsSection renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/settings-section.templ",
+            "target": "internal/web/templates/ui/settings-section.templ",
+            "class": "templ",
+            "sha256": "2189a2e9ee793a7966f44eb3c3169af40cfa313d56d64529f5480a18d8c1cea8",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "settings-section",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/settings-section.templ",
+          "source": "internal/web/templates/ui/settings-section.templ",
+          "base_sha256": "2189a2e9ee793a7966f44eb3c3169af40cfa313d56d64529f5480a18d8c1cea8",
+          "local_sha256": "2189a2e9ee793a7966f44eb3c3169af40cfa313d56d64529f5480a18d8c1cea8",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/skeleton",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4798,7 +5513,7 @@
       "id": "component/skip-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4872,7 +5587,7 @@
       "id": "component/slug-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4930,7 +5645,7 @@
       "id": "component/split",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4985,7 +5700,7 @@
       "id": "component/stack",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5040,7 +5755,7 @@
       "id": "component/stat-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5095,9 +5810,12 @@
       "id": "component/status-dot",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/delivery-status",
+        "component/notification-item"
+      ],
       "manifest": {
         "id": "component/status-dot",
         "kind": "component",
@@ -5169,7 +5887,7 @@
       "id": "component/steps",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5243,7 +5961,7 @@
       "id": "component/sticky-bar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5298,7 +6016,7 @@
       "id": "component/switch",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5353,7 +6071,7 @@
       "id": "component/tab-panels",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5430,7 +6148,7 @@
       "id": "component/table",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5485,7 +6203,7 @@
       "id": "component/table-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5569,7 +6287,7 @@
       "id": "component/table-of-contents",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5624,7 +6342,7 @@
       "id": "component/table-toolbar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5679,7 +6397,7 @@
       "id": "component/tags-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5737,7 +6455,7 @@
       "id": "component/terminal-page",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5792,7 +6510,7 @@
       "id": "component/text-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5847,9 +6565,11 @@
       "id": "component/textarea",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/composer"
+      ],
       "manifest": {
         "id": "component/textarea",
         "kind": "component",
@@ -5902,7 +6622,7 @@
       "id": "component/tile",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5958,7 +6678,7 @@
       "id": "component/time-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6010,10 +6730,65 @@
       "migrations": []
     },
     {
+      "id": "component/timeline",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/timeline",
+        "kind": "component",
+        "name": "timeline",
+        "revision": 1,
+        "contract": 1,
+        "title": "Timeline",
+        "description": "The Timeline renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/timeline.templ",
+            "target": "internal/web/templates/ui/timeline.templ",
+            "class": "templ",
+            "sha256": "a16194ef671b9230ce49c6557e842fdca06ba68af74128acbf76c9d62b8896e4",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "timeline",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/timeline.templ",
+          "source": "internal/web/templates/ui/timeline.templ",
+          "base_sha256": "a16194ef671b9230ce49c6557e842fdca06ba68af74128acbf76c9d62b8896e4",
+          "local_sha256": "a16194ef671b9230ce49c6557e842fdca06ba68af74128acbf76c9d62b8896e4",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "component/toast",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6089,7 +6864,7 @@
       "id": "component/toolbar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6144,7 +6919,7 @@
       "id": "component/tooltip",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6196,12 +6971,71 @@
       "migrations": []
     },
     {
+      "id": "component/usage-card",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "component/usage-card",
+        "kind": "component",
+        "name": "usage-card",
+        "revision": 1,
+        "contract": 1,
+        "title": "UsageCard",
+        "description": "The UsageCard renderer and its options.",
+        "requires": [
+          "component/meter",
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/usage-card.templ",
+            "target": "internal/web/templates/ui/usage-card.templ",
+            "class": "templ",
+            "sha256": "97a20ad99ed025dde7b8e95eecd8aa237201e4d7c967c0204ae9cfd6b0e31ce2",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "usage-card",
+              "family": "communication"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/usage-card.templ",
+          "source": "internal/web/templates/ui/usage-card.templ",
+          "base_sha256": "97a20ad99ed025dde7b8e95eecd8aa237201e4d7c967c0204ae9cfd6b0e31ce2",
+          "local_sha256": "97a20ad99ed025dde7b8e95eecd8aa237201e4d7c967c0204ae9cfd6b0e31ce2",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "element/avatar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/comment",
+        "component/member-item"
+      ],
       "manifest": {
         "id": "element/avatar",
         "kind": "element",
@@ -6273,7 +7107,7 @@
       "id": "element/avatar-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6347,9 +7181,11 @@
       "id": "element/button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
-      "required_by": [],
+      "required_by": [
+        "component/composer"
+      ],
       "manifest": {
         "id": "element/button",
         "kind": "element",
@@ -6421,7 +7257,7 @@
       "id": "element/button-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6476,7 +7312,7 @@
       "id": "element/button-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6550,7 +7386,7 @@
       "id": "element/code",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6605,7 +7441,7 @@
       "id": "element/copy-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6708,7 +7544,7 @@
       "id": "element/heading",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "component/section"
@@ -6784,9 +7620,10 @@
       "id": "element/icon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
+        "component/activity-item",
         "component/attachment",
         "component/back-link",
         "component/column-header",
@@ -6795,6 +7632,7 @@
         "component/drawer",
         "component/error-state",
         "component/hover-card",
+        "component/onboarding-checklist",
         "component/tile",
         "component/toast"
       ],
@@ -6850,7 +7688,7 @@
       "id": "element/icon-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "component/toast"
@@ -6926,7 +7764,7 @@
       "id": "element/kbd",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7000,7 +7838,7 @@
       "id": "element/link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7055,7 +7893,7 @@
       "id": "element/prose",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7110,7 +7948,7 @@
       "id": "element/separator",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7184,7 +8022,7 @@
       "id": "element/spinner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7239,7 +8077,7 @@
       "id": "element/text",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7294,7 +8132,7 @@
       "id": "element/toggle-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7349,7 +8187,7 @@
       "id": "element/toggle-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7423,7 +8261,7 @@
       "id": "element/truncate",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7497,10 +8335,11 @@
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "component/accordion",
+        "component/activity-item",
         "component/alert-dialog",
         "component/aspect-ratio",
         "component/attachment",
@@ -7511,12 +8350,17 @@
         "component/card",
         "component/center",
         "component/char-counter",
+        "component/chat-log",
+        "component/chat-message",
         "component/checkbox",
         "component/checkbox-group",
         "component/collapsible",
         "component/color-input",
         "component/column-header",
         "component/combobox",
+        "component/comment",
+        "component/comment-thread",
+        "component/composer",
         "component/confirm-action",
         "component/container",
         "component/context-menu",
@@ -7525,6 +8369,7 @@
         "component/date-field",
         "component/date-range-field",
         "component/date-time-field",
+        "component/delivery-status",
         "component/description-list",
         "component/dialog",
         "component/disclosure",
@@ -7548,6 +8393,8 @@
         "component/key-value",
         "component/label",
         "component/list",
+        "component/member-item",
+        "component/mention-chip",
         "component/menubar",
         "component/meter",
         "component/metric",
@@ -7555,7 +8402,9 @@
         "component/nav-tabs",
         "component/navigation-menu",
         "component/notice",
+        "component/notification-item",
         "component/number-input",
+        "component/onboarding-checklist",
         "component/otp-input",
         "component/page-header",
         "component/pagination",
@@ -7574,6 +8423,7 @@
         "component/section-header",
         "component/select",
         "component/selection-bar",
+        "component/settings-section",
         "component/skeleton",
         "component/skip-link",
         "component/slug-input",
@@ -7595,9 +8445,11 @@
         "component/textarea",
         "component/tile",
         "component/time-field",
+        "component/timeline",
         "component/toast",
         "component/toolbar",
         "component/tooltip",
+        "component/usage-card",
         "element/avatar",
         "element/avatar-group",
         "element/button",
@@ -7649,7 +8501,7 @@
             "source": "internal/web/templates/ui/contract_test.go",
             "target": "internal/web/templates/ui/contract_test.go",
             "class": "test",
-            "sha256": "ebf28372407f8536971343251d5f94e6463b01a05fd70abd4e61661a8fdfbab0",
+            "sha256": "d615cf5ed533b80e80d941c0ef8fefbe73eb05ef07c75df73d73b30295d9ebf0",
             "rewrite_module": true,
             "contract": false
           },
@@ -7665,7 +8517,7 @@
             "source": "internal/web/templates/ui/enums_test.go",
             "target": "internal/web/templates/ui/enums_test.go",
             "class": "test",
-            "sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
+            "sha256": "cfda4db8029431f2c9b565850dfaa65e76d015f6d79ed6c420ac494a0f55c999",
             "rewrite_module": true,
             "contract": false
           },
@@ -7787,8 +8639,8 @@
         {
           "path": "internal/web/templates/ui/contract_test.go",
           "source": "internal/web/templates/ui/contract_test.go",
-          "base_sha256": "ebf28372407f8536971343251d5f94e6463b01a05fd70abd4e61661a8fdfbab0",
-          "local_sha256": "ebf28372407f8536971343251d5f94e6463b01a05fd70abd4e61661a8fdfbab0",
+          "base_sha256": "d615cf5ed533b80e80d941c0ef8fefbe73eb05ef07c75df73d73b30295d9ebf0",
+          "local_sha256": "d615cf5ed533b80e80d941c0ef8fefbe73eb05ef07c75df73d73b30295d9ebf0",
           "state": "clean"
         },
         {
@@ -7801,8 +8653,8 @@
         {
           "path": "internal/web/templates/ui/enums_test.go",
           "source": "internal/web/templates/ui/enums_test.go",
-          "base_sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
-          "local_sha256": "ba9a16a4b4051bfad917ba9f02aac273fdf02805cf9552d44f4f39b552e701b1",
+          "base_sha256": "cfda4db8029431f2c9b565850dfaa65e76d015f6d79ed6c420ac494a0f55c999",
+          "local_sha256": "cfda4db8029431f2c9b565850dfaa65e76d015f6d79ed6c420ac494a0f55c999",
           "state": "clean"
         },
         {
@@ -7875,7 +8727,7 @@
       "id": "element/visually-hidden",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7949,7 +8801,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8099,7 +8951,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -8285,7 +9137,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8406,7 +9258,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8631,7 +9483,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8729,7 +9581,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8808,7 +9660,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8888,7 +9740,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -9088,7 +9940,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -9251,7 +10103,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -9383,7 +10235,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9491,7 +10343,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9634,7 +10486,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -9822,7 +10674,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9958,7 +10810,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10078,7 +10930,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10183,7 +11035,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10318,7 +11170,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10349,7 +11201,7 @@
             "source": "internal/web/templates/gallery.templ",
             "target": "internal/web/templates/gallery.templ",
             "class": "templ",
-            "sha256": "20349af2d53226e917a297f0cda575be15626923e7f33bf6171ec6bf4570b25c",
+            "sha256": "7e7fd40473f65e2bd3f7ea7890aa99bf93700bfee278ae860272f033d511140a",
             "rewrite_module": true,
             "contract": false
           }
@@ -10403,8 +11255,8 @@
         {
           "path": "internal/web/templates/gallery.templ",
           "source": "internal/web/templates/gallery.templ",
-          "base_sha256": "20349af2d53226e917a297f0cda575be15626923e7f33bf6171ec6bf4570b25c",
-          "local_sha256": "20349af2d53226e917a297f0cda575be15626923e7f33bf6171ec6bf4570b25c",
+          "base_sha256": "7e7fd40473f65e2bd3f7ea7890aa99bf93700bfee278ae860272f033d511140a",
+          "local_sha256": "7e7fd40473f65e2bd3f7ea7890aa99bf93700bfee278ae860272f033d511140a",
           "state": "clean"
         }
       ],
@@ -10414,7 +11266,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10515,7 +11367,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -10637,7 +11489,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10716,7 +11568,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -10869,7 +11721,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11087,7 +11939,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -11227,7 +12079,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11340,7 +12192,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11456,7 +12308,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11536,7 +12388,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11615,7 +12467,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11790,7 +12642,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -11961,7 +12813,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -12113,7 +12965,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -12281,7 +13133,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -12428,7 +13280,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12557,7 +13409,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -12749,7 +13601,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12865,7 +13717,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -13022,7 +13874,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -13151,7 +14003,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -13594,7 +14446,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -13693,7 +14545,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -13889,7 +14741,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -14339,7 +15191,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -14500,7 +15352,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -14999,7 +15851,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -15643,7 +16495,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -15708,7 +16560,7 @@
             "source": "internal/db/module_test.go",
             "target": "internal/db/module_test.go",
             "class": "test",
-            "sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+            "sha256": "8a351703d6ceafa6438159aa858936d6dcd26ea423768b58b96c361275525f77",
             "rewrite_module": true,
             "contract": false
           },
@@ -15813,8 +16665,8 @@
         {
           "path": "internal/db/module_test.go",
           "source": "internal/db/module_test.go",
-          "base_sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
-          "local_sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+          "base_sha256": "8a351703d6ceafa6438159aa858936d6dcd26ea423768b58b96c361275525f77",
+          "local_sha256": "8a351703d6ceafa6438159aa858936d6dcd26ea423768b58b96c361275525f77",
           "state": "clean"
         },
         {
@@ -15838,7 +16690,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -16090,7 +16942,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -16257,7 +17109,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -17458,7 +18310,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -17612,7 +18464,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -17892,7 +18744,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -18056,7 +18908,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -18259,7 +19111,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18359,7 +19211,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19000,7 +19852,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -19297,7 +20149,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -19477,7 +20329,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -19794,7 +20646,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -19930,7 +20782,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -20090,7 +20942,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -20231,7 +21083,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20283,7 +21135,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -20337,7 +21189,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -21306,7 +22158,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21341,7 +22193,7 @@
             "source": "static/app.css",
             "target": "static/app.css",
             "class": "generated",
-            "sha256": "ca1c731bbcfb7a526cac79e1320c609590ffb9904fe7a2b1c69fdfdf214524a2",
+            "sha256": "5a608bc2e8b176122cdca0260299b4ac7b16369e937247b57d9e5b89eebf6da0",
             "rewrite_module": false,
             "contract": false
           },
@@ -21405,7 +22257,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "6e810744fa635b429f3bd2d76dbad7d37e34b499eec1b11c6615c5becf4ddb25",
+            "sha256": "ad627492ccacb60fdfb13655b8f9181c68906827eafe4664c7e09290bf59b7c6",
             "rewrite_module": false,
             "contract": false
           },
@@ -21591,7 +22443,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -21799,7 +22651,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21818,7 +22670,7 @@
             "source": "internal/db/testdb/testdb.go",
             "target": "internal/db/testdb/testdb.go",
             "class": "go",
-            "sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
+            "sha256": "51e81f8e2d3d6003e5f0861b1cbd7e964e1fc9c66b56a006b220189306679821",
             "rewrite_module": true,
             "contract": true
           }
@@ -21844,8 +22696,8 @@
         {
           "path": "internal/db/testdb/testdb.go",
           "source": "internal/db/testdb/testdb.go",
-          "base_sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
-          "local_sha256": "ad9b77e39f62461a5a80db37cda5ec5847b9202ec769e8ed53f73ccdcaf3ea5c",
+          "base_sha256": "51e81f8e2d3d6003e5f0861b1cbd7e964e1fc9c66b56a006b220189306679821",
+          "local_sha256": "51e81f8e2d3d6003e5f0861b1cbd7e964e1fc9c66b56a006b220189306679821",
           "state": "clean"
         }
       ],
@@ -21855,7 +22707,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -22031,7 +22883,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -22300,7 +23152,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22384,7 +23236,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22480,7 +23332,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22614,7 +23466,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -22807,7 +23659,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22979,7 +23831,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23064,7 +23916,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23184,7 +24036,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23320,7 +24172,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23418,7 +24270,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23652,7 +24504,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23988,7 +24840,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24087,7 +24939,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24214,7 +25066,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -24348,7 +25200,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24465,7 +25317,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24544,7 +25396,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -24660,7 +25512,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24845,7 +25697,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -24952,7 +25804,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -25085,7 +25937,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -25220,7 +26072,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -25301,7 +26153,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -25442,7 +26294,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -25565,7 +26417,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -25741,7 +26593,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -25861,7 +26713,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -26111,7 +26963,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "ce049bfe65c64cc0deedd638c976d86aaf5b88da974fbd7810eb46a26587e348",
+      "source_commit": "5f29757407ec8b5b7a9ffeef1c17bba6b742c21c66e385c0ee72e94371987673",
       "reason": "profile",
       "required_by": [],
       "manifest": {

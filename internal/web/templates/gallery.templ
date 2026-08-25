@@ -794,6 +794,124 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Communication — activity and discussion") {
+			<div class="space-y-6">
+				<ul class="table-card">
+					@ui.NotificationItem(ui.NotificationItemOpts{
+						Title: "Deployment finished", Body: "Apollo deployed to production.",
+						Timestamp: "2 hours ago", MachineTime: "2026-01-15T09:30:00Z",
+						Kind: ui.KindSuccess, Href: "/dev/gallery",
+					})
+					@ui.NotificationItem(ui.NotificationItemOpts{
+						Title: "Payment failed", Body: "Retry scheduled for tomorrow.",
+						Timestamp: "yesterday", MachineTime: "2026-01-14T09:30:00Z",
+						Kind: ui.KindDanger, Unread: true,
+					})
+				</ul>
+				@ui.Timeline(ui.TimelineOpts{Label: "Recent activity"}) {
+					@ui.ActivityItem(ui.ActivityItemOpts{
+						Actor: "Ada", Action: "invited", Target: "grace@example.com",
+						Timestamp: "10:04", MachineTime: "2026-01-15T10:04:00Z", Icon: ui.IconUser,
+					})
+					@ui.ActivityItem(ui.ActivityItemOpts{
+						Actor: "Grace", Action: "renamed", Target: "Apollo",
+						Timestamp: "09:12", MachineTime: "2026-01-15T09:12:00Z", Icon: ui.IconEdit,
+						Detail: ui.Badge(ui.BadgeOpts{Text: "was: Apollo Launch", Kind: ui.KindNeutral}),
+					})
+				}
+				@ui.CommentThread(ui.CommentThreadOpts{Label: "Discussion on Apollo"}) {
+					@ui.Comment(ui.CommentOpts{
+						Author: "Ada Lovelace", Timestamp: "10:04", MachineTime: "2026-01-15T10:04:00Z",
+						Body: "The migration looks right to me.",
+					})
+					@ui.Comment(ui.CommentOpts{
+						Author: "Grace Hopper", Timestamp: "10:11", MachineTime: "2026-01-15T10:11:00Z",
+						Body: "Agreed — shipping it.", Edited: true,
+					})
+				}
+				@ui.Composer(ui.ComposerOpts{
+					Name: "reply", Placeholder: "Write a reply…", SubmitLabel: "Post reply",
+					HX: ui.HX{Post: "/dev/gallery", Target: "closest form"},
+				})
+			</div>
+		}
+
+		@gallerySection("Communication — chat and delivery") {
+			<div class="space-y-6">
+				@ui.ChatLog(ui.ChatLogOpts{Label: "Assistant conversation", Streaming: true}) {
+					@ui.ChatMessage(ui.ChatMessageOpts{Role: ui.ChatRoleSystem, RoleLabel: "System", Body: "Session started."})
+					@ui.ChatMessage(ui.ChatMessageOpts{Role: ui.ChatRoleUser, RoleLabel: "You", Body: "Summarise the last deploy."})
+					@ui.ChatMessage(ui.ChatMessageOpts{
+						Role: ui.ChatRoleAssistant, RoleLabel: "Assistant",
+						Body: "The last deploy shipped 12 commits", Streaming: true,
+					})
+				}
+				<p class="text-sm">
+					Mentions render inline:
+					@ui.MentionChip(ui.MentionChipOpts{Name: "ada", Href: "/dev/gallery"})
+					and
+					@ui.MentionChip(ui.MentionChipOpts{Name: "platform-team"})
+				</p>
+				<div class="flex flex-wrap gap-6">
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{State: ui.DeliveryDelivered, Label: "Delivered", Detail: "200 in 84ms"})
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{State: ui.DeliveryPending, Label: "Pending", Detail: "attempt 1 of 8"})
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{State: ui.DeliveryFailed, Label: "Failed", Detail: "503 — retrying"})
+				</div>
+			</div>
+		}
+
+		@gallerySection("Product patterns") {
+			<div class="space-y-6">
+				@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapMD}) {
+					@ui.UsageCard(ui.UsageCardOpts{
+						Title: "Projects", Used: "12", Limit: "20", Percent: 60,
+						MeterLabel: "Project quota",
+					})
+					@ui.UsageCard(ui.UsageCardOpts{
+						Title: "Storage", Used: "9.4 GB", Limit: "10 GB", Percent: 94,
+						MeterLabel: "Storage quota",
+						Notice: ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn}),
+					})
+				}
+				@ui.OnboardingChecklist(ui.OnboardingChecklistOpts{
+					Title: "Finish setting up", ProgressLabel: "Onboarding progress",
+					Steps: []ui.ChecklistStep{
+						{Label: "Create an organization", Done: true},
+						{Label: "Invite a teammate", Body: "Collaborators can see every project.", Href: "/app/settings/org"},
+						{Label: "Connect billing", Body: "Required before the trial ends.", Href: "/app/settings/billing"},
+					},
+				})
+				@ui.SettingsSection(ui.SettingsSectionOpts{
+					Title: "Organization name", Description: "Shown to every member and on invoices.",
+				}) {
+					@ui.Field(ui.FieldOpts{Name: "org_name", Label: "Name", HiddenLabel: true}) {
+						@ui.TextInput(ui.TextInputOpts{Name: "org_name", Value: "Demo Org"})
+					}
+				}
+				@ui.SettingsSection(ui.SettingsSectionOpts{
+					Title: "Delete organization", Description: "This removes every project and cannot be undone.",
+					Danger: true,
+				}) {
+					@ui.ConfirmAction(ui.ConfirmActionOpts{
+						ID: "gallery-delete-org", TriggerLabel: "Delete organization",
+						Title: "Delete this organization?", Message: "Every project and file is removed. This cannot be undone.",
+						ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+						HX: ui.HX{Delete: "/dev/gallery"},
+					})
+				}
+				<ul class="table-card px-3">
+					@ui.MemberItem(ui.MemberItemOpts{
+						Name: "Ada Lovelace", Email: "ada@example.com", RoleLabel: "Owner",
+						Since: "Jan 2026", MachineTime: "2026-01-02",
+					})
+					@ui.MemberItem(ui.MemberItemOpts{
+						Name: "Grace Hopper", Email: "grace@example.com", RoleLabel: "Member",
+						Pending: true,
+					})
+				</ul>
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

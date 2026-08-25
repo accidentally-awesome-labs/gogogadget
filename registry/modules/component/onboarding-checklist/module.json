@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/onboarding-checklist",
+    "kind": "component",
+    "name": "onboarding-checklist",
+    "revision": 1,
+    "contract": 1,
+    "title": "OnboardingChecklist",
+    "description": "The OnboardingChecklist renderer and its options.",
+    "requires": [
+      "component/progress-bar",
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/onboarding-checklist.templ",
+        "target": "internal/web/templates/ui/onboarding-checklist.templ",
+        "class": "templ",
+        "sha256": "7cc8bf68e4733d7eb2dfb4b6461178a4147e2157627e31358b924c42eafa0d9c",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "onboarding-checklist",
+          "family": "communication"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

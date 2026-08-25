@@ -1,0 +1,90 @@
+package ui
+
+import "fmt"
+
+// ChecklistStep is one onboarding task.
+type ChecklistStep struct {
+	Label string
+	Body  string
+	Href  string
+	Done  bool
+	// DoneLabel states completion in words, because a tick glyph and a struck
+	// line are both colour and shape signals a screen reader cannot read.
+	DoneLabel string
+}
+
+// OnboardingChecklistOpts is the getting-started list.
+type OnboardingChecklistOpts struct {
+	Title string
+	Steps []ChecklistStep
+	// ProgressLabel names the overall progress meter.
+	ProgressLabel string
+	Attrs         Attrs
+}
+
+// OnboardingChecklist renders setup steps with progress.
+//
+// Every step stays visible and actionable once done, rather than disappearing:
+// a list that shrinks as you complete it hides what the product can do, and a
+// user who wants to revisit a step has nowhere to go.
+templ OnboardingChecklist(o OnboardingChecklistOpts) {
+	<div { root("onboarding-checklist", "card space-y-3", o.Attrs)... }>
+		<h3 class="font-semibold">{ o.Title }</h3>
+		@ProgressBar(ProgressBarOpts{
+			Value: float64(checklistDone(o.Steps)), Max: float64(len(o.Steps)),
+			Label:     o.ProgressLabel,
+			ValueText: fmt.Sprintf("%d of %d complete", checklistDone(o.Steps), len(o.Steps)),
+		})
+		<ol class="space-y-2">
+			for _, step := range o.Steps {
+				<li class="flex items-start gap-2 text-sm">
+					@Icon(IconOpts{Name: checklistIcon(step.Done), Attrs: Attrs{Class: checklistIconClass(step.Done)}})
+					<span>
+						if step.Href != "" {
+							<a href={ templ.SafeURL(step.Href) } class="link font-medium">{ step.Label }</a>
+						} else {
+							<span class="font-medium">{ step.Label }</span>
+						}
+						if step.Done {
+							<span class="ml-2 text-xs text-fg-muted">{ checklistDoneLabel(step.DoneLabel) }</span>
+						}
+						if step.Body != "" {
+							<span class="block text-fg-muted">{ step.Body }</span>
+						}
+					</span>
+				</li>
+			}
+		</ol>
+	</div>
+}
+
+func checklistDone(steps []ChecklistStep) int {
+	done := 0
+	for _, step := range steps {
+		if step.Done {
+			done++
+		}
+	}
+	return done
+}
+
+func checklistIcon(done bool) IconName {
+	if done {
+		return IconSuccess
+	}
+	return IconArrowRight
+}
+
+func checklistIconClass(done bool) string {
+	if done {
+		return "w-4 h-4 mt-0.5 shrink-0 text-success-text"
+	}
+	return "w-4 h-4 mt-0.5 shrink-0 text-fg-muted"
+}
+
+func checklistDoneLabel(label string) string {
+	if label == "" {
+		return "done"
+	}
+	return label
+}

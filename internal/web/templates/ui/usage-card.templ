@@ -1,0 +1,38 @@
+package ui
+
+// UsageCardOpts is a metered-usage summary.
+//
+// It takes a pre-computed view struct rather than a billing type, so a module
+// can reuse it without pulling a provider package. The percentage and the labels
+// are the caller's calculation: usage rules (proration, overage, trial credit)
+// belong to billing, not to a card.
+type UsageCardOpts struct {
+	Title string
+	// Used and Limit are display strings, already formatted and localized.
+	Used  string
+	Limit string
+	// Percent drives the meter and is clamped by it.
+	Percent int
+	// MeterLabel names the quota for assistive technology, because "84%" beside
+	// a title is not a sentence a screen reader can make sense of.
+	MeterLabel string
+	// Notice is an optional slot for an over-quota warning.
+	Notice templ.Component
+	Attrs  Attrs
+}
+
+// UsageCard renders a quota with its meter.
+templ UsageCard(o UsageCardOpts) {
+	<div { root("usage-card", "card", o.Attrs)... }>
+		<div class="flex items-baseline justify-between gap-2">
+			<p class="text-sm text-fg-muted">{ o.Title }</p>
+			<p class="text-sm font-medium tabular-nums">{ o.Used + " / " + o.Limit }</p>
+		</div>
+		@Meter(MeterOpts{Percent: o.Percent, Label: o.MeterLabel, ValueText: o.Used + " of " + o.Limit})
+		if o.Notice != nil {
+			<div class="mt-3">
+				@o.Notice
+			</div>
+		}
+	</div>
+}

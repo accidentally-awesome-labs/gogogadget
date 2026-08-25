@@ -41,7 +41,7 @@
         "source": "internal/db/module_test.go",
         "target": "internal/db/module_test.go",
         "class": "test",
-        "sha256": "c614c86efa1c12de515fa48e1158e070c5831048b5ba3d93c3acd443a7af6f3e",
+        "sha256": "8a351703d6ceafa6438159aa858936d6dcd26ea423768b58b96c361275525f77",
         "rewrite_module": true,
         "contract": false
       },
@@ -91,12 +91,12 @@
             "type": "*sqlc.Queries"
           }
         ],
-        "stop": true,
-        "start": false,
         "type_imports": [
           "github.com/jackc/pgx/v5/pgxpool",
           "internal/db/sqlc"
-        ]
+        ],
+        "start": false,
+        "stop": true
       }
     },
     "migrations": [],
@@ -107,9 +107,9 @@
         "type": "string",
         "description": "Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting",
         "default": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
+        "example": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
         "production_required": true,
-        "secret": true,
-        "example": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable"
+        "secret": true
       }
     ],
     "docs": [],

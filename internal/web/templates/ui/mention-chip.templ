@@ -1,0 +1,32 @@
+package ui
+
+// mentionSigil is the visual marker for a mention. It is a Go constant rather
+// than a literal in the markup because templ reads a bare "@" as the start of
+// an expression.
+const mentionSigil = "@"
+
+// MentionChipOpts is an inline reference to a person or team.
+type MentionChipOpts struct {
+	Name string
+	Href string
+	Attrs Attrs
+}
+
+// MentionChip renders an inline mention.
+//
+// The @ is decorative and hidden: a screen reader reading "at Ada Lovelace"
+// inside a sentence is confusing, and the visual marker is what distinguishes a
+// mention from ordinary text for sighted readers.
+templ MentionChip(o MentionChipOpts) {
+	if o.Href != "" {
+		<a href={ templ.SafeURL(o.Href) } { root("mention-chip", "inline-flex items-center rounded px-1 bg-brand-subtle text-brand-subtle-fg", o.Attrs)... }>
+			<span aria-hidden="true">{ mentionSigil }</span>
+			{ o.Name }
+		</a>
+	} else {
+		<span { root("mention-chip", "inline-flex items-center rounded px-1 bg-brand-subtle text-brand-subtle-fg", o.Attrs)... }>
+			<span aria-hidden="true">{ mentionSigil }</span>
+			{ o.Name }
+		</span>
+	}
+}

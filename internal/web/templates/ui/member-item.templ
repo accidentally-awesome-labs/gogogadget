@@ -1,0 +1,54 @@
+package ui
+
+// MemberItemOpts is one organization member row.
+//
+// It takes display strings rather than an identity or sqlc type, so a module can
+// reuse it without importing a provider package.
+type MemberItemOpts struct {
+	Name  string
+	Email string
+	// RoleLabel is the display name of the role, already localized.
+	RoleLabel string
+	AvatarSrc string
+	// Since is a pre-formatted join date.
+	Since       string
+	MachineTime string
+	// Pending marks an invitation that has not been accepted, which is a
+	// different state from being a member and needs a different action.
+	Pending      bool
+	PendingLabel string
+	Actions      templ.Component
+	Attrs        Attrs
+}
+
+// MemberItem renders one member row.
+templ MemberItem(o MemberItemOpts) {
+	<li { root("member-item", "flex items-center gap-3 py-2", o.Attrs)... }>
+		@Avatar(AvatarOpts{Name: o.Name, Src: o.AvatarSrc, Size: SizeSM})
+		<div class="min-w-0 flex-1">
+			<p class="text-sm font-medium truncate">
+				{ o.Name }
+				if o.Pending {
+					@Badge(BadgeOpts{Text: memberPendingLabel(o.PendingLabel), Kind: KindWarn, Attrs: Attrs{Class: "ml-2"}})
+				}
+			</p>
+			<p class="text-xs text-fg-muted truncate">{ o.Email }</p>
+		</div>
+		<span class="text-sm text-fg-muted shrink-0">{ o.RoleLabel }</span>
+		if o.Since != "" {
+			<time class="text-xs text-fg-muted shrink-0 hidden sm:block" datetime={ o.MachineTime }>{ o.Since }</time>
+		}
+		if o.Actions != nil {
+			<span class="shrink-0">
+				@o.Actions
+			</span>
+		}
+	</li>
+}
+
+func memberPendingLabel(label string) string {
+	if label == "" {
+		return "pending"
+	}
+	return label
+}

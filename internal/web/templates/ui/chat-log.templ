@@ -1,0 +1,27 @@
+package ui
+
+// ChatLogOpts is the message transcript.
+type ChatLogOpts struct {
+	Label string
+	// Streaming marks the whole log as receiving a response.
+	Streaming bool
+	Attrs     Attrs
+}
+
+// ChatLog renders the transcript as a polite live region.
+//
+// Polite, never assertive: an assertive log interrupts the screen reader on
+// every token of a streaming response, which makes the page unusable. role=log
+// is the specific one for an append-only transcript - it tells assistive
+// technology that only additions matter, so earlier messages are not re-read.
+templ ChatLog(o ChatLogOpts) {
+	<div
+		{ rootWith("chat-log", "space-y-3", o.Attrs,
+			"role", "log",
+			"aria-live", "polite",
+			"aria-busy", boolAttr(o.Streaming),
+			"aria-label", o.Label)... }
+	>
+		{ children... }
+	</div>
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/settings-section",
+    "kind": "component",
+    "name": "settings-section",
+    "revision": 1,
+    "contract": 1,
+    "title": "SettingsSection",
+    "description": "The SettingsSection renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/settings-section.templ",
+        "target": "internal/web/templates/ui/settings-section.templ",
+        "class": "templ",
+        "sha256": "2189a2e9ee793a7966f44eb3c3169af40cfa313d56d64529f5480a18d8c1cea8",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "settings-section",
+          "family": "communication"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

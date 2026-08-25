@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/notification-item",
+    "kind": "component",
+    "name": "notification-item",
+    "revision": 1,
+    "contract": 1,
+    "title": "NotificationItem",
+    "description": "The NotificationItem renderer and its options.",
+    "requires": [
+      "component/status-dot",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/notification-item.templ",
+        "target": "internal/web/templates/ui/notification-item.templ",
+        "class": "templ",
+        "sha256": "126d8fe82603acdfb0ac7af42c495c25e1f26463cd5edd979d4805084029ca1b",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "notification-item",
+          "family": "communication"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

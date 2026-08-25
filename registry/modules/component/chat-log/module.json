@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/chat-log",
+    "kind": "component",
+    "name": "chat-log",
+    "revision": 1,
+    "contract": 1,
+    "title": "ChatLog",
+    "description": "The ChatLog renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/chat-log.templ",
+        "target": "internal/web/templates/ui/chat-log.templ",
+        "class": "templ",
+        "sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/chat-log_test.go",
+        "target": "internal/web/templates/ui/chat-log_test.go",
+        "class": "test",
+        "sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "chat-log",
+          "family": "communication"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

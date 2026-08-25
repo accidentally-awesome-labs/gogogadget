@@ -1,0 +1,66 @@
+package ui
+
+// ChatRole is who produced a chat message.
+type ChatRole string
+
+const (
+	ChatRoleUser      ChatRole = "user"
+	ChatRoleAssistant ChatRole = "assistant"
+	ChatRoleSystem    ChatRole = "system"
+)
+
+var ChatRoles = []ChatRole{ChatRoleUser, ChatRoleAssistant, ChatRoleSystem}
+
+func (r ChatRole) Value() ChatRole { return normalize(r, ChatRoles, ChatRoleAssistant) }
+func (r ChatRole) Valid() bool     { return contains(r, ChatRoles) }
+
+// ChatMessageOpts is one message in a chat log.
+type ChatMessageOpts struct {
+	Role ChatRole
+	// RoleLabel names the speaker in words. Alignment and colour are the only
+	// visual cues for who said what, and both are invisible to a screen reader.
+	RoleLabel string
+	Body      string
+	BodySlot  templ.Component
+	// Streaming marks a message still being written, so the log can say so
+	// rather than leaving a half-sentence that looks finished.
+	Streaming      bool
+	StreamingLabel string
+	Attrs          Attrs
+}
+
+// ChatMessage renders one message.
+templ ChatMessage(o ChatMessageOpts) {
+	<div { root("chat-message", chatMessageClass(o.Role), o.Attrs)... }>
+		<p class="text-xs text-fg-muted">{ o.RoleLabel }</p>
+		<div class="text-sm mt-1">
+			if o.BodySlot != nil {
+				@o.BodySlot
+			} else {
+				{ o.Body }
+			}
+			if o.Streaming {
+				<span class="text-fg-muted">{ " " + chatStreamingLabel(o.StreamingLabel) }</span>
+			}
+		</div>
+	</div>
+}
+
+func chatMessageClass(role ChatRole) string {
+	base := "rounded-lg px-3 py-2 max-w-[42rem]"
+	switch role.Value() {
+	case ChatRoleUser:
+		return base + " bg-selected ml-auto"
+	case ChatRoleSystem:
+		return base + " bg-surface-raised text-fg-muted mx-auto text-center"
+	default:
+		return base + " bg-surface-raised"
+	}
+}
+
+func chatStreamingLabel(label string) string {
+	if label == "" {
+		return "(still writing)"
+	}
+	return label
+}

@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/composer",
+    "kind": "component",
+    "name": "composer",
+    "revision": 1,
+    "contract": 1,
+    "title": "Composer",
+    "description": "The Composer renderer and its options.",
+    "requires": [
+      "component/field-error",
+      "component/form-actions",
+      "component/textarea",
+      "element/button",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/composer.templ",
+        "target": "internal/web/templates/ui/composer.templ",
+        "class": "templ",
+        "sha256": "3cb08be38a13c9001018ea3126e72ffc46d7d8b52c631c55f1e7926acb216bdc",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "composer",
+          "family": "communication"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}
