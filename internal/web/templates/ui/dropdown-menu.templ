@@ -23,8 +23,57 @@ templ DropdownMenu(o DropdownMenuOpts) {
 		</button>
 		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">
 			for _, item := range o.Items {
-				<a href={ templ.SafeURL(item.Href) } class={ "block px-3 py-2 rounded-lg text-sm hover:bg-surface-raised", templ.KV("text-fg-muted", item.Disabled) }>{ item.Label }</a>
+				if item.Separator {
+					<hr role="separator" class="my-1 border-t border-border"/>
+				} else if item.Disabled {
+					// A disabled command stays visible and readable but is not a
+					// link: a real href would still navigate on click or Enter.
+					<span class="block px-3 py-2 text-sm text-fg-muted" aria-disabled="true">
+						@menuItemBody(item)
+					</span>
+				} else if item.Href != "" {
+					<a href={ templ.SafeURL(item.Href) } class={ menuItemClass(item) } { menuItemHX(item)... }>
+						@menuItemBody(item)
+					</a>
+				} else {
+					// No destination: this item acts rather than navigates, so it
+					// is a button. An <a href=""> would point at the current page
+					// and reload it on click before HTMX had loaded.
+					<button type="button" class={ menuItemClass(item) + " w-full text-left" } { menuItemHX(item)... }>
+						@menuItemBody(item)
+					</button>
+				}
 			}
 		</div>
 	</div>
+}
+
+// menuItemBody renders the optional icon and the label. The icon is decorative:
+// the label already names the command, so announcing it twice is noise.
+templ menuItemBody(item MenuItem) {
+	if item.Icon != "" {
+		@Icon(IconOpts{Name: item.Icon, Attrs: Attrs{Class: "w-4 h-4 inline-block mr-2 align-text-bottom"}})
+	}
+	{ item.Label }
+}
+
+// menuItemHX builds the request attributes for an acting item, plus the
+// confirmation the contract carries.
+func menuItemHX(item MenuItem) templ.Attributes {
+	out := templ.Attributes{}
+	applyHX(out, item.HX)
+	if item.Confirm != "" {
+		out["hx-confirm"] = item.Confirm
+	}
+	return out
+}
+
+// menuItemClass colours a destructive command. The kind is normalized, so a
+// typo cannot leave an item with no colour class at all.
+func menuItemClass(item MenuItem) string {
+	base := "block px-3 py-2 text-sm hover:bg-surface-raised"
+	if NormalizeKind(item.Kind) == KindDanger {
+		return base + " text-danger-text"
+	}
+	return base
 }

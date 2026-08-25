@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/dropdown-menu.templ",
         "target": "internal/web/templates/ui/dropdown-menu.templ",
         "class": "templ",
-        "sha256": "898ebfd0460120295ded18f197370e6fc29e9046216d95658ebb10ab77c2cc58",
+        "sha256": "a13acf9ada2fbc7cc1829b49ec820b4b89dd30dafb9109afe3c66ee3718cf388",
         "rewrite_module": true,
         "contract": true
       }

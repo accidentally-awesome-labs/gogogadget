@@ -3,9 +3,11 @@ package ui
 import (
 	"bytes"
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/a-h/templ"
+	"github.com/stretchr/testify/assert"
 )
 
 // renderComponent renders a templ component to a string for assertions.
@@ -49,4 +51,21 @@ func TestIconRegistryHasNoDuplicates(t *testing.T) {
 		}
 		seen[name] = true
 	}
+}
+
+// An icon is decorative by default: the control beside it already carries the
+// name, so announcing the glyph too is noise. An icon that is the *only* thing
+// in a control has to be named instead, which is what Label does.
+func TestIconIsDecorativeUnlessLabelled(t *testing.T) {
+	decorative := renderComponent(t, Icon(IconOpts{Name: IconBell}))
+	assert.Equal(t, 1, strings.Count(decorative, `aria-hidden="true"`),
+		"a duplicated attribute means the spread value can never override the literal")
+	assert.NotContains(t, decorative, `role="img"`)
+	assert.NotContains(t, decorative, "aria-label")
+
+	labelled := renderComponent(t, Icon(IconOpts{Name: IconBell, Label: "Notifications"}))
+	assert.NotContains(t, labelled, "aria-hidden",
+		"a labelled icon that stays aria-hidden cannot be announced at all")
+	assert.Contains(t, labelled, `role="img"`)
+	assert.Contains(t, labelled, `aria-label="Notifications"`)
 }

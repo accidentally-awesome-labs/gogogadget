@@ -460,9 +460,15 @@ templ Gallery() {
 		@gallerySection("Overlays") {
 			<div class="flex flex-wrap items-center gap-4">
 				@ui.DropdownMenu(ui.DropdownMenuOpts{Label: "Actions", Items: []ui.MenuItem{
-					{Label: "Rename", Href: "/dev/gallery"},
-					{Label: "Duplicate", Href: "/dev/gallery"},
-					{Label: "Delete", Href: "/dev/gallery", Kind: ui.KindDanger, Disabled: true},
+					{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+					{Label: "Duplicate", Href: "/dev/gallery", Icon: ui.IconCopy},
+					{Separator: true},
+					{Label: "Archive", Icon: ui.IconFolder, Disabled: true},
+					{
+						Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger,
+						Confirm: "Delete this project? This cannot be undone.",
+						HX:      ui.HX{Delete: "/dev/gallery", Target: "closest div"},
+					},
 				}})
 				@ui.Popover(ui.PopoverOpts{Label: "Details"}) {
 					<p class="text-sm text-fg-muted">Popovers hold richer content than a tooltip.</p>

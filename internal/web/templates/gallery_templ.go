@@ -1896,9 +1896,15 @@ func Gallery() templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = ui.DropdownMenu(ui.DropdownMenuOpts{Label: "Actions", Items: []ui.MenuItem{
-				{Label: "Rename", Href: "/dev/gallery"},
-				{Label: "Duplicate", Href: "/dev/gallery"},
-				{Label: "Delete", Href: "/dev/gallery", Kind: ui.KindDanger, Disabled: true},
+				{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+				{Label: "Duplicate", Href: "/dev/gallery", Icon: ui.IconCopy},
+				{Separator: true},
+				{Label: "Archive", Icon: ui.IconFolder, Disabled: true},
+				{
+					Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger,
+					Confirm: "Delete this project? This cannot be undone.",
+					HX:      ui.HX{Delete: "/dev/gallery", Target: "closest div"},
+				},
 			}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2045,7 +2051,7 @@ func gallerySection(title string) templ.Component {
 		var templ_7745c5c3_Var82 string
 		templ_7745c5c3_Var82, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery.templ`, Line: 492, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery.templ`, Line: 498, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var82))
 		if templ_7745c5c3_Err != nil {
@@ -2097,7 +2103,7 @@ func swatch(token string) templ.Component {
 		var templ_7745c5c3_Var84 string
 		templ_7745c5c3_Var84, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(swatchStyle(token))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery.templ`, Line: 501, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery.templ`, Line: 507, Col: 83}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var84))
 		if templ_7745c5c3_Err != nil {
@@ -2110,7 +2116,7 @@ func swatch(token string) templ.Component {
 		var templ_7745c5c3_Var85 string
 		templ_7745c5c3_Var85, templ_7745c5c3_Err = templ.JoinStringErrs(token)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery.templ`, Line: 502, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery.templ`, Line: 508, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var85))
 		if templ_7745c5c3_Err != nil {

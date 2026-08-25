@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/icon.templ",
         "target": "internal/web/templates/ui/icon.templ",
         "class": "templ",
-        "sha256": "39691b460886c3cc875d277e75e71044ea2bd7dac8e6cd8989ef292a3ba005a4",
+        "sha256": "c372771725c63bf3cef47daa6a4d1fbb7f810c5ee3b77ad9b833cb396b0bf645",
         "rewrite_module": true,
         "contract": true
       }

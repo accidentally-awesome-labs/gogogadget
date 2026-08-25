@@ -301,3 +301,73 @@ func TestPaginationSurvivesMissingLabels(t *testing.T) {
 	assert.Contains(t, localized, "Anterior")
 	assert.NotContains(t, localized, "Previous")
 }
+
+// MenuItem and Column are data contracts shared by several renderers, so their
+// fields are fixed here rather than per consumer: DropdownMenu, ContextMenu,
+// RowActions and Kanban all read MenuItem, and Table, DataTable, DataGrid and
+// TreeGrid all read Column. A consumer that needed its own field would fork the
+// contract and break the others.
+func TestSharedDataContractShapes(t *testing.T) {
+	menu := reflect.TypeOf(MenuItem{})
+	for name, want := range map[string]reflect.Kind{
+		"Label": reflect.String, "Href": reflect.String,
+		"Icon": reflect.String, "Kind": reflect.String,
+		"Disabled": reflect.Bool, "Separator": reflect.Bool,
+		"Confirm": reflect.String,
+	} {
+		field, ok := menu.FieldByName(name)
+		require.True(t, ok, "MenuItem has no %s field", name)
+		assert.Equal(t, want, field.Type.Kind(), "MenuItem.%s has the wrong kind", name)
+	}
+	iconField, _ := menu.FieldByName("Icon")
+	assert.Equal(t, reflect.TypeOf(IconName("")), iconField.Type,
+		"MenuItem.Icon must be the typed icon name, not a free string")
+	hx, ok := menu.FieldByName("HX")
+	require.True(t, ok, "a menu item that issues a request needs HX")
+	assert.Equal(t, reflect.TypeOf(HX{}), hx.Type)
+
+	col := reflect.TypeOf(Column{})
+	hide, ok := col.FieldByName("HideBelow")
+	require.True(t, ok, "a column that cannot be hidden forces horizontal scroll on small screens")
+	assert.Equal(t, reflect.TypeOf(Breakpoint("")), hide.Type)
+	align, _ := col.FieldByName("Align")
+	assert.Equal(t, reflect.TypeOf(Align("")), align.Type)
+}
+
+// A separator is not a command: it carries no label, no href and no handler, so
+// rendering it as an item would put an empty, focusable row in the menu.
+func TestMenuSeparatorRendersAsSeparator(t *testing.T) {
+	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{
+			{Label: "Rename", Href: "/x"},
+			{Separator: true},
+			{Label: "Delete", Href: "/y", Kind: KindDanger, Confirm: "Delete this?"},
+		},
+	}))
+
+	assert.Contains(t, html, `role="separator"`)
+	assert.Equal(t, 2, strings.Count(html, "<a "),
+		"a separator must not render as a link")
+	assert.Contains(t, html, `hx-confirm="Delete this?"`,
+		"a destructive item declares its confirmation in the contract")
+}
+
+// A menu item that acts is a button; one that navigates is a link. Rendering an
+// acting item as <a href=""> makes it a link to the current page, so a click
+// before HTMX has loaded reloads the page instead of doing nothing.
+func TestActingMenuItemIsAButtonNotAnEmptyLink(t *testing.T) {
+	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{
+			{Label: "Open", Href: "/projects/1"},
+			{Label: "Delete", Kind: KindDanger, Confirm: "Sure?", HX: HX{Delete: "/projects/1"}},
+		},
+	}))
+
+	assert.NotContains(t, html, `href=""`,
+		"an empty href is a link to the current page")
+	assert.Contains(t, html, `href="/projects/1"`, "a navigating item stays a link")
+	assert.Contains(t, html, `<button type="button"`, "an acting item must be a button")
+	assert.Contains(t, html, `hx-delete="/projects/1"`)
+}

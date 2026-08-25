@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "264256f77d0829463d8dc7785725f5d91c3f0a6c5c8c38fa0fe443d107739479",
+        "sha256": "3b1473115c426a88ee1dae4720bf756703f89a21cbfd140d0d2a4bdc07e862dc",
         "rewrite_module": true,
         "contract": false
       },
@@ -70,7 +70,7 @@
         "source": "internal/web/templates/ui/icons_test.go",
         "target": "internal/web/templates/ui/icons_test.go",
         "class": "test",
-        "sha256": "48f7e2ce37529f96d20bb58d9185d7a374185073edfd907e9b0c2b00c621aaab",
+        "sha256": "f5d3d6255245626d46a2f778a52756cf295e01529c4ceea99f16fbc45ed01c00",
         "rewrite_module": true,
         "contract": false
       },
@@ -86,7 +86,7 @@
         "source": "internal/web/templates/ui/shared.go",
         "target": "internal/web/templates/ui/shared.go",
         "class": "go",
-        "sha256": "fa3e2e55c7da07edab437ba02f52ed4525e7f9d55be3484c41ac4886f7d34134",
+        "sha256": "0ca54651824b4e57a7aded588e1a3e8c57400d5f78831c06de23a98debd29f6b",
         "rewrite_module": false,
         "contract": false
       },
