@@ -216,3 +216,98 @@ func kindBlock(t *testing.T, source, kind string) string {
 	require.Greater(t, end, 0, "unterminated .k-%s block", kind)
 	return source[start : start+end]
 }
+
+// The gallery is the catalog's reference surface: if a component is installed
+// but never rendered there, nobody reviewing the design system - human or agent
+// - can see it, and no visual or accessibility gate covers it. Comparing the
+// rendered data-ui markers against the generated registry closes the gap that a
+// hand-kept list leaves open.
+func TestGalleryCoversEveryInstalledComponent(t *testing.T) {
+	html := renderComponent(t, Gallery())
+	rendered := renderedComponentMarkers(html)
+	require.NotEmpty(t, ui.ComponentRegistry, "no components are installed")
+
+	var missing []string
+	for _, c := range ui.ComponentRegistry {
+		if _, ok := rendered[c.Name]; !ok {
+			missing = append(missing, c.Name+" ("+string(c.Family)+")")
+		}
+	}
+	assert.Empty(t, missing, "installed components the gallery never renders")
+
+	for name := range rendered {
+		_, ok := ui.ComponentByName(name)
+		assert.True(t, ok, "gallery renders %q, which no installed module declares", name)
+	}
+}
+
+func renderedComponentMarkers(html string) map[string]struct{} {
+	out := map[string]struct{}{}
+	for _, m := range regexp.MustCompile(`data-ui="([a-z0-9-]+)"`).FindAllStringSubmatch(html, -1) {
+		out[m[1]] = struct{}{}
+	}
+	return out
+}
+
+// Under CSP (script-src 'self') Alpine cannot evaluate expression strings, so
+// every x-data name must resolve to a registered component. An unregistered
+// name is silently inert - the control renders and does nothing - which is why
+// this is a test and not a code review item.
+func TestEveryAlpineComponentUsedIsRegistered(t *testing.T) {
+	used := map[string]string{}
+	templates, err := filepath.Glob("*.templ")
+	require.NoError(t, err)
+	nested, err := filepath.Glob("ui/*.templ")
+	require.NoError(t, err)
+	for _, path := range append(templates, nested...) {
+		body, readErr := os.ReadFile(path)
+		require.NoError(t, readErr)
+		for _, m := range regexp.MustCompile(`x-data="([a-zA-Z][a-zA-Z0-9]*)"`).FindAllStringSubmatch(string(body), -1) {
+			used[m[1]] = path
+		}
+	}
+	require.NotEmpty(t, used, "no x-data components found - the scan is broken")
+
+	registered := map[string]bool{}
+	scripts, err := filepath.Glob("../../../static/*.js")
+	require.NoError(t, err)
+	fragments, err := filepath.Glob("../../../static/ui/*.js")
+	require.NoError(t, err)
+	for _, path := range append(scripts, fragments...) {
+		body, readErr := os.ReadFile(path)
+		require.NoError(t, readErr)
+		for _, m := range regexp.MustCompile(`Alpine\.data\(\s*"([a-zA-Z][a-zA-Z0-9]*)"`).FindAllStringSubmatch(string(body), -1) {
+			registered[m[1]] = true
+		}
+	}
+
+	for name, path := range used {
+		assert.True(t, registered[name],
+			"%s uses x-data=%q but no shipped script registers it: under CSP the component is inert", path, name)
+	}
+}
+
+// The generated list of expected registrations must match what the shipped
+// fragments actually register, or the shell publishes a promise nothing keeps.
+func TestGeneratedAlpineExpectationsAreRegistered(t *testing.T) {
+	published, err := os.ReadFile("../../../static/ui-components.js")
+	require.NoError(t, err)
+	expected := regexp.MustCompile(`push\("([a-zA-Z0-9]+)"\)`).FindAllStringSubmatch(string(published), -1)
+	require.NotEmpty(t, expected, "no module declares an Alpine component")
+
+	registered := map[string]bool{}
+	fragments, err := filepath.Glob("../../../static/ui/*.js")
+	require.NoError(t, err)
+	require.NotEmpty(t, fragments, "modules declare Alpine components but ship no fragment")
+	for _, path := range fragments {
+		body, readErr := os.ReadFile(path)
+		require.NoError(t, readErr)
+		for _, m := range regexp.MustCompile(`Alpine\.data\(\s*"([a-zA-Z0-9]+)"`).FindAllStringSubmatch(string(body), -1) {
+			registered[m[1]] = true
+		}
+	}
+	for _, m := range expected {
+		assert.True(t, registered[m[1]],
+			"a module declares Alpine component %q but no installed fragment registers it", m[1])
+	}
+}

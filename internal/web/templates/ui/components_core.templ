@@ -12,7 +12,7 @@ import "fmt"
 type SpinnerOpts struct{ Attrs Attrs }
 
 templ Spinner(o SpinnerOpts) {
-	@Icon(IconOpts{Name: IconSpinner, Attrs: withClass(o.Attrs, "htmx-indicator w-4 h-4 animate-spin")})
+	@Icon(IconOpts{Name: IconSpinner, Attrs: withClass(o.Attrs, "htmx-indicator w-4 h-4 animate-spin"), component: "spinner"})
 }
 
 // BadgeOpts is a small state pill: Kind picks the semantic colour.

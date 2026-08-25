@@ -101,6 +101,134 @@ var Densities = []Density{DensityComfortable, DensityCompact}
 func (d Density) Value() Density { return normalize(d, Densities, DensityComfortable) }
 func (d Density) Valid() bool    { return contains(d, Densities) }
 
+// Gap is the spacing scale between siblings. The zero value is the standard
+// gap, not flush: stacked content wants breathing room by default, and every
+// existing caller that omits a gap already renders spaced. Flush is spelled
+// explicitly as GapNone so it reads as a choice at the call site.
+type Gap string
+
+const (
+	GapNone Gap = "none"
+	GapXS   Gap = "xs"
+	GapSM   Gap = "sm"
+	GapMD   Gap = "md"
+	GapLG   Gap = "lg"
+	GapXL   Gap = "xl"
+)
+
+var Gaps = []Gap{GapNone, GapXS, GapSM, GapMD, GapLG, GapXL}
+
+func (g Gap) Value() Gap  { return normalize(g, Gaps, GapMD) }
+func (g Gap) Valid() bool { return contains(g, Gaps) }
+
+// Padding is the inset scale, and follows Gap: the zero value is the standard
+// inset, with flush spelled explicitly.
+type Padding string
+
+const (
+	PaddingNone Padding = "none"
+	PaddingSM   Padding = "sm"
+	PaddingMD   Padding = "md"
+	PaddingLG   Padding = "lg"
+)
+
+var Paddings = []Padding{PaddingNone, PaddingSM, PaddingMD, PaddingLG}
+
+func (p Padding) Value() Padding { return normalize(p, Paddings, PaddingMD) }
+func (p Padding) Valid() bool    { return contains(p, Paddings) }
+
+// Width is the measure a container constrains content to. Unlike Gap, there is
+// no meaningful empty: an unbounded line length is unreadable, so an unset
+// width normalizes to the standard page measure.
+type Width string
+
+// Only the measures the token layer actually defines are declared here: a
+// "wide" member with no --container-wide token would render unconstrained while
+// claiming to be constrained.
+const (
+	WidthNarrow Width = "narrow"
+	WidthPage   Width = "page"
+	WidthFull   Width = "full"
+)
+
+var Widths = []Width{WidthNarrow, WidthPage, WidthFull}
+
+func (w Width) Value() Width { return normalize(w, Widths, WidthPage) }
+func (w Width) Valid() bool  { return contains(w, Widths) }
+
+// Height is the vertical sizing intent for a media or scroll region.
+type Height string
+
+const (
+	HeightAuto   Height = "auto"
+	HeightSM     Height = "sm"
+	HeightMD     Height = "md"
+	HeightLG     Height = "lg"
+	HeightScreen Height = "screen"
+)
+
+var Heights = []Height{HeightAuto, HeightSM, HeightMD, HeightLG, HeightScreen}
+
+func (h Height) Value() Height { return normalize(h, Heights, HeightAuto) }
+func (h Height) Valid() bool   { return contains(h, Heights) }
+
+// Ratio is the aspect ratio a media box reserves. Reserving the box before the
+// asset loads is what stops layout shift, so "auto" is the honest name for
+// declining to reserve rather than a default that hides the cost.
+type Ratio string
+
+const (
+	RatioAuto     Ratio = "auto"
+	RatioSquare   Ratio = "square"
+	RatioVideo    Ratio = "video"
+	RatioWide     Ratio = "wide"
+	RatioPortrait Ratio = "portrait"
+)
+
+var Ratios = []Ratio{RatioAuto, RatioSquare, RatioVideo, RatioWide, RatioPortrait}
+
+func (r Ratio) Value() Ratio { return normalize(r, Ratios, RatioAuto) }
+func (r Ratio) Valid() bool  { return contains(r, Ratios) }
+
+// InputType is the HTML input type a text field renders. It is closed because
+// an unrecognised type silently degrades to text in the browser while dropping
+// the validation and mobile keyboard the caller asked for.
+type InputType string
+
+const (
+	InputTypeText     InputType = "text"
+	InputTypeEmail    InputType = "email"
+	InputTypePassword InputType = "password"
+	InputTypeURL      InputType = "url"
+	InputTypeTel      InputType = "tel"
+	InputTypeNumber   InputType = "number"
+	InputTypeSearch   InputType = "search"
+	InputTypeDate     InputType = "date"
+)
+
+var InputTypes = []InputType{
+	InputTypeText, InputTypeEmail, InputTypePassword, InputTypeURL,
+	InputTypeTel, InputTypeNumber, InputTypeSearch, InputTypeDate,
+}
+
+func (i InputType) Value() InputType { return normalize(i, InputTypes, InputTypeText) }
+func (i InputType) Valid() bool      { return contains(i, InputTypes) }
+
+// Side is the edge an element attaches to.
+type Side string
+
+const (
+	SideTop    Side = "top"
+	SideRight  Side = "right"
+	SideBottom Side = "bottom"
+	SideLeft   Side = "left"
+)
+
+var Sides = []Side{SideTop, SideRight, SideBottom, SideLeft}
+
+func (s Side) Value() Side { return normalize(s, Sides, SideTop) }
+func (s Side) Valid() bool { return contains(s, Sides) }
+
 // Orientation is the axis a group lays out along.
 type Orientation string
 

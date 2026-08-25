@@ -11,6 +11,11 @@ package ui
 type IconOpts struct {
 	Name  IconName
 	Attrs Attrs
+	// component overrides the data-ui marker for an in-package renderer that is
+	// an icon in one specific role — Spinner is an icon, but it is its own
+	// catalog entry and coverage has to be able to see it. Unexported so no
+	// caller outside this package can rename a component.
+	component string
 }
 
 templ Icon(o IconOpts) {
@@ -23,9 +28,32 @@ templ Icon(o IconOpts) {
 func iconRootAttrs(o IconOpts) templ.Attributes {
 	out := attributes(o.Attrs)
 	delete(out, "class")
-	out["data-ui"] = "icon"
+	out["data-ui"] = iconComponent(o.component)
 	out["aria-hidden"] = "true"
 	return out
+}
+
+// Valid reports whether this name is in the icon registry.
+//
+// IconName deliberately has no Value() normalizer, unlike every style enum in
+// this package. A style modifier that falls back to a default renders something
+// slightly wrong; an icon that falls back to a default renders a *different
+// icon*, which silently mislabels an action. A misspelled icon name renders
+// nothing, so the mistake is visible where it was made.
+func (n IconName) Valid() bool {
+	for _, known := range IconNames {
+		if n == known {
+			return true
+		}
+	}
+	return false
+}
+
+func iconComponent(name string) string {
+	if name == "" {
+		return "icon"
+	}
+	return name
 }
 
 func iconSwitch(name IconName, class string, extra templ.Attributes) templ.Component {

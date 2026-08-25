@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+  "registry_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
   "order": [
     "element/ui-core",
     "system/apphost",
@@ -106,7 +106,7 @@
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -139,7 +139,7 @@
             "source": "internal/web/templates/ui/components_core.templ",
             "target": "internal/web/templates/ui/components_core.templ",
             "class": "templ",
-            "sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
+            "sha256": "502fc4ec9aafab06a10ed8be5509de8d96b24e06707b2befdc4b191d9fefc7be",
             "rewrite_module": true,
             "contract": false
           },
@@ -147,7 +147,7 @@
             "source": "internal/web/templates/ui/components_nav.templ",
             "target": "internal/web/templates/ui/components_nav.templ",
             "class": "templ",
-            "sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
+            "sha256": "107a95083313b98783139cf60a0cc831280b16fb157ebee1e6b0afe544c4bcdf",
             "rewrite_module": true,
             "contract": false
           },
@@ -155,7 +155,7 @@
             "source": "internal/web/templates/ui/contract_test.go",
             "target": "internal/web/templates/ui/contract_test.go",
             "class": "test",
-            "sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
+            "sha256": "264256f77d0829463d8dc7785725f5d91c3f0a6c5c8c38fa0fe443d107739479",
             "rewrite_module": true,
             "contract": false
           },
@@ -163,7 +163,7 @@
             "source": "internal/web/templates/ui/data.templ",
             "target": "internal/web/templates/ui/data.templ",
             "class": "templ",
-            "sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
+            "sha256": "619fcd307bba94b900cc4f4533a4d363df7383515d6e41621cec5d4bd927b8ff",
             "rewrite_module": true,
             "contract": false
           },
@@ -171,7 +171,7 @@
             "source": "internal/web/templates/ui/enums.go",
             "target": "internal/web/templates/ui/enums.go",
             "class": "go",
-            "sha256": "a3c75b499f39e58054c2f68c0cad7c25c1a801ea64da81012f84a1e48dafe36e",
+            "sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
             "rewrite_module": true,
             "contract": true
           },
@@ -179,7 +179,7 @@
             "source": "internal/web/templates/ui/enums_test.go",
             "target": "internal/web/templates/ui/enums_test.go",
             "class": "test",
-            "sha256": "9e089fb144e24e4d6d3e010c40ae27b98244fd87c19bcf4b3f7c84937748681d",
+            "sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
             "rewrite_module": true,
             "contract": false
           },
@@ -187,8 +187,16 @@
             "source": "internal/web/templates/ui/forms.templ",
             "target": "internal/web/templates/ui/forms.templ",
             "class": "templ",
-            "sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
+            "sha256": "f14281dd6e1ed715ad68a875e8fc8a188090ea4f298bb26ded6edbcbd8547fe9",
             "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/gallery.go",
+            "target": "internal/web/templates/ui/gallery.go",
+            "class": "go",
+            "sha256": "76adeb1870f63ad9a03fe53a8d57cca6b791d11ab6fee5d565d62e0c10eba709",
+            "rewrite_module": false,
             "contract": false
           },
           {
@@ -203,7 +211,7 @@
             "source": "internal/web/templates/ui/icons.templ",
             "target": "internal/web/templates/ui/icons.templ",
             "class": "templ",
-            "sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
+            "sha256": "29ce49bd2a341abe212ad039a1eaab207c8af3983337be09453db640d4e45bc0",
             "rewrite_module": true,
             "contract": false
           },
@@ -219,7 +227,7 @@
             "source": "internal/web/templates/ui/overlays.templ",
             "target": "internal/web/templates/ui/overlays.templ",
             "class": "templ",
-            "sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
+            "sha256": "7c32f8208634611387a94ddd0a8885179e00099ca89f1d0c942ea3d4c26fde18",
             "rewrite_module": true,
             "contract": false
           },
@@ -235,7 +243,7 @@
             "source": "internal/web/templates/ui/root.go",
             "target": "internal/web/templates/ui/root.go",
             "class": "go",
-            "sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+            "sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
             "rewrite_module": true,
             "contract": true
           },
@@ -246,10 +254,224 @@
             "sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
             "rewrite_module": true,
             "contract": true
+          },
+          {
+            "source": "static/ui/overlays.js",
+            "target": "static/ui/overlays.js",
+            "class": "asset",
+            "sha256": "d77fb2b5207201ccc1637723dc55c5d8d7f80bead0b423345f0352a7ef843110",
+            "rewrite_module": false,
+            "contract": false
           }
         ],
         "claims": {},
-        "runtime": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "alert-dialog",
+              "family": "overlays",
+              "engine": "alpine",
+              "alpine": "uiDialog",
+              "native_fallback": "dialog element"
+            },
+            {
+              "name": "badge",
+              "family": "feedback"
+            },
+            {
+              "name": "banner",
+              "family": "feedback"
+            },
+            {
+              "name": "card",
+              "family": "layout"
+            },
+            {
+              "name": "card-footer",
+              "family": "layout"
+            },
+            {
+              "name": "card-header",
+              "family": "layout"
+            },
+            {
+              "name": "checkbox",
+              "family": "forms"
+            },
+            {
+              "name": "container",
+              "family": "layout"
+            },
+            {
+              "name": "description-list",
+              "family": "data"
+            },
+            {
+              "name": "dialog",
+              "family": "overlays",
+              "engine": "alpine",
+              "alpine": "uiDialog",
+              "native_fallback": "dialog element"
+            },
+            {
+              "name": "divider",
+              "family": "foundations"
+            },
+            {
+              "name": "dropdown-menu",
+              "family": "overlays",
+              "engine": "alpine",
+              "alpine": "uiMenu",
+              "native_fallback": "details element"
+            },
+            {
+              "name": "empty-state",
+              "family": "feedback"
+            },
+            {
+              "name": "field",
+              "family": "forms"
+            },
+            {
+              "name": "field-error",
+              "family": "forms"
+            },
+            {
+              "name": "fieldset",
+              "family": "forms"
+            },
+            {
+              "name": "form",
+              "family": "forms"
+            },
+            {
+              "name": "grid",
+              "family": "layout"
+            },
+            {
+              "name": "icon",
+              "family": "foundations"
+            },
+            {
+              "name": "inline",
+              "family": "layout"
+            },
+            {
+              "name": "item",
+              "family": "data"
+            },
+            {
+              "name": "key-value",
+              "family": "data"
+            },
+            {
+              "name": "list",
+              "family": "data"
+            },
+            {
+              "name": "meter",
+              "family": "feedback"
+            },
+            {
+              "name": "metric",
+              "family": "data"
+            },
+            {
+              "name": "nav-tabs",
+              "family": "navigation"
+            },
+            {
+              "name": "notice",
+              "family": "feedback"
+            },
+            {
+              "name": "page-header",
+              "family": "layout"
+            },
+            {
+              "name": "pagination",
+              "family": "navigation"
+            },
+            {
+              "name": "plan-card",
+              "family": "communication"
+            },
+            {
+              "name": "popover",
+              "family": "overlays",
+              "engine": "alpine",
+              "alpine": "uiMenu",
+              "native_fallback": "details element"
+            },
+            {
+              "name": "radio-group",
+              "family": "forms"
+            },
+            {
+              "name": "search-input",
+              "family": "forms"
+            },
+            {
+              "name": "secret-reveal",
+              "family": "feedback"
+            },
+            {
+              "name": "section-header",
+              "family": "layout"
+            },
+            {
+              "name": "select",
+              "family": "forms"
+            },
+            {
+              "name": "spinner",
+              "family": "foundations"
+            },
+            {
+              "name": "stack",
+              "family": "layout"
+            },
+            {
+              "name": "switch",
+              "family": "forms"
+            },
+            {
+              "name": "table",
+              "family": "data"
+            },
+            {
+              "name": "table-card",
+              "family": "data"
+            },
+            {
+              "name": "table-empty",
+              "family": "data"
+            },
+            {
+              "name": "terminal-page",
+              "family": "navigation"
+            },
+            {
+              "name": "text-input",
+              "family": "forms"
+            },
+            {
+              "name": "textarea",
+              "family": "forms"
+            },
+            {
+              "name": "tooltip",
+              "family": "overlays"
+            }
+          ],
+          "assets": [
+            {
+              "id": "ui-overlays",
+              "path": "static/ui/overlays.js",
+              "kind": "script"
+            }
+          ]
+        },
         "migrations": [],
         "environment": [],
         "docs": [],
@@ -275,50 +497,57 @@
         {
           "path": "internal/web/templates/ui/components_core.templ",
           "source": "internal/web/templates/ui/components_core.templ",
-          "base_sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
-          "local_sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
+          "base_sha256": "502fc4ec9aafab06a10ed8be5509de8d96b24e06707b2befdc4b191d9fefc7be",
+          "local_sha256": "502fc4ec9aafab06a10ed8be5509de8d96b24e06707b2befdc4b191d9fefc7be",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/components_nav.templ",
           "source": "internal/web/templates/ui/components_nav.templ",
-          "base_sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
-          "local_sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
+          "base_sha256": "107a95083313b98783139cf60a0cc831280b16fb157ebee1e6b0afe544c4bcdf",
+          "local_sha256": "107a95083313b98783139cf60a0cc831280b16fb157ebee1e6b0afe544c4bcdf",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/contract_test.go",
           "source": "internal/web/templates/ui/contract_test.go",
-          "base_sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
-          "local_sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
+          "base_sha256": "264256f77d0829463d8dc7785725f5d91c3f0a6c5c8c38fa0fe443d107739479",
+          "local_sha256": "264256f77d0829463d8dc7785725f5d91c3f0a6c5c8c38fa0fe443d107739479",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/data.templ",
           "source": "internal/web/templates/ui/data.templ",
-          "base_sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
-          "local_sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
+          "base_sha256": "619fcd307bba94b900cc4f4533a4d363df7383515d6e41621cec5d4bd927b8ff",
+          "local_sha256": "619fcd307bba94b900cc4f4533a4d363df7383515d6e41621cec5d4bd927b8ff",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/enums.go",
           "source": "internal/web/templates/ui/enums.go",
-          "base_sha256": "a3c75b499f39e58054c2f68c0cad7c25c1a801ea64da81012f84a1e48dafe36e",
-          "local_sha256": "a3c75b499f39e58054c2f68c0cad7c25c1a801ea64da81012f84a1e48dafe36e",
+          "base_sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
+          "local_sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/enums_test.go",
           "source": "internal/web/templates/ui/enums_test.go",
-          "base_sha256": "9e089fb144e24e4d6d3e010c40ae27b98244fd87c19bcf4b3f7c84937748681d",
-          "local_sha256": "9e089fb144e24e4d6d3e010c40ae27b98244fd87c19bcf4b3f7c84937748681d",
+          "base_sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
+          "local_sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/forms.templ",
           "source": "internal/web/templates/ui/forms.templ",
-          "base_sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
-          "local_sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
+          "base_sha256": "f14281dd6e1ed715ad68a875e8fc8a188090ea4f298bb26ded6edbcbd8547fe9",
+          "local_sha256": "f14281dd6e1ed715ad68a875e8fc8a188090ea4f298bb26ded6edbcbd8547fe9",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/gallery.go",
+          "source": "internal/web/templates/ui/gallery.go",
+          "base_sha256": "76adeb1870f63ad9a03fe53a8d57cca6b791d11ab6fee5d565d62e0c10eba709",
+          "local_sha256": "76adeb1870f63ad9a03fe53a8d57cca6b791d11ab6fee5d565d62e0c10eba709",
           "state": "clean"
         },
         {
@@ -331,8 +560,8 @@
         {
           "path": "internal/web/templates/ui/icons.templ",
           "source": "internal/web/templates/ui/icons.templ",
-          "base_sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
-          "local_sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
+          "base_sha256": "29ce49bd2a341abe212ad039a1eaab207c8af3983337be09453db640d4e45bc0",
+          "local_sha256": "29ce49bd2a341abe212ad039a1eaab207c8af3983337be09453db640d4e45bc0",
           "state": "clean"
         },
         {
@@ -345,8 +574,8 @@
         {
           "path": "internal/web/templates/ui/overlays.templ",
           "source": "internal/web/templates/ui/overlays.templ",
-          "base_sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
-          "local_sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
+          "base_sha256": "7c32f8208634611387a94ddd0a8885179e00099ca89f1d0c942ea3d4c26fde18",
+          "local_sha256": "7c32f8208634611387a94ddd0a8885179e00099ca89f1d0c942ea3d4c26fde18",
           "state": "clean"
         },
         {
@@ -359,8 +588,8 @@
         {
           "path": "internal/web/templates/ui/root.go",
           "source": "internal/web/templates/ui/root.go",
-          "base_sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
-          "local_sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+          "base_sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
+          "local_sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
           "state": "clean"
         },
         {
@@ -368,6 +597,13 @@
           "source": "internal/web/templates/ui/ui.go",
           "base_sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
           "local_sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
+          "state": "clean"
+        },
+        {
+          "path": "static/ui/overlays.js",
+          "source": "static/ui/overlays.js",
+          "base_sha256": "d77fb2b5207201ccc1637723dc55c5d8d7f80bead0b423345f0352a7ef843110",
+          "local_sha256": "d77fb2b5207201ccc1637723dc55c5d8d7f80bead0b423345f0352a7ef843110",
           "state": "clean"
         }
       ],
@@ -377,7 +613,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -527,7 +763,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -713,7 +949,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -834,7 +1070,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1059,7 +1295,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1157,7 +1393,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1236,7 +1472,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1316,7 +1552,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -1516,7 +1752,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -1679,7 +1915,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -1811,7 +2047,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1919,7 +2155,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2062,7 +2298,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -2250,7 +2486,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2386,7 +2622,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2506,7 +2742,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2611,7 +2847,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2746,7 +2982,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2777,7 +3013,7 @@
             "source": "internal/web/templates/gallery.templ",
             "target": "internal/web/templates/gallery.templ",
             "class": "templ",
-            "sha256": "7f919c7fa0238399bf4db149c9b0e486bceb84fd8d50972c2d645bacec45757e",
+            "sha256": "5015a7cfe08c0c2114d18a798ea6bf1a0a0dbb1cf08e4343744614172fab12d0",
             "rewrite_module": true,
             "contract": false
           }
@@ -2831,8 +3067,8 @@
         {
           "path": "internal/web/templates/gallery.templ",
           "source": "internal/web/templates/gallery.templ",
-          "base_sha256": "7f919c7fa0238399bf4db149c9b0e486bceb84fd8d50972c2d645bacec45757e",
-          "local_sha256": "7f919c7fa0238399bf4db149c9b0e486bceb84fd8d50972c2d645bacec45757e",
+          "base_sha256": "5015a7cfe08c0c2114d18a798ea6bf1a0a0dbb1cf08e4343744614172fab12d0",
+          "local_sha256": "5015a7cfe08c0c2114d18a798ea6bf1a0a0dbb1cf08e4343744614172fab12d0",
           "state": "clean"
         }
       ],
@@ -2842,7 +3078,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2943,7 +3179,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -3065,7 +3301,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3144,7 +3380,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -3297,7 +3533,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3515,7 +3751,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -3655,7 +3891,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3768,7 +4004,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3884,7 +4120,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3964,7 +4200,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4043,7 +4279,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4218,7 +4454,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -4389,7 +4625,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -4541,7 +4777,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -4709,7 +4945,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -4856,7 +5092,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4985,7 +5221,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -5177,7 +5413,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5293,7 +5529,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -5450,7 +5686,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -5579,7 +5815,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -6022,7 +6258,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6121,7 +6357,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -6317,7 +6553,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -6767,7 +7003,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6928,7 +7164,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -7427,7 +7663,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -8071,7 +8307,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -8266,7 +8502,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -8518,7 +8754,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -8685,7 +8921,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -9886,7 +10122,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -10040,7 +10276,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -10320,7 +10556,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -10484,7 +10720,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -10687,7 +10923,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10787,7 +11023,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10876,7 +11112,7 @@
             "source": "internal/modkit/generate.go",
             "target": "internal/modkit/generate.go",
             "class": "go",
-            "sha256": "a85e258e78c45234837cc5efd660dee1959845489983eeba5175fd647c0e3a31",
+            "sha256": "a4b72582300788f80887151bef697170f3ba6893a599bac87b1f14b59adb1c4f",
             "rewrite_module": true,
             "contract": false
           },
@@ -10884,7 +11120,7 @@
             "source": "internal/modkit/generate_test.go",
             "target": "internal/modkit/generate_test.go",
             "class": "test",
-            "sha256": "69c46d46aca926c338e922d8c384c15b15bcaa6fa29da95049c95dba3553e51e",
+            "sha256": "5afcfb633f3d0997553bff9e3c9272a165d32e51d1aedcebb89f3607a5b3fcec",
             "rewrite_module": true,
             "contract": false
           },
@@ -10948,7 +11184,7 @@
             "source": "internal/modkit/model_regression_test.go",
             "target": "internal/modkit/model_regression_test.go",
             "class": "test",
-            "sha256": "c725e2ace1c372edf5124f3566c830f43d74b1c4535fadd50c57f4739a35d4f5",
+            "sha256": "f36bdf3c94ae8231254f84115777b15eefd57571301426edf1ac5b066ead95fd",
             "rewrite_module": true,
             "contract": false
           },
@@ -11116,7 +11352,7 @@
             "source": "internal/modkit/validate.go",
             "target": "internal/modkit/validate.go",
             "class": "go",
-            "sha256": "72b73a780b6a14bc1c9903e545f26c34b38c42159d7d49f7cb24f66d3ef9a08b",
+            "sha256": "047cbeb9e95f9c55dac183ba115edaebe520a469864345023993b0e3490ec193",
             "rewrite_module": true,
             "contract": false
           }
@@ -11207,15 +11443,15 @@
         {
           "path": "internal/modkit/generate.go",
           "source": "internal/modkit/generate.go",
-          "base_sha256": "a85e258e78c45234837cc5efd660dee1959845489983eeba5175fd647c0e3a31",
-          "local_sha256": "a85e258e78c45234837cc5efd660dee1959845489983eeba5175fd647c0e3a31",
+          "base_sha256": "a4b72582300788f80887151bef697170f3ba6893a599bac87b1f14b59adb1c4f",
+          "local_sha256": "a4b72582300788f80887151bef697170f3ba6893a599bac87b1f14b59adb1c4f",
           "state": "clean"
         },
         {
           "path": "internal/modkit/generate_test.go",
           "source": "internal/modkit/generate_test.go",
-          "base_sha256": "69c46d46aca926c338e922d8c384c15b15bcaa6fa29da95049c95dba3553e51e",
-          "local_sha256": "69c46d46aca926c338e922d8c384c15b15bcaa6fa29da95049c95dba3553e51e",
+          "base_sha256": "5afcfb633f3d0997553bff9e3c9272a165d32e51d1aedcebb89f3607a5b3fcec",
+          "local_sha256": "5afcfb633f3d0997553bff9e3c9272a165d32e51d1aedcebb89f3607a5b3fcec",
           "state": "clean"
         },
         {
@@ -11270,8 +11506,8 @@
         {
           "path": "internal/modkit/model_regression_test.go",
           "source": "internal/modkit/model_regression_test.go",
-          "base_sha256": "c725e2ace1c372edf5124f3566c830f43d74b1c4535fadd50c57f4739a35d4f5",
-          "local_sha256": "c725e2ace1c372edf5124f3566c830f43d74b1c4535fadd50c57f4739a35d4f5",
+          "base_sha256": "f36bdf3c94ae8231254f84115777b15eefd57571301426edf1ac5b066ead95fd",
+          "local_sha256": "f36bdf3c94ae8231254f84115777b15eefd57571301426edf1ac5b066ead95fd",
           "state": "clean"
         },
         {
@@ -11417,8 +11653,8 @@
         {
           "path": "internal/modkit/validate.go",
           "source": "internal/modkit/validate.go",
-          "base_sha256": "72b73a780b6a14bc1c9903e545f26c34b38c42159d7d49f7cb24f66d3ef9a08b",
-          "local_sha256": "72b73a780b6a14bc1c9903e545f26c34b38c42159d7d49f7cb24f66d3ef9a08b",
+          "base_sha256": "047cbeb9e95f9c55dac183ba115edaebe520a469864345023993b0e3490ec193",
+          "local_sha256": "047cbeb9e95f9c55dac183ba115edaebe520a469864345023993b0e3490ec193",
           "state": "clean"
         }
       ],
@@ -11428,7 +11664,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -11725,7 +11961,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -11905,7 +12141,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -12222,7 +12458,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -12358,7 +12594,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -12518,7 +12754,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -12659,7 +12895,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12711,7 +12947,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -12765,7 +13001,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -13017,7 +13253,7 @@
             "source": "internal/web/templates/designsystem_test.go",
             "target": "internal/web/templates/designsystem_test.go",
             "class": "test",
-            "sha256": "fae1d8b517d4dcfbfcdb083a165169863f11834859c7382d5f47049487542b73",
+            "sha256": "56b75984ac893088fb76d6b45cad14f34518b5926a951591a10eb98b469fe9f5",
             "rewrite_module": true,
             "contract": false
           },
@@ -13041,7 +13277,7 @@
             "source": "internal/web/templates/layouts.templ",
             "target": "internal/web/templates/layouts.templ",
             "class": "templ",
-            "sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
+            "sha256": "3d18644b3eaf41da7b3a264b12d4027d3d5697cfb58b440d3d4153983ba0f5df",
             "rewrite_module": true,
             "contract": false
           },
@@ -13646,8 +13882,8 @@
         {
           "path": "internal/web/templates/designsystem_test.go",
           "source": "internal/web/templates/designsystem_test.go",
-          "base_sha256": "fae1d8b517d4dcfbfcdb083a165169863f11834859c7382d5f47049487542b73",
-          "local_sha256": "fae1d8b517d4dcfbfcdb083a165169863f11834859c7382d5f47049487542b73",
+          "base_sha256": "56b75984ac893088fb76d6b45cad14f34518b5926a951591a10eb98b469fe9f5",
+          "local_sha256": "56b75984ac893088fb76d6b45cad14f34518b5926a951591a10eb98b469fe9f5",
           "state": "clean"
         },
         {
@@ -13667,8 +13903,8 @@
         {
           "path": "internal/web/templates/layouts.templ",
           "source": "internal/web/templates/layouts.templ",
-          "base_sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
-          "local_sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
+          "base_sha256": "3d18644b3eaf41da7b3a264b12d4027d3d5697cfb58b440d3d4153983ba0f5df",
+          "local_sha256": "3d18644b3eaf41da7b3a264b12d4027d3d5697cfb58b440d3d4153983ba0f5df",
           "state": "clean"
         },
         {
@@ -13734,7 +13970,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13753,7 +13989,7 @@
             "source": "input.css",
             "target": "input.css",
             "class": "style",
-            "sha256": "24a6a19229535aca7668463dbc521f9ec13ea81bb942631d234e87e2eb27890d",
+            "sha256": "e7a61a5a9b6c4c03de2d64e8adb8e6f9ed11a1e0ebca7ccdafe5c433e7c0eb0b",
             "rewrite_module": false,
             "contract": false
           },
@@ -13833,7 +14069,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "be048dc09576ca7dec1a182840a824a8e247c1c20c579de7a9c973abd04580a9",
+            "sha256": "09506da28553fb706451ee534014e96b6b330a8eee11c777af35a01ab0281846",
             "rewrite_module": false,
             "contract": false
           },
@@ -13917,8 +14153,8 @@
         {
           "path": "input.css",
           "source": "input.css",
-          "base_sha256": "24a6a19229535aca7668463dbc521f9ec13ea81bb942631d234e87e2eb27890d",
-          "local_sha256": "24a6a19229535aca7668463dbc521f9ec13ea81bb942631d234e87e2eb27890d",
+          "base_sha256": "e7a61a5a9b6c4c03de2d64e8adb8e6f9ed11a1e0ebca7ccdafe5c433e7c0eb0b",
+          "local_sha256": "e7a61a5a9b6c4c03de2d64e8adb8e6f9ed11a1e0ebca7ccdafe5c433e7c0eb0b",
           "state": "clean"
         },
         {
@@ -14019,7 +14255,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -14227,7 +14463,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14283,7 +14519,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -14459,7 +14695,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -14728,7 +14964,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14812,7 +15048,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14908,7 +15144,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15042,7 +15278,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -15235,7 +15471,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15407,7 +15643,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15492,7 +15728,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15612,7 +15848,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15748,7 +15984,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15846,7 +16082,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16080,7 +16316,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16416,7 +16652,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16515,7 +16751,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16642,7 +16878,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -16776,7 +17012,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16893,7 +17129,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16972,7 +17208,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -17088,7 +17324,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17273,7 +17509,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17380,7 +17616,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17513,7 +17749,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17648,7 +17884,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17729,7 +17965,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -17870,7 +18106,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -17993,7 +18229,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18169,7 +18405,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18289,7 +18525,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -18539,7 +18775,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "d34f72850d7322ec27699ed245e0c05fe0aaa0b845c7624881ae3671b509cedb",
+      "source_commit": "5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384",
       "reason": "profile",
       "required_by": [],
       "manifest": {

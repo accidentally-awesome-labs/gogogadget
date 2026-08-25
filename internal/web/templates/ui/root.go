@@ -94,13 +94,6 @@ func clampPercent(pct int) int {
 
 // inputType defaults an unset control type to text rather than emitting
 // type="", which browsers treat as text anyway but which reads as a bug.
-func inputType(t string) string {
-	if t == "" {
-		return "text"
-	}
-	return t
-}
-
 // NormalizeKind maps an unset or unrecognised Kind onto neutral. An unknown
 // value renders the neutral component rather than a class-less element: a bare
 // `badge` with no colour reads as a visible bug, which is the point — it is

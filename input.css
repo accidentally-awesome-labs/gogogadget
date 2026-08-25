@@ -5,6 +5,10 @@
 
 @source "internal/web/templates";
 
+/* Every module owns its own CSS fragment; sync regenerates this import list, so
+   installing or removing a module never patches this entry file by hand. */
+@import "./internal/web/styles/modules_registry_gen.css";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {

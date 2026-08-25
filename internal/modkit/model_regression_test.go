@@ -236,9 +236,16 @@ func TestParseLockRejectsInvalidClosedContributions(t *testing.T) {
 		{
 			name: "gallery family",
 			set: func(runtime *RuntimeContributions) {
-				runtime.UI = []UIContribution{{Name: "Guide", Family: GalleryFamily("typo")}}
+				runtime.UI = []UIContribution{{Name: "guide", Family: GalleryFamily("typo")}}
 			},
 			want: "family",
+		},
+		{
+			name: "gallery component name",
+			set: func(runtime *RuntimeContributions) {
+				runtime.UI = []UIContribution{{Name: "Guide", Family: GalleryFeedback}}
+			},
+			want: "name",
 		},
 		{
 			name: "asset kind",
@@ -409,6 +416,22 @@ func TestValidateRoutePathAcceptsSubtreePatterns(t *testing.T) {
 	for _, path := range invalid {
 		if err := validateRoutePath(path); err == nil {
 			t.Errorf("validateRoutePath(%q) = nil, want an error", path)
+		}
+	}
+}
+
+// A UI component name is the value rendered as data-ui on the component root,
+// so the manifest must accept exactly the kebab-case shape the markup uses and
+// reject shapes that could never appear as one attribute value.
+func TestValidateUIAcceptsKebabCaseComponentNames(t *testing.T) {
+	for _, name := range []string{"badge", "alert-dialog", "table-card"} {
+		if err := validateUI([]UIContribution{{Name: name, Family: GalleryFeedback}}, true); err != nil {
+			t.Fatalf("%q is a real rendered data-ui value: %v", name, err)
+		}
+	}
+	for _, bad := range []string{"", "Badge", "alert_dialog", "-badge", "badge-", "alert--dialog", "badge 2"} {
+		if err := validateUI([]UIContribution{{Name: bad, Family: GalleryFeedback}}, true); err == nil {
+			t.Fatalf("%q cannot be a data-ui value but was accepted", bad)
 		}
 	}
 }

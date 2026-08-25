@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/a-h/templ"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -139,4 +140,164 @@ func TestOptionsSamplesCoverEveryRenderer(t *testing.T) {
 		seen[name] = true
 		assert.True(t, strings.HasSuffix(name, "Opts"), "%s is not an options struct", name)
 	}
+}
+
+// A modal must always be dismissible without JavaScript. Both alert-dialog
+// buttons submit the enclosing form method="dialog", which is what closes the
+// dialog and records the choice - they were once type="button" with no handler
+// at all, trapping the user inside a destructive confirmation.
+func TestAlertDialogIsDismissibleWithoutJavaScript(t *testing.T) {
+	html := renderComponent(t, AlertDialog(AlertDialogOpts{
+		ID: "confirm-delete", Title: "Delete project?", Message: "This cannot be undone.",
+		ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: KindDanger,
+	}))
+
+	require.Contains(t, html, `<form method="dialog"`,
+		"without a dialog-method form neither button can close the modal")
+	assert.Equal(t, 2, strings.Count(html, `type="submit"`),
+		"both choices must submit the form: a type=button with no handler is inert")
+	assert.Contains(t, html, `value="cancel"`)
+	assert.Contains(t, html, `value="confirm"`)
+	assert.NotContains(t, html, `type="button"`,
+		"a button that closes a modal must not depend on a script being loaded")
+
+	// The consequence, not just the title, has to be announced.
+	assert.Contains(t, html, `role="alertdialog"`)
+	assert.Contains(t, html, `aria-labelledby="confirm-delete-title"`)
+	assert.Contains(t, html, `aria-describedby="confirm-delete-message"`)
+	assert.Contains(t, html, `id="confirm-delete-message"`)
+}
+
+// An unset kind must still produce a real colour class: "text--text" matches no
+// rule and renders an uncoloured heading in a destructive confirmation.
+func TestAlertDialogNormalizesItsKind(t *testing.T) {
+	html := renderComponent(t, AlertDialog(AlertDialogOpts{ID: "d", Title: "T", Message: "M"}))
+	assert.NotContains(t, html, "text--text")
+	assert.Contains(t, html, "text-neutral-text")
+}
+
+// A declared TestID must reach the DOM. Every renderer accepts Attrs, so a
+// renderer that ignores them looks configurable while silently dropping the
+// caller's class, test id and ARIA overrides - which is how Tooltip shipped
+// with an Attrs field nothing read. Reflection covers every renderer, so a new
+// one cannot regress this quietly.
+func TestEveryRendererPropagatesItsAttrs(t *testing.T) {
+	table := renderers()
+	// The AST scan is the authority: a renderer missing from the table below
+	// would otherwise be silently exempt from this contract.
+	for _, name := range exportedRendererNames(t) {
+		require.Contains(t, table, name,
+			"renderer %s is not in the renderers() table, so nothing checks it", name)
+	}
+
+	for name, raw := range table {
+		fn := reflect.ValueOf(raw)
+		t.Run(name, func(t *testing.T) {
+			fnType := fn.Type()
+			require.Equal(t, 1, fnType.NumIn(), "renderer must take exactly one options struct")
+			opts := reflect.New(fnType.In(0)).Elem()
+			// Some renderers correctly render nothing for a zero value: a
+			// single-page pager and an unnamed icon are both "no output" by
+			// design, so they need the minimum input that makes them render.
+			if seed, ok := rendererSeeds()[name]; ok {
+				opts.Set(reflect.ValueOf(seed))
+			}
+			attrs := opts.FieldByName("Attrs")
+			require.True(t, attrs.IsValid(), "options must embed Attrs")
+			attrs.FieldByName("TestID").SetString("probe-id")
+			attrs.FieldByName("Class").SetString("probe-class")
+
+			out := fn.Call([]reflect.Value{opts})
+			component, ok := out[0].Interface().(templ.Component)
+			require.True(t, ok, "renderer must return a templ.Component")
+
+			html := renderComponent(t, component)
+			assert.Contains(t, html, `data-testid="probe-id"`,
+				"%s ignores Attrs.TestID, so no test can target it", name)
+			assert.Contains(t, html, "probe-class",
+				"%s ignores Attrs.Class, so callers cannot extend it", name)
+		})
+	}
+}
+
+// rendererSeeds supplies the minimum options for renderers whose zero value
+// legitimately produces no output.
+func rendererSeeds() map[string]any {
+	return map[string]any{
+		"Pagination": PaginationOpts{Page: 1, TotalPages: 3, BaseURL: "/x", Target: "#t"},
+		"Icon":       IconOpts{Name: IconLogo},
+	}
+}
+
+// renderers maps every exported renderer to its function value so reflection
+// can exercise all of them. TestEveryRendererPropagatesItsAttrs checks this
+// table against the AST scan, so it cannot fall behind the package.
+func renderers() map[string]any {
+	return map[string]any{
+		"AlertDialog": AlertDialog, "Badge": Badge, "Banner": Banner, "Card": Card,
+		"CardFooter": CardFooter, "CardHeader": CardHeader, "Checkbox": Checkbox, "Container": Container,
+		"DescriptionList": DescriptionList, "Dialog": Dialog, "Divider": Divider, "DropdownMenu": DropdownMenu,
+		"EmptyState": EmptyState, "Field": Field, "FieldError": FieldError, "Fieldset": Fieldset,
+		"Form": Form, "Grid": Grid, "Icon": Icon, "Inline": Inline,
+		"Item": Item, "KeyValue": KeyValue, "List": List, "Meter": Meter,
+		"Metric": Metric, "NavTabs": NavTabs, "Notice": Notice, "PageHeader": PageHeader,
+		"Pagination": Pagination, "PlanCard": PlanCard, "Popover": Popover, "RadioGroup": RadioGroup,
+		"SearchInput": SearchInput, "SecretReveal": SecretReveal, "SectionHeader": SectionHeader, "Select": Select,
+		"Spinner": Spinner, "Stack": Stack, "Switch": Switch, "Table": Table,
+		"TableCard": TableCard, "TableEmpty": TableEmpty, "TerminalPage": TerminalPage, "TextInput": TextInput,
+		"Textarea": Textarea, "Tooltip": Tooltip,
+	}
+}
+
+// exportedRendererNames returns every exported function in the generated templ
+// output that returns a templ.Component.
+func exportedRendererNames(t *testing.T) []string {
+	t.Helper()
+	fset := token.NewFileSet()
+	files, err := filepath.Glob("*_templ.go")
+	require.NoError(t, err)
+	var out []string
+	for _, path := range files {
+		parsed, parseErr := parser.ParseFile(fset, path, nil, 0)
+		require.NoError(t, parseErr)
+		for _, decl := range parsed.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Recv != nil || !fn.Name.IsExported() || !returnsTemplComponent(fn) {
+				continue
+			}
+			out = append(out, fn.Name.Name)
+		}
+	}
+	require.NotEmpty(t, out)
+	return out
+}
+
+// PagerLabels holds functions, so an omitted label used to nil-dereference and
+// take down the whole page render. A missing translation must degrade to a
+// readable fallback instead: an English arrow is a translation bug, a panic is
+// an outage.
+func TestPaginationSurvivesMissingLabels(t *testing.T) {
+	html := renderComponent(t, Pagination(PaginationOpts{
+		Page: 2, TotalPages: 5, BaseURL: "/app/projects", Target: "#table",
+	}))
+
+	assert.Contains(t, html, `aria-label="Pagination"`,
+		"the landmark still needs a name when no localized one is supplied")
+	assert.Contains(t, html, "Previous")
+	assert.Contains(t, html, "Next")
+	assert.Contains(t, html, "2 / 5")
+
+	// A supplied label must still win over every fallback.
+	localized := renderComponent(t, Pagination(PaginationOpts{
+		Page: 2, TotalPages: 5, BaseURL: "/app/projects", Target: "#table",
+		Labels: PagerLabels{
+			Aria:   func(int, int) string { return "Paginación" },
+			Prev:   func(int, int) string { return "Anterior" },
+			Next:   func(int, int) string { return "Siguiente" },
+			PageOf: func(p, n int) string { return "Página 2 de 5" },
+		},
+	}))
+	assert.Contains(t, localized, `aria-label="Paginación"`)
+	assert.Contains(t, localized, "Anterior")
+	assert.NotContains(t, localized, "Previous")
 }

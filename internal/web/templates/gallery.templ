@@ -352,6 +352,119 @@ templ Gallery() {
 				@ui.TerminalPage(ui.TerminalPageOpts{Code: "404", Message: "That page doesn't exist.", BackHomeLabel: i18n.T(ctx, "errors.back_home")})
 			</div>
 		}
+
+		@gallerySection("Layout — card") {
+			@ui.Card(ui.CardOpts{}) {
+				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {
+					@ui.Badge(ui.BadgeOpts{Text: "new", Kind: ui.KindInfo})
+				}
+				<p class="text-sm text-fg-muted">Cards carry a surface, a border and the standard padding.</p>
+				@ui.CardFooter(ui.CardFooterOpts{}) {
+					<button type="button" class="btn btn-primary btn-sm">Save</button>
+					<button type="button" class="btn btn-ghost btn-sm">Cancel</button>
+				}
+			}
+		}
+
+		@gallerySection("Layout — structure") {
+			<div class="space-y-6">
+				@ui.Container(ui.ContainerOpts{Width: ui.WidthNarrow}) {
+					<p class="text-sm text-fg-muted">Container constrains a measure.</p>
+				}
+				@ui.Stack(ui.StackOpts{Gap: ui.GapMD}) {
+					<div class="card text-sm">Stack row one</div>
+					<div class="card text-sm">Stack row two</div>
+				}
+				@ui.Inline(ui.InlineOpts{Gap: ui.GapSM}) {
+					@ui.Badge(ui.BadgeOpts{Text: "inline", Kind: ui.KindNeutral})
+					@ui.Badge(ui.BadgeOpts{Text: "items", Kind: ui.KindNeutral})
+				}
+				@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD}) {
+					<div class="card text-sm">Grid 1</div>
+					<div class="card text-sm">Grid 2</div>
+					<div class="card text-sm">Grid 3</div>
+				}
+				@ui.SectionHeader(ui.SectionHeaderOpts{Text: "Section header", Attrs: ui.Attrs{Class: "pt-2"}})
+				@ui.Divider(ui.DividerOpts{})
+			</div>
+		}
+
+		@gallerySection("Data — table") {
+			@ui.Table(ui.TableOpts{Caption: "Recent projects", Density: ui.DensityCompact}) {
+				<thead>
+					<tr><th scope="col">Name</th><th scope="col">Status</th></tr>
+				</thead>
+				<tbody>
+					<tr><td>Apollo</td><td>@ui.Badge(ui.BadgeOpts{Text: "active", Kind: ui.KindSuccess})</td></tr>
+					<tr><td>Borealis</td><td>@ui.Badge(ui.BadgeOpts{Text: "paused", Kind: ui.KindWarn})</td></tr>
+				</tbody>
+			}
+		}
+
+		@gallerySection("Data — lists") {
+			<div class="space-y-6">
+				@ui.List(ui.ListOpts{}) {
+					@ui.Item(ui.ItemOpts{}) {
+						<span class="text-sm">First list item</span>
+					}
+					@ui.Item(ui.ItemOpts{}) {
+						<span class="text-sm">Second list item</span>
+					}
+				}
+				@ui.KeyValue(ui.KeyValueOpts{Key: "Plan", Value: "Pro"})
+				@ui.KeyValue(ui.KeyValueOpts{Key: "Seats", Value: "12"})
+			</div>
+		}
+
+		@gallerySection("Forms — grouped controls") {
+			@ui.Form(ui.FormOpts{Method: "post", Action: "/dev/gallery"}) {
+				@ui.Fieldset(ui.FieldsetOpts{Legend: "Notification channels"}) {
+					@ui.Checkbox(ui.CheckboxOpts{Name: "email", Label: "Email", Checked: true})
+					@ui.Switch(ui.SwitchOpts{Name: "digest", Label: "Weekly digest", On: true})
+					@ui.RadioGroup(ui.RadioGroupOpts{Name: "frequency", Options: []ui.Option{
+						{Value: "daily", Label: "Daily", Selected: true},
+						{Value: "weekly", Label: "Weekly"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "role", Label: "Role"}) {
+					@ui.Select(ui.SelectOpts{Name: "role", Options: []ui.Option{
+						{Value: "member", Label: "Member", Selected: true},
+						{Value: "admin", Label: "Admin"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "notes", Label: "Notes"}) {
+					@ui.Textarea(ui.TextareaOpts{Name: "notes", Rows: 3, Placeholder: "Anything else?"})
+				}
+			}
+		}
+
+		@gallerySection("Overlays") {
+			<div class="flex flex-wrap items-center gap-4">
+				@ui.DropdownMenu(ui.DropdownMenuOpts{Label: "Actions", Items: []ui.MenuItem{
+					{Label: "Rename", Href: "/dev/gallery"},
+					{Label: "Duplicate", Href: "/dev/gallery"},
+					{Label: "Delete", Href: "/dev/gallery", Kind: ui.KindDanger, Disabled: true},
+				}})
+				@ui.Popover(ui.PopoverOpts{Label: "Details"}) {
+					<p class="text-sm text-fg-muted">Popovers hold richer content than a tooltip.</p>
+				}
+				@ui.Tooltip(ui.TooltipOpts{Text: "Copied to clipboard"}) {
+					<button type="button" class="btn btn-ghost btn-sm">Hover me</button>
+				}
+				<button type="button" class="btn btn-primary btn-sm" x-data="uiDialog" x-on:click="open('gallery-dialog')">Open dialog</button>
+				<button type="button" class="btn btn-danger btn-sm" x-data="uiDialog" x-on:click="open('gallery-alert')">Confirm delete</button>
+			</div>
+			@ui.Dialog(ui.DialogOpts{ID: "gallery-dialog", Title: "Invite a teammate"}) {
+				@ui.Field(ui.FieldOpts{Name: "invite", Label: "Email"}) {
+					@ui.TextInput(ui.TextInputOpts{Name: "invite", Type: ui.InputTypeEmail})
+				}
+			}
+			@ui.AlertDialog(ui.AlertDialogOpts{
+				ID: "gallery-alert", Title: "Delete project?",
+				Message:      "This removes the project and its files. It cannot be undone.",
+				ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+			})
+		}
 	</section>
 }
 

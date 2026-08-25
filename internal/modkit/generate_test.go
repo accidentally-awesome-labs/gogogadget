@@ -1813,3 +1813,97 @@ func TestPersonasRegistryRejectsDuplicateIDs(t *testing.T) {
 		t.Fatal("GenerateAll accepted a duplicate persona id")
 	}
 }
+
+// The UI metadata registry is what lets gallery coverage compare rendered
+// output against installed modules rather than a hand-kept list. A component
+// declared by a module must appear with its owning module and family, so an
+// uninstalled module's components vanish from the reference automatically.
+func TestUIComponentRegistryEmitsOwnedComponents(t *testing.T) {
+	mods := []Manifest{{
+		ID: "element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
+		Runtime: RuntimeContributions{UI: []UIContribution{
+			{Name: "badge", Family: GalleryFeedback},
+			{Name: "dialog", Family: GalleryOverlays, Engine: "alpine", Alpine: "uiDialog"},
+		}},
+	}}
+	lock := Lock{Order: []string{"element/ui-core"}, Modules: []LockedModule{{ID: "element/ui-core"}}}
+	f, err := emitUIComponentRegistry(context.Background(), "example.com/app", lock, mods)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	for _, want := range []string{
+		`Name: "badge"`, `Family: "feedback"`, `Module: "element/ui-core"`,
+		`Alpine: "uiDialog"`, `Engine: "alpine"`,
+	} {
+		if !strings.Contains(f.Content, want) {
+			t.Fatalf("ui registry missing %s:\n%s", want, f.Content)
+		}
+	}
+}
+
+// Two modules must never claim the same component name: the gallery reference
+// would show one entry whose ownership depends on iteration order, and removing
+// either module would leave a live reference to a component nobody installs.
+func TestUIComponentRegistryRejectsDuplicateComponent(t *testing.T) {
+	mods := []Manifest{
+		{ID: "element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
+			Runtime: RuntimeContributions{UI: []UIContribution{{Name: "badge", Family: GalleryFeedback}}}},
+		{ID: "component/badge-two", Kind: ModuleComponent, Name: "badge-two", Revision: 1, Contract: 1,
+			Runtime: RuntimeContributions{UI: []UIContribution{{Name: "badge", Family: GalleryFeedback}}}},
+	}
+	lock := Lock{Order: []string{"element/ui-core", "component/badge-two"},
+		Modules: []LockedModule{{ID: "element/ui-core"}, {ID: "component/badge-two"}}}
+	if _, err := emitUIComponentRegistry(context.Background(), "example.com/app", lock, mods); err == nil {
+		t.Fatal("two modules declaring the same component must be rejected")
+	} else if !strings.Contains(err.Error(), "badge") {
+		t.Fatalf("error must name the contested component: %v", err)
+	}
+}
+
+// The shell cannot hard-code module script paths: modules are installed and
+// removed. The generated fragment list is what lets the shell load exactly the
+// Alpine sources the selected modules ship, in lock order, before Alpine boots.
+func TestAlpineFragmentRegistryListsOwnedScripts(t *testing.T) {
+	mods := []Manifest{{
+		ID: "element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
+		Files: []ManifestFile{
+			{Source: "static/ui/overlays.js", Target: "static/ui/overlays.js", Class: FileClassAsset},
+		},
+		Runtime: RuntimeContributions{
+			UI: []UIContribution{{Name: "dialog", Family: GalleryOverlays, Engine: "alpine", Alpine: "uiDialog"}},
+			Assets: []AssetContribution{
+				{ID: "ui-overlays", Path: "static/ui/overlays.js", Kind: AssetScript},
+				{ID: "ui-sprite", Path: "static/ui/sprite.svg", Kind: AssetImage},
+			},
+		},
+	}}
+	lock := Lock{Order: []string{"element/ui-core"}, Modules: []LockedModule{{ID: "element/ui-core"}}}
+	f, err := emitAlpineFragments(context.Background(), "example.com/app", lock, mods)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	if !strings.Contains(f.Content, `"/static/ui/overlays.js"`) {
+		t.Fatalf("fragment list missing the owned script:\n%s", f.Content)
+	}
+	if strings.Contains(f.Content, "sprite.svg") {
+		t.Fatal("only script assets are Alpine fragments")
+	}
+}
+
+// A module that ships no Alpine fragment must contribute nothing: an empty
+// script tag is a wasted request, and a path to a file no module installs is a
+// 404 in every deployment.
+func TestAlpineFragmentRegistryOmitsModulesWithoutScripts(t *testing.T) {
+	mods := []Manifest{{
+		ID: "system/audit", Kind: ModuleSystem, Name: "audit", Revision: 1, Contract: 1,
+		Files: []ManifestFile{{Source: "internal/audit/audit.go", Target: "internal/audit/audit.go", Class: FileClassGo}},
+	}}
+	lock := Lock{Order: []string{"system/audit"}, Modules: []LockedModule{{ID: "system/audit"}}}
+	f, err := emitAlpineFragments(context.Background(), "example.com/app", lock, mods)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	if strings.Contains(f.Content, "/static/") {
+		t.Fatalf("module ships no fragment but a path was emitted:\n%s", f.Content)
+	}
+}

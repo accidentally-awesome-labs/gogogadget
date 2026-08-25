@@ -19,6 +19,11 @@ import templruntime "github.com/a-h/templ/runtime"
 type IconOpts struct {
 	Name  IconName
 	Attrs Attrs
+	// component overrides the data-ui marker for an in-package renderer that is
+	// an icon in one specific role — Spinner is an icon, but it is its own
+	// catalog entry and coverage has to be able to see it. Unexported so no
+	// caller outside this package can rename a component.
+	component string
 }
 
 func Icon(o IconOpts) templ.Component {
@@ -56,9 +61,32 @@ func Icon(o IconOpts) templ.Component {
 func iconRootAttrs(o IconOpts) templ.Attributes {
 	out := attributes(o.Attrs)
 	delete(out, "class")
-	out["data-ui"] = "icon"
+	out["data-ui"] = iconComponent(o.component)
 	out["aria-hidden"] = "true"
 	return out
+}
+
+// Valid reports whether this name is in the icon registry.
+//
+// IconName deliberately has no Value() normalizer, unlike every style enum in
+// this package. A style modifier that falls back to a default renders something
+// slightly wrong; an icon that falls back to a default renders a *different
+// icon*, which silently mislabels an action. A misspelled icon name renders
+// nothing, so the mistake is visible where it was made.
+func (n IconName) Valid() bool {
+	for _, known := range IconNames {
+		if n == known {
+			return true
+		}
+	}
+	return false
+}
+
+func iconComponent(name string) string {
+	if name == "" {
+		return "icon"
+	}
+	return name
 }
 
 func iconSwitch(name IconName, class string, extra templ.Attributes) templ.Component {
@@ -225,7 +253,7 @@ func svgFill(class, d string, extra templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 143, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 171, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -293,7 +321,7 @@ func svgStroke(class, d string, extra templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 149, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 177, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -372,7 +400,7 @@ func svgMulti(class string, paths []string, withCircle bool, extra templ.Attribu
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 159, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icons.templ`, Line: 187, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {

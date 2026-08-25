@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/components_core.templ",
         "target": "internal/web/templates/ui/components_core.templ",
         "class": "templ",
-        "sha256": "c52fc76705f24efdc0f6e792e93b72628f62e0280ebd1a4910c05344d448a152",
+        "sha256": "502fc4ec9aafab06a10ed8be5509de8d96b24e06707b2befdc4b191d9fefc7be",
         "rewrite_module": true,
         "contract": false
       },
@@ -38,7 +38,7 @@
         "source": "internal/web/templates/ui/components_nav.templ",
         "target": "internal/web/templates/ui/components_nav.templ",
         "class": "templ",
-        "sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
+        "sha256": "107a95083313b98783139cf60a0cc831280b16fb157ebee1e6b0afe544c4bcdf",
         "rewrite_module": true,
         "contract": false
       },
@@ -46,7 +46,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
+        "sha256": "264256f77d0829463d8dc7785725f5d91c3f0a6c5c8c38fa0fe443d107739479",
         "rewrite_module": true,
         "contract": false
       },
@@ -54,7 +54,7 @@
         "source": "internal/web/templates/ui/data.templ",
         "target": "internal/web/templates/ui/data.templ",
         "class": "templ",
-        "sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
+        "sha256": "619fcd307bba94b900cc4f4533a4d363df7383515d6e41621cec5d4bd927b8ff",
         "rewrite_module": true,
         "contract": false
       },
@@ -62,7 +62,7 @@
         "source": "internal/web/templates/ui/enums.go",
         "target": "internal/web/templates/ui/enums.go",
         "class": "go",
-        "sha256": "a3c75b499f39e58054c2f68c0cad7c25c1a801ea64da81012f84a1e48dafe36e",
+        "sha256": "c16e8f64f64b4574b09b9eafdd48cb624aa05aa8e3f469787d4ede7ceb654467",
         "rewrite_module": true,
         "contract": true
       },
@@ -70,7 +70,7 @@
         "source": "internal/web/templates/ui/enums_test.go",
         "target": "internal/web/templates/ui/enums_test.go",
         "class": "test",
-        "sha256": "9e089fb144e24e4d6d3e010c40ae27b98244fd87c19bcf4b3f7c84937748681d",
+        "sha256": "c1b2a54d07fd71ba12936aaa2e0ac5c2400b65598cabf892828296fd28f70e16",
         "rewrite_module": true,
         "contract": false
       },
@@ -78,8 +78,16 @@
         "source": "internal/web/templates/ui/forms.templ",
         "target": "internal/web/templates/ui/forms.templ",
         "class": "templ",
-        "sha256": "c9911b361d6bfbe7e6c23f2c4a8790341a404aa8893ab21b75c4c61cf24cfed2",
+        "sha256": "f14281dd6e1ed715ad68a875e8fc8a188090ea4f298bb26ded6edbcbd8547fe9",
         "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/gallery.go",
+        "target": "internal/web/templates/ui/gallery.go",
+        "class": "go",
+        "sha256": "76adeb1870f63ad9a03fe53a8d57cca6b791d11ab6fee5d565d62e0c10eba709",
+        "rewrite_module": false,
         "contract": false
       },
       {
@@ -94,7 +102,7 @@
         "source": "internal/web/templates/ui/icons.templ",
         "target": "internal/web/templates/ui/icons.templ",
         "class": "templ",
-        "sha256": "d76cdc85b3d31b1af95a6c2d63e44b0e40e30d3a3e9b5a7e39cdf9288084e01f",
+        "sha256": "29ce49bd2a341abe212ad039a1eaab207c8af3983337be09453db640d4e45bc0",
         "rewrite_module": true,
         "contract": false
       },
@@ -110,7 +118,7 @@
         "source": "internal/web/templates/ui/overlays.templ",
         "target": "internal/web/templates/ui/overlays.templ",
         "class": "templ",
-        "sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
+        "sha256": "7c32f8208634611387a94ddd0a8885179e00099ca89f1d0c942ea3d4c26fde18",
         "rewrite_module": true,
         "contract": false
       },
@@ -126,7 +134,7 @@
         "source": "internal/web/templates/ui/root.go",
         "target": "internal/web/templates/ui/root.go",
         "class": "go",
-        "sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+        "sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
         "rewrite_module": true,
         "contract": true
       },
@@ -137,10 +145,224 @@
         "sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "static/ui/overlays.js",
+        "target": "static/ui/overlays.js",
+        "class": "asset",
+        "sha256": "d77fb2b5207201ccc1637723dc55c5d8d7f80bead0b423345f0352a7ef843110",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
     "claims": {},
-    "runtime": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "alert-dialog",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiDialog",
+          "native_fallback": "dialog element"
+        },
+        {
+          "name": "badge",
+          "family": "feedback"
+        },
+        {
+          "name": "banner",
+          "family": "feedback"
+        },
+        {
+          "name": "card",
+          "family": "layout"
+        },
+        {
+          "name": "card-footer",
+          "family": "layout"
+        },
+        {
+          "name": "card-header",
+          "family": "layout"
+        },
+        {
+          "name": "checkbox",
+          "family": "forms"
+        },
+        {
+          "name": "container",
+          "family": "layout"
+        },
+        {
+          "name": "description-list",
+          "family": "data"
+        },
+        {
+          "name": "dialog",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiDialog",
+          "native_fallback": "dialog element"
+        },
+        {
+          "name": "divider",
+          "family": "foundations"
+        },
+        {
+          "name": "dropdown-menu",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiMenu",
+          "native_fallback": "details element"
+        },
+        {
+          "name": "empty-state",
+          "family": "feedback"
+        },
+        {
+          "name": "field",
+          "family": "forms"
+        },
+        {
+          "name": "field-error",
+          "family": "forms"
+        },
+        {
+          "name": "fieldset",
+          "family": "forms"
+        },
+        {
+          "name": "form",
+          "family": "forms"
+        },
+        {
+          "name": "grid",
+          "family": "layout"
+        },
+        {
+          "name": "icon",
+          "family": "foundations"
+        },
+        {
+          "name": "inline",
+          "family": "layout"
+        },
+        {
+          "name": "item",
+          "family": "data"
+        },
+        {
+          "name": "key-value",
+          "family": "data"
+        },
+        {
+          "name": "list",
+          "family": "data"
+        },
+        {
+          "name": "meter",
+          "family": "feedback"
+        },
+        {
+          "name": "metric",
+          "family": "data"
+        },
+        {
+          "name": "nav-tabs",
+          "family": "navigation"
+        },
+        {
+          "name": "notice",
+          "family": "feedback"
+        },
+        {
+          "name": "page-header",
+          "family": "layout"
+        },
+        {
+          "name": "pagination",
+          "family": "navigation"
+        },
+        {
+          "name": "plan-card",
+          "family": "communication"
+        },
+        {
+          "name": "popover",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiMenu",
+          "native_fallback": "details element"
+        },
+        {
+          "name": "radio-group",
+          "family": "forms"
+        },
+        {
+          "name": "search-input",
+          "family": "forms"
+        },
+        {
+          "name": "secret-reveal",
+          "family": "feedback"
+        },
+        {
+          "name": "section-header",
+          "family": "layout"
+        },
+        {
+          "name": "select",
+          "family": "forms"
+        },
+        {
+          "name": "spinner",
+          "family": "foundations"
+        },
+        {
+          "name": "stack",
+          "family": "layout"
+        },
+        {
+          "name": "switch",
+          "family": "forms"
+        },
+        {
+          "name": "table",
+          "family": "data"
+        },
+        {
+          "name": "table-card",
+          "family": "data"
+        },
+        {
+          "name": "table-empty",
+          "family": "data"
+        },
+        {
+          "name": "terminal-page",
+          "family": "navigation"
+        },
+        {
+          "name": "text-input",
+          "family": "forms"
+        },
+        {
+          "name": "textarea",
+          "family": "forms"
+        },
+        {
+          "name": "tooltip",
+          "family": "overlays"
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-overlays",
+          "path": "static/ui/overlays.js",
+          "kind": "script"
+        }
+      ]
+    },
     "migrations": [],
     "environment": [],
     "docs": [],

@@ -59,6 +59,14 @@ templ headScripts(page Page) {
 	<script src="/static/app.js"></script>
 	<script defer src="/static/vendor/htmx.min.js"></script>
 	<script defer src="/static/vendor/alpine-focus.min.js"></script>
+	// Module-owned Alpine sources, generated from the installed modules and
+	// loaded before alpine-csp boots. Each fragment registers its components on
+	// alpine:init, so order between fragments does not matter - only that they
+	// all run before Alpine initialises.
+	for _, fragment := range ui.AlpineFragments {
+		<script defer src={ fragment }></script>
+	}
+	<script defer src="/static/ui-components.js"></script>
 	<script defer src="/static/vendor/alpine-csp.min.js"></script>
 	if page.ClerkPublishableKey != "" {
 		// Load-bearing: clerk-js owns the ~60s __session JWT refresh cycle.

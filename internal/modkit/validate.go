@@ -493,7 +493,7 @@ func validateUI(items []UIContribution, canonical bool) error {
 	seen := make(map[string]struct{}, len(items))
 	last := ""
 	for i, item := range items {
-		if !validIdentifier(item.Name) {
+		if !validComponentName(item.Name) {
 			return fmt.Errorf("manifest runtime ui[%d] name is invalid", i)
 		}
 		if !validGalleryFamily(item.Family) {
@@ -1294,6 +1294,31 @@ func validHTTPMethod(value string) bool {
 	default:
 		return false
 	}
+}
+
+// validComponentName accepts the kebab-case slug a component renders as its
+// data-ui value: lowercase words joined by single hyphens. Anything else could
+// not be matched by the attribute selector the gallery and tests rely on.
+func validComponentName(value string) bool {
+	if value == "" || value[0] == '-' || value[len(value)-1] == '-' {
+		return false
+	}
+	prevHyphen := false
+	for i := 0; i < len(value); i++ {
+		c := value[i]
+		switch {
+		case c >= 'a' && c <= 'z', c >= '0' && c <= '9':
+			prevHyphen = false
+		case c == '-':
+			if prevHyphen {
+				return false
+			}
+			prevHyphen = true
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func validIdentifier(value string) bool {

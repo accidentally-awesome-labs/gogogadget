@@ -3,10 +3,9 @@
 // index: fc9f9754664afdf6f649d83a416302d6bea508dc66e52687a8a3802718b58947
 // registry: 5ced8d7628b952de47a91030462dced7aadc4f34a3afd402aced8370dcaff384
 
-package content
+package ui
 
-// ContentRegistry lists selected content types.
-var ContentRegistry = []string{
-	"post",
-	"release",
+// AlpineFragments are the module-owned Alpine sources, in load order.
+var AlpineFragments = []string{
+	"/static/ui/overlays.js",
 }

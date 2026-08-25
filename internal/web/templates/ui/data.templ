@@ -9,7 +9,7 @@ type CardOpts struct {
 
 // Card is the bordered container every panel sits in.
 templ Card(o CardOpts) {
-	<div class={ mergeClasses("card", o.Attrs.Class) } data-testid={ o.Attrs.TestID }>
+	<div { root("card", "card", o.Attrs)... }>
 		{ children... }
 	</div>
 }
@@ -22,7 +22,7 @@ type CardHeaderOpts struct {
 
 // CardHeader renders a title row with optional trailing actions.
 templ CardHeader(o CardHeaderOpts) {
-	<div class="flex items-center justify-between mb-4">
+	<div { root("card-header", "flex items-center justify-between mb-4", o.Attrs)... }>
 		<h3 class="section-title">{ o.Title }</h3>
 		{ children... }
 	</div>
@@ -35,15 +35,18 @@ type CardFooterOpts struct {
 
 // CardFooter renders a trailing action row.
 templ CardFooter(o CardFooterOpts) {
-	<div class={ mergeClasses("flex items-center gap-2 mt-4", o.Attrs.Class) }>
+	<div { root("card-footer", "flex items-center gap-2 mt-4", o.Attrs)... }>
 		{ children... }
 	</div>
 }
 
 // Column is one column in a table.
 type Column struct {
-	Key, Label, Width string
-	Align             string
+	Key, Label string
+	// Width is a CSS length for one column (e.g. "8rem"), not the container
+	// measure enum: a table column is sized in absolute terms.
+	Width             string
+	Align             Align
 	Sortable, Numeric bool
 }
 
@@ -51,13 +54,13 @@ type Column struct {
 type TableOpts struct {
 	Caption       string
 	HiddenCaption bool
-	Density       string
+	Density       Density
 	Attrs         Attrs
 }
 
 // Table renders a semantic table with a caption and responsive overflow.
 templ Table(o TableOpts) {
-	<div class="table-card">
+	<div { root("table", "table-card", o.Attrs)... }>
 		<table class={ tableClasses(o) }>
 			if o.Caption != "" {
 				<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
@@ -69,7 +72,7 @@ templ Table(o TableOpts) {
 
 func tableClasses(o TableOpts) string {
 	cls := "table"
-	if o.Density == "compact" {
+	if o.Density.Value() == DensityCompact {
 		cls += " table-compact"
 	}
 	return mergeClasses(cls, o.Attrs.Class)
@@ -90,7 +93,7 @@ type KeyValueOpts struct {
 
 // KeyValue renders one definition row.
 templ KeyValue(o KeyValueOpts) {
-	<div class={ mergeClasses("flex items-center justify-between py-2", o.Attrs.Class) }>
+	<div { root("key-value", "flex items-center justify-between py-2", o.Attrs)... }>
 		<dt class="text-fg-muted">{ o.Key }</dt>
 		<dd class="font-medium">{ o.Value }</dd>
 	</div>
@@ -103,7 +106,7 @@ type ListOpts struct {
 
 // List renders an unordered list.
 templ List(o ListOpts) {
-	<ul class={ mergeClasses("space-y-2", o.Attrs.Class) } data-testid={ o.Attrs.TestID }>
+	<ul { root("list", "space-y-2", o.Attrs)... }>
 		{ children... }
 	</ul>
 }
@@ -117,37 +120,39 @@ templ Item(o ItemOpts) {
 
 // ContainerOpts configures a layout container.
 type ContainerOpts struct {
-	Width string
+	Width Width
 	Attrs Attrs
 }
 
 // Container renders a width-constrained wrapper.
 templ Container(o ContainerOpts) {
-	<div class={ containerClasses(o) } data-testid={ o.Attrs.TestID }>
+	<div { root("container", containerClasses(o), o.Attrs)... }>
 		{ children... }
 	</div>
 }
 
 func containerClasses(o ContainerOpts) string {
 	cls := "mx-auto px-4"
-	switch o.Width {
-	case "narrow":
+	switch o.Width.Value() {
+	case WidthNarrow:
 		cls += " max-w-narrow"
-	case "page", "":
+	case WidthPage:
 		cls += " max-w-page"
+	case WidthFull:
+		// No max-width: full is the deliberate unconstrained measure.
 	}
 	return mergeClasses(cls, o.Attrs.Class)
 }
 
 // StackOpts configures a vertical stack.
 type StackOpts struct {
-	Gap   string
+	Gap   Gap
 	Attrs Attrs
 }
 
 // Stack renders children in a vertical stack.
 templ Stack(o StackOpts) {
-	<div class={ stackClasses(o) } data-testid={ o.Attrs.TestID }>
+	<div { root("stack", stackClasses(o), o.Attrs)... }>
 		{ children... }
 	</div>
 }
@@ -156,17 +161,17 @@ func stackClasses(o StackOpts) string {
 	return mergeClasses("flex flex-col "+gapClass(o.Gap), o.Attrs.Class)
 }
 
-func gapClass(gap string) string {
-	switch gap {
-	case "xs":
+func gapClass(gap Gap) string {
+	switch gap.Value() {
+	case GapNone:
+		return "gap-0"
+	case GapXS:
 		return "gap-1"
-	case "sm":
+	case GapSM:
 		return "gap-2"
-	case "md", "":
-		return "gap-4"
-	case "lg":
+	case GapLG:
 		return "gap-6"
-	case "xl":
+	case GapXL:
 		return "gap-8"
 	}
 	return "gap-4"
@@ -174,13 +179,13 @@ func gapClass(gap string) string {
 
 // InlineOpts configures a horizontal row.
 type InlineOpts struct {
-	Gap   string
+	Gap   Gap
 	Attrs Attrs
 }
 
 // Inline renders children in a horizontal row.
 templ Inline(o InlineOpts) {
-	<div class={ inlineClasses(o) } data-testid={ o.Attrs.TestID }>
+	<div { root("inline", inlineClasses(o), o.Attrs)... }>
 		{ children... }
 	</div>
 }
@@ -192,12 +197,13 @@ func inlineClasses(o InlineOpts) string {
 // GridOpts configures a grid.
 type GridOpts struct {
 	Cols  int
+	Gap   Gap
 	Attrs Attrs
 }
 
 // Grid renders children in a responsive grid.
 templ Grid(o GridOpts) {
-	<div class={ gridClasses(o) } data-testid={ o.Attrs.TestID }>
+	<div { root("grid", gridClasses(o), o.Attrs)... }>
 		{ children... }
 	</div>
 }
@@ -207,7 +213,7 @@ func gridClasses(o GridOpts) string {
 	if cols <= 0 {
 		cols = 3
 	}
-	return mergeClasses("grid grid-cols-1 gap-4 sm:grid-cols-"+fmt.Sprint(cols), o.Attrs.Class)
+	return mergeClasses("grid grid-cols-1 "+gapClass(o.Gap)+" sm:grid-cols-"+fmt.Sprint(cols), o.Attrs.Class)
 }
 
 // DividerOpts renders a horizontal rule.

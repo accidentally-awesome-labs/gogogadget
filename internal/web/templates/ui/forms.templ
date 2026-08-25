@@ -115,7 +115,7 @@ type TextInputOpts struct {
 	Name        string
 	Value       string
 	Placeholder string
-	Type        string
+	Type        InputType
 	Required    bool
 	Error       string
 	Attrs       Attrs
@@ -125,7 +125,7 @@ templ TextInput(o TextInputOpts) {
 	<input
 		{ root("text-input", "input", o.Attrs)... }
 		{ FieldARIA(o.Name, o.Error, o.Required)... }
-		id={ o.Name } name={ o.Name } type={ inputType(o.Type) }
+		id={ o.Name } name={ o.Name } type={ string(o.Type.Value()) }
 		value={ o.Value } placeholder={ o.Placeholder } required?={ o.Required }
 	/>
 }
@@ -172,11 +172,10 @@ type TextareaOpts struct {
 // Textarea is a multi-line text input.
 templ Textarea(o TextareaOpts) {
 	<textarea
+		{ root("textarea", "input", o.Attrs)... }
 		id={ o.Name } name={ o.Name } rows={ fmt.Sprint(o.Rows) }
-		class={ mergeClasses("input", o.Attrs.Class) }
 		placeholder={ o.Placeholder }
 		required?={ o.Required }
-		data-testid={ o.Attrs.TestID }
 	>{ o.Value }</textarea>
 }
 
@@ -191,10 +190,9 @@ type SelectOpts struct {
 // Select is a native select.
 templ Select(o SelectOpts) {
 	<select
+		{ root("select", "input", o.Attrs)... }
 		id={ o.Name } name={ o.Name }
-		class={ mergeClasses("input", o.Attrs.Class) }
 		required?={ o.Required }
-		data-testid={ o.Attrs.TestID }
 	>
 		for _, opt := range o.Options {
 			<option value={ opt.Value } selected?={ opt.Selected } disabled?={ opt.Disabled }>{ opt.Label }</option>
@@ -211,8 +209,8 @@ type CheckboxOpts struct {
 
 // Checkbox is a labelled checkbox.
 templ Checkbox(o CheckboxOpts) {
-	<label class="flex items-center gap-2 text-sm">
-		<input type="checkbox" name={ o.Name } value={ o.Value } checked?={ o.Checked } class="h-4 w-4" data-testid={ o.Attrs.TestID }/>
+	<label { root("checkbox", "flex items-center gap-2 text-sm", Attrs{})... }>
+		<input { attributes(o.Attrs)... } type="checkbox" name={ o.Name } value={ o.Value } checked?={ o.Checked } class="h-4 w-4"/>
 		{ o.Label }
 	</label>
 }
@@ -227,7 +225,7 @@ type RadioGroupOpts struct {
 
 // RadioGroup renders a group of radios sharing a name.
 templ RadioGroup(o RadioGroupOpts) {
-	<div class="space-y-2" role="radiogroup" data-testid={ o.Attrs.TestID }>
+	<div { rootWith("radio-group", "space-y-2", o.Attrs, "role", "radiogroup")... }>
 		for _, opt := range o.Options {
 			<label class="flex items-center gap-2 text-sm">
 				<input type="radio" name={ o.Name } value={ opt.Value } checked?={ opt.Selected } disabled?={ opt.Disabled } class="h-4 w-4"/>
@@ -246,8 +244,8 @@ type SwitchOpts struct {
 
 // Switch is a labelled toggle.
 templ Switch(o SwitchOpts) {
-	<label class="flex items-center gap-2 text-sm">
-		<input type="checkbox" name={ o.Name } checked?={ o.On } class="h-4 w-4" data-testid={ o.Attrs.TestID }/>
+	<label { root("switch", "flex items-center gap-2 text-sm", Attrs{})... }>
+		<input { attributes(o.Attrs)... } type="checkbox" name={ o.Name } checked?={ o.On } class="h-4 w-4"/>
 		{ o.Label }
 	</label>
 }

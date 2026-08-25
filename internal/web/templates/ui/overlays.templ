@@ -6,10 +6,12 @@ type DialogOpts struct {
 	Attrs     Attrs
 }
 
-// Dialog renders a native <dialog> with a title and children content. Alpine
-// `uiOverlay` provides open/close with Escape and focus return.
+// Dialog renders a native <dialog>. The platform supplies the top layer, the
+// backdrop, the focus trap and Escape-to-close, and the close control is a
+// `form method="dialog"` submit button - so the dialog dismisses with no
+// JavaScript at all. The Alpine `uiDialog` component only calls showModal().
 templ Dialog(o DialogOpts) {
-	<dialog id={ o.ID } class="dialog card max-w-lg w-full" data-ui="dialog" data-testid={ o.Attrs.TestID }>
+	<dialog id={ o.ID } { root("dialog", "dialog card max-w-lg w-full", o.Attrs)... }>
 		<form method="dialog" class="flex flex-col gap-4">
 			<div class="flex items-center justify-between">
 				<h2 class="section-title">{ o.Title }</h2>
@@ -30,17 +32,39 @@ type AlertDialogOpts struct {
 }
 
 // AlertDialog renders a modal requiring an explicit confirm or cancel.
+//
+// Both buttons submit the enclosing `form method="dialog"` with a value, so the
+// platform closes the dialog and records the choice in `returnValue`. They were
+// once type="button" with no handler, which left a keyboard or pointer user
+// inside a modal with no way out; a destructive confirmation is the last place
+// to depend on JavaScript having loaded.
+//
+// role="alertdialog" with a described message is what makes a screen reader
+// announce the consequence rather than just the title.
 templ AlertDialog(o AlertDialogOpts) {
-	<dialog id={ o.ID } class="dialog card max-w-md w-full" data-ui="alert-dialog" data-testid={ o.Attrs.TestID }>
-		<div class="flex flex-col gap-4">
-			<h2 class={ "section-title text-" + string(o.Kind) + "-text" }>{ o.Title }</h2>
-			<p class="text-sm text-fg-muted">{ o.Message }</p>
+	<dialog
+		id={ o.ID }
+		{ rootWith("alert-dialog", "dialog card max-w-md w-full", o.Attrs,
+			"role", "alertdialog",
+			"aria-labelledby", o.ID+"-title",
+			"aria-describedby", o.ID+"-message")... }
+	>
+		<form method="dialog" class="flex flex-col gap-4">
+			<h2 id={ o.ID + "-title" } class={ alertTitleClass(o.Kind) }>{ o.Title }</h2>
+			<p id={ o.ID + "-message" } class="text-sm text-fg-muted">{ o.Message }</p>
 			<div class="flex justify-end gap-2">
-				<button type="button" class="btn btn-ghost" data-ui-dialog-cancel>{ o.CancelLabel }</button>
-				<button type="button" class={ "btn btn-" + dialogButtonClass(o.Kind) } data-ui-dialog-confirm>{ o.ConfirmLabel }</button>
+				<button type="submit" value="cancel" class="btn btn-ghost" data-ui-dialog-cancel>{ o.CancelLabel }</button>
+				<button type="submit" value="confirm" class={ "btn btn-" + dialogButtonClass(o.Kind) } data-ui-dialog-confirm>{ o.ConfirmLabel }</button>
 			</div>
-		</div>
+		</form>
 	</dialog>
+}
+
+// alertTitleClass colours the title by kind. The kind is normalized first: an
+// unset kind would otherwise compose the class "text--text", which matches
+// nothing and renders an uncoloured heading.
+func alertTitleClass(kind Kind) string {
+	return "section-title text-" + string(NormalizeKind(kind)) + "-text"
 }
 
 func dialogButtonClass(kind Kind) string {
@@ -65,15 +89,21 @@ type MenuItem struct {
 	Attrs       Attrs
 }
 
-// DropdownMenu renders a button that toggles a menu. Alpine `uiMenu` provides
-// open/close, Escape, and roving focus.
+// DropdownMenu renders a button that toggles a panel of links.
+//
+// This is a disclosure, not an ARIA menu: it deliberately does not claim
+// role="menu", because that role promises arrow-key navigation between
+// menuitems, and claiming a keyboard contract the widget does not implement is
+// worse for a screen-reader user than presenting an honest expandable button.
+// The trigger and panel carry data hooks so the Alpine component can move focus
+// in on open and return it to the trigger on close.
 templ DropdownMenu(o DropdownMenuOpts) {
-	<div class="relative inline-block" x-data="uiMenu" data-ui="dropdown-menu" data-testid={ o.Attrs.TestID }>
-		<button type="button" class="btn btn-ghost btn-icon" :aria-expanded="open.toString()" @click="toggle">
+	<div { rootWith("dropdown-menu", "relative inline-block", o.Attrs, "x-data", "uiMenu")... }>
+		<button type="button" class="btn btn-ghost btn-icon" data-ui-menu-trigger :aria-expanded="open.toString()" @click="toggle">
 			@Icon(IconOpts{Name: IconMore, Attrs: Attrs{Class: "w-4 h-4"}})
 			<span class="sr-only">{ o.Label }</span>
 		</button>
-		<div x-show="open" x-cloak @click.outside="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">
+		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">
 			for _, item := range o.Items {
 				<a href={ templ.SafeURL(item.Href) } class={ "block px-3 py-2 rounded-lg text-sm hover:bg-surface-raised", templ.KV("text-fg-muted", item.Disabled) }>{ item.Label }</a>
 			}
@@ -89,9 +119,9 @@ type PopoverOpts struct {
 
 // Popover renders a trigger with a positioned panel.
 templ Popover(o PopoverOpts) {
-	<div class="relative inline-block" x-data="uiMenu" data-ui="popover" data-testid={ o.Attrs.TestID }>
-		<button type="button" class="btn btn-ghost btn-sm" :aria-expanded="open.toString()" @click="toggle">{ o.Label }</button>
-		<div x-show="open" x-cloak @click.outside="close" class="absolute left-0 mt-1 card p-3 z-(--z-overlay)">
+	<div { rootWith("popover", "relative inline-block", o.Attrs, "x-data", "uiMenu")... }>
+		<button type="button" class="btn btn-ghost btn-sm" data-ui-menu-trigger :aria-expanded="open.toString()" @click="toggle">{ o.Label }</button>
+		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute left-0 mt-1 card p-3 z-(--z-overlay)">
 			{ children... }
 		</div>
 	</div>
@@ -104,9 +134,13 @@ type TooltipOpts struct {
 }
 
 // Tooltip renders an inline tooltip on hover/focus.
+//
+// The trigger is the caller's own element (children), so this renderer cannot
+// put aria-describedby on it; the text is exposed with role="tooltip" and the
+// association belongs to the trigger-owning API in the component catalog.
 templ Tooltip(o TooltipOpts) {
-	<span class="relative group inline-flex" data-ui="tooltip">
+	<span { root("tooltip", "relative group inline-flex", o.Attrs)... }>
 		{ children... }
-		<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs rounded-lg bg-fg text-surface opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none whitespace-nowrap z-(--z-overlay)">{ o.Text }</span>
+		<span role="tooltip" class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs rounded-lg bg-fg text-surface opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none whitespace-nowrap z-(--z-overlay)">{ o.Text }</span>
 	</span>
 }
