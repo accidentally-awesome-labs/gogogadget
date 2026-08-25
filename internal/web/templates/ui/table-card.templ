@@ -1,0 +1,10 @@
+package ui
+
+// TableCardOpts is the bordered, clipped box every table sits in.
+type TableCardOpts struct{ Attrs Attrs }
+
+templ TableCard(o TableCardOpts) {
+	<div { root("table-card", "table-card", o.Attrs)... }>
+		{ children... }
+	</div>
+}

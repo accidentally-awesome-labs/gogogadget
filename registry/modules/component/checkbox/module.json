@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/checkbox",
+    "kind": "component",
+    "name": "checkbox",
+    "revision": 1,
+    "contract": 1,
+    "title": "Checkbox",
+    "description": "The Checkbox renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/checkbox.templ",
+        "target": "internal/web/templates/ui/checkbox.templ",
+        "class": "templ",
+        "sha256": "8e5fc885f32e668872ce3f6255279ea13a8e6295ec682b396311954c9b5f26a4",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "checkbox",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

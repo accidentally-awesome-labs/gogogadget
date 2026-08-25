@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/key-value",
+    "kind": "component",
+    "name": "key-value",
+    "revision": 1,
+    "contract": 1,
+    "title": "KeyValue",
+    "description": "The KeyValue renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/key-value.templ",
+        "target": "internal/web/templates/ui/key-value.templ",
+        "class": "templ",
+        "sha256": "47cf38db3f6247dc5514b5a90eec629e6e41a6b61205db29c316f616e38afca4",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "key-value",
+          "family": "data"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

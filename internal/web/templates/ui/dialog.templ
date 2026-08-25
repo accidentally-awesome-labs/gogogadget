@@ -1,0 +1,24 @@
+package ui
+
+type DialogOpts struct {
+	ID, Title string
+	Attrs     Attrs
+}
+
+// Dialog renders a native <dialog>. The platform supplies the top layer, the
+// backdrop, the focus trap and Escape-to-close, and the close control is a
+// `form method="dialog"` submit button - so the dialog dismisses with no
+// JavaScript at all. The Alpine `uiDialog` component only calls showModal().
+templ Dialog(o DialogOpts) {
+	<dialog id={ o.ID } { root("dialog", "dialog card max-w-lg w-full", o.Attrs)... }>
+		<form method="dialog" class="flex flex-col gap-4">
+			<div class="flex items-center justify-between">
+				<h2 class="section-title">{ o.Title }</h2>
+				<button type="submit" class="btn btn-ghost btn-icon" aria-label="Close" data-ui-dialog-close>
+					@Icon(IconOpts{Name: IconClose, Attrs: Attrs{Class: "w-4 h-4"}})
+				</button>
+			</div>
+			{ children... }
+		</form>
+	</dialog>
+}

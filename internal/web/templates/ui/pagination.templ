@@ -1,0 +1,96 @@
+package ui
+
+import (
+	"fmt"
+	"strings"
+)
+
+// PageURL appends the page parameter with the right separator: callers pass a
+// base that already carries their filters ("/admin/content?kind=post"), and
+// hardcoding "?" would bury those in the value of the last one.
+func PageURL(baseURL string, page int) string {
+	sep := "?"
+	if strings.Contains(baseURL, "?") {
+		sep = "&"
+	}
+	return fmt.Sprintf("%s%spage=%d", baseURL, sep, page)
+}
+
+// PagerLabels carries the pager's strings so ui never imports i18n.
+//
+// The fields are functions, so an omitted label used to panic mid-render and
+// take the whole page down. They are read through the nil-safe accessors below:
+// a missing label degrades to a plain, unlocalized fallback, because a pager
+// with English arrows is a translation bug while a nil dereference is an
+// outage.
+type PagerLabels struct {
+	Aria, Prev, Next, PageOf func(page, totalPages int) string
+}
+
+func (l PagerLabels) aria(page, totalPages int) string {
+	if l.Aria == nil {
+		// The landmark still needs a name: several navs can share a page, and
+		// an unnamed one is indistinguishable in a screen reader's list.
+		return "Pagination"
+	}
+	return l.Aria(page, totalPages)
+}
+
+func (l PagerLabels) prev(page, totalPages int) string {
+	if l.Prev == nil {
+		return "Previous"
+	}
+	return l.Prev(page, totalPages)
+}
+
+func (l PagerLabels) next(page, totalPages int) string {
+	if l.Next == nil {
+		return "Next"
+	}
+	return l.Next(page, totalPages)
+}
+
+func (l PagerLabels) pageOf(page, totalPages int) string {
+	if l.PageOf == nil {
+		return fmt.Sprintf("%d / %d", page, totalPages)
+	}
+	return l.PageOf(page, totalPages)
+}
+
+// PaginationOpts renders hx-get pager links. Target is the box the pager
+// morphs; Labels carries the localized strings so ui never imports i18n.
+//
+// A single page renders nothing at all: a pager with both arrows dead is noise
+// that still occupies layout.
+type PaginationOpts struct {
+	Page       int
+	TotalPages int
+	BaseURL    string
+	Target     string
+	Labels     PagerLabels
+	Attrs      Attrs
+}
+
+templ Pagination(o PaginationOpts) {
+	if o.TotalPages > 1 {
+		<nav { rootWith("pagination", "flex items-center justify-between mt-4 text-sm", o.Attrs, "aria-label", o.Labels.aria(o.Page, o.TotalPages))... }>
+			if o.Page > 1 {
+				<a href={ templ.SafeURL(PageURL(o.BaseURL, o.Page-1)) }
+					hx-get={ PageURL(o.BaseURL, o.Page-1) }
+					hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+					class="btn btn-ghost">{ o.Labels.prev(o.Page, o.TotalPages) }</a>
+			} else {
+				<span></span>
+			}
+			<span class="text-fg-muted">{ o.Labels.pageOf(o.Page, o.TotalPages) }</span>
+			if o.Page < o.TotalPages {
+				<a href={ templ.SafeURL(PageURL(o.BaseURL, o.Page+1)) }
+					hx-get={ PageURL(o.BaseURL, o.Page+1) }
+					hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+					class="btn btn-ghost">{ o.Labels.next(o.Page, o.TotalPages) }</a>
+			} else {
+				<span></span>
+			}
+		</nav>
+	}
+}

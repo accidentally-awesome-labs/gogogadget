@@ -1,0 +1,27 @@
+package ui
+
+import (
+	"fmt"
+)
+
+// GridOpts configures a grid.
+type GridOpts struct {
+	Cols  int
+	Gap   Gap
+	Attrs Attrs
+}
+
+// Grid renders children in a responsive grid.
+templ Grid(o GridOpts) {
+	<div { root("grid", gridClasses(o), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func gridClasses(o GridOpts) string {
+	cols := o.Cols
+	if cols <= 0 {
+		cols = 3
+	}
+	return mergeClasses("grid grid-cols-1 "+gapClass(o.Gap)+" sm:grid-cols-"+fmt.Sprint(cols), o.Attrs.Class)
+}

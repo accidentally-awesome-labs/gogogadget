@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/select",
+    "kind": "component",
+    "name": "select",
+    "revision": 1,
+    "contract": 1,
+    "title": "Select",
+    "description": "The Select renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/select.templ",
+        "target": "internal/web/templates/ui/select.templ",
+        "class": "templ",
+        "sha256": "1bc739cadb55543ef0e341232c23cc1e8a80f622369f3ff77f91609849bf46cd",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "select",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

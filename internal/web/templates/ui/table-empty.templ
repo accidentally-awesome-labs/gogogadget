@@ -1,0 +1,11 @@
+package ui
+
+// TableEmptyOpts is the zero-row message inside a TableCard.
+type TableEmptyOpts struct {
+	Text  string
+	Attrs Attrs
+}
+
+templ TableEmpty(o TableEmptyOpts) {
+	<p { root("table-empty", "table-empty", o.Attrs)... }>{ o.Text }</p>
+}

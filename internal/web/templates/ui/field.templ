@@ -1,0 +1,63 @@
+package ui
+
+// FieldIDs returns the stable input/hint/error IDs for a field name.
+func FieldIDs(name string) (input, hint, error string) {
+	return name, name + "-hint", name + "-error"
+}
+
+// FieldARIA returns the aria attributes for a field name/error/required state.
+func FieldARIA(name, err string, required bool) templ.Attributes {
+	attrs := templ.Attributes{}
+	if err != "" {
+		attrs["aria-invalid"] = "true"
+	}
+	if required {
+		attrs["aria-required"] = "true"
+	}
+	attrs["aria-describedby"] = FieldAriaDescribedBy(name, err)
+	return attrs
+}
+
+// FieldAriaDescribedBy names the hint/error element describing a field.
+func FieldAriaDescribedBy(name, err string) string {
+	if err != "" {
+		return name + "-error"
+	}
+	return name + "-hint"
+}
+
+// FieldOpts renders label + control + field-level error. The control arrives as
+// children so any input type composes, and the hint/error ids come from
+// FieldIDs so a custom control can wire the same aria-describedby.
+type FieldOpts struct {
+	Name        string
+	Label       string
+	Hint        string
+	Error       string
+	Required    bool
+	Optional    bool
+	HiddenLabel bool
+	Attrs       Attrs
+}
+
+templ Field(o FieldOpts) {
+	<div { root("field", "", o.Attrs)... }>
+		if o.HiddenLabel {
+			<label for={ o.Name } class="sr-only">{ o.Label }</label>
+		} else {
+			<label for={ o.Name } class="label">
+				{ o.Label }
+				if o.Optional {
+					<span class="text-fg-muted"> ({ "optional" })</span>
+				}
+			</label>
+		}
+		{ children... }
+		if o.Hint != "" && o.Error == "" {
+			<p id={ o.Name + "-hint" } class="text-sm text-fg-muted mt-1">{ o.Hint }</p>
+		}
+		if o.Error != "" {
+			@FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: o.Name + "-error"}})
+		}
+	</div>
+}

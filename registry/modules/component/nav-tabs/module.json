@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/nav-tabs",
+    "kind": "component",
+    "name": "nav-tabs",
+    "revision": 1,
+    "contract": 1,
+    "title": "NavTabs",
+    "description": "The NavTabs renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/nav-tabs.templ",
+        "target": "internal/web/templates/ui/nav-tabs.templ",
+        "class": "templ",
+        "sha256": "99038b09e0e3c064eec357ae1e769645f73685b9a2be7cc4a48a487dc9841396",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "nav-tabs",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

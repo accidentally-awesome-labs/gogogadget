@@ -1,0 +1,18 @@
+package ui
+
+// EmptyStateOpts is the zero-data pattern for tables and lists.
+type EmptyStateOpts struct {
+	Title string
+	Body  string
+	Attrs Attrs
+}
+
+templ EmptyState(o EmptyStateOpts) {
+	<div { root("empty-state", "card text-center py-12", o.Attrs)... }>
+		<h3 class="font-semibold">{ o.Title }</h3>
+		<p class="text-sm text-fg-muted mt-1">{ o.Body }</p>
+		<div class="mt-4">
+			{ children... }
+		</div>
+	</div>
+}

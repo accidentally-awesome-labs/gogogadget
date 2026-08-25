@@ -1,0 +1,22 @@
+package ui
+
+// SelectOpts configures a select control.
+type SelectOpts struct {
+	Name     string
+	Options  []Option
+	Required bool
+	Attrs    Attrs
+}
+
+// Select is a native select.
+templ Select(o SelectOpts) {
+	<select
+		{ root("select", "input", o.Attrs)... }
+		id={ o.Name } name={ o.Name }
+		required?={ o.Required }
+	>
+		for _, opt := range o.Options {
+			<option value={ opt.Value } selected?={ opt.Selected } disabled?={ opt.Disabled }>{ opt.Label }</option>
+		}
+	</select>
+}

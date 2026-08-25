@@ -27,34 +27,10 @@
         "contract": false
       },
       {
-        "source": "internal/web/templates/ui/components_core.templ",
-        "target": "internal/web/templates/ui/components_core.templ",
-        "class": "templ",
-        "sha256": "502fc4ec9aafab06a10ed8be5509de8d96b24e06707b2befdc4b191d9fefc7be",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/ui/components_nav.templ",
-        "target": "internal/web/templates/ui/components_nav.templ",
-        "class": "templ",
-        "sha256": "107a95083313b98783139cf60a0cc831280b16fb157ebee1e6b0afe544c4bcdf",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
         "sha256": "264256f77d0829463d8dc7785725f5d91c3f0a6c5c8c38fa0fe443d107739479",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/ui/data.templ",
-        "target": "internal/web/templates/ui/data.templ",
-        "class": "templ",
-        "sha256": "619fcd307bba94b900cc4f4533a4d363df7383515d6e41621cec5d4bd927b8ff",
         "rewrite_module": true,
         "contract": false
       },
@@ -75,14 +51,6 @@
         "contract": false
       },
       {
-        "source": "internal/web/templates/ui/forms.templ",
-        "target": "internal/web/templates/ui/forms.templ",
-        "class": "templ",
-        "sha256": "f14281dd6e1ed715ad68a875e8fc8a188090ea4f298bb26ded6edbcbd8547fe9",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/web/templates/ui/gallery.go",
         "target": "internal/web/templates/ui/gallery.go",
         "class": "go",
@@ -94,17 +62,9 @@
         "source": "internal/web/templates/ui/icons.go",
         "target": "internal/web/templates/ui/icons.go",
         "class": "go",
-        "sha256": "a8cb43b212550a6712f247466a063947fadbafe2f7ee6f1a08a6141a2eb6df7d",
+        "sha256": "59c3948cde57f1f6ac1c3d6077baf7852f304579b4589db7e85f7a72c551bb76",
         "rewrite_module": true,
         "contract": true
-      },
-      {
-        "source": "internal/web/templates/ui/icons.templ",
-        "target": "internal/web/templates/ui/icons.templ",
-        "class": "templ",
-        "sha256": "29ce49bd2a341abe212ad039a1eaab207c8af3983337be09453db640d4e45bc0",
-        "rewrite_module": true,
-        "contract": false
       },
       {
         "source": "internal/web/templates/ui/icons_test.go",
@@ -115,28 +75,20 @@
         "contract": false
       },
       {
-        "source": "internal/web/templates/ui/overlays.templ",
-        "target": "internal/web/templates/ui/overlays.templ",
-        "class": "templ",
-        "sha256": "7c32f8208634611387a94ddd0a8885179e00099ca89f1d0c942ea3d4c26fde18",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/ui/patterns.templ",
-        "target": "internal/web/templates/ui/patterns.templ",
-        "class": "templ",
-        "sha256": "4a603e042b6307b36e696b72c6f3aa0e168978450d1bf14032aa9ed7bba0da4a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/web/templates/ui/root.go",
         "target": "internal/web/templates/ui/root.go",
         "class": "go",
         "sha256": "28c76c57a282376a43a6cbaf9ca3ee04cf26f26ed14cc32493b48179fc4f7a2c",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/shared.go",
+        "target": "internal/web/templates/ui/shared.go",
+        "class": "go",
+        "sha256": "fa3e2e55c7da07edab437ba02f52ed4525e7f9d55be3484c41ac4886f7d34134",
+        "rewrite_module": false,
+        "contract": false
       },
       {
         "source": "internal/web/templates/ui/ui.go",
@@ -157,204 +109,6 @@
     ],
     "claims": {},
     "runtime": {
-      "ui": [
-        {
-          "name": "alert-dialog",
-          "family": "overlays",
-          "engine": "alpine",
-          "alpine": "uiDialog",
-          "native_fallback": "dialog element"
-        },
-        {
-          "name": "badge",
-          "family": "feedback"
-        },
-        {
-          "name": "banner",
-          "family": "feedback"
-        },
-        {
-          "name": "card",
-          "family": "layout"
-        },
-        {
-          "name": "card-footer",
-          "family": "layout"
-        },
-        {
-          "name": "card-header",
-          "family": "layout"
-        },
-        {
-          "name": "checkbox",
-          "family": "forms"
-        },
-        {
-          "name": "container",
-          "family": "layout"
-        },
-        {
-          "name": "description-list",
-          "family": "data"
-        },
-        {
-          "name": "dialog",
-          "family": "overlays",
-          "engine": "alpine",
-          "alpine": "uiDialog",
-          "native_fallback": "dialog element"
-        },
-        {
-          "name": "divider",
-          "family": "foundations"
-        },
-        {
-          "name": "dropdown-menu",
-          "family": "overlays",
-          "engine": "alpine",
-          "alpine": "uiMenu",
-          "native_fallback": "details element"
-        },
-        {
-          "name": "empty-state",
-          "family": "feedback"
-        },
-        {
-          "name": "field",
-          "family": "forms"
-        },
-        {
-          "name": "field-error",
-          "family": "forms"
-        },
-        {
-          "name": "fieldset",
-          "family": "forms"
-        },
-        {
-          "name": "form",
-          "family": "forms"
-        },
-        {
-          "name": "grid",
-          "family": "layout"
-        },
-        {
-          "name": "icon",
-          "family": "foundations"
-        },
-        {
-          "name": "inline",
-          "family": "layout"
-        },
-        {
-          "name": "item",
-          "family": "data"
-        },
-        {
-          "name": "key-value",
-          "family": "data"
-        },
-        {
-          "name": "list",
-          "family": "data"
-        },
-        {
-          "name": "meter",
-          "family": "feedback"
-        },
-        {
-          "name": "metric",
-          "family": "data"
-        },
-        {
-          "name": "nav-tabs",
-          "family": "navigation"
-        },
-        {
-          "name": "notice",
-          "family": "feedback"
-        },
-        {
-          "name": "page-header",
-          "family": "layout"
-        },
-        {
-          "name": "pagination",
-          "family": "navigation"
-        },
-        {
-          "name": "plan-card",
-          "family": "communication"
-        },
-        {
-          "name": "popover",
-          "family": "overlays",
-          "engine": "alpine",
-          "alpine": "uiMenu",
-          "native_fallback": "details element"
-        },
-        {
-          "name": "radio-group",
-          "family": "forms"
-        },
-        {
-          "name": "search-input",
-          "family": "forms"
-        },
-        {
-          "name": "secret-reveal",
-          "family": "feedback"
-        },
-        {
-          "name": "section-header",
-          "family": "layout"
-        },
-        {
-          "name": "select",
-          "family": "forms"
-        },
-        {
-          "name": "spinner",
-          "family": "foundations"
-        },
-        {
-          "name": "stack",
-          "family": "layout"
-        },
-        {
-          "name": "switch",
-          "family": "forms"
-        },
-        {
-          "name": "table",
-          "family": "data"
-        },
-        {
-          "name": "table-card",
-          "family": "data"
-        },
-        {
-          "name": "table-empty",
-          "family": "data"
-        },
-        {
-          "name": "terminal-page",
-          "family": "navigation"
-        },
-        {
-          "name": "text-input",
-          "family": "forms"
-        },
-        {
-          "name": "textarea",
-          "family": "forms"
-        },
-        {
-          "name": "tooltip",
-          "family": "overlays"
-        }
-      ],
       "assets": [
         {
           "id": "ui-overlays",

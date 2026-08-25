@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/modkit"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -87,4 +88,79 @@ func loadLock(t *testing.T, root string) modkit.Lock {
 	lock, err := modkit.ParseLock(raw)
 	require.NoError(t, err)
 	return lock
+}
+
+// Catalog granularity is one public renderer per installable item. A module that
+// owns two renderers cannot be installed or removed independently, which is the
+// whole point of a source catalog: a project that wants Badge must not be forced
+// to take Banner with it.
+func TestEveryUIRendererIsIndependentlyInstallable(t *testing.T) {
+	lock := loadLock(t, repoRoot(t))
+
+	fileOwner := map[string]string{}
+	var uiModules int
+	for _, m := range lock.Modules {
+		if len(m.Manifest.Runtime.UI) == 0 {
+			continue
+		}
+		uiModules++
+		var templFiles []string
+		for _, f := range m.Manifest.Files {
+			if f.Class == modkit.FileClassTempl {
+				templFiles = append(templFiles, f.Target)
+			}
+		}
+		require.Len(t, templFiles, 1,
+			"%s owns %d templ files; one renderer per module means one file", m.ID, len(templFiles))
+		if prior, ok := fileOwner[templFiles[0]]; ok {
+			t.Fatalf("%s and %s both own %s", prior, m.ID, templFiles[0])
+		}
+		fileOwner[templFiles[0]] = m.ID
+
+		// The module id must name what it installs, so a reader of
+		// gogogadget.json can tell which component a line selects.
+		kind := "component/"
+		if m.Manifest.Kind == modkit.ModuleElement {
+			kind = "element/"
+		}
+		require.True(t, strings.HasPrefix(m.ID, kind),
+			"%s declares kind %s but its id says otherwise", m.ID, m.Manifest.Kind)
+	}
+	require.Greater(t, uiModules, 30, "the scan found suspiciously few UI modules")
+}
+
+// Shared data contracts and helpers belong to the required core element, not to
+// whichever renderer happened to be written first: a project that installs only
+// Select still needs Option.
+func TestSharedUIContractsBelongToCore(t *testing.T) {
+	lock := loadLock(t, repoRoot(t))
+
+	var core *modkit.LockedModule
+	for i := range lock.Modules {
+		if lock.Modules[i].ID == "element/ui-core" {
+			core = &lock.Modules[i]
+		}
+	}
+	require.NotNil(t, core, "element/ui-core must exist")
+
+	owned := map[string]bool{}
+	for _, f := range core.Manifest.Files {
+		owned[f.Target] = true
+	}
+	require.True(t, owned["internal/web/templates/ui/shared.go"],
+		"the shared data contracts (Option, MenuItem, Column) must be core-owned")
+	require.True(t, owned["internal/web/templates/ui/enums.go"])
+	require.True(t, owned["internal/web/templates/ui/attrs.go"])
+	require.Empty(t, core.Manifest.Runtime.UI,
+		"ui-core carries shared code, not renderers: a renderer here could not be removed")
+
+	// Every renderer module must require core, or its file will not compile
+	// after a selective install.
+	for _, m := range lock.Modules {
+		if len(m.Manifest.Runtime.UI) == 0 {
+			continue
+		}
+		assert.Contains(t, m.Manifest.Requires, "element/ui-core",
+			"%s uses shared types but does not require element/ui-core", m.ID)
+	}
 }

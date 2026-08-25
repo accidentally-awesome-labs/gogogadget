@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/page-header",
+    "kind": "component",
+    "name": "page-header",
+    "revision": 1,
+    "contract": 1,
+    "title": "PageHeader",
+    "description": "The PageHeader renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/page-header.templ",
+        "target": "internal/web/templates/ui/page-header.templ",
+        "class": "templ",
+        "sha256": "3e8ee26dc2bd4c25b28ed03c58c9438b706f8049056b8b16ab23ca6565a08edd",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "page-header",
+          "family": "layout"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

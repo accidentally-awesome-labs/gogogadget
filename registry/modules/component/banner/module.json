@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/banner",
+    "kind": "component",
+    "name": "banner",
+    "revision": 1,
+    "contract": 1,
+    "title": "Banner",
+    "description": "The Banner renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/banner.templ",
+        "target": "internal/web/templates/ui/banner.templ",
+        "class": "templ",
+        "sha256": "3ca212ad0f4133b938b1f34c7217037157b17bb7004fac4c1ad858dd307869d8",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "banner",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

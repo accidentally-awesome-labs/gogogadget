@@ -1,0 +1,19 @@
+package ui
+
+// MetricOpts is one number on a dashboard.
+type MetricOpts struct {
+	Title string
+	Value string
+	Sub   string
+	Attrs Attrs
+}
+
+templ Metric(o MetricOpts) {
+	<div { root("metric", "card", defaultTestID(o.Attrs, "stat-card"))... }>
+		<p class="text-sm text-fg-muted">{ o.Title }</p>
+		<p class="text-3xl font-bold mt-1">{ o.Value }</p>
+		if o.Sub != "" {
+			<p class="text-sm text-fg-muted mt-1">{ o.Sub }</p>
+		}
+	</div>
+}

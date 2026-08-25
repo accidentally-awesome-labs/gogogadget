@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/fieldset",
+    "kind": "component",
+    "name": "fieldset",
+    "revision": 1,
+    "contract": 1,
+    "title": "Fieldset",
+    "description": "The Fieldset renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/fieldset.templ",
+        "target": "internal/web/templates/ui/fieldset.templ",
+        "class": "templ",
+        "sha256": "2d4d0e8f6f937d4394c4b9cffe229a053082f63bd175afb57293c322136d8bc0",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "fieldset",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

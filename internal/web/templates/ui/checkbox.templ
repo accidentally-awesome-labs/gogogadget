@@ -1,0 +1,16 @@
+package ui
+
+// CheckboxOpts configures a single checkbox.
+type CheckboxOpts struct {
+	Name, Label, Value string
+	Checked            bool
+	Attrs              Attrs
+}
+
+// Checkbox is a labelled checkbox.
+templ Checkbox(o CheckboxOpts) {
+	<label { root("checkbox", "flex items-center gap-2 text-sm", Attrs{})... }>
+		<input { attributes(o.Attrs)... } type="checkbox" name={ o.Name } value={ o.Value } checked?={ o.Checked } class="h-4 w-4"/>
+		{ o.Label }
+	</label>
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/form",
+    "kind": "component",
+    "name": "form",
+    "revision": 1,
+    "contract": 1,
+    "title": "Form",
+    "description": "The Form renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/form.templ",
+        "target": "internal/web/templates/ui/form.templ",
+        "class": "templ",
+        "sha256": "d92c4f139aae4e6935724b2b30d3e84e1fdc60feb6957559496e93f546d70d21",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "form",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

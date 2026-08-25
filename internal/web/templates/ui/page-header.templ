@@ -1,0 +1,15 @@
+package ui
+
+// PageHeaderOpts is the title row every page opens with; children are the
+// right-hand actions.
+type PageHeaderOpts struct {
+	Title string
+	Attrs Attrs
+}
+
+templ PageHeader(o PageHeaderOpts) {
+	<div { root("page-header", "page-header", o.Attrs)... }>
+		<h1 class="page-title">{ o.Title }</h1>
+		{ children... }
+	</div>
+}

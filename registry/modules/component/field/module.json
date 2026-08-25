@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/field",
+    "kind": "component",
+    "name": "field",
+    "revision": 1,
+    "contract": 1,
+    "title": "Field",
+    "description": "The Field renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/field.templ",
+        "target": "internal/web/templates/ui/field.templ",
+        "class": "templ",
+        "sha256": "29cecbd8576a6ba53b0eae52bc373c9f6d01d1804271db44f96f520958c95699",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "field",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

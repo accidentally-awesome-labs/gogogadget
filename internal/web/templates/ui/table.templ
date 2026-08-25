@@ -1,0 +1,36 @@
+package ui
+
+// TableOpts configures a semantic table.
+type TableOpts struct {
+	Caption       string
+	HiddenCaption bool
+	Density       Density
+	Attrs         Attrs
+}
+
+// Table renders a semantic table with a caption and responsive overflow.
+templ Table(o TableOpts) {
+	<div { root("table", "table-card", o.Attrs)... }>
+		<table class={ tableClasses(o) }>
+			if o.Caption != "" {
+				<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
+			}
+			{ children... }
+		</table>
+	</div>
+}
+
+func tableClasses(o TableOpts) string {
+	cls := "table"
+	if o.Density.Value() == DensityCompact {
+		cls += " table-compact"
+	}
+	return mergeClasses(cls, o.Attrs.Class)
+}
+
+func captionClass(hidden bool) string {
+	if hidden {
+		return "sr-only"
+	}
+	return "text-left text-sm text-fg-muted mb-2"
+}

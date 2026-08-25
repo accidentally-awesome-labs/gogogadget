@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/textarea",
+    "kind": "component",
+    "name": "textarea",
+    "revision": 1,
+    "contract": 1,
+    "title": "Textarea",
+    "description": "The Textarea renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/textarea.templ",
+        "target": "internal/web/templates/ui/textarea.templ",
+        "class": "templ",
+        "sha256": "1cc6f8a1cf3e199e25f1a9e8b802c143b72f7374ecc47370713ff2fa9de15497",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "textarea",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

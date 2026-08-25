@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/radio-group",
+    "kind": "component",
+    "name": "radio-group",
+    "revision": 1,
+    "contract": 1,
+    "title": "RadioGroup",
+    "description": "The RadioGroup renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/radio-group.templ",
+        "target": "internal/web/templates/ui/radio-group.templ",
+        "class": "templ",
+        "sha256": "9c60ca35c8c4a16bc4994a7b92b48969e7df9d8c0926dc9d38cc3ddbee5198c5",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "radio-group",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

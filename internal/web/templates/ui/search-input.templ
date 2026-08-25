@@ -1,0 +1,32 @@
+package ui
+
+// SearchInputOpts is the debounced table search. It morphs Target and pushes
+// the URL, so a search is shareable and the Back button works.
+type SearchInputOpts struct {
+	Name        string
+	Value       string
+	Placeholder string
+	AriaLabel   string
+	GetURL      string
+	Target      string
+	IndicatorID string
+	Attrs       Attrs
+}
+
+templ SearchInput(o SearchInputOpts) {
+	<div { root("search-input", "toolbar", Attrs{})... }>
+		<input
+			{ attributes(o.Attrs)... }
+			type="search" name={ o.Name } value={ o.Value } placeholder={ o.Placeholder }
+			class={ mergeClasses("input max-w-sm", o.Attrs.Class) }
+			hx-get={ o.GetURL } hx-trigger="input changed delay:300ms, search"
+			hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true" hx-include="this"
+			hx-sync="this:replace"
+			hx-indicator={ "#" + o.IndicatorID }
+			aria-label={ o.AriaLabel }
+		/>
+		<span id={ o.IndicatorID } class="text-fg-muted">
+			@Spinner(SpinnerOpts{})
+		</span>
+	</div>
+}

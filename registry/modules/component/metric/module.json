@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/metric",
+    "kind": "component",
+    "name": "metric",
+    "revision": 1,
+    "contract": 1,
+    "title": "Metric",
+    "description": "The Metric renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/metric.templ",
+        "target": "internal/web/templates/ui/metric.templ",
+        "class": "templ",
+        "sha256": "1d0b8c4a5717723bcfa8f2ee6ea697706d2f0a5889dc0dc2e8d38e0dd3b4144b",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "metric",
+          "family": "data"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

@@ -1,0 +1,27 @@
+package ui
+
+// ContainerOpts configures a layout container.
+type ContainerOpts struct {
+	Width Width
+	Attrs Attrs
+}
+
+// Container renders a width-constrained wrapper.
+templ Container(o ContainerOpts) {
+	<div { root("container", containerClasses(o), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func containerClasses(o ContainerOpts) string {
+	cls := "mx-auto px-4"
+	switch o.Width.Value() {
+	case WidthNarrow:
+		cls += " max-w-narrow"
+	case WidthPage:
+		cls += " max-w-page"
+	case WidthFull:
+		// No max-width: full is the deliberate unconstrained measure.
+	}
+	return mergeClasses(cls, o.Attrs.Class)
+}

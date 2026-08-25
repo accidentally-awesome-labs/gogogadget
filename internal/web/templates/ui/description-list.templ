@@ -1,0 +1,21 @@
+package ui
+
+// DescriptionItem is one term/value pair in a DescriptionList.
+type DescriptionItem struct{ Term, Value string }
+
+// DescriptionListOpts is the read-only detail pattern (account, org).
+type DescriptionListOpts struct {
+	Items []DescriptionItem
+	Attrs Attrs
+}
+
+templ DescriptionList(o DescriptionListOpts) {
+	<dl { root("description-list", "space-y-4 text-sm", o.Attrs)... }>
+		for _, item := range o.Items {
+			<div>
+				<dt class="text-fg-muted">{ item.Term }</dt>
+				<dd class="font-medium">{ item.Value }</dd>
+			</div>
+		}
+	</dl>
+}

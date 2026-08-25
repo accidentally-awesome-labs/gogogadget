@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/search-input",
+    "kind": "component",
+    "name": "search-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "SearchInput",
+    "description": "The SearchInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/search-input.templ",
+        "target": "internal/web/templates/ui/search-input.templ",
+        "class": "templ",
+        "sha256": "d20b4d4770bd694360652c78d643f7265387e8265439eace421840eba9a67bda",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "search-input",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

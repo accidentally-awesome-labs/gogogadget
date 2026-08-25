@@ -1,0 +1,30 @@
+package ui
+
+// DropdownMenuOpts configures a trigger + menu.
+type DropdownMenuOpts struct {
+	ID, Label string
+	Items     []MenuItem
+	Attrs     Attrs
+}
+
+// DropdownMenu renders a button that toggles a panel of links.
+//
+// This is a disclosure, not an ARIA menu: it deliberately does not claim
+// role="menu", because that role promises arrow-key navigation between
+// menuitems, and claiming a keyboard contract the widget does not implement is
+// worse for a screen-reader user than presenting an honest expandable button.
+// The trigger and panel carry data hooks so the Alpine component can move focus
+// in on open and return it to the trigger on close.
+templ DropdownMenu(o DropdownMenuOpts) {
+	<div { rootWith("dropdown-menu", "relative inline-block", o.Attrs, "x-data", "uiMenu")... }>
+		<button type="button" class="btn btn-ghost btn-icon" data-ui-menu-trigger :aria-expanded="open.toString()" @click="toggle">
+			@Icon(IconOpts{Name: IconMore, Attrs: Attrs{Class: "w-4 h-4"}})
+			<span class="sr-only">{ o.Label }</span>
+		</button>
+		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">
+			for _, item := range o.Items {
+				<a href={ templ.SafeURL(item.Href) } class={ "block px-3 py-2 rounded-lg text-sm hover:bg-surface-raised", templ.KV("text-fg-muted", item.Disabled) }>{ item.Label }</a>
+			}
+		</div>
+	</div>
+}

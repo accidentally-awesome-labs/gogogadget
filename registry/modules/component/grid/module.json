@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/grid",
+    "kind": "component",
+    "name": "grid",
+    "revision": 1,
+    "contract": 1,
+    "title": "Grid",
+    "description": "The Grid renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/grid.templ",
+        "target": "internal/web/templates/ui/grid.templ",
+        "class": "templ",
+        "sha256": "d7cc82003fc53e00691ef21ca723ab4371d81b52c717519c40058da66289a79e",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "grid",
+          "family": "layout"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/card",
+    "kind": "component",
+    "name": "card",
+    "revision": 1,
+    "contract": 1,
+    "title": "Card",
+    "description": "The Card renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/card.templ",
+        "target": "internal/web/templates/ui/card.templ",
+        "class": "templ",
+        "sha256": "a3cb024486587f76ab627a43c6a7dbba2d597e55a3c6a51d5cf78c61dc0c36f5",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "card",
+          "family": "layout"
+        },
+        {
+          "name": "card-footer",
+          "family": "layout"
+        },
+        {
+          "name": "card-header",
+          "family": "layout"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

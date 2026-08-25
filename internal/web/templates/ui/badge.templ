@@ -1,0 +1,12 @@
+package ui
+
+// BadgeOpts is a small state pill: Kind picks the semantic colour.
+type BadgeOpts struct {
+	Text  string
+	Kind  Kind
+	Attrs Attrs
+}
+
+templ Badge(o BadgeOpts) {
+	<span { root("badge", "badge badge-"+string(NormalizeKind(o.Kind)), o.Attrs)... }>{ o.Text }</span>
+}

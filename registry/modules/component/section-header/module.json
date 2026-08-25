@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/section-header",
+    "kind": "component",
+    "name": "section-header",
+    "revision": 1,
+    "contract": 1,
+    "title": "SectionHeader",
+    "description": "The SectionHeader renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/section-header.templ",
+        "target": "internal/web/templates/ui/section-header.templ",
+        "class": "templ",
+        "sha256": "40d885f48a59f81ce51180bb7ee20a98fff545dd7dffddf1530df910478b7541",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "section-header",
+          "family": "layout"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

@@ -1,0 +1,15 @@
+package ui
+
+// KeyValueOpts configures one key/value row.
+type KeyValueOpts struct {
+	Key, Value string
+	Attrs      Attrs
+}
+
+// KeyValue renders one definition row.
+templ KeyValue(o KeyValueOpts) {
+	<div { root("key-value", "flex items-center justify-between py-2", o.Attrs)... }>
+		<dt class="text-fg-muted">{ o.Key }</dt>
+		<dd class="font-medium">{ o.Value }</dd>
+	</div>
+}

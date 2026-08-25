@@ -1,0 +1,21 @@
+package ui
+
+// TextInputOpts is a single-line text input.
+type TextInputOpts struct {
+	Name        string
+	Value       string
+	Placeholder string
+	Type        InputType
+	Required    bool
+	Error       string
+	Attrs       Attrs
+}
+
+templ TextInput(o TextInputOpts) {
+	<input
+		{ root("text-input", "input", o.Attrs)... }
+		{ FieldARIA(o.Name, o.Error, o.Required)... }
+		id={ o.Name } name={ o.Name } type={ string(o.Type.Value()) }
+		value={ o.Value } placeholder={ o.Placeholder } required?={ o.Required }
+	/>
+}

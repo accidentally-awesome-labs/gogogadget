@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/popover",
+    "kind": "component",
+    "name": "popover",
+    "revision": 1,
+    "contract": 1,
+    "title": "Popover",
+    "description": "The Popover renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/popover.templ",
+        "target": "internal/web/templates/ui/popover.templ",
+        "class": "templ",
+        "sha256": "e4fce01d994128791fac6a1f095f659fcb572755522e583c229971bc4f35962c",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "popover",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiMenu",
+          "native_fallback": "details element"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

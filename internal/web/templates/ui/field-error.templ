@@ -1,0 +1,11 @@
+package ui
+
+// FieldErrorOpts is the per-field validation message under an input.
+type FieldErrorOpts struct {
+	Error string
+	Attrs Attrs
+}
+
+templ FieldError(o FieldErrorOpts) {
+	<p { root("field-error", "field-error", defaultTestID(o.Attrs, "form-error"))... }>{ o.Error }</p>
+}

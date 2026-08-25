@@ -1,0 +1,23 @@
+package ui
+
+// FormOpts renders a form wrapper; children are the fields. novalidate is
+// always set: server validation is authoritative, and letting the browser block
+// submission first means the server's rules never run.
+type FormOpts struct {
+	Method string
+	Action string
+	Target string
+	Swap   string
+	Attrs  Attrs
+}
+
+templ Form(o FormOpts) {
+	<form
+		{ root("form", "", o.Attrs)... }
+		method={ o.Method } action={ o.Action }
+		hx-target={ o.Target } hx-swap={ o.Swap }
+		novalidate
+	>
+		{ children... }
+	</form>
+}

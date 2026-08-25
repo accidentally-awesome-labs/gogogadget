@@ -1,0 +1,11 @@
+package ui
+
+// SectionHeaderOpts is a sub-heading inside a page.
+type SectionHeaderOpts struct {
+	Text  string
+	Attrs Attrs
+}
+
+templ SectionHeader(o SectionHeaderOpts) {
+	<h2 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h2>
+}

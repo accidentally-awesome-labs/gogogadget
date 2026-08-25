@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/plan-card",
+    "kind": "component",
+    "name": "plan-card",
+    "revision": 1,
+    "contract": 1,
+    "title": "PlanCard",
+    "description": "The PlanCard renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/plan-card.templ",
+        "target": "internal/web/templates/ui/plan-card.templ",
+        "class": "templ",
+        "sha256": "00725274be152a808848af9076629bdfac99d74ae3f2824be0f715c40ad3a68a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "plan-card",
+          "family": "communication"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

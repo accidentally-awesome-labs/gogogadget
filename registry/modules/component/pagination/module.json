@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/pagination",
+    "kind": "component",
+    "name": "pagination",
+    "revision": 1,
+    "contract": 1,
+    "title": "Pagination",
+    "description": "The Pagination renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/pagination.templ",
+        "target": "internal/web/templates/ui/pagination.templ",
+        "class": "templ",
+        "sha256": "d7df2f2b5e4feb9cdb40940a3af15f71fef04bad0a7299d05119caaedeba030a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "pagination",
+          "family": "navigation"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

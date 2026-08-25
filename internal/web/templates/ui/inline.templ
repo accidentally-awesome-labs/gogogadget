@@ -1,0 +1,18 @@
+package ui
+
+// InlineOpts configures a horizontal row.
+type InlineOpts struct {
+	Gap   Gap
+	Attrs Attrs
+}
+
+// Inline renders children in a horizontal row.
+templ Inline(o InlineOpts) {
+	<div { root("inline", inlineClasses(o), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func inlineClasses(o InlineOpts) string {
+	return mergeClasses("flex items-center "+gapClass(o.Gap), o.Attrs.Class)
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/tooltip",
+    "kind": "component",
+    "name": "tooltip",
+    "revision": 1,
+    "contract": 1,
+    "title": "Tooltip",
+    "description": "The Tooltip renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tooltip.templ",
+        "target": "internal/web/templates/ui/tooltip.templ",
+        "class": "templ",
+        "sha256": "0530a3692dc822e7aca4cdc99eca34f1ef75e79707d30ece9d1e37fd1fcba4dc",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "tooltip",
+          "family": "overlays"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

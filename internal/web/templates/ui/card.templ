@@ -1,0 +1,38 @@
+package ui
+
+type CardOpts struct {
+	Attrs Attrs
+}
+
+// Card is the bordered container every panel sits in.
+templ Card(o CardOpts) {
+	<div { root("card", "card", o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+// CardHeaderOpts configures a card header row.
+type CardHeaderOpts struct {
+	Title string
+	Attrs Attrs
+}
+
+// CardHeader renders a title row with optional trailing actions.
+templ CardHeader(o CardHeaderOpts) {
+	<div { root("card-header", "flex items-center justify-between mb-4", o.Attrs)... }>
+		<h3 class="section-title">{ o.Title }</h3>
+		{ children... }
+	</div>
+}
+
+// CardFooterOpts configures a card footer row.
+type CardFooterOpts struct {
+	Attrs Attrs
+}
+
+// CardFooter renders a trailing action row.
+templ CardFooter(o CardFooterOpts) {
+	<div { root("card-footer", "flex items-center gap-2 mt-4", o.Attrs)... }>
+		{ children... }
+	</div>
+}

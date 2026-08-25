@@ -1,0 +1,18 @@
+package ui
+
+import (
+	"fmt"
+)
+
+// MeterOpts is a usage bar. Percent is clamped, so an over-quota caller cannot
+// render a bar wider than its track.
+type MeterOpts struct {
+	Percent int
+	Attrs   Attrs
+}
+
+templ Meter(o MeterOpts) {
+	<div { root("meter", "meter", o.Attrs)... }>
+		<div class="meter-fill" style={ fmt.Sprintf("width: %d%%", clampPercent(o.Percent)) }></div>
+	</div>
+}

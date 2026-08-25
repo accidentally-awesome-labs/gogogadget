@@ -1,0 +1,23 @@
+package ui
+
+import (
+	"fmt"
+)
+
+// TextareaOpts configures a multi-line input.
+type TextareaOpts struct {
+	Name, Value, Placeholder string
+	Rows                     int
+	Required                 bool
+	Attrs                    Attrs
+}
+
+// Textarea is a multi-line text input.
+templ Textarea(o TextareaOpts) {
+	<textarea
+		{ root("textarea", "input", o.Attrs)... }
+		id={ o.Name } name={ o.Name } rows={ fmt.Sprint(o.Rows) }
+		placeholder={ o.Placeholder }
+		required?={ o.Required }
+	>{ o.Value }</textarea>
+}

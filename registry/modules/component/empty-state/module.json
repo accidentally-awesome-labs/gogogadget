@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/empty-state",
+    "kind": "component",
+    "name": "empty-state",
+    "revision": 1,
+    "contract": 1,
+    "title": "EmptyState",
+    "description": "The EmptyState renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/empty-state.templ",
+        "target": "internal/web/templates/ui/empty-state.templ",
+        "class": "templ",
+        "sha256": "408d20f405bc927d48ed27c5fbfbf568d3059ad8157728c89b749e76cb84f843",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "empty-state",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

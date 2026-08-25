@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/meter",
+    "kind": "component",
+    "name": "meter",
+    "revision": 1,
+    "contract": 1,
+    "title": "Meter",
+    "description": "The Meter renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/meter.templ",
+        "target": "internal/web/templates/ui/meter.templ",
+        "class": "templ",
+        "sha256": "1f6dcd3da57a923dd800b4b5278e4e248575e06907f0dfca2b7d74a089d818f7",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "meter",
+          "family": "feedback"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

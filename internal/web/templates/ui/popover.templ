@@ -1,0 +1,17 @@
+package ui
+
+// PopoverOpts configures a trigger + popover panel.
+type PopoverOpts struct {
+	ID, Label string
+	Attrs     Attrs
+}
+
+// Popover renders a trigger with a positioned panel.
+templ Popover(o PopoverOpts) {
+	<div { rootWith("popover", "relative inline-block", o.Attrs, "x-data", "uiMenu")... }>
+		<button type="button" class="btn btn-ghost btn-sm" data-ui-menu-trigger :aria-expanded="open.toString()" @click="toggle">{ o.Label }</button>
+		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute left-0 mt-1 card p-3 z-(--z-overlay)">
+			{ children... }
+		</div>
+	</div>
+}
