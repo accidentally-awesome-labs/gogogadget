@@ -1,0 +1,38 @@
+package ui
+
+// SelectionBarOpts is the bulk-action bar for selected rows.
+type SelectionBarOpts struct {
+	// Count is how many rows are selected; the bar renders nothing at zero.
+	Count int
+	// CountLabel states the selection in words, because a bare number beside
+	// buttons does not say what was selected.
+	CountLabel string
+	ClearLabel string
+	ClearURL   string
+	Target     string
+	Attrs      Attrs
+}
+
+// SelectionBar renders bulk actions for a selection.
+//
+// role="status" with a polite live region: the count changes as the user
+// selects, and an unannounced count means a screen-reader user cannot tell how
+// many rows a bulk delete is about to affect.
+templ SelectionBar(o SelectionBarOpts) {
+	if o.Count > 0 {
+		<div
+			{ rootWith("selection-bar", "flex items-center gap-3 flex-wrap rounded-lg border border-border bg-surface-raised px-3 py-2 mb-3 text-sm", o.Attrs,
+				"role", "status")... }
+		>
+			<span class="font-medium">{ o.CountLabel }</span>
+			{ children... }
+			if o.ClearURL != "" {
+				<a
+					href={ templ.SafeURL(o.ClearURL) }
+					hx-get={ o.ClearURL } hx-target={ o.Target } hx-swap="innerMorph"
+					class="btn btn-ghost btn-xs ml-auto"
+				>{ breadcrumbOrDefault(o.ClearLabel, "Clear selection") }</a>
+			}
+		</div>
+	}
+}

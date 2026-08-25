@@ -686,6 +686,114 @@ templ Gallery() {
 			}
 		}
 
+		@gallerySection("Data — the full table surface") {
+			@ui.DataTable(ui.DataTableOpts{
+				Caption: "Projects, sorted by name ascending",
+				Columns: []ui.Column{
+					{Key: "name", Label: "Name", Sortable: true},
+					{Key: "owner", Label: "Owner", HideBelow: ui.BreakpointSM},
+					{Key: "status", Label: "Status"},
+					{Key: "runs", Label: "Runs", Numeric: true, Sortable: true},
+					{Key: "actions", Label: "Actions", Align: ui.AlignEnd},
+				},
+				SortKey: "name", SortDir: ui.SortAsc,
+				BaseURL: "/dev/gallery", Target: "#content",
+				RowCount: 2, Density: ui.DensityCompact,
+				Toolbar: dataTableToolbar(),
+				Selection: ui.SelectionBar(ui.SelectionBarOpts{
+					Count: 2, CountLabel: "2 projects selected",
+					ClearURL: "/dev/gallery", Target: "#content",
+				}),
+				Pagination: ui.Pagination(ui.PaginationOpts{
+					Page: 1, TotalPages: 4, BaseURL: "/dev/gallery", Target: "#content",
+					Labels: pagerLabels(ctx),
+				}),
+			}) {
+				<tr>
+					<td class="px-4 py-3">Apollo</td>
+					<td class="px-4 py-3 hidden sm:table-cell">Ada</td>
+					<td class="px-4 py-3">@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindSuccess, Label: "Active"})</td>
+					<td class="px-4 py-3 text-right tabular-nums">1,204</td>
+					<td class="px-4 py-3">
+						@ui.RowActions(ui.RowActionsOpts{Label: "Actions for Apollo", Items: []ui.MenuItem{
+							{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+							{Separator: true},
+							{Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger, HX: ui.HX{Delete: "/dev/gallery"}},
+						}})
+					</td>
+				</tr>
+				<tr>
+					<td class="px-4 py-3">Borealis</td>
+					<td class="px-4 py-3 hidden sm:table-cell">Grace</td>
+					<td class="px-4 py-3">@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindWarn, Label: "Paused"})</td>
+					<td class="px-4 py-3 text-right tabular-nums">87</td>
+					<td class="px-4 py-3">
+						@ui.RowActions(ui.RowActionsOpts{Label: "Actions for Borealis", Items: []ui.MenuItem{
+							{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+						}})
+					</td>
+				</tr>
+			}
+		}
+
+		@gallerySection("Data — details, tiles and files") {
+			<div class="space-y-6">
+				@ui.StatGroup(ui.StatGroupOpts{Label: "Workspace totals", Columns: 3}) {
+					@ui.Metric(ui.MetricOpts{Title: "Active projects", Value: "12"})
+					@ui.Metric(ui.MetricOpts{Title: "Team members", Value: "4"})
+					@ui.Metric(ui.MetricOpts{Title: "Runs this week", Value: "1,291", Sub: "+8% on last week"})
+				}
+				@ui.DescriptionList(ui.DescriptionListOpts{Columns: 2, Density: ui.DensityCompact, Items: []ui.DescriptionItem{
+					{Term: "Project ID", Value: "prj_8f2a41c9", Copyable: true},
+					{Term: "Region", Value: "eu-west-1", Hint: "Set at creation and immutable."},
+					{Term: "Plan", ValueSlot: ui.Badge(ui.BadgeOpts{Text: "Pro", Kind: ui.KindBrand})},
+					{Term: "Created", Value: "January 15, 2026"},
+				}})
+				@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD}) {
+					@ui.Tile(ui.TileOpts{Title: "Documentation", Body: "Guides and recipes.", Icon: ui.IconFile, Href: "/docs"})
+					@ui.Tile(ui.TileOpts{Title: "API tokens", Body: "Create and revoke.", Icon: ui.IconKey, Href: "/app/settings/api"})
+					@ui.Tile(ui.TileOpts{Title: "Not a link", Body: "A tile with no destination stays a card.", Icon: ui.IconInfo})
+				}
+				@ui.Stack(ui.StackOpts{Gap: ui.GapSM}) {
+					@ui.Attachment(ui.AttachmentOpts{Name: "architecture-decision-record.pdf", Size: "184 KB", Href: "/dev/gallery"})
+					@ui.Attachment(ui.AttachmentOpts{Name: "seed-data.sql", Size: "12 KB", Icon: ui.IconFolder})
+				}
+			</div>
+		}
+
+		@gallerySection("Layout — composition primitives") {
+			<div class="space-y-6">
+				@ui.Section(ui.SectionOpts{Title: "A named landmark", Level: 3, Attrs: ui.Attrs{ID: "gallery-section"}}) {
+					<p class="text-sm text-fg-muted">A section with an accessible name is a landmark a screen reader can jump to.</p>
+				}
+				@ui.Split(ui.SplitOpts{Ratio: ui.RatioWide, Gap: ui.GapMD}) {
+					<div class="card text-sm">Primary pane (two thirds)</div>
+					<div class="card text-sm">Secondary pane</div>
+				}
+				@ui.Center(ui.CenterOpts{Width: ui.WidthNarrow}) {
+					<div class="card text-sm text-center">Centred block, left-aligned text.</div>
+				}
+				@ui.AspectRatio(ui.AspectRatioOpts{Ratio: ui.RatioVideo}) {
+					<div class="w-full h-full bg-surface-raised flex items-center justify-center text-sm text-fg-muted">16:9 reserved box</div>
+				}
+				@ui.ScrollArea(ui.ScrollAreaOpts{Label: "Release notes", Height: ui.HeightSM}) {
+					<div class="p-3 space-y-2 text-sm">
+						for i := 1; i <= 12; i++ {
+							<p>Scrollable line { fmt.Sprint(i) } — this region is focusable, so arrow keys work.</p>
+						}
+					</div>
+				}
+				@ui.Toolbar(ui.ToolbarOpts{Label: "Editor actions"}) {
+					@ui.Button(ui.ButtonOpts{Label: "Format", Size: ui.SizeSM})
+					@ui.Button(ui.ButtonOpts{Label: "Run", Size: ui.SizeSM, Action: ui.ActionPrimary})
+				}
+				@ui.StickyBar(ui.StickyBarOpts{Side: ui.SideBottom}) {
+					<span class="text-sm text-fg-muted">Unsaved changes</span>
+					@ui.Button(ui.ButtonOpts{Label: "Save", Action: ui.ActionPrimary, Size: ui.SizeSM, Attrs: ui.Attrs{Class: "ml-auto"}})
+				}
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

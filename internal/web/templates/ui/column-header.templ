@@ -1,0 +1,134 @@
+package ui
+
+import (
+	"fmt"
+	"strings"
+)
+
+// ColumnHeaderOpts is one sortable table header cell.
+type ColumnHeaderOpts struct {
+	Column Column
+	// Sort is this column's current direction. SortNone means the table is not
+	// sorted by this column, which is different from ascending.
+	Sort SortDirection
+	// BaseURL and Param build the toggle link, so sorting works with scripts
+	// disabled and the sorted URL is shareable.
+	BaseURL string
+	Param   string
+	Target  string
+	Attrs   Attrs
+}
+
+// ColumnHeader renders a th with sort semantics.
+//
+// aria-sort is what tells a screen-reader user which column orders the table
+// and in which direction. Without it a sorted table is indistinguishable from
+// an unsorted one, and the little arrow glyph is invisible to them.
+templ ColumnHeader(o ColumnHeaderOpts) {
+	<th
+		{ rootWith("column-header", columnHeaderClass(o.Column), o.Attrs,
+			"scope", "col",
+			"aria-sort", columnAriaSort(o.Sort))... }
+	>
+		if o.Column.Sortable && o.BaseURL != "" {
+			<a
+				href={ templ.SafeURL(SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort)) }
+				hx-get={ SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort) }
+				hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+				class="inline-flex items-center gap-1 hover:text-fg"
+			>
+				{ o.Column.Label }
+				@Icon(IconOpts{Name: columnSortIcon(o.Sort), Attrs: Attrs{Class: "w-3 h-3"}})
+			</a>
+		} else {
+			{ o.Column.Label }
+		}
+	</th>
+}
+
+// SortURL toggles a column's direction: unsorted becomes ascending, ascending
+// becomes descending, and descending returns to unsorted. The third state is
+// deliberate - without it a user who sorted by mistake cannot get back to the
+// table's natural order.
+func SortURL(baseURL, param, key string, current SortDirection) string {
+	next := SortAsc
+	switch current.Value() {
+	case SortAsc:
+		next = SortDesc
+	case SortDesc:
+		next = SortNone
+	}
+	sep := "?"
+	if strings.Contains(baseURL, "?") {
+		sep = "&"
+	}
+	if next == SortNone {
+		return baseURL
+	}
+	return fmt.Sprintf("%s%s%s=%s&dir=%s", baseURL, sep, sortParam(param), key, next)
+}
+
+func sortParam(param string) string {
+	if param == "" {
+		return "sort"
+	}
+	return param
+}
+
+// columnAriaSort maps the direction onto the ARIA value. An unsorted column
+// emits nothing: aria-sort="none" on every other header is noise a screen
+// reader reads out per column.
+func columnAriaSort(sort SortDirection) string {
+	switch sort.Value() {
+	case SortAsc:
+		return "ascending"
+	case SortDesc:
+		return "descending"
+	default:
+		return ""
+	}
+}
+
+func columnSortIcon(sort SortDirection) IconName {
+	switch sort.Value() {
+	case SortAsc:
+		return IconArrowUp
+	case SortDesc:
+		return IconArrowDown
+	default:
+		return IconSort
+	}
+}
+
+func columnHeaderClass(column Column) string {
+	cls := "px-4 py-3 font-medium"
+	if column.Numeric {
+		cls += " text-right tabular-nums"
+	}
+	switch column.Align.Value() {
+	case AlignCenter:
+		cls += " text-center"
+	case AlignEnd:
+		cls += " text-right"
+	}
+	if hide := breakpointHideClass(column.HideBelow); hide != "" {
+		cls += " " + hide
+	}
+	return cls
+}
+
+// breakpointHideClass hides a column below a breakpoint. Without this a wide
+// table can only scroll sideways on a phone, which puts data behind a gesture
+// instead of choosing what matters.
+func breakpointHideClass(bp Breakpoint) string {
+	switch bp.Value() {
+	case BreakpointSM:
+		return "hidden sm:table-cell"
+	case BreakpointMD:
+		return "hidden md:table-cell"
+	case BreakpointLG:
+		return "hidden lg:table-cell"
+	default:
+		return ""
+	}
+}

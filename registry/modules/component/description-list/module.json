@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/description-list.templ",
         "target": "internal/web/templates/ui/description-list.templ",
         "class": "templ",
-        "sha256": "d50bd10c2413922791f702416a9efeb3219873d28ef814fa494bed9c739c620b",
+        "sha256": "af043eb308903a76e976ead7bbc12a98a4e8ef414a46398f3e2cf328e9d293e1",
         "rewrite_module": true,
         "contract": true
       }

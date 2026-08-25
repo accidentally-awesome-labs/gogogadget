@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/attachment",
+    "kind": "component",
+    "name": "attachment",
+    "revision": 1,
+    "contract": 1,
+    "title": "Attachment",
+    "description": "The Attachment renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/attachment.templ",
+        "target": "internal/web/templates/ui/attachment.templ",
+        "class": "templ",
+        "sha256": "5b5b062ed74f3daa5f3e38f8738f0405a460ec6671985374421c9211eff7bc94",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "attachment",
+          "family": "data"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

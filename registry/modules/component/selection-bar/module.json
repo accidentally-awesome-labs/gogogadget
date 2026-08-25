@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/selection-bar",
+    "kind": "component",
+    "name": "selection-bar",
+    "revision": 1,
+    "contract": 1,
+    "title": "SelectionBar",
+    "description": "The SelectionBar renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/selection-bar.templ",
+        "target": "internal/web/templates/ui/selection-bar.templ",
+        "class": "templ",
+        "sha256": "7316a14a7ecec8229e8ed2f8158f323672a452544f94580818c235c60afb7bd9",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "selection-bar",
+          "family": "data"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

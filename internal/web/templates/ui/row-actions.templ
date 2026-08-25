@@ -1,0 +1,18 @@
+package ui
+
+// RowActionsOpts is the per-row command cluster.
+type RowActionsOpts struct {
+	// Label must name the row, not just the action: "Actions" repeated on
+	// forty rows gives a screen-reader user forty identical menus with no way
+	// to tell which row each belongs to.
+	Label string
+	Items []MenuItem
+	Attrs Attrs
+}
+
+// RowActions renders a row's commands as a menu.
+templ RowActions(o RowActionsOpts) {
+	<div { root("row-actions", "flex justify-end", o.Attrs)... }>
+		@DropdownMenu(DropdownMenuOpts{Label: o.Label, Items: o.Items})
+	</div>
+}

@@ -3,6 +3,8 @@ package templates
 import (
 	"context"
 
+	"github.com/a-h/templ"
+
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
@@ -50,4 +52,11 @@ func uiPlanCard(ctx context.Context, plan billing.Plan, current bool) ui.PlanCar
 		Current:      current,
 		CurrentLabel: i18n.T(ctx, "common.current_plan"),
 	}
+}
+
+// dataTableToolbar builds the gallery's table toolbar. It lives here rather than
+// inline because DataTable takes components as slots, and a slot argument
+// cannot be written as templ markup at the call site.
+func dataTableToolbar() templ.Component {
+	return ui.TableToolbar(ui.TableToolbarOpts{Label: "Project table controls"})
 }

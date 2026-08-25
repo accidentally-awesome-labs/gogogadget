@@ -228,6 +228,8 @@ func rendererSeeds() map[string]any {
 		"Icon":       IconOpts{Name: IconLogo},
 		// Both ends of a keyset sequence render nothing, which is the point.
 		"CursorPagination": CursorPaginationOpts{NextURL: "/x?after=1", Target: "#t"},
+		// An empty selection has no bulk actions to offer.
+		"SelectionBar": SelectionBarOpts{Count: 2, CountLabel: "2 selected"},
 	}
 }
 
@@ -253,6 +255,7 @@ func renderers() map[string]any {
 		"Accordion": Accordion, "BackLink": BackLink, "Breadcrumbs": Breadcrumbs, "Collapsible": Collapsible, "CursorPagination": CursorPagination, "Disclosure": Disclosure, "Menubar": Menubar, "NavigationMenu": NavigationMenu, "SkipLink": SkipLink, "Steps": Steps, "TabPanels": TabPanels, "TableOfContents": TableOfContents,
 		"ErrorState": ErrorState, "ProgressBar": ProgressBar, "ProgressCircle": ProgressCircle, "Skeleton": Skeleton, "StatusDot": StatusDot, "Toast": Toast,
 		"ConfirmAction": ConfirmAction, "ContextMenu": ContextMenu, "Drawer": Drawer, "HoverCard": HoverCard,
+		"AspectRatio": AspectRatio, "Attachment": Attachment, "Center": Center, "ColumnHeader": ColumnHeader, "DataTable": DataTable, "RowActions": RowActions, "ScrollArea": ScrollArea, "Section": Section, "SelectionBar": SelectionBar, "Split": Split, "StatGroup": StatGroup, "StickyBar": StickyBar, "TableToolbar": TableToolbar, "Tile": Tile, "Toolbar": Toolbar,
 	}
 }
 

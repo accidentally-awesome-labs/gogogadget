@@ -1,0 +1,27 @@
+package ui
+
+// StickyBarOpts is a bar pinned to an edge of the scroll container.
+type StickyBarOpts struct {
+	Side  Side
+	Attrs Attrs
+}
+
+// StickyBar renders a pinned action bar.
+//
+// It is sticky rather than fixed, so it stays inside its scroll container and
+// cannot cover content the container has scrolled past. A fixed bar overlays
+// the viewport, which on a short screen can hide the very field its Save button
+// submits.
+templ StickyBar(o StickyBarOpts) {
+	<div { root("sticky-bar", stickyBarClass(o.Side), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func stickyBarClass(side Side) string {
+	base := "sticky z-(--z-nav) bg-surface border-border px-4 py-3 flex items-center gap-2 flex-wrap"
+	if side.Value() == SideTop {
+		return base + " top-0 border-b"
+	}
+	return base + " bottom-0 border-t"
+}

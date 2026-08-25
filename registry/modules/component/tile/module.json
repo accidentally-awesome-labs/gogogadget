@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/tile",
+    "kind": "component",
+    "name": "tile",
+    "revision": 1,
+    "contract": 1,
+    "title": "Tile",
+    "description": "The Tile renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tile.templ",
+        "target": "internal/web/templates/ui/tile.templ",
+        "class": "templ",
+        "sha256": "55a6f98d82c462dc3e60f39f5a6adfab97e840cc57526da36ebb909016411cef",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "tile",
+          "family": "data"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

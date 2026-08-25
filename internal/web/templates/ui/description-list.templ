@@ -1,21 +1,92 @@
 package ui
 
+import "fmt"
+
 // DescriptionItem is one term/value pair in a DescriptionList.
-type DescriptionItem struct{ Term, Value string }
+type DescriptionItem struct {
+	Term, Value string
+	// Hint is secondary explanation under the value.
+	Hint string
+	// ValueSlot renders rich content in place of Value and wins when both are
+	// set. Two sources for one slot needs a stated precedence, or the same
+	// options struct renders differently depending on which field a caller
+	// happened to fill.
+	ValueSlot templ.Component
+	// Actions is the trailing control cluster for this row.
+	Actions templ.Component
+	// Copyable adds a copy control for values a user will paste elsewhere -
+	// API hosts, IDs, connection strings.
+	Copyable bool
+	// CopyLabel and CopiedLabel are the copy control's strings, so ui never
+	// imports i18n.
+	CopyLabel, CopiedLabel string
+}
 
 // DescriptionListOpts is the read-only detail pattern (account, org).
 type DescriptionListOpts struct {
-	Items []DescriptionItem
-	Attrs Attrs
+	Items   []DescriptionItem
+	Columns int
+	Density Density
+	Attrs   Attrs
 }
 
 templ DescriptionList(o DescriptionListOpts) {
-	<dl { root("description-list", "space-y-4 text-sm", o.Attrs)... }>
+	<dl { root("description-list", descriptionListClass(o), o.Attrs)... }>
 		for _, item := range o.Items {
-			<div>
+			<div class={ descriptionRowClass(o.Density) }>
 				<dt class="text-fg-muted">{ item.Term }</dt>
-				<dd class="font-medium">{ item.Value }</dd>
+				<dd class="font-medium flex items-center gap-2">
+					if item.ValueSlot != nil {
+						@item.ValueSlot
+					} else {
+						{ item.Value }
+					}
+					if item.Copyable && item.Value != "" {
+						@CopyButton(CopyButtonOpts{
+							Value: item.Value, Size: SizeXS,
+							Label:       descriptionCopyLabel(item.CopyLabel),
+							CopiedLabel: descriptionCopiedLabel(item.CopiedLabel),
+						})
+					}
+					if item.Actions != nil {
+						<span class="ml-auto">
+							@item.Actions
+						</span>
+					}
+				</dd>
+				if item.Hint != "" {
+					<dd class="text-xs text-fg-muted">{ item.Hint }</dd>
+				}
 			</div>
 		}
 	</dl>
+}
+
+func descriptionListClass(o DescriptionListOpts) string {
+	base := "text-sm"
+	if o.Columns > 1 {
+		return base + " grid gap-4 sm:grid-cols-" + fmt.Sprint(o.Columns)
+	}
+	return base + " space-y-4"
+}
+
+func descriptionRowClass(density Density) string {
+	if density.Value() == DensityCompact {
+		return "py-1"
+	}
+	return ""
+}
+
+func descriptionCopyLabel(label string) string {
+	if label == "" {
+		return "Copy"
+	}
+	return label
+}
+
+func descriptionCopiedLabel(label string) string {
+	if label == "" {
+		return "Copied"
+	}
+	return label
 }

@@ -1,0 +1,36 @@
+package ui
+
+// SectionOpts is a titled content region.
+type SectionOpts struct {
+	Title string
+	// Level is the heading level, so a section nested inside another does not
+	// break the document outline.
+	Level int
+	Attrs Attrs
+}
+
+// Section renders a landmark region with its own heading.
+//
+// It is a <section> with an accessible name, which is what makes it a landmark
+// a screen reader can jump to. A <section> without a name is not a landmark at
+// all - it is an anonymous div with extra letters.
+templ Section(o SectionOpts) {
+	<section { rootWith("section", "space-y-4", o.Attrs, "aria-labelledby", sectionHeadingID(o))... }>
+		if o.Title != "" {
+			<div id={ sectionHeadingID(o) }>
+				@Heading(HeadingOpts{Text: o.Title, Level: o.Level, Size: SizeSM})
+			</div>
+		}
+		{ children... }
+	</section>
+}
+
+// sectionHeadingID derives the heading id from the caller's ID. Without an ID
+// there is nothing to point aria-labelledby at, so the attribute is omitted
+// rather than dangling.
+func sectionHeadingID(o SectionOpts) string {
+	if o.Attrs.ID == "" || o.Title == "" {
+		return ""
+	}
+	return o.Attrs.ID + "-title"
+}

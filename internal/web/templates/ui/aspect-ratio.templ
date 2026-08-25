@@ -1,0 +1,34 @@
+package ui
+
+// AspectRatioOpts reserves space for media before it loads.
+type AspectRatioOpts struct {
+	Ratio Ratio
+	Attrs Attrs
+}
+
+// AspectRatio reserves the box a medium will occupy.
+//
+// This exists to stop layout shift: without a reserved box the page reflows the
+// moment an image or embed arrives, moving whatever the user was about to click.
+// RatioAuto is the honest name for declining to reserve, rather than a default
+// that hides the cost.
+templ AspectRatio(o AspectRatioOpts) {
+	<div { root("aspect-ratio", mergeClasses("overflow-hidden", aspectClass(o.Ratio)), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func aspectClass(ratio Ratio) string {
+	switch ratio.Value() {
+	case RatioSquare:
+		return "aspect-square"
+	case RatioVideo:
+		return "aspect-video"
+	case RatioWide:
+		return "aspect-[21/9]"
+	case RatioPortrait:
+		return "aspect-[3/4]"
+	default:
+		return ""
+	}
+}

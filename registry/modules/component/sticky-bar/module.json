@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/sticky-bar",
+    "kind": "component",
+    "name": "sticky-bar",
+    "revision": 1,
+    "contract": 1,
+    "title": "StickyBar",
+    "description": "The StickyBar renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/sticky-bar.templ",
+        "target": "internal/web/templates/ui/sticky-bar.templ",
+        "class": "templ",
+        "sha256": "b32f2f5e975cc22d910bfc39125bfed9ed368d2dddae839099c34dd33307bfc0",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "sticky-bar",
+          "family": "layout"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}
