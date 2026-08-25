@@ -127,7 +127,7 @@ func TestWebhookDeliverSuccess(t *testing.T) {
 	pointEndpoint(t, pool, epID, srv.URL)
 
 	d := insertDelivery(t, q, epID)
-	require.NoError(t, w.deliverWebhook(ctx, sqlc.Job{ID: 1, Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d.ID}), MaxAttempts: 8}))
+	require.NoError(t, w.deliverWebhook(ctx, WebhookDeliverPayload{DeliveryID: d.ID}, Attempt{Number: 1, Max: 8}))
 
 	row, err := q.GetWebhookDelivery(ctx, d.ID)
 	require.NoError(t, err)
@@ -155,7 +155,7 @@ func TestWebhookDeliver5xxRetries(t *testing.T) {
 	pointEndpoint(t, pool, epID, srv.URL)
 
 	d := insertDelivery(t, q, epID)
-	err := w.deliverWebhook(ctx, sqlc.Job{ID: 2, Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d.ID}), MaxAttempts: 8})
+	err := w.deliverWebhook(ctx, WebhookDeliverPayload{DeliveryID: d.ID}, Attempt{Number: 1, Max: 8})
 	require.Error(t, err, "5xx returns error → backoff path")
 
 	row, err := q.GetWebhookDelivery(ctx, d.ID)
@@ -175,8 +175,9 @@ func TestWebhookDeliverDeadLetterNotifies(t *testing.T) {
 	pointEndpoint(t, pool, epID, srv.URL)
 
 	d := insertDelivery(t, q, epID)
-	// Final attempt (attempts already at max-1 → this failure exhausts).
-	err := w.deliverWebhook(ctx, sqlc.Job{ID: 3, Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d.ID}), Attempts: 7, MaxAttempts: 8})
+	// The last attempt: ClaimJob has already incremented, so attempt 8 of 8 is
+	// the one ProcessOne dead-letters on.
+	err := w.deliverWebhook(ctx, WebhookDeliverPayload{DeliveryID: d.ID}, Attempt{Number: 8, Max: 8})
 	require.Error(t, err)
 
 	row, err := q.GetWebhookDelivery(ctx, d.ID)
@@ -187,6 +188,31 @@ func TestWebhookDeliverDeadLetterNotifies(t *testing.T) {
 	n, err := q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{ClerkOrgID: "org_wh", ClerkUserID: "user_wh"})
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), n)
+}
+
+// The customer-visible delivery status and the queue must agree on when a
+// delivery is permanently dead. On the second-to-last attempt the queue still
+// has a retry left, so the endpoint owner must not yet be told it failed
+// permanently — and must not get the notification that goes with it.
+func TestWebhookDeliverStaysPendingWhileQueueWillRetry(t *testing.T) {
+	w, q, pool, epID := webhookTestSetup(t)
+	ctx := context.Background()
+	srv := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusBadGateway)
+	}))
+	t.Cleanup(srv.Close)
+	pointEndpoint(t, pool, epID, srv.URL)
+
+	d := insertDelivery(t, q, epID)
+	require.Error(t, w.deliverWebhook(ctx, WebhookDeliverPayload{DeliveryID: d.ID}, Attempt{Number: 7, Max: 8}))
+
+	row, err := q.GetWebhookDelivery(ctx, d.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "pending", row.Status, "attempt 7 of 8 leaves a retry, so the delivery is not dead yet")
+
+	n, err := q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{ClerkOrgID: "org_wh", ClerkUserID: "user_wh"})
+	require.NoError(t, err)
+	assert.Equal(t, int64(0), n, "no permanent-failure notification while retries remain")
 }
 
 func mustJSON(t *testing.T, v any) []byte {
@@ -238,7 +264,7 @@ func TestWebhookDeliverSignsWithBothSecretsDuringGrace(t *testing.T) {
 	pointEndpoint(t, pool, epID, srv.URL)
 
 	d := insertDelivery(t, q, epID)
-	require.NoError(t, w.deliverWebhook(ctx, sqlc.Job{Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d.ID})}))
+	require.NoError(t, w.deliverWebhook(ctx, WebhookDeliverPayload{DeliveryID: d.ID}, Attempt{Number: 1, Max: 8}))
 
 	// Two space-delimited signatures — a receiver holding EITHER secret verifies.
 	sigs := strings.Fields(gotHeader.Get("webhook-signature"))
@@ -253,7 +279,7 @@ func TestWebhookDeliverSignsWithBothSecretsDuringGrace(t *testing.T) {
 	_, err = pool.Exec(ctx, `UPDATE webhook_endpoints SET secret_rotated_at = now() - interval '48 hours' WHERE id = $1`, epID)
 	require.NoError(t, err)
 	d2 := insertDelivery(t, q, epID)
-	require.NoError(t, w.deliverWebhook(ctx, sqlc.Job{Payload: mustJSON(t, WebhookDeliverPayload{DeliveryID: d2.ID})}))
+	require.NoError(t, w.deliverWebhook(ctx, WebhookDeliverPayload{DeliveryID: d2.ID}, Attempt{Number: 1, Max: 8}))
 	require.Len(t, strings.Fields(gotHeader.Get("webhook-signature")), 1)
 	oldWh, err := standardwebhooks.NewWebhookRaw([]byte(oldSecret))
 	require.NoError(t, err)

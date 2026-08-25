@@ -38,7 +38,17 @@
         "usage_events"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "jobs": [
+        {
+          "kind": "usage.flush",
+          "package": "internal/jobs",
+          "handler": "defineUsageFlush",
+          "schedulable": true,
+          "max_attempts": 0
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0007_usage_events",

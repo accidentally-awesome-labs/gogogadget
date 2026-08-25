@@ -38,13 +38,10 @@ const (
 	KindExportOrgJSON        = "export.org_json"
 )
 
-// SchedulableKinds are the kinds a schedule row may reference — handlers
-// whose payloads are job-specific (webhook.deliver carries a delivery id,
-// emails carry a recipient) can't be scheduled generically and are absent
-// by design. Builders extend this list as they add recurring handlers.
-var SchedulableKinds = []string{KindEmailDigest, KindUsageFlush}
-
-// SchedulableKindsContains reports whether kind may back a schedule row.
+// SchedulableKindsContains reports whether kind may back a schedule row. The
+// list itself is generated from module declarations — a kind cannot be scheduled
+// unless its module said it may be, because a schedule pointing at a one-shot
+// handler would fire it forever.
 func SchedulableKindsContains(kind string) bool {
 	for _, k := range SchedulableKinds {
 		if k == kind {
@@ -92,7 +89,13 @@ func EnqueueAt(ctx context.Context, q *sqlc.Queries, kind string, payload any, r
 	if !runAt.IsZero() {
 		at = pgtype.Timestamptz{Time: runAt, Valid: true}
 	}
-	_, err = q.EnqueueJob(ctx, sqlc.EnqueueJobParams{Kind: kind, Payload: raw, RunAt: at})
+	// The declaring module's budget is applied here because the row is dispatch
+	// truth: a job keeps the budget it was enqueued under even if the module
+	// later changes its mind. An undeclared kind gets the column default — a
+	// project may queue work before the module that handles it is installed.
+	_, err = q.EnqueueJob(ctx, sqlc.EnqueueJobParams{
+		Kind: kind, Payload: raw, RunAt: at, MaxAttempts: int32(declaredAttempts[kind]),
+	})
 	return err
 }
 
@@ -110,6 +113,10 @@ type Worker struct {
 	sender mail.Sender
 	log    *slog.Logger
 	poll   time.Duration
+	// definitions is the dispatch table, keyed by kind. Built at construction
+	// from the generated declarations; a kind no installed module declares is
+	// absent, which is what makes a stale queued row dead-letter immediately.
+	definitions map[string]Definition
 	// OnDeadLetter reports exhausted jobs (wired to Sentry when enabled).
 	OnDeadLetter func(kind string, err error)
 	// Webhook delivery policy hooks — strict by default; tests swap these.
@@ -144,8 +151,15 @@ func (w *Worker) digestLocale() language.Tag {
 }
 
 func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
-	return &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second,
+	w := &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second,
 		WebhookGuard: guardWebhookURL, WebhookTransport: guardedTransport()}
+	// Built once from the generated table. The declarations close over w, so the
+	// collaborators callers assign after construction are still picked up.
+	w.definitions = make(map[string]Definition, len(workerDefinitions(w)))
+	for _, d := range workerDefinitions(w) {
+		w.definitions[d.Kind] = d
+	}
+	return w
 }
 
 // Run polls until ctx is done; a daily janitor pass deletes finished jobs
@@ -309,52 +323,49 @@ const (
 // It is not a handler failure, so it never retries.
 var errUnknownKind = errors.New("no installed module provides this job kind")
 
-func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
-	switch job.Kind {
-	case KindEmailDigest:
-		return w.sendDigests(ctx, job)
-	case KindUsageFlush:
-		return w.flushUsage(ctx, job)
-	case KindWebhookDeliver:
-		return w.deliverWebhook(ctx, job)
-	case KindExportProjectsCSV:
-		return w.exportProjectsCSV(ctx, job)
-	case KindExportOrgJSON:
-		return w.exportOrgJSON(ctx, job)
-	case KindWelcome, KindPaymentFailed, KindSubscriptionCanceled, KindTrialEnding, KindDunningReminder, KindDunningFinal:
-		var p EmailPayload
-		if err := json.Unmarshal(job.Payload, &p); err != nil {
+// sendTransactionalEmail is the shared body behind every email kind. The kind is
+// a parameter rather than a branch on the job row, because each kind is now its
+// own declaration and the row is no longer in scope here.
+func (w *Worker) sendTransactionalEmail(ctx context.Context, kind string, p EmailPayload) error {
+	if kind == KindTrialEnding {
+		if skip, err := w.trialNoLongerActive(ctx, p.OrgID); err != nil {
 			return err
+		} else if skip {
+			w.log.Info("trial-ending email skipped: subscription no longer trialing", "org", p.OrgID)
+			return nil
 		}
-		if job.Kind == KindTrialEnding {
-			if skip, err := w.trialNoLongerActive(ctx, p.OrgID); err != nil {
-				return err
-			} else if skip {
-				w.log.Info("trial-ending email skipped: subscription no longer trialing", "org", p.OrgID)
-				return nil
-			}
+	}
+	if kind == KindDunningReminder || kind == KindDunningFinal {
+		if skip, err := w.paymentRecovered(ctx, p.OrgID); err != nil {
+			return err
+		} else if skip {
+			w.log.Info("dunning email skipped: payment no longer failing", "kind", kind, "org", p.OrgID)
+			return nil
 		}
-		if job.Kind == KindDunningReminder || job.Kind == KindDunningFinal {
-			if skip, err := w.paymentRecovered(ctx, p.OrgID); err != nil {
-				return err
-			} else if skip {
-				w.log.Info("dunning email skipped: payment no longer failing", "kind", job.Kind, "org", p.OrgID)
-				return nil
-			}
-			if job.Kind == KindDunningFinal {
-				// The day-0 notification is a week stale by now; the last
-				// notice is the one worth putting back in front of them.
-				notify.SendOrg(ctx, w.q, p.OrgID, "payment_failed", "Final notice: payment still failing",
-					"Update your card to keep your plan active.", "/app/settings/billing")
-			}
+		if kind == KindDunningFinal {
+			// The day-0 notification is a week stale by now; the last
+			// notice is the one worth putting back in front of them.
+			notify.SendOrg(ctx, w.q, p.OrgID, "payment_failed", "Final notice: payment still failing",
+				"Update your card to keep your plan active.", "/app/settings/billing")
 		}
-		return w.sender.Send(ctx, mail.Message{To: p.To, Subject: p.Subject, HTML: p.HTML, Text: p.Text})
-	default:
-		// No installed module provides this kind. Wrapping the sentinel keeps the
-		// kind in the message for the operator while letting ProcessOne recognise
-		// that retrying cannot help.
+	}
+	return w.sender.Send(ctx, mail.Message{To: p.To, Subject: p.Subject, HTML: p.HTML, Text: p.Text})
+}
+
+// dispatch routes a claimed row to the declaration that owns its kind. The table
+// is generated from module manifests, so an uninstalled module's kind is simply
+// absent — which ProcessOne turns into an immediate dead-letter rather than a
+// retry of a handler that cannot exist.
+func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
+	definition, ok := w.definitions[job.Kind]
+	if !ok {
 		return fmt.Errorf("%w: %s", errUnknownKind, job.Kind)
 	}
+	// Attempt state comes from the row, not the declaration: a job keeps the
+	// budget it was enqueued under even if the module later changes its mind.
+	return definition.Handle(ctx, job.Payload, Attempt{
+		Number: int(job.Attempts), Max: int(job.MaxAttempts),
+	})
 }
 
 // paymentRecovered is the run-time guard for the dunning follow-ups. They are

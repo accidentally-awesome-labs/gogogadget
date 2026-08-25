@@ -47,7 +47,17 @@
         "notifications"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "jobs": [
+        {
+          "kind": "email.digest",
+          "package": "internal/jobs",
+          "handler": "defineEmailDigest",
+          "schedulable": true,
+          "max_attempts": 0
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0005_notifications",

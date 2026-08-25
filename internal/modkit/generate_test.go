@@ -702,3 +702,88 @@ func TestRoutesRegistryRejectsContentPathCollidingWithRoute(t *testing.T) {
 		t.Fatal("GenerateAll accepted a content path that collides with a route pattern")
 	}
 }
+
+// The dispatch table is generated from job declarations so an uninstalled
+// module's kind is simply absent, which is what turns a stale queued row into an
+// immediate dead-letter instead of a retried handler that cannot exist.
+func TestJobsRegistryEmitsDispatchTableAndSchedulables(t *testing.T) {
+	module := Manifest{
+		ID: "workflow/digest", Kind: ModuleWorkflow, Name: "digest",
+		Revision: 1, Contract: 1, Title: "Digest", Description: "Digest workflow.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{Jobs: []JobContribution{
+			{Kind: "email.digest", Package: "internal/jobs", Handler: "defineEmailDigest",
+				Schedulable: true, MaxAttempts: 0},
+			{Kind: "webhook.deliver", Package: "internal/jobs", Handler: "defineWebhookDeliver",
+				Schedulable: false, MaxAttempts: 5},
+		}},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"workflow/digest"},
+		Modules: []LockedModule{{
+			ID: "workflow/digest", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: module,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{module})
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/jobs/jobs_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if registry == "" {
+		t.Fatal("jobs registry was not emitted")
+	}
+
+	for _, want := range []string{
+		// The table names the declaration constructors; it never knows a payload type.
+		"func workerDefinitions(w *Worker) []Definition",
+		"w.defineEmailDigest()",
+		"w.defineWebhookDeliver()",
+		// The schedulable catalog is derived, not hand-listed.
+		`var SchedulableKinds = []string{ "email.digest",`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("jobs registry missing %s:\n%s", want, registry)
+		}
+	}
+	// webhook.deliver is not schedulable, so it must not appear in the catalog.
+	catalog := registry[strings.Index(registry, "SchedulableKinds"):]
+	if strings.Contains(catalog[:strings.Index(catalog, "}")], "webhook.deliver") {
+		t.Fatalf("non-schedulable kind leaked into the catalog:\n%s", catalog)
+	}
+}
+
+// Two modules declaring the same job kind is a dispatch ambiguity: whichever
+// wins silently owns the other's queued rows.
+func TestJobsRegistryRejectsDuplicateKinds(t *testing.T) {
+	mk := func(id, name string) Manifest {
+		return Manifest{
+			ID: id, Kind: ModuleWorkflow, Name: name,
+			Revision: 1, Contract: 1, Title: name, Description: name + " workflow.",
+			Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+			Runtime: RuntimeContributions{Jobs: []JobContribution{
+				{Kind: "same.kind", Package: "internal/jobs", Handler: "defineSame"},
+			}},
+		}
+	}
+	a, b := mk("workflow/a", "a"), mk("workflow/b", "b")
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"workflow/a", "workflow/b"},
+		Modules: []LockedModule{
+			{ID: "workflow/a", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: a, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+			{ID: "workflow/b", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: b, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+		},
+	}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{a, b}); err == nil {
+		t.Fatal("GenerateAll accepted two modules declaring the same job kind")
+	}
+}

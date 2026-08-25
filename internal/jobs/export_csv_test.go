@@ -29,7 +29,7 @@ func TestExportProjectsCSVJob(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	require.NoError(t, w.exportProjectsCSV(ctx, sqlc.Job{Payload: mustJSON(t, ExportProjectsPayload{OrgID: "org_ex", UserID: "user_ex"})}))
+	require.NoError(t, w.exportProjectsCSV(ctx, ExportProjectsPayload{OrgID: "org_ex", UserID: "user_ex"}))
 
 	// Files row exists, CSV bytes parse.
 	var f struct {

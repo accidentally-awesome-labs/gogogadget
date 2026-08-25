@@ -148,6 +148,10 @@ var bootstrapFixedImports = map[string]struct{}{
 	"net/http": {},
 }
 
+// DefaultJobAttempts mirrors jobs.DefaultMaxAttempts and the jobs.max_attempts
+// column default. A declaration that omits a budget gets this.
+const DefaultJobAttempts = 8
+
 // httpHandlerCapability is the one structurally special capability: the module
 // providing it is what the runtime serves.
 const httpHandlerCapability = "http.handler"
@@ -512,6 +516,14 @@ func emitTestHostRegistry(ctx context.Context, modulePath string, lock Lock, gra
 
 // emitRoutesRegistry renders internal/web/routes_registry_gen.go from every
 // selected RouteContribution, in module topological order then lexical ID.
+// routePattern is one concrete method+pattern pair awaiting validation.
+type routePattern struct {
+	id      string
+	module  string
+	method  string
+	pattern string
+}
+
 func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	type route struct {
 		moduleID string
@@ -925,54 +937,78 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 		contrib  JobContribution
 	}
 	jobs := make([]job, 0)
+	owner := make(map[string]string)
 	for _, m := range orderedModules(lock, graph) {
 		for _, j := range m.Runtime.Jobs {
+			// Two modules declaring one kind is a dispatch ambiguity: whichever
+			// wins silently owns the other's queued rows.
+			if previous, clash := owner[j.Kind]; clash {
+				return nil, fmt.Errorf("job kind %q is declared by both %s and %s", j.Kind, previous, m.ID)
+			}
+			owner[j.Kind] = m.ID
 			jobs = append(jobs, job{moduleID: m.ID, contrib: j})
 		}
 	}
-	sort.Slice(jobs, func(i, j int) bool {
-		if jobs[i].moduleID != jobs[j].moduleID {
-			return jobs[i].moduleID < jobs[j].moduleID
+	sort.Slice(jobs, func(i, j int) bool { return jobs[i].contrib.Kind < jobs[j].contrib.Kind })
+	// The table must exist whenever the jobs package does: jobs.go references
+	// these symbols, so emitting nothing would break a project that installs the
+	// queue but has not yet declared a kind.
+	installed := false
+	for _, m := range graph {
+		for _, f := range m.Files {
+			if strings.HasPrefix(f.Target, "internal/jobs/") {
+				installed = true
+			}
 		}
-		return jobs[i].contrib.Kind < jobs[j].contrib.Kind
-	})
-	if len(jobs) == 0 {
-		// Nothing declares a job, so the project has no reason to define the
-		// definition type this table would reference. Emitting it anyway would
-		// break the build through a DO-NOT-EDIT file.
+	}
+	if len(jobs) == 0 && !installed {
 		return nil, nil
 	}
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package jobs\n\n")
-	b.WriteString("// JobRegistry is the complete set of selected job definitions.\n")
-	b.WriteString("var JobRegistry = []Definition{\n")
+
+	b.WriteString("// workerDefinitions assembles every selected job declaration. The table names\n")
+	b.WriteString("// declaration constructors and never knows a payload type, so a module's\n")
+	b.WriteString("// handler stays typed while dispatch stays data.\n")
+	b.WriteString("func workerDefinitions(w *Worker) []Definition {\n")
+	b.WriteString("\treturn []Definition{\n")
+	for _, j := range jobs {
+		if !validIdentifier(j.contrib.Handler) {
+			return nil, fmt.Errorf("job %s: handler %q is not a Go identifier", j.contrib.Kind, j.contrib.Handler)
+		}
+		fmt.Fprintf(&b, "\t\tw.%s(),\n", j.contrib.Handler)
+	}
+	b.WriteString("\t}\n}\n\n")
+
+	b.WriteString("// SchedulableKinds are the kinds a schedule row may reference. Derived from\n")
+	b.WriteString("// the declarations, so a kind cannot be scheduled unless its module said it\n")
+	b.WriteString("// may be — a schedule pointing at a one-shot handler would fire it forever.\n")
+	b.WriteString("var SchedulableKinds = []string{\n")
+	for _, j := range jobs {
+		if j.contrib.Schedulable {
+			fmt.Fprintf(&b, "\t%s,\n", goString(j.contrib.Kind))
+		}
+	}
+	b.WriteString("}\n\n")
+
+	b.WriteString("// declaredAttempts is the budget each kind declares. Enqueue helpers write it\n")
+	b.WriteString("// onto the row, and the row is dispatch truth from then on.\n")
+	b.WriteString("var declaredAttempts = map[string]int{\n")
 	for _, j := range jobs {
 		attempts := j.contrib.MaxAttempts
 		if attempts == 0 {
-			attempts = 8
+			attempts = DefaultJobAttempts
 		}
-		fmt.Fprintf(&b, "\t{Kind: %s, Schedulable: %t, MaxAttempts: %d},\n",
-			goString(j.contrib.Kind), j.contrib.Schedulable, attempts)
+		fmt.Fprintf(&b, "\t%s: %d,\n", goString(j.contrib.Kind), attempts)
 	}
 	b.WriteString("}\n")
+
 	_ = ctx
 	return &GeneratedFile{Path: "internal/jobs/jobs_registry_gen.go", Content: b.String()}, nil
 }
 
-// routePattern is one concrete method+pattern pair awaiting validation.
-type routePattern struct {
-	id      string
-	module  string
-	method  string
-	pattern string
-}
-
-// validateRoutePatterns registers every pattern on a throwaway ServeMux. That is
-// the only authority on what Go's router considers a conflict — exact duplicates,
-// wildcard-equivalent paths, and malformed patterns all panic there — so the
-// check runs at generation time instead of on the first matching request in
-// production.
 func validateRoutePatterns(patterns []routePattern) (err error) {
 	mux := http.NewServeMux()
 	for _, p := range patterns {

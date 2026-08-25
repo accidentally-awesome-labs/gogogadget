@@ -96,7 +96,44 @@
         ],
         "start": false,
         "stop": false
-      }
+      },
+      "jobs": [
+        {
+          "kind": "email.dunning_final",
+          "package": "internal/jobs",
+          "handler": "defineEmailDunningFinal",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.dunning_reminder",
+          "package": "internal/jobs",
+          "handler": "defineEmailDunningReminder",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.payment_failed",
+          "package": "internal/jobs",
+          "handler": "defineEmailPaymentFailed",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.subscription_canceled",
+          "package": "internal/jobs",
+          "handler": "defineEmailSubscriptionCanceled",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.trial_ending",
+          "package": "internal/jobs",
+          "handler": "defineEmailTrialEnding",
+          "schedulable": false,
+          "max_attempts": 0
+        }
+      ]
     },
     "migrations": [],
     "environment": [

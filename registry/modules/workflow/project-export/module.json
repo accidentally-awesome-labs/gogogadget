@@ -50,6 +50,15 @@
           "package": "internal/web",
           "handler": "handleProjectsExport"
         }
+      ],
+      "jobs": [
+        {
+          "kind": "export.projects_csv",
+          "package": "internal/jobs",
+          "handler": "defineExportProjectsCSV",
+          "schedulable": false,
+          "max_attempts": 0
+        }
       ]
     },
     "migrations": [],

@@ -110,7 +110,7 @@ func TestDefineNormalizesMaxAttempts(t *testing.T) {
 		t.Fatalf("MaxAttempts = %d, want %d for an omitted value",
 			definition.MaxAttempts, DefaultMaxAttempts)
 	}
-	if err := definition.Handle(context.Background(), []byte(`{"org_id":"org_1"}`)); err != nil {
+	if err := definition.Handle(context.Background(), []byte(`{"org_id":"org_1"}`), Attempt{Number: 1, Max: 8}); err != nil {
 		t.Fatalf("Handle: %v", err)
 	}
 	if handled != "org_1" {
@@ -130,7 +130,7 @@ func TestDefineReportsMalformedPayload(t *testing.T) {
 		N int `json:"n"`
 	}
 	definition := Define("k", false, 3, func(context.Context, payload) error { return nil })
-	if err := definition.Handle(context.Background(), []byte(`{"n":"not-a-number"}`)); err == nil {
+	if err := definition.Handle(context.Background(), []byte(`{"n":"not-a-number"}`), Attempt{Number: 1, Max: 3}); err == nil {
 		t.Fatal("Handle accepted a malformed payload")
 	}
 }
@@ -190,5 +190,46 @@ func TestAttemptBudgetDefaultsAgree(t *testing.T) {
 	}
 	if stored != DefaultMaxAttempts {
 		t.Fatalf("enqueue fallback stored %d, want %d", stored, DefaultMaxAttempts)
+	}
+}
+
+// A module that declares a non-default attempt budget must actually get it. The
+// budget travels through Enqueue onto the row, so this is the only place it can
+// be applied — the worker reads the row, never the declaration.
+//
+// Every kind currently declares the default, so this drives a non-default value
+// through the generated table rather than asserting a value the column default
+// would produce anyway.
+func TestEnqueueAppliesDeclaredBudget(t *testing.T) {
+	pool, queries := testdb.Open(t, "jobs_declared")
+	defer pool.Close()
+	ctx := context.Background()
+
+	declaredAttempts["test.budget"] = 3
+	defer delete(declaredAttempts, "test.budget")
+
+	if err := Enqueue(ctx, queries, "test.budget", map[string]string{}); err != nil {
+		t.Fatalf("Enqueue: %v", err)
+	}
+	var got int32
+	if err := pool.QueryRow(ctx,
+		`SELECT max_attempts FROM jobs WHERE kind = 'test.budget'`).Scan(&got); err != nil {
+		t.Fatalf("read row: %v", err)
+	}
+	if got != 3 {
+		t.Fatalf("max_attempts = %d, want the declared 3", got)
+	}
+
+	// An undeclared kind still enqueues — a project may queue work before the
+	// module that handles it is installed — and falls back to the default.
+	if err := Enqueue(ctx, queries, "not.declared", map[string]string{}); err != nil {
+		t.Fatalf("Enqueue undeclared: %v", err)
+	}
+	if err := pool.QueryRow(ctx,
+		`SELECT max_attempts FROM jobs WHERE kind = 'not.declared'`).Scan(&got); err != nil {
+		t.Fatalf("read undeclared row: %v", err)
+	}
+	if int(got) != DefaultMaxAttempts {
+		t.Fatalf("undeclared max_attempts = %d, want the default %d", got, DefaultMaxAttempts)
 	}
 }

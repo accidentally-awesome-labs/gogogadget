@@ -116,11 +116,7 @@ type exportSubscription struct {
 	CancelAtPeriodEnd bool       `json:"cancel_at_period_end"`
 }
 
-func (w *Worker) exportOrgJSON(ctx context.Context, job sqlc.Job) error {
-	var p ExportProjectsPayload
-	if err := json.Unmarshal(job.Payload, &p); err != nil {
-		return err
-	}
+func (w *Worker) exportOrgJSON(ctx context.Context, p ExportProjectsPayload) error {
 	if w.Storage == nil {
 		return fmt.Errorf("export.org_json: no storage configured on worker")
 	}

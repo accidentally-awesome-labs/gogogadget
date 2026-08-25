@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -35,11 +34,7 @@ type WebhookDeliverPayload struct {
 // the standard-webhooks scheme (webhook-id/-timestamp/-signature), then
 // records the outcome: 2xx → success; anything else → error (existing 2^n
 // backoff), and at max attempts → dead + the endpoint owner is notified.
-func (w *Worker) deliverWebhook(ctx context.Context, job sqlc.Job) error {
-	var p WebhookDeliverPayload
-	if err := json.Unmarshal(job.Payload, &p); err != nil {
-		return err
-	}
+func (w *Worker) deliverWebhook(ctx context.Context, p WebhookDeliverPayload, attempt Attempt) error {
 	d, err := w.q.GetWebhookDelivery(ctx, p.DeliveryID)
 	if err != nil {
 		return err
@@ -61,7 +56,7 @@ func (w *Worker) deliverWebhook(ctx context.Context, job sqlc.Job) error {
 	_ = w.q.RecordDeliveryAttempt(ctx, sqlc.RecordDeliveryAttemptParams{
 		ID: d.ID, LastResponseStatus: pgStatus, LastError: attemptErr.Error(),
 	})
-	if job.Attempts+1 >= job.MaxAttempts {
+	if attempt.Last() {
 		if err := w.q.MarkDeliveryDead(ctx, sqlc.MarkDeliveryDeadParams{ID: d.ID, LastError: attemptErr.Error()}); err != nil {
 			return err
 		}

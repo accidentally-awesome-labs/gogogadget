@@ -135,9 +135,8 @@ func TestOrgExportJobStoresFileAndNotifies(t *testing.T) {
 	seedExportOrg(t, pool, q, orgID)
 
 	w := exportWorker(t, q, &captureSender{})
-	payload, err := json.Marshal(ExportProjectsPayload{OrgID: orgID, UserID: "user_exp"})
-	require.NoError(t, err)
-	require.NoError(t, w.exportOrgJSON(ctx, sqlc.Job{Kind: KindExportOrgJSON, Payload: payload}))
+	payload := ExportProjectsPayload{OrgID: orgID, UserID: "user_exp"}
+	require.NoError(t, w.exportOrgJSON(ctx, payload))
 
 	files, err := q.ListFilesByOrg(ctx, sqlc.ListFilesByOrgParams{ClerkOrgID: orgID, Limit: 10, Offset: 0})
 	require.NoError(t, err)
@@ -174,8 +173,8 @@ func TestOrgExportJobStoresFileAndNotifies(t *testing.T) {
 func TestOrgExportJobFailsLoudlyWithoutStorage(t *testing.T) {
 	_, q := testdb.Open(t, "jobsexport")
 	w := NewWorker(q, &captureSender{}, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	payload, _ := json.Marshal(ExportProjectsPayload{OrgID: "org_exp5", UserID: "user_exp"})
-	err := w.exportOrgJSON(context.Background(), sqlc.Job{Payload: payload})
+	payload := ExportProjectsPayload{OrgID: "org_exp5", UserID: "user_exp"}
+	err := w.exportOrgJSON(context.Background(), payload)
 	require.Error(t, err, "no storage configured is a job failure, not a silent no-op")
 	assert.Contains(t, err.Error(), "storage")
 }

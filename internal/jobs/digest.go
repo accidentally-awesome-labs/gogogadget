@@ -33,7 +33,7 @@ const (
 // delivery failure. The cost is that a crash between send and stamp can
 // repeat one digest — a duplicate summary is a far smaller harm than a
 // silently skipped one.
-func (w *Worker) sendDigests(ctx context.Context, job sqlc.Job) error {
+func (w *Worker) sendDigests(ctx context.Context, _ SchedulePayload) error {
 	due, err := w.q.ListUsersDueForDigest(ctx, digestBatch)
 	if err != nil {
 		return err

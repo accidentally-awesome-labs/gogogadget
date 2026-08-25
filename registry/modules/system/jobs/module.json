@@ -29,7 +29,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "261c7ae871827331e9e1f1f334ab2f9a8c05f97dab486317499daa730699f743",
+        "sha256": "f634193428a63f1c1f2bb6894f05922dbe730f653fc96cba2775050935ed6cc4",
         "rewrite_module": true,
         "contract": true
       },

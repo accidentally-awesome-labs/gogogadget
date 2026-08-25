@@ -112,6 +112,15 @@
           "package": "internal/web",
           "handler": "handleWebhookEndpointRotate"
         }
+      ],
+      "jobs": [
+        {
+          "kind": "webhook.deliver",
+          "package": "internal/jobs",
+          "handler": "defineWebhookDeliver",
+          "schedulable": false,
+          "max_attempts": 0
+        }
       ]
     },
     "migrations": [],

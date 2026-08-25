@@ -56,7 +56,16 @@
         ],
         "start": false,
         "stop": false
-      }
+      },
+      "jobs": [
+        {
+          "kind": "email.welcome",
+          "package": "internal/jobs",
+          "handler": "defineEmailWelcome",
+          "schedulable": false,
+          "max_attempts": 0
+        }
+      ]
     },
     "migrations": [],
     "environment": [

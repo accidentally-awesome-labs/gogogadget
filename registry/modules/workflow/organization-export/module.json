@@ -51,6 +51,15 @@
           "package": "internal/web",
           "handler": "handleOrgExport"
         }
+      ],
+      "jobs": [
+        {
+          "kind": "export.org_json",
+          "package": "internal/jobs",
+          "handler": "defineExportOrgJSON",
+          "schedulable": false,
+          "max_attempts": 0
+        }
       ]
     },
     "migrations": [],
