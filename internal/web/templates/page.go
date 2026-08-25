@@ -3,6 +3,7 @@ package templates
 import (
 	"context"
 	"github.com/a-h/templ"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"strings"
 	"time"
 	"unicode"
@@ -35,9 +36,12 @@ const (
 // htmx.config.transitions so in-page updates stay instant. The scroll is
 // explicit because htmx only defaults boosted *forms* to show:top — a boosted
 // link otherwise keeps the previous scroll offset and lands you mid-page.
+// Both constants live in the leaf ui package: it owns the navigation contract
+// because its components emit the attributes. These are aliases so this package
+// and ui can never disagree about which element a navigation swaps.
 const (
-	NavTarget = "#content"
-	NavSwap   = "outerHTML transition:true show:top"
+	NavTarget = ui.NavTarget
+	NavSwap   = ui.NavSwap
 )
 
 // Page is the per-request view model every layout receives. Fields are added

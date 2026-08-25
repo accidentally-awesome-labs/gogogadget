@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"net/http"
 	"strings"
 
@@ -25,9 +26,12 @@ type Page = templates.Page
 // rather than through htmx.config.transitions so in-page updates — table
 // search, row deletes, the billing poll — stay instant. Templates declare it in
 // hx-swap; templates.NavSwap keeps the two spellings from drifting.
+// Both are aliases of the ui contract, which owns them because its components
+// emit the attributes. Three copies of "#content" is three chances to disagree
+// about which element a navigation replaces.
 const (
-	ContentTarget = "#content"
-	NavSwap       = templates.NavSwap
+	ContentTarget = ui.NavTarget
+	NavSwap       = ui.NavSwap
 )
 
 // IsHX reports whether the request came from htmx at all.

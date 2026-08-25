@@ -59,6 +59,22 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/ui/enums.go",
+        "target": "internal/web/templates/ui/enums.go",
+        "class": "go",
+        "sha256": "a3c75b499f39e58054c2f68c0cad7c25c1a801ea64da81012f84a1e48dafe36e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/enums_test.go",
+        "target": "internal/web/templates/ui/enums_test.go",
+        "class": "test",
+        "sha256": "9e089fb144e24e4d6d3e010c40ae27b98244fd87c19bcf4b3f7c84937748681d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/ui/forms.templ",
         "target": "internal/web/templates/ui/forms.templ",
         "class": "templ",
