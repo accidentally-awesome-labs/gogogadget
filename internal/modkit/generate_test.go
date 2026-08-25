@@ -787,3 +787,75 @@ func TestJobsRegistryRejectsDuplicateKinds(t *testing.T) {
 		t.Fatal("GenerateAll accepted two modules declaring the same job kind")
 	}
 }
+
+// Janitor sweeps are declared per module because each one deletes from a table
+// its module owns. Uninstalling the module must take its sweep with it, or the
+// generated pass calls a query that no longer exists.
+func TestJobsRegistryEmitsDeclaredJanitors(t *testing.T) {
+	audit := Manifest{
+		ID: "system/audit", Kind: ModuleSystem, Name: "audit",
+		Revision: 1, Contract: 1, Title: "Audit", Description: "Audit log.",
+		Files: []ManifestFile{{Source: "internal/jobs/janitor_audit.go",
+			Target: "internal/jobs/janitor_audit.go", Class: FileClassGo,
+			SHA256: "0000000000000000000000000000000000000000000000000000000000000000"}},
+		Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{Janitors: []JanitorContribution{
+			{Name: "audit_log", Package: "internal/jobs", Handler: "janitorAuditLog"},
+		}},
+	}
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"system/audit"},
+		Modules: []LockedModule{{
+			ID: "system/audit", Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: audit,
+			Files: []LockedFile{}, Migrations: []LockedMigration{},
+		}},
+	}
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{audit})
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var registry string
+	for _, file := range files {
+		if file.Path == "internal/jobs/jobs_registry_gen.go" {
+			registry = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	for _, want := range []string{
+		"func workerJanitors(w *Worker) []Janitor",
+		`{Name: "audit_log", Sweep: w.janitorAuditLog},`,
+	} {
+		if !strings.Contains(registry, want) {
+			t.Fatalf("janitor table missing %s:\n%s", want, registry)
+		}
+	}
+}
+
+// Two modules claiming one janitor name would make the operator-facing log
+// ambiguous about which sweep failed.
+func TestJobsRegistryRejectsDuplicateJanitorNames(t *testing.T) {
+	mk := func(id, name string) Manifest {
+		return Manifest{
+			ID: id, Kind: ModuleSystem, Name: name,
+			Revision: 1, Contract: 1, Title: name, Description: name + " system.",
+			Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+			Runtime: RuntimeContributions{Janitors: []JanitorContribution{
+				{Name: "same", Package: "internal/jobs", Handler: "janitorSame"},
+			}},
+		}
+	}
+	a, b := mk("system/a", "a"), mk("system/b", "b")
+	lock := Lock{
+		Schema: 1, RegistryCommit: testCommitA, Order: []string{"system/a", "system/b"},
+		Modules: []LockedModule{
+			{ID: "system/a", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: a, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+			{ID: "system/b", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{}, Manifest: b, Files: []LockedFile{}, Migrations: []LockedMigration{}},
+		},
+	}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{a, b}); err == nil {
+		t.Fatal("GenerateAll accepted two modules declaring the same janitor name")
+	}
+}

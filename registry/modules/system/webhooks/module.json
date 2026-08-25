@@ -38,6 +38,14 @@
         "contract": false
       },
       {
+        "source": "internal/jobs/janitor_webhooks.go",
+        "target": "internal/jobs/janitor_webhooks.go",
+        "class": "go",
+        "sha256": "590c93b8533a4a52718f9bf52cad5a65af5a677045e75c4c6fbfc5101ee17e35",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/webhooks/webhooks.go",
         "target": "internal/webhooks/webhooks.go",
         "class": "go",
@@ -56,7 +64,20 @@
         "webhook_events"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "janitors": [
+        {
+          "name": "webhook_events",
+          "package": "internal/jobs",
+          "handler": "janitorWebhookEvents"
+        },
+        {
+          "name": "webhook_secrets",
+          "package": "internal/jobs",
+          "handler": "janitorWebhookSecrets"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0006_webhooks_out",

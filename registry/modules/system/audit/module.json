@@ -28,6 +28,14 @@
         "sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/jobs/janitor_audit.go",
+        "target": "internal/jobs/janitor_audit.go",
+        "class": "go",
+        "sha256": "af0a61372818ff7f7ac47fd8f0740600cd08c0712f659590635750959868469d",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -38,7 +46,15 @@
         "audit"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "janitors": [
+        {
+          "name": "audit_log",
+          "package": "internal/jobs",
+          "handler": "janitorAuditLog"
+        }
+      ]
+    },
     "migrations": [],
     "environment": [
       {

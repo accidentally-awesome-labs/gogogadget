@@ -176,13 +176,13 @@ func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
 	body := []byte("-- +goose Up\nSELECT 1;\n")
 	registry := fstest.MapFS{
-		"registry.json":              &fstest.MapFile{Data: []byte(`{"schema":1,"includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
-		"registry/elements.json":     &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"element","items":[]}`)},
-		"registry/components.json":   &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"component","items":[]}`)},
-		"registry/pages.json":        &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"page","items":[]}`)},
-		"registry/workflows.json":    &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"workflow","items":[]}`)},
-		"registry/profiles.json":     &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"profile","items":[]}`)},
-		"registry/systems.json":      &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"system","items":["registry/modules/system/legacy/module.json"]}`)},
+		"registry.json":            &fstest.MapFile{Data: []byte(`{"schema":1,"includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
+		"registry/elements.json":   &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"element","items":[]}`)},
+		"registry/components.json": &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"component","items":[]}`)},
+		"registry/pages.json":      &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"page","items":[]}`)},
+		"registry/workflows.json":  &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"workflow","items":[]}`)},
+		"registry/profiles.json":   &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"profile","items":[]}`)},
+		"registry/systems.json":    &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"system","items":["registry/modules/system/legacy/module.json"]}`)},
 		"registry/modules/system/legacy/migrations/0007_legacy.sql": &fstest.MapFile{Data: body},
 		"registry/modules/system/legacy/module.json": &fstest.MapFile{Data: []byte(`{"schema":1,"module":{
 			"id":"system/legacy","kind":"system","name":"legacy","revision":1,"contract":1,

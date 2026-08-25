@@ -516,6 +516,16 @@ func emitTestHostRegistry(ctx context.Context, modulePath string, lock Lock, gra
 
 // emitRoutesRegistry renders internal/web/routes_registry_gen.go from every
 // selected RouteContribution, in module topological order then lexical ID.
+// hasJanitors reports whether any selected module declares a cleanup sweep.
+func hasJanitors(graph []Manifest) bool {
+	for _, m := range graph {
+		if len(m.Runtime.Janitors) > 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // routePattern is one concrete method+pattern pair awaiting validation.
 type routePattern struct {
 	id      string
@@ -961,7 +971,7 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 			}
 		}
 	}
-	if len(jobs) == 0 && !installed {
+	if len(jobs) == 0 && !installed && !hasJanitors(graph) {
 		return nil, nil
 	}
 
@@ -992,6 +1002,37 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 		}
 	}
 	b.WriteString("}\n\n")
+
+	// Janitor sweeps, same discipline: declared by the module that owns the table
+	// each one deletes from.
+	type janitor struct {
+		moduleID string
+		contrib  JanitorContribution
+	}
+	janitors := make([]janitor, 0)
+	sweepOwner := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		for _, jn := range m.Runtime.Janitors {
+			if previous, clash := sweepOwner[jn.Name]; clash {
+				return nil, fmt.Errorf("janitor %q is declared by both %s and %s", jn.Name, previous, m.ID)
+			}
+			sweepOwner[jn.Name] = m.ID
+			janitors = append(janitors, janitor{moduleID: m.ID, contrib: jn})
+		}
+	}
+	sort.Slice(janitors, func(i, j int) bool { return janitors[i].contrib.Name < janitors[j].contrib.Name })
+
+	b.WriteString("// workerJanitors is every declared cleanup sweep. The pass runs all of them\n")
+	b.WriteString("// and logs per sweep, so one failing sweep cannot strand the rest.\n")
+	b.WriteString("func workerJanitors(w *Worker) []Janitor {\n")
+	b.WriteString("\treturn []Janitor{\n")
+	for _, jn := range janitors {
+		if !validIdentifier(jn.contrib.Handler) {
+			return nil, fmt.Errorf("janitor %s: handler %q is not a Go identifier", jn.contrib.Name, jn.contrib.Handler)
+		}
+		fmt.Fprintf(&b, "\t\t{Name: %s, Sweep: w.%s},\n", goString(jn.contrib.Name), jn.contrib.Handler)
+	}
+	b.WriteString("\t}\n}\n\n")
 
 	b.WriteString("// declaredAttempts is the budget each kind declares. Enqueue helpers write it\n")
 	b.WriteString("// onto the row, and the row is dispatch truth from then on.\n")

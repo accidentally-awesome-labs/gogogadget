@@ -93,6 +93,14 @@
         "sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
         "rewrite_module": false,
         "contract": false
+      },
+      {
+        "source": "internal/jobs/janitor_api.go",
+        "target": "internal/jobs/janitor_api.go",
+        "class": "go",
+        "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -104,7 +112,15 @@
         "idempotency_keys"
       ]
     },
-    "runtime": {},
+    "runtime": {
+      "janitors": [
+        {
+          "name": "idempotency_keys",
+          "package": "internal/jobs",
+          "handler": "janitorIdempotencyKeys"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0015_idempotency_keys",

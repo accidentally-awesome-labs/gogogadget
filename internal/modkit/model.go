@@ -222,6 +222,7 @@ type RuntimeContributions struct {
 	System       *SystemContribution       `json:"system,omitempty"`
 	Routes       []RouteContribution       `json:"routes,omitempty"`
 	Jobs         []JobContribution         `json:"jobs,omitempty"`
+	Janitors     []JanitorContribution     `json:"janitors,omitempty"`
 	ContentTypes []ContentTypeContribution `json:"content_types,omitempty"`
 	Navigation   []NavigationContribution  `json:"navigation,omitempty"`
 	Slots        []SlotContribution        `json:"slots,omitempty"`
@@ -292,6 +293,16 @@ type JobContribution struct {
 	Handler     string `json:"handler"`
 	Schedulable bool   `json:"schedulable"`
 	MaxAttempts int    `json:"max_attempts"`
+}
+
+// JanitorContribution declares one recurring cleanup sweep. Each sweep deletes
+// from a table its module owns, so it is declared alongside that table rather
+// than hard-coded in the worker: uninstalling the module removes the sweep with
+// it, instead of leaving a call to a query that no longer exists.
+type JanitorContribution struct {
+	Name    string `json:"name"`
+	Package string `json:"package"`
+	Handler string `json:"handler"`
 }
 
 // ContentTypeContribution declares generated content routes and their handler.

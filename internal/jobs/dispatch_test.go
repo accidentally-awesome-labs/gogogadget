@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"testing"
@@ -231,5 +232,47 @@ func TestEnqueueAppliesDeclaredBudget(t *testing.T) {
 	}
 	if int(got) != DefaultMaxAttempts {
 		t.Fatalf("undeclared max_attempts = %d, want the default %d", got, DefaultMaxAttempts)
+	}
+}
+
+// The pass must run every sweep even when one fails. Before janitors were
+// declared this was a straight-line function, so a mid-function error return
+// would have silently skipped every later table's cleanup.
+func TestJanitorPassContinuesPastAFailingSweep(t *testing.T) {
+	ran := []string{}
+	failing := []Janitor{
+		{Name: "first", Sweep: func(context.Context) error { ran = append(ran, "first"); return nil }},
+		{Name: "broken", Sweep: func(context.Context) error {
+			ran = append(ran, "broken")
+			return errors.New("table unreachable")
+		}},
+		{Name: "last", Sweep: func(context.Context) error { ran = append(ran, "last"); return nil }},
+	}
+	w := &Worker{log: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	w.runJanitors(context.Background(), failing)
+
+	if len(ran) != 3 || ran[2] != "last" {
+		t.Fatalf("sweeps ran %v, want all three with last reached", ran)
+	}
+}
+
+// Every declared sweep must resolve to a real method, and the operator-facing
+// name must be unique — the log says only the name when one fails.
+func TestDeclaredJanitorsAreDistinctAndWired(t *testing.T) {
+	seen := map[string]bool{}
+	for _, janitor := range workerJanitors(&Worker{}) {
+		if janitor.Name == "" {
+			t.Fatal("a janitor was generated without a name")
+		}
+		if seen[janitor.Name] {
+			t.Fatalf("duplicate janitor name %q", janitor.Name)
+		}
+		seen[janitor.Name] = true
+		if janitor.Sweep == nil {
+			t.Fatalf("janitor %q has no sweep", janitor.Name)
+		}
+	}
+	if len(seen) == 0 {
+		t.Fatal("no janitors were generated")
 	}
 }

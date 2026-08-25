@@ -202,41 +202,31 @@ func (w *Worker) sleep(ctx context.Context, d time.Duration) {
 	}
 }
 
-// IdempotencyRetention is how long a stored API response stays replayable.
-// Long enough for any sane client retry schedule; short enough that the table
-// is a cache, not an archive.
-const IdempotencyRetention = 24 * time.Hour
+// Janitor is one declared cleanup sweep. Name is what the operator sees in the
+// log when it fails.
+type Janitor struct {
+	Name  string
+	Sweep func(context.Context) error
+}
 
+// janitorPass runs every declared sweep. Each is logged independently and a
+// failure does not stop the others: an unreachable table must not strand the
+// cleanup of every other one.
 func (w *Worker) janitorPass(ctx context.Context) {
-	if err := w.q.DeleteOldJobs(ctx); err != nil {
-		w.log.Error("janitor jobs", "error", err)
-	}
-	if err := w.q.DeleteOldWebhookEvents(ctx); err != nil {
-		w.log.Error("janitor webhook_events", "error", err)
-	}
-	cutoff := pgtype.Timestamptz{Time: time.Now().Add(-WebhookRotationGrace), Valid: true}
-	if n, err := w.q.ClearExpiredPreviousSecrets(ctx, cutoff); err != nil {
-		w.log.Error("janitor webhook secrets", "error", err)
-	} else if n > 0 {
-		w.log.Info("janitor webhook secrets", "cleared", n)
-	}
-	// Idempotency keys stop being useful once no client will retry; 24h
-	// covers any sane retry schedule and keeps the table small.
-	idemCutoff := pgtype.Timestamptz{Time: time.Now().Add(-IdempotencyRetention), Valid: true}
-	if n, err := w.q.DeleteOldIdempotencyKeys(ctx, idemCutoff); err != nil {
-		w.log.Error("janitor idempotency_keys", "error", err)
-	} else if n > 0 {
-		w.log.Info("janitor idempotency_keys", "deleted", n)
-	}
-	if w.AuditRetentionDays > 0 {
-		cutoff := pgtype.Timestamptz{Time: time.Now().AddDate(0, 0, -w.AuditRetentionDays), Valid: true}
-		n, err := w.q.DeleteOldAuditRows(ctx, cutoff)
-		if err != nil {
-			w.log.Error("janitor audit_log", "error", err)
-		} else if n > 0 {
-			w.log.Info("janitor audit_log", "deleted", n, "retention_days", w.AuditRetentionDays)
+	w.runJanitors(ctx, workerJanitors(w))
+}
+
+func (w *Worker) runJanitors(ctx context.Context, janitors []Janitor) {
+	for _, janitor := range janitors {
+		if err := janitor.Sweep(ctx); err != nil {
+			w.log.Error("janitor", "sweep", janitor.Name, "error", err)
 		}
 	}
+}
+
+// janitorOldJobs drops finished rows after a week. Owned by system/jobs.
+func (w *Worker) janitorOldJobs(ctx context.Context) error {
+	return w.q.DeleteOldJobs(ctx)
 }
 
 // drain processes every currently-claimable job; returns the count.

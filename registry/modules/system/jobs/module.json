@@ -29,7 +29,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "f634193428a63f1c1f2bb6894f05922dbe730f653fc96cba2775050935ed6cc4",
+        "sha256": "59c036807164c98760f08d2fb6e570d5d3d6d941d768a7f230735168bcec67ba",
         "rewrite_module": true,
         "contract": true
       },
@@ -101,7 +101,14 @@
         ],
         "start": true,
         "stop": true
-      }
+      },
+      "janitors": [
+        {
+          "name": "old_jobs",
+          "package": "internal/jobs",
+          "handler": "janitorOldJobs"
+        }
+      ]
     },
     "migrations": [],
     "environment": [],
