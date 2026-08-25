@@ -65,6 +65,18 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "legal.privacy.body": "Account data is stored with Clerk; payment data with Polar (merchant of record); analytics, when enabled, with PostHog behind an explicit consent gate.",
+        "legal.privacy.placeholder": "Placeholder privacy policy. Replace with counsel-reviewed copy before launch.",
+        "legal.privacy.title": "Privacy Policy"
+      },
+      "es": {
+        "legal.privacy.body": "Los datos de cuenta se guardan en Clerk; los datos de pago en Polar (registrante comercial); las analíticas, si están activadas, en PostHog tras un consentimiento explícito.",
+        "legal.privacy.placeholder": "Política de privacidad provisional. Sustitúyela por un texto revisado por un abogado antes del lanzamiento.",
+        "legal.privacy.title": "Política de privacidad"
+      }
+    }
   }
 }

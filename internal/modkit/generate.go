@@ -69,44 +69,47 @@ func indexSHA(lock Lock) string {
 // is a pure function of (modulePath, lock, graph): identical inputs always
 // produce byte-identical outputs, and the file list is sorted by path.
 func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Manifest) ([]GeneratedFile, error) {
+	// Most emitters produce one file. A few produce a set whose size is itself
+	// declared data — one catalog per locale a module translates into — so the
+	// contract is a slice rather than a fixed list of emitter names.
 	emitters := []struct {
 		name string
-		fn   func(context.Context, string, Lock, []Manifest) (*GeneratedFile, error)
+		fn   func(context.Context, string, Lock, []Manifest) ([]GeneratedFile, error)
 	}{
-		{"bootstrap", emitBootstrapRegistry},
-		{"testhost", emitTestHostRegistry},
-		{"routes", emitRoutesRegistry},
-		{"chrome", emitChromeRegistry},
-		{"settings_nav", emitSettingsNavigationRegistry},
-		{"shell_slots", emitShellSlotsRegistry},
-		{"locales", emitLocalesRegistry},
-		{"catalog_en", emitCatalogRegistry},
-		{"catalog_es", emitCatalogRegistryES},
-		{"openapi", emitOpenAPIRegistry},
-		{"queries", emitQueriesRegistry},
-		{"static", emitStaticRegistry},
-		{"ui_components", emitUIComponentsRegistry},
-		{"styles", emitStylesRegistry},
-		{"content", emitContentRegistry},
-		{"config", emitConfigRegistry},
-		{"env-example", emitEnvExample},
-		{"config-reference", emitConfigReference},
-		{"jobs", emitJobsRegistry},
+		{"bootstrap", one(emitBootstrapRegistry)},
+		{"testhost", one(emitTestHostRegistry)},
+		{"routes", one(emitRoutesRegistry)},
+		{"chrome", one(emitChromeRegistry)},
+		{"settings_nav", one(emitSettingsNavigationRegistry)},
+		{"shell_slots", one(emitShellSlotsRegistry)},
+		{"locales", one(emitLocalesRegistry)},
+		{"catalogs", emitCatalogRegistries},
+		{"openapi", one(emitOpenAPIRegistry)},
+		{"queries", one(emitQueriesRegistry)},
+		{"static", one(emitStaticRegistry)},
+		{"ui_components", one(emitUIComponentsRegistry)},
+		{"styles", one(emitStylesRegistry)},
+		{"content", one(emitContentRegistry)},
+		{"config", one(emitConfigRegistry)},
+		{"env-example", one(emitEnvExample)},
+		{"config-reference", one(emitConfigReference)},
+		{"jobs", one(emitJobsRegistry)},
 	}
 	files := make([]GeneratedFile, 0, len(emitters))
 	for _, emitter := range emitters {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		file, err := emitter.fn(ctx, modulePath, lock, graph)
+		emitted, err := emitter.fn(ctx, modulePath, lock, graph)
 		if err != nil {
 			return nil, fmt.Errorf("generate %s: %w", emitter.name, err)
 		}
-		if file != nil {
+		for i := range emitted {
+			file := emitted[i]
 			if !isGeneratedOutput(file.Path) {
 				return nil, fmt.Errorf("emitter %s produced non-generated path %s", emitter.name, file.Path)
 			}
-			formatted, err := formatGo(file)
+			formatted, err := formatGo(&file)
 			if err != nil {
 				return nil, fmt.Errorf("generate %s: %w", emitter.name, err)
 			}
@@ -115,6 +118,18 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 	}
 	sort.Slice(files, func(i, j int) bool { return files[i].Path < files[j].Path })
 	return files, nil
+}
+
+// one adapts a single-file emitter to the slice contract. A nil file means the
+// emitter had nothing to produce, which is legal.
+func one(fn func(context.Context, string, Lock, []Manifest) (*GeneratedFile, error)) func(context.Context, string, Lock, []Manifest) ([]GeneratedFile, error) {
+	return func(ctx context.Context, modulePath string, lock Lock, graph []Manifest) ([]GeneratedFile, error) {
+		file, err := fn(ctx, modulePath, lock, graph)
+		if err != nil || file == nil {
+			return nil, err
+		}
+		return []GeneratedFile{*file}, nil
+	}
 }
 
 // qualifyPackage turns a module-relative package path from a manifest into an
@@ -780,14 +795,44 @@ func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, g
 	return &GeneratedFile{Path: "internal/web/templates/shell_slots_registry_gen.go", Content: b.String()}, nil
 }
 
+// emitLocalesRegistry renders the supported locales from what modules actually
+// translate. The switcher cannot offer a language nothing is translated into,
+// and the matcher cannot resolve a request to one either.
 func emitLocalesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	declared, err := declaredLocales(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package i18n\n\n")
-	b.WriteString("// LocaleRegistry lists modules that own locale fragments.\n")
+	b.WriteString("import \"golang.org/x/text/language\"\n\n")
+	b.WriteString("// Locale is one supported language: its switcher code, its matcher tag, and\n")
+	b.WriteString("// the label shown in the switcher.\n")
+	b.WriteString("type Locale struct {\n\tCode  string\n\tTag   language.Tag\n\tLabel string\n}\n\n")
+	b.WriteString("// Locales are the supported languages in display order, derived from the\n")
+	b.WriteString("// locales installed modules declare. The first is the default.\n")
+	b.WriteString("var Locales = []Locale{\n")
+	for _, locale := range declared.locales {
+		fmt.Fprintf(&b, "\t{Code: %s, Tag: %s, Label: %s},\n",
+			goString(locale), languageExpr(locale), goString(localeLabel(locale)))
+	}
+	b.WriteString("}\n\n")
+	b.WriteString("// CatalogKeys is every key the installed modules declare, sorted. Generation\n")
+	b.WriteString("// already guarantees each key exists in every locale, so this is the inventory\n")
+	b.WriteString("// callers compare against rather than scraping catalog source text.\n")
+	b.WriteString("var CatalogKeys = []string{\n")
+	for _, key := range declared.keys {
+		fmt.Fprintf(&b, "\t%s,\n", goString(key))
+	}
+	b.WriteString("}\n\n")
+	b.WriteString("// LocaleRegistry lists the modules that own locale entries.\n")
 	b.WriteString("var LocaleRegistry = []string{\n")
+	owners := make(map[string]bool)
 	for _, m := range orderedModules(lock, graph) {
-		if len(m.Claims.I18n) > 0 {
+		if len(m.Locales) > 0 && !owners[m.ID] {
+			owners[m.ID] = true
 			fmt.Fprintf(&b, "\t%s,\n", goString(m.ID))
 		}
 	}
@@ -796,29 +841,173 @@ func emitLocalesRegistry(ctx context.Context, modulePath string, lock Lock, grap
 	return &GeneratedFile{Path: "internal/i18n/locales_registry_gen.go", Content: b.String()}, nil
 }
 
-func emitCatalogRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
-	return emitCatalogRegistryFor(ctx, modulePath, lock, graph, "en")
-}
-
-func emitCatalogRegistryES(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
-	return emitCatalogRegistryFor(ctx, modulePath, lock, graph, "es")
-}
-
-func emitCatalogRegistryFor(ctx context.Context, modulePath string, lock Lock, graph []Manifest, locale string) (*GeneratedFile, error) {
-	var b strings.Builder
-	b.WriteString(genHeader(modulePath, lock))
-	b.WriteString("package i18n\n\n")
-	fmt.Fprintf(&b, "// catalog%sRegistry is the generated %s catalog aggregate.\n", localeTitle(locale), locale)
-	fmt.Fprintf(&b, "var catalog%sRegistry = map[string]string{}\n", localeTitle(locale))
-	_ = ctx
-	return &GeneratedFile{Path: "internal/i18n/catalog_" + locale + "_registry_gen.go", Content: b.String()}, nil
-}
-
-func localeTitle(locale string) string {
-	if locale == "en" {
-		return "EN"
+// localeLabel is the switcher label, written in the language it selects — a
+// reader looking for their own language recognises it, not its English name.
+func localeLabel(locale string) string {
+	switch locale {
+	case "en":
+		return "English"
+	case "es":
+		return "Espa\u00f1ol"
+	default:
+		return locale
 	}
-	return "ES"
+}
+
+func emitCatalogRegistries(ctx context.Context, modulePath string, lock Lock, graph []Manifest) ([]GeneratedFile, error) {
+	declared, err := declaredLocales(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+	files := make([]GeneratedFile, 0, len(declared.locales))
+	for _, locale := range declared.locales {
+		var b strings.Builder
+		b.WriteString(genHeader(modulePath, lock))
+		b.WriteString("package i18n\n\n")
+		b.WriteString("import (\n\t\"golang.org/x/text/language\"\n\t\"golang.org/x/text/message\"\n)\n\n")
+		fmt.Fprintf(&b, "// The %s catalog. Every entry is owned by exactly one module, and every key\n", locale)
+		b.WriteString("// exists in every declared locale, so a missing translation is a generation\n")
+		b.WriteString("// failure rather than a raw key rendered at a user.\n")
+		b.WriteString("func init() {\n")
+		for _, key := range declared.keys {
+			fmt.Fprintf(&b, "\tmessage.SetString(%s, %s, %s)\n",
+				languageExpr(locale), goString(key), goString(declared.values[locale][key]))
+		}
+		b.WriteString("}\n")
+		files = append(files, GeneratedFile{
+			Path:    "internal/i18n/catalog_" + locale + "_registry_gen.go",
+			Content: b.String(),
+		})
+	}
+	_ = ctx
+	return files, nil
+}
+
+// localeSet is the validated union of every module's locale declarations.
+type localeSet struct {
+	locales []string
+	keys    []string
+	values  map[string]map[string]string
+	owner   map[string]string
+}
+
+// declaredLocales merges module locale records and refuses the three ways a
+// catalog goes wrong: two owners for a key, a key missing from a locale, and
+// format placeholders that differ between locales.
+func declaredLocales(lock Lock, graph []Manifest) (localeSet, error) {
+	out := localeSet{
+		values: make(map[string]map[string]string),
+		owner:  make(map[string]string),
+	}
+	keySeen := make(map[string]bool)
+	for _, m := range orderedModules(lock, graph) {
+		for _, locale := range sortedKeys(m.Locales) {
+			if !validLocaleCode(locale) {
+				return localeSet{}, fmt.Errorf("module %s: locale %q is not a supported code", m.ID, locale)
+			}
+			if _, seen := out.values[locale]; !seen {
+				out.values[locale] = make(map[string]string)
+				out.locales = append(out.locales, locale)
+			}
+			for _, key := range sortedKeys(m.Locales[locale]) {
+				if previous, clash := out.owner[key+"\x00"+locale]; clash {
+					return localeSet{}, fmt.Errorf("i18n key %q (%s) is declared by both %s and %s",
+						key, locale, previous, m.ID)
+				}
+				out.owner[key+"\x00"+locale] = m.ID
+				out.values[locale][key] = m.Locales[locale][key]
+				if !keySeen[key] {
+					keySeen[key] = true
+					out.keys = append(out.keys, key)
+				}
+			}
+		}
+	}
+	sort.Strings(out.locales)
+	sort.Strings(out.keys)
+
+	for _, key := range out.keys {
+		var reference, referenceLocale string
+		for _, locale := range out.locales {
+			value, ok := out.values[locale][key]
+			if !ok {
+				return localeSet{}, fmt.Errorf("i18n key %q has no %s translation", key, locale)
+			}
+			verbs := formatVerbs(value)
+			if referenceLocale == "" {
+				reference, referenceLocale = verbs, locale
+				continue
+			}
+			if verbs != reference {
+				return localeSet{}, fmt.Errorf(
+					"i18n key %q formats %s as %q in %s but %q in %s",
+					key, "arguments", verbs, locale, reference, referenceLocale)
+			}
+		}
+	}
+	return out, nil
+}
+
+// formatVerbs is the ordered format verbs in a catalog value. Two locales must
+// agree exactly: the same arguments, in the same order, formatted the same way,
+// or one language formats wrongly at runtime.
+func formatVerbs(value string) string {
+	var verbs []string
+	for i := 0; i < len(value); i++ {
+		if value[i] != '%' || i+1 >= len(value) {
+			continue
+		}
+		next := value[i+1]
+		if next == '%' {
+			i++
+			continue
+		}
+		// Skip flags, width, and precision so "%d" and "%3d" are the same argument.
+		j := i + 1
+		for j < len(value) && strings.ContainsRune("+-# 0123456789.*[]", rune(value[j])) {
+			j++
+		}
+		if j < len(value) {
+			verbs = append(verbs, string(value[j]))
+			i = j
+		}
+	}
+	return strings.Join(verbs, ",")
+}
+
+// validLocaleCode keeps a typo from becoming a silent third catalog.
+func validLocaleCode(code string) bool {
+	if len(code) != 2 {
+		return false
+	}
+	for i := 0; i < len(code); i++ {
+		if code[i] < 'a' || code[i] > 'z' {
+			return false
+		}
+	}
+	return true
+}
+
+// languageExpr maps a locale code to its golang.org/x/text tag expression.
+func languageExpr(locale string) string {
+	switch locale {
+	case "en":
+		return "language.English"
+	case "es":
+		return "language.Spanish"
+	default:
+		return fmt.Sprintf("language.MustParse(%s)", goString(locale))
+	}
+}
+
+// sortedKeys is a deterministic iteration order over a string-keyed map.
+func sortedKeys[V any](m map[string]V) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func emitOpenAPIRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {

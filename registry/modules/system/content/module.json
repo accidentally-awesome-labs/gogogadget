@@ -187,6 +187,28 @@
         ]
       }
     ],
-    "removal_policy": "retain-data"
+    "removal_policy": "retain-data",
+    "locales": {
+      "en": {
+        "content.empty": "Nothing published yet.",
+        "content.field.author": "Author",
+        "content.published_on": "Published on",
+        "content.read_more": "Read more",
+        "content.type.post": "Post",
+        "content.type.posts": "Posts",
+        "content.type.release": "Release",
+        "content.type.releases": "Releases"
+      },
+      "es": {
+        "content.empty": "Todavía no hay nada publicado.",
+        "content.field.author": "Autor",
+        "content.published_on": "Publicado el",
+        "content.read_more": "Leer más",
+        "content.type.post": "Publicación",
+        "content.type.posts": "Publicaciones",
+        "content.type.release": "Versión",
+        "content.type.releases": "Versiones"
+      }
+    }
   }
 }

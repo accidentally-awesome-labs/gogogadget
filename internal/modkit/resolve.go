@@ -294,12 +294,3 @@ func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, m
 	}
 	return order, nil
 }
-
-func sortedKeys(values map[string]struct{}) []string {
-	keys := make([]string, 0, len(values))
-	for key := range values {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	return keys
-}

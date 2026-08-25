@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+  "registry_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
   "order": [
     "system/apphost",
     "system/config",
@@ -105,7 +105,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -168,6 +168,36 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "activity.col_action": "Action",
+            "activity.col_actor": "Actor",
+            "activity.col_details": "Details",
+            "activity.col_when": "When",
+            "activity.empty_body": "Actions across your organization will appear here.",
+            "activity.empty_title": "No activity yet",
+            "activity.metadata": "metadata",
+            "activity.pagination_aria": "Pagination",
+            "activity.pagination_next": "Next →",
+            "activity.pagination_page_of": "Page %d of %d",
+            "activity.pagination_prev": "← Previous",
+            "activity.title": "Activity"
+          },
+          "es": {
+            "activity.col_action": "Acción",
+            "activity.col_actor": "Actor",
+            "activity.col_details": "Detalles",
+            "activity.col_when": "Cuándo",
+            "activity.empty_body": "Las acciones de tu organización aparecerán aquí.",
+            "activity.empty_title": "Aún no hay actividad",
+            "activity.metadata": "metadatos",
+            "activity.pagination_aria": "Paginación",
+            "activity.pagination_next": "Siguiente →",
+            "activity.pagination_page_of": "Página %d de %d",
+            "activity.pagination_prev": "← Anterior",
+            "activity.title": "Actividad"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -199,7 +229,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -256,6 +286,70 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.announcements.activate": "Activate",
+            "admin.announcements.activated": "Announcement activated.",
+            "admin.announcements.active": "active",
+            "admin.announcements.col_actions": "Actions",
+            "admin.announcements.col_created": "Created",
+            "admin.announcements.col_kind": "Kind",
+            "admin.announcements.col_message": "Message",
+            "admin.announcements.col_status": "Status",
+            "admin.announcements.create": "Create",
+            "admin.announcements.create_title": "New announcement",
+            "admin.announcements.created": "Announcement created (inactive until activated).",
+            "admin.announcements.deactivate": "Deactivate",
+            "admin.announcements.deactivated": "Announcement deactivated.",
+            "admin.announcements.delete": "Delete",
+            "admin.announcements.delete_confirm": "Delete this announcement?",
+            "admin.announcements.deleted": "Announcement deleted.",
+            "admin.announcements.empty": "No announcements yet.",
+            "admin.announcements.inactive": "inactive",
+            "admin.announcements.invalid": "Check the kind, a message of at most 280 characters, and an optional http(s) link.",
+            "admin.announcements.kind_critical": "Critical",
+            "admin.announcements.kind_info": "Info",
+            "admin.announcements.kind_label": "Kind",
+            "admin.announcements.kind_warning": "Warning",
+            "admin.announcements.message_label": "Message",
+            "admin.announcements.message_placeholder": "Scheduled maintenance Sunday 02:00 UTC",
+            "admin.announcements.one_active_hint": "Only one announcement is shown at a time — activating one deactivates the rest.",
+            "admin.announcements.title": "Announcements",
+            "admin.announcements.url_label": "Link (optional)",
+            "admin.announcements.url_placeholder": "https://status.example.com/incident/123"
+          },
+          "es": {
+            "admin.announcements.activate": "Activar",
+            "admin.announcements.activated": "Anuncio activado.",
+            "admin.announcements.active": "activo",
+            "admin.announcements.col_actions": "Acciones",
+            "admin.announcements.col_created": "Creado",
+            "admin.announcements.col_kind": "Tipo",
+            "admin.announcements.col_message": "Mensaje",
+            "admin.announcements.col_status": "Estado",
+            "admin.announcements.create": "Crear",
+            "admin.announcements.create_title": "Nuevo anuncio",
+            "admin.announcements.created": "Anuncio creado (inactivo hasta que lo actives).",
+            "admin.announcements.deactivate": "Desactivar",
+            "admin.announcements.deactivated": "Anuncio desactivado.",
+            "admin.announcements.delete": "Eliminar",
+            "admin.announcements.delete_confirm": "¿Eliminar este anuncio?",
+            "admin.announcements.deleted": "Anuncio eliminado.",
+            "admin.announcements.empty": "Aún no hay anuncios.",
+            "admin.announcements.inactive": "inactivo",
+            "admin.announcements.invalid": "Revisa el tipo, un mensaje de máximo 280 caracteres y un enlace http(s) opcional.",
+            "admin.announcements.kind_critical": "Crítico",
+            "admin.announcements.kind_info": "Información",
+            "admin.announcements.kind_label": "Tipo",
+            "admin.announcements.kind_warning": "Advertencia",
+            "admin.announcements.message_label": "Mensaje",
+            "admin.announcements.message_placeholder": "Mantenimiento programado el domingo a las 02:00 UTC",
+            "admin.announcements.one_active_hint": "Solo se muestra un anuncio a la vez: al activar uno se desactivan los demás.",
+            "admin.announcements.title": "Anuncios",
+            "admin.announcements.url_label": "Enlace (opcional)",
+            "admin.announcements.url_placeholder": "https://status.example.com/incident/123"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -280,7 +374,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -343,6 +437,22 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.audit.col_org": "Org",
+            "admin.audit.empty": "No audit rows match.",
+            "admin.audit.search_aria": "Search audit log",
+            "admin.audit.search_placeholder": "Filter by action or org…",
+            "admin.audit.title": "Audit log"
+          },
+          "es": {
+            "admin.audit.col_org": "Organización",
+            "admin.audit.empty": "No hay registros que coincidan.",
+            "admin.audit.search_aria": "Buscar en la auditoría",
+            "admin.audit.search_placeholder": "Filtrar por acción u organización…",
+            "admin.audit.title": "Auditoría"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -374,7 +484,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -429,6 +539,126 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.content.all": "All",
+            "admin.content.body_label": "Body (Markdown)",
+            "admin.content.col_actions": "Actions",
+            "admin.content.col_locale": "Language",
+            "admin.content.col_published": "Published",
+            "admin.content.col_status": "Status",
+            "admin.content.col_title": "Title",
+            "admin.content.col_type": "Type",
+            "admin.content.created": "Entry created.",
+            "admin.content.delete": "Delete",
+            "admin.content.delete_confirm": "Delete this entry? This cannot be undone.",
+            "admin.content.deleted": "Entry deleted.",
+            "admin.content.edit": "Edit",
+            "admin.content.empty": "No content matches.",
+            "admin.content.invalid_body": "The body cannot be empty.",
+            "admin.content.invalid_expiry": "The expiry must be after the publish date.",
+            "admin.content.invalid_field": "Check this field.",
+            "admin.content.invalid_locale": "Choose a supported language.",
+            "admin.content.invalid_slug": "Use lowercase letters, numbers and hyphens.",
+            "admin.content.invalid_slug_taken": "That slug is already used by another entry in this language.",
+            "admin.content.invalid_title": "A title of 1–200 characters is required.",
+            "admin.content.locale_all": "All languages",
+            "admin.content.locale_hint": "A language variant replaces the all-languages entry for readers in that language.",
+            "admin.content.locale_label": "Language",
+            "admin.content.media_copy": "Copy markdown",
+            "admin.content.media_heading": "Recent media",
+            "admin.content.new": "New",
+            "admin.content.preview": "Preview",
+            "admin.content.preview_heading": "Preview",
+            "admin.content.publish": "Publish",
+            "admin.content.published": "Entry published.",
+            "admin.content.published_at_hint": "Optional. A future time schedules the entry.",
+            "admin.content.published_at_label": "Publish at",
+            "admin.content.restore": "Restore",
+            "admin.content.restore_confirm": "Restore this revision? The current version is snapshotted first.",
+            "admin.content.restored": "Entry restored.",
+            "admin.content.revision_current": "current",
+            "admin.content.revisions_empty": "No revisions yet.",
+            "admin.content.revisions_heading": "Revisions",
+            "admin.content.save": "Save",
+            "admin.content.save_draft": "Save draft",
+            "admin.content.search_aria": "Search content",
+            "admin.content.search_placeholder": "Filter by title…",
+            "admin.content.slug_hint": "Lowercase letters, numbers and hyphens.",
+            "admin.content.slug_label": "Slug",
+            "admin.content.status_draft": "Draft",
+            "admin.content.status_expired": "Expired",
+            "admin.content.status_live": "Live",
+            "admin.content.status_scheduled": "Scheduled",
+            "admin.content.summary_label": "Summary",
+            "admin.content.title": "Content",
+            "admin.content.title_label": "Title",
+            "admin.content.unpublish": "Unpublish",
+            "admin.content.unpublish_at_hint": "Optional. The entry disappears from the site at this time.",
+            "admin.content.unpublish_at_label": "Unpublish at",
+            "admin.content.unpublished": "Entry unpublished.",
+            "admin.content.updated": "Entry updated."
+          },
+          "es": {
+            "admin.content.all": "Todo",
+            "admin.content.body_label": "Contenido (Markdown)",
+            "admin.content.col_actions": "Acciones",
+            "admin.content.col_locale": "Idioma",
+            "admin.content.col_published": "Publicado",
+            "admin.content.col_status": "Estado",
+            "admin.content.col_title": "Título",
+            "admin.content.col_type": "Tipo",
+            "admin.content.created": "Entrada creada.",
+            "admin.content.delete": "Eliminar",
+            "admin.content.delete_confirm": "¿Eliminar esta entrada? Esta acción no se puede deshacer.",
+            "admin.content.deleted": "Entrada eliminada.",
+            "admin.content.edit": "Editar",
+            "admin.content.empty": "Ningún contenido coincide.",
+            "admin.content.invalid_body": "El contenido no puede estar vacío.",
+            "admin.content.invalid_expiry": "La caducidad debe ser posterior a la fecha de publicación.",
+            "admin.content.invalid_field": "Revisa este campo.",
+            "admin.content.invalid_locale": "Elige un idioma admitido.",
+            "admin.content.invalid_slug": "Usa letras minúsculas, números y guiones.",
+            "admin.content.invalid_slug_taken": "Ese slug ya está en uso por otra entrada en este idioma.",
+            "admin.content.invalid_title": "Se requiere un título de 1 a 200 caracteres.",
+            "admin.content.locale_all": "Todos los idiomas",
+            "admin.content.locale_hint": "Una variante de idioma sustituye a la entrada para todos los idiomas en los lectores de ese idioma.",
+            "admin.content.locale_label": "Idioma",
+            "admin.content.media_copy": "Copiar markdown",
+            "admin.content.media_heading": "Medios recientes",
+            "admin.content.new": "Nuevo",
+            "admin.content.preview": "Previsualizar",
+            "admin.content.preview_heading": "Previsualización",
+            "admin.content.publish": "Publicar",
+            "admin.content.published": "Entrada publicada.",
+            "admin.content.published_at_hint": "Opcional. Una hora futura programa la entrada.",
+            "admin.content.published_at_label": "Fecha de publicación",
+            "admin.content.restore": "Restaurar",
+            "admin.content.restore_confirm": "¿Restaurar esta revisión? Primero se guarda una copia de la versión actual.",
+            "admin.content.restored": "Entrada restaurada.",
+            "admin.content.revision_current": "actual",
+            "admin.content.revisions_empty": "Todavía no hay revisiones.",
+            "admin.content.revisions_heading": "Revisiones",
+            "admin.content.save": "Guardar",
+            "admin.content.save_draft": "Guardar borrador",
+            "admin.content.search_aria": "Buscar contenido",
+            "admin.content.search_placeholder": "Filtrar por título…",
+            "admin.content.slug_hint": "Letras minúsculas, números y guiones.",
+            "admin.content.slug_label": "Slug",
+            "admin.content.status_draft": "Borrador",
+            "admin.content.status_expired": "Caducado",
+            "admin.content.status_live": "Publicado",
+            "admin.content.status_scheduled": "Programado",
+            "admin.content.summary_label": "Resumen",
+            "admin.content.title": "Contenido",
+            "admin.content.title_label": "Título",
+            "admin.content.unpublish": "Despublicar",
+            "admin.content.unpublish_at_hint": "Opcional. La entrada desaparece del sitio a esta hora.",
+            "admin.content.unpublish_at_label": "Fecha de caducidad",
+            "admin.content.unpublished": "Entrada despublicada.",
+            "admin.content.updated": "Entrada actualizada."
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -453,7 +683,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -551,7 +781,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -630,7 +860,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -710,7 +940,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -767,6 +997,84 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "flags.back": "← All flags",
+            "flags.col_actions": "Actions",
+            "flags.col_description": "Description",
+            "flags.col_enabled": "Enabled",
+            "flags.col_key": "Key",
+            "flags.col_org": "Org",
+            "flags.col_override": "Override",
+            "flags.col_rollout": "Rollout %",
+            "flags.create": "Create flag",
+            "flags.create_title": "New flag",
+            "flags.created": "Flag created.",
+            "flags.delete": "Delete",
+            "flags.delete_confirm": "Delete this flag and all its per-org overrides?",
+            "flags.deleted": "Flag deleted.",
+            "flags.description_label": "Description",
+            "flags.description_placeholder": "What this flag gates",
+            "flags.empty": "No flags yet.",
+            "flags.exists": "That key already exists.",
+            "flags.hint": "Missing keys evaluate to off; per-org overrides win over the global setting.",
+            "flags.invalid": "Key must be lowercase letters, digits, and dashes (max 64); description max 200 chars; rollout 0–100.",
+            "flags.key_label": "Key",
+            "flags.key_placeholder": "my-feature",
+            "flags.off": "off",
+            "flags.on": "on",
+            "flags.override_add": "Set override",
+            "flags.override_delete": "Remove",
+            "flags.override_delete_confirm": "Remove this override? The org goes back to the global setting.",
+            "flags.override_deleted": "Override removed.",
+            "flags.override_org_label": "Organization",
+            "flags.override_saved": "Override saved.",
+            "flags.override_state_label": "State",
+            "flags.overrides_empty": "No overrides — every org follows the global setting.",
+            "flags.overrides_heading": "Per-org overrides",
+            "flags.rollout_label": "Rollout %",
+            "flags.set": "Set",
+            "flags.title": "Feature flags"
+          },
+          "es": {
+            "flags.back": "← Todas las flags",
+            "flags.col_actions": "Acciones",
+            "flags.col_description": "Descripción",
+            "flags.col_enabled": "Activa",
+            "flags.col_key": "Clave",
+            "flags.col_org": "Organización",
+            "flags.col_override": "Anulación",
+            "flags.col_rollout": "Despliegue %",
+            "flags.create": "Crear flag",
+            "flags.create_title": "Nueva flag",
+            "flags.created": "Flag creada.",
+            "flags.delete": "Eliminar",
+            "flags.delete_confirm": "¿Eliminar esta flag y todas sus anulaciones por organización?",
+            "flags.deleted": "Flag eliminada.",
+            "flags.description_label": "Descripción",
+            "flags.description_placeholder": "Qué controla esta flag",
+            "flags.empty": "Aún no hay banderas.",
+            "flags.exists": "Esa clave ya existe.",
+            "flags.hint": "Las claves inexistentes evalúan como inactivas; las excepciones por organización prevalecen sobre el ajuste global.",
+            "flags.invalid": "La clave debe tener minúsculas, dígitos y guiones (máx. 64); descripción máx. 200 caracteres; despliegue 0–100.",
+            "flags.key_label": "Clave",
+            "flags.key_placeholder": "mi-funcionalidad",
+            "flags.off": "inactiva",
+            "flags.on": "activa",
+            "flags.override_add": "Fijar anulación",
+            "flags.override_delete": "Quitar",
+            "flags.override_delete_confirm": "¿Quitar esta anulación? La organización vuelve al ajuste global.",
+            "flags.override_deleted": "Anulación eliminada.",
+            "flags.override_org_label": "Organización",
+            "flags.override_saved": "Anulación guardada.",
+            "flags.override_state_label": "Estado",
+            "flags.overrides_empty": "Sin anulaciones: cada organización sigue el ajuste global.",
+            "flags.overrides_heading": "Anulaciones por organización",
+            "flags.rollout_label": "Despliegue %",
+            "flags.set": "Fijar",
+            "flags.title": "Banderas de funciones"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -791,7 +1099,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -847,6 +1155,48 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.jobs.col_actions": "Actions",
+            "admin.jobs.col_attempts": "Attempts",
+            "admin.jobs.col_error": "Last error",
+            "admin.jobs.col_kind": "Kind",
+            "admin.jobs.col_run_at": "Run at",
+            "admin.jobs.col_status": "Status",
+            "admin.jobs.empty": "No jobs match.",
+            "admin.jobs.requeue": "Requeue",
+            "admin.jobs.requeue_confirm": "Requeue this dead-lettered job? It will be claimed immediately.",
+            "admin.jobs.requeued": "Job requeued.",
+            "admin.jobs.search_aria": "Search jobs",
+            "admin.jobs.search_placeholder": "Filter by kind…",
+            "admin.jobs.status_dead": "dead",
+            "admin.jobs.status_done": "done",
+            "admin.jobs.status_pending": "pending",
+            "admin.jobs.status_retrying": "retrying",
+            "admin.jobs.status_running": "running",
+            "admin.jobs.title": "Jobs"
+          },
+          "es": {
+            "admin.jobs.col_actions": "Acciones",
+            "admin.jobs.col_attempts": "Intentos",
+            "admin.jobs.col_error": "Último error",
+            "admin.jobs.col_kind": "Tipo",
+            "admin.jobs.col_run_at": "Ejecuta",
+            "admin.jobs.col_status": "Estado",
+            "admin.jobs.empty": "No hay trabajos que coincidan.",
+            "admin.jobs.requeue": "Reencolar",
+            "admin.jobs.requeue_confirm": "¿Reencolar este trabajo fallido? Se reclamará de inmediato.",
+            "admin.jobs.requeued": "Trabajo reencolado.",
+            "admin.jobs.search_aria": "Buscar trabajos",
+            "admin.jobs.search_placeholder": "Filtrar por tipo…",
+            "admin.jobs.status_dead": "fallido",
+            "admin.jobs.status_done": "completado",
+            "admin.jobs.status_pending": "pendiente",
+            "admin.jobs.status_retrying": "reintentando",
+            "admin.jobs.status_running": "en ejecución",
+            "admin.jobs.title": "Trabajos"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -871,7 +1221,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -928,6 +1278,42 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.media.back_to_content": "Back to content",
+            "admin.media.col_actions": "Actions",
+            "admin.media.col_filename": "Filename",
+            "admin.media.col_preview": "Preview",
+            "admin.media.col_size": "Size",
+            "admin.media.col_uploaded": "Uploaded",
+            "admin.media.delete_confirm": "Delete this image? Posts referencing it will break.",
+            "admin.media.deleted": "Image deleted.",
+            "admin.media.empty": "No media uploaded yet.",
+            "admin.media.invalid_missing": "Choose a file to upload.",
+            "admin.media.invalid_type": "Only PNG, JPEG, GIF and WebP images are accepted.",
+            "admin.media.title": "Media",
+            "admin.media.upload": "Upload",
+            "admin.media.upload_label": "Image file",
+            "admin.media.uploaded": "Image uploaded."
+          },
+          "es": {
+            "admin.media.back_to_content": "Volver al contenido",
+            "admin.media.col_actions": "Acciones",
+            "admin.media.col_filename": "Nombre de archivo",
+            "admin.media.col_preview": "Previsualización",
+            "admin.media.col_size": "Tamaño",
+            "admin.media.col_uploaded": "Subido",
+            "admin.media.delete_confirm": "¿Eliminar esta imagen? Las entradas que la usen se romperán.",
+            "admin.media.deleted": "Imagen eliminada.",
+            "admin.media.empty": "Todavía no se han subido medios.",
+            "admin.media.invalid_missing": "Elige un archivo para subir.",
+            "admin.media.invalid_type": "Solo se aceptan imágenes PNG, JPEG, GIF y WebP.",
+            "admin.media.title": "Medios",
+            "admin.media.upload": "Subir",
+            "admin.media.upload_label": "Archivo de imagen",
+            "admin.media.uploaded": "Imagen subida."
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -952,7 +1338,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1007,6 +1393,24 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.orgs.col_created": "Created",
+            "admin.orgs.col_members": "Members",
+            "admin.orgs.col_name": "Name",
+            "admin.orgs.col_plan": "Plan",
+            "admin.orgs.col_slug": "Slug",
+            "admin.orgs.title": "Organizations"
+          },
+          "es": {
+            "admin.orgs.col_created": "Creada",
+            "admin.orgs.col_members": "Miembros",
+            "admin.orgs.col_name": "Nombre",
+            "admin.orgs.col_plan": "Plan",
+            "admin.orgs.col_slug": "Slug",
+            "admin.orgs.title": "Organizaciones"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1031,7 +1435,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1088,6 +1492,30 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.read_only": "Read-only",
+            "admin.signups_empty": "No signups yet.",
+            "admin.signups_heading": "Signups, last 30 days",
+            "admin.stats.active_subs": "Active subscriptions",
+            "admin.stats.mrr": "MRR",
+            "admin.stats.mrr_hint": "across active + trialing + past_due",
+            "admin.stats.total_orgs": "Total orgs",
+            "admin.stats.total_users": "Total users",
+            "admin.title": "Admin"
+          },
+          "es": {
+            "admin.read_only": "Solo lectura",
+            "admin.signups_empty": "Aún no hay registros.",
+            "admin.signups_heading": "Registros, últimos 30 días",
+            "admin.stats.active_subs": "Suscripciones activas",
+            "admin.stats.mrr": "MRR",
+            "admin.stats.mrr_hint": "incluye active + trialing + past_due",
+            "admin.stats.total_orgs": "Total de organizaciones",
+            "admin.stats.total_users": "Total de usuarios",
+            "admin.title": "Administración"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1112,7 +1540,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -1171,6 +1599,70 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.schedules.col_actions": "Actions",
+            "admin.schedules.col_enabled": "Enabled",
+            "admin.schedules.col_every": "Every",
+            "admin.schedules.col_kind": "Kind",
+            "admin.schedules.col_name": "Name",
+            "admin.schedules.col_next": "Next run",
+            "admin.schedules.col_scope": "Scope",
+            "admin.schedules.create": "Create schedule",
+            "admin.schedules.create_title": "New schedule",
+            "admin.schedules.created": "Schedule created.",
+            "admin.schedules.delete": "Delete",
+            "admin.schedules.delete_confirm": "Delete this schedule? In-flight jobs are unaffected.",
+            "admin.schedules.deleted": "Schedule deleted.",
+            "admin.schedules.empty": "No schedules yet.",
+            "admin.schedules.every_label": "Every (seconds)",
+            "admin.schedules.hint": "Schedules enqueue their kind each interval; missed ticks are skipped, never caught up. Minimum interval 60s.",
+            "admin.schedules.invalid": "Name max 100 chars, kind must be schedulable, interval 60s–30 days, payload must be a JSON object.",
+            "admin.schedules.kind_label": "Kind",
+            "admin.schedules.name_label": "Name",
+            "admin.schedules.name_placeholder": "Daily digest",
+            "admin.schedules.off": "off",
+            "admin.schedules.on": "on",
+            "admin.schedules.payload_label": "Payload (JSON)",
+            "admin.schedules.run_now": "Run now",
+            "admin.schedules.run_started": "Scheduled for the next worker pass.",
+            "admin.schedules.scope_label": "Scope",
+            "admin.schedules.scope_system": "System-wide",
+            "admin.schedules.title": "Schedules",
+            "admin.schedules.toggled": "Schedule updated."
+          },
+          "es": {
+            "admin.schedules.col_actions": "Acciones",
+            "admin.schedules.col_enabled": "Activada",
+            "admin.schedules.col_every": "Intervalo",
+            "admin.schedules.col_kind": "Tipo",
+            "admin.schedules.col_name": "Nombre",
+            "admin.schedules.col_next": "Próxima",
+            "admin.schedules.col_scope": "Ámbito",
+            "admin.schedules.create": "Crear programación",
+            "admin.schedules.create_title": "Nueva programación",
+            "admin.schedules.created": "Programación creada.",
+            "admin.schedules.delete": "Eliminar",
+            "admin.schedules.delete_confirm": "¿Eliminar esta programación? Los trabajos en curso no se ven afectados.",
+            "admin.schedules.deleted": "Programación eliminada.",
+            "admin.schedules.empty": "Aún no hay programaciones.",
+            "admin.schedules.every_label": "Cada (segundos)",
+            "admin.schedules.hint": "Cada programación encola su tipo en cada intervalo; los ticks perdidos se saltan, nunca se recuperan. Intervalo mínimo 60s.",
+            "admin.schedules.invalid": "Nombre máx. 100, tipo programable, intervalo 60s–30 días, payload debe ser un objeto JSON.",
+            "admin.schedules.kind_label": "Tipo",
+            "admin.schedules.name_label": "Nombre",
+            "admin.schedules.name_placeholder": "Resumen diario",
+            "admin.schedules.off": "inactiva",
+            "admin.schedules.on": "activa",
+            "admin.schedules.payload_label": "Payload (JSON)",
+            "admin.schedules.run_now": "Ejecutar ya",
+            "admin.schedules.run_started": "Programada para el siguiente ciclo del worker.",
+            "admin.schedules.scope_label": "Ámbito",
+            "admin.schedules.scope_system": "Todo el sistema",
+            "admin.schedules.title": "Programaciones",
+            "admin.schedules.toggled": "Programación actualizada."
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1195,7 +1687,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1250,6 +1742,52 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "admin.users.col_actions": "Actions",
+            "admin.users.col_email": "Email",
+            "admin.users.col_joined": "Joined",
+            "admin.users.col_name": "Name",
+            "admin.users.col_role": "Staff role",
+            "admin.users.col_status": "Status",
+            "admin.users.confirm_disable": "Disable %s? They will lose access immediately.",
+            "admin.users.confirm_enable": "Re-enable %s?",
+            "admin.users.disable": "Disable",
+            "admin.users.enable": "Enable",
+            "admin.users.impersonate": "Impersonate",
+            "admin.users.role_admin": "Admin",
+            "admin.users.role_last_admin": "This is the last admin — promote someone else first.",
+            "admin.users.role_none": "—",
+            "admin.users.role_support": "Support",
+            "admin.users.search_aria": "Search users",
+            "admin.users.search_placeholder": "Search by email…",
+            "admin.users.status_active": "active",
+            "admin.users.status_disabled": "disabled",
+            "admin.users.title": "Users"
+          },
+          "es": {
+            "admin.users.col_actions": "Acciones",
+            "admin.users.col_email": "Correo",
+            "admin.users.col_joined": "Se unió",
+            "admin.users.col_name": "Nombre",
+            "admin.users.col_role": "Rol de equipo",
+            "admin.users.col_status": "Estado",
+            "admin.users.confirm_disable": "¿Deshabilitar a %s? Perderá el acceso de inmediato.",
+            "admin.users.confirm_enable": "¿Reactivar a %s?",
+            "admin.users.disable": "Deshabilitar",
+            "admin.users.enable": "Reactivar",
+            "admin.users.impersonate": "Suplantar",
+            "admin.users.role_admin": "Administrador",
+            "admin.users.role_last_admin": "Es el último administrador: asciende a otra persona primero.",
+            "admin.users.role_none": "—",
+            "admin.users.role_support": "Soporte",
+            "admin.users.search_aria": "Buscar usuarios",
+            "admin.users.search_placeholder": "Buscar por correo…",
+            "admin.users.status_active": "activo",
+            "admin.users.status_disabled": "deshabilitado",
+            "admin.users.title": "Usuarios"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1274,7 +1812,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1321,6 +1859,16 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "blog.empty": "No posts yet.",
+            "blog.title": "Blog"
+          },
+          "es": {
+            "blog.empty": "Aún no hay publicaciones.",
+            "blog.title": "Blog"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1345,7 +1893,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1383,6 +1931,16 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "changelog.intro": "Everything that shipped, newest first. Each release links to itself, so you can point someone at the exact one.",
+            "changelog.title": "Changelog"
+          },
+          "es": {
+            "changelog.intro": "Todo lo que se ha lanzado, lo más reciente primero. Cada versión enlaza a sí misma, para que puedas señalar exactamente cuál.",
+            "changelog.title": "Novedades"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1399,7 +1957,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1463,6 +2021,38 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "dashboard.checklist.create_project": "Create your first project",
+            "dashboard.checklist.dismiss": "Dismiss checklist",
+            "dashboard.checklist.invite_team": "Invite your team",
+            "dashboard.checklist.invite_team_note": "(from the Clerk organization profile)",
+            "dashboard.checklist.review_plans": "Review plans",
+            "dashboard.checklist.review_plans_note": "when you outgrow free",
+            "dashboard.getting_started": "Getting started",
+            "dashboard.recent_activity": "Recent activity",
+            "dashboard.recent_empty": "Nothing yet — create a project to see activity here.",
+            "dashboard.stats.active_projects": "Active projects",
+            "dashboard.stats.current_plan": "Current plan",
+            "dashboard.stats.team_members": "Team members",
+            "dashboard.title": "Dashboard"
+          },
+          "es": {
+            "dashboard.checklist.create_project": "Crea tu primer proyecto",
+            "dashboard.checklist.dismiss": "Descartar la lista de primeros pasos",
+            "dashboard.checklist.invite_team": "Invita a tu equipo",
+            "dashboard.checklist.invite_team_note": "(desde el perfil de la organización de Clerk)",
+            "dashboard.checklist.review_plans": "Revisa los planes",
+            "dashboard.checklist.review_plans_note": "cuando superes el plan gratuito",
+            "dashboard.getting_started": "Primeros pasos",
+            "dashboard.recent_activity": "Actividad reciente",
+            "dashboard.recent_empty": "Aún no hay nada — crea un proyecto para ver la actividad aquí.",
+            "dashboard.stats.active_projects": "Proyectos activos",
+            "dashboard.stats.current_plan": "Plan actual",
+            "dashboard.stats.team_members": "Miembros del equipo",
+            "dashboard.title": "Panel"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1494,7 +2084,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1590,7 +2180,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1635,6 +2225,14 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "docs.edit_page": "Edit this page →"
+          },
+          "es": {
+            "docs.edit_page": "Editar esta página →"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1651,7 +2249,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -1732,7 +2330,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1777,6 +2375,24 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "docs.search_aria": "Search the docs",
+            "docs.search_no_results": "No pages matched your search.",
+            "docs.search_placeholder": "Search the docs…",
+            "docs.search_prompt": "Type a term to search the documentation.",
+            "docs.search_results_for": "Results for “%s”",
+            "docs.search_title": "Search"
+          },
+          "es": {
+            "docs.search_aria": "Buscar en los docs",
+            "docs.search_no_results": "Ninguna página coincide con tu búsqueda.",
+            "docs.search_placeholder": "Buscar en los docs…",
+            "docs.search_prompt": "Escribe un término para buscar en la documentación.",
+            "docs.search_results_for": "Resultados para «%s»",
+            "docs.search_title": "Buscar"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1793,7 +2409,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -1851,6 +2467,36 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "files.choose": "Choose file",
+            "files.col_name": "Name",
+            "files.col_size": "Size",
+            "files.col_uploaded": "Uploaded",
+            "files.delete_confirm": "Delete this file? This cannot be undone.",
+            "files.download": "Download",
+            "files.empty_body": "Uploads land here, scoped to your organization.",
+            "files.empty_title": "No files yet",
+            "files.limit_hit": "Storage limit reached — the %s MB plan is full.",
+            "files.quota": "%s MB of %s MB used on %s",
+            "files.title": "Files",
+            "files.upload": "Upload"
+          },
+          "es": {
+            "files.choose": "Elegir archivo",
+            "files.col_name": "Nombre",
+            "files.col_size": "Tamaño",
+            "files.col_uploaded": "Subido",
+            "files.delete_confirm": "¿Eliminar este archivo? Esta acción no se puede deshacer.",
+            "files.download": "Descargar",
+            "files.empty_body": "Las subidas aparecen aquí, con alcance de tu organización.",
+            "files.empty_title": "Aún no hay archivos",
+            "files.limit_hit": "Límite de almacenamiento alcanzado — el plan de %s MB está lleno.",
+            "files.quota": "%s MB de %s MB usados en el plan %s",
+            "files.title": "Archivos",
+            "files.upload": "Subir"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1875,7 +2521,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1936,6 +2582,110 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "home.cta.docs": "Read the docs",
+            "home.cta.start": "Start building",
+            "home.cta_band.body": "Auth, billing, and email are solved problems. Ship the part that makes you money.",
+            "home.cta_band.button": "Get started free",
+            "home.cta_band.title": "Stop rebuilding the same 40%%",
+            "home.f1.body": "Clerk powers sign-in, social OAuth, 2FA, orgs, roles, and invitations — mirrored locally for fast queries.",
+            "home.f1.title": "Auth \u0026 teams, hosted",
+            "home.f2.body": "Polar.sh is your merchant of record. Checkout, customer portal, webhooks, and entitlements included.",
+            "home.f2.title": "Billing without tax pain",
+            "home.f3.body": "templ templates, sqlc queries, and Go handlers — the compiler catches what templates usually hide.",
+            "home.f3.title": "Type-safe end to end",
+            "home.f4.body": "No SPA weight. Fragments, toasts, inline validation, and optimistic-feeling tables at ~14 KB.",
+            "home.f4.title": "HTMX interactivity",
+            "home.f5.body": "Strict CSP, CSRF, per-IP rate limiting, hashed API tokens, and auto-escaped templates.",
+            "home.f5.title": "Secure by default",
+            "home.f6.body": "Postgres job queue, audit log, structured logs, Sentry + PostHog hooks, /healthz and /readyz.",
+            "home.f6.title": "Operable from day one",
+            "home.faq.a1": "One static binary, no node in production, no hydration cost. HTMX + Alpine cover the interactivity a SaaS dashboard actually needs.",
+            "home.faq.a2": "Not to evaluate: DEV_AUTH_BYPASS runs the full app locally with zero SaaS accounts. Connect real services when you are ready to ship.",
+            "home.faq.a3": "Yes. Every external service sits behind one narrow Go interface — swapping a provider means replacing one file.",
+            "home.faq.a4": "Strict CSP, CSRF, rate limiting, migrations on boot, background jobs, audit log, tests, CI, and a Dockerfile ship in the box.",
+            "home.faq.a5": "Tailwind v4 standalone CLI and vendored JS — there is no node_modules anywhere in the shipped artifact.",
+            "home.faq.q1": "Why Go + HTMX instead of a JS framework?",
+            "home.faq.q2": "Do I need accounts with Clerk, Polar, and Resend?",
+            "home.faq.q3": "Can I swap a managed service?",
+            "home.faq.q4": "Is this production-ready?",
+            "home.faq.q5": "What about the frontend build?",
+            "home.faq.title": "Frequently asked questions",
+            "home.features.title": "Everything a SaaS needs, nothing it doesn't",
+            "home.hero.subtitle": "The production-grade Go + HTMX boilerplate. Auth, teams, billing, email, admin, blog, and docs — wired to best-in-class managed services so you own the product, not the plumbing.",
+            "home.hero.title1": "Ship your SaaS this weekend,",
+            "home.hero.title2": "not next quarter",
+            "home.how.title": "How it works",
+            "home.pricing.choose": "Choose %s",
+            "home.pricing.current": "Current plan",
+            "home.pricing.get_started": "Get started",
+            "home.pricing.heading": "Pricing",
+            "home.pricing.subtitle": "Start free. Upgrade when you outgrow it. Cancel anytime.",
+            "home.pricing.taxes": "Prices in USD. Taxes handled by Polar as merchant of record.",
+            "home.pricing.title": "Simple pricing",
+            "home.pricing.upgrade": "Upgrade to %s",
+            "home.screenshot": "Product screenshot",
+            "home.stack": "Built on a curated value stack",
+            "home.step1.body": "make setup, add your Clerk and Polar keys, make dev. Zero to running SaaS in ten minutes.",
+            "home.step1.title": "Clone \u0026 configure",
+            "home.step2.body": "Your pages, your domain model, your pricing. Undifferentiated heavy lifting stays delegated.",
+            "home.step2.title": "Own the product surface",
+            "home.step3.body": "One static binary. Docker, fly.io, or any VM — migrations run on boot, scaling is horizontal.",
+            "home.step3.title": "Deploy anywhere"
+          },
+          "es": {
+            "home.cta.docs": "Lee la documentación",
+            "home.cta.start": "Empieza a construir",
+            "home.cta_band.body": "La autenticación, la facturación y el correo son problemas resueltos. Lanza la parte que te genera dinero.",
+            "home.cta_band.button": "Empieza gratis",
+            "home.cta_band.title": "Deja de reconstruir el mismo 40%%",
+            "home.f1.body": "Clerk proporciona inicio de sesión, OAuth social, 2FA, organizaciones, roles e invitaciones — replicados localmente para consultas rápidas.",
+            "home.f1.title": "Autenticación y equipos, gestionados",
+            "home.f2.body": "Polar.sh es tu comerciante de registro. Checkout, portal de clientes, webhooks y derechos incluidos.",
+            "home.f2.title": "Facturación sin dolores fiscales",
+            "home.f3.body": "Plantillas templ, consultas sqlc y handlers en Go — el compilador detecta lo que las plantillas suelen ocultar.",
+            "home.f3.title": "Tipado seguro de extremo a extremo",
+            "home.f4.body": "Sin el peso de un SPA. Fragmentos, toasts, validación en línea y tablas con sensación optimista en ~14 KB.",
+            "home.f4.title": "Interactividad con HTMX",
+            "home.f5.body": "CSP estricto, CSRF, límite de peticiones por IP, tokens de API con hash y plantillas con escape automático.",
+            "home.f5.title": "Seguro por defecto",
+            "home.f6.body": "Cola de trabajos en Postgres, registro de auditoría, logs estructurados, hooks de Sentry + PostHog, /healthz y /readyz.",
+            "home.f6.title": "Operativo desde el primer día",
+            "home.faq.a1": "Un solo binario estático, sin node en producción, sin coste de hidratación. HTMX + Alpine cubren la interactividad que un panel de SaaS realmente necesita.",
+            "home.faq.a2": "No para evaluarlo: DEV_AUTH_BYPASS ejecuta la app completa en local sin ninguna cuenta SaaS. Conecta los servicios reales cuando estés listo para lanzar.",
+            "home.faq.a3": "Sí. Cada servicio externo está detrás de una interfaz Go bien delimitada — cambiar de proveedor significa reemplazar un archivo.",
+            "home.faq.a4": "CSP estricto, CSRF, límite de peticiones, migraciones al arrancar, trabajos en segundo plano, registro de auditoría, tests, CI y un Dockerfile incluidos de serie.",
+            "home.faq.a5": "CLI independiente de Tailwind v4 y JS vendored — no hay ningún node_modules en el artefacto final.",
+            "home.faq.q1": "¿Por qué Go + HTMX en lugar de un framework de JS?",
+            "home.faq.q2": "¿Necesito cuentas con Clerk, Polar y Resend?",
+            "home.faq.q3": "¿Puedo cambiar un servicio gestionado?",
+            "home.faq.q4": "¿Está listo para producción?",
+            "home.faq.q5": "¿Y la compilación del frontend?",
+            "home.faq.title": "Preguntas frecuentes",
+            "home.features.title": "Todo lo que un SaaS necesita, nada de lo que no",
+            "home.hero.subtitle": "El boilerplate de Go + HTMX listo para producción. Autenticación, equipos, facturación, correo, administración, blog y documentación — conectados a servicios gestionados de primera clase para que seas dueño del producto, no de la infraestructura.",
+            "home.hero.title1": "Lanza tu SaaS este fin de semana,",
+            "home.hero.title2": "no el próximo trimestre",
+            "home.how.title": "Cómo funciona",
+            "home.pricing.choose": "Elegir %s",
+            "home.pricing.current": "Plan actual",
+            "home.pricing.get_started": "Comenzar",
+            "home.pricing.heading": "Precios",
+            "home.pricing.subtitle": "Empieza gratis. Mejora de plan cuando lo superes. Cancela cuando quieras.",
+            "home.pricing.taxes": "Precios en USD. Impuestos gestionados por Polar como comerciante de registro.",
+            "home.pricing.title": "Precios simples",
+            "home.pricing.upgrade": "Mejorar a %s",
+            "home.screenshot": "Captura del producto",
+            "home.stack": "Construido sobre una pila de valor cuidadosamente elegida",
+            "home.step1.body": "make setup, añade tus claves de Clerk y Polar, make dev. De cero a un SaaS funcionando en diez minutos.",
+            "home.step1.title": "Clona y configura",
+            "home.step2.body": "Tus páginas, tu modelo de dominio, tus precios. El trabajo pesado sin diferenciación sigue delegado.",
+            "home.step2.title": "Sé dueño de la superficie del producto",
+            "home.step3.body": "Un solo binario estático. Docker, fly.io o cualquier VM — las migraciones se ejecutan al arrancar, el escalado es horizontal.",
+            "home.step3.title": "Despliega donde quieras"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -1967,7 +2717,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -2025,6 +2775,34 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "notifications.empty_body": "You're all caught up.",
+            "notifications.empty_title": "No notifications",
+            "notifications.kind.export_ready": "Export ready",
+            "notifications.kind.payment_failed": "Payment failed",
+            "notifications.kind.webhook_failed": "Webhook delivery failed",
+            "notifications.kind.welcome": "Welcome",
+            "notifications.mark_read": "Mark read",
+            "notifications.open": "Open",
+            "notifications.read_all": "Mark all read",
+            "notifications.title": "Notifications",
+            "notifications.unread_aria": "%d unread notifications"
+          },
+          "es": {
+            "notifications.empty_body": "Estás al día.",
+            "notifications.empty_title": "No hay notificaciones",
+            "notifications.kind.export_ready": "Exportación lista",
+            "notifications.kind.payment_failed": "Pago fallido",
+            "notifications.kind.webhook_failed": "Entrega de webhook fallida",
+            "notifications.kind.welcome": "Bienvenida",
+            "notifications.mark_read": "Marcar como leído",
+            "notifications.open": "Abrir",
+            "notifications.read_all": "Marcar todo como leído",
+            "notifications.title": "Notificaciones",
+            "notifications.unread_aria": "%d notificaciones sin leer"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2049,7 +2827,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2141,7 +2919,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2202,6 +2980,18 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "legal.privacy.body": "Account data is stored with Clerk; payment data with Polar (merchant of record); analytics, when enabled, with PostHog behind an explicit consent gate.",
+            "legal.privacy.placeholder": "Placeholder privacy policy. Replace with counsel-reviewed copy before launch.",
+            "legal.privacy.title": "Privacy Policy"
+          },
+          "es": {
+            "legal.privacy.body": "Los datos de cuenta se guardan en Clerk; los datos de pago en Polar (registrante comercial); las analíticas, si están activadas, en PostHog tras un consentimiento explícito.",
+            "legal.privacy.placeholder": "Política de privacidad provisional. Sustitúyela por un texto revisado por un abogado antes del lanzamiento.",
+            "legal.privacy.title": "Política de privacidad"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2233,7 +3023,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2313,7 +3103,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2392,7 +3182,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2448,6 +3238,60 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "projects.archive": "Archive",
+            "projects.cancel": "Cancel",
+            "projects.col_actions": "Actions",
+            "projects.col_created": "Created",
+            "projects.col_name": "Name",
+            "projects.create": "Create project",
+            "projects.delete": "Delete",
+            "projects.delete_confirm": "Delete this project? This cannot be undone.",
+            "projects.edit": "Edit",
+            "projects.edit_heading": "Edit project",
+            "projects.empty_body": "Create your first project to get going.",
+            "projects.empty_title": "No projects",
+            "projects.export": "Export CSV",
+            "projects.field_name": "Name",
+            "projects.field_placeholder": "Launch checklist",
+            "projects.fix_error": "Please fix the error below.",
+            "projects.limit_hit": "You've reached the %s plan limit of %s projects.",
+            "projects.new": "New project",
+            "projects.save": "Save changes",
+            "projects.search_label": "Search projects",
+            "projects.search_placeholder": "Search projects…",
+            "projects.title": "Projects",
+            "projects.upgrade": "Upgrade to create more →",
+            "projects.usage": "%s / %s projects used on %s"
+          },
+          "es": {
+            "projects.archive": "Archivar",
+            "projects.cancel": "Cancelar",
+            "projects.col_actions": "Acciones",
+            "projects.col_created": "Creado",
+            "projects.col_name": "Nombre",
+            "projects.create": "Crear proyecto",
+            "projects.delete": "Eliminar",
+            "projects.delete_confirm": "¿Eliminar este proyecto? Esta acción no se puede deshacer.",
+            "projects.edit": "Editar",
+            "projects.edit_heading": "Editar proyecto",
+            "projects.empty_body": "Crea tu primer proyecto para comenzar.",
+            "projects.empty_title": "No hay proyectos",
+            "projects.export": "Exportar CSV",
+            "projects.field_name": "Nombre",
+            "projects.field_placeholder": "Lista de verificación de lanzamiento",
+            "projects.fix_error": "Corrige el error que aparece a continuación.",
+            "projects.limit_hit": "Has llegado al límite del plan %s de %s proyectos.",
+            "projects.new": "Nuevo proyecto",
+            "projects.save": "Guardar cambios",
+            "projects.search_label": "Buscar proyectos",
+            "projects.search_placeholder": "Buscar proyectos…",
+            "projects.title": "Proyectos",
+            "projects.upgrade": "Mejora tu plan para crear más →",
+            "projects.usage": "%s / %s proyectos usados en el plan %s"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2472,7 +3316,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -2530,6 +3374,62 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "settings.account_clerk_managed": "Profile, password, social connections, and two-factor authentication are managed by Clerk.",
+            "settings.account_deleted": "Your account has been deleted. Goodbye!",
+            "settings.account_email": "Email",
+            "settings.account_manage_link": "Manage your account →",
+            "settings.account_member_since": "Member since",
+            "settings.account_name": "Name",
+            "settings.account_title": "Account settings",
+            "settings.appearance_body": "Saved to your account, so these follow you to every device — and the digest email speaks your language.",
+            "settings.appearance_title": "Appearance",
+            "settings.danger_blocked": "Transfer the admin role in %s first — you're the only admin.",
+            "settings.danger_body": "Permanently delete your account. Organizations where you are the only member are deleted too; audit rows are kept.",
+            "settings.danger_confirm_label": "Type your email address to confirm",
+            "settings.danger_confirm_prompt": "Permanently delete this account? This cannot be undone.",
+            "settings.danger_delete": "Delete account",
+            "settings.danger_mismatch": "That doesn't match your account email.",
+            "settings.danger_title": "Danger zone",
+            "settings.data_body": "Download everything we hold about your account as JSON — profile, memberships, notifications, and audit trail.",
+            "settings.data_export": "Export my data (JSON)",
+            "settings.data_title": "Data \u0026 privacy",
+            "settings.language_auto": "Browser default",
+            "settings.language_label": "Language",
+            "settings.theme_dark": "Dark",
+            "settings.theme_label": "Theme",
+            "settings.theme_light": "Light",
+            "settings.theme_system": "System"
+          },
+          "es": {
+            "settings.account_clerk_managed": "El perfil, la contraseña, las conexiones sociales y la autenticación de dos factores se gestionan en Clerk.",
+            "settings.account_deleted": "Tu cuenta ha sido eliminada. ¡Hasta pronto!",
+            "settings.account_email": "Correo electrónico",
+            "settings.account_manage_link": "Gestionar tu cuenta →",
+            "settings.account_member_since": "Miembro desde",
+            "settings.account_name": "Nombre",
+            "settings.account_title": "Configuración de la cuenta",
+            "settings.appearance_body": "Se guarda en tu cuenta, así te acompaña en todos tus dispositivos y el correo de resumen habla tu idioma.",
+            "settings.appearance_title": "Apariencia",
+            "settings.danger_blocked": "Transfiere primero el rol de administrador en %s: eres el único administrador.",
+            "settings.danger_body": "Elimina tu cuenta permanentemente. Las organizaciones en las que eres el único miembro también se eliminan; el registro de auditoría se conserva.",
+            "settings.danger_confirm_label": "Escribe tu correo electrónico para confirmar",
+            "settings.danger_confirm_prompt": "¿Eliminar esta cuenta permanentemente? No se puede deshacer.",
+            "settings.danger_delete": "Eliminar cuenta",
+            "settings.danger_mismatch": "No coincide con el correo de tu cuenta.",
+            "settings.danger_title": "Zona de peligro",
+            "settings.data_body": "Descarga en JSON todo lo que guardamos sobre tu cuenta: perfil, membresías, notificaciones y registro de actividad.",
+            "settings.data_export": "Exportar mis datos (JSON)",
+            "settings.data_title": "Datos y privacidad",
+            "settings.language_auto": "Predeterminado del navegador",
+            "settings.language_label": "Idioma",
+            "settings.theme_dark": "Oscuro",
+            "settings.theme_label": "Tema",
+            "settings.theme_light": "Claro",
+            "settings.theme_system": "Sistema"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2554,7 +3454,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -2612,6 +3512,50 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "api.col_created": "Created",
+            "api.col_last_used": "Last used",
+            "api.col_name": "Name",
+            "api.col_scope": "Scope",
+            "api.copied": "Copied!",
+            "api.copy": "Copy",
+            "api.create": "Create",
+            "api.create_title": "Create a token",
+            "api.empty": "No tokens yet.",
+            "api.name_label": "Name",
+            "api.name_placeholder": "CI deploys",
+            "api.never_used": "never",
+            "api.reveal_note": "This is the only time the plaintext is shown.",
+            "api.reveal_title": "Token created — copy it now",
+            "api.revoke": "Revoke",
+            "api.revoke_confirm": "Revoke this token? API calls with it will start failing.",
+            "api.revoked": "revoked",
+            "api.scope_label": "Scope",
+            "api.title": "API tokens"
+          },
+          "es": {
+            "api.col_created": "Creado",
+            "api.col_last_used": "Último uso",
+            "api.col_name": "Nombre",
+            "api.col_scope": "Alcance",
+            "api.copied": "¡Copiado!",
+            "api.copy": "Copiar",
+            "api.create": "Crear",
+            "api.create_title": "Crear un token",
+            "api.empty": "Aún no hay tokens.",
+            "api.name_label": "Nombre",
+            "api.name_placeholder": "Despliegues de CI",
+            "api.never_used": "nunca",
+            "api.reveal_note": "Esta es la única vez que se muestra el texto plano.",
+            "api.reveal_title": "Token creado — cópialo ahora",
+            "api.revoke": "Revocar",
+            "api.revoke_confirm": "¿Revocar este token? Las llamadas a la API con este token empezarán a fallar.",
+            "api.revoked": "revocado",
+            "api.scope_label": "Alcance",
+            "api.title": "Tokens de API"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2636,7 +3580,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -2695,6 +3639,50 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "billing.current_plan": "Current plan",
+            "billing.ends_on": "Your plan ends on %s.",
+            "billing.manage": "Manage subscription →",
+            "billing.meter_used": "%s / %s this month",
+            "billing.not_configured": "%s not configured",
+            "billing.not_configured_body": "This service isn't set up yet — the app degrades instead of crashing.",
+            "billing.period_ends": "Current period ends %s.",
+            "billing.plan_free": "free",
+            "billing.plan_heading": "%s plan",
+            "billing.processing_sub": "Confirming with the payment provider — this takes a few seconds.",
+            "billing.processing_title": "Processing your subscription…",
+            "billing.projects_used": "%s / %s projects used",
+            "billing.setup_guide": "Setup guide →",
+            "billing.storage": "Storage",
+            "billing.storage_used": "%s MB of %s MB used",
+            "billing.title": "Billing",
+            "billing.upgrade_to": "Upgrade to %s",
+            "billing.usage": "Usage",
+            "billing.welcome": "Your subscription is active. Welcome aboard!"
+          },
+          "es": {
+            "billing.current_plan": "Plan actual",
+            "billing.ends_on": "Tu plan termina el %s.",
+            "billing.manage": "Gestionar suscripción →",
+            "billing.meter_used": "%s / %s este mes",
+            "billing.not_configured": "%s no está configurado",
+            "billing.not_configured_body": "Este servicio aún no está configurado — la aplicación se degrada en lugar de fallar.",
+            "billing.period_ends": "El período actual termina el %s.",
+            "billing.plan_free": "gratis",
+            "billing.plan_heading": "Plan %s",
+            "billing.processing_sub": "Confirmando con el proveedor de pagos — esto tarda unos segundos.",
+            "billing.processing_title": "Procesando tu suscripción…",
+            "billing.projects_used": "%s / %s proyectos en uso",
+            "billing.setup_guide": "Guía de configuración →",
+            "billing.storage": "Almacenamiento",
+            "billing.storage_used": "%s MB de %s MB usados",
+            "billing.title": "Facturación",
+            "billing.upgrade_to": "Mejorar a %s",
+            "billing.usage": "Uso",
+            "billing.welcome": "Tu suscripción está activa. ¡Bienvenido a bordo!"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2719,7 +3707,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -2777,6 +3765,30 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "settings.digest_daily": "Daily",
+            "settings.digest_hint": "A periodic email summarizing the notifications above. In-app mutes apply first — a muted kind never reaches the digest.",
+            "settings.digest_label": "Email digest",
+            "settings.digest_off": "Never",
+            "settings.digest_weekly": "Weekly",
+            "settings.notifications_intro": "Choose which in-app notifications you receive. Everything is on by default.",
+            "settings.notifications_save": "Save preferences",
+            "settings.notifications_saved": "Notification preferences saved.",
+            "settings.notifications_title": "Notification preferences"
+          },
+          "es": {
+            "settings.digest_daily": "Diario",
+            "settings.digest_hint": "Un correo periódico que resume las notificaciones anteriores. Los silencios en la app se aplican primero: un tipo silenciado nunca llega al resumen.",
+            "settings.digest_label": "Resumen por correo",
+            "settings.digest_off": "Nunca",
+            "settings.digest_weekly": "Semanal",
+            "settings.notifications_intro": "Elige qué notificaciones recibes en la app. Todo está activado por defecto.",
+            "settings.notifications_save": "Guardar preferencias",
+            "settings.notifications_saved": "Preferencias de notificación guardadas.",
+            "settings.notifications_title": "Preferencias de notificación"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2801,7 +3813,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2859,6 +3871,42 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "settings.org_clerk_managed": "Invitations and roles are managed by Clerk.",
+            "settings.org_col_email": "Email",
+            "settings.org_col_member": "Member",
+            "settings.org_col_role": "Role",
+            "settings.org_export_body": "A JSON snapshot of everything held for this organization: members, projects, files, audit log, billing state, and the API and webhook inventory. Secrets are never included. You'll get a notification with the download when it's ready.",
+            "settings.org_export_button": "Export data",
+            "settings.org_export_started": "Export started — you'll get a notification when it's ready.",
+            "settings.org_export_title": "Export organization data",
+            "settings.org_manage_link": "Manage organization →",
+            "settings.org_members_heading": "Members",
+            "settings.org_name": "Name",
+            "settings.org_slug": "Slug",
+            "settings.org_title": "Organization settings",
+            "settings.select_org_sub": "You're a member of %d organization(s). Pick one to continue.",
+            "settings.select_org_title": "Choose an organization"
+          },
+          "es": {
+            "settings.org_clerk_managed": "Las invitaciones y los roles se gestionan en Clerk.",
+            "settings.org_col_email": "Correo electrónico",
+            "settings.org_col_member": "Miembro",
+            "settings.org_col_role": "Rol",
+            "settings.org_export_body": "Una instantánea JSON de todo lo que se guarda de esta organización: miembros, proyectos, archivos, registro de auditoría, estado de facturación e inventario de API y webhooks. Nunca incluye secretos. Recibirás una notificación con la descarga cuando esté lista.",
+            "settings.org_export_button": "Exportar datos",
+            "settings.org_export_started": "Exportación iniciada: recibirás una notificación cuando esté lista.",
+            "settings.org_export_title": "Exportar datos de la organización",
+            "settings.org_manage_link": "Gestionar organización →",
+            "settings.org_members_heading": "Miembros",
+            "settings.org_name": "Nombre",
+            "settings.org_slug": "Slug",
+            "settings.org_title": "Configuración de la organización",
+            "settings.select_org_sub": "Eres miembro de %d organización(es). Elige una para continuar.",
+            "settings.select_org_title": "Elige una organización"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2883,7 +3931,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -2939,6 +3987,74 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "webhooks.all_events": "all",
+            "webhooks.col_attempts": "Attempts",
+            "webhooks.col_endpoint": "Endpoint",
+            "webhooks.col_event": "Event",
+            "webhooks.col_events": "Events",
+            "webhooks.col_status": "Status",
+            "webhooks.col_url": "URL",
+            "webhooks.col_when": "When",
+            "webhooks.create": "Create endpoint",
+            "webhooks.create_title": "Create an endpoint",
+            "webhooks.deliveries_empty": "No deliveries yet.",
+            "webhooks.deliveries_heading": "Recent deliveries",
+            "webhooks.description_label": "Description",
+            "webhooks.description_placeholder": "Staging listener",
+            "webhooks.disable": "Disable",
+            "webhooks.disabled": "disabled",
+            "webhooks.enable": "Enable",
+            "webhooks.enabled": "enabled",
+            "webhooks.endpoints_empty": "No endpoints yet.",
+            "webhooks.endpoints_heading": "Endpoints",
+            "webhooks.events_hint": "None selected = all events.",
+            "webhooks.events_label": "Events",
+            "webhooks.replay": "Replay",
+            "webhooks.rotate": "Rotate secret",
+            "webhooks.rotate_confirm": "Rotate this endpoint's signing secret? The current one keeps verifying for 24 hours.",
+            "webhooks.rotate_note": "The previous secret keeps verifying for 24 hours — deliveries carry both signatures until then. Update your receiver before the window closes.",
+            "webhooks.rotated": "Secret rotated.",
+            "webhooks.secret_note": "This is the only time the secret is shown.",
+            "webhooks.secret_title": "Endpoint created — copy the signing secret now",
+            "webhooks.title": "Webhooks",
+            "webhooks.url_label": "URL"
+          },
+          "es": {
+            "webhooks.all_events": "todos",
+            "webhooks.col_attempts": "Intentos",
+            "webhooks.col_endpoint": "Endpoint",
+            "webhooks.col_event": "Evento",
+            "webhooks.col_events": "Eventos",
+            "webhooks.col_status": "Estado",
+            "webhooks.col_url": "URL",
+            "webhooks.col_when": "Cuándo",
+            "webhooks.create": "Crear endpoint",
+            "webhooks.create_title": "Crear un endpoint",
+            "webhooks.deliveries_empty": "Aún no hay entregas.",
+            "webhooks.deliveries_heading": "Entregas recientes",
+            "webhooks.description_label": "Descripción",
+            "webhooks.description_placeholder": "Listener de staging",
+            "webhooks.disable": "Desactivar",
+            "webhooks.disabled": "desactivado",
+            "webhooks.enable": "Activar",
+            "webhooks.enabled": "activo",
+            "webhooks.endpoints_empty": "Aún no hay endpoints.",
+            "webhooks.endpoints_heading": "Endpoints",
+            "webhooks.events_hint": "Sin selección = todos los eventos.",
+            "webhooks.events_label": "Eventos",
+            "webhooks.replay": "Reenviar",
+            "webhooks.rotate": "Rotar secreto",
+            "webhooks.rotate_confirm": "¿Rotar el secreto de firma de este endpoint? El actual seguirá validando durante 24 horas.",
+            "webhooks.rotate_note": "El secreto anterior seguirá validando 24 horas: las entregas llevan ambas firmas hasta entonces. Actualiza tu receptor antes de que se cierre la ventana.",
+            "webhooks.rotated": "Secreto rotado.",
+            "webhooks.secret_note": "Esta es la única vez que se muestra el secreto.",
+            "webhooks.secret_title": "Endpoint creado — copia el secreto de firma ahora",
+            "webhooks.title": "Webhooks",
+            "webhooks.url_label": "URL"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -2963,7 +4079,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3024,6 +4140,18 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "legal.terms.body": "GoGoGadget is provided \"as is\", without warranty of any kind. By using the service you agree to use it lawfully and not abuse the platform.",
+            "legal.terms.placeholder": "Placeholder terms. Replace with counsel-reviewed copy before launch.",
+            "legal.terms.title": "Terms of Service"
+          },
+          "es": {
+            "legal.terms.body": "GoGoGadget se ofrece \"tal cual\", sin garantía de ningún tipo. Al usar el servicio aceptas usarlo de manera lícita y no abusar de la plataforma.",
+            "legal.terms.placeholder": "Términos provisionales. Sustitúyelos por un texto revisado por un abogado antes del lanzamiento.",
+            "legal.terms.title": "Términos del servicio"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -3055,7 +4183,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -3167,7 +4295,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -3209,6 +4337,16 @@
           }
         ],
         "environment": [],
+        "locales": {
+          "en": {
+            "announcement.dismiss": "Dismiss announcement",
+            "announcement.link": "Learn more →"
+          },
+          "es": {
+            "announcement.dismiss": "Descartar anuncio",
+            "announcement.link": "Más información →"
+          }
+        },
         "docs": [],
         "tests": {},
         "data": [
@@ -3244,7 +4382,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -3510,7 +4648,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -3579,7 +4717,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -3711,7 +4849,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -3896,6 +5034,58 @@
             "secret": true
           }
         ],
+        "locales": {
+          "en": {
+            "email.canceled.body_a": "Your plan remains active until",
+            "email.canceled.body_b": ". After that you drop to the free plan — your projects stay, within free limits.",
+            "email.canceled.cta": "Reactivate anytime →",
+            "email.canceled.subject": "Your subscription is canceled",
+            "email.canceled.title": "Your subscription is canceled",
+            "email.dunning_final.body": "We've been unable to charge your card for a week. Without a working payment method your plan will be canceled and your team will lose access to paid features.",
+            "email.dunning_final.body_dated": "We've been unable to charge your card for a week. Without a working payment method your plan will be canceled on",
+            "email.dunning_final.cta": "Update your payment method now:",
+            "email.dunning_final.subject": "Final notice: your plan is about to be canceled",
+            "email.dunning_final.title": "Last notice before your plan is canceled",
+            "email.dunning_reminder.body": "Your plan is still active while we retry, but the charge keeps failing. Updating your card takes a minute and stops the retries.",
+            "email.dunning_reminder.cta": "Update your payment method:",
+            "email.dunning_reminder.subject": "Your payment is still failing",
+            "email.dunning_reminder.title": "We still can't charge your card",
+            "email.payment_failed.body": "We couldn't charge your card on file. Your plan stays active while we retry — update your payment method to avoid interruption.",
+            "email.payment_failed.cta": "Update payment method →",
+            "email.payment_failed.subject": "Your payment failed",
+            "email.payment_failed.title": "Your payment failed",
+            "email.trial_ending.body_a": "Your trial ends on",
+            "email.trial_ending.body_b": "Add a payment method now to keep your plan without interruption.",
+            "email.trial_ending.cta": "Review billing →",
+            "email.trial_ending.subject": "Your trial ends soon",
+            "email.trial_ending.title": "Your trial ends soon"
+          },
+          "es": {
+            "email.canceled.body_a": "Tu plan permanece activo hasta",
+            "email.canceled.body_b": ". Después de eso pasas al plan gratuito — tus proyectos se conservan, dentro de los límites gratuitos.",
+            "email.canceled.cta": "Reactiva cuando quieras →",
+            "email.canceled.subject": "Tu suscripción está cancelada",
+            "email.canceled.title": "Tu suscripción está cancelada",
+            "email.dunning_final.body": "Llevamos una semana sin poder cobrar tu tarjeta. Sin un método de pago válido, tu plan se cancelará y tu equipo perderá el acceso a las funciones de pago.",
+            "email.dunning_final.body_dated": "Llevamos una semana sin poder cobrar tu tarjeta. Sin un método de pago válido, tu plan se cancelará el",
+            "email.dunning_final.cta": "Actualiza tu método de pago ahora:",
+            "email.dunning_final.subject": "Aviso final: tu plan está por cancelarse",
+            "email.dunning_final.title": "Último aviso antes de cancelar tu plan",
+            "email.dunning_reminder.body": "Tu plan sigue activo mientras reintentamos, pero el cobro continúa fallando. Actualizar tu tarjeta toma un minuto y detiene los reintentos.",
+            "email.dunning_reminder.cta": "Actualiza tu método de pago:",
+            "email.dunning_reminder.subject": "Tu pago sigue fallando",
+            "email.dunning_reminder.title": "Todavía no podemos cobrar tu tarjeta",
+            "email.payment_failed.body": "No pudimos cobrar tu tarjeta registrada. Tu plan sigue activo mientras reintentamos — actualiza tu método de pago para evitar interrupciones.",
+            "email.payment_failed.cta": "Actualiza tu método de pago →",
+            "email.payment_failed.subject": "Tu pago falló",
+            "email.payment_failed.title": "Tu pago falló",
+            "email.trial_ending.body_a": "Tu prueba termina el",
+            "email.trial_ending.body_b": "Añade un método de pago ahora para mantener tu plan sin interrupciones.",
+            "email.trial_ending.cta": "Revisa la facturación →",
+            "email.trial_ending.subject": "Tu prueba termina pronto",
+            "email.trial_ending.title": "Tu prueba termina pronto"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -3962,7 +5152,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -4093,7 +5283,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -4270,6 +5460,28 @@
           }
         ],
         "environment": [],
+        "locales": {
+          "en": {
+            "content.empty": "Nothing published yet.",
+            "content.field.author": "Author",
+            "content.published_on": "Published on",
+            "content.read_more": "Read more",
+            "content.type.post": "Post",
+            "content.type.posts": "Posts",
+            "content.type.release": "Release",
+            "content.type.releases": "Releases"
+          },
+          "es": {
+            "content.empty": "Todavía no hay nada publicado.",
+            "content.field.author": "Autor",
+            "content.published_on": "Publicado el",
+            "content.read_more": "Leer más",
+            "content.type.post": "Publicación",
+            "content.type.posts": "Publicaciones",
+            "content.type.release": "Versión",
+            "content.type.releases": "Versiones"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -4424,7 +5636,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -5068,7 +6280,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -5218,7 +6430,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -5361,7 +6573,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -5428,26 +6640,10 @@
         ],
         "files": [
           {
-            "source": "internal/i18n/catalog_en.go",
-            "target": "internal/i18n/catalog_en.go",
-            "class": "go",
-            "sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
-            "rewrite_module": true,
-            "contract": false
-          },
-          {
-            "source": "internal/i18n/catalog_es.go",
-            "target": "internal/i18n/catalog_es.go",
-            "class": "go",
-            "sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
-            "rewrite_module": true,
-            "contract": false
-          },
-          {
             "source": "internal/i18n/i18n.go",
             "target": "internal/i18n/i18n.go",
             "class": "go",
-            "sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
+            "sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
             "rewrite_module": true,
             "contract": true
           }
@@ -5488,24 +6684,10 @@
       },
       "files": [
         {
-          "path": "internal/i18n/catalog_en.go",
-          "source": "internal/i18n/catalog_en.go",
-          "base_sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
-          "local_sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
-          "state": "clean"
-        },
-        {
-          "path": "internal/i18n/catalog_es.go",
-          "source": "internal/i18n/catalog_es.go",
-          "base_sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
-          "local_sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
-          "state": "clean"
-        },
-        {
           "path": "internal/i18n/i18n.go",
           "source": "internal/i18n/i18n.go",
-          "base_sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
-          "local_sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
+          "base_sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
+          "local_sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
           "state": "clean"
         }
       ],
@@ -5528,7 +6710,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -5719,6 +6901,16 @@
             "example": "true"
           }
         ],
+        "locales": {
+          "en": {
+            "settings.disabled_body": "Your account has been disabled by an administrator. Contact your organization admin if you believe this is a mistake.",
+            "settings.disabled_title": "Account disabled"
+          },
+          "es": {
+            "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
+            "settings.disabled_title": "Cuenta deshabilitada"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -5778,7 +6970,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -5827,6 +7019,36 @@
           }
         ],
         "environment": [],
+        "locales": {
+          "en": {
+            "impersonation.banner": "Viewing as",
+            "impersonation.cancel": "Cancel",
+            "impersonation.exit": "Exit",
+            "impersonation.no_orgs": "This user has no organization to view as.",
+            "impersonation.org_label": "Organization",
+            "impersonation.reason_hint": "Recorded on the session and in both audit entries (start and stop). 10–280 characters.",
+            "impersonation.reason_invalid": "State a reason of 10–280 characters — it goes in the audit trail.",
+            "impersonation.reason_label": "Reason",
+            "impersonation.reason_placeholder": "Ticket #1234 — reproducing the failing export",
+            "impersonation.start_button": "Start session",
+            "impersonation.start_intro": "You are about to view the app as %s. The session lasts 2 hours, is visible to you as a banner, and is recorded.",
+            "impersonation.start_title": "View as user"
+          },
+          "es": {
+            "impersonation.banner": "Viendo como",
+            "impersonation.cancel": "Cancelar",
+            "impersonation.exit": "Salir",
+            "impersonation.no_orgs": "Este usuario no tiene ninguna organización que ver.",
+            "impersonation.org_label": "Organización",
+            "impersonation.reason_hint": "Se registra en la sesión y en ambas entradas de auditoría (inicio y fin). 10–280 caracteres.",
+            "impersonation.reason_invalid": "Indica un motivo de 10 a 280 caracteres: queda en el registro de auditoría.",
+            "impersonation.reason_label": "Motivo",
+            "impersonation.reason_placeholder": "Ticket #1234: reproducir la exportación fallida",
+            "impersonation.start_button": "Iniciar sesión",
+            "impersonation.start_intro": "Vas a ver la app como %s. La sesión dura 2 horas, te aparecerá un aviso y queda registrada.",
+            "impersonation.start_title": "Ver como usuario"
+          }
+        },
         "docs": [],
         "tests": {},
         "data": [
@@ -5868,7 +7090,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -6039,7 +7261,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -6158,7 +7380,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -6247,6 +7469,14 @@
             "secret": true
           }
         ],
+        "locales": {
+          "en": {
+            "email.footer": "You are receiving this because you have a GoGoGadget account."
+          },
+          "es": {
+            "email.footer": "Recibes este correo porque tienes una cuenta en GoGoGadget."
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -6278,7 +7508,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6363,7 +7593,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6428,7 +7658,7 @@
             "source": "internal/modkit/generate.go",
             "target": "internal/modkit/generate.go",
             "class": "go",
-            "sha256": "b869d227f4e8edd8b2e37695b7068c864beacab96d9519b51be4cbb3c7e48a79",
+            "sha256": "4174839ae8931415e6f9f36560a8e3d0463f67e475f1f65ed4c635677c7dc17f",
             "rewrite_module": true,
             "contract": false
           },
@@ -6460,7 +7690,7 @@
             "source": "internal/modkit/model.go",
             "target": "internal/modkit/model.go",
             "class": "go",
-            "sha256": "160220843d45e9e1f4549b4947a0b0ec38b518c2122bec6413f5dedb2fe83027",
+            "sha256": "df9a05c02f8f5b6a33b7bcdeafaba3da6e5119f2bf4145bdf00f78397844b9c7",
             "rewrite_module": true,
             "contract": true
           },
@@ -6516,7 +7746,7 @@
             "source": "internal/modkit/resolve.go",
             "target": "internal/modkit/resolve.go",
             "class": "go",
-            "sha256": "062d8420d8de713dc85b3b199c40159e31793b882b6d923d4d719b04f80c079a",
+            "sha256": "431ae17cf96709f242944f50037b6296321dc35b5bf953c0fab0c2ed6e5203f4",
             "rewrite_module": true,
             "contract": false
           },
@@ -6642,8 +7872,8 @@
         {
           "path": "internal/modkit/generate.go",
           "source": "internal/modkit/generate.go",
-          "base_sha256": "b869d227f4e8edd8b2e37695b7068c864beacab96d9519b51be4cbb3c7e48a79",
-          "local_sha256": "b869d227f4e8edd8b2e37695b7068c864beacab96d9519b51be4cbb3c7e48a79",
+          "base_sha256": "4174839ae8931415e6f9f36560a8e3d0463f67e475f1f65ed4c635677c7dc17f",
+          "local_sha256": "4174839ae8931415e6f9f36560a8e3d0463f67e475f1f65ed4c635677c7dc17f",
           "state": "clean"
         },
         {
@@ -6670,8 +7900,8 @@
         {
           "path": "internal/modkit/model.go",
           "source": "internal/modkit/model.go",
-          "base_sha256": "160220843d45e9e1f4549b4947a0b0ec38b518c2122bec6413f5dedb2fe83027",
-          "local_sha256": "160220843d45e9e1f4549b4947a0b0ec38b518c2122bec6413f5dedb2fe83027",
+          "base_sha256": "df9a05c02f8f5b6a33b7bcdeafaba3da6e5119f2bf4145bdf00f78397844b9c7",
+          "local_sha256": "df9a05c02f8f5b6a33b7bcdeafaba3da6e5119f2bf4145bdf00f78397844b9c7",
           "state": "clean"
         },
         {
@@ -6719,8 +7949,8 @@
         {
           "path": "internal/modkit/resolve.go",
           "source": "internal/modkit/resolve.go",
-          "base_sha256": "062d8420d8de713dc85b3b199c40159e31793b882b6d923d4d719b04f80c079a",
-          "local_sha256": "062d8420d8de713dc85b3b199c40159e31793b882b6d923d4d719b04f80c079a",
+          "base_sha256": "431ae17cf96709f242944f50037b6296321dc35b5bf953c0fab0c2ed6e5203f4",
+          "local_sha256": "431ae17cf96709f242944f50037b6296321dc35b5bf953c0fab0c2ed6e5203f4",
           "state": "clean"
         },
         {
@@ -6779,7 +8009,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -6867,6 +8097,22 @@
           }
         ],
         "environment": [],
+        "locales": {
+          "en": {
+            "email.digest.cta": "See all notifications:",
+            "email.digest.intro": "A summary of your notifications since the last digest.",
+            "email.digest.manage": "Change how often you get this:",
+            "email.digest.subject": "Your GoGoGadget digest",
+            "email.digest.title": "Here's what happened%s"
+          },
+          "es": {
+            "email.digest.cta": "Ver todas las notificaciones:",
+            "email.digest.intro": "Un resumen de tus notificaciones desde el último envío.",
+            "email.digest.manage": "Cambia la frecuencia de estos correos:",
+            "email.digest.subject": "Tu resumen de GoGoGadget",
+            "email.digest.title": "Esto es lo que pasó%s"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -6939,7 +8185,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -7059,7 +8305,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -7214,7 +8460,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -7320,7 +8566,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -7419,7 +8665,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -7545,7 +8791,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7627,7 +8873,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -7681,7 +8927,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -8096,6 +9342,150 @@
             "max": 65535
           }
         ],
+        "locales": {
+          "en": {
+            "a11y.analytics_consent": "Analytics consent",
+            "a11y.documentation": "Documentation",
+            "a11y.menu": "Open menu",
+            "a11y.theme": "Toggle dark mode",
+            "common.current_plan": "Current plan",
+            "errors.back_home": "Back to home",
+            "errors.code_403": "403",
+            "errors.code_404": "404",
+            "errors.code_500": "500",
+            "errors.code_503": "503",
+            "errors.forbidden": "You don't have access to that page.",
+            "errors.maintenance": "We're down for scheduled maintenance. Back soon.",
+            "errors.not_found": "That page doesn't exist.",
+            "errors.server_error": "Something went wrong on our side.",
+            "footer.about": "About",
+            "footer.api": "API",
+            "footer.blog": "Blog",
+            "footer.changelog": "Changelog",
+            "footer.company": "Company",
+            "footer.copyright": "© %s %s. MIT licensed.",
+            "footer.docs": "Docs",
+            "footer.features": "Features",
+            "footer.getting_started": "Getting started",
+            "footer.legal": "Legal",
+            "footer.pricing": "Pricing",
+            "footer.privacy": "Privacy",
+            "footer.product": "Product",
+            "footer.resources": "Resources",
+            "footer.rss": "RSS",
+            "footer.terms": "Terms",
+            "i18n.language": "Language",
+            "layout.analytics_accept": "Accept",
+            "layout.analytics_consent_body": "We use privacy-respecting product analytics (self-proxied PostHog) to improve GoGoGadget.",
+            "layout.analytics_decline": "Decline",
+            "layout.banner_ending_link": "manage billing",
+            "layout.banner_ending_prefix": "Your plan ends on",
+            "layout.banner_past_due_link": "update your card",
+            "layout.banner_past_due_prefix": "Your payment is failing —",
+            "layout.banner_past_due_suffix": "to keep your plan.",
+            "layout.skip_content": "Skip to content",
+            "nav.blog": "Blog",
+            "nav.changelog": "Changelog",
+            "nav.docs": "Docs",
+            "nav.features": "Features",
+            "nav.get_started": "Get started",
+            "nav.pricing": "Pricing",
+            "nav.sign_in": "Sign in",
+            "settings.tab_account": "Account",
+            "settings.tab_api": "API",
+            "settings.tab_billing": "Billing",
+            "settings.tab_notifications": "Notifications",
+            "settings.tab_org": "Organization",
+            "settings.tab_webhooks": "Webhooks",
+            "sidebar.activity": "Activity",
+            "sidebar.admin": "Admin",
+            "sidebar.admin_announcements": "Announcements",
+            "sidebar.admin_audit": "Audit log",
+            "sidebar.admin_content": "Content",
+            "sidebar.admin_flags": "Feature flags",
+            "sidebar.admin_jobs": "Jobs",
+            "sidebar.admin_orgs": "Organizations",
+            "sidebar.admin_overview": "Overview",
+            "sidebar.admin_schedules": "Schedules",
+            "sidebar.admin_users": "Users",
+            "sidebar.dashboard": "Dashboard",
+            "sidebar.files": "Files",
+            "sidebar.notifications": "Notifications",
+            "sidebar.projects": "Projects",
+            "sidebar.settings": "Settings"
+          },
+          "es": {
+            "a11y.analytics_consent": "Consentimiento de analítica",
+            "a11y.documentation": "Documentación",
+            "a11y.menu": "Abrir menú",
+            "a11y.theme": "Cambiar a modo oscuro",
+            "common.current_plan": "Plan actual",
+            "errors.back_home": "Volver al inicio",
+            "errors.code_403": "403",
+            "errors.code_404": "404",
+            "errors.code_500": "500",
+            "errors.code_503": "503",
+            "errors.forbidden": "No tienes acceso a esa página.",
+            "errors.maintenance": "Estamos en mantenimiento programado. Volvemos enseguida.",
+            "errors.not_found": "Esa página no existe.",
+            "errors.server_error": "Algo salió mal de nuestra parte.",
+            "footer.about": "Acerca de",
+            "footer.api": "API",
+            "footer.blog": "Blog",
+            "footer.changelog": "Novedades",
+            "footer.company": "Empresa",
+            "footer.copyright": "© %s %s. Licencia MIT.",
+            "footer.docs": "Documentación",
+            "footer.features": "Funciones",
+            "footer.getting_started": "Primeros pasos",
+            "footer.legal": "Legal",
+            "footer.pricing": "Precios",
+            "footer.privacy": "Privacidad",
+            "footer.product": "Producto",
+            "footer.resources": "Recursos",
+            "footer.rss": "RSS",
+            "footer.terms": "Términos",
+            "i18n.language": "Idioma",
+            "layout.analytics_accept": "Aceptar",
+            "layout.analytics_consent_body": "Usamos analítica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
+            "layout.analytics_decline": "Rechazar",
+            "layout.banner_ending_link": "gestionar la facturación",
+            "layout.banner_ending_prefix": "Tu plan termina el",
+            "layout.banner_past_due_link": "actualiza tu tarjeta",
+            "layout.banner_past_due_prefix": "Tu pago está fallando —",
+            "layout.banner_past_due_suffix": "para mantener tu plan.",
+            "layout.skip_content": "Saltar al contenido",
+            "nav.blog": "Blog",
+            "nav.changelog": "Novedades",
+            "nav.docs": "Documentación",
+            "nav.features": "Funciones",
+            "nav.get_started": "Comenzar",
+            "nav.pricing": "Precios",
+            "nav.sign_in": "Iniciar sesión",
+            "settings.tab_account": "Cuenta",
+            "settings.tab_api": "API",
+            "settings.tab_billing": "Facturación",
+            "settings.tab_notifications": "Notificaciones",
+            "settings.tab_org": "Organización",
+            "settings.tab_webhooks": "Webhooks",
+            "sidebar.activity": "Actividad",
+            "sidebar.admin": "Administración",
+            "sidebar.admin_announcements": "Anuncios",
+            "sidebar.admin_audit": "Auditoría",
+            "sidebar.admin_content": "Contenido",
+            "sidebar.admin_flags": "Banderas de funciones",
+            "sidebar.admin_jobs": "Trabajos",
+            "sidebar.admin_orgs": "Organizaciones",
+            "sidebar.admin_overview": "Resumen",
+            "sidebar.admin_schedules": "Programaciones",
+            "sidebar.admin_users": "Usuarios",
+            "sidebar.dashboard": "Panel",
+            "sidebar.files": "Archivos",
+            "sidebar.notifications": "Notificaciones",
+            "sidebar.projects": "Proyectos",
+            "sidebar.settings": "Configuración"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -8176,7 +9566,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8266,7 +9656,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -8429,7 +9819,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8485,7 +9875,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -8594,7 +9984,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -8775,7 +10165,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8859,7 +10249,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8940,7 +10330,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9074,7 +10464,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -9267,7 +10657,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9439,7 +10829,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9501,7 +10891,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9621,7 +11011,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9757,7 +11147,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9855,7 +11245,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9917,7 +11307,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9996,7 +11386,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10095,7 +11485,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10207,7 +11597,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -10326,7 +11716,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10443,7 +11833,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10522,7 +11912,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -10623,7 +12013,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10742,7 +12132,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10796,6 +12186,20 @@
         },
         "migrations": [],
         "environment": [],
+        "locales": {
+          "en": {
+            "email.welcome.body": "Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.",
+            "email.welcome.cta": "Open your dashboard →",
+            "email.welcome.subject": "Welcome to GoGoGadget",
+            "email.welcome.title": "Welcome aboard%s!"
+          },
+          "es": {
+            "email.welcome.body": "Tu espacio de trabajo está listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
+            "email.welcome.cta": "Abre tu panel →",
+            "email.welcome.subject": "Te damos la bienvenida a GoGoGadget",
+            "email.welcome.title": "¡Bienvenido a bordo%s!"
+          }
+        },
         "docs": [],
         "tests": {
           "go_packages": [
@@ -10820,7 +12224,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10953,7 +12357,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11088,7 +12492,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11169,7 +12573,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -11249,7 +12653,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -11342,7 +12746,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11486,7 +12890,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11576,7 +12980,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -11716,7 +13120,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "cdebcd220c5a685a0659cf4b75d9e41d27fa09173c9617f6259dd9eaf43377da",
+      "source_commit": "e5421a7b2b3bb5a693ec7776b18dea703a6c98f8f88c72fe2f2678e991ab0618",
       "reason": "profile",
       "required_by": [],
       "manifest": {

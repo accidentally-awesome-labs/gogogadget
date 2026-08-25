@@ -58,6 +58,20 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "email.welcome.body": "Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.",
+        "email.welcome.cta": "Open your dashboard →",
+        "email.welcome.subject": "Welcome to GoGoGadget",
+        "email.welcome.title": "Welcome aboard%s!"
+      },
+      "es": {
+        "email.welcome.body": "Tu espacio de trabajo está listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
+        "email.welcome.cta": "Abre tu panel →",
+        "email.welcome.subject": "Te damos la bienvenida a GoGoGadget",
+        "email.welcome.title": "¡Bienvenido a bordo%s!"
+      }
+    }
   }
 }

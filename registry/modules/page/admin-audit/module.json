@@ -67,6 +67,22 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.audit.col_org": "Org",
+        "admin.audit.empty": "No audit rows match.",
+        "admin.audit.search_aria": "Search audit log",
+        "admin.audit.search_placeholder": "Filter by action or org…",
+        "admin.audit.title": "Audit log"
+      },
+      "es": {
+        "admin.audit.col_org": "Organización",
+        "admin.audit.empty": "No hay registros que coincidan.",
+        "admin.audit.search_aria": "Buscar en la auditoría",
+        "admin.audit.search_placeholder": "Filtrar por acción u organización…",
+        "admin.audit.title": "Auditoría"
+      }
+    }
   }
 }

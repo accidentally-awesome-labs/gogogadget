@@ -61,6 +61,30 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.read_only": "Read-only",
+        "admin.signups_empty": "No signups yet.",
+        "admin.signups_heading": "Signups, last 30 days",
+        "admin.stats.active_subs": "Active subscriptions",
+        "admin.stats.mrr": "MRR",
+        "admin.stats.mrr_hint": "across active + trialing + past_due",
+        "admin.stats.total_orgs": "Total orgs",
+        "admin.stats.total_users": "Total users",
+        "admin.title": "Admin"
+      },
+      "es": {
+        "admin.read_only": "Solo lectura",
+        "admin.signups_empty": "Aún no hay registros.",
+        "admin.signups_heading": "Registros, últimos 30 días",
+        "admin.stats.active_subs": "Suscripciones activas",
+        "admin.stats.mrr": "MRR",
+        "admin.stats.mrr_hint": "incluye active + trialing + past_due",
+        "admin.stats.total_orgs": "Total de organizaciones",
+        "admin.stats.total_users": "Total de usuarios",
+        "admin.title": "Administración"
+      }
+    }
   }
 }

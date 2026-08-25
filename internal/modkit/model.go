@@ -171,24 +171,30 @@ const (
 
 // Manifest is the canonical, embedded snapshot of one resolved module.
 type Manifest struct {
-	ID            string                `json:"id"`
-	Kind          ModuleKind            `json:"kind"`
-	Name          string                `json:"name"`
-	Revision      int                   `json:"revision"`
-	Contract      int                   `json:"contract"`
-	Title         string                `json:"title"`
-	Description   string                `json:"description"`
-	Requires      []string              `json:"requires"`
-	Files         []ManifestFile        `json:"files"`
-	Claims        NamespaceClaims       `json:"claims"`
-	Runtime       RuntimeContributions  `json:"runtime"`
-	Migrations    []ManifestMigration   `json:"migrations"`
-	Environment   []EnvironmentVariable `json:"environment"`
-	Docs          []DocumentationRef    `json:"docs"`
-	Tests         TestMetadata          `json:"tests"`
-	Data          []DataDeclaration     `json:"data"`
-	RemovalPolicy RemovalPolicy         `json:"removal_policy"`
-	TestOnly      bool                  `json:"test_only,omitempty"`
+	ID          string                `json:"id"`
+	Kind        ModuleKind            `json:"kind"`
+	Name        string                `json:"name"`
+	Revision    int                   `json:"revision"`
+	Contract    int                   `json:"contract"`
+	Title       string                `json:"title"`
+	Description string                `json:"description"`
+	Requires    []string              `json:"requires"`
+	Files       []ManifestFile        `json:"files"`
+	Claims      NamespaceClaims       `json:"claims"`
+	Runtime     RuntimeContributions  `json:"runtime"`
+	Migrations  []ManifestMigration   `json:"migrations"`
+	Environment []EnvironmentVariable `json:"environment"`
+	// Locales maps a locale code to the keys this module owns in that locale.
+	// A module's own translations travel with it, so installing a page installs
+	// its strings and removing it removes them. Ownership is exclusive: two
+	// modules declaring one key would make the rendered string depend on which
+	// other modules happen to be installed.
+	Locales       map[string]map[string]string `json:"locales,omitempty"`
+	Docs          []DocumentationRef           `json:"docs"`
+	Tests         TestMetadata                 `json:"tests"`
+	Data          []DataDeclaration            `json:"data"`
+	RemovalPolicy RemovalPolicy                `json:"removal_policy"`
+	TestOnly      bool                         `json:"test_only,omitempty"`
 }
 
 // ManifestFile maps one verified registry payload to one project-owned target.

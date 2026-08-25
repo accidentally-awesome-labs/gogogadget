@@ -49,6 +49,14 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "docs.edit_page": "Edit this page →"
+      },
+      "es": {
+        "docs.edit_page": "Editar esta página →"
+      }
+    }
   }
 }

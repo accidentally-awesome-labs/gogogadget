@@ -60,6 +60,36 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "files.choose": "Choose file",
+        "files.col_name": "Name",
+        "files.col_size": "Size",
+        "files.col_uploaded": "Uploaded",
+        "files.delete_confirm": "Delete this file? This cannot be undone.",
+        "files.download": "Download",
+        "files.empty_body": "Uploads land here, scoped to your organization.",
+        "files.empty_title": "No files yet",
+        "files.limit_hit": "Storage limit reached — the %s MB plan is full.",
+        "files.quota": "%s MB of %s MB used on %s",
+        "files.title": "Files",
+        "files.upload": "Upload"
+      },
+      "es": {
+        "files.choose": "Elegir archivo",
+        "files.col_name": "Nombre",
+        "files.col_size": "Tamaño",
+        "files.col_uploaded": "Subido",
+        "files.delete_confirm": "¿Eliminar este archivo? Esta acción no se puede deshacer.",
+        "files.download": "Descargar",
+        "files.empty_body": "Las subidas aparecen aquí, con alcance de tu organización.",
+        "files.empty_title": "Aún no hay archivos",
+        "files.limit_hit": "Límite de almacenamiento alcanzado — el plan de %s MB está lleno.",
+        "files.quota": "%s MB de %s MB usados en el plan %s",
+        "files.title": "Archivos",
+        "files.upload": "Subir"
+      }
+    }
   }
 }

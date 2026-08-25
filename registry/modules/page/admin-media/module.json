@@ -59,6 +59,42 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.media.back_to_content": "Back to content",
+        "admin.media.col_actions": "Actions",
+        "admin.media.col_filename": "Filename",
+        "admin.media.col_preview": "Preview",
+        "admin.media.col_size": "Size",
+        "admin.media.col_uploaded": "Uploaded",
+        "admin.media.delete_confirm": "Delete this image? Posts referencing it will break.",
+        "admin.media.deleted": "Image deleted.",
+        "admin.media.empty": "No media uploaded yet.",
+        "admin.media.invalid_missing": "Choose a file to upload.",
+        "admin.media.invalid_type": "Only PNG, JPEG, GIF and WebP images are accepted.",
+        "admin.media.title": "Media",
+        "admin.media.upload": "Upload",
+        "admin.media.upload_label": "Image file",
+        "admin.media.uploaded": "Image uploaded."
+      },
+      "es": {
+        "admin.media.back_to_content": "Volver al contenido",
+        "admin.media.col_actions": "Acciones",
+        "admin.media.col_filename": "Nombre de archivo",
+        "admin.media.col_preview": "Previsualización",
+        "admin.media.col_size": "Tamaño",
+        "admin.media.col_uploaded": "Subido",
+        "admin.media.delete_confirm": "¿Eliminar esta imagen? Las entradas que la usen se romperán.",
+        "admin.media.deleted": "Imagen eliminada.",
+        "admin.media.empty": "Todavía no se han subido medios.",
+        "admin.media.invalid_missing": "Elige un archivo para subir.",
+        "admin.media.invalid_type": "Solo se aceptan imágenes PNG, JPEG, GIF y WebP.",
+        "admin.media.title": "Medios",
+        "admin.media.upload": "Subir",
+        "admin.media.upload_label": "Archivo de imagen",
+        "admin.media.uploaded": "Imagen subida."
+      }
+    }
   }
 }

@@ -1030,3 +1030,140 @@ func TestEnvExampleAndReferenceCoverEveryDeclaredKey(t *testing.T) {
 		t.Fatalf("reference must state declared bounds:\n%s", reference)
 	}
 }
+
+func localeModule(id, name string, locales map[string]map[string]string) Manifest {
+	return Manifest{
+		ID: id, Kind: ModulePage, Name: name,
+		Revision: 1, Contract: 1, Title: name, Description: name + " page.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Locales: locales,
+	}
+}
+
+func localeLock(modules ...Manifest) Lock {
+	lock := Lock{Schema: 1, RegistryCommit: testCommitA}
+	for _, m := range modules {
+		lock.Order = append(lock.Order, m.ID)
+		lock.Modules = append(lock.Modules, LockedModule{
+			ID: m.ID, Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+			RequiredBy: []string{}, Manifest: m, Files: []LockedFile{}, Migrations: []LockedMigration{},
+		})
+	}
+	return lock
+}
+
+// Catalogs are generated per locale from module-owned locale records, so a key
+// belongs to exactly one module and every locale carries every key.
+func TestI18nRegistryEmitsPerLocaleCatalogs(t *testing.T) {
+	a := localeModule("page/home", "home", map[string]map[string]string{
+		"en": {"home.title": "Ship your SaaS", "home.count": "%d projects"},
+		"es": {"home.title": "Lanza tu SaaS", "home.count": "%d proyectos"},
+	})
+	b := localeModule("page/pricing", "pricing", map[string]map[string]string{
+		"en": {"pricing.title": "Pricing"},
+		"es": {"pricing.title": "Precios"},
+	})
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLock(a, b), []Manifest{a, b})
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	emitted := map[string]string{}
+	for _, file := range files {
+		emitted[file.Path] = strings.Join(strings.Fields(file.Content), " ")
+	}
+
+	en, ok := emitted["internal/i18n/catalog_en_registry_gen.go"]
+	if !ok {
+		t.Fatal("en catalog was not emitted")
+	}
+	es, ok := emitted["internal/i18n/catalog_es_registry_gen.go"]
+	if !ok {
+		t.Fatal("es catalog was not emitted")
+	}
+
+	// Keys are sorted so the file is diffable, and both catalogs carry both modules.
+	for _, want := range []string{
+		`message.SetString(language.English, "home.count", "%d projects")`,
+		`message.SetString(language.English, "home.title", "Ship your SaaS")`,
+		`message.SetString(language.English, "pricing.title", "Pricing")`,
+	} {
+		if !strings.Contains(en, want) {
+			t.Fatalf("en catalog missing %s:\n%s", want, en)
+		}
+	}
+	if !strings.Contains(es, `message.SetString(language.Spanish, "home.title", "Lanza tu SaaS")`) {
+		t.Fatalf("es catalog missing the Spanish value:\n%s", es)
+	}
+	if strings.Index(en, "home.count") > strings.Index(en, "home.title") {
+		t.Fatalf("catalog keys are not sorted:\n%s", en)
+	}
+
+	// The locale list is derived, so the switcher cannot offer a locale no module
+	// has translated.
+	locales := emitted["internal/i18n/locales_registry_gen.go"]
+	if !strings.Contains(locales, `{Code: "en", Tag: language.English`) ||
+		!strings.Contains(locales, `{Code: "es", Tag: language.Spanish`) {
+		t.Fatalf("locale registry is not derived from declarations:\n%s", locales)
+	}
+}
+
+// One key owned by two modules means an unpredictable winner and a string that
+// changes when an unrelated module is installed.
+func TestI18nRegistryRejectsDuplicateKeyOwnership(t *testing.T) {
+	a := localeModule("page/home", "home", map[string]map[string]string{
+		"en": {"shared.title": "One"}, "es": {"shared.title": "Uno"},
+	})
+	b := localeModule("page/pricing", "pricing", map[string]map[string]string{
+		"en": {"shared.title": "Two"}, "es": {"shared.title": "Dos"},
+	})
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLock(a, b), []Manifest{a, b}); err == nil {
+		t.Fatal("GenerateAll accepted one key owned by two modules")
+	}
+}
+
+// A key present in one locale but not another renders as the raw key for some
+// users. Parity is checked at generation time instead.
+func TestI18nRegistryRejectsMissingTranslation(t *testing.T) {
+	a := localeModule("page/home", "home", map[string]map[string]string{
+		"en": {"home.title": "Ship", "home.subtitle": "Fast"},
+		"es": {"home.title": "Lanza"},
+	})
+	err := func() error {
+		_, err := GenerateAll(context.Background(), "example.com/acme", localeLock(a), []Manifest{a})
+		return err
+	}()
+	if err == nil {
+		t.Fatal("GenerateAll accepted a key missing from a declared locale")
+	}
+	if !strings.Contains(err.Error(), "home.subtitle") {
+		t.Fatalf("error must name the untranslated key, got: %v", err)
+	}
+}
+
+// Mismatched format placeholders are a runtime formatting bug in one language
+// only — the kind that ships because nobody reads the other locale.
+func TestI18nRegistryRejectsPlaceholderMismatch(t *testing.T) {
+	a := localeModule("page/home", "home", map[string]map[string]string{
+		"en": {"home.count": "%d of %d projects"},
+		"es": {"home.count": "%d proyectos"},
+	})
+	_, err := GenerateAll(context.Background(), "example.com/acme", localeLock(a), []Manifest{a})
+	if err == nil {
+		t.Fatal("GenerateAll accepted mismatched format placeholders")
+	}
+	if !strings.Contains(err.Error(), "home.count") {
+		t.Fatalf("error must name the key, got: %v", err)
+	}
+}
+
+// A different verb for the same argument formats wrongly in one locale.
+func TestI18nRegistryRejectsPlaceholderVerbChange(t *testing.T) {
+	a := localeModule("page/home", "home", map[string]map[string]string{
+		"en": {"home.owner": "Owned by %s"},
+		"es": {"home.owner": "Propiedad de %d"},
+	})
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLock(a), []Manifest{a}); err == nil {
+		t.Fatal("GenerateAll accepted a changed format verb")
+	}
+}

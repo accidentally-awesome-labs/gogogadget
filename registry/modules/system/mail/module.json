@@ -91,6 +91,14 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "email.footer": "You are receiving this because you have a GoGoGadget account."
+      },
+      "es": {
+        "email.footer": "Recibes este correo porque tienes una cuenta en GoGoGadget."
+      }
+    }
   }
 }

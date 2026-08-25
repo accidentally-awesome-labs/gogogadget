@@ -47,6 +47,16 @@
         "organization_delete": "retain"
       }
     ],
-    "removal_policy": "retain-data"
+    "removal_policy": "retain-data",
+    "locales": {
+      "en": {
+        "announcement.dismiss": "Dismiss announcement",
+        "announcement.link": "Learn more →"
+      },
+      "es": {
+        "announcement.dismiss": "Descartar anuncio",
+        "announcement.link": "Más información →"
+      }
+    }
   }
 }

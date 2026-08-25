@@ -13,26 +13,10 @@
     ],
     "files": [
       {
-        "source": "internal/i18n/catalog_en.go",
-        "target": "internal/i18n/catalog_en.go",
-        "class": "go",
-        "sha256": "393e3432acbbc3a7fcba1b091d81ea584aeefd2fa51cb35224777fe565d79945",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/i18n/catalog_es.go",
-        "target": "internal/i18n/catalog_es.go",
-        "class": "go",
-        "sha256": "0d715f9f2c710ac093d91db20c4cffaace7e35c5ddf6bbff55bf37225d5c1234",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/i18n/i18n.go",
         "target": "internal/i18n/i18n.go",
         "class": "go",
-        "sha256": "351ca1459c61ae069dd155de4a79d9becfe24fbcc1c3141de6dd08c89dd37779",
+        "sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
         "rewrite_module": true,
         "contract": true
       }

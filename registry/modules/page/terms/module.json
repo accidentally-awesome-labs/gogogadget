@@ -65,6 +65,18 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "legal.terms.body": "GoGoGadget is provided \"as is\", without warranty of any kind. By using the service you agree to use it lawfully and not abuse the platform.",
+        "legal.terms.placeholder": "Placeholder terms. Replace with counsel-reviewed copy before launch.",
+        "legal.terms.title": "Terms of Service"
+      },
+      "es": {
+        "legal.terms.body": "GoGoGadget se ofrece \"tal cual\", sin garantía de ningún tipo. Al usar el servicio aceptas usarlo de manera lícita y no abusar de la plataforma.",
+        "legal.terms.placeholder": "Términos provisionales. Sustitúyelos por un texto revisado por un abogado antes del lanzamiento.",
+        "legal.terms.title": "Términos del servicio"
+      }
+    }
   }
 }

@@ -304,6 +304,41 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "claims": {
+          "$ref": "#/$defs/NamespaceClaims"
+        },
+        "contract": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DataDeclaration"
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "docs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DocumentationRef"
+          }
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EnvironmentVariable"
+          }
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ManifestFile"
+          }
+        },
         "id": {
           "type": "string",
           "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
@@ -318,45 +353,17 @@
             "system"
           ]
         },
-        "name": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-        },
-        "revision": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "contract": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "title": {
-          "type": "string",
-          "minLength": 1
-        },
-        "description": {
-          "type": "string",
-          "minLength": 1
-        },
-        "requires": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        "locales": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z]{2}$"
           },
-          "uniqueItems": true
-        },
-        "files": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/ManifestFile"
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
-        },
-        "claims": {
-          "$ref": "#/$defs/NamespaceClaims"
-        },
-        "runtime": {
-          "$ref": "#/$defs/RuntimeContributions"
         },
         "migrations": {
           "type": "array",
@@ -364,26 +371,9 @@
             "$ref": "#/$defs/ManifestMigration"
           }
         },
-        "environment": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/EnvironmentVariable"
-          }
-        },
-        "docs": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/DocumentationRef"
-          }
-        },
-        "tests": {
-          "$ref": "#/$defs/TestMetadata"
-        },
-        "data": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/DataDeclaration"
-          }
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         },
         "removal_policy": {
           "type": "string",
@@ -395,8 +385,30 @@
             "major-version-only"
           ]
         },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeContributions"
+        },
         "test_only": {
           "type": "boolean"
+        },
+        "tests": {
+          "$ref": "#/$defs/TestMetadata"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": [

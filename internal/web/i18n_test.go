@@ -201,44 +201,39 @@ func TestChromeKeysExistInCatalogs(t *testing.T) {
 	}
 }
 
+// Every declared key must resolve in every declared locale at runtime. Parity
+// is enforced at generation time, so what this catches is a catalog that failed
+// to load — a key that exists in the declarations but not in the program.
 func TestCatalogParity(t *testing.T) {
-	en := catalogKeys(t, language.English)
-	es := catalogKeys(t, language.Spanish)
-	for k := range en {
-		assert.True(t, es[k], "key %s missing from es catalog", k)
-	}
-	for k := range es {
-		assert.True(t, en[k], "key %s missing from en catalog", k)
+	require.NotEmpty(t, i18n.CatalogKeys)
+	require.NotEmpty(t, i18n.Locales)
+	for _, locale := range i18n.Locales {
+		resolved := catalogKeys(t, locale.Tag)
+		for _, key := range i18n.CatalogKeys {
+			assert.True(t, resolved[key], "key %s does not resolve in %s", key, locale.Code)
+		}
+		assert.Len(t, resolved, len(i18n.CatalogKeys),
+			"%s resolves a different number of keys than are declared", locale.Code)
 	}
 }
 
-// catalogKeys returns the keys PRESENT in a language's dictionary: a catalog
-// key that formats as itself is missing from that language.
+// catalogKeys returns the keys a language's dictionary actually resolves. A
+// catalog key that formats as itself is missing from that language.
+//
+// The inventory comes from the generated i18n.CatalogKeys rather than from
+// scraping catalog source text: the catalogs are generated now, so a source
+// scan would be testing the generator's output format instead of whether the
+// running program can resolve a string.
 func catalogKeys(t *testing.T, tag language.Tag) map[string]bool {
 	t.Helper()
 	p := message.NewPrinter(tag)
 	present := map[string]bool{}
-	for k := range allCatalogKeys(t) {
+	for _, k := range i18n.CatalogKeys {
 		if p.Sprintf(k) != k {
 			present[k] = true
 		}
 	}
 	return present
-}
-
-// allCatalogKeys inventories the catalogs straight from their sources.
-func allCatalogKeys(t *testing.T) map[string]bool {
-	t.Helper()
-	srcs, err := catalogSources()
-	require.NoError(t, err)
-	re := regexp.MustCompile(`message\.SetString\(language\.[A-Za-z]+,\s*"([a-z0-9_.]+)",`)
-	keys := map[string]bool{}
-	for _, src := range srcs {
-		for _, m := range re.FindAllStringSubmatch(src, -1) {
-			keys[m[1]] = true
-		}
-	}
-	return keys
 }
 
 func templSources() ([]string, error) {
@@ -255,22 +250,6 @@ func templSources() ([]string, error) {
 			}
 			out = append(out, string(b))
 		}
-	}
-	return out, nil
-}
-
-func catalogSources() ([]string, error) {
-	files := []string{
-		"../i18n/catalog_en.go",
-		"../i18n/catalog_es.go",
-	}
-	var out []string
-	for _, f := range files {
-		b, err := os.ReadFile(f)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, string(b))
 	}
 	return out, nil
 }

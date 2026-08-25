@@ -49,6 +49,24 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "docs.search_aria": "Search the docs",
+        "docs.search_no_results": "No pages matched your search.",
+        "docs.search_placeholder": "Search the docs…",
+        "docs.search_prompt": "Type a term to search the documentation.",
+        "docs.search_results_for": "Results for “%s”",
+        "docs.search_title": "Search"
+      },
+      "es": {
+        "docs.search_aria": "Buscar en los docs",
+        "docs.search_no_results": "Ninguna página coincide con tu búsqueda.",
+        "docs.search_placeholder": "Buscar en los docs…",
+        "docs.search_prompt": "Escribe un término para buscar en la documentación.",
+        "docs.search_results_for": "Resultados para «%s»",
+        "docs.search_title": "Buscar"
+      }
+    }
   }
 }

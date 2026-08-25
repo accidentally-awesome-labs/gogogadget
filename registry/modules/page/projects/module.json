@@ -60,6 +60,60 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "projects.archive": "Archive",
+        "projects.cancel": "Cancel",
+        "projects.col_actions": "Actions",
+        "projects.col_created": "Created",
+        "projects.col_name": "Name",
+        "projects.create": "Create project",
+        "projects.delete": "Delete",
+        "projects.delete_confirm": "Delete this project? This cannot be undone.",
+        "projects.edit": "Edit",
+        "projects.edit_heading": "Edit project",
+        "projects.empty_body": "Create your first project to get going.",
+        "projects.empty_title": "No projects",
+        "projects.export": "Export CSV",
+        "projects.field_name": "Name",
+        "projects.field_placeholder": "Launch checklist",
+        "projects.fix_error": "Please fix the error below.",
+        "projects.limit_hit": "You've reached the %s plan limit of %s projects.",
+        "projects.new": "New project",
+        "projects.save": "Save changes",
+        "projects.search_label": "Search projects",
+        "projects.search_placeholder": "Search projects…",
+        "projects.title": "Projects",
+        "projects.upgrade": "Upgrade to create more →",
+        "projects.usage": "%s / %s projects used on %s"
+      },
+      "es": {
+        "projects.archive": "Archivar",
+        "projects.cancel": "Cancelar",
+        "projects.col_actions": "Acciones",
+        "projects.col_created": "Creado",
+        "projects.col_name": "Nombre",
+        "projects.create": "Crear proyecto",
+        "projects.delete": "Eliminar",
+        "projects.delete_confirm": "¿Eliminar este proyecto? Esta acción no se puede deshacer.",
+        "projects.edit": "Editar",
+        "projects.edit_heading": "Editar proyecto",
+        "projects.empty_body": "Crea tu primer proyecto para comenzar.",
+        "projects.empty_title": "No hay proyectos",
+        "projects.export": "Exportar CSV",
+        "projects.field_name": "Nombre",
+        "projects.field_placeholder": "Lista de verificación de lanzamiento",
+        "projects.fix_error": "Corrige el error que aparece a continuación.",
+        "projects.limit_hit": "Has llegado al límite del plan %s de %s proyectos.",
+        "projects.new": "Nuevo proyecto",
+        "projects.save": "Guardar cambios",
+        "projects.search_label": "Buscar proyectos",
+        "projects.search_placeholder": "Buscar proyectos…",
+        "projects.title": "Proyectos",
+        "projects.upgrade": "Mejora tu plan para crear más →",
+        "projects.usage": "%s / %s proyectos usados en el plan %s"
+      }
+    }
   }
 }

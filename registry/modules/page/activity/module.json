@@ -67,6 +67,36 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "activity.col_action": "Action",
+        "activity.col_actor": "Actor",
+        "activity.col_details": "Details",
+        "activity.col_when": "When",
+        "activity.empty_body": "Actions across your organization will appear here.",
+        "activity.empty_title": "No activity yet",
+        "activity.metadata": "metadata",
+        "activity.pagination_aria": "Pagination",
+        "activity.pagination_next": "Next →",
+        "activity.pagination_page_of": "Page %d of %d",
+        "activity.pagination_prev": "← Previous",
+        "activity.title": "Activity"
+      },
+      "es": {
+        "activity.col_action": "Acción",
+        "activity.col_actor": "Actor",
+        "activity.col_details": "Detalles",
+        "activity.col_when": "Cuándo",
+        "activity.empty_body": "Las acciones de tu organización aparecerán aquí.",
+        "activity.empty_title": "Aún no hay actividad",
+        "activity.metadata": "metadatos",
+        "activity.pagination_aria": "Paginación",
+        "activity.pagination_next": "Siguiente →",
+        "activity.pagination_page_of": "Página %d de %d",
+        "activity.pagination_prev": "← Anterior",
+        "activity.title": "Actividad"
+      }
+    }
   }
 }

@@ -101,6 +101,22 @@
         "organization_delete": "cascade"
       }
     ],
-    "removal_policy": "retain-data"
+    "removal_policy": "retain-data",
+    "locales": {
+      "en": {
+        "email.digest.cta": "See all notifications:",
+        "email.digest.intro": "A summary of your notifications since the last digest.",
+        "email.digest.manage": "Change how often you get this:",
+        "email.digest.subject": "Your GoGoGadget digest",
+        "email.digest.title": "Here's what happened%s"
+      },
+      "es": {
+        "email.digest.cta": "Ver todas las notificaciones:",
+        "email.digest.intro": "Un resumen de tus notificaciones desde el último envío.",
+        "email.digest.manage": "Cambia la frecuencia de estos correos:",
+        "email.digest.subject": "Tu resumen de GoGoGadget",
+        "email.digest.title": "Esto es lo que pasó%s"
+      }
+    }
   }
 }

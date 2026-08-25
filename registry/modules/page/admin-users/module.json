@@ -59,6 +59,52 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.users.col_actions": "Actions",
+        "admin.users.col_email": "Email",
+        "admin.users.col_joined": "Joined",
+        "admin.users.col_name": "Name",
+        "admin.users.col_role": "Staff role",
+        "admin.users.col_status": "Status",
+        "admin.users.confirm_disable": "Disable %s? They will lose access immediately.",
+        "admin.users.confirm_enable": "Re-enable %s?",
+        "admin.users.disable": "Disable",
+        "admin.users.enable": "Enable",
+        "admin.users.impersonate": "Impersonate",
+        "admin.users.role_admin": "Admin",
+        "admin.users.role_last_admin": "This is the last admin — promote someone else first.",
+        "admin.users.role_none": "—",
+        "admin.users.role_support": "Support",
+        "admin.users.search_aria": "Search users",
+        "admin.users.search_placeholder": "Search by email…",
+        "admin.users.status_active": "active",
+        "admin.users.status_disabled": "disabled",
+        "admin.users.title": "Users"
+      },
+      "es": {
+        "admin.users.col_actions": "Acciones",
+        "admin.users.col_email": "Correo",
+        "admin.users.col_joined": "Se unió",
+        "admin.users.col_name": "Nombre",
+        "admin.users.col_role": "Rol de equipo",
+        "admin.users.col_status": "Estado",
+        "admin.users.confirm_disable": "¿Deshabilitar a %s? Perderá el acceso de inmediato.",
+        "admin.users.confirm_enable": "¿Reactivar a %s?",
+        "admin.users.disable": "Deshabilitar",
+        "admin.users.enable": "Reactivar",
+        "admin.users.impersonate": "Suplantar",
+        "admin.users.role_admin": "Administrador",
+        "admin.users.role_last_admin": "Es el último administrador: asciende a otra persona primero.",
+        "admin.users.role_none": "—",
+        "admin.users.role_support": "Soporte",
+        "admin.users.search_aria": "Buscar usuarios",
+        "admin.users.search_placeholder": "Buscar por correo…",
+        "admin.users.status_active": "activo",
+        "admin.users.status_disabled": "deshabilitado",
+        "admin.users.title": "Usuarios"
+      }
+    }
   }
 }

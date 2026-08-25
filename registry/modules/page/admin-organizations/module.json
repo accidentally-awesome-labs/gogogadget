@@ -59,6 +59,24 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.orgs.col_created": "Created",
+        "admin.orgs.col_members": "Members",
+        "admin.orgs.col_name": "Name",
+        "admin.orgs.col_plan": "Plan",
+        "admin.orgs.col_slug": "Slug",
+        "admin.orgs.title": "Organizations"
+      },
+      "es": {
+        "admin.orgs.col_created": "Creada",
+        "admin.orgs.col_members": "Miembros",
+        "admin.orgs.col_name": "Nombre",
+        "admin.orgs.col_plan": "Plan",
+        "admin.orgs.col_slug": "Slug",
+        "admin.orgs.title": "Organizaciones"
+      }
+    }
   }
 }

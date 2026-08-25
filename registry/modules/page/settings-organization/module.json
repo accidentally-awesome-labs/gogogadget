@@ -62,6 +62,42 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "settings.org_clerk_managed": "Invitations and roles are managed by Clerk.",
+        "settings.org_col_email": "Email",
+        "settings.org_col_member": "Member",
+        "settings.org_col_role": "Role",
+        "settings.org_export_body": "A JSON snapshot of everything held for this organization: members, projects, files, audit log, billing state, and the API and webhook inventory. Secrets are never included. You'll get a notification with the download when it's ready.",
+        "settings.org_export_button": "Export data",
+        "settings.org_export_started": "Export started — you'll get a notification when it's ready.",
+        "settings.org_export_title": "Export organization data",
+        "settings.org_manage_link": "Manage organization →",
+        "settings.org_members_heading": "Members",
+        "settings.org_name": "Name",
+        "settings.org_slug": "Slug",
+        "settings.org_title": "Organization settings",
+        "settings.select_org_sub": "You're a member of %d organization(s). Pick one to continue.",
+        "settings.select_org_title": "Choose an organization"
+      },
+      "es": {
+        "settings.org_clerk_managed": "Las invitaciones y los roles se gestionan en Clerk.",
+        "settings.org_col_email": "Correo electrónico",
+        "settings.org_col_member": "Miembro",
+        "settings.org_col_role": "Rol",
+        "settings.org_export_body": "Una instantánea JSON de todo lo que se guarda de esta organización: miembros, proyectos, archivos, registro de auditoría, estado de facturación e inventario de API y webhooks. Nunca incluye secretos. Recibirás una notificación con la descarga cuando esté lista.",
+        "settings.org_export_button": "Exportar datos",
+        "settings.org_export_started": "Exportación iniciada: recibirás una notificación cuando esté lista.",
+        "settings.org_export_title": "Exportar datos de la organización",
+        "settings.org_manage_link": "Gestionar organización →",
+        "settings.org_members_heading": "Miembros",
+        "settings.org_name": "Nombre",
+        "settings.org_slug": "Slug",
+        "settings.org_title": "Configuración de la organización",
+        "settings.select_org_sub": "Eres miembro de %d organización(es). Elige una para continuar.",
+        "settings.select_org_title": "Elige una organización"
+      }
+    }
   }
 }

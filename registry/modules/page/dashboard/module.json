@@ -68,6 +68,38 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "dashboard.checklist.create_project": "Create your first project",
+        "dashboard.checklist.dismiss": "Dismiss checklist",
+        "dashboard.checklist.invite_team": "Invite your team",
+        "dashboard.checklist.invite_team_note": "(from the Clerk organization profile)",
+        "dashboard.checklist.review_plans": "Review plans",
+        "dashboard.checklist.review_plans_note": "when you outgrow free",
+        "dashboard.getting_started": "Getting started",
+        "dashboard.recent_activity": "Recent activity",
+        "dashboard.recent_empty": "Nothing yet — create a project to see activity here.",
+        "dashboard.stats.active_projects": "Active projects",
+        "dashboard.stats.current_plan": "Current plan",
+        "dashboard.stats.team_members": "Team members",
+        "dashboard.title": "Dashboard"
+      },
+      "es": {
+        "dashboard.checklist.create_project": "Crea tu primer proyecto",
+        "dashboard.checklist.dismiss": "Descartar la lista de primeros pasos",
+        "dashboard.checklist.invite_team": "Invita a tu equipo",
+        "dashboard.checklist.invite_team_note": "(desde el perfil de la organización de Clerk)",
+        "dashboard.checklist.review_plans": "Revisa los planes",
+        "dashboard.checklist.review_plans_note": "cuando superes el plan gratuito",
+        "dashboard.getting_started": "Primeros pasos",
+        "dashboard.recent_activity": "Actividad reciente",
+        "dashboard.recent_empty": "Aún no hay nada — crea un proyecto para ver la actividad aquí.",
+        "dashboard.stats.active_projects": "Proyectos activos",
+        "dashboard.stats.current_plan": "Plan actual",
+        "dashboard.stats.team_members": "Miembros del equipo",
+        "dashboard.title": "Panel"
+      }
+    }
   }
 }

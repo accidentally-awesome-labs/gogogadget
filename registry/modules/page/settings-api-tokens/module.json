@@ -60,6 +60,50 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "api.col_created": "Created",
+        "api.col_last_used": "Last used",
+        "api.col_name": "Name",
+        "api.col_scope": "Scope",
+        "api.copied": "Copied!",
+        "api.copy": "Copy",
+        "api.create": "Create",
+        "api.create_title": "Create a token",
+        "api.empty": "No tokens yet.",
+        "api.name_label": "Name",
+        "api.name_placeholder": "CI deploys",
+        "api.never_used": "never",
+        "api.reveal_note": "This is the only time the plaintext is shown.",
+        "api.reveal_title": "Token created — copy it now",
+        "api.revoke": "Revoke",
+        "api.revoke_confirm": "Revoke this token? API calls with it will start failing.",
+        "api.revoked": "revoked",
+        "api.scope_label": "Scope",
+        "api.title": "API tokens"
+      },
+      "es": {
+        "api.col_created": "Creado",
+        "api.col_last_used": "Último uso",
+        "api.col_name": "Nombre",
+        "api.col_scope": "Alcance",
+        "api.copied": "¡Copiado!",
+        "api.copy": "Copiar",
+        "api.create": "Crear",
+        "api.create_title": "Crear un token",
+        "api.empty": "Aún no hay tokens.",
+        "api.name_label": "Nombre",
+        "api.name_placeholder": "Despliegues de CI",
+        "api.never_used": "nunca",
+        "api.reveal_note": "Esta es la única vez que se muestra el texto plano.",
+        "api.reveal_title": "Token creado — cópialo ahora",
+        "api.revoke": "Revocar",
+        "api.revoke_confirm": "¿Revocar este token? Las llamadas a la API con este token empezarán a fallar.",
+        "api.revoked": "revocado",
+        "api.scope_label": "Alcance",
+        "api.title": "Tokens de API"
+      }
+    }
   }
 }

@@ -161,6 +161,16 @@
       ]
     },
     "data": [],
-    "removal_policy": "major-version-only"
+    "removal_policy": "major-version-only",
+    "locales": {
+      "en": {
+        "settings.disabled_body": "Your account has been disabled by an administrator. Contact your organization admin if you believe this is a mistake.",
+        "settings.disabled_title": "Account disabled"
+      },
+      "es": {
+        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
+        "settings.disabled_title": "Cuenta deshabilitada"
+      }
+    }
   }
 }

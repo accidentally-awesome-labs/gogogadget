@@ -60,6 +60,34 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "notifications.empty_body": "You're all caught up.",
+        "notifications.empty_title": "No notifications",
+        "notifications.kind.export_ready": "Export ready",
+        "notifications.kind.payment_failed": "Payment failed",
+        "notifications.kind.webhook_failed": "Webhook delivery failed",
+        "notifications.kind.welcome": "Welcome",
+        "notifications.mark_read": "Mark read",
+        "notifications.open": "Open",
+        "notifications.read_all": "Mark all read",
+        "notifications.title": "Notifications",
+        "notifications.unread_aria": "%d unread notifications"
+      },
+      "es": {
+        "notifications.empty_body": "Estás al día.",
+        "notifications.empty_title": "No hay notificaciones",
+        "notifications.kind.export_ready": "Exportación lista",
+        "notifications.kind.payment_failed": "Pago fallido",
+        "notifications.kind.webhook_failed": "Entrega de webhook fallida",
+        "notifications.kind.welcome": "Bienvenida",
+        "notifications.mark_read": "Marcar como leído",
+        "notifications.open": "Abrir",
+        "notifications.read_all": "Marcar todo como leído",
+        "notifications.title": "Notificaciones",
+        "notifications.unread_aria": "%d notificaciones sin leer"
+      }
+    }
   }
 }

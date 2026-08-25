@@ -42,6 +42,16 @@
       ]
     },
     "data": [],
-    "removal_policy": "retain-data"
+    "removal_policy": "retain-data",
+    "locales": {
+      "en": {
+        "changelog.intro": "Everything that shipped, newest first. Each release links to itself, so you can point someone at the exact one.",
+        "changelog.title": "Changelog"
+      },
+      "es": {
+        "changelog.intro": "Todo lo que se ha lanzado, lo más reciente primero. Cada versión enlaza a sí misma, para que puedas señalar exactamente cuál.",
+        "changelog.title": "Novedades"
+      }
+    }
   }
 }

@@ -60,6 +60,30 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "settings.digest_daily": "Daily",
+        "settings.digest_hint": "A periodic email summarizing the notifications above. In-app mutes apply first — a muted kind never reaches the digest.",
+        "settings.digest_label": "Email digest",
+        "settings.digest_off": "Never",
+        "settings.digest_weekly": "Weekly",
+        "settings.notifications_intro": "Choose which in-app notifications you receive. Everything is on by default.",
+        "settings.notifications_save": "Save preferences",
+        "settings.notifications_saved": "Notification preferences saved.",
+        "settings.notifications_title": "Notification preferences"
+      },
+      "es": {
+        "settings.digest_daily": "Diario",
+        "settings.digest_hint": "Un correo periódico que resume las notificaciones anteriores. Los silencios en la app se aplican primero: un tipo silenciado nunca llega al resumen.",
+        "settings.digest_label": "Resumen por correo",
+        "settings.digest_off": "Nunca",
+        "settings.digest_weekly": "Semanal",
+        "settings.notifications_intro": "Elige qué notificaciones recibes en la app. Todo está activado por defecto.",
+        "settings.notifications_save": "Guardar preferencias",
+        "settings.notifications_saved": "Preferencias de notificación guardadas.",
+        "settings.notifications_title": "Preferencias de notificación"
+      }
+    }
   }
 }

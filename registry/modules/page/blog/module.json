@@ -51,6 +51,16 @@
       ]
     },
     "data": [],
-    "removal_policy": "retain-data"
+    "removal_policy": "retain-data",
+    "locales": {
+      "en": {
+        "blog.empty": "No posts yet.",
+        "blog.title": "Blog"
+      },
+      "es": {
+        "blog.empty": "Aún no hay publicaciones.",
+        "blog.title": "Blog"
+      }
+    }
   }
 }

@@ -58,6 +58,48 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.jobs.col_actions": "Actions",
+        "admin.jobs.col_attempts": "Attempts",
+        "admin.jobs.col_error": "Last error",
+        "admin.jobs.col_kind": "Kind",
+        "admin.jobs.col_run_at": "Run at",
+        "admin.jobs.col_status": "Status",
+        "admin.jobs.empty": "No jobs match.",
+        "admin.jobs.requeue": "Requeue",
+        "admin.jobs.requeue_confirm": "Requeue this dead-lettered job? It will be claimed immediately.",
+        "admin.jobs.requeued": "Job requeued.",
+        "admin.jobs.search_aria": "Search jobs",
+        "admin.jobs.search_placeholder": "Filter by kind…",
+        "admin.jobs.status_dead": "dead",
+        "admin.jobs.status_done": "done",
+        "admin.jobs.status_pending": "pending",
+        "admin.jobs.status_retrying": "retrying",
+        "admin.jobs.status_running": "running",
+        "admin.jobs.title": "Jobs"
+      },
+      "es": {
+        "admin.jobs.col_actions": "Acciones",
+        "admin.jobs.col_attempts": "Intentos",
+        "admin.jobs.col_error": "Último error",
+        "admin.jobs.col_kind": "Tipo",
+        "admin.jobs.col_run_at": "Ejecuta",
+        "admin.jobs.col_status": "Estado",
+        "admin.jobs.empty": "No hay trabajos que coincidan.",
+        "admin.jobs.requeue": "Reencolar",
+        "admin.jobs.requeue_confirm": "¿Reencolar este trabajo fallido? Se reclamará de inmediato.",
+        "admin.jobs.requeued": "Trabajo reencolado.",
+        "admin.jobs.search_aria": "Buscar trabajos",
+        "admin.jobs.search_placeholder": "Filtrar por tipo…",
+        "admin.jobs.status_dead": "fallido",
+        "admin.jobs.status_done": "completado",
+        "admin.jobs.status_pending": "pendiente",
+        "admin.jobs.status_retrying": "reintentando",
+        "admin.jobs.status_running": "en ejecución",
+        "admin.jobs.title": "Trabajos"
+      }
+    }
   }
 }
