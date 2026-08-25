@@ -28,7 +28,7 @@
         "source": "internal/web/templates/settings.templ",
         "target": "internal/web/templates/settings.templ",
         "class": "templ",
-        "sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
+        "sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
         "rewrite_module": true,
         "contract": false
       }
@@ -63,8 +63,8 @@
           "id": "nav.app.settings",
           "area": "app",
           "route_id": "settings-account.index",
-          "label_key": "sidebar.settings",
           "match": "/app/settings",
+          "label_key": "sidebar.settings",
           "after": [
             "nav.app.activity"
           ]
@@ -79,14 +79,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "settings.account_clerk_managed": "Profile, password, social connections, and two-factor authentication are managed by Clerk.",
@@ -107,7 +99,7 @@
         "settings.danger_title": "Danger zone",
         "settings.data_body": "Download everything we hold about your account as JSON — profile, memberships, notifications, and audit trail.",
         "settings.data_export": "Export my data (JSON)",
-        "settings.data_title": "Data & privacy",
+        "settings.data_title": "Data \u0026 privacy",
         "settings.language_auto": "Browser default",
         "settings.language_label": "Language",
         "settings.theme_dark": "Dark",
@@ -142,6 +134,14 @@
         "settings.theme_light": "Claro",
         "settings.theme_system": "Sistema"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

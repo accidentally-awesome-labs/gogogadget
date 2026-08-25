@@ -37,7 +37,7 @@
         "source": "internal/web/templates/billing.templ",
         "target": "internal/web/templates/billing.templ",
         "class": "templ",
-        "sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
+        "sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
         "rewrite_module": true,
         "contract": false
       }
@@ -81,14 +81,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "billing.current_plan": "Current plan",
@@ -132,6 +124,14 @@
         "billing.usage": "Uso",
         "billing.welcome": "Tu suscripción está activa. ¡Bienvenido a bordo!"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

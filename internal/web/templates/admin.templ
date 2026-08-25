@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"context"
 	"fmt"
 
@@ -9,18 +10,18 @@ import (
 )
 
 templ AdminHome(d AdminHomeData) {
-	@PageHeader(i18n.T(ctx, "admin.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.title")})
 	<div class="grid sm:grid-cols-4 gap-4">
-		@StatCard(i18n.T(ctx, "admin.stats.total_users"), fmt.Sprint(d.TotalUsers), "")
-		@StatCard(i18n.T(ctx, "admin.stats.total_orgs"), fmt.Sprint(d.TotalOrgs), "")
-		@StatCard(i18n.T(ctx, "admin.stats.active_subs"), fmt.Sprint(d.ActiveSubs), "")
-		@StatCard(i18n.T(ctx, "admin.stats.mrr"), fmt.Sprintf("$%d", d.MRR), i18n.T(ctx, "admin.stats.mrr_hint"))
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_users"), Value: fmt.Sprint(d.TotalUsers), Sub: ""})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_orgs"), Value: fmt.Sprint(d.TotalOrgs), Sub: ""})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.active_subs"), Value: fmt.Sprint(d.ActiveSubs), Sub: ""})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.mrr"), Value: fmt.Sprintf("$%d", d.MRR), Sub: i18n.T(ctx, "admin.stats.mrr_hint")})
 	</div>
 
-	@SectionHeading(i18n.T(ctx, "admin.signups_heading"), "mt-10 mb-3")
-	@TableCard("") {
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.signups_heading"), Attrs: ui.Attrs{Class: "mt-10 mb-3"}})
+	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 		if len(d.RecentSignups) == 0 {
-			@TableEmpty(i18n.T(ctx, "admin.signups_empty"))
+			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.signups_empty")})
 		} else {
 			<table class="table">
 				<tbody>
@@ -38,15 +39,14 @@ templ AdminHome(d AdminHomeData) {
 }
 
 templ AdminUsersPage(d AdminUsersData) {
-	@PageHeader(i18n.T(ctx, "admin.users.title"))
-	@SearchToolbar("q", d.Query, i18n.T(ctx, "admin.users.search_placeholder"), i18n.T(ctx, "admin.users.search_aria"),
-		"/admin/users", "#table-container", "admin-search-indicator", "")
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.users.title")})
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.users.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.users.search_aria"), GetURL: "/admin/users", Target: "#table-container", IndicatorID: "admin-search-indicator", Attrs: ui.Attrs{TestID: ""}})
 	@AdminUsersTable(d)
 }
 
 templ AdminUsersTable(d AdminUsersData) {
 	<div id="table-container">
-		@TableCard("") {
+		@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 			<table class="table">
 				<thead>
 					<tr><th>{ i18n.T(ctx, "admin.users.col_email") }</th><th>{ i18n.T(ctx, "admin.users.col_name") }</th><th>{ i18n.T(ctx, "admin.users.col_joined") }</th><th>{ i18n.T(ctx, "admin.users.col_role") }</th><th>{ i18n.T(ctx, "admin.users.col_status") }</th><th class="text-right">{ i18n.T(ctx, "admin.users.col_actions") }</th></tr>
@@ -66,9 +66,9 @@ templ AdminUsersTable(d AdminUsersData) {
 							</td>
 							<td>
 								if u.DisabledAt.Valid {
-									@Badge(i18n.T(ctx, "admin.users.status_disabled"), KindDanger)
+									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_disabled"), Kind: ui.KindDanger})
 								} else {
-									@Badge(i18n.T(ctx, "admin.users.status_active"), KindSuccess)
+									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_active"), Kind: ui.KindSuccess})
 								}
 							</td>
 							<td class="text-right">
@@ -108,7 +108,7 @@ templ AdminUsersTable(d AdminUsersData) {
 				</tbody>
 			</table>
 		}
-		@Pagination(d.Page, d.TotalPages, "/admin/users?q="+d.Query, "#table-container")
+		@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/users?q="+d.Query, Target: "#table-container", Labels: pagerLabels(ctx)})
 	</div>
 }
 
@@ -120,8 +120,8 @@ func disableConfirm(ctx context.Context, u sqlc.User) string {
 }
 
 templ AdminOrgsPage(d AdminOrgsData) {
-	@PageHeader(i18n.T(ctx, "admin.orgs.title"))
-	@TableCard("") {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.orgs.title")})
+	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 		<table class="table">
 			<thead>
 				<tr><th>{ i18n.T(ctx, "admin.orgs.col_name") }</th><th>{ i18n.T(ctx, "admin.orgs.col_slug") }</th><th>{ i18n.T(ctx, "admin.orgs.col_members") }</th><th>{ i18n.T(ctx, "admin.orgs.col_plan") }</th><th>{ i18n.T(ctx, "admin.orgs.col_created") }</th></tr>
@@ -132,7 +132,7 @@ templ AdminOrgsPage(d AdminOrgsData) {
 						<td class="font-medium">{ o.Name }</td>
 						<td class="text-fg-muted">{ o.Slug }</td>
 						<td>{ fmt.Sprint(o.MemberCount) }</td>
-						<td>@BadgeTagged(o.ProductKey, KindBrand, "plan-badge")</td>
+						<td>@ui.Badge(ui.BadgeOpts{Text: o.ProductKey, Kind: ui.KindBrand, Attrs: ui.Attrs{TestID: "plan-badge"}})</td>
 						<td class="text-fg-muted">{ o.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 					</tr>
 				}
@@ -145,9 +145,9 @@ templ AdminOrgsPage(d AdminOrgsData) {
 templ roleBadge(role string) {
 	switch role {
 		case "admin":
-			@BadgeTagged(i18n.T(ctx, "admin.users.role_admin"), KindBrand, "role-badge")
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.role_admin"), Kind: ui.KindBrand, Attrs: ui.Attrs{TestID: "role-badge"}})
 		case "support":
-			@BadgeTagged(i18n.T(ctx, "admin.users.role_support"), KindWarn, "role-badge")
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.role_support"), Kind: ui.KindWarn, Attrs: ui.Attrs{TestID: "role-badge"}})
 		default:
 			<span class="text-xs text-fg-muted" data-testid="role-badge">{ i18n.T(ctx, "admin.users.role_none") }</span>
 	}

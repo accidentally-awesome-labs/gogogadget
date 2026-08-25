@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -8,7 +9,7 @@ import (
 
 templ SettingsAPI(d APITokensData) {
 	@SettingsTabs("/app/settings/api")
-	@PageHeader(i18n.T(ctx, "api.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "api.title")})
 
 	<div id="api-tokens-container">
 		@APITokensSection(d)
@@ -20,14 +21,14 @@ templ APITokensSection(d APITokensData) {
 		<div class="card mb-6 max-w-lg border-success" data-testid="api-token-reveal">
 			<h2 class="font-semibold text-success-text">{ i18n.T(ctx, "api.reveal_title") }</h2>
 			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "api.reveal_note") }</p>
-			@CopyRow(d.NewToken, i18n.T(ctx, "api.copy"), i18n.T(ctx, "api.copied"))
+			@ui.SecretReveal(ui.SecretRevealOpts{Value: d.NewToken, CopyLabel: i18n.T(ctx, "api.copy"), CopiedLabel: i18n.T(ctx, "api.copied")})
 		</div>
 	}
 
 	<div class="card max-w-lg mb-6">
 		<h2 class="font-semibold mb-3">{ i18n.T(ctx, "api.create_title") }</h2>
 		if d.NameErr != "" {
-			@Alert(KindDanger, "alert", "mb-3", "") {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-3", TestID: ""}}) {
 				{ d.NameErr }
 			}
 		}
@@ -44,7 +45,7 @@ templ APITokensSection(d APITokensData) {
 				</select>
 			</div>
 			<button type="submit" class="btn btn-primary">
-				@Spinner()
+				@ui.Spinner(ui.SpinnerOpts{})
 				{ i18n.T(ctx, "api.create") }
 			</button>
 		</form>
@@ -62,7 +63,7 @@ templ APITokensSection(d APITokensData) {
 				for _, t := range d.Tokens {
 					<tr>
 						<td class="font-medium">{ t.Name }</td>
-						<td>@Badge(t.Scope, KindNeutral)</td>
+						<td>@ui.Badge(ui.BadgeOpts{Text: t.Scope, Kind: ui.KindNeutral})</td>
 						<td class="text-fg-muted">
 							if t.LastUsedAt.Valid {
 								{ t.LastUsedAt.Time.Format("Jan 2, 2006") }
@@ -73,7 +74,7 @@ templ APITokensSection(d APITokensData) {
 						<td class="text-fg-muted">{ t.CreatedAt.Time.Format("Jan 2, 2006") }</td>
 						<td class="text-right">
 							if t.RevokedAt.Valid {
-								@Badge(i18n.T(ctx, "api.revoked"), KindDanger)
+								@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "api.revoked"), Kind: ui.KindDanger})
 							} else {
 								<button
 									type="button"

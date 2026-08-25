@@ -36,7 +36,7 @@
         "source": "internal/web/templates/settings_notifications.templ",
         "target": "internal/web/templates/settings_notifications.templ",
         "class": "templ",
-        "sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
+        "sha256": "d0083e865c7d6844102cf363778082e0b634910bf0d2aad23793a752d2d54d5b",
         "rewrite_module": true,
         "contract": false
       }
@@ -80,14 +80,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "settings.digest_daily": "Daily",
@@ -111,6 +103,14 @@
         "settings.notifications_saved": "Preferencias de notificación guardadas.",
         "settings.notifications_title": "Preferencias de notificación"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

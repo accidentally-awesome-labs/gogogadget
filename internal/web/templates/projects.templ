@@ -1,13 +1,14 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 templ ProjectsPage(d ProjectListData) {
-	@PageHeader(i18n.T(ctx, "projects.title")) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "projects.title")}) {
 		<div class="flex items-center gap-2">
 			<button type="button" hx-post="/app/projects/export" hx-swap="none" class="btn btn-ghost" data-testid="projects-export">{ i18n.T(ctx, "projects.export") }</button>
 			<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
@@ -20,19 +21,18 @@ templ ProjectsPage(d ProjectListData) {
 		</div>
 	}
 
-	@SearchToolbar("q", d.Query, i18n.T(ctx, "projects.search_placeholder"), i18n.T(ctx, "projects.search_label"),
-		"/app/projects", "#table-container", "projects-search-indicator", "")
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "projects.search_placeholder"), AriaLabel: i18n.T(ctx, "projects.search_label"), GetURL: "/app/projects", Target: "#table-container", IndicatorID: "projects-search-indicator", Attrs: ui.Attrs{TestID: ""}})
 	@ProjectsTable(d)
 }
 
 templ ProjectsTable(d ProjectListData) {
 	<div id="table-container">
 		if len(d.Projects) == 0 {
-			@EmptyState(i18n.T(ctx, "projects.empty_title"), i18n.T(ctx, "projects.empty_body")) {
+			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "projects.empty_title"), Body: i18n.T(ctx, "projects.empty_body")}) {
 				<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
 			}
 		} else {
-			@TableCard("") {
+			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 				<table class="table">
 					<thead>
 						<tr><th>{ i18n.T(ctx, "projects.col_name") }</th><th>{ i18n.T(ctx, "projects.col_created") }</th><th class="text-right">{ i18n.T(ctx, "projects.col_actions") }</th></tr>
@@ -65,7 +65,7 @@ templ ProjectsTable(d ProjectListData) {
 					</tbody>
 				</table>
 			}
-			@Pagination(d.Page, d.TotalPages, "/app/projects?q="+d.Query, "#table-container")
+			@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/app/projects?q="+d.Query, Target: "#table-container", Labels: pagerLabels(ctx)})
 		}
 	</div>
 }
@@ -73,13 +73,13 @@ templ ProjectsTable(d ProjectListData) {
 templ ProjectForm(d ProjectFormData) {
 	<div id="project-form">
 		if d.LimitHit {
-			@Alert(KindDanger, "alert", "mb-4", "plan-limit") {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-4", TestID: "plan-limit"}}) {
 				{ i18n.T(ctx, "projects.limit_hit", d.Plan.Name, fmt.Sprint(d.Plan.MaxProjects)) }
 				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
 			}
 		}
 		if d.NameErr != "" {
-			@Alert(KindDanger, "alert", "mb-4", "") {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-4", TestID: ""}}) {
 				{ i18n.T(ctx, "projects.fix_error") }
 			}
 		}
@@ -95,10 +95,12 @@ templ ProjectForm(d ProjectFormData) {
 			novalidate
 			class="card max-w-lg space-y-4"
 		>
-			@FormField("name", i18n.T(ctx, "projects.field_name"), "text", d.Name, d.NameErr, i18n.T(ctx, "projects.field_placeholder"), true)
+			@ui.Field(ui.FieldOpts{Name: "name", Label: i18n.T(ctx, "projects.field_name"), Error: d.NameErr, Required: true}) {
+			@ui.TextInput(ui.TextInputOpts{Name: "name", Type: "text", Value: d.Name, Placeholder: i18n.T(ctx, "projects.field_placeholder"), Required: true, Error: d.NameErr})
+		}
 			<div class="flex gap-3">
 				<button type="submit" class="btn btn-primary">
-					@Spinner()
+					@ui.Spinner(ui.SpinnerOpts{})
 					if d.ID == 0 {
 						{ i18n.T(ctx, "projects.create") }
 					} else {
@@ -112,11 +114,11 @@ templ ProjectForm(d ProjectFormData) {
 }
 
 templ ProjectNewPage(d ProjectFormData) {
-	@PageHeader(i18n.T(ctx, "projects.new"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "projects.new")})
 	@ProjectForm(d)
 }
 
 templ ProjectEditPage(d ProjectFormData) {
-	@PageHeader(i18n.T(ctx, "projects.edit_heading"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "projects.edit_heading")})
 	@ProjectForm(d)
 }

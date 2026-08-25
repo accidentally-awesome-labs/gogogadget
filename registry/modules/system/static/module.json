@@ -96,7 +96,7 @@
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "a903943967b5628308ae9a0f6b28b9d228e71b1127f8dab1f400d6c03ea99775",
+        "sha256": "1f6045258f20ec4e82a71556f479fa1f24ece0f8b262ca7a7dfaceedaaca65bc",
         "rewrite_module": false,
         "contract": false
       },

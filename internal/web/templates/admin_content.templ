@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 	"time"
 
@@ -75,14 +76,14 @@ func contentStatus(e sqlc.ContentEntry, now time.Time) string {
 }
 
 // contentStatusKind maps the computed status onto the shared semantic axis.
-func contentStatusKind(status string) Kind {
+func contentStatusKind(status string) ui.Kind {
 	switch status {
 	case "live":
-		return KindSuccess
+		return ui.KindSuccess
 	case "scheduled":
-		return KindWarn
+		return ui.KindWarn
 	default: // expired, draft
-		return KindNeutral
+		return ui.KindNeutral
 	}
 }
 
@@ -121,7 +122,7 @@ func mediaMarkdown(m sqlc.ContentMedium) string {
 }
 
 templ AdminContentPage(d ContentListData) {
-	@PageHeader(i18n.T(ctx, "admin.content.title")) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.content.title")}) {
 		if AdminWrite(ctx) {
 			<div class="flex items-center gap-2 flex-wrap">
 				<a href="/admin/media" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="btn btn-ghost" data-testid="content-media-link">{ i18n.T(ctx, "admin.media.title") }</a>
@@ -156,14 +157,13 @@ templ AdminContentPage(d ContentListData) {
 			>{ i18n.T(ctx, t.PluralKey) }</a>
 		}
 	</div>
-	@SearchToolbar("q", d.Query, i18n.T(ctx, "admin.content.search_placeholder"), i18n.T(ctx, "admin.content.search_aria"),
-		"/admin/content?kind="+d.Kind, "#table-container", "content-search-indicator", "content-search")
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.content.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.content.search_aria"), GetURL: "/admin/content?kind="+d.Kind, Target: "#table-container", IndicatorID: "content-search-indicator", Attrs: ui.Attrs{TestID: "content-search"}})
 	@AdminContentTable(d)
 }
 
 templ AdminContentTable(d ContentListData) {
 	<div id="table-container">
-		@TableCard("") {
+		@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 			<table class="table" data-testid="content-table">
 				<thead>
 					<tr>
@@ -233,26 +233,26 @@ templ AdminContentTable(d ContentListData) {
 				</tbody>
 			</table>
 		}
-		@Pagination(d.Page, d.TotalPages, "/admin/content?q="+d.Query, "#table-container")
+		@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/content?q="+d.Query, Target: "#table-container", Labels: pagerLabels(ctx)})
 	</div>
 }
 
 templ contentStatusBadge(status string) {
 	switch status {
 		case "live":
-			@BadgeTagged(i18n.T(ctx, "admin.content.status_live"), contentStatusKind(status), "content-status")
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_live"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}})
 		case "scheduled":
-			@BadgeTagged(i18n.T(ctx, "admin.content.status_scheduled"), contentStatusKind(status), "content-status")
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_scheduled"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}})
 		case "expired":
-			@BadgeTagged(i18n.T(ctx, "admin.content.status_expired"), contentStatusKind(status), "content-status")
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_expired"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}})
 		default:
-			@BadgeTagged(i18n.T(ctx, "admin.content.status_draft"), contentStatusKind(status), "content-status")
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_draft"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}})
 	}
 }
 
 // AdminContentEditorPage wraps the editor with its heading and back link.
 templ AdminContentEditorPage(d ContentEditorData) {
-	@PageHeader(i18n.T(ctx, d.Type.LabelKey)) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, d.Type.LabelKey)}) {
 		<div class="form-actions">
 			if d.ID != 0 && d.Type.Path != "" {
 				// Deliberately NOT boosted: boosting would swap the public
@@ -288,7 +288,7 @@ templ AdminContentEditor(d ContentEditorData) {
 				<label class="label" for="content-title">{ i18n.T(ctx, "admin.content.title_label") }</label>
 				<input id="content-title" name="title" type="text" value={ d.Title } class="input" data-testid="content-title" @input="onTitle"/>
 				if d.Errs.Title != "" {
-					@FieldError(d.Errs.Title)
+					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Title})
 				}
 			</div>
 			<div>
@@ -303,7 +303,7 @@ templ AdminContentEditor(d ContentEditorData) {
 				/>
 				<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.slug_hint") }</p>
 				if d.Errs.Slug != "" {
-					@FieldError(d.Errs.Slug)
+					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Slug})
 				}
 			</div>
 			<div>
@@ -321,14 +321,14 @@ templ AdminContentEditor(d ContentEditorData) {
 				</select>
 				<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.locale_hint") }</p>
 				if d.Errs.Locale != "" {
-					@FieldError(d.Errs.Locale)
+					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Locale})
 				}
 			</div>
 			<div>
 				<label class="label" for="content-summary">{ i18n.T(ctx, "admin.content.summary_label") }</label>
 				<input id="content-summary" name="summary" type="text" value={ d.Summary } class="input" data-testid="content-summary"/>
 				if d.Errs.Summary != "" {
-					@FieldError(d.Errs.Summary)
+					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Summary})
 				}
 			</div>
 			for _, f := range d.Type.Fields {
@@ -340,7 +340,7 @@ templ AdminContentEditor(d ContentEditorData) {
 					<input id="content-published-at" name="published_at" type="datetime-local" value={ d.PublishedAt } class="input" data-testid="content-published-at"/>
 					<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.published_at_hint") }</p>
 					if d.Errs.PublishedAt != "" {
-						@FieldError(d.Errs.PublishedAt)
+						@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.PublishedAt})
 					}
 				</div>
 				<div>
@@ -348,7 +348,7 @@ templ AdminContentEditor(d ContentEditorData) {
 					<input id="content-unpublish-at" name="unpublish_at" type="datetime-local" value={ d.UnpublishAt } class="input" data-testid="content-unpublish-at"/>
 					<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.unpublish_at_hint") }</p>
 					if d.Errs.UnpublishAt != "" {
-						@FieldError(d.Errs.UnpublishAt)
+						@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.UnpublishAt})
 					}
 				</div>
 			</div>
@@ -363,7 +363,7 @@ templ AdminContentEditor(d ContentEditorData) {
 					hx-include="closest form"
 				>{ d.BodyMd }</textarea>
 				if d.Errs.Body != "" {
-					@FieldError(d.Errs.Body)
+					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Body})
 				}
 			</div>
 			if AdminWrite(ctx) {
@@ -375,7 +375,7 @@ templ AdminContentEditor(d ContentEditorData) {
 							{ i18n.T(ctx, "admin.content.save") }
 						}
 					</button>
-					@Spinner()
+					@ui.Spinner(ui.SpinnerOpts{})
 					if d.ID != 0 {
 						if d.Status == "published" {
 							<button type="button" hx-post={ fmt.Sprintf("/admin/content/%d/unpublish", d.ID) } class="btn btn-ghost" data-testid={ fmt.Sprintf("content-unpublish-%d", d.ID) }>{ i18n.T(ctx, "admin.content.unpublish") }</button>
@@ -395,7 +395,7 @@ templ AdminContentEditor(d ContentEditorData) {
 		</form>
 		<div class="space-y-6">
 			<div class="card">
-				@SectionHeading(i18n.T(ctx, "admin.content.preview_heading"), "mb-3")
+				@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.preview_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 				<div id="content-preview" class="prose" data-testid="content-preview">
 					@templ.Raw(d.PreviewHTML)
 				</div>
@@ -434,14 +434,14 @@ templ contentField(f content.Field, value, err string) {
 				<input id={ "content-meta-" + f.Key } name={ "meta_" + f.Key } type="text" value={ value } class="input" data-testid={ "content-meta-" + f.Key }/>
 		}
 		if err != "" {
-			@FieldError(err)
+			@ui.FieldError(ui.FieldErrorOpts{Error: err})
 		}
 	</div>
 }
 
 templ contentRevisions(d ContentEditorData) {
 	<div class="card">
-		@SectionHeading(i18n.T(ctx, "admin.content.revisions_heading"), "mb-3")
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.revisions_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 		if len(d.Revisions) == 0 {
 			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.content.revisions_empty") }</p>
 		} else {
@@ -473,7 +473,7 @@ templ contentRevisions(d ContentEditorData) {
 templ contentMediaPicker(d ContentEditorData) {
 	<div class="card">
 		<div class="flex items-center justify-between mb-3">
-			@SectionHeading(i18n.T(ctx, "admin.content.media_heading"), "")
+			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.media_heading"), Attrs: ui.Attrs{Class: ""}})
 			<a href="/admin/media" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="link text-sm">{ i18n.T(ctx, "admin.media.title") }</a>
 		</div>
 		if len(d.Media) == 0 {
@@ -496,14 +496,14 @@ templ contentMediaPicker(d ContentEditorData) {
 
 // AdminMediaPage is the platform image library: upload, copy, delete.
 templ AdminMediaPage(d MediaData) {
-	@PageHeader(i18n.T(ctx, "admin.media.title")) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.media.title")}) {
 		<a href="/admin/content" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="link text-sm">{ i18n.T(ctx, "admin.media.back_to_content") }</a>
 	}
 	if AdminWrite(ctx) {
 		@MediaUploadCard(d)
 	}
 	<div id="table-container">
-		@TableCard("") {
+		@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 			<table class="table" data-testid="media-table">
 				<thead>
 					<tr>
@@ -548,7 +548,7 @@ templ AdminMediaPage(d MediaData) {
 				</tbody>
 			</table>
 		}
-		@Pagination(d.Page, d.TotalPages, "/admin/media", "#table-container")
+		@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/media", Target: "#table-container", Labels: pagerLabels(ctx)})
 	</div>
 }
 
@@ -568,7 +568,7 @@ templ MediaUploadCard(d MediaData) {
 			data-testid="media-upload-form"
 		>
 			if d.Err != "" {
-				@Alert(KindDanger, "alert", "", "media-error") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: "media-error"}}) {
 					{ d.Err }
 				}
 			}
@@ -578,7 +578,7 @@ templ MediaUploadCard(d MediaData) {
 			</div>
 			<div class="form-actions">
 				<button type="submit" class="btn btn-primary" data-testid="media-upload">{ i18n.T(ctx, "admin.media.upload") }</button>
-				@Spinner()
+				@ui.Spinner(ui.SpinnerOpts{})
 			</div>
 		</form>
 	</div>

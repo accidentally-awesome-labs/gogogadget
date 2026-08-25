@@ -25,7 +25,7 @@
         "source": "internal/web/templates/home.templ",
         "target": "internal/web/templates/home.templ",
         "class": "templ",
-        "sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+        "sha256": "f1d52e0aea0d4f4366931b4f9a02f8d0115cbb2ee86ed0102ceb40207202ba70",
         "rewrite_module": true,
         "contract": false
       }
@@ -59,16 +59,16 @@
         {
           "id": "footer.company.about",
           "area": "footer",
-          "group": "footer.company",
           "href": "/#about",
-          "label_key": "footer.about"
+          "label_key": "footer.about",
+          "group": "footer.company"
         },
         {
           "id": "footer.product.features",
           "area": "footer",
-          "group": "footer.product",
           "href": "/#features",
-          "label_key": "footer.features"
+          "label_key": "footer.features",
+          "group": "footer.product"
         },
         {
           "id": "nav.public.features",
@@ -80,14 +80,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "home.cta.docs": "Read the docs",
@@ -96,7 +88,7 @@
         "home.cta_band.button": "Get started free",
         "home.cta_band.title": "Stop rebuilding the same 40%%",
         "home.f1.body": "Clerk powers sign-in, social OAuth, 2FA, orgs, roles, and invitations — mirrored locally for fast queries.",
-        "home.f1.title": "Auth & teams, hosted",
+        "home.f1.title": "Auth \u0026 teams, hosted",
         "home.f2.body": "Polar.sh is your merchant of record. Checkout, customer portal, webhooks, and entitlements included.",
         "home.f2.title": "Billing without tax pain",
         "home.f3.body": "templ templates, sqlc queries, and Go handlers — the compiler catches what templates usually hide.",
@@ -134,7 +126,7 @@
         "home.screenshot": "Product screenshot",
         "home.stack": "Built on a curated value stack",
         "home.step1.body": "make setup, add your Clerk and Polar keys, make dev. Zero to running SaaS in ten minutes.",
-        "home.step1.title": "Clone & configure",
+        "home.step1.title": "Clone \u0026 configure",
         "home.step2.body": "Your pages, your domain model, your pricing. Undifferentiated heavy lifting stays delegated.",
         "home.step2.title": "Own the product surface",
         "home.step3.body": "One static binary. Docker, fly.io, or any VM — migrations run on boot, scaling is horizontal.",
@@ -191,6 +183,14 @@
         "home.step3.body": "Un solo binario estático. Docker, fly.io o cualquier VM — las migraciones se ejecutan al arrancar, el escalado es horizontal.",
         "home.step3.title": "Despliega donde quieras"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

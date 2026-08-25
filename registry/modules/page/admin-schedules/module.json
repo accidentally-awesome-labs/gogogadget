@@ -37,7 +37,7 @@
         "source": "internal/web/templates/admin_schedules.templ",
         "target": "internal/web/templates/admin_schedules.templ",
         "class": "templ",
-        "sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
+        "sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
         "rewrite_module": true,
         "contract": false
       }
@@ -81,14 +81,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "admin.schedules.col_actions": "Actions",
@@ -152,6 +144,14 @@
         "admin.schedules.title": "Programaciones",
         "admin.schedules.toggled": "Programación actualizada."
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

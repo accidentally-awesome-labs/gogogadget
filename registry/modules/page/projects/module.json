@@ -36,7 +36,7 @@
         "source": "internal/web/templates/projects.templ",
         "target": "internal/web/templates/projects.templ",
         "class": "templ",
-        "sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
+        "sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
         "rewrite_module": true,
         "contract": false
       }
@@ -80,14 +80,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "projects.archive": "Archive",
@@ -141,6 +133,14 @@
         "projects.upgrade": "Mejora tu plan para crear más →",
         "projects.usage": "%s / %s proyectos usados en el plan %s"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

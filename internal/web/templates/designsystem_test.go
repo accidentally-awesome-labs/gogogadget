@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -127,25 +128,25 @@ func TestIconRegistryIsComplete(t *testing.T) {
 }
 
 // Every semantic kind must resolve to a real component class, in every family
-// that takes a Kind. A typo'd or unregistered kind renders "badge-" and no
+// that takes a ui.Kind. A typo'd or unregistered kind renders "badge-" and no
 // colour, which this catches at build time instead of in a screenshot.
 func TestKindsRenderComponentClasses(t *testing.T) {
 	css, err := os.ReadFile(filepath.Join("..", "..", "..", "input.css"))
 	require.NoError(t, err)
 	sheet := string(css)
 
-	require.NotEmpty(t, Kinds)
-	for _, kind := range Kinds {
+	require.NotEmpty(t, ui.Kinds)
+	for _, kind := range ui.Kinds {
 		assert.Contains(t, sheet, ".badge-"+string(kind)+" ",
 			"Kind %q has no .badge- rule in input.css", kind)
 	}
 	// Alerts, banners and toasts cover a narrower set on purpose: there is no
 	// neutral alert and no brand-coloured banner.
-	for _, kind := range []Kind{KindInfo, KindSuccess, KindWarn, KindDanger} {
+	for _, kind := range []ui.Kind{ui.KindInfo, ui.KindSuccess, ui.KindWarn, ui.KindDanger} {
 		assert.Contains(t, sheet, ".alert-"+string(kind)+" ",
 			"Kind %q has no .alert- rule in input.css", kind)
 	}
-	for _, kind := range []Kind{KindInfo, KindWarn, KindDanger} {
+	for _, kind := range []ui.Kind{ui.KindInfo, ui.KindWarn, ui.KindDanger} {
 		assert.Contains(t, sheet, ".banner-"+string(kind)+" ",
 			"Kind %q has no .banner- rule in input.css", kind)
 	}

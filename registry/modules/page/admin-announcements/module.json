@@ -35,7 +35,7 @@
         "source": "internal/web/templates/admin_announcements.templ",
         "target": "internal/web/templates/admin_announcements.templ",
         "class": "templ",
-        "sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
+        "sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
         "rewrite_module": true,
         "contract": false
       }
@@ -79,14 +79,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "admin.announcements.activate": "Activate",
@@ -150,6 +142,14 @@
         "admin.announcements.url_label": "Enlace (opcional)",
         "admin.announcements.url_placeholder": "https://status.example.com/incident/123"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

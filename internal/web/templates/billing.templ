@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -20,16 +21,16 @@ func planRank(key string) int {
 }
 
 // subKind maps a subscription status onto the shared semantic axis.
-func subKind(status string) Kind {
+func subKind(status string) ui.Kind {
 	switch status {
 	case "active", "trialing":
-		return KindSuccess
+		return ui.KindSuccess
 	case "past_due":
-		return KindWarn
+		return ui.KindWarn
 	case "canceled":
-		return KindDanger
+		return ui.KindDanger
 	default:
-		return KindNeutral
+		return ui.KindNeutral
 	}
 }
 
@@ -62,11 +63,11 @@ templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
 			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "billing.processing_sub") }</p>
 		} else {
 			<div class="flex items-center justify-between">
-				@SectionHeading(i18n.T(ctx, "billing.plan_heading", plan.Name), "")
+				@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "billing.plan_heading", plan.Name), Attrs: ui.Attrs{Class: ""}})
 				if sub != nil {
-					@BadgeTagged(sub.Status, subKind(sub.Status), "plan-badge")
+					@ui.Badge(ui.BadgeOpts{Text: sub.Status, Kind: subKind(sub.Status), Attrs: ui.Attrs{TestID: "plan-badge"}})
 				} else {
-					@BadgeTagged(i18n.T(ctx, "billing.plan_free"), KindNeutral, "plan-badge")
+					@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "billing.plan_free"), Kind: ui.KindNeutral, Attrs: ui.Attrs{TestID: "plan-badge"}})
 				}
 			</div>
 			if sub != nil && sub.CurrentPeriodEnd.Valid {
@@ -83,7 +84,7 @@ templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
 }
 
 templ BillingError(msg string) {
-	@Alert(KindDanger, "alert", "max-w-lg", "") {
+	@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "max-w-lg", TestID: ""}}) {
 		{ msg }
 	}
 }
@@ -103,16 +104,16 @@ templ usageCard(heading, detail string, pct int, testID string) {
 	<div class="card mb-6 max-w-lg" data-testid={ testID }>
 		<h2 class="text-sm font-semibold mb-2">{ heading }</h2>
 		<p class="text-sm text-fg-muted">{ detail }</p>
-		@Meter(pct, "")
+		@ui.Meter(ui.MeterOpts{Percent: pct, Attrs: ui.Attrs{TestID: ""}})
 	</div>
 }
 
 templ SettingsBilling(d BillingData) {
 	@SettingsTabs("/app/settings/billing")
-	@PageHeader(i18n.T(ctx, "billing.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "billing.title")})
 
 	if d.Success && !d.Processing {
-		@Alert(KindSuccess, "status", "mb-4 max-w-lg", "") {
+		@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Role: "status", Attrs: ui.Attrs{Class: "mb-4 max-w-lg", TestID: ""}}) {
 			{ i18n.T(ctx, "billing.welcome") }
 		}
 	}
@@ -150,12 +151,12 @@ templ SettingsBilling(d BillingData) {
 
 	<div class="grid sm:grid-cols-3 gap-4 max-w-4xl">
 		for _, p := range d.Plans {
-			@PlanCard(p, p.Key == d.Plan.Key) {
+			@ui.PlanCard(uiPlanCard(ctx, p, p.Key == d.Plan.Key)) {
 				if planRank(p.Key) > planRank(d.Plan.Key) {
 					<form hx-post="/app/billing/checkout" hx-disable="this">
 						<input type="hidden" name="plan" value={ p.Key }/>
 						<button type="submit" class="btn btn-primary w-full">
-							@Spinner()
+							@ui.Spinner(ui.SpinnerOpts{})
 							{ i18n.T(ctx, "billing.upgrade_to", p.Name) }
 						</button>
 					</form>
@@ -169,7 +170,7 @@ templ SettingsBilling(d BillingData) {
 	if d.Sub != nil {
 		<form hx-post="/app/billing/portal" hx-disable="this" class="mt-6">
 			<button type="submit" class="btn btn-ghost" data-testid="manage-subscription">
-				@Spinner()
+				@ui.Spinner(ui.SpinnerOpts{})
 				{ i18n.T(ctx, "billing.manage") }
 			</button>
 		</form>

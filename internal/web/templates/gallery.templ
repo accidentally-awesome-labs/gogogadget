@@ -1,6 +1,11 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -92,7 +97,7 @@ templ Gallery() {
 				normal surface, tinted background, text on the tint, and the tint's border.
 			</p>
 			<div class="space-y-3">
-				for _, kind := range []Kind{KindSuccess, KindWarn, KindDanger, KindInfo} {
+				for _, kind := range []ui.Kind{ui.KindSuccess, ui.KindWarn, ui.KindDanger, ui.KindInfo} {
 					<div>
 						<p class="eyebrow mb-2">{ string(kind) }</p>
 						<div class="flex flex-wrap gap-2">
@@ -125,24 +130,24 @@ templ Gallery() {
 
 		@gallerySection("Badges") {
 			<div class="flex flex-wrap items-center gap-2">
-				for _, kind := range Kinds {
-					@Badge(string(kind), kind)
+				for _, kind := range ui.Kinds {
+					@ui.Badge(ui.BadgeOpts{Text: string(kind), Kind: kind})
 				}
 			</div>
 		}
 
 		@gallerySection("Alerts") {
 			<div class="space-y-2 max-w-narrow">
-				@Alert(KindInfo, "status", "", "") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Info — a neutral notice.
 				}
-				@Alert(KindSuccess, "status", "", "") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Role: "status", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Success — the thing you asked for happened.
 				}
-				@Alert(KindWarn, "alert", "", "") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Warning — this will need attention.
 				}
-				@Alert(KindDanger, "alert", "", "") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					Danger — the request was refused.
 				}
 			</div>
@@ -150,13 +155,13 @@ templ Gallery() {
 
 		@gallerySection("Banners") {
 			<div class="space-y-2">
-				@Banner(KindInfo, "status", "") {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{TestID: ""}}) {
 					Info banner — full bleed inside the shell.
 				}
-				@Banner(KindWarn, "alert", "") {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: ""}}) {
 					Warning banner — impersonation and past-due use this.
 				}
-				@Banner(KindDanger, "alert", "") {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{TestID: ""}}) {
 					Danger banner — a critical platform announcement.
 				}
 			</div>
@@ -188,7 +193,7 @@ templ Gallery() {
 		}
 
 		@gallerySection("Page header") {
-			@PageHeader("Page header with actions") {
+			@ui.PageHeader(ui.PageHeaderOpts{Title: "Page header with actions"}) {
 				<div class="card-actions">
 					<button type="button" class="btn btn-ghost btn-sm">Secondary</button>
 					<button type="button" class="btn btn-primary btn-sm">Primary</button>
@@ -197,11 +202,11 @@ templ Gallery() {
 		}
 
 		@gallerySection("Tabs") {
-			@Tabs(galleryTabs, "/dev/gallery")
+			@ui.NavTabs(ui.NavTabsOpts{Items: uiNavItems(ctx, galleryTabs), ActivePath: "/dev/gallery"})
 		}
 
 		@gallerySection("Table card") {
-			@TableCard("gallery-table") {
+			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "gallery-table"}}) {
 				<table class="table">
 					<thead>
 						<tr><th>Name</th><th>Status</th><th class="text-right">Actions</th></tr>
@@ -209,11 +214,11 @@ templ Gallery() {
 					<tbody>
 						for _, row := range []struct {
 							Name string
-							Kind Kind
-						}{{"First", KindSuccess}, {"Second", KindWarn}, {"Third", KindDanger}} {
+							Kind ui.Kind
+						}{{"First", ui.KindSuccess}, {"Second", ui.KindWarn}, {"Third", ui.KindDanger}} {
 							<tr>
 								<td class="font-medium">{ row.Name }</td>
-								<td>@Badge(string(row.Kind), row.Kind)</td>
+								<td>@ui.Badge(ui.BadgeOpts{Text: string(row.Kind), Kind: row.Kind})</td>
 								<td class="text-right">
 									<div class="card-actions">
 										<button type="button" class="btn btn-ghost btn-xs">Edit</button>
@@ -226,40 +231,40 @@ templ Gallery() {
 				</table>
 			}
 			<div class="mt-4">
-				@TableCard("gallery-table-empty") {
-					@TableEmpty("Nothing here yet — this is table-empty.")
+				@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "gallery-table-empty"}}) {
+					@ui.TableEmpty(ui.TableEmptyOpts{Text: "Nothing here yet — this is table-empty."})
 				}
 			</div>
 		}
 
 		@gallerySection("Pagination") {
-			@Pagination(2, 5, "/dev/gallery", "#gallery-pager")
+			@ui.Pagination(ui.PaginationOpts{Page: 2, TotalPages: 5, BaseURL: "/dev/gallery", Target: "#gallery-pager", Labels: pagerLabels(ctx)})
 		}
 
 		@gallerySection("Search toolbar") {
-			@SearchToolbar("q", "", "Search…", "Gallery search", "/dev/gallery", "#gallery-pager", "gallery-search-indicator", "gallery-search")
+			@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: "", Placeholder: "Search…", AriaLabel: "Gallery search", GetURL: "/dev/gallery", Target: "#gallery-pager", IndicatorID: "gallery-search-indicator", Attrs: ui.Attrs{TestID: "gallery-search"}})
 		}
 
 		@gallerySection("Empty state") {
-			@EmptyState("No projects yet", "Create one to get started.") {
+			@ui.EmptyState(ui.EmptyStateOpts{Title: "No projects yet", Body: "Create one to get started."}) {
 				<button type="button" class="btn btn-primary">New project</button>
 			}
 		}
 
 		@gallerySection("Stat cards") {
 			<div class="grid sm:grid-cols-3 gap-4">
-				@StatCard("Active projects", "12", "")
-				@StatCard("Team members", "4", "")
-				@StatCard("Current plan", "Pro", "$20/mo")
+				@ui.Metric(ui.MetricOpts{Title: "Active projects", Value: "12", Sub: ""})
+				@ui.Metric(ui.MetricOpts{Title: "Team members", Value: "4", Sub: ""})
+				@ui.Metric(ui.MetricOpts{Title: "Current plan", Value: "Pro", Sub: "$20/mo"})
 			</div>
 		}
 
 		@gallerySection("Plan cards") {
 			<div class="grid sm:grid-cols-2 gap-4 max-w-narrow">
-				@PlanCard(galleryPlan, false) {
+				@ui.PlanCard(uiPlanCard(ctx, galleryPlan, false)) {
 					<button type="button" class="btn btn-primary w-full">Choose Pro</button>
 				}
-				@PlanCard(galleryPlan, true) {
+				@ui.PlanCard(uiPlanCard(ctx, galleryPlan, true)) {
 					<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">Current plan</span>
 				}
 			</div>
@@ -267,8 +272,12 @@ templ Gallery() {
 
 		@gallerySection("Form fields") {
 			<form class="card max-w-lg space-y-4" novalidate>
-				@FormField("gallery-name", "Name", "text", "Acme", "", "Project name", false)
-				@FormField("gallery-broken", "Name", "text", "", "Name is required.", "Project name", false)
+				@ui.Field(ui.FieldOpts{Name: "gallery-name", Label: "Name", Error: "", Required: false}) {
+			@ui.TextInput(ui.TextInputOpts{Name: "gallery-name", Type: "text", Value: "Acme", Placeholder: "Project name", Required: false, Error: ""})
+		}
+				@ui.Field(ui.FieldOpts{Name: "gallery-broken", Label: "Name", Error: "Name is required.", Required: false}) {
+			@ui.TextInput(ui.TextInputOpts{Name: "gallery-broken", Type: "text", Value: "", Placeholder: "Project name", Required: false, Error: "Name is required."})
+		}
 				<div>
 					<label class="label" for="gallery-select">Select</label>
 					<select id="gallery-select" class="input">
@@ -282,18 +291,18 @@ templ Gallery() {
 				</div>
 				<div class="form-actions">
 					<button type="button" class="btn btn-primary">Save</button>
-					@Spinner()
+					@ui.Spinner(ui.SpinnerOpts{})
 				</div>
 			</form>
 		}
 
 		@gallerySection("Definition list") {
 			<div class="card max-w-lg">
-				@DefinitionList([]DefRow{
+				@ui.DescriptionList(ui.DescriptionListOpts{Items: []ui.DescriptionItem{
 					{Term: "Name", Value: "Ada Lovelace"},
 					{Term: "Email", Value: "ada@example.com"},
 					{Term: "Member since", Value: "January 15, 2026"},
-				})
+				}})
 			</div>
 		}
 
@@ -302,7 +311,7 @@ templ Gallery() {
 				for _, pct := range []int{0, 50, 100} {
 					<div>
 						<p class="text-sm text-fg-muted">{ fmt.Sprintf("%d%%", pct) }</p>
-						@Meter(pct, fmt.Sprintf("gallery-meter-%d", pct))
+						@ui.Meter(ui.MeterOpts{Percent: pct, Attrs: ui.Attrs{TestID: fmt.Sprintf("gallery-meter-%d", pct)}})
 					</div>
 				}
 			</div>
@@ -312,7 +321,7 @@ templ Gallery() {
 			<div class="card max-w-lg border-success">
 				<h2 class="font-semibold text-success-text">Secret created</h2>
 				<p class="text-sm text-fg-muted mt-1">Shown once. The value rides on data-copy, never inside an Alpine expression.</p>
-				@CopyRow("ggg_sk_example_value", "Copy", "Copied")
+				@ui.SecretReveal(ui.SecretRevealOpts{Value: "ggg_sk_example_value", CopyLabel: "Copy", CopiedLabel: "Copied"})
 			</div>
 		}
 
@@ -321,7 +330,7 @@ templ Gallery() {
 				<div class="skeleton h-4 w-full"></div>
 				<div class="skeleton h-4 w-2/3"></div>
 				<div class="flex items-center gap-2 text-fg-muted htmx-request">
-					@Spinner()
+					@ui.Spinner(ui.SpinnerOpts{})
 					<span class="text-sm">Spinner (shown here by a forced .htmx-request)</span>
 				</div>
 			</div>
@@ -340,7 +349,7 @@ templ Gallery() {
 
 		@gallerySection("Terminal pages") {
 			<div class="table-card">
-				@ErrorPage("404", "That page doesn't exist.", "", true)
+				@ui.TerminalPage(ui.TerminalPageOpts{Code: "404", Message: "That page doesn't exist.", BackHomeLabel: i18n.T(ctx, "errors.back_home")})
 			</div>
 		}
 	</section>

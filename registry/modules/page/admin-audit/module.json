@@ -27,7 +27,7 @@
         "source": "internal/web/templates/admin_audit.templ",
         "target": "internal/web/templates/admin_audit.templ",
         "class": "templ",
-        "sha256": "57771cd5ac3f8f4e90ce56c505d6147c382fdd96d18404fbde1e9b817f56ddfb",
+        "sha256": "018ed1986d2625c0565a37f93171110e799bf420a3866fb7dfbcb9abacb53e35",
         "rewrite_module": true,
         "contract": false
       }
@@ -71,14 +71,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "admin.audit.col_org": "Org",
@@ -94,6 +86,14 @@
         "admin.audit.search_placeholder": "Filtrar por acción u organización…",
         "admin.audit.title": "Auditoría"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

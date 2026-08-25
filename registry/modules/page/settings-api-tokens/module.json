@@ -28,7 +28,7 @@
         "source": "internal/web/templates/api_tokens.templ",
         "target": "internal/web/templates/api_tokens.templ",
         "class": "templ",
-        "sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
+        "sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
         "rewrite_module": true,
         "contract": false
       }
@@ -72,14 +72,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "api.col_created": "Created",
@@ -123,6 +115,14 @@
         "api.scope_label": "Alcance",
         "api.title": "Tokens de API"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

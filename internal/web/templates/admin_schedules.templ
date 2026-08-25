@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 	"time"
 
@@ -35,13 +36,13 @@ func scheduleScope(s sqlc.Schedule) string {
 }
 
 templ AdminSchedulesPage(d SchedulesData) {
-	@PageHeader(i18n.T(ctx, "admin.schedules.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.schedules.title")})
 	if AdminWrite(ctx) {
 		<div id="schedule-create-form" class="card mb-8 max-w-2xl">
-			@SectionHeading(i18n.T(ctx, "admin.schedules.create_title"), "mb-4")
+			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.schedules.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
 			<form hx-post="/admin/schedules" hx-target="#schedule-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="schedule-create-form" class="space-y-4">
 				if d.Invalid {
-					@Alert(KindDanger, "alert", "", "") {
+					@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 						{ i18n.T(ctx, "admin.schedules.invalid") }
 					}
 				}
@@ -80,14 +81,14 @@ templ AdminSchedulesPage(d SchedulesData) {
 				</div>
 				<div class="form-actions">
 					<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.schedules.create") }</button>
-					@Spinner()
+					@ui.Spinner(ui.SpinnerOpts{})
 				</div>
 			</form>
 		</div>
 	}
 	<div class="table-card max-w-4xl" data-testid="schedules-table">
 		if len(d.Items) == 0 {
-			@TableEmpty(i18n.T(ctx, "admin.schedules.empty"))
+			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.schedules.empty")})
 		} else {
 			<table class="table">
 				<thead>
@@ -121,9 +122,9 @@ templ AdminSchedulesPage(d SchedulesData) {
 									</form>
 								} else {
 									if row.Enabled {
-										@Badge(i18n.T(ctx, "admin.schedules.on"), KindSuccess)
+										@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.schedules.on"), Kind: ui.KindSuccess})
 									} else {
-										@Badge(i18n.T(ctx, "admin.schedules.off"), KindNeutral)
+										@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.schedules.off"), Kind: ui.KindNeutral})
 									}
 								}
 							</td>

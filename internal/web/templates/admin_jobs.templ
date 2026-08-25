@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"context"
 	"fmt"
 	"time"
@@ -17,18 +18,18 @@ import (
 
 // jobKind maps a projected job status onto the shared semantic axis. Mapping,
 // not styling: the shades live in input.css.
-func jobKind(status string) Kind {
+func jobKind(status string) ui.Kind {
 	switch status {
 	case "pending":
-		return KindNeutral
+		return ui.KindNeutral
 	case "running":
-		return KindBrand
+		return ui.KindBrand
 	case "retrying":
-		return KindWarn
+		return ui.KindWarn
 	case "done":
-		return KindSuccess
+		return ui.KindSuccess
 	default: // dead
-		return KindDanger
+		return ui.KindDanger
 	}
 }
 
@@ -43,10 +44,10 @@ func jobStatusLabel(ctx context.Context, status string) string {
 templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
 	<div id="table-container">
 		if len(rows) == 0 {
-			@EmptyState(i18n.T(ctx, "admin.jobs.title"), i18n.T(ctx, "admin.jobs.empty")) {
+			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "admin.jobs.title"), Body: i18n.T(ctx, "admin.jobs.empty")}) {
 			}
 		} else {
-			@TableCard("jobs-table") {
+			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "jobs-table"}}) {
 				<table class="table">
 					<thead>
 						<tr><th>{ i18n.T(ctx, "admin.jobs.col_kind") }</th><th>{ i18n.T(ctx, "admin.jobs.col_status") }</th><th>{ i18n.T(ctx, "admin.jobs.col_attempts") }</th><th>{ i18n.T(ctx, "admin.jobs.col_run_at") }</th><th>{ i18n.T(ctx, "admin.jobs.col_error") }</th><th class="text-right">{ i18n.T(ctx, "admin.jobs.col_actions") }</th></tr>
@@ -56,7 +57,7 @@ templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page
 							<tr id={ fmt.Sprintf("job-row-%d", row.ID) }>
 								<td class="font-medium">{ row.Kind }</td>
 								<td>
-									@BadgeTagged(jobStatusLabel(ctx, row.Status), jobKind(row.Status), "job-status")
+									@ui.Badge(ui.BadgeOpts{Text: jobStatusLabel(ctx, row.Status), Kind: jobKind(row.Status), Attrs: ui.Attrs{TestID: "job-status"}})
 								</td>
 								<td>{ fmt.Sprintf("%d/%d", row.Attempts, row.MaxAttempts) }</td>
 								<td>
@@ -79,14 +80,13 @@ templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page
 					</tbody>
 				</table>
 			}
-			@Pagination(page, totalPages, "/admin/jobs?q="+filter, "#table-container")
+			@ui.Pagination(ui.PaginationOpts{Page: page, TotalPages: totalPages, BaseURL: "/admin/jobs?q="+filter, Target: "#table-container", Labels: pagerLabels(ctx)})
 		}
 	</div>
 }
 
 templ AdminJobsPage(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
-	@PageHeader(i18n.T(ctx, "admin.jobs.title"))
-	@SearchToolbar("q", filter, i18n.T(ctx, "admin.jobs.search_placeholder"), i18n.T(ctx, "admin.jobs.search_aria"),
-		"/admin/jobs", "#table-container", "admin-jobs-search-indicator", "")
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.jobs.title")})
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: filter, Placeholder: i18n.T(ctx, "admin.jobs.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.jobs.search_aria"), GetURL: "/admin/jobs", Target: "#table-container", IndicatorID: "admin-jobs-search-indicator", Attrs: ui.Attrs{TestID: ""}})
 	@AdminJobsTable(rows, now, filter, page, totalPages)
 }

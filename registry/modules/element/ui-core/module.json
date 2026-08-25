@@ -43,6 +43,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/ui/contract_test.go",
+        "target": "internal/web/templates/ui/contract_test.go",
+        "class": "test",
+        "sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/ui/data.templ",
         "target": "internal/web/templates/ui/data.templ",
         "class": "templ",
@@ -89,6 +97,22 @@
         "sha256": "008e526413e4ce6ca19235ab74bb65d87b5f6a7e29e8af33bf4a5053e9d1a2fa",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/patterns.templ",
+        "target": "internal/web/templates/ui/patterns.templ",
+        "class": "templ",
+        "sha256": "4a603e042b6307b36e696b72c6f3aa0e168978450d1bf14032aa9ed7bba0da4a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/root.go",
+        "target": "internal/web/templates/ui/root.go",
+        "class": "go",
+        "sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/web/templates/ui/ui.go",

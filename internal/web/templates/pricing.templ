@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
@@ -11,7 +12,7 @@ templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
 		<p class="mt-4 text-center text-fg-muted">{ i18n.T(ctx, "home.pricing.subtitle") }</p>
 		<div class="mt-12 grid md:grid-cols-3 gap-6">
 			for _, p := range plans {
-				@PlanCard(p, authed && p.Key == currentPlanKey) {
+				@ui.PlanCard(uiPlanCard(ctx, p, authed && p.Key == currentPlanKey)) {
 					if !authed {
 						<a href="/signup" class="btn btn-primary w-full">{ i18n.T(ctx, "home.pricing.choose", p.Name) }</a>
 					} else if p.Key == currentPlanKey {

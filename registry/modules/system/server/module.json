@@ -169,14 +169,6 @@
         "contract": false
       },
       {
-        "source": "internal/web/templates/components.templ",
-        "target": "internal/web/templates/components.templ",
-        "class": "templ",
-        "sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
         "source": "internal/web/templates/data.go",
         "target": "internal/web/templates/data.go",
         "class": "go",
@@ -188,7 +180,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+        "sha256": "c0a3ab0bfcafde5caffdfa25ce351f0ba2b2a885a7c5c40805ff969ab494953b",
         "rewrite_module": true,
         "contract": false
       },
@@ -196,7 +188,7 @@
         "source": "internal/web/templates/errors.templ",
         "target": "internal/web/templates/errors.templ",
         "class": "templ",
-        "sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+        "sha256": "33fd5d4069fbbd7fd9c54ae08883d9ae22186b0265dcdc43b0c1c3d88e55667c",
         "rewrite_module": true,
         "contract": false
       },
@@ -212,7 +204,7 @@
         "source": "internal/web/templates/layouts.templ",
         "target": "internal/web/templates/layouts.templ",
         "class": "templ",
-        "sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+        "sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
         "rewrite_module": true,
         "contract": false
       },
@@ -245,6 +237,14 @@
         "target": "internal/web/templates/theme.go",
         "class": "go",
         "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui_adapters.go",
+        "target": "internal/web/templates/ui_adapters.go",
+        "class": "go",
+        "sha256": "babf91dd2778728e7cfcf2401cf7938fa8a5153629caef3f1e7970b0bbbafe98",
         "rewrite_module": true,
         "contract": false
       },
@@ -519,14 +519,6 @@
         "max": 65535
       }
     ],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "replacement-required",
     "locales": {
       "en": {
         "a11y.analytics_consent": "Analytics consent",
@@ -670,6 +662,14 @@
         "sidebar.projects": "Proyectos",
         "sidebar.settings": "Configuración"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
   }
 }

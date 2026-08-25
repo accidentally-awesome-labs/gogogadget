@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -50,7 +51,7 @@ templ SettingsNotificationsPage(prefs map[string]bool, digest string) {
 		</div>
 		<div class="pt-2 form-actions">
 			<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "settings.notifications_save") }</button>
-			@Spinner()
+			@ui.Spinner(ui.SpinnerOpts{})
 		</div>
 	</form>
 }

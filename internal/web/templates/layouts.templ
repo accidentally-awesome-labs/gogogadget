@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -172,7 +173,7 @@ templ AppLayout(page Page, content templ.Component) {
 		<body class="bg-surface text-fg antialiased" hx-headers:inherited={ fmt.Sprintf(`{"X-CSRF-Token": %q}`, page.CSRFToken) }>
 			@skipLink()
 			if page.Impersonator != nil {
-				@Banner(KindWarn, "alert", "impersonation-banner") {
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: "impersonation-banner"}}) {
 					<div class="flex items-center justify-center gap-3">
 						<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
 						<form hx-post="/app/impersonation/exit" hx-disable="this">
@@ -199,14 +200,14 @@ templ AppLayout(page Page, content templ.Component) {
 // announcementKind maps the stored announcement kind onto the shared semantic
 // axis. This is the only domain-specific part; the colours themselves live in
 // input.css.
-func announcementKind(kind string) Kind {
+func announcementKind(kind string) ui.Kind {
 	switch kind {
 	case "warning":
-		return KindWarn
+		return ui.KindWarn
 	case "critical":
-		return KindDanger
+		return ui.KindDanger
 	default: // info
-		return KindInfo
+		return ui.KindInfo
 	}
 }
 
@@ -239,12 +240,12 @@ templ announcementBanner(page Page) {
 // billingBanner is the persistent past_due / ending-plan nudge in the shell.
 templ billingBanner(page Page) {
 	if page.Sub != nil && page.Sub.Status == "past_due" {
-		@Banner(KindWarn, "alert", "") {
+		@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Role: "alert", Attrs: ui.Attrs{TestID: ""}}) {
 			{ i18n.T(ctx, "layout.banner_past_due_prefix") } <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_past_due_link") }</a> { i18n.T(ctx, "layout.banner_past_due_suffix") }
 		}
 	}
 	if page.Sub != nil && page.Sub.Status == "canceled" && page.Sub.CurrentPeriodEnd.Valid && page.Sub.CurrentPeriodEnd.Time.After(page.NowOrDefault()) {
-		@Banner(KindInfo, "status", "") {
+		@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Role: "status", Attrs: ui.Attrs{TestID: ""}}) {
 			{ i18n.T(ctx, "layout.banner_ending_prefix") } { page.Sub.CurrentPeriodEnd.Time.Format("January 2, 2006") } — <a href="/app/settings/billing" class="font-semibold underline">{ i18n.T(ctx, "layout.banner_ending_link") }</a>.
 		}
 	}

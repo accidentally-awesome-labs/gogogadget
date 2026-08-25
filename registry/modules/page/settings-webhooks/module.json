@@ -26,7 +26,7 @@
         "source": "internal/web/templates/webhooks.templ",
         "target": "internal/web/templates/webhooks.templ",
         "class": "templ",
-        "sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+        "sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
         "rewrite_module": true,
         "contract": false
       },
@@ -81,14 +81,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "webhooks.all_events": "all",
@@ -156,6 +148,14 @@
         "webhooks.title": "Webhooks",
         "webhooks.url_label": "URL"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

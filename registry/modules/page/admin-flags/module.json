@@ -35,7 +35,7 @@
         "source": "internal/web/templates/admin_flags.templ",
         "target": "internal/web/templates/admin_flags.templ",
         "class": "templ",
-        "sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
+        "sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
         "rewrite_module": true,
         "contract": false
       }
@@ -79,14 +79,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "flags.back": "← All flags",
@@ -164,6 +156,14 @@
         "flags.set": "Fijar",
         "flags.title": "Banderas de funciones"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

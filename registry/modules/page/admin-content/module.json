@@ -27,7 +27,7 @@
         "source": "internal/web/templates/admin_content.templ",
         "target": "internal/web/templates/admin_content.templ",
         "class": "templ",
-        "sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
+        "sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
         "rewrite_module": true,
         "contract": false
       }
@@ -71,14 +71,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "admin.content.all": "All",
@@ -198,6 +190,14 @@
         "admin.content.unpublished": "Entrada despublicada.",
         "admin.content.updated": "Entrada actualizada."
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

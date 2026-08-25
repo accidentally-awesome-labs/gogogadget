@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
@@ -22,7 +23,7 @@ templ AdminImpersonateForm(d ImpersonateData) {
 
 	<div id="impersonate-form-wrap" class="card max-w-lg" data-testid="impersonate-form">
 		if d.Err != "" {
-			@Alert(KindDanger, "alert", "mb-4", "impersonate-error") {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-4", TestID: "impersonate-error"}}) {
 				{ d.Err }
 			}
 		}
@@ -53,7 +54,7 @@ templ AdminImpersonateForm(d ImpersonateData) {
 				<div class="form-actions">
 					<button type="submit" class="btn btn-primary" data-testid="impersonate-start">{ i18n.T(ctx, "impersonation.start_button") }</button>
 					<a href="/admin/users" class="link text-sm">{ i18n.T(ctx, "impersonation.cancel") }</a>
-					@Spinner()
+					@ui.Spinner(ui.SpinnerOpts{})
 				</div>
 			</form>
 		}

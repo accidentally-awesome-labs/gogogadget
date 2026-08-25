@@ -1,13 +1,14 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 templ Dashboard(d DashboardData) {
-	@PageHeader(i18n.T(ctx, "dashboard.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "dashboard.title")})
 
 	// One dismissible pattern for the whole product: data-key names the
 	// localStorage entry, so the checklist needs no component of its own.
@@ -26,22 +27,22 @@ templ Dashboard(d DashboardData) {
 	</div>
 
 	<div class="grid sm:grid-cols-3 gap-4">
-		@StatCard(i18n.T(ctx, "dashboard.stats.active_projects"), fmt.Sprint(d.ActiveProjects), "")
-		@StatCard(i18n.T(ctx, "dashboard.stats.team_members"), fmt.Sprint(d.MemberCount), "")
-		@StatCard(i18n.T(ctx, "dashboard.stats.current_plan"), d.Plan.Name, d.Plan.PriceDisplay)
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.active_projects"), Value: fmt.Sprint(d.ActiveProjects), Sub: ""})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.team_members"), Value: fmt.Sprint(d.MemberCount), Sub: ""})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.current_plan"), Value: d.Plan.Name, Sub: d.Plan.PriceDisplay})
 	</div>
 
-	@SectionHeading(i18n.T(ctx, "dashboard.recent_activity"), "mt-10 mb-3")
-	@TableCard("") {
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "dashboard.recent_activity"), Attrs: ui.Attrs{Class: "mt-10 mb-3"}})
+	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 		if len(d.Recent) == 0 {
-			@TableEmpty(i18n.T(ctx, "dashboard.recent_empty"))
+			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "dashboard.recent_empty")})
 		} else {
 			<table class="table">
 				<tbody>
 					for _, row := range d.Recent {
 						<tr>
 							<td>{ row.ActorEmail }</td>
-							<td>@Badge(row.Action, KindBrand)</td>
+							<td>@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})</td>
 							<td class="text-right text-fg-muted"><span data-testid="relative-time">{ RelTime(d.Now, row.CreatedAt.Time) }</span></td>
 						</tr>
 					}

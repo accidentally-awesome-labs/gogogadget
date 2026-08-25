@@ -8,7 +8,10 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/gogogadget/gogogadget/internal/i18n"
+import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
 
 // The five terminal pages are one shape (ErrorPage) with five vocabularies.
 // All five names stay exported: they are called from htmx.go, auth.go,
@@ -34,7 +37,7 @@ func NotFound() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ErrorPage(i18n.T(ctx, "errors.code_404"), i18n.T(ctx, "errors.not_found"), "", true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TerminalPage(ui.TerminalPageOpts{Code: i18n.T(ctx, "errors.code_404"), Message: i18n.T(ctx, "errors.not_found"), BackHomeLabel: i18n.T(ctx, "errors.back_home")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -63,7 +66,7 @@ func Forbidden() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ErrorPage(i18n.T(ctx, "errors.code_403"), i18n.T(ctx, "errors.forbidden"), "", true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TerminalPage(ui.TerminalPageOpts{Code: i18n.T(ctx, "errors.code_403"), Message: i18n.T(ctx, "errors.forbidden"), BackHomeLabel: i18n.T(ctx, "errors.back_home")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,7 +96,7 @@ func Maintenance() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ErrorPage(i18n.T(ctx, "errors.code_503"), i18n.T(ctx, "errors.maintenance"), "", false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TerminalPage(ui.TerminalPageOpts{Code: i18n.T(ctx, "errors.code_503"), Message: i18n.T(ctx, "errors.maintenance")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -122,7 +125,7 @@ func ServerError(detail string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ErrorPage(i18n.T(ctx, "errors.code_500"), i18n.T(ctx, "errors.server_error"), detail, true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TerminalPage(ui.TerminalPageOpts{Code: i18n.T(ctx, "errors.code_500"), Message: i18n.T(ctx, "errors.server_error"), Detail: detail, BackHomeLabel: i18n.T(ctx, "errors.back_home")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -153,7 +156,7 @@ func StatusPage(title, detail string) templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ErrorPage(title, detail, "", true).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TerminalPage(ui.TerminalPageOpts{Code: title, Message: detail, BackHomeLabel: i18n.T(ctx, "errors.back_home")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

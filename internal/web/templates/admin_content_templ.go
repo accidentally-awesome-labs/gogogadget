@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/content"
@@ -83,14 +84,14 @@ func contentStatus(e sqlc.ContentEntry, now time.Time) string {
 }
 
 // contentStatusKind maps the computed status onto the shared semantic axis.
-func contentStatusKind(status string) Kind {
+func contentStatusKind(status string) ui.Kind {
 	switch status {
 	case "live":
-		return KindSuccess
+		return ui.KindSuccess
 	case "scheduled":
-		return KindWarn
+		return ui.KindWarn
 	default: // expired, draft
-		return KindNeutral
+		return ui.KindNeutral
 	}
 }
 
@@ -169,7 +170,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(NavTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 127, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 128, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 				if templ_7745c5c3_Err != nil {
@@ -182,7 +183,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(NavTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 127, Col: 88}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 128, Col: 88}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 				if templ_7745c5c3_Err != nil {
@@ -195,7 +196,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(NavSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 127, Col: 108}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 128, Col: 108}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 				if templ_7745c5c3_Err != nil {
@@ -208,7 +209,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "admin.media.title"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 127, Col: 200}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 128, Col: 200}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -226,7 +227,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var7 templ.SafeURL
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/admin/content/new?kind=" + t.Kind))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 133, Col: 63}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 134, Col: 63}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -239,7 +240,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(NavTarget)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 134, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 135, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 					if templ_7745c5c3_Err != nil {
@@ -252,7 +253,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var9 string
 					templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(NavTarget)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 134, Col: 67}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 135, Col: 67}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 					if templ_7745c5c3_Err != nil {
@@ -265,7 +266,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(NavSwap)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 134, Col: 87}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 135, Col: 87}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 					if templ_7745c5c3_Err != nil {
@@ -278,7 +279,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(i18n.T(ctx, "admin.content.new") + " — " + i18n.T(ctx, t.LabelKey))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 136, Col: 87}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 137, Col: 87}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 					if templ_7745c5c3_Err != nil {
@@ -291,7 +292,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue("content-new-" + t.Kind)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 137, Col: 43}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 138, Col: 43}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 					if templ_7745c5c3_Err != nil {
@@ -304,7 +305,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("+ " + i18n.T(ctx, t.LabelKey))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 138, Col: 38}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 139, Col: 38}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -322,7 +323,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = PageHeader(i18n.T(ctx, "admin.content.title")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.content.title")}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -355,7 +356,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "admin.content.all"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 149, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 150, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -378,7 +379,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 			var templ_7745c5c3_Var18 templ.SafeURL
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/admin/content?kind=" + t.Kind))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 152, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 153, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -391,7 +392,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue("/admin/content?kind=" + t.Kind)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 153, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 154, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 			if templ_7745c5c3_Err != nil {
@@ -417,7 +418,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue("content-filter-" + t.Kind)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 155, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 156, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 			if templ_7745c5c3_Err != nil {
@@ -430,7 +431,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, t.PluralKey))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 156, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_content.templ`, Line: 157, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -445,8 +446,7 @@ func AdminContentPage(d ContentListData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SearchToolbar("q", d.Query, i18n.T(ctx, "admin.content.search_placeholder"), i18n.T(ctx, "admin.content.search_aria"),
-			"/admin/content?kind="+d.Kind, "#table-container", "content-search-indicator", "content-search").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.content.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.content.search_aria"), GetURL: "/admin/content?kind=" + d.Kind, Target: "#table-container", IndicatorID: "content-search-indicator", Attrs: ui.Attrs{TestID: "content-search"}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -971,11 +971,11 @@ func AdminContentTable(d ContentListData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = TableCard("").Render(templ.WithChildren(ctx, templ_7745c5c3_Var24), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var24), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Pagination(d.Page, d.TotalPages, "/admin/content?q="+d.Query, "#table-container").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/content?q=" + d.Query, Target: "#table-container", Labels: pagerLabels(ctx)}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1010,22 +1010,22 @@ func contentStatusBadge(status string) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		switch status {
 		case "live":
-			templ_7745c5c3_Err = BadgeTagged(i18n.T(ctx, "admin.content.status_live"), contentStatusKind(status), "content-status").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_live"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case "scheduled":
-			templ_7745c5c3_Err = BadgeTagged(i18n.T(ctx, "admin.content.status_scheduled"), contentStatusKind(status), "content-status").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_scheduled"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case "expired":
-			templ_7745c5c3_Err = BadgeTagged(i18n.T(ctx, "admin.content.status_expired"), contentStatusKind(status), "content-status").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_expired"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		default:
-			templ_7745c5c3_Err = BadgeTagged(i18n.T(ctx, "admin.content.status_draft"), contentStatusKind(status), "content-status").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.status_draft"), Kind: contentStatusKind(status), Attrs: ui.Attrs{TestID: "content-status"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1162,7 +1162,7 @@ func AdminContentEditorPage(d ContentEditorData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = PageHeader(i18n.T(ctx, d.Type.LabelKey)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var58), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, d.Type.LabelKey)}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var58), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1269,7 +1269,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.Title != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.Title).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Title}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1328,7 +1328,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.Slug != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.Slug).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Slug}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1422,7 +1422,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.Locale != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.Locale).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Locale}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1458,7 +1458,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.Summary != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.Summary).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Summary}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1517,7 +1517,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.PublishedAt != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.PublishedAt).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.PublishedAt}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1566,7 +1566,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.UnpublishAt != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.UnpublishAt).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.UnpublishAt}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1602,7 +1602,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if d.Errs.Body != "" {
-			templ_7745c5c3_Err = FieldError(d.Errs.Body).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Body}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1641,7 +1641,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Spinner().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Spinner(ui.SpinnerOpts{}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1801,7 +1801,7 @@ func AdminContentEditor(d ContentEditorData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SectionHeading(i18n.T(ctx, "admin.content.preview_heading"), "mb-3").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.preview_heading"), Attrs: ui.Attrs{Class: "mb-3"}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2252,7 +2252,7 @@ func contentField(f content.Field, value, err string) templ.Component {
 			}
 		}
 		if err != "" {
-			templ_7745c5c3_Err = FieldError(err).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.FieldError(ui.FieldErrorOpts{Error: err}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -2290,7 +2290,7 @@ func contentRevisions(d ContentEditorData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SectionHeading(i18n.T(ctx, "admin.content.revisions_heading"), "mb-3").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.revisions_heading"), Attrs: ui.Attrs{Class: "mb-3"}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2480,7 +2480,7 @@ func contentMediaPicker(d ContentEditorData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SectionHeading(i18n.T(ctx, "admin.content.media_heading"), "").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.media_heading"), Attrs: ui.Attrs{Class: ""}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -2739,7 +2739,7 @@ func AdminMediaPage(d MediaData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = PageHeader(i18n.T(ctx, "admin.media.title")).Render(templ.WithChildren(ctx, templ_7745c5c3_Var147), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.media.title")}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var147), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -3070,11 +3070,11 @@ func AdminMediaPage(d MediaData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = TableCard("").Render(templ.WithChildren(ctx, templ_7745c5c3_Var152), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var152), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Pagination(d.Page, d.TotalPages, "/admin/media", "#table-container").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/media", Target: "#table-container", Labels: pagerLabels(ctx)}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -3138,7 +3138,7 @@ func MediaUploadCard(d MediaData) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = Alert(KindDanger, "alert", "", "media-error").Render(templ.WithChildren(ctx, templ_7745c5c3_Var175), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: "media-error"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var175), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -3173,7 +3173,7 @@ func MediaUploadCard(d MediaData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Spinner().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Spinner(ui.SpinnerOpts{}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

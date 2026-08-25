@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 	"time"
 
@@ -13,10 +14,10 @@ import (
 templ AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string, page, totalPages int) {
 	<div id="table-container">
 		if len(rows) == 0 {
-			@EmptyState(i18n.T(ctx, "admin.audit.title"), i18n.T(ctx, "admin.audit.empty")) {
+			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "admin.audit.title"), Body: i18n.T(ctx, "admin.audit.empty")}) {
 			}
 		} else {
-			@TableCard("audit-table") {
+			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "audit-table"}}) {
 				<table class="table">
 					<thead>
 						<tr><th>{ i18n.T(ctx, "activity.col_when") }</th><th>{ i18n.T(ctx, "activity.col_actor") }</th><th>{ i18n.T(ctx, "admin.audit.col_org") }</th><th>{ i18n.T(ctx, "activity.col_action") }</th><th>{ i18n.T(ctx, "activity.col_details") }</th></tr>
@@ -35,7 +36,7 @@ templ AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string,
 									}
 								</td>
 								<td class="text-fg-muted">{ row.ClerkOrgID.String }</td>
-								<td>@Badge(row.Action, KindBrand)</td>
+								<td>@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})</td>
 								<td>
 									if len(row.Metadata) > 2 {
 										<details>
@@ -49,14 +50,13 @@ templ AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string,
 					</tbody>
 				</table>
 			}
-			@Pagination(page, totalPages, "/admin/audit?q="+filter, "#table-container")
+			@ui.Pagination(ui.PaginationOpts{Page: page, TotalPages: totalPages, BaseURL: "/admin/audit?q="+filter, Target: "#table-container", Labels: pagerLabels(ctx)})
 		}
 	</div>
 }
 
 templ AdminAuditPage(rows []sqlc.ListAuditAllRow, now time.Time, filter string, page, totalPages int) {
-	@PageHeader(i18n.T(ctx, "admin.audit.title"))
-	@SearchToolbar("q", filter, i18n.T(ctx, "admin.audit.search_placeholder"), i18n.T(ctx, "admin.audit.search_aria"),
-		"/admin/audit", "#table-container", "admin-audit-search-indicator", "")
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.audit.title")})
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: filter, Placeholder: i18n.T(ctx, "admin.audit.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.audit.search_aria"), GetURL: "/admin/audit", Target: "#table-container", IndicatorID: "admin-audit-search-indicator", Attrs: ui.Attrs{TestID: ""}})
 	@AdminAuditTable(rows, now, filter, page, totalPages)
 }

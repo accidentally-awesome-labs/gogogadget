@@ -1,0 +1,52 @@
+package ui
+
+// SaaS compositions live here. They are presentation only: they accept view
+// structs of plain strings and booleans, never a billing, identity or sqlc
+// type, so a module can reuse them without pulling a provider package in
+// behind them.
+
+// PlanFeature is one bullet on a plan card.
+type PlanFeature = string
+
+// PlanCardOpts renders one plan on the pricing page or in an upgrade CTA.
+// Price is pre-formatted by the caller: currency and period formatting is a
+// billing concern, and ui does not import billing.
+type PlanCardOpts struct {
+	Name         string
+	Price        string
+	Features     []PlanFeature
+	Current      bool
+	CurrentLabel string
+	Attrs        Attrs
+}
+
+templ PlanCard(o PlanCardOpts) {
+	<div { root("plan-card", planCardClasses(o), o.Attrs)... }>
+		<div class="flex items-center justify-between">
+			<h3 class="section-title">{ o.Name }</h3>
+			if o.Current {
+				@Badge(BadgeOpts{Text: o.CurrentLabel, Kind: KindBrand})
+			}
+		</div>
+		<div class="text-3xl font-bold">{ o.Price }</div>
+		<ul class="space-y-2 text-sm text-fg-muted flex-1">
+			for _, feature := range o.Features {
+				<li class="flex gap-2">
+					@Icon(IconOpts{Name: IconCheck, Attrs: Attrs{Class: "w-4 h-4 mt-0.5 shrink-0 text-success"}})
+					{ feature }
+				</li>
+			}
+		</ul>
+		{ children... }
+	</div>
+}
+
+// planCardClasses rings the current plan. The ring is the only difference, so
+// it is expressed as one conditional class rather than a second renderer.
+func planCardClasses(o PlanCardOpts) string {
+	base := "card flex flex-col gap-4"
+	if o.Current {
+		return base + " ring-2 ring-brand"
+	}
+	return base
+}

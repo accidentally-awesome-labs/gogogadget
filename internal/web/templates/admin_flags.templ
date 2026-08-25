@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -18,18 +19,18 @@ type FlagsData struct {
 
 // onOffKind is the shared on/off badge colour: a live flag or schedule reads
 // success, a dormant one reads neutral.
-func onOffKind(on bool) Kind {
+func onOffKind(on bool) ui.Kind {
 	if on {
-		return KindSuccess
+		return ui.KindSuccess
 	}
-	return KindNeutral
+	return ui.KindNeutral
 }
 
 // AdminFlagsPage is the feature-flag table: key, description, enabled,
 // rollout — with per-row toggle, rollout form, delete, and a create form.
 // The key cell links to the per-org override detail page.
 templ AdminFlagsPage(d FlagsData) {
-	@PageHeader(i18n.T(ctx, "flags.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "flags.title")})
 	if AdminWrite(ctx) {
 		@flagCreateCard(d)
 	}
@@ -40,10 +41,10 @@ templ AdminFlagsPage(d FlagsData) {
 // create flags.
 templ flagCreateCard(d FlagsData) {
 	<div id="flag-create-form" class="card mb-8 max-w-3xl">
-		@SectionHeading(i18n.T(ctx, "flags.create_title"), "mb-4")
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
 		<form hx-post="/admin/flags" hx-target="#flag-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="flag-create-form" class="space-y-4">
 			if d.CreateErr != "" {
-				@Alert(KindDanger, "alert", "", "") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: ""}}) {
 					{ d.CreateErr }
 				}
 			}
@@ -63,7 +64,7 @@ templ flagCreateCard(d FlagsData) {
 			</div>
 			<div class="form-actions">
 				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "flags.create") }</button>
-				@Spinner()
+				@ui.Spinner(ui.SpinnerOpts{})
 			</div>
 		</form>
 	</div>
@@ -102,9 +103,9 @@ templ adminFlagsTable(d FlagsData) {
 								</form>
 							} else {
 								if f.Enabled {
-									@Badge(i18n.T(ctx, "flags.on"), KindSuccess)
+									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
 								} else {
-									@Badge(i18n.T(ctx, "flags.off"), KindNeutral)
+									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindNeutral})
 								}
 							}
 						</td>
@@ -147,18 +148,18 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 	<p class="text-fg-muted text-sm mb-1">{ flag.Description }</p>
 	<p class="text-sm mb-8">
 		if flag.Enabled {
-			@Badge(i18n.T(ctx, "flags.on"), KindSuccess)
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
 		} else {
-			@Badge(i18n.T(ctx, "flags.off"), KindNeutral)
+			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindNeutral})
 		}
 		<span class="text-fg-muted ml-2">{ i18n.T(ctx, "flags.col_rollout") }: { fmt.Sprint(flag.Rollout) }%</span>
 		<a href="/admin/flags" class="link ml-4 text-sm">{ i18n.T(ctx, "flags.back") }</a>
 	</p>
 
-	@SectionHeading(i18n.T(ctx, "flags.overrides_heading"), "mb-3")
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.overrides_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 	<div class="table-card max-w-3xl mb-6" data-testid="flag-overrides">
 		if len(overrides) == 0 {
-			@TableEmpty(i18n.T(ctx, "flags.overrides_empty"))
+			@ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "flags.overrides_empty")})
 		} else {
 			<table class="table">
 				<thead>
@@ -170,9 +171,9 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 							<td class="font-medium">{ o.Name }</td>
 							<td>
 								if o.OverrideEnabled {
-									@Badge(i18n.T(ctx, "flags.on"), KindSuccess)
+									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
 								} else {
-									@Badge(i18n.T(ctx, "flags.off"), KindDanger)
+									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindDanger})
 								}
 							</td>
 							<td class="text-right">

@@ -36,7 +36,7 @@
         "source": "internal/web/templates/notifications.templ",
         "target": "internal/web/templates/notifications.templ",
         "class": "templ",
-        "sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
+        "sha256": "68019b60070cef1bb487009fe5d2302a6994990520558b6fec1e8346040a1c51",
         "rewrite_module": true,
         "contract": false
       }
@@ -69,14 +69,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "notifications.empty_body": "You're all caught up.",
@@ -104,6 +96,14 @@
         "notifications.title": "Notificaciones",
         "notifications.unread_aria": "%d notificaciones sin leer"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

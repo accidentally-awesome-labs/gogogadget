@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -39,19 +40,19 @@ templ Disabled() {
 }
 
 templ SettingsTabs(active string) {
-	@Tabs(settingsTabs(ctx), active)
+	@ui.NavTabs(ui.NavTabsOpts{Items: uiNavItems(ctx, settingsTabs(ctx)), ActivePath: active})
 }
 
 
 templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string) {
 	@SettingsTabs("/app/settings/account")
-	@PageHeader(i18n.T(ctx, "settings.account_title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "settings.account_title")})
 	<div class="card max-w-lg">
-		@DefinitionList([]DefRow{
+		@ui.DescriptionList(ui.DescriptionListOpts{Items: []ui.DescriptionItem{
 			{Term: i18n.T(ctx, "settings.account_name"), Value: user.Name},
 			{Term: i18n.T(ctx, "settings.account_email"), Value: string(user.Email)},
 			{Term: i18n.T(ctx, "settings.account_member_since"), Value: user.CreatedAt.Time.Format("January 2, 2006")},
-		})
+		}})
 		<p class="mt-6 text-sm text-fg-muted">
 			{ i18n.T(ctx, "settings.account_clerk_managed") }
 			if accountPortalURL != "" {
@@ -61,7 +62,7 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 	</div>
 
 	<div class="card max-w-lg mt-6" data-testid="appearance-card">
-		@SectionHeading(i18n.T(ctx, "settings.appearance_title"), "")
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "settings.appearance_title"), Attrs: ui.Attrs{Class: ""}})
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.appearance_body") }</p>
 		<div class="mt-4">
 			<p class="label">{ i18n.T(ctx, "settings.theme_label") }</p>
@@ -83,7 +84,7 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 	</div>
 
 	<div class="card max-w-lg mt-6">
-		@SectionHeading(i18n.T(ctx, "settings.data_title"), "")
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "settings.data_title"), Attrs: ui.Attrs{Class: ""}})
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.data_body") }</p>
 		<a href="/app/settings/account/export" class="btn btn-ghost mt-4" data-testid="export-data">{ i18n.T(ctx, "settings.data_export") }</a>
 	</div>
@@ -97,11 +98,11 @@ templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string)
 // re-render (email mismatch, sole-admin blocker) swaps exactly this card.
 templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 	<div class="card max-w-lg mt-6 border-danger-border">
-		@SectionHeading(i18n.T(ctx, "settings.danger_title"), "text-danger-text")
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "settings.danger_title"), Attrs: ui.Attrs{Class: "text-danger-text"}})
 		<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.danger_body") }</p>
 		<form hx-post="/app/settings/account/delete" hx-target="#danger-zone" hx-swap="outerHTML" novalidate hx-disable="this" class="mt-4 space-y-3">
 			if dangerErr != "" {
-				@Alert(KindDanger, "alert", "", "delete-account-error") {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "", TestID: "delete-account-error"}}) {
 					{ dangerErr }
 				}
 			}
@@ -114,7 +115,7 @@ templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 					hx-confirm={ i18n.T(ctx, "settings.danger_confirm_prompt") }>
 					{ i18n.T(ctx, "settings.danger_delete") }
 				</button>
-				@Spinner()
+				@ui.Spinner(ui.SpinnerOpts{})
 			</div>
 		</form>
 	</div>
@@ -122,12 +123,12 @@ templ SettingsDangerZone(user sqlc.User, dangerErr string) {
 
 templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organizationPortalURL string, canExport bool) {
 	@SettingsTabs("/app/settings/org")
-	@PageHeader(i18n.T(ctx, "settings.org_title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "settings.org_title")})
 	<div class="card mb-6 max-w-lg">
-		@DefinitionList([]DefRow{
+		@ui.DescriptionList(ui.DescriptionListOpts{Items: []ui.DescriptionItem{
 			{Term: i18n.T(ctx, "settings.org_name"), Value: org.Name},
 			{Term: i18n.T(ctx, "settings.org_slug"), Value: org.Slug},
-		})
+		}})
 		<p class="mt-6 text-sm text-fg-muted">
 			{ i18n.T(ctx, "settings.org_clerk_managed") }
 			if organizationPortalURL != "" {
@@ -137,7 +138,7 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 	</div>
 	if canExport {
 		<div class="card mb-6 max-w-lg" data-testid="org-export-card">
-			@SectionHeading(i18n.T(ctx, "settings.org_export_title"), "")
+			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "settings.org_export_title"), Attrs: ui.Attrs{Class: ""}})
 			<p class="mt-2 text-sm text-fg-muted">{ i18n.T(ctx, "settings.org_export_body") }</p>
 			<button
 				type="button"
@@ -148,8 +149,8 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 			>{ i18n.T(ctx, "settings.org_export_button") }</button>
 		</div>
 	}
-	@SectionHeading(i18n.T(ctx, "settings.org_members_heading"), "mb-3")
-	@TableCard("") {
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "settings.org_members_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
+	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 		<table class="table">
 			<thead>
 				<tr><th>{ i18n.T(ctx, "settings.org_col_member") }</th><th>{ i18n.T(ctx, "settings.org_col_email") }</th><th>{ i18n.T(ctx, "settings.org_col_role") }</th></tr>
@@ -159,7 +160,7 @@ templ SettingsOrg(org sqlc.Org, members []sqlc.ListMembersByOrgRow, organization
 					<tr>
 						<td class="font-medium">{ m.Name }</td>
 						<td>{ string(m.Email) }</td>
-						<td>@Badge(m.Role, KindNeutral)</td>
+						<td>@ui.Badge(ui.BadgeOpts{Text: m.Role, Kind: ui.KindNeutral})</td>
 					</tr>
 				}
 			</tbody>

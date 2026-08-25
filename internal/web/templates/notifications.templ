@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -19,7 +20,7 @@ templ NotificationsBadge(unread int64) {
 // NotificationsPage is the list: unread rows bolded, per-row read buttons,
 // read-all, pagination.
 templ NotificationsPage(d NotificationsData) {
-	@PageHeader(i18n.T(ctx, "notifications.title")) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "notifications.title")}) {
 		if d.Unread > 0 {
 			<button
 				type="button"
@@ -38,9 +39,9 @@ templ NotificationsPage(d NotificationsData) {
 templ NotificationsList(d NotificationsData) {
 	<div id="notif-list">
 		if len(d.Items) == 0 {
-			@EmptyState(i18n.T(ctx, "notifications.empty_title"), i18n.T(ctx, "notifications.empty_body"))
+			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "notifications.empty_title"), Body: i18n.T(ctx, "notifications.empty_body")})
 		} else {
-			@TableCard("") {
+			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
 				<ul class="divide-y divide-border">
 					for _, n := range d.Items {
 						<li class={ "flex items-start gap-3 px-4 py-3", templ.KV("font-medium", !n.ReadAt.Valid), "text-fg-muted", templ.KV("text-fg", !n.ReadAt.Valid) } data-testid="notification-row">
@@ -78,7 +79,7 @@ templ NotificationsList(d NotificationsData) {
 					}
 				</ul>
 			}
-			@Pagination(d.Page, d.TotalPages, "/app/notifications", "#notif-list")
+			@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/app/notifications", Target: "#notif-list", Labels: pagerLabels(ctx)})
 		}
 	</div>
 }

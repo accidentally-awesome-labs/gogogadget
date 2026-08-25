@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
@@ -74,7 +75,7 @@ templ Home(plans []billing.Plan) {
 		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.pricing.title") }</h2>
 		<div class="mt-10 grid md:grid-cols-3 gap-6">
 			for _, p := range plans {
-				@PlanCard(p, false) {
+				@ui.PlanCard(uiPlanCard(ctx, p, false)) {
 					<a href="/signup" class="btn btn-ghost w-full">{ i18n.T(ctx, "home.pricing.get_started") }</a>
 				}
 			}

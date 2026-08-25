@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+  "registry_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
   "order": [
     "element/ui-core",
     "system/apphost",
@@ -106,7 +106,7 @@
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -148,6 +148,14 @@
             "target": "internal/web/templates/ui/components_nav.templ",
             "class": "templ",
             "sha256": "fd43f4f5b05df532751cd94eba1b3ad50025e59c7d50e87db910b25ef9a5c644",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/contract_test.go",
+            "target": "internal/web/templates/ui/contract_test.go",
+            "class": "test",
+            "sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
             "rewrite_module": true,
             "contract": false
           },
@@ -200,6 +208,22 @@
             "contract": false
           },
           {
+            "source": "internal/web/templates/ui/patterns.templ",
+            "target": "internal/web/templates/ui/patterns.templ",
+            "class": "templ",
+            "sha256": "4a603e042b6307b36e696b72c6f3aa0e168978450d1bf14032aa9ed7bba0da4a",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui/root.go",
+            "target": "internal/web/templates/ui/root.go",
+            "class": "go",
+            "sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
             "source": "internal/web/templates/ui/ui.go",
             "target": "internal/web/templates/ui/ui.go",
             "class": "go",
@@ -247,6 +271,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/templates/ui/contract_test.go",
+          "source": "internal/web/templates/ui/contract_test.go",
+          "base_sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
+          "local_sha256": "8e6cf2fd80910f5fb2f8e0fd38fb612c13c1aa8d8f9e44836694453c064b5f8d",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/templates/ui/data.templ",
           "source": "internal/web/templates/ui/data.templ",
           "base_sha256": "9b493824c460b7db35ef65fc30fe503bd4ca41025036d59b86694538d8c124a0",
@@ -289,6 +320,20 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/templates/ui/patterns.templ",
+          "source": "internal/web/templates/ui/patterns.templ",
+          "base_sha256": "4a603e042b6307b36e696b72c6f3aa0e168978450d1bf14032aa9ed7bba0da4a",
+          "local_sha256": "4a603e042b6307b36e696b72c6f3aa0e168978450d1bf14032aa9ed7bba0da4a",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/root.go",
+          "source": "internal/web/templates/ui/root.go",
+          "base_sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+          "local_sha256": "2799b86ed335969adde7e76b2559561a71502d1ec6f15339ffb76d1da95e4555",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/templates/ui/ui.go",
           "source": "internal/web/templates/ui/ui.go",
           "base_sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
@@ -302,7 +347,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -340,7 +385,7 @@
             "source": "internal/web/templates/activity.templ",
             "target": "internal/web/templates/activity.templ",
             "class": "templ",
-            "sha256": "b2ec84cacc5853fb3d852ba075c559b17514e7d0cc877a05fea4e0adffa6cdbf",
+            "sha256": "58fa519f63fbe9a81a67588d586dbe502fc0a81b83593adea76537e016c957ea",
             "rewrite_module": true,
             "contract": false
           }
@@ -441,8 +486,8 @@
         {
           "path": "internal/web/templates/activity.templ",
           "source": "internal/web/templates/activity.templ",
-          "base_sha256": "b2ec84cacc5853fb3d852ba075c559b17514e7d0cc877a05fea4e0adffa6cdbf",
-          "local_sha256": "b2ec84cacc5853fb3d852ba075c559b17514e7d0cc877a05fea4e0adffa6cdbf",
+          "base_sha256": "58fa519f63fbe9a81a67588d586dbe502fc0a81b83593adea76537e016c957ea",
+          "local_sha256": "58fa519f63fbe9a81a67588d586dbe502fc0a81b83593adea76537e016c957ea",
           "state": "clean"
         }
       ],
@@ -452,7 +497,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -492,7 +537,7 @@
             "source": "internal/web/templates/admin_announcements.templ",
             "target": "internal/web/templates/admin_announcements.templ",
             "class": "templ",
-            "sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
+            "sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
             "rewrite_module": true,
             "contract": false
           }
@@ -627,8 +672,8 @@
         {
           "path": "internal/web/templates/admin_announcements.templ",
           "source": "internal/web/templates/admin_announcements.templ",
-          "base_sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
-          "local_sha256": "5d081cda99f12a5cc408d1980814e37d3331722665a6c9a60671cb845aca3e45",
+          "base_sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
+          "local_sha256": "e10a560e2d4aa0437f1ce951b1cebb539cfe803f5f50040a2c73ba199336d694",
           "state": "clean"
         }
       ],
@@ -638,7 +683,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -668,7 +713,7 @@
             "source": "internal/web/templates/admin_audit.templ",
             "target": "internal/web/templates/admin_audit.templ",
             "class": "templ",
-            "sha256": "57771cd5ac3f8f4e90ce56c505d6147c382fdd96d18404fbde1e9b817f56ddfb",
+            "sha256": "018ed1986d2625c0565a37f93171110e799bf420a3866fb7dfbcb9abacb53e35",
             "rewrite_module": true,
             "contract": false
           }
@@ -748,8 +793,8 @@
         {
           "path": "internal/web/templates/admin_audit.templ",
           "source": "internal/web/templates/admin_audit.templ",
-          "base_sha256": "57771cd5ac3f8f4e90ce56c505d6147c382fdd96d18404fbde1e9b817f56ddfb",
-          "local_sha256": "57771cd5ac3f8f4e90ce56c505d6147c382fdd96d18404fbde1e9b817f56ddfb",
+          "base_sha256": "018ed1986d2625c0565a37f93171110e799bf420a3866fb7dfbcb9abacb53e35",
+          "local_sha256": "018ed1986d2625c0565a37f93171110e799bf420a3866fb7dfbcb9abacb53e35",
           "state": "clean"
         }
       ],
@@ -759,7 +804,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -789,7 +834,7 @@
             "source": "internal/web/templates/admin_content.templ",
             "target": "internal/web/templates/admin_content.templ",
             "class": "templ",
-            "sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
+            "sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
             "rewrite_module": true,
             "contract": false
           }
@@ -973,8 +1018,8 @@
         {
           "path": "internal/web/templates/admin_content.templ",
           "source": "internal/web/templates/admin_content.templ",
-          "base_sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
-          "local_sha256": "312f320d0b9e567de59df35efa62becfdf55fb08fec00b2f55531d0c9d60478d",
+          "base_sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
+          "local_sha256": "7680b1df51c7f4412975fea8a5c47df87fe4c36a822b7d67c2594a447c8825ad",
           "state": "clean"
         }
       ],
@@ -984,7 +1029,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1082,7 +1127,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1161,7 +1206,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1241,7 +1286,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -1281,7 +1326,7 @@
             "source": "internal/web/templates/admin_flags.templ",
             "target": "internal/web/templates/admin_flags.templ",
             "class": "templ",
-            "sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
+            "sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
             "rewrite_module": true,
             "contract": false
           }
@@ -1430,8 +1475,8 @@
         {
           "path": "internal/web/templates/admin_flags.templ",
           "source": "internal/web/templates/admin_flags.templ",
-          "base_sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
-          "local_sha256": "80ff4430d1902bddda51048668ea7c14e13acabbfcc6a3ea59e3b8b151d68d42",
+          "base_sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
+          "local_sha256": "8d2fa7474526658d07f5ad2348327a1c3ca81cbd276065478fdd82e396c813d4",
           "state": "clean"
         }
       ],
@@ -1441,7 +1486,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -1480,7 +1525,7 @@
             "source": "internal/web/templates/admin_jobs.templ",
             "target": "internal/web/templates/admin_jobs.templ",
             "class": "templ",
-            "sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
+            "sha256": "3222883649b32857488ecd0411834aab388bdf6e51ff8274fb91a0058ea39b7a",
             "rewrite_module": true,
             "contract": false
           }
@@ -1593,8 +1638,8 @@
         {
           "path": "internal/web/templates/admin_jobs.templ",
           "source": "internal/web/templates/admin_jobs.templ",
-          "base_sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
-          "local_sha256": "7a973d7db2d7984967593f1b7304e30c2c64824a73adc7789325a7601af6ba14",
+          "base_sha256": "3222883649b32857488ecd0411834aab388bdf6e51ff8274fb91a0058ea39b7a",
+          "local_sha256": "3222883649b32857488ecd0411834aab388bdf6e51ff8274fb91a0058ea39b7a",
           "state": "clean"
         }
       ],
@@ -1604,7 +1649,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -1736,7 +1781,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1844,7 +1889,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1884,7 +1929,7 @@
             "source": "internal/web/templates/admin.templ",
             "target": "internal/web/templates/admin.templ",
             "class": "templ",
-            "sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
+            "sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
             "rewrite_module": true,
             "contract": false
           }
@@ -1976,8 +2021,8 @@
         {
           "path": "internal/web/templates/admin.templ",
           "source": "internal/web/templates/admin.templ",
-          "base_sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
-          "local_sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
+          "base_sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
+          "local_sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
           "state": "clean"
         }
       ],
@@ -1987,7 +2032,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -2029,7 +2074,7 @@
             "source": "internal/web/templates/admin_schedules.templ",
             "target": "internal/web/templates/admin_schedules.templ",
             "class": "templ",
-            "sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
+            "sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
             "rewrite_module": true,
             "contract": false
           }
@@ -2164,8 +2209,8 @@
         {
           "path": "internal/web/templates/admin_schedules.templ",
           "source": "internal/web/templates/admin_schedules.templ",
-          "base_sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
-          "local_sha256": "8fbeb1cd1de71ce9ca63f84d28a6722512a03fb98c7328477d5459383710724b",
+          "base_sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
+          "local_sha256": "bce81785daa8f3c7f5eb75c202feafffef69f138b056d7341e043d3735b27e03",
           "state": "clean"
         }
       ],
@@ -2175,7 +2220,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2311,7 +2356,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2431,7 +2476,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2536,7 +2581,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2567,7 +2612,7 @@
             "source": "internal/web/templates/dashboard.templ",
             "target": "internal/web/templates/dashboard.templ",
             "class": "templ",
-            "sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+            "sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
             "rewrite_module": true,
             "contract": false
           }
@@ -2660,8 +2705,8 @@
         {
           "path": "internal/web/templates/dashboard.templ",
           "source": "internal/web/templates/dashboard.templ",
-          "base_sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
-          "local_sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+          "base_sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
+          "local_sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
           "state": "clean"
         }
       ],
@@ -2671,7 +2716,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2702,7 +2747,7 @@
             "source": "internal/web/templates/gallery.templ",
             "target": "internal/web/templates/gallery.templ",
             "class": "templ",
-            "sha256": "2834e33ac5b32cc92dd5333d04050f06857d137599fbb28bd7954f260a5ccd15",
+            "sha256": "7f919c7fa0238399bf4db149c9b0e486bceb84fd8d50972c2d645bacec45757e",
             "rewrite_module": true,
             "contract": false
           }
@@ -2756,8 +2801,8 @@
         {
           "path": "internal/web/templates/gallery.templ",
           "source": "internal/web/templates/gallery.templ",
-          "base_sha256": "2834e33ac5b32cc92dd5333d04050f06857d137599fbb28bd7954f260a5ccd15",
-          "local_sha256": "2834e33ac5b32cc92dd5333d04050f06857d137599fbb28bd7954f260a5ccd15",
+          "base_sha256": "7f919c7fa0238399bf4db149c9b0e486bceb84fd8d50972c2d645bacec45757e",
+          "local_sha256": "7f919c7fa0238399bf4db149c9b0e486bceb84fd8d50972c2d645bacec45757e",
           "state": "clean"
         }
       ],
@@ -2767,7 +2812,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2868,7 +2913,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -2990,7 +3035,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3069,7 +3114,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -3110,7 +3155,7 @@
             "source": "internal/web/templates/files.templ",
             "target": "internal/web/templates/files.templ",
             "class": "templ",
-            "sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
+            "sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
             "rewrite_module": true,
             "contract": false
           }
@@ -3211,8 +3256,8 @@
         {
           "path": "internal/web/templates/files.templ",
           "source": "internal/web/templates/files.templ",
-          "base_sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
-          "local_sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
+          "base_sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
+          "local_sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
           "state": "clean"
         }
       ],
@@ -3222,7 +3267,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3250,7 +3295,7 @@
             "source": "internal/web/templates/home.templ",
             "target": "internal/web/templates/home.templ",
             "class": "templ",
-            "sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+            "sha256": "f1d52e0aea0d4f4366931b4f9a02f8d0115cbb2ee86ed0102ceb40207202ba70",
             "rewrite_module": true,
             "contract": false
           }
@@ -3429,8 +3474,8 @@
         {
           "path": "internal/web/templates/home.templ",
           "source": "internal/web/templates/home.templ",
-          "base_sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
-          "local_sha256": "ae2c8dd90baaa39d3940121902324a22983c5eb4fb3b80418b843215606a374e",
+          "base_sha256": "f1d52e0aea0d4f4366931b4f9a02f8d0115cbb2ee86ed0102ceb40207202ba70",
+          "local_sha256": "f1d52e0aea0d4f4366931b4f9a02f8d0115cbb2ee86ed0102ceb40207202ba70",
           "state": "clean"
         }
       ],
@@ -3440,7 +3485,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -3481,7 +3526,7 @@
             "source": "internal/web/templates/notifications.templ",
             "target": "internal/web/templates/notifications.templ",
             "class": "templ",
-            "sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
+            "sha256": "68019b60070cef1bb487009fe5d2302a6994990520558b6fec1e8346040a1c51",
             "rewrite_module": true,
             "contract": false
           }
@@ -3569,8 +3614,8 @@
         {
           "path": "internal/web/templates/notifications.templ",
           "source": "internal/web/templates/notifications.templ",
-          "base_sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
-          "local_sha256": "e5e47217a232a583abdd92bff12dcfdc962f037f9ecf4eb7c4d05ed692a000a4",
+          "base_sha256": "68019b60070cef1bb487009fe5d2302a6994990520558b6fec1e8346040a1c51",
+          "local_sha256": "68019b60070cef1bb487009fe5d2302a6994990520558b6fec1e8346040a1c51",
           "state": "clean"
         }
       ],
@@ -3580,7 +3625,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3608,7 +3653,7 @@
             "source": "internal/web/templates/pricing.templ",
             "target": "internal/web/templates/pricing.templ",
             "class": "templ",
-            "sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
+            "sha256": "fc1c687fc23444397dd93ea42bb9523cbf407c7f29078b9ea52d9e45a983057d",
             "rewrite_module": true,
             "contract": false
           }
@@ -3682,8 +3727,8 @@
         {
           "path": "internal/web/templates/pricing.templ",
           "source": "internal/web/templates/pricing.templ",
-          "base_sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
-          "local_sha256": "18936c954debc574006e17d4631d6b47d6a1b6ab32e7870ab4a0d3fb381f5c0d",
+          "base_sha256": "fc1c687fc23444397dd93ea42bb9523cbf407c7f29078b9ea52d9e45a983057d",
+          "local_sha256": "fc1c687fc23444397dd93ea42bb9523cbf407c7f29078b9ea52d9e45a983057d",
           "state": "clean"
         }
       ],
@@ -3693,7 +3738,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3809,7 +3854,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3889,7 +3934,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3968,7 +4013,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4007,7 +4052,7 @@
             "source": "internal/web/templates/projects.templ",
             "target": "internal/web/templates/projects.templ",
             "class": "templ",
-            "sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
+            "sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
             "rewrite_module": true,
             "contract": false
           }
@@ -4132,8 +4177,8 @@
         {
           "path": "internal/web/templates/projects.templ",
           "source": "internal/web/templates/projects.templ",
-          "base_sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
-          "local_sha256": "652664dc2bc741dc3799b8ede6fea312f16262a81993622003adfdc5139c4eb3",
+          "base_sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
+          "local_sha256": "c2bb14bbc4d7c85853ccf260af52816963c3b9b8b7f2113a115c54e1b9803372",
           "state": "clean"
         }
       ],
@@ -4143,7 +4188,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -4176,7 +4221,7 @@
             "source": "internal/web/templates/settings.templ",
             "target": "internal/web/templates/settings.templ",
             "class": "templ",
-            "sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
+            "sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
             "rewrite_module": true,
             "contract": false
           }
@@ -4303,8 +4348,8 @@
         {
           "path": "internal/web/templates/settings.templ",
           "source": "internal/web/templates/settings.templ",
-          "base_sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
-          "local_sha256": "95eb7b46ad954c4d724325e8d09248b7c35c7de0ae65eabfb5ab0f139c2e8b82",
+          "base_sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
+          "local_sha256": "852f5e0d4c93888382154567157ba3a71d66d0d8fc397b14623c59fec37e9672",
           "state": "clean"
         }
       ],
@@ -4314,7 +4359,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -4347,7 +4392,7 @@
             "source": "internal/web/templates/api_tokens.templ",
             "target": "internal/web/templates/api_tokens.templ",
             "class": "templ",
-            "sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
+            "sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
             "rewrite_module": true,
             "contract": false
           }
@@ -4455,8 +4500,8 @@
         {
           "path": "internal/web/templates/api_tokens.templ",
           "source": "internal/web/templates/api_tokens.templ",
-          "base_sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
-          "local_sha256": "233ebd8ac28c0335be822f478f1f43ebbf57f91f70b65b9de56420198826fe1c",
+          "base_sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
+          "local_sha256": "fad93ffb790333c30c495ed9401bc13bc49e8eb38f9201a12c7cb2674848a3f7",
           "state": "clean"
         }
       ],
@@ -4466,7 +4511,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -4508,7 +4553,7 @@
             "source": "internal/web/templates/billing.templ",
             "target": "internal/web/templates/billing.templ",
             "class": "templ",
-            "sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
+            "sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
             "rewrite_module": true,
             "contract": false
           }
@@ -4623,8 +4668,8 @@
         {
           "path": "internal/web/templates/billing.templ",
           "source": "internal/web/templates/billing.templ",
-          "base_sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
-          "local_sha256": "861ddde335273b1db6de25aa2d7c13b0f0f8f2c42214f3575d050f45c46f8bff",
+          "base_sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
+          "local_sha256": "520d4fc1a02955c7d2e59d6759185befa4f5f5424028bf12a157d8b3af17fdb7",
           "state": "clean"
         }
       ],
@@ -4634,7 +4679,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -4675,7 +4720,7 @@
             "source": "internal/web/templates/settings_notifications.templ",
             "target": "internal/web/templates/settings_notifications.templ",
             "class": "templ",
-            "sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
+            "sha256": "d0083e865c7d6844102cf363778082e0b634910bf0d2aad23793a752d2d54d5b",
             "rewrite_module": true,
             "contract": false
           }
@@ -4770,8 +4815,8 @@
         {
           "path": "internal/web/templates/settings_notifications.templ",
           "source": "internal/web/templates/settings_notifications.templ",
-          "base_sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
-          "local_sha256": "5c1765b2cce7657a9689fd52d6d27a72fee15634496d3a0b3126fe71b422ac29",
+          "base_sha256": "d0083e865c7d6844102cf363778082e0b634910bf0d2aad23793a752d2d54d5b",
+          "local_sha256": "d0083e865c7d6844102cf363778082e0b634910bf0d2aad23793a752d2d54d5b",
           "state": "clean"
         }
       ],
@@ -4781,7 +4826,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4910,7 +4955,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -4941,7 +4986,7 @@
             "source": "internal/web/templates/webhooks.templ",
             "target": "internal/web/templates/webhooks.templ",
             "class": "templ",
-            "sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+            "sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
             "rewrite_module": true,
             "contract": false
           },
@@ -5084,8 +5129,8 @@
         {
           "path": "internal/web/templates/webhooks.templ",
           "source": "internal/web/templates/webhooks.templ",
-          "base_sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
-          "local_sha256": "1b6e2ea1dc7050be8fc6887a57b1f294dfcf2fcd8cb7dabad9e740cbfe00d94f",
+          "base_sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
+          "local_sha256": "62195e100df77ac6ce7f84c428013cecc46b74a915d67fa342c2c19414d66429",
           "state": "clean"
         },
         {
@@ -5102,7 +5147,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5218,7 +5263,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -5375,7 +5420,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -5504,7 +5549,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -5947,7 +5992,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6046,7 +6091,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -6242,7 +6287,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -6692,7 +6737,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -6853,7 +6898,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -7352,7 +7397,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -7996,7 +8041,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -8191,7 +8236,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -8443,7 +8488,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -8610,7 +8655,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -9811,7 +9856,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -9965,7 +10010,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -10245,7 +10290,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -10409,7 +10454,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -10612,7 +10657,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10712,7 +10757,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11353,7 +11398,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -11650,7 +11695,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -11830,7 +11875,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -12147,7 +12192,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -12283,7 +12328,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -12443,7 +12488,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -12584,7 +12629,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12636,7 +12681,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -12690,7 +12735,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -12931,14 +12976,6 @@
             "contract": false
           },
           {
-            "source": "internal/web/templates/components.templ",
-            "target": "internal/web/templates/components.templ",
-            "class": "templ",
-            "sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
-            "rewrite_module": true,
-            "contract": false
-          },
-          {
             "source": "internal/web/templates/data.go",
             "target": "internal/web/templates/data.go",
             "class": "go",
@@ -12950,7 +12987,7 @@
             "source": "internal/web/templates/designsystem_test.go",
             "target": "internal/web/templates/designsystem_test.go",
             "class": "test",
-            "sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+            "sha256": "c0a3ab0bfcafde5caffdfa25ce351f0ba2b2a885a7c5c40805ff969ab494953b",
             "rewrite_module": true,
             "contract": false
           },
@@ -12958,7 +12995,7 @@
             "source": "internal/web/templates/errors.templ",
             "target": "internal/web/templates/errors.templ",
             "class": "templ",
-            "sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+            "sha256": "33fd5d4069fbbd7fd9c54ae08883d9ae22186b0265dcdc43b0c1c3d88e55667c",
             "rewrite_module": true,
             "contract": false
           },
@@ -12974,7 +13011,7 @@
             "source": "internal/web/templates/layouts.templ",
             "target": "internal/web/templates/layouts.templ",
             "class": "templ",
-            "sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+            "sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
             "rewrite_module": true,
             "contract": false
           },
@@ -13007,6 +13044,14 @@
             "target": "internal/web/templates/theme.go",
             "class": "go",
             "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
+            "rewrite_module": true,
+            "contract": false
+          },
+          {
+            "source": "internal/web/templates/ui_adapters.go",
+            "target": "internal/web/templates/ui_adapters.go",
+            "class": "go",
+            "sha256": "babf91dd2778728e7cfcf2401cf7938fa8a5153629caef3f1e7970b0bbbafe98",
             "rewrite_module": true,
             "contract": false
           },
@@ -13562,13 +13607,6 @@
           "state": "clean"
         },
         {
-          "path": "internal/web/templates/components.templ",
-          "source": "internal/web/templates/components.templ",
-          "base_sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
-          "local_sha256": "e99e319aa1f8c798ce0fbb444d9f16818eb7ac1a07f7629672a4303bdcad3b96",
-          "state": "clean"
-        },
-        {
           "path": "internal/web/templates/data.go",
           "source": "internal/web/templates/data.go",
           "base_sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
@@ -13578,15 +13616,15 @@
         {
           "path": "internal/web/templates/designsystem_test.go",
           "source": "internal/web/templates/designsystem_test.go",
-          "base_sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
-          "local_sha256": "9b3c92e255ff0bf82953b891cb71ddf61fc1ae30969dd4917d0d2a413f9e8afe",
+          "base_sha256": "c0a3ab0bfcafde5caffdfa25ce351f0ba2b2a885a7c5c40805ff969ab494953b",
+          "local_sha256": "c0a3ab0bfcafde5caffdfa25ce351f0ba2b2a885a7c5c40805ff969ab494953b",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/errors.templ",
           "source": "internal/web/templates/errors.templ",
-          "base_sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
-          "local_sha256": "3ff277b22d191b73bd76e596aca9d13e9e9e01789b39c5b84b8b91c9159ae166",
+          "base_sha256": "33fd5d4069fbbd7fd9c54ae08883d9ae22186b0265dcdc43b0c1c3d88e55667c",
+          "local_sha256": "33fd5d4069fbbd7fd9c54ae08883d9ae22186b0265dcdc43b0c1c3d88e55667c",
           "state": "clean"
         },
         {
@@ -13599,8 +13637,8 @@
         {
           "path": "internal/web/templates/layouts.templ",
           "source": "internal/web/templates/layouts.templ",
-          "base_sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
-          "local_sha256": "227804eced1f002daf9a0f53fc4e3b44e7155dd48c03ac498e29f8e9fb108509",
+          "base_sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
+          "local_sha256": "c9ef2aa7184da2c015e93c368ffe0cf2ffbb574e5230db3fd45616a37c4fc00a",
           "state": "clean"
         },
         {
@@ -13632,6 +13670,13 @@
           "state": "clean"
         },
         {
+          "path": "internal/web/templates/ui_adapters.go",
+          "source": "internal/web/templates/ui_adapters.go",
+          "base_sha256": "babf91dd2778728e7cfcf2401cf7938fa8a5153629caef3f1e7970b0bbbafe98",
+          "local_sha256": "babf91dd2778728e7cfcf2401cf7938fa8a5153629caef3f1e7970b0bbbafe98",
+          "state": "clean"
+        },
+        {
           "path": "internal/web/testhelpers_test.go",
           "source": "internal/web/testhelpers_test.go",
           "base_sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
@@ -13659,7 +13704,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13758,7 +13803,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "a903943967b5628308ae9a0f6b28b9d228e71b1127f8dab1f400d6c03ea99775",
+            "sha256": "1f6045258f20ec4e82a71556f479fa1f24ece0f8b262ca7a7dfaceedaaca65bc",
             "rewrite_module": false,
             "contract": false
           },
@@ -13944,7 +13989,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -14152,7 +14197,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14208,7 +14253,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -14384,7 +14429,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -14653,7 +14698,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14737,7 +14782,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14833,7 +14878,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14967,7 +15012,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -15160,7 +15205,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15332,7 +15377,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15417,7 +15462,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15537,7 +15582,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15673,7 +15718,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15771,7 +15816,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16005,7 +16050,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16341,7 +16386,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16440,7 +16485,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16567,7 +16612,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -16701,7 +16746,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16818,7 +16863,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16897,7 +16942,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -17013,7 +17058,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17198,7 +17243,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17305,7 +17350,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17338,7 +17383,7 @@
             "source": "internal/web/templates/admin_impersonate.templ",
             "target": "internal/web/templates/admin_impersonate.templ",
             "class": "templ",
-            "sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
+            "sha256": "dbfe9805dffbfc5de6d7285c0277752a377518ce49a483d749f10d6b9e92c8e3",
             "rewrite_module": true,
             "contract": false
           }
@@ -17427,8 +17472,8 @@
         {
           "path": "internal/web/templates/admin_impersonate.templ",
           "source": "internal/web/templates/admin_impersonate.templ",
-          "base_sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
-          "local_sha256": "80db5d3f5d07ce92474c169f81217623094c44e2f4f99518c6069a347a857155",
+          "base_sha256": "dbfe9805dffbfc5de6d7285c0277752a377518ce49a483d749f10d6b9e92c8e3",
+          "local_sha256": "dbfe9805dffbfc5de6d7285c0277752a377518ce49a483d749f10d6b9e92c8e3",
           "state": "clean"
         }
       ],
@@ -17438,7 +17483,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17573,7 +17618,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17654,7 +17699,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -17795,7 +17840,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -17918,7 +17963,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18094,7 +18139,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18214,7 +18259,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -18464,7 +18509,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "c01ce81a1413473676a5ee6d21469cc5df4f82d4e00b286660af3e7345957099",
+      "source_commit": "eaa06e5c59b03cd97838771afaa761fa757002e61374993efff68d484826af41",
       "reason": "profile",
       "required_by": [],
       "manifest": {

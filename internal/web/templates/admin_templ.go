@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"context"
 	"fmt"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -37,7 +38,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = PageHeader(i18n.T(ctx, "admin.title")).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.title")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,19 +46,19 @@ func AdminHome(d AdminHomeData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StatCard(i18n.T(ctx, "admin.stats.total_users"), fmt.Sprint(d.TotalUsers), "").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_users"), Value: fmt.Sprint(d.TotalUsers), Sub: ""}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StatCard(i18n.T(ctx, "admin.stats.total_orgs"), fmt.Sprint(d.TotalOrgs), "").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_orgs"), Value: fmt.Sprint(d.TotalOrgs), Sub: ""}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StatCard(i18n.T(ctx, "admin.stats.active_subs"), fmt.Sprint(d.ActiveSubs), "").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.active_subs"), Value: fmt.Sprint(d.ActiveSubs), Sub: ""}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = StatCard(i18n.T(ctx, "admin.stats.mrr"), fmt.Sprintf("$%d", d.MRR), i18n.T(ctx, "admin.stats.mrr_hint")).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.mrr"), Value: fmt.Sprintf("$%d", d.MRR), Sub: i18n.T(ctx, "admin.stats.mrr_hint")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -65,7 +66,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SectionHeading(i18n.T(ctx, "admin.signups_heading"), "mt-10 mb-3").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.signups_heading"), Attrs: ui.Attrs{Class: "mt-10 mb-3"}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -82,7 +83,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 			}
 			ctx = templ.InitializeContext(ctx)
 			if len(d.RecentSignups) == 0 {
-				templ_7745c5c3_Err = TableEmpty(i18n.T(ctx, "admin.signups_empty")).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.TableEmpty(ui.TableEmptyOpts{Text: i18n.T(ctx, "admin.signups_empty")}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -99,7 +100,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(string(u.Email))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 29, Col: 48}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 30, Col: 48}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 					if templ_7745c5c3_Err != nil {
@@ -112,7 +113,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(u.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 30, Col: 19}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 31, Col: 19}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -125,7 +126,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(RelTime(d.Now, u.CreatedAt.Time))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 31, Col: 112}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 32, Col: 112}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -143,7 +144,7 @@ func AdminHome(d AdminHomeData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = TableCard("").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -172,12 +173,11 @@ func AdminUsersPage(d AdminUsersData) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = PageHeader(i18n.T(ctx, "admin.users.title")).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.users.title")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SearchToolbar("q", d.Query, i18n.T(ctx, "admin.users.search_placeholder"), i18n.T(ctx, "admin.users.search_aria"),
-			"/admin/users", "#table-container", "admin-search-indicator", "").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.users.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.users.search_aria"), GetURL: "/admin/users", Target: "#table-container", IndicatorID: "admin-search-indicator", Attrs: ui.Attrs{TestID: ""}}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -381,12 +381,12 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				if u.DisabledAt.Valid {
-					templ_7745c5c3_Err = Badge(i18n.T(ctx, "admin.users.status_disabled"), KindDanger).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_disabled"), Kind: ui.KindDanger}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = Badge(i18n.T(ctx, "admin.users.status_active"), KindSuccess).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_active"), Kind: ui.KindSuccess}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -556,11 +556,11 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = TableCard("").Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Pagination(d.Page, d.TotalPages, "/admin/users?q="+d.Query, "#table-container").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/users?q=" + d.Query, Target: "#table-container", Labels: pagerLabels(ctx)}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -600,7 +600,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 			templ_7745c5c3_Var29 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = PageHeader(i18n.T(ctx, "admin.orgs.title")).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.orgs.title")}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -729,7 +729,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = BadgeTagged(o.ProductKey, KindBrand, "plan-badge").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: o.ProductKey, Kind: ui.KindBrand, Attrs: ui.Attrs{TestID: "plan-badge"}}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -757,7 +757,7 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = TableCard("").Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -789,12 +789,12 @@ func roleBadge(role string) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		switch role {
 		case "admin":
-			templ_7745c5c3_Err = BadgeTagged(i18n.T(ctx, "admin.users.role_admin"), KindBrand, "role-badge").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.role_admin"), Kind: ui.KindBrand, Attrs: ui.Attrs{TestID: "role-badge"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		case "support":
-			templ_7745c5c3_Err = BadgeTagged(i18n.T(ctx, "admin.users.role_support"), KindWarn, "role-badge").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.role_support"), Kind: ui.KindWarn, Attrs: ui.Attrs{TestID: "role-badge"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -36,7 +36,7 @@
         "source": "internal/web/templates/files.templ",
         "target": "internal/web/templates/files.templ",
         "class": "templ",
-        "sha256": "374a564de360ed207462eb10b1d5f88cb56f1489d60348987cfb38b30613f6d7",
+        "sha256": "3bf437d5f3ea4bd4244d65f77ea2104414223d27eaf0b2bcf64de05d206fb439",
         "rewrite_module": true,
         "contract": false
       }
@@ -80,14 +80,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "files.choose": "Choose file",
@@ -117,6 +109,14 @@
         "files.title": "Archivos",
         "files.upload": "Subir"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

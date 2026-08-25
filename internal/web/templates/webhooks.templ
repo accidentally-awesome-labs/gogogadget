@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -10,7 +11,7 @@ import (
 // endpoints table + delivery log.
 templ WebhooksPage(d WebhooksData) {
 	@SettingsTabs("/app/settings/webhooks")
-	@PageHeader(i18n.T(ctx, "webhooks.title"))
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "webhooks.title")})
 
 	<div id="webhooks-container">
 		@WebhooksSection(d)
@@ -25,14 +26,14 @@ templ WebhooksSection(d WebhooksData) {
 			if d.Rotated {
 				<p class="text-sm text-warn-text mt-1" data-testid="webhook-rotate-note">{ i18n.T(ctx, "webhooks.rotate_note") }</p>
 			}
-			@CopyRow(d.NewSecret, i18n.T(ctx, "api.copy"), i18n.T(ctx, "api.copied"))
+			@ui.SecretReveal(ui.SecretRevealOpts{Value: d.NewSecret, CopyLabel: i18n.T(ctx, "api.copy"), CopiedLabel: i18n.T(ctx, "api.copied")})
 		</div>
 	}
 
 	<div class="card max-w-lg mb-6">
 		<h2 class="font-semibold mb-3">{ i18n.T(ctx, "webhooks.create_title") }</h2>
 		if d.URLErr != "" {
-			@Alert(KindDanger, "alert", "mb-3", "") {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Role: "alert", Attrs: ui.Attrs{Class: "mb-3", TestID: ""}}) {
 				{ d.URLErr }
 			}
 		}
@@ -56,13 +57,13 @@ templ WebhooksSection(d WebhooksData) {
 				}
 			</fieldset>
 			<button type="submit" class="btn btn-primary" data-testid="webhook-create">
-				@Spinner()
+				@ui.Spinner(ui.SpinnerOpts{})
 				{ i18n.T(ctx, "webhooks.create") }
 			</button>
 		</form>
 	</div>
 
-	@SectionHeading(i18n.T(ctx, "webhooks.endpoints_heading"), "mb-3")
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "webhooks.endpoints_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 	<div class="table-card max-w-3xl mb-6">
 		<table class="table">
 			<thead>
@@ -89,9 +90,9 @@ templ WebhooksSection(d WebhooksData) {
 						</td>
 						<td>
 							if ep.DisabledAt.Valid {
-								@Badge(i18n.T(ctx, "webhooks.disabled"), KindDanger)
+								@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "webhooks.disabled"), Kind: ui.KindDanger})
 							} else {
-								@Badge(i18n.T(ctx, "webhooks.enabled"), KindSuccess)
+								@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "webhooks.enabled"), Kind: ui.KindSuccess})
 							}
 						</td>
 						<td class="text-right">
@@ -115,7 +116,7 @@ templ WebhooksSection(d WebhooksData) {
 		</table>
 	</div>
 
-	@SectionHeading(i18n.T(ctx, "webhooks.deliveries_heading"), "mb-3")
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "webhooks.deliveries_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 	<div class="table-card max-w-3xl">
 		<table class="table">
 			<thead>
@@ -136,7 +137,7 @@ templ WebhooksSection(d WebhooksData) {
 					<tr data-testid="webhook-delivery-row">
 						<td><code class="code-chip">{ del.EventType }</code></td>
 						<td class="text-fg-muted text-xs max-w-0 truncate">{ del.EndpointUrl }</td>
-						<td>@Badge(del.Status, KindNeutral)</td>
+						<td>@ui.Badge(ui.BadgeOpts{Text: del.Status, Kind: ui.KindNeutral})</td>
 						<td class="text-fg-muted">{ fmt.Sprint(del.Attempts) }</td>
 						<td class="text-fg-muted">{ del.CreatedAt.Time.Format("Jan 2, 15:04") }</td>
 						<td class="text-right">

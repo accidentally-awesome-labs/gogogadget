@@ -37,7 +37,7 @@
         "source": "internal/web/templates/admin.templ",
         "target": "internal/web/templates/admin.templ",
         "class": "templ",
-        "sha256": "0e74ae5c4bbd4fd4bb30b978aab65c6a65c148e71b296a940ea7ee44588b82cb",
+        "sha256": "017a137314c62f67eb6cad3073feb1c7ee2a0ab61854ce8f3b05af3f5d68405b",
         "rewrite_module": true,
         "contract": false
       }
@@ -78,14 +78,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "admin.read_only": "Read-only",
@@ -109,6 +101,14 @@
         "admin.stats.total_users": "Total de usuarios",
         "admin.title": "Administración"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

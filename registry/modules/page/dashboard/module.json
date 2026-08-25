@@ -28,7 +28,7 @@
         "source": "internal/web/templates/dashboard.templ",
         "target": "internal/web/templates/dashboard.templ",
         "class": "templ",
-        "sha256": "b7c2ecb656fe1f6279d1c2045195e043835d62c1b0e82cfef5b1691d8dd0f456",
+        "sha256": "223a96f7190242ea42e8bdb8492eaad90ac896c662566e60759de5fa27cc2004",
         "rewrite_module": true,
         "contract": false
       }
@@ -69,14 +69,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "dashboard.checklist.create_project": "Create your first project",
@@ -108,6 +100,14 @@
         "dashboard.stats.team_members": "Miembros del equipo",
         "dashboard.title": "Panel"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }
