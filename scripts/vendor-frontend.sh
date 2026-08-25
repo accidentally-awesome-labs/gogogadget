@@ -38,6 +38,15 @@ fetch "@clerk/clerk-js@5.127.1" \
   "static/vendor/clerk.browser.js" \
   "d92e69c91eeb10ec1558b79376a35520ead6e358811319366c6c28a4fb88d5a0"
 
+# Chart.js is a lazily loaded engine, not shell runtime: it is fetched by
+# static/ui/engines.js only when a chart root appears. MIT licensed, and the
+# UMD bundle embeds @kurkle/color (also MIT); both notices travel inside the
+# committed file itself, which is what those licences require.
+fetch "chart.js@4.5.1" \
+  "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" \
+  "static/vendor/chartjs-4.5.1.umd.min.js" \
+  "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a"
+
 fetch "inter-variable@5.3.0" \
   "https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.3.0/files/inter-latin-wght-normal.woff2" \
   "static/fonts/inter-var.woff2" \

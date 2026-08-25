@@ -14,6 +14,7 @@
     "registry/modules/component/card/module.json",
     "registry/modules/component/center/module.json",
     "registry/modules/component/char-counter/module.json",
+    "registry/modules/component/chart/module.json",
     "registry/modules/component/chat-log/module.json",
     "registry/modules/component/chat-message/module.json",
     "registry/modules/component/checkbox-group/module.json",

@@ -1970,3 +1970,30 @@ func TestEngineRegistryRejectsDuplicateEngine(t *testing.T) {
 		t.Fatalf("error must name the contested engine: %v", err)
 	}
 }
+
+// An engine asset is loaded on demand by definition, so it must never appear in
+// the shell fragment list. Both are kind "script", and the fragment emitter
+// originally filtered on kind alone - which put Chart.js in the head of every
+// page and made the whole lazy-loading design a no-op.
+func TestAlpineFragmentRegistryExcludesEngineAssets(t *testing.T) {
+	mods := []Manifest{{
+		ID: "component/chart", Kind: ModuleComponent, Name: "chart", Revision: 1, Contract: 1,
+		Runtime: RuntimeContributions{Assets: []AssetContribution{
+			{ID: "chartjs", Path: "static/vendor/chartjs-4.5.1.umd.min.js", Kind: AssetScript,
+				Engine: "chartjs", Integrity: "sha256-AAAA"},
+			{ID: "ui-chart", Path: "static/ui/chart.js", Kind: AssetScript},
+		}},
+	}}
+	lock := Lock{Order: []string{"component/chart"}, Modules: []LockedModule{{ID: "component/chart"}}}
+
+	f, err := emitAlpineFragments(context.Background(), "example.com/app", lock, mods)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	if !strings.Contains(f.Content, "/static/ui/chart.js") {
+		t.Fatalf("the adapter is shell runtime and must load with the page:\n%s", f.Content)
+	}
+	if strings.Contains(f.Content, "chartjs-4.5.1") {
+		t.Fatalf("an engine asset in the shell list defeats the whole lazy design:\n%s", f.Content)
+	}
+}

@@ -2,6 +2,7 @@ package templates
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/a-h/templ"
 
@@ -59,4 +60,55 @@ func uiPlanCard(ctx context.Context, plan billing.Plan, current bool) ui.PlanCar
 // cannot be written as templ markup at the call site.
 func dataTableToolbar() templ.Component {
 	return ui.TableToolbar(ui.TableToolbarOpts{Label: "Project table controls"})
+}
+
+// galleryChartBase builds a two-series fixture for the chart demos. The values
+// are fixed so the visual baseline is deterministic.
+func galleryChartBase(id, title string, legend bool) ui.ChartBase {
+	days := []string{"Mon", "Tue", "Wed", "Thu", "Fri"}
+	shipped := []float64{12, 19, 14, 22, 17}
+	failed := []float64{1, 0, 3, 2, 1}
+	build := func(values []float64) []ui.ChartPoint {
+		points := make([]ui.ChartPoint, 0, len(days))
+		for i, day := range days {
+			points = append(points, ui.ChartPoint{
+				Key: day, Label: day,
+				Display: fmt.Sprintf("%.0f", values[i]),
+				Value:   values[i],
+			})
+		}
+		return points
+	}
+	return ui.ChartBase{
+		ID: id, Title: title,
+		Summary: "Shipped runs peaked on Thursday at 22; failures stayed at or below 3.",
+		XLabel:  "Day", YLabel: "Runs",
+		Legend: legend, Tooltip: true,
+		Series: []ui.ChartSeries{
+			{ID: "shipped", Label: "Shipped", Kind: ui.KindSuccess, Points: build(shipped)},
+			{ID: "failed", Label: "Failed", Kind: ui.KindDanger, Points: build(failed)},
+		},
+	}
+}
+
+// gallerySingleSeries builds a one-series fixture, for the shapes where a second
+// series would be meaningless.
+func gallerySingleSeries(id, title string) ui.ChartBase {
+	labels := []string{"Free", "Pro", "Team"}
+	values := []float64{48, 31, 21}
+	points := make([]ui.ChartPoint, 0, len(labels))
+	for i, label := range labels {
+		points = append(points, ui.ChartPoint{
+			Key: label, Label: label,
+			Display: fmt.Sprintf("%.0f%%", values[i]),
+			Value:   values[i],
+		})
+	}
+	return ui.ChartBase{
+		ID: id, Title: title,
+		Summary: "Free accounts are 48% of the total, Pro 31%, Team 21%.",
+		XLabel:  "Plan", YLabel: "Share",
+		Legend: true, Tooltip: true,
+		Series: []ui.ChartSeries{{ID: "share", Label: "Share", Kind: ui.KindBrand, Points: points}},
+	}
 }

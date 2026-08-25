@@ -20,36 +20,50 @@
 //   - `script-src 'self'` is never widened. The vendor file is installed into
 //     `static/vendor/` by the module, so it is same-origin and needs no CSP
 //     change at all.
-document.addEventListener("alpine:init", () => {
-  // uiEngine is the adapter every advanced widget's root carries. It requests
-  // its engine on init and does nothing else: the widget's own component waits
-  // for the ready event, so a widget whose engine fails to load stays in its
-  // server-rendered fallback state rather than half-initialising.
-  Alpine.data("uiEngine", () => ({
-    init() {
-      const name = this.$root.dataset.uiEngine;
-      if (!name) return;
-      loadEngine(name).then(
-        () => {
-          this.$root.dispatchEvent(
-            new CustomEvent("ui:engine-ready", { detail: { engine: name }, bubbles: false }),
-          );
-        },
-        (error) => {
-          // Failure is announced on the root rather than thrown: the widget is
-          // already showing its accessible fallback, and an unhandled rejection
-          // would say nothing to the component that needs to know.
-          this.$root.dispatchEvent(
-            new CustomEvent("ui:engine-failed", {
-              detail: { engine: name, error: String(error) },
-              bubbles: false,
-            }),
-          );
-        },
-      );
-    },
-  }));
-});
+// The loader is plain DOM code, not an Alpine component, and that is a
+// correction rather than a preference: an element can carry only one x-data, and
+// every widget that needs an engine already uses that slot for its own
+// behaviour. Making the loader a component meant a chart could be a chart or
+// could request its engine, never both.
+//
+// Scanning also covers content htmx inserts, which an Alpine-only adapter would
+// have missed on any fragment swap.
+function scan(root) {
+  const scope = root && root.querySelectorAll ? root : document;
+  scope.querySelectorAll("[data-ui-engine]").forEach((el) => {
+    const name = el.dataset.uiEngine;
+    if (!name || el.dataset.uiEngineRequested === "true") return;
+    // Marked before the request so a re-scan of the same subtree - htmx
+    // processes nested content more than once - does not queue it twice.
+    el.dataset.uiEngineRequested = "true";
+    loadEngine(name).then(
+      () => {
+        el.dispatchEvent(
+          new CustomEvent("ui:engine-ready", { detail: { engine: name }, bubbles: false }),
+        );
+      },
+      (error) => {
+        // Failure is announced on the root rather than thrown: the widget is
+        // already showing its accessible fallback, and an unhandled rejection
+        // would say nothing to the component that needs to know.
+        el.dispatchEvent(
+          new CustomEvent("ui:engine-failed", {
+            detail: { engine: name, error: String(error) },
+            bubbles: false,
+          }),
+        );
+      },
+    );
+  });
+}
+
+// Both hooks are needed: the first paint is not an htmx event, and an htmx swap
+// is not a document load.
+document.addEventListener("DOMContentLoaded", () => scan(document));
+document.addEventListener("htmx:after:process", (event) => scan(event.target));
+// A widget mounted by Alpine after boot - a dialog's contents, say - still needs
+// its engine, and alpine:initialized fires once Alpine has walked the tree.
+document.addEventListener("alpine:initialized", () => scan(document));
 
 // pending holds one promise per engine, so ten charts on a page trigger one
 // fetch. Keyed by name rather than by element: the second widget must wait on

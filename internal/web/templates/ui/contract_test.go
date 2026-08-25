@@ -257,6 +257,7 @@ func renderers() map[string]any {
 		"ConfirmAction": ConfirmAction, "ContextMenu": ContextMenu, "Drawer": Drawer, "HoverCard": HoverCard,
 		"AspectRatio": AspectRatio, "Attachment": Attachment, "Center": Center, "ColumnHeader": ColumnHeader, "DataTable": DataTable, "RowActions": RowActions, "ScrollArea": ScrollArea, "Section": Section, "SelectionBar": SelectionBar, "Split": Split, "StatGroup": StatGroup, "StickyBar": StickyBar, "TableToolbar": TableToolbar, "Tile": Tile, "Toolbar": Toolbar,
 		"NotificationItem": NotificationItem, "ActivityItem": ActivityItem, "Timeline": Timeline, "Comment": Comment, "CommentThread": CommentThread, "Composer": Composer, "ChatMessage": ChatMessage, "ChatLog": ChatLog, "MentionChip": MentionChip, "DeliveryStatus": DeliveryStatus, "UsageCard": UsageCard, "OnboardingChecklist": OnboardingChecklist, "SettingsSection": SettingsSection, "MemberItem": MemberItem,
+		"BarChart": BarChart, "LineChart": LineChart, "AreaChart": AreaChart, "DonutChart": DonutChart, "Sparkline": Sparkline, "ChartLegend": ChartLegend,
 	}
 }
 

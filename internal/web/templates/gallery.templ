@@ -912,6 +912,21 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Advanced — charts") {
+			<div class="space-y-6">
+				<p class="text-sm text-fg-muted">
+					Every figure below renders its caption, summary and data table on the server.
+					Chart.js is fetched only because these roots exist, and the canvas appears
+					only once it initialises — with scripts disabled the tables are the charts.
+				</p>
+				@ui.BarChart(ui.BarChartOpts{Chart: galleryChartBase("gallery-bar", "Runs per day", true)})
+				@ui.LineChart(ui.LineChartOpts{Chart: galleryChartBase("gallery-line", "Latency trend", true)})
+				@ui.AreaChart(ui.AreaChartOpts{Chart: galleryChartBase("gallery-area", "Cumulative storage", false)})
+				@ui.DonutChart(ui.DonutChartOpts{Chart: gallerySingleSeries("gallery-donut", "Plan mix")})
+				@ui.Sparkline(ui.SparklineOpts{Chart: gallerySingleSeries("gallery-spark", "Weekly signups")})
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

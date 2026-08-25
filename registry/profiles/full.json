@@ -21,6 +21,7 @@
       "component/card",
       "component/center",
       "component/char-counter",
+      "component/chart",
       "component/chat-log",
       "component/chat-message",
       "component/checkbox",

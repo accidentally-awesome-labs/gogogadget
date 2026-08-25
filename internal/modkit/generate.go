@@ -1840,7 +1840,11 @@ func emitAlpineFragments(ctx context.Context, modulePath string, lock Lock, grap
 	b.WriteString("var AlpineFragments = []string{\n")
 	for _, m := range orderedModules(lock, graph) {
 		for _, a := range m.Runtime.Assets {
-			if a.Kind == AssetScript {
+			// An engine asset is fetched on demand by the loader, so listing it
+			// here would put the vendor file in the head of every page and make
+			// the lazy design a no-op. Both kinds are "script"; the engine field
+			// is what separates shell runtime from an on-demand runtime.
+			if a.Kind == AssetScript && a.Engine == "" {
 				fmt.Fprintf(&b, "\t%s,\n", goString("/"+a.Path))
 			}
 		}

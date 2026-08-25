@@ -545,6 +545,17 @@ func TestEngineLoaderConstraints(t *testing.T) {
 	assert.Contains(t, source, "pending.has(name)")
 	assert.Contains(t, source, "pending.set(name")
 
+	// The loader must not be an Alpine component: an element carries only one
+	// x-data, and every widget needing an engine already uses that slot for its
+	// own behaviour. As a component, a chart could be a chart or could request
+	// its engine, never both.
+	assert.NotContains(t, source, "Alpine.data",
+		"the loader is plain DOM code so it never competes for the x-data slot")
+	assert.Contains(t, source, `document.addEventListener("htmx:after:process"`,
+		"content htmx inserts needs its engines too")
+	assert.Contains(t, source, "uiEngineRequested",
+		"htmx processes nested content more than once, so a root must be claimed before the request")
+
 	// The vendor file is same-origin, so no CSP widening is needed anywhere.
 	assert.NotContains(t, source, "crossorigin")
 	assert.NotContains(t, source, "unsafe-inline")
@@ -575,4 +586,34 @@ func TestShellLoadsEngineRegistryBeforeAlpine(t *testing.T) {
 	head = head[:strings.Index(head, "\n}")]
 	assert.NotContains(t, head, "page.Path",
 		"conditioning head assets on the entry page gives the same app different capabilities")
+}
+
+// A third-party instance must never be stored on an Alpine component. Alpine
+// wraps component state in a reactive Proxy, and a library that walks its own
+// deeply nested internals recurses through that proxy until the stack overflows,
+// then corrupts whatever it did reach. The observed symptom pointed at Chart.js
+// ("Maximum call stack size exceeded" inside alpine-csp, then "cannot set
+// fullSize") while the cause was ours, which is why this is a test and not a
+// comment.
+func TestEngineAdaptersKeepInstancesOutOfReactiveState(t *testing.T) {
+	adapters, err := filepath.Glob(filepath.Join("..", "..", "..", "static", "ui", "*.js"))
+	require.NoError(t, err)
+	require.NotEmpty(t, adapters)
+
+	for _, path := range adapters {
+		body, readErr := os.ReadFile(path)
+		require.NoError(t, readErr)
+		source := string(body)
+		// Only files that actually construct a third-party instance are in
+		// scope. The loader mentions data-ui-engine but owns no instances.
+		if !strings.Contains(source, "new window.") {
+			continue
+		}
+		assert.NotContains(t, source, "this.chart =",
+			"%s stores a third-party instance in Alpine state; use a WeakMap keyed by the root", path)
+		assert.Contains(t, source, "WeakMap",
+			"%s must hold its instances outside reactive state", path)
+		assert.Contains(t, source, "destroy()",
+			"%s must release its instance: Alpine calls destroy during DOM cleanup", path)
+	}
 }

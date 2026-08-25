@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/chart",
+    "kind": "component",
+    "name": "chart",
+    "revision": 1,
+    "contract": 1,
+    "title": "Charts",
+    "description": "Bar, line, area, donut and sparkline figures. Each renders a caption, summary and semantic data table always; the Chart.js visual is added on top only when the engine loads.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/chart.templ",
+        "target": "internal/web/templates/ui/chart.templ",
+        "class": "templ",
+        "sha256": "f299b6b50d6fe78a86d220dc485a23baa9c3aefe201ecbd72d1242f9399a6f07",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/chart_test.go",
+        "target": "internal/web/templates/ui/chart_test.go",
+        "class": "test",
+        "sha256": "eab9208d19316bdaa6e0b974a273c0a8e045605efa5e99e3cc486c6dc900b6b7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/chart.js",
+        "target": "static/ui/chart.js",
+        "class": "asset",
+        "sha256": "f52cf045f4f46c7be45834f4d68a206379f65c74a6b5a05a239562d2fdbba0f5",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/chartjs-4.5.1.umd.min.js",
+        "target": "static/vendor/chartjs-4.5.1.umd.min.js",
+        "class": "asset",
+        "sha256": "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "area-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table"
+        },
+        {
+          "name": "bar-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table"
+        },
+        {
+          "name": "chart-legend",
+          "family": "advanced"
+        },
+        {
+          "name": "donut-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table"
+        },
+        {
+          "name": "line-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table"
+        },
+        {
+          "name": "sparkline",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table"
+        }
+      ],
+      "assets": [
+        {
+          "id": "chartjs",
+          "path": "static/vendor/chartjs-4.5.1.umd.min.js",
+          "kind": "script",
+          "engine": "chartjs",
+          "integrity": "sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo="
+        },
+        {
+          "id": "ui-chart",
+          "path": "static/ui/chart.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

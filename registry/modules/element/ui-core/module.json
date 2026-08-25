@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "d615cf5ed533b80e80d941c0ef8fefbe73eb05ef07c75df73d73b30295d9ebf0",
+        "sha256": "b0f9387fb2991347890e8461290e7c1d30e9aab96098fa90944fdef6e7b9b019",
         "rewrite_module": true,
         "contract": false
       },
@@ -102,7 +102,7 @@
         "source": "static/ui/engines.js",
         "target": "static/ui/engines.js",
         "class": "asset",
-        "sha256": "ced579f12bd8d3812f9360a4fd49505cd174c07b861e728eec6e34528d3f2682",
+        "sha256": "fd5aab675b55c824272560321e81cd73c20f5ab8effb26e81c1f5f591b5837b6",
         "rewrite_module": false,
         "contract": false
       },
@@ -154,8 +154,7 @@
           "path": "static/ui/overlays.js",
           "kind": "script"
         }
-      ],
-      "ui": []
+      ]
     },
     "migrations": [],
     "environment": [],
