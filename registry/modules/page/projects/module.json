@@ -49,6 +49,17 @@
           "package": "internal/web",
           "handler": "handleProjects"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.projects",
+          "area": "app",
+          "route_id": "projects.index",
+          "label_key": "sidebar.projects",
+          "after": [
+            "nav.app.dashboard"
+          ]
+        }
       ]
     },
     "migrations": [],

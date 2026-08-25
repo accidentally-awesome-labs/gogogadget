@@ -74,6 +74,18 @@
           "package": "internal/web",
           "handler": "handleSitemap"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.resources.rss",
+          "area": "footer",
+          "group": "footer.resources",
+          "route_id": "seo.rss",
+          "label_key": "footer.rss",
+          "after": [
+            "footer.resources.api"
+          ]
+        }
       ]
     },
     "migrations": [],

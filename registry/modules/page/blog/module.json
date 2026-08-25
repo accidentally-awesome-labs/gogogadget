@@ -40,6 +40,30 @@
           "package": "internal/web",
           "handler": "handleContent"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.company.blog",
+          "area": "footer",
+          "group": "footer.company",
+          "route_id": "content.post.index",
+          "label_key": "footer.blog",
+          "before": [
+            "footer.company.about"
+          ],
+          "after": [
+            "footer.product.docs"
+          ]
+        },
+        {
+          "id": "nav.public.blog",
+          "area": "public",
+          "route_id": "content.post.index",
+          "label_key": "nav.blog",
+          "after": [
+            "nav.public.pricing"
+          ]
+        }
       ]
     },
     "migrations": [],

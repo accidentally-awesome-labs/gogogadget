@@ -54,6 +54,28 @@
           "package": "internal/web",
           "handler": "handleHome"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.company.about",
+          "area": "footer",
+          "group": "footer.company",
+          "href": "/#about",
+          "label_key": "footer.about"
+        },
+        {
+          "id": "footer.product.features",
+          "area": "footer",
+          "group": "footer.product",
+          "href": "/#features",
+          "label_key": "footer.features"
+        },
+        {
+          "id": "nav.public.features",
+          "area": "public",
+          "href": "/#features",
+          "label_key": "nav.features"
+        }
       ]
     },
     "migrations": [],

@@ -1040,6 +1040,8 @@ func localeModule(id, name string, locales map[string]map[string]string) Manifes
 	}
 }
 
+func localeLockOf(modules []Manifest) Lock { return localeLock(modules...) }
+
 func localeLock(modules ...Manifest) Lock {
 	lock := Lock{Schema: 1, RegistryCommit: testCommitA}
 	for _, m := range modules {
@@ -1165,5 +1167,130 @@ func TestI18nRegistryRejectsPlaceholderVerbChange(t *testing.T) {
 	})
 	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLock(a), []Manifest{a}); err == nil {
 		t.Fatal("GenerateAll accepted a changed format verb")
+	}
+}
+
+func navModule(id, name string, nav []NavigationContribution, routes []RouteContribution) Manifest {
+	return Manifest{
+		ID: id, Kind: ModulePage, Name: name,
+		Revision: 1, Contract: 1, Title: name, Description: name + " page.",
+		Files: []ManifestFile{}, Requires: []string{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{Navigation: nav, Routes: routes},
+	}
+}
+
+// Navigation is generated from route-linked declarations, so a nav link cannot
+// point at a route that does not exist and installing a page installs its own
+// nav entry.
+func TestChromeRegistryEmitsOrderedNavigation(t *testing.T) {
+	projects := navModule("page/projects", "projects",
+		[]NavigationContribution{{
+			ID: "nav.app.projects", Area: NavAreaApp, RouteID: "projects.index",
+			LabelKey: "sidebar.projects", Match: "/app/projects", After: []string{"nav.app.dashboard"},
+		}},
+		[]RouteContribution{{
+			ID: "projects.index", Method: "GET", Pattern: "/app/projects", Scope: RouteApp,
+			Handler: "handleProjects",
+		}})
+	dashboard := navModule("page/dashboard", "dashboard",
+		[]NavigationContribution{{
+			ID: "nav.app.dashboard", Area: NavAreaApp, RouteID: "dashboard.index",
+			LabelKey: "sidebar.dashboard", Match: "/app",
+		}},
+		[]RouteContribution{{
+			ID: "dashboard.index", Method: "GET", Pattern: "/app", Scope: RouteApp,
+			Handler: "handleDashboard",
+		}})
+	home := navModule("page/home", "home",
+		[]NavigationContribution{
+			{ID: "nav.public.features", Area: NavAreaPublic, Href: "/#features", LabelKey: "nav.features"},
+			{ID: "footer.product.features", Area: NavAreaFooter, Group: "footer.product",
+				Href: "/#features", LabelKey: "footer.features"},
+		}, nil)
+	settings := navModule("page/settings-webhooks", "settings-webhooks",
+		[]NavigationContribution{{
+			ID: "nav.settings.webhooks", Area: NavAreaSettings, RouteID: "settings-webhooks.index",
+			LabelKey: "settings.tab_webhooks", Flags: []string{"webhooks"},
+		}},
+		[]RouteContribution{{
+			ID: "settings-webhooks.index", Method: "GET", Pattern: "/app/settings/webhooks",
+			Scope: RouteApp, Package: "internal/web", Handler: "handleSettingsWebhooks",
+		}})
+
+	// Declared out of order on purpose: the emitted order must come from the
+	// declared before/after edges, not from manifest sequence.
+	mods := []Manifest{projects, dashboard, home, settings}
+	files, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var chrome string
+	for _, file := range files {
+		if file.Path == "internal/web/templates/chrome_registry_gen.go" {
+			chrome = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if chrome == "" {
+		t.Fatal("chrome registry was not emitted")
+	}
+
+	// Hrefs come from the route table, not from a hand-typed string. Match is
+	// omitted when it equals the href, because MatchPath already falls back to it.
+	for _, want := range []string{
+		`var AppNav = []NavItem{`,
+		`{ID: "nav.app.dashboard", LabelKey: "sidebar.dashboard", Href: "/app"}`,
+		`{ID: "nav.app.projects", LabelKey: "sidebar.projects", Href: "/app/projects"}`,
+		`var PublicNav = []NavItem{`,
+		`{ID: "nav.public.features", LabelKey: "nav.features", Href: "/#features"}`,
+		`var FooterColumns = []NavColumn{`,
+		`{TitleKey: "footer.product", Items: []NavItem{`,
+	} {
+		if !strings.Contains(chrome, want) {
+			t.Fatalf("chrome registry missing %s:\n%s", want, chrome)
+		}
+	}
+	if strings.Index(chrome, "nav.app.projects") < strings.Index(chrome, "nav.app.dashboard") {
+		t.Fatalf("declared after-edge was not honoured:\n%s", chrome)
+	}
+
+	// A flag-gated entry keeps its condition, so the settings tab strip still
+	// hides behind its feature flag.
+	var settingsNav string
+	for _, file := range files {
+		if file.Path == "internal/web/templates/settings_navigation_registry_gen.go" {
+			settingsNav = strings.Join(strings.Fields(file.Content), " ")
+		}
+	}
+	if !strings.Contains(settingsNav, `Flags: []string{"webhooks"}`) {
+		t.Fatalf("settings registry dropped the flag gate:\n%s", settingsNav)
+	}
+}
+
+// A nav entry pointing at a route no module registers is a dead link, and it is
+// exactly the drift that generation exists to prevent.
+func TestChromeRegistryRejectsUnknownRoute(t *testing.T) {
+	orphan := navModule("page/orphan", "orphan", []NavigationContribution{{
+		ID: "nav.app.orphan", Area: NavAreaApp, RouteID: "nope.index", LabelKey: "sidebar.orphan",
+	}}, nil)
+	mods := []Manifest{orphan}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted a nav entry pointing at an unregistered route")
+	}
+}
+
+// A cycle in before/after has no stable order; picking one silently would make
+// the sidebar depend on map iteration.
+func TestChromeRegistryRejectsOrderingCycle(t *testing.T) {
+	a := navModule("page/a", "a", []NavigationContribution{{
+		ID: "nav.app.a", Area: NavAreaApp, Href: "/app/a", LabelKey: "sidebar.a",
+		After: []string{"nav.app.b"},
+	}}, nil)
+	b := navModule("page/b", "b", []NavigationContribution{{
+		ID: "nav.app.b", Area: NavAreaApp, Href: "/app/b", LabelKey: "sidebar.b",
+		After: []string{"nav.app.a"},
+	}}, nil)
+	mods := []Manifest{a, b}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", localeLockOf(mods), mods); err == nil {
+		t.Fatal("GenerateAll accepted a navigation ordering cycle")
 	}
 }

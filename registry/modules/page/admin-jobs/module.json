@@ -47,6 +47,17 @@
           "package": "internal/web",
           "handler": "handleAdminJobs"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.jobs",
+          "area": "admin",
+          "route_id": "admin.jobs.index",
+          "label_key": "sidebar.admin_jobs",
+          "after": [
+            "nav.admin.audit"
+          ]
+        }
       ]
     },
     "migrations": [],

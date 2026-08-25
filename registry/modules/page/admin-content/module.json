@@ -48,6 +48,17 @@
           "package": "internal/web",
           "handler": "handleAdminContent"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.content",
+          "area": "admin",
+          "route_id": "admin.content.index",
+          "label_key": "sidebar.admin_content",
+          "after": [
+            "nav.admin.announcements"
+          ]
+        }
       ]
     },
     "migrations": [],

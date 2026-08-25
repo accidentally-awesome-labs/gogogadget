@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"context"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -43,22 +42,6 @@ templ SettingsTabs(active string) {
 	@Tabs(settingsTabs(ctx), active)
 }
 
-// settingsTabs assembles the tab list; the Webhooks tab obeys its feature
-// flag (WithWebhooksEnabled on the request context).
-func settingsTabs(ctx context.Context) []NavItem {
-	items := []NavItem{
-		{LabelKey: "settings.tab_account", Href: "/app/settings/account"},
-		{LabelKey: "settings.tab_org", Href: "/app/settings/org"},
-		{LabelKey: "settings.tab_billing", Href: "/app/settings/billing"},
-		{LabelKey: "settings.tab_api", Href: "/app/settings/api"},
-	}
-	if WebhooksEnabled(ctx) {
-		items = append(items, NavItem{LabelKey: "settings.tab_webhooks", Href: "/app/settings/webhooks"})
-	}
-	// Notification preferences are always available (not flag-gated).
-	items = append(items, NavItem{LabelKey: "settings.tab_notifications", Href: "/app/settings/notifications"})
-	return items
-}
 
 templ SettingsAccount(user sqlc.User, accountPortalURL string, dangerErr string) {
 	@SettingsTabs("/app/settings/account")

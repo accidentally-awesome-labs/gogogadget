@@ -48,6 +48,17 @@
           "package": "internal/web",
           "handler": "handleAdminFlags"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.flags",
+          "area": "admin",
+          "route_id": "admin.flags.index",
+          "label_key": "sidebar.admin_flags",
+          "after": [
+            "nav.admin.orgs"
+          ]
+        }
       ]
     },
     "migrations": [],

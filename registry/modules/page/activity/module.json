@@ -56,6 +56,17 @@
           "package": "internal/web",
           "handler": "handleActivity"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.activity",
+          "area": "app",
+          "route_id": "activity.index",
+          "label_key": "sidebar.activity",
+          "after": [
+            "nav.app.files"
+          ]
+        }
       ]
     },
     "migrations": [],

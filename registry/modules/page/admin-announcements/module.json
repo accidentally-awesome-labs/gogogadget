@@ -48,6 +48,17 @@
           "package": "internal/web",
           "handler": "handleAdminAnnouncements"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.announcements",
+          "area": "admin",
+          "route_id": "admin.announcements.index",
+          "label_key": "sidebar.admin_announcements",
+          "after": [
+            "nav.admin.jobs"
+          ]
+        }
       ]
     },
     "migrations": [],

@@ -322,14 +322,27 @@ type ContentTypeContribution struct {
 
 // NavigationContribution declares a generated navigation entry.
 type NavigationContribution struct {
-	ID       string   `json:"id"`
-	Area     NavArea  `json:"area"`
-	RouteID  string   `json:"route_id"`
-	LabelKey string   `json:"label_key"`
-	Before   []string `json:"before,omitempty"`
-	After    []string `json:"after,omitempty"`
-	Roles    []string `json:"roles,omitempty"`
-	Flags    []string `json:"flags,omitempty"`
+	ID   string  `json:"id"`
+	Area NavArea `json:"area"`
+	// RouteID names the route this entry links to, so the href comes from the
+	// same records the router is built from and a nav link cannot point at a
+	// route that does not exist. Empty only for a target that is not a route:
+	// an in-page anchor.
+	RouteID string `json:"route_id,omitempty"`
+	// Href is the literal target for a non-route entry. Exactly one of RouteID
+	// and Href is set.
+	Href string `json:"href,omitempty"`
+	// Match is the path prefix that marks this entry current. Empty means the
+	// href itself, which is right for a leaf and wrong for a section root.
+	Match    string `json:"match,omitempty"`
+	LabelKey string `json:"label_key"`
+	// Group is the footer column this entry belongs to, named by its title key.
+	// Footer entries only.
+	Group  string   `json:"group,omitempty"`
+	Before []string `json:"before,omitempty"`
+	After  []string `json:"after,omitempty"`
+	Roles  []string `json:"roles,omitempty"`
+	Flags  []string `json:"flags,omitempty"`
 }
 
 // SlotContribution declares a typed renderer in a generated shell slot.

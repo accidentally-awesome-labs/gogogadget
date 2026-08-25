@@ -50,6 +50,17 @@
           "package": "internal/web",
           "handler": "handleSettingsBilling"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.billing",
+          "area": "settings",
+          "route_id": "settings-billing.index",
+          "label_key": "settings.tab_billing",
+          "after": [
+            "nav.settings.org"
+          ]
+        }
       ]
     },
     "migrations": [],

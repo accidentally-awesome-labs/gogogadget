@@ -51,6 +51,17 @@
           "package": "internal/web",
           "handler": "handleSettingsOrg"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.org",
+          "area": "settings",
+          "route_id": "settings-organization.index",
+          "label_key": "settings.tab_org",
+          "after": [
+            "nav.settings.account"
+          ]
+        }
       ]
     },
     "migrations": [],

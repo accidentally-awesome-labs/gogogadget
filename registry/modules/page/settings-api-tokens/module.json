@@ -49,6 +49,17 @@
           "package": "internal/web",
           "handler": "handleSettingsAPI"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.api",
+          "area": "settings",
+          "route_id": "settings-api-tokens.index",
+          "label_key": "settings.tab_api",
+          "after": [
+            "nav.settings.billing"
+          ]
+        }
       ]
     },
     "migrations": [],

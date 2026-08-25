@@ -50,6 +50,17 @@
           "package": "internal/web",
           "handler": "handleAdminSchedules"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.schedules",
+          "area": "admin",
+          "route_id": "admin.schedules.index",
+          "label_key": "sidebar.admin_schedules",
+          "after": [
+            "nav.admin.content"
+          ]
+        }
       ]
     },
     "migrations": [],

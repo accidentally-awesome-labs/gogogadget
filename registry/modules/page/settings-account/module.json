@@ -49,6 +49,24 @@
           "package": "internal/web",
           "handler": "handleSettingsAccount"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.settings",
+          "area": "app",
+          "route_id": "settings-account.index",
+          "label_key": "sidebar.settings",
+          "match": "/app/settings",
+          "after": [
+            "nav.app.activity"
+          ]
+        },
+        {
+          "id": "nav.settings.account",
+          "area": "settings",
+          "route_id": "settings-account.index",
+          "label_key": "settings.tab_account"
+        }
       ]
     },
     "migrations": [],

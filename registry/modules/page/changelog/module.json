@@ -31,6 +31,30 @@
           "package": "internal/web",
           "handler": "handleContent"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.company.changelog",
+          "area": "footer",
+          "group": "footer.company",
+          "route_id": "content.release.index",
+          "label_key": "footer.changelog",
+          "before": [
+            "footer.company.about"
+          ],
+          "after": [
+            "footer.company.blog"
+          ]
+        },
+        {
+          "id": "nav.public.changelog",
+          "area": "public",
+          "route_id": "content.release.index",
+          "label_key": "nav.changelog",
+          "after": [
+            "nav.public.docs"
+          ]
+        }
       ]
     },
     "migrations": [],

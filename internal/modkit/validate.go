@@ -403,8 +403,22 @@ func validateNavigation(items []NavigationContribution, canonical bool) error {
 	seen := make(map[string]struct{}, len(items))
 	last := ""
 	for i, item := range items {
-		if strings.TrimSpace(item.ID) == "" || strings.TrimSpace(item.RouteID) == "" || strings.TrimSpace(item.LabelKey) == "" {
+		if strings.TrimSpace(item.ID) == "" || strings.TrimSpace(item.LabelKey) == "" {
 			return fmt.Errorf("manifest runtime navigation[%d] required field is empty", i)
+		}
+		// A link needs exactly one target. A route id is preferred, because the
+		// href then comes from the route table and cannot go stale; a literal
+		// href is for the targets that are not routes, such as an in-page anchor.
+		hasRoute := strings.TrimSpace(item.RouteID) != ""
+		hasHref := strings.TrimSpace(item.Href) != ""
+		if hasRoute == hasHref {
+			return fmt.Errorf("manifest runtime navigation[%d] must declare exactly one of route_id and href", i)
+		}
+		if hasHref && !strings.HasPrefix(item.Href, "/") {
+			return fmt.Errorf("manifest runtime navigation[%d] href must be site-relative", i)
+		}
+		if (item.Area == NavAreaFooter) != (strings.TrimSpace(item.Group) != "") {
+			return fmt.Errorf("manifest runtime navigation[%d] group is required for footer entries and forbidden elsewhere", i)
 		}
 		if !validNavArea(item.Area) {
 			return fmt.Errorf("manifest runtime navigation[%d] area is invalid", i)

@@ -50,6 +50,14 @@
           "package": "internal/web",
           "handler": "handleAdminHome"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.overview",
+          "area": "admin",
+          "route_id": "admin.overview.index",
+          "label_key": "sidebar.admin_overview"
+        }
       ]
     },
     "migrations": [],

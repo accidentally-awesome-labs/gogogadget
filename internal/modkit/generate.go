@@ -552,22 +552,29 @@ type routePattern struct {
 	pattern string
 }
 
-func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
-	type route struct {
-		moduleID string
-		contrib  RouteContribution
-		// contentType is non-empty for a route expanded from a content type
-		// declaration; its handler resolves the type by id.
-		contentType string
-	}
+// route is one concrete registered route: a declaration plus, for a route
+// expanded from a content type, the type its handler resolves by id.
+type route struct {
+	moduleID string
+	contrib  RouteContribution
+	// contentType is non-empty for a route expanded from a content type
+	// declaration; its handler resolves the type by id.
+	contentType string
+}
+
+// selectedRoutes is every route the router will register, in module order. A
+// content type declares public paths, not routes; expanding them here is what
+// lets the generator know every pattern and reserved prefix before boot,
+// instead of the router walking a registry at startup.
+//
+// Navigation resolves hrefs against this same set, so a nav link and the route
+// it points at can never disagree.
+func selectedRoutes(lock Lock, graph []Manifest) []route {
 	routes := make([]route, 0)
 	for _, m := range orderedModules(lock, graph) {
 		for _, r := range m.Runtime.Routes {
 			routes = append(routes, route{moduleID: m.ID, contrib: r})
 		}
-		// A content type declares public paths, not routes. Expanding them here
-		// is what lets the generator know every pattern and reserved prefix
-		// before boot, instead of the router walking a registry at startup.
 		for _, ct := range m.Runtime.ContentTypes {
 			for _, path := range ct.Paths {
 				routes = append(routes, route{moduleID: m.ID, contrib: RouteContribution{
@@ -584,6 +591,11 @@ func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph
 			}
 		}
 	}
+	return routes
+}
+
+func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	routes := selectedRoutes(lock, graph)
 	sort.Slice(routes, func(i, j int) bool {
 		if routes[i].contrib.Pattern != routes[j].contrib.Pattern {
 			return routes[i].contrib.Pattern < routes[j].contrib.Pattern
@@ -731,38 +743,297 @@ func routeEnabledName(r RouteContribution) string {
 	return r.Enabled
 }
 
+// emitChromeRegistry renders the shell navigation from route-linked
+// declarations. Hrefs come from the same route records the router is built
+// from, so a nav link cannot point at a route no module registers, and a page
+// module carries its own sidebar entry rather than editing a central list.
 func emitChromeRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	nav, err := resolveNavigation(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package templates\n\n")
-	b.WriteString("// ChromeRegistry is the route-ID-based navigation registry.\n")
+
+	for _, area := range []struct {
+		area NavArea
+		name string
+		note string
+	}{
+		{NavAreaPublic, "PublicNav", "the marketing header"},
+		{NavAreaApp, "AppNav", "the application sidebar"},
+		{NavAreaAdmin, "AdminNav", "the admin sidebar"},
+	} {
+		fmt.Fprintf(&b, "// %s is %s, in declared order.\n", area.name, area.note)
+		fmt.Fprintf(&b, "var %s = []NavItem{\n", area.name)
+		for _, entry := range nav[area.area] {
+			b.WriteString("\t" + navItemLiteral(entry) + ",\n")
+		}
+		b.WriteString("}\n\n")
+	}
+
+	// Footer columns keep their declared grouping; a column exists because a
+	// module put an entry in it.
+	b.WriteString("// FooterColumns are the footer link columns, in declared order.\n")
+	b.WriteString("var FooterColumns = []NavColumn{\n")
+	for _, group := range footerGroups(nav[NavAreaFooter]) {
+		fmt.Fprintf(&b, "\t{TitleKey: %s, Items: []NavItem{\n", goString(group.title))
+		for _, entry := range group.entries {
+			b.WriteString("\t\t" + navItemLiteral(entry) + ",\n")
+		}
+		b.WriteString("\t}},\n")
+	}
+	b.WriteString("}\n\n")
+
+	b.WriteString("// ChromeRegistry is every navigation entry ID in declared order, which is\n")
+	b.WriteString("// what a completeness check compares against.\n")
 	b.WriteString("var ChromeRegistry = []string{\n")
-	for _, m := range orderedModules(lock, graph) {
-		for _, n := range m.Runtime.Navigation {
-			fmt.Fprintf(&b, "\t%s,\n", goString(n.ID))
+	for _, area := range []NavArea{NavAreaPublic, NavAreaApp, NavAreaAdmin, NavAreaFooter, NavAreaSettings} {
+		for _, entry := range nav[area] {
+			fmt.Fprintf(&b, "\t%s,\n", goString(entry.contrib.ID))
 		}
 	}
 	b.WriteString("}\n")
+
 	_ = ctx
 	return &GeneratedFile{Path: "internal/web/templates/chrome_registry_gen.go", Content: b.String()}, nil
 }
 
+// emitSettingsNavigationRegistry renders the settings tab strip. Tabs keep
+// their declared role and flag conditions, evaluated per request, because a tab
+// whose page 404s for the viewer is worse than an absent tab.
 func emitSettingsNavigationRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	nav, err := resolveNavigation(lock, graph)
+	if err != nil {
+		return nil, err
+	}
+
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package templates\n\n")
-	b.WriteString("// SettingsNavigationRegistry lists settings-area entries.\n")
-	b.WriteString("var SettingsNavigationRegistry = []string{\n")
-	for _, m := range orderedModules(lock, graph) {
-		for _, n := range m.Runtime.Navigation {
-			if n.Area == NavAreaSettings {
-				fmt.Fprintf(&b, "\t%s,\n", goString(n.ID))
-			}
-		}
+	b.WriteString("// SettingsTab is one settings tab and the conditions under which it is shown.\n")
+	b.WriteString("type SettingsTab struct {\n\tItem  NavItem\n\tRoles []string\n\tFlags []string\n}\n\n")
+	b.WriteString("// SettingsNavigationRegistry is the declared settings tabs in order. Use\n")
+	b.WriteString("// settingsTabs(ctx) to get the subset the current viewer may see.\n")
+	b.WriteString("var SettingsNavigationRegistry = []SettingsTab{\n")
+	for _, entry := range nav[NavAreaSettings] {
+		fmt.Fprintf(&b, "\t{Item: NavItem%s, Roles: %s, Flags: %s},\n",
+			navItemLiteral(entry), goStringSlice(entry.contrib.Roles), goStringSlice(entry.contrib.Flags))
 	}
 	b.WriteString("}\n")
 	_ = ctx
 	return &GeneratedFile{Path: "internal/web/templates/settings_navigation_registry_gen.go", Content: b.String()}, nil
+}
+
+// navEntry is one resolved navigation entry: its declaration plus the href
+// resolved from the route table.
+type navEntry struct {
+	contrib NavigationContribution
+	href    string
+	module  string
+}
+
+func navItemLiteral(e navEntry) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "{ID: %s, LabelKey: %s, Href: %s",
+		goString(e.contrib.ID), goString(e.contrib.LabelKey), goString(e.href))
+	// Match is omitted when it equals the href, which is the common leaf case;
+	// the accessor already falls back to Href.
+	if e.contrib.Match != "" && e.contrib.Match != e.href {
+		fmt.Fprintf(&b, ", Match: %s", goString(e.contrib.Match))
+	}
+	b.WriteString("}")
+	return b.String()
+}
+
+func goStringSlice(values []string) string {
+	if len(values) == 0 {
+		return "nil"
+	}
+	parts := make([]string, 0, len(values))
+	for _, v := range values {
+		parts = append(parts, goString(v))
+	}
+	return "[]string{" + strings.Join(parts, ", ") + "}"
+}
+
+type footerGroup struct {
+	title   string
+	entries []navEntry
+}
+
+// footerGroups preserves the order columns are first mentioned in, so a module
+// adding an entry to an existing column does not reorder the footer.
+func footerGroups(entries []navEntry) []footerGroup {
+	var groups []footerGroup
+	index := make(map[string]int)
+	for _, entry := range entries {
+		title := entry.contrib.Group
+		if _, ok := index[title]; !ok {
+			index[title] = len(groups)
+			groups = append(groups, footerGroup{title: title})
+		}
+		at := index[title]
+		groups[at].entries = append(groups[at].entries, entry)
+	}
+	return groups
+}
+
+// resolveNavigation validates every declaration and orders each area. Ordering
+// is a topological sort over the declared before/after edges with manifest
+// order as the tiebreak, so the result is deterministic and a cycle is an
+// error rather than whichever order a map happened to produce.
+func resolveNavigation(lock Lock, graph []Manifest) (map[NavArea][]navEntry, error) {
+	routes := make(map[string]RouteContribution)
+	for _, r := range selectedRoutes(lock, graph) {
+		routes[r.contrib.ID] = r.contrib
+	}
+
+	byArea := make(map[NavArea][]navEntry)
+	seen := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		for _, n := range m.Runtime.Navigation {
+			if previous, clash := seen[n.ID]; clash {
+				return nil, fmt.Errorf("navigation entry %q is declared by both %s and %s", n.ID, previous, m.ID)
+			}
+			seen[n.ID] = m.ID
+
+			switch {
+			case n.RouteID != "" && n.Href != "":
+				return nil, fmt.Errorf("navigation entry %s declares both a route and an href", n.ID)
+			case n.RouteID == "" && n.Href == "":
+				return nil, fmt.Errorf("navigation entry %s declares no target", n.ID)
+			}
+			href := n.Href
+			if n.RouteID != "" {
+				route, ok := routes[n.RouteID]
+				if !ok {
+					return nil, fmt.Errorf("navigation entry %s points at unregistered route %q", n.ID, n.RouteID)
+				}
+				if route.Method != http.MethodGet {
+					return nil, fmt.Errorf("navigation entry %s points at %s %s, which a link cannot follow",
+						n.ID, route.Method, route.Pattern)
+				}
+				href = route.Pattern
+			}
+			if n.LabelKey == "" {
+				return nil, fmt.Errorf("navigation entry %s has no label key", n.ID)
+			}
+			if n.Area == NavAreaFooter && n.Group == "" {
+				return nil, fmt.Errorf("footer entry %s declares no column", n.ID)
+			}
+			if n.Area != NavAreaFooter && n.Group != "" {
+				return nil, fmt.Errorf("navigation entry %s declares a footer column outside the footer", n.ID)
+			}
+			// A condition the runtime does not recognise evaluates as unmet, so a
+			// typo would silently hide an entry. Refuse it here instead.
+			for _, flag := range n.Flags {
+				if flag != "webhooks" {
+					return nil, fmt.Errorf("navigation entry %s gates on unknown flag %q", n.ID, flag)
+				}
+			}
+			for _, role := range n.Roles {
+				if role != "staff" && role != "admin" {
+					return nil, fmt.Errorf("navigation entry %s gates on unknown role %q", n.ID, role)
+				}
+			}
+			byArea[n.Area] = append(byArea[n.Area], navEntry{contrib: n, href: href, module: m.ID})
+		}
+	}
+
+	for area, entries := range byArea {
+		ordered, err := orderNavEntries(entries)
+		if err != nil {
+			return nil, fmt.Errorf("navigation area %s: %w", area, err)
+		}
+		byArea[area] = ordered
+	}
+	return byArea, nil
+}
+
+// orderNavEntries topologically sorts one area. Declaration order is the
+// tiebreak, so an area with no constraints keeps the order modules were
+// installed in.
+func orderNavEntries(entries []navEntry) ([]navEntry, error) {
+	position := make(map[string]int, len(entries))
+	for i, e := range entries {
+		position[e.contrib.ID] = i
+	}
+
+	// after[x] holds the entries that must precede x.
+	predecessors := make(map[string]map[string]bool, len(entries))
+	for _, e := range entries {
+		if predecessors[e.contrib.ID] == nil {
+			predecessors[e.contrib.ID] = make(map[string]bool)
+		}
+	}
+	edge := func(earlier, later string) error {
+		if _, ok := position[later]; !ok {
+			return fmt.Errorf("entry %q orders against unknown entry %q", earlier, later)
+		}
+		if predecessors[later] == nil {
+			predecessors[later] = make(map[string]bool)
+		}
+		predecessors[later][earlier] = true
+		return nil
+	}
+	for _, e := range entries {
+		for _, other := range e.contrib.After {
+			if _, ok := position[other]; !ok {
+				return nil, fmt.Errorf("entry %q declares after %q, which is not in this area", e.contrib.ID, other)
+			}
+			if err := edge(other, e.contrib.ID); err != nil {
+				return nil, err
+			}
+		}
+		for _, other := range e.contrib.Before {
+			if _, ok := position[other]; !ok {
+				return nil, fmt.Errorf("entry %q declares before %q, which is not in this area", e.contrib.ID, other)
+			}
+			if err := edge(e.contrib.ID, other); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	remaining := make(map[string]bool, len(entries))
+	for _, e := range entries {
+		remaining[e.contrib.ID] = true
+	}
+	out := make([]navEntry, 0, len(entries))
+	for len(out) < len(entries) {
+		// Lowest declaration index whose predecessors are all placed: a stable
+		// choice, so the same declarations always emit the same order.
+		best := -1
+		for i, e := range entries {
+			if !remaining[e.contrib.ID] {
+				continue
+			}
+			ready := true
+			for pred := range predecessors[e.contrib.ID] {
+				if remaining[pred] {
+					ready = false
+					break
+				}
+			}
+			if ready && (best == -1 || i < best) {
+				best = i
+			}
+		}
+		if best == -1 {
+			var stuck []string
+			for id := range remaining {
+				stuck = append(stuck, id)
+			}
+			sort.Strings(stuck)
+			return nil, fmt.Errorf("ordering cycle among %s", strings.Join(stuck, ", "))
+		}
+		out = append(out, entries[best])
+		delete(remaining, entries[best].contrib.ID)
+	}
+	return out, nil
 }
 
 func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {

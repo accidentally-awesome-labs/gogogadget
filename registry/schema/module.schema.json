@@ -629,9 +629,13 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "string",
-          "minLength": 1
+        "after": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
         },
         "area": {
           "type": "string",
@@ -643,31 +647,7 @@
             "settings"
           ]
         },
-        "route_id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "label_key": {
-          "type": "string",
-          "minLength": 1
-        },
         "before": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "uniqueItems": true
-        },
-        "after": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          },
-          "uniqueItems": true
-        },
-        "roles": {
           "type": "array",
           "items": {
             "type": "string",
@@ -682,12 +662,43 @@
             "minLength": 1
           },
           "uniqueItems": true
+        },
+        "group": {
+          "type": "string",
+          "minLength": 1
+        },
+        "href": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "match": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "route_id": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": [
-        "id",
         "area",
-        "route_id",
+        "id",
         "label_key"
       ]
     },

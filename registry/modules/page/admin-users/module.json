@@ -48,6 +48,17 @@
           "package": "internal/web",
           "handler": "handleAdminUsers"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.users",
+          "area": "admin",
+          "route_id": "admin.users.index",
+          "label_key": "sidebar.admin_users",
+          "after": [
+            "nav.admin.overview"
+          ]
+        }
       ]
     },
     "migrations": [],

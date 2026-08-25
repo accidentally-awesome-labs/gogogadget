@@ -4,12 +4,18 @@ import (
 	"context"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/identity"
 )
 
 // NavItem is one chrome link. LabelKey is an i18n key, not a resolved string:
 // these are package-level values and translation needs the request context.
 // Match is the path prefix that marks the item current (defaults to Href).
-type NavItem struct{ LabelKey, Href, Match string }
+type NavItem struct {
+	// ID is the stable declaration id, which is what another module orders
+	// itself against.
+	ID                    string
+	LabelKey, Href, Match string
+}
 
 // MatchPath is the prefix navCurrent compares the request path against.
 func (n NavItem) MatchPath() string {
@@ -25,68 +31,20 @@ type NavColumn struct {
 	Items    []NavItem
 }
 
-// Chrome is the product identity and navigation a rebrand edits. Everything
-// here is read at render time, so overriding these values in an init() or at
-// startup restyles the shell without touching a template.
+// Chrome is the product identity a rebrand edits. Navigation itself is not
+// here: PublicNav, AppNav, AdminNav, FooterColumns, and the settings tabs are
+// generated from module declarations (chrome_registry_gen.go), so installing a
+// page installs its own entry and removing it takes the entry with it. Hrefs
+// come from the route table, so a nav link cannot outlive its route.
 //
-// Page CONTENT does not belong here — the marketing copy in home.templ stays
-// with the page that renders it. This is the frame, not the picture.
+// Page CONTENT does not belong here either — the marketing copy in home.templ
+// stays with the page that renders it. This is the frame, not the picture.
 var (
 	BrandName = "GoGoGadget"
 
 	// DocsEditBase is the prefix of the "edit this page" link on every docs
 	// page; a fork points it at its own repository.
 	DocsEditBase = "https://github.com/gogogadget/gogogadget/edit/main/content/docs/"
-
-	PublicNav = []NavItem{
-		{LabelKey: "nav.features", Href: "/#features"},
-		{LabelKey: "nav.pricing", Href: "/pricing"},
-		{LabelKey: "nav.blog", Href: "/blog"},
-		{LabelKey: "nav.docs", Href: "/docs"},
-		{LabelKey: "nav.changelog", Href: "/changelog"},
-	}
-
-	AppNav = []NavItem{
-		{LabelKey: "sidebar.dashboard", Href: "/app", Match: "/app"},
-		{LabelKey: "sidebar.projects", Href: "/app/projects", Match: "/app/projects"},
-		{LabelKey: "sidebar.files", Href: "/app/files", Match: "/app/files"},
-		{LabelKey: "sidebar.activity", Href: "/app/activity", Match: "/app/activity"},
-		{LabelKey: "sidebar.settings", Href: "/app/settings/account", Match: "/app/settings"},
-	}
-
-	AdminNav = []NavItem{
-		{LabelKey: "sidebar.admin_overview", Href: "/admin", Match: "/admin"},
-		{LabelKey: "sidebar.admin_users", Href: "/admin/users", Match: "/admin/users"},
-		{LabelKey: "sidebar.admin_orgs", Href: "/admin/orgs", Match: "/admin/orgs"},
-		{LabelKey: "sidebar.admin_flags", Href: "/admin/flags", Match: "/admin/flags"},
-		{LabelKey: "sidebar.admin_audit", Href: "/admin/audit", Match: "/admin/audit"},
-		{LabelKey: "sidebar.admin_jobs", Href: "/admin/jobs", Match: "/admin/jobs"},
-		{LabelKey: "sidebar.admin_announcements", Href: "/admin/announcements", Match: "/admin/announcements"},
-		{LabelKey: "sidebar.admin_content", Href: "/admin/content", Match: "/admin/content"},
-		{LabelKey: "sidebar.admin_schedules", Href: "/admin/schedules", Match: "/admin/schedules"},
-	}
-
-	FooterColumns = []NavColumn{
-		{TitleKey: "footer.product", Items: []NavItem{
-			{LabelKey: "footer.features", Href: "/#features"},
-			{LabelKey: "footer.pricing", Href: "/pricing"},
-			{LabelKey: "footer.docs", Href: "/docs"},
-		}},
-		{TitleKey: "footer.company", Items: []NavItem{
-			{LabelKey: "footer.blog", Href: "/blog"},
-			{LabelKey: "footer.changelog", Href: "/changelog"},
-			{LabelKey: "footer.about", Href: "/#about"},
-		}},
-		{TitleKey: "footer.resources", Items: []NavItem{
-			{LabelKey: "footer.getting_started", Href: "/docs/getting-started"},
-			{LabelKey: "footer.api", Href: "/docs/api"},
-			{LabelKey: "footer.rss", Href: "/rss.xml"},
-		}},
-		{TitleKey: "footer.legal", Items: []NavItem{
-			{LabelKey: "footer.terms", Href: "/terms"},
-			{LabelKey: "footer.privacy", Href: "/privacy"},
-		}},
-	}
 )
 
 // NavLabel resolves a NavItem's label in the request locale.
@@ -94,17 +52,69 @@ func NavLabel(ctx context.Context, item NavItem) string {
 	return i18n.T(ctx, item.LabelKey)
 }
 
-// ChromeCatalogKeys is every i18n key the chrome config and the settings tabs
-// reference. The template scanner's literal regexp cannot see keys that arrive
-// as struct VALUES, so TestChromeKeysExistInCatalogs walks this instead.
+// settingsTabs is the tabs the current viewer may see. A tab whose page would
+// 404 or 403 for them is worse than an absent tab, so the declared role and
+// flag conditions are evaluated per request rather than baked in.
+func settingsTabs(ctx context.Context) []NavItem {
+	items := make([]NavItem, 0, len(SettingsNavigationRegistry))
+	for _, tab := range SettingsNavigationRegistry {
+		if navConditionsMet(ctx, tab.Roles, tab.Flags) {
+			items = append(items, tab.Item)
+		}
+	}
+	return items
+}
+
+// navConditionsMet evaluates a declared entry's conditions against the current
+// request. An unrecognised condition name is treated as unmet: showing a gated
+// entry because of a typo is the worse failure, and generation refuses unknown
+// names anyway, so this is a second line rather than the only one.
+func navConditionsMet(ctx context.Context, roles, flags []string) bool {
+	for _, flag := range flags {
+		if flag != navFlagWebhooks || !WebhooksEnabled(ctx) {
+			return false
+		}
+	}
+	user := identity.UserFrom(ctx)
+	for _, role := range roles {
+		switch role {
+		case navRoleStaff:
+			if !identity.IsStaff(user) {
+				return false
+			}
+		case navRoleAdmin:
+			if !identity.IsAdmin(user) {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+// The condition names a manifest may use. Generation validates declarations
+// against these same names, so a typo is caught before it can hide a tab.
+const (
+	navFlagWebhooks = "webhooks"
+	navRoleStaff    = "staff"
+	navRoleAdmin    = "admin"
+)
+
+// ChromeCatalogKeys is every i18n key the generated chrome references. The
+// template scanner's literal regexp cannot see keys that arrive as struct
+// VALUES, so TestChromeKeysExistInCatalogs walks this instead.
 func ChromeCatalogKeys() []string {
 	keys := []string{"footer.copyright"}
-	// A bare context leaves every feature gate at its default, which for the
-	// webhooks tab is "shown" — so this covers the whole tab list.
-	for _, group := range [][]NavItem{PublicNav, AppNav, AdminNav, settingsTabs(context.Background())} {
+	for _, group := range [][]NavItem{PublicNav, AppNav, AdminNav} {
 		for _, item := range group {
 			keys = append(keys, item.LabelKey)
 		}
+	}
+	// Every declared tab, not just the ones the current viewer sees: a gated
+	// tab still needs its label translated.
+	for _, tab := range SettingsNavigationRegistry {
+		keys = append(keys, tab.Item.LabelKey)
 	}
 	for _, col := range FooterColumns {
 		keys = append(keys, col.TitleKey)

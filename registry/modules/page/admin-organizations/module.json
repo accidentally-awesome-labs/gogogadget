@@ -48,6 +48,17 @@
           "package": "internal/web",
           "handler": "handleAdminOrgs"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.orgs",
+          "area": "admin",
+          "route_id": "admin.organizations.index",
+          "label_key": "sidebar.admin_orgs",
+          "after": [
+            "nav.admin.users"
+          ]
+        }
       ]
     },
     "migrations": [],

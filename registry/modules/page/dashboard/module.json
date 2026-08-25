@@ -57,6 +57,14 @@
           "package": "internal/web",
           "handler": "handleDashboard"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.dashboard",
+          "area": "app",
+          "route_id": "dashboard.index",
+          "label_key": "sidebar.dashboard"
+        }
       ]
     },
     "migrations": [],

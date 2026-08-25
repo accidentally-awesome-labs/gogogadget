@@ -54,6 +54,18 @@
           "package": "internal/web",
           "handler": "handleTerms"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.legal.terms",
+          "area": "footer",
+          "group": "footer.legal",
+          "route_id": "terms.show",
+          "label_key": "footer.terms",
+          "after": [
+            "footer.resources.rss"
+          ]
+        }
       ]
     },
     "migrations": [],

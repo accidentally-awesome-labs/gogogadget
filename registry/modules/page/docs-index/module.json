@@ -47,6 +47,47 @@
           "package": "internal/web",
           "handler": "handleDocsIndex"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.product.docs",
+          "area": "footer",
+          "group": "footer.product",
+          "route_id": "docs.index",
+          "label_key": "footer.docs",
+          "after": [
+            "footer.product.pricing"
+          ]
+        },
+        {
+          "id": "footer.resources.api",
+          "area": "footer",
+          "group": "footer.resources",
+          "href": "/docs/api",
+          "label_key": "footer.api",
+          "after": [
+            "footer.resources.getting_started"
+          ]
+        },
+        {
+          "id": "footer.resources.getting_started",
+          "area": "footer",
+          "group": "footer.resources",
+          "href": "/docs/getting-started",
+          "label_key": "footer.getting_started",
+          "after": [
+            "footer.company.about"
+          ]
+        },
+        {
+          "id": "nav.public.docs",
+          "area": "public",
+          "route_id": "docs.index",
+          "label_key": "nav.docs",
+          "after": [
+            "nav.public.blog"
+          ]
+        }
       ]
     },
     "migrations": [],

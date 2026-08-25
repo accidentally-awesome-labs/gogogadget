@@ -54,6 +54,27 @@
           "package": "internal/web",
           "handler": "handlePricing"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.product.pricing",
+          "area": "footer",
+          "group": "footer.product",
+          "route_id": "pricing.show",
+          "label_key": "footer.pricing",
+          "after": [
+            "footer.product.features"
+          ]
+        },
+        {
+          "id": "nav.public.pricing",
+          "area": "public",
+          "route_id": "pricing.show",
+          "label_key": "nav.pricing",
+          "after": [
+            "nav.public.features"
+          ]
+        }
       ]
     },
     "migrations": [],

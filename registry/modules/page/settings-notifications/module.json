@@ -49,6 +49,17 @@
           "package": "internal/web",
           "handler": "handleSettingsNotifications"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.notifications",
+          "area": "settings",
+          "route_id": "settings-notifications.index",
+          "label_key": "settings.tab_notifications",
+          "after": [
+            "nav.settings.webhooks"
+          ]
+        }
       ]
     },
     "migrations": [],

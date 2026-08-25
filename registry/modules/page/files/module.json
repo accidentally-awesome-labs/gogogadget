@@ -49,6 +49,17 @@
           "package": "internal/web",
           "handler": "handleFiles"
         }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.files",
+          "area": "app",
+          "route_id": "files.index",
+          "label_key": "sidebar.files",
+          "after": [
+            "nav.app.projects"
+          ]
+        }
       ]
     },
     "migrations": [],

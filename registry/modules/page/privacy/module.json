@@ -54,6 +54,18 @@
           "package": "internal/web",
           "handler": "handlePrivacy"
         }
+      ],
+      "navigation": [
+        {
+          "id": "footer.legal.privacy",
+          "area": "footer",
+          "group": "footer.legal",
+          "route_id": "privacy.show",
+          "label_key": "footer.privacy",
+          "after": [
+            "footer.legal.terms"
+          ]
+        }
       ]
     },
     "migrations": [],
