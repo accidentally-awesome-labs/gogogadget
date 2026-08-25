@@ -66,6 +66,9 @@ templ headScripts(page Page) {
 	for _, fragment := range ui.AlpineFragments {
 		<script defer src={ fragment }></script>
 	}
+	// The engine registry is data, not behaviour: it tells the loader which
+	// versioned vendor file each engine maps to and what its integrity hash is.
+	<script defer src="/static/ui-engines.js"></script>
 	<script defer src="/static/ui-components.js"></script>
 	<script defer src="/static/vendor/alpine-csp.min.js"></script>
 	if page.ClerkPublishableKey != "" {

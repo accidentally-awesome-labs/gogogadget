@@ -435,3 +435,38 @@ func TestValidateUIAcceptsKebabCaseComponentNames(t *testing.T) {
 		}
 	}
 }
+
+// An engine asset with no integrity is a lazily injected script that can be
+// swapped without anything noticing, so the manifest must not express one.
+func TestValidateAssetsRequiresIntegrityForEngines(t *testing.T) {
+	engine := func(integrity string) []AssetContribution {
+		return []AssetContribution{{
+			ID: "chartjs", Path: "static/vendor/chart.js", Kind: AssetScript,
+			Engine: "chartjs", Integrity: integrity,
+		}}
+	}
+	if err := validateAssets(engine("sha256-AAAA"), true); err != nil {
+		t.Fatalf("a pinned engine asset is valid: %v", err)
+	}
+	if err := validateAssets(engine(""), true); err == nil {
+		t.Fatal("an engine asset with no integrity must be rejected")
+	}
+
+	// An integrity value with no engine is meaningless: the shell loads its own
+	// scripts from tags the templates own, where the integrity would be ignored.
+	orphan := []AssetContribution{{
+		ID: "ui-overlays", Path: "static/ui/overlays.js", Kind: AssetScript,
+		Integrity: "sha256-AAAA",
+	}}
+	if err := validateAssets(orphan, true); err == nil {
+		t.Fatal("integrity without an engine must be rejected")
+	}
+
+	// The engine name reaches a data attribute selector, so it follows the same
+	// kebab-case rule component names do.
+	bad := engine("sha256-AAAA")
+	bad[0].Engine = "ChartJS"
+	if err := validateAssets(bad, true); err == nil {
+		t.Fatal("an engine name that cannot appear in an attribute selector must be rejected")
+	}
+}

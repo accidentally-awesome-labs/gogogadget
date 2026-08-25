@@ -254,7 +254,8 @@ func isGeneratedOutput(path string) bool {
 	if strings.HasSuffix(path, "_templ.go") || strings.Contains(path, "_registry_gen.") {
 		return true
 	}
-	if strings.HasPrefix(path, "internal/db/sqlc/") || path == "static/app.css" || path == "static/ui-components.js" {
+	if strings.HasPrefix(path, "internal/db/sqlc/") || path == "static/app.css" ||
+		path == "static/ui-components.js" || path == "static/ui-engines.js" {
 		return true
 	}
 	// Rendered from the same declarations as the code that reads them. Listed

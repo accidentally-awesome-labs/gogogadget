@@ -521,3 +521,58 @@ func findRoleTags(html, role string) []string {
 	}
 	return out
 }
+
+// The lazy engine loader has four constraints, and each rules out an easier
+// design. They are asserted against the source because the failure modes are
+// invisible at runtime until the exact wrong thing happens: a script injected
+// into #content works until the first navigation, and a missing integrity hash
+// works until someone swaps the file.
+func TestEngineLoaderConstraints(t *testing.T) {
+	loader, err := os.ReadFile(filepath.Join("..", "..", "..", "static", "ui", "engines.js"))
+	require.NoError(t, err)
+	source := string(loader)
+
+	assert.Contains(t, source, "document.head.appendChild",
+		"scripts must be appended to head: htmx replaces #content on every navigation")
+	assert.NotContains(t, source, "content.appendChild")
+	assert.NotContains(t, source, `querySelector("#content")`)
+
+	assert.Contains(t, source, "script.integrity = asset.integrity",
+		"a lazily injected script with no integrity can be swapped unnoticed")
+
+	// One fetch per engine, not per widget: ten charts on a page must not open
+	// ten requests for the same runtime.
+	assert.Contains(t, source, "pending.has(name)")
+	assert.Contains(t, source, "pending.set(name")
+
+	// The vendor file is same-origin, so no CSP widening is needed anywhere.
+	assert.NotContains(t, source, "crossorigin")
+	assert.NotContains(t, source, "unsafe-inline")
+	assert.NotContains(t, source, "https://")
+}
+
+// The shell must load the engine registry before any fragment can read it, and
+// both must precede Alpine's boot: a fragment that registers on alpine:init is
+// too late if Alpine already initialised.
+func TestShellLoadsEngineRegistryBeforeAlpine(t *testing.T) {
+	shell, err := os.ReadFile("layouts.templ")
+	require.NoError(t, err)
+	source := string(shell)
+
+	registry := strings.Index(source, "/static/ui-engines.js")
+	components := strings.Index(source, "/static/ui-components.js")
+	alpine := strings.Index(source, "alpine-csp.min.js")
+	require.Positive(t, registry)
+	require.Positive(t, components)
+	require.Positive(t, alpine)
+
+	assert.Less(t, registry, components, "the registry is data the fragments read")
+	assert.Less(t, components, alpine, "registrations must exist before Alpine initialises")
+
+	// Head assets must not depend on which page was requested first: the shell
+	// is persistent, and the entry URL is an accident.
+	head := source[strings.Index(source, "templ headScripts"):]
+	head = head[:strings.Index(head, "\n}")]
+	assert.NotContains(t, head, "page.Path",
+		"conditioning head assets on the entry page gives the same app different capabilities")
+}

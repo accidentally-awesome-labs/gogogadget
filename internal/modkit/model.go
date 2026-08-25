@@ -447,11 +447,20 @@ type UIContribution struct {
 
 // AssetContribution declares an ordered same-origin static asset.
 type AssetContribution struct {
-	ID     string    `json:"id"`
-	Path   string    `json:"path"`
-	Kind   AssetKind `json:"kind"`
-	Before []string  `json:"before,omitempty"`
-	After  []string  `json:"after,omitempty"`
+	ID   string    `json:"id"`
+	Path string    `json:"path"`
+	Kind AssetKind `json:"kind"`
+	// Engine names the third-party runtime this asset provides. A non-empty
+	// engine means the asset is *not* loaded with the shell: the loader fetches
+	// it the first time a matching data-ui-engine root appears, so a project
+	// that never renders a chart never pays for the charting library.
+	Engine string `json:"engine,omitempty"`
+	// Integrity is the subresource integrity value for an engine asset. It is
+	// required alongside Engine: a lazily injected script with no integrity is
+	// a file that can be swapped without anything noticing.
+	Integrity string   `json:"integrity,omitempty"`
+	Before    []string `json:"before,omitempty"`
+	After     []string `json:"after,omitempty"`
 }
 
 // ManifestMigration declares a reviewed, forward-only migration payload.

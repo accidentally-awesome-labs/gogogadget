@@ -19,6 +19,14 @@
         "sha256": "51e81f8e2d3d6003e5f0861b1cbd7e964e1fc9c66b56a006b220189306679821",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/db/testdb/testdb_test.go",
+        "target": "internal/db/testdb/testdb_test.go",
+        "class": "test",
+        "sha256": "89aa4da2daad256e8893badce6189fc98b63d13f8991eb52c75158b133726959",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

@@ -32,6 +32,14 @@
             "file"
           ]
         },
+        "engine": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "integrity": {
+          "type": "string",
+          "minLength": 1
+        },
         "before": {
           "type": "array",
           "items": {

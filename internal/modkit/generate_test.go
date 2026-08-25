@@ -1907,3 +1907,66 @@ func TestAlpineFragmentRegistryOmitsModulesWithoutScripts(t *testing.T) {
 		t.Fatalf("module ships no fragment but a path was emitted:\n%s", f.Content)
 	}
 }
+
+// An advanced widget's vendor asset must not load with the shell: a project
+// that never renders a chart should never pay for Chart.js. The generated engine
+// registry is what lets the shell's loader fetch a versioned asset on demand,
+// and the integrity hash is what stops a swapped file from executing.
+func TestEngineRegistryEmitsVersionedAssetsWithIntegrity(t *testing.T) {
+	mods := []Manifest{{
+		ID: "component/chart", Kind: ModuleComponent, Name: "chart", Revision: 1, Contract: 1,
+		Runtime: RuntimeContributions{Assets: []AssetContribution{
+			{
+				ID: "chartjs", Path: "static/vendor/chartjs-4.5.1.umd.min.js", Kind: AssetScript,
+				Engine:    "chartjs",
+				Integrity: "sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=",
+			},
+			// A shell script has no engine: it loads with the page.
+			{ID: "ui-overlays", Path: "static/ui/overlays.js", Kind: AssetScript},
+		}},
+	}}
+	lock := Lock{Order: []string{"component/chart"}, Modules: []LockedModule{{ID: "component/chart"}}}
+
+	f, err := emitEngineRegistry(context.Background(), "example.com/app", lock, mods)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	for _, want := range []string{
+		`"chartjs"`,
+		`/static/vendor/chartjs-4.5.1.umd.min.js`,
+		"sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo=",
+	} {
+		if !strings.Contains(f.Content, want) {
+			t.Fatalf("engine registry missing %s:\n%s", want, f.Content)
+		}
+	}
+	if strings.Contains(f.Content, "overlays.js") {
+		t.Fatal("a shell fragment is not a lazily loaded engine")
+	}
+}
+
+// Two modules must not claim one engine name: the loader would fetch whichever
+// asset won the iteration, and removing either module would break the other.
+func TestEngineRegistryRejectsDuplicateEngine(t *testing.T) {
+	asset := func(path string) []AssetContribution {
+		return []AssetContribution{{
+			ID: "chartjs", Path: path, Kind: AssetScript,
+			Engine: "chartjs", Integrity: "sha256-AAAA",
+		}}
+	}
+	mods := []Manifest{
+		{ID: "component/chart", Kind: ModuleComponent, Name: "chart", Revision: 1, Contract: 1,
+			Runtime: RuntimeContributions{Assets: asset("static/vendor/a.js")}},
+		{ID: "component/graph", Kind: ModuleComponent, Name: "graph", Revision: 1, Contract: 1,
+			Runtime: RuntimeContributions{Assets: asset("static/vendor/b.js")}},
+	}
+	lock := Lock{
+		Order:   []string{"component/chart", "component/graph"},
+		Modules: []LockedModule{{ID: "component/chart"}, {ID: "component/graph"}},
+	}
+	if _, err := emitEngineRegistry(context.Background(), "example.com/app", lock, mods); err == nil {
+		t.Fatal("two modules claiming one engine must be rejected")
+	} else if !strings.Contains(err.Error(), "chartjs") {
+		t.Fatalf("error must name the contested engine: %v", err)
+	}
+}

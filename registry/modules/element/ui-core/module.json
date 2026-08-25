@@ -99,6 +99,14 @@
         "contract": true
       },
       {
+        "source": "static/ui/engines.js",
+        "target": "static/ui/engines.js",
+        "class": "asset",
+        "sha256": "ced579f12bd8d3812f9360a4fd49505cd174c07b861e728eec6e34528d3f2682",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "static/ui/forms.js",
         "target": "static/ui/forms.js",
         "class": "asset",
@@ -127,6 +135,11 @@
     "runtime": {
       "assets": [
         {
+          "id": "ui-engines",
+          "path": "static/ui/engines.js",
+          "kind": "script"
+        },
+        {
           "id": "ui-forms",
           "path": "static/ui/forms.js",
           "kind": "script"
@@ -141,7 +154,8 @@
           "path": "static/ui/overlays.js",
           "kind": "script"
         }
-      ]
+      ],
+      "ui": []
     },
     "migrations": [],
     "environment": [],

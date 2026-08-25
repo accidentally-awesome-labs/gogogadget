@@ -521,6 +521,21 @@ func validateAssets(items []AssetContribution, canonical bool) error {
 		if !validAssetKind(item.Kind) {
 			return fmt.Errorf("manifest runtime assets[%d] kind is invalid", i)
 		}
+		// An engine asset is injected at runtime rather than named by a template,
+		// so integrity is the only thing standing between a swapped vendor file
+		// and arbitrary execution. The two fields only make sense together: an
+		// integrity value with no engine would be silently ignored, because the
+		// shell's own script tags are owned by templates.
+		if item.Engine != "" {
+			if !validComponentName(item.Engine) {
+				return fmt.Errorf("manifest runtime assets[%d] engine is invalid", i)
+			}
+			if strings.TrimSpace(item.Integrity) == "" {
+				return fmt.Errorf("manifest runtime assets[%d] engine %q must declare integrity", i, item.Engine)
+			}
+		} else if strings.TrimSpace(item.Integrity) != "" {
+			return fmt.Errorf("manifest runtime assets[%d] declares integrity without an engine", i)
+		}
 		if err := validateSafePath(item.Path); err != nil {
 			return fmt.Errorf("manifest runtime assets[%d] path: %w", i, err)
 		}

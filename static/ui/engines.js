@@ -1,0 +1,94 @@
+// The lazy engine loader, owned by element/ui-core.
+//
+// An advanced widget needs a third-party runtime, and loading every such
+// runtime with the shell would make a page that renders no chart pay for the
+// charting library. This loader fetches a versioned vendor file the first time
+// a matching `data-ui-engine` root appears, then tells that root it is ready.
+//
+// Four constraints shape it, and each one rules out an easier design:
+//
+//   - Scripts are only ever appended to <head>. htmx replaces `#content` on
+//     every navigation, so a script injected there is re-executed on each swap
+//     and removed from under a running instance.
+//   - Head assets are never conditioned on the initially requested page. The
+//     shell is persistent and the first URL is an accident of where the user
+//     entered; deciding what to load from it means the same app has different
+//     capabilities depending on the entry point.
+//   - Every injected script carries its integrity hash from the generated
+//     registry. A lazily injected script with no integrity is a file that can
+//     be swapped without anything noticing.
+//   - `script-src 'self'` is never widened. The vendor file is installed into
+//     `static/vendor/` by the module, so it is same-origin and needs no CSP
+//     change at all.
+document.addEventListener("alpine:init", () => {
+  // uiEngine is the adapter every advanced widget's root carries. It requests
+  // its engine on init and does nothing else: the widget's own component waits
+  // for the ready event, so a widget whose engine fails to load stays in its
+  // server-rendered fallback state rather than half-initialising.
+  Alpine.data("uiEngine", () => ({
+    init() {
+      const name = this.$root.dataset.uiEngine;
+      if (!name) return;
+      loadEngine(name).then(
+        () => {
+          this.$root.dispatchEvent(
+            new CustomEvent("ui:engine-ready", { detail: { engine: name }, bubbles: false }),
+          );
+        },
+        (error) => {
+          // Failure is announced on the root rather than thrown: the widget is
+          // already showing its accessible fallback, and an unhandled rejection
+          // would say nothing to the component that needs to know.
+          this.$root.dispatchEvent(
+            new CustomEvent("ui:engine-failed", {
+              detail: { engine: name, error: String(error) },
+              bubbles: false,
+            }),
+          );
+        },
+      );
+    },
+  }));
+});
+
+// pending holds one promise per engine, so ten charts on a page trigger one
+// fetch. Keyed by name rather than by element: the second widget must wait on
+// the first request, not start a second.
+const pending = new Map();
+
+function loadEngine(name) {
+  if (pending.has(name)) return pending.get(name);
+
+  const registry = window.__gggEngines || {};
+  const asset = registry[name];
+  if (!asset) {
+    // An undeclared engine is a manifest bug, and it must fail loudly here
+    // rather than resolving to a runtime that never arrives.
+    const failure = Promise.reject(new Error("engine " + name + " is not installed"));
+    pending.set(name, failure);
+    return failure;
+  }
+
+  const promise = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-ui-engine-src="' + name + '"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error(name)), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = asset.src;
+    script.integrity = asset.integrity;
+    script.defer = true;
+    script.dataset.uiEngineSrc = name;
+    script.addEventListener("load", () => resolve(), { once: true });
+    script.addEventListener("error", () => reject(new Error("failed to load engine " + name)), {
+      once: true,
+    });
+    // <head>, never #content: the shell survives navigation and the content box
+    // does not.
+    document.head.appendChild(script);
+  });
+  pending.set(name, promise);
+  return promise;
+}

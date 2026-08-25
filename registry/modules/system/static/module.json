@@ -96,7 +96,15 @@
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "ad627492ccacb60fdfb13655b8f9181c68906827eafe4664c7e09290bf59b7c6",
+        "sha256": "61d8a66bade1ffc92b3b6381651a3654a691f3abf24b0bdf1d45964a160bf8ae",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/ui-engines.js",
+        "target": "static/ui-engines.js",
+        "class": "generated",
+        "sha256": "87786a9632f8173fb9b2a72fb6bdb3f2586e1ed7bb6083b4fd821c2ade0f2476",
         "rewrite_module": false,
         "contract": false
       },
