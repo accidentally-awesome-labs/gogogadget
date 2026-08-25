@@ -83,6 +83,23 @@
   --color-info: var(--color-brand-600); --color-info-fg: #ffffff;
   --color-info-text: var(--color-brand-600); --color-info-subtle: var(--color-brand-50);
   --color-info-subtle-fg: var(--color-brand-700); --color-info-border: var(--color-brand-200);
+
+  /* Interaction and surface semantics. These exist so a component never names
+     a raw utility for a *meaning*: two components that both mean "focused"
+     must not disagree, which is exactly what happened when .btn used an
+     outline and .input used a ring. */
+  --color-focus-ring:    var(--color-brand-500);
+  --color-overlay-scrim: rgb(15 23 42 / 0.55);
+  --color-selected:      var(--color-brand-subtle);
+  --color-selected-fg:   var(--color-brand-subtle-fg);
+
+  /* Radius has exactly two meanings: a control the user manipulates, and a
+     surface that contains content. Anything else is drift. */
+  --radius-control: 0.5rem;
+  --radius-surface: 0.75rem;
+
+  /* One elevation. A second one would need a reason nobody has yet. */
+  --shadow-raised: 0 1px 2px 0 rgb(15 23 42 / 0.06), 0 1px 3px 0 rgb(15 23 42 / 0.10);
 }
 
 @layer base {
@@ -92,6 +109,42 @@
     --z-nav: 40;       /* sticky header, app drawer */
     --z-overlay: 50;   /* toasts, dropdowns, consent, skip link */
     --z-progress: 60;  /* navigation progress bar */
+
+    /* Control heights. Padding alone let a button and the input beside it end
+       up different heights; naming the height is what keeps a row aligned. */
+    --control-height-sm: 2rem;
+    --control-height-md: 2.5rem;
+    --control-height-lg: 3rem;
+
+    /* Motion. Two durations: one for state changes the user caused, one for
+       larger transitions. Anything slower reads as lag. */
+    --motion-fast: 150ms;
+    --motion-base: 250ms;
+
+    /* Chart series colours, ordered so adjacent series never share a hue. These
+       are plain custom properties, not @theme entries: the chart module reads
+       them with var() rather than as utility classes, and Tailwind drops an
+       unreferenced @theme colour from the build - which left every light-mode
+       series with no colour at all while dark mode kept its override. */
+    --color-chart-1: var(--color-brand-500);
+    --color-chart-2: #0d9488;
+    --color-chart-3: #d97706;
+    --color-chart-4: #db2777;
+    --color-chart-5: #7c3aed;
+    --color-chart-6: #65a30d;
+
+    /* Disabled is one opacity everywhere, or the same control looks differently
+       unavailable depending on which class it happens to carry. */
+    --disabled-opacity: 0.5;
+  }
+
+  /* Honour the OS setting: motion tokens collapse to zero rather than every
+     animated rule needing its own media query. */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-fast: 0ms;
+      --motion-base: 0ms;
+    }
   }
 
   /* Dark mode is token flipping, never a dark: variant in a template: every
@@ -118,6 +171,24 @@
     --color-danger-subtle-fg: #fca5a5; --color-danger-border: #991b1b;
     --color-info-text: var(--color-brand-400); --color-info-subtle: var(--color-brand-950);
     --color-info-subtle-fg: var(--color-brand-300); --color-info-border: var(--color-brand-800);
+
+    /* The focus ring must stay visible against a dark surface, so it moves up
+       the ramp rather than keeping the light value. */
+    --color-focus-ring: var(--color-brand-400);
+
+    /* A darker scrim: the same translucency over a dark page barely separates
+       the dialog from what is behind it. */
+    --color-overlay-scrim: rgb(2 6 23 / 0.7);
+
+    /* Elevation in dark cannot be a drop shadow - there is nothing lighter for
+       it to fall on - so it becomes a lifted border instead. */
+    --shadow-raised: 0 0 0 1px rgb(226 232 240 / 0.06);
+
+    --color-chart-2: #2dd4bf;
+    --color-chart-3: #fbbf24;
+    --color-chart-4: #f472b6;
+    --color-chart-5: #a78bfa;
+    --color-chart-6: #a3e635;
   }
 
   @font-face {
@@ -162,10 +233,16 @@
      size axis (sm/xs/icon) is what removes ad-hoc !padding overrides. */
   .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
   .btn-sm, .btn-xs, .btn-icon {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
-      transition-colors duration-150 cursor-pointer
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand
-      disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold
+      transition-colors cursor-pointer disabled:pointer-events-none;
+    border-radius: var(--radius-control);
+    min-height: var(--control-height-md);
+    transition-duration: var(--motion-fast);
+  }
+  .btn:disabled, .btn-primary:disabled, .btn-ghost:disabled,
+  .btn-danger:disabled, .btn-inverse:disabled,
+  .btn-sm:disabled, .btn-xs:disabled, .btn-icon:disabled {
+    opacity: var(--disabled-opacity);
   }
   .btn-primary { @apply bg-brand text-brand-fg hover:bg-brand-hover; }
   .btn-ghost   { @apply border border-border text-fg hover:bg-surface-raised; }
@@ -176,18 +253,52 @@
   .btn-icon    { @apply px-2 py-2; }
 
   .input {
-    @apply block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg
-      placeholder:text-fg-muted outline-none
-      focus:border-brand focus:ring-2 focus:ring-brand/30
-      disabled:opacity-50;
+    @apply block w-full border border-border bg-surface px-3 py-2 text-sm text-fg
+      placeholder:text-fg-muted;
+    border-radius: var(--radius-control);
+    min-height: var(--control-height-md);
   }
-  .input-sm { @apply py-1.5 text-sm; }
-  .input-xs { @apply py-1 text-xs; }
+  .input:disabled { opacity: var(--disabled-opacity); }
+  .input-sm { @apply py-1.5 text-sm; min-height: var(--control-height-sm); }
+  .input-xs { @apply py-1 text-xs; min-height: var(--control-height-sm); }
+  /* One focus treatment, on every interactive element. This used to be an
+     outline on buttons and a ring on inputs - two things meaning "focused" and
+     looking different - while links, tabs and menu items had neither.
+     focus-visible (not focus) is what keeps a mouse click from painting a ring
+     the user did not ask for. */
+  .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
+  .btn-sm, .btn-xs, .btn-icon,
+  .input, .input-sm, .input-xs,
+  .nav-link, .doc-link, .tab, .link,
+  a:focus-visible, button:focus-visible, summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline-color: var(--color-focus-ring);
+  }
+  .btn:focus-visible, .btn-primary:focus-visible, .btn-ghost:focus-visible,
+  .btn-danger:focus-visible, .btn-inverse:focus-visible,
+  .btn-sm:focus-visible, .btn-xs:focus-visible, .btn-icon:focus-visible,
+  .input:focus-visible, .input-sm:focus-visible, .input-xs:focus-visible,
+  .nav-link:focus-visible, .doc-link:focus-visible, .tab:focus-visible,
+  .link:focus-visible,
+  a:focus-visible, button:focus-visible, summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline-style: solid;
+    outline-width: 2px;
+    outline-offset: 2px;
+  }
+
+  /* The scrim is a token so light and dark separate the dialog equally. */
+  .dialog::backdrop {
+    background-color: var(--color-overlay-scrim);
+  }
+
   .label {
     @apply block text-sm font-medium text-fg mb-1;
   }
   .card {
-    @apply rounded-xl border border-border bg-surface p-6 shadow-sm;
+    @apply border border-border bg-surface p-6;
+    border-radius: var(--radius-surface);
+    box-shadow: var(--shadow-raised);
   }
   .table {
     @apply min-w-full divide-y divide-border text-sm;
@@ -287,7 +398,8 @@
   .hero-title    { @apply text-5xl font-extrabold tracking-tight; }
   .error-code    { @apply text-6xl font-extrabold text-brand-text; }
   .eyebrow       { @apply text-xs font-semibold uppercase tracking-wide text-fg-muted; }
-  .table-card   { @apply rounded-xl border border-border bg-surface shadow-sm overflow-hidden; }
+  .table-card   { @apply border border-border bg-surface overflow-hidden;
+                  border-radius: var(--radius-surface); box-shadow: var(--shadow-raised); }
   .table-empty  { @apply p-6 text-sm text-fg-muted; }
   .card-actions { @apply flex justify-end gap-2 flex-wrap; }
   .toolbar      { @apply flex items-center gap-2 mb-4; }
@@ -301,11 +413,17 @@
 
   /* Navigation link idioms. aria-current="page" is the active signal (set
      server-side by navCurrent and client-side by syncAppNavigation). */
-  .nav-link { @apply rounded-lg px-3 py-2 text-sm text-fg-muted hover:bg-surface hover:text-fg
-                aria-[current=page]:bg-surface aria-[current=page]:text-fg
-                aria-[current=page]:font-semibold; }
-  .doc-link { @apply block rounded-lg px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised
-                aria-[current=page]:text-brand-text aria-[current=page]:font-semibold; }
+  .nav-link { @apply px-3 py-2 text-sm text-fg-muted hover:bg-surface hover:text-fg
+                aria-[current=page]:font-semibold;
+              border-radius: var(--radius-control); }
+  .nav-link[aria-current="page"] {
+    background-color: var(--color-selected);
+    color: var(--color-selected-fg);
+  }
+  .doc-link { @apply block px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised
+                aria-[current=page]:font-semibold;
+              border-radius: var(--radius-control); }
+  .doc-link[aria-current="page"] { color: var(--color-selected-fg); }
   .tab      { @apply px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent
                 text-fg-muted hover:text-fg
                 aria-[current=page]:border-brand aria-[current=page]:text-fg; }

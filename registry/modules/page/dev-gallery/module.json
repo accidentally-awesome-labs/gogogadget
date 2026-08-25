@@ -28,7 +28,7 @@
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "5015a7cfe08c0c2114d18a798ea6bf1a0a0dbb1cf08e4343744614172fab12d0",
+        "sha256": "35f200bdbb496e7a6f9047f386e22ec8fd67188e50e2d0f496b36128f3e4d118",
         "rewrite_module": true,
         "contract": false
       }

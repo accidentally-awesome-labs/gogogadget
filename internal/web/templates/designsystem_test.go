@@ -311,3 +311,180 @@ func TestGeneratedAlpineExpectationsAreRegistered(t *testing.T) {
 			"a module declares Alpine component %q but no installed fragment registers it", m[1])
 	}
 }
+
+// The semantic families a component may name. A component that reaches for a
+// raw utility to express one of these meanings is how two controls end up
+// disagreeing about what "focused" or "disabled" looks like.
+func TestSemanticTokenFamiliesExist(t *testing.T) {
+	sheet := readInputCSS(t)
+	for _, token := range []string{
+		"--color-focus-ring", "--color-overlay-scrim", "--color-selected",
+		"--color-selected-fg", "--radius-control", "--radius-surface",
+		"--shadow-raised", "--control-height-sm", "--control-height-md",
+		"--control-height-lg", "--motion-fast", "--motion-base",
+		"--disabled-opacity", "--color-chart-1", "--color-chart-6",
+	} {
+		assert.Contains(t, sheet, token+":", "no %s token is declared", token)
+	}
+}
+
+// Dark mode is token flipping. A token whose light value survives into dark is
+// either theme-independent on purpose or a bug; these are the ones that must
+// flip, because their light values are unusable on a dark surface.
+func TestDarkModeFlipsInteractionTokens(t *testing.T) {
+	sheet := readInputCSS(t)
+	dark := sheet[strings.Index(sheet, ".dark {"):]
+	dark = dark[:strings.Index(dark, "\n  }")]
+
+	for _, token := range []string{
+		"--color-focus-ring", "--color-overlay-scrim", "--shadow-raised",
+	} {
+		assert.Contains(t, dark, token+":",
+			"%s keeps its light value in dark mode", token)
+	}
+}
+
+// One focus treatment, applied through the token. Two components that both mean
+// "focused" must not look different, and an interactive element with no focus
+// style at all is unusable by keyboard.
+func TestFocusTreatmentIsSingleSourced(t *testing.T) {
+	sheet := readInputCSS(t)
+
+	assert.NotContains(t, sheet, "focus:ring",
+		"a focus: ring paints on mouse click too; focus-visible is the keyboard signal")
+	assert.NotContains(t, sheet, "outline-brand",
+		"the focus colour must come from --color-focus-ring, not a palette utility")
+	assert.Contains(t, sheet, "outline-color: var(--color-focus-ring)")
+
+	// Every interactive idiom must be in the focus selector list.
+	focusBlock := sheet[strings.Index(sheet, "outline-style: solid")-1400:]
+	for _, idiom := range []string{".btn", ".input", ".nav-link", ".tab", ".link"} {
+		assert.Contains(t, focusBlock, idiom+":focus-visible",
+			"%s has no focus-visible treatment", idiom)
+	}
+}
+
+// Reduced motion must be honoured once, at the token, rather than in every
+// animated rule - a rule that forgets the media query is a rule that ignores
+// the user's OS setting.
+func TestReducedMotionCollapsesMotionTokens(t *testing.T) {
+	sheet := readInputCSS(t)
+	require.Contains(t, sheet, "prefers-reduced-motion: reduce")
+	block := sheet[strings.Index(sheet, "prefers-reduced-motion: reduce"):]
+	block = block[:strings.Index(block, "\n  }")]
+	assert.Contains(t, block, "--motion-fast: 0ms")
+	assert.Contains(t, block, "--motion-base: 0ms")
+}
+
+// Tokens consumed only through var() must not live in @theme. Tailwind decides
+// what to emit from @theme by scanning source text for the name, so such a
+// token survives only while some unrelated file happens to mention it - the
+// chart series were kept alive purely by the gallery's swatch labels. Declaring
+// them in :root removes the coincidence.
+func TestVarOnlyTokensAreNotThemeEntries(t *testing.T) {
+	sheet := readInputCSS(t)
+	themeStart := strings.Index(sheet, "@theme {")
+	require.GreaterOrEqual(t, themeStart, 0)
+	depth, themeEnd := 0, -1
+	for i := themeStart + len("@theme "); i < len(sheet); i++ {
+		switch sheet[i] {
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				themeEnd = i
+			}
+		}
+		if themeEnd >= 0 {
+			break
+		}
+	}
+	require.Greater(t, themeEnd, themeStart)
+	theme := sheet[themeStart:themeEnd]
+
+	for _, token := range []string{
+		"--color-chart-1", "--color-chart-2", "--color-chart-3",
+		"--color-chart-4", "--color-chart-5", "--color-chart-6",
+	} {
+		assert.NotContains(t, theme, token+":",
+			"%s is consumed with var(), so an @theme declaration only survives while some source file mentions its name", token)
+		assert.Contains(t, sheet, token+":", "%s is not declared at all", token)
+	}
+}
+
+// A token declared in the source but dropped by the build is worse than a
+// missing token: it resolves to nothing in one theme while the .dark override
+// still applies in the other. Tailwind tree-shakes @theme entries that no class
+// references, which is exactly what happened to the chart series - they are
+// read with var() by the chart module, never as utilities.
+func TestVarConsumedTokensSurviveTheBuild(t *testing.T) {
+	// The .dark block declares many of these too, so it is stripped first: a
+	// token that survives only inside .dark resolves to nothing in light mode,
+	// which is the exact failure this test exists to catch.
+	built := withoutDarkBlock(t, readBuiltCSS(t))
+	for _, token := range []string{
+		"--color-chart-1", "--color-chart-2", "--color-chart-3",
+		"--color-chart-4", "--color-chart-5", "--color-chart-6",
+		"--color-focus-ring", "--color-overlay-scrim",
+		"--color-selected", "--color-selected-fg",
+		"--radius-control", "--radius-surface", "--shadow-raised",
+		"--control-height-md", "--motion-fast", "--disabled-opacity",
+	} {
+		assert.Contains(t, built, token,
+			"%s is declared in input.css but absent from the built stylesheet", token)
+	}
+}
+
+// withoutDarkBlock removes every .dark rule body from the built sheet, leaving
+// only what applies in the default theme.
+func withoutDarkBlock(t *testing.T, css string) string {
+	t.Helper()
+	out := css
+	for {
+		start := strings.Index(out, ".dark")
+		if start < 0 {
+			break
+		}
+		open := strings.Index(out[start:], "{")
+		require.Greater(t, open, 0, "malformed .dark rule")
+		depth, end := 0, -1
+		for i := start + open; i < len(out); i++ {
+			switch out[i] {
+			case '{':
+				depth++
+			case '}':
+				depth--
+				if depth == 0 {
+					end = i
+				}
+			}
+			if end >= 0 {
+				break
+			}
+		}
+		require.Greater(t, end, start, "unterminated .dark rule")
+		out = out[:start] + out[end+1:]
+	}
+	require.NotContains(t, out, ".dark")
+	return out
+}
+
+// readBuiltCSS returns the compiled stylesheet the browser actually loads.
+func readBuiltCSS(t *testing.T) string {
+	t.Helper()
+	css, err := os.ReadFile(filepath.Join("..", "..", "..", "static", "app.css"))
+	require.NoError(t, err)
+	return string(css)
+}
+
+// readInputCSS returns the token and component source. The tests read the
+// source rather than the built stylesheet where they are asserting intent; the
+// built sheet is checked separately, because a rule present in the source and
+// dropped by the build is still an unstyled component.
+func readInputCSS(t *testing.T) string {
+	t.Helper()
+	css, err := os.ReadFile(filepath.Join("..", "..", "..", "input.css"))
+	require.NoError(t, err)
+	return string(css)
+}
