@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/form-actions",
+    "kind": "component",
+    "name": "form-actions",
+    "revision": 1,
+    "contract": 1,
+    "title": "FormActions",
+    "description": "The FormActions renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/form-actions.templ",
+        "target": "internal/web/templates/ui/form-actions.templ",
+        "class": "templ",
+        "sha256": "72d328fa880a8c4043f168d65628d74e94afaaa0c393f39cb1e1f9329cf34ce6",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/form-actions_test.go",
+        "target": "internal/web/templates/ui/form-actions_test.go",
+        "class": "test",
+        "sha256": "1727c533a4df8b72da9747188345196c4406be07da636f2af9a971cb567ded34",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "form-actions",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

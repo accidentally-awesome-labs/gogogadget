@@ -447,6 +447,101 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Forms — native controls") {
+			@ui.Form(ui.FormOpts{Method: "post", Action: "/dev/gallery"}) {
+				@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapMD}) {
+					@ui.Field(ui.FieldOpts{Name: "quantity", Label: "Quantity", Required: true, Hint: "Between 1 and 99"}) {
+						@ui.NumberInput(ui.NumberInputOpts{Name: "quantity", Value: "3", Min: "1", Max: "99", Step: "1", Hint: "Between 1 and 99", Required: true})
+					}
+					@ui.Field(ui.FieldOpts{Name: "secret", Label: "Password", Required: true}) {
+						@ui.PasswordInput(ui.PasswordInputOpts{Name: "secret", Autocomplete: "new-password", Required: true})
+					}
+					@ui.Field(ui.FieldOpts{Name: "starts", Label: "Start date"}) {
+						@ui.DateField(ui.DateFieldOpts{Name: "starts", Value: "2026-01-15"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "at", Label: "Reminder time"}) {
+						@ui.TimeField(ui.TimeFieldOpts{Name: "at", Value: "09:30"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "deploy", Label: "Deploy at"}) {
+						@ui.DateTimeField(ui.DateTimeFieldOpts{Name: "deploy", Value: "2026-01-15T09:30"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "logo", Label: "Logo", Optional: true}) {
+						@ui.FileInput(ui.FileInputOpts{Name: "logo", Accept: "image/*"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "rate", Label: "Sample rate"}) {
+						@ui.RangeInput(ui.RangeInputOpts{Name: "rate", Value: "40", Min: "0", Max: "100", Step: "10", ValueLabel: "40%"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "accent", Label: "Accent colour"}) {
+						@ui.ColorInput(ui.ColorInputOpts{Name: "accent"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "price", Label: "Monthly price"}) {
+						@ui.InputGroup(ui.InputGroupOpts{}) {
+							@ui.InputAddon(ui.InputAddonOpts{Text: "$"})
+							@ui.TextInput(ui.TextInputOpts{Name: "price", Value: "20", Attrs: ui.Attrs{Class: "border-0 rounded-none"}})
+							@ui.InputAddon(ui.InputAddonOpts{Text: "/mo"})
+						}
+					}
+					@ui.CheckboxGroup(ui.CheckboxGroupOpts{
+						Name: "channels", Legend: "Notification channels",
+						Options: []ui.Option{
+							{Value: "email", Label: "Email", Selected: true},
+							{Value: "sms", Label: "SMS"},
+						},
+					})
+				}
+				@ui.Field(ui.FieldOpts{Name: "role_label", Label: "Custom control", HiddenLabel: true}) {
+					@ui.Label(ui.LabelOpts{For: "role_label", Text: "Role", Required: true})
+					@ui.Select(ui.SelectOpts{Name: "role_label", Options: []ui.Option{{Value: "member", Label: "Member", Selected: true}, {Value: "admin", Label: "Admin"}}})
+					@ui.Hint(ui.HintOpts{For: "role_label", Text: "Admins can change billing."})
+				}
+				@ui.FormActions(ui.FormActionsOpts{}) {
+					@ui.Button(ui.ButtonOpts{Label: "Cancel"})
+					@ui.Button(ui.ButtonOpts{Label: "Save", Type: ui.TypeSubmit, Action: ui.ActionPrimary})
+				}
+			}
+		}
+
+		@gallerySection("Forms — progressively enhanced") {
+			<div class="space-y-4">
+				@ui.Field(ui.FieldOpts{Name: "project_name", Label: "Project name"}) {
+					@ui.TextInput(ui.TextInputOpts{Name: "project_name", Placeholder: "Apollo Launch"})
+				}
+				@ui.Field(ui.FieldOpts{Name: "project_slug", Label: "Slug", Hint: "Mirrors the name until you edit it."}) {
+					@ui.SlugInput(ui.SlugInputOpts{Name: "project_slug", From: "project_name", Prefix: "gogogadget.dev/", Hint: "Mirrors the name until you edit it."})
+				}
+				@ui.Field(ui.FieldOpts{Name: "region", Label: "Region", Hint: "Type to filter, or enter your own."}) {
+					@ui.Combobox(ui.ComboboxOpts{Name: "region", Placeholder: "us-east-1", Hint: "Type to filter, or enter your own.", Options: []ui.Option{
+						{Value: "us-east-1", Label: "us-east-1"}, {Value: "eu-west-1", Label: "eu-west-1"},
+						{Value: "ap-south-1", Label: "ap-south-1"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "envs", Label: "Environments"}) {
+					@ui.MultiSelect(ui.MultiSelectOpts{Name: "envs", Options: []ui.Option{
+						{Value: "dev", Label: "Development", Selected: true},
+						{Value: "staging", Label: "Staging"},
+						{Value: "prod", Label: "Production"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "tags", Label: "Tags", Hint: "Comma separated."}) {
+					@ui.TagsInput(ui.TagsInputOpts{Name: "tags", Value: "go, htmx", Hint: "Comma separated.", Suggestions: []ui.Option{
+						{Value: "go", Label: "go"}, {Value: "htmx", Label: "htmx"}, {Value: "templ", Label: "templ"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "summary", Label: "Summary"}) {
+					@ui.Textarea(ui.TextareaOpts{Name: "summary", Rows: 3, Attrs: ui.Attrs{}})
+					@ui.CharCounter(ui.CharCounterOpts{For: "summary", Max: 280, Label: "characters"})
+				}
+				@ui.Field(ui.FieldOpts{Name: "code", Label: "One-time code", Hint: "Six digits from your authenticator."}) {
+					@ui.OTPInput(ui.OTPInputOpts{Name: "code", Length: 6, Hint: "Six digits from your authenticator."})
+				}
+				@ui.DateRangeField(ui.DateRangeFieldOpts{
+					StartName: "period_start", EndName: "period_end", Legend: "Billing period",
+					StartValue: "2026-01-01", EndValue: "2026-01-31",
+				})
+				@ui.FileDropzone(ui.FileDropzoneOpts{Name: "attachments", Label: "Drop files here, or click to choose", Multiple: true})
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/input-addon",
+    "kind": "component",
+    "name": "input-addon",
+    "revision": 1,
+    "contract": 1,
+    "title": "InputAddon",
+    "description": "The InputAddon renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/input-addon.templ",
+        "target": "internal/web/templates/ui/input-addon.templ",
+        "class": "templ",
+        "sha256": "f0cb999c7032ec0a8ddb0667c56508fbc3b84fdb297fa020f4fc5a57a9bb9561",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/input-addon_test.go",
+        "target": "internal/web/templates/ui/input-addon_test.go",
+        "class": "test",
+        "sha256": "e9fa884221ac71dbee5f4513e56418aa0e415b1203494f36dca6f353861841d6",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "input-addon",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

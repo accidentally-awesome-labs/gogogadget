@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/slug-input",
+    "kind": "component",
+    "name": "slug-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "SlugInput",
+    "description": "The SlugInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/slug-input.templ",
+        "target": "internal/web/templates/ui/slug-input.templ",
+        "class": "templ",
+        "sha256": "770fb350f5d3fcf6f5099dae20cae3bf44c37afb8526698fbdec341978e0cdf2",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "slug-input",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiSlug",
+          "native_fallback": "native input"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

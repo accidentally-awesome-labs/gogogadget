@@ -1,0 +1,37 @@
+package ui
+
+// RangeInputOpts is a slider.
+type RangeInputOpts struct {
+	Name           string
+	Value          string
+	Min, Max, Step string
+	// ValueLabel is the human reading of the current value. A slider whose
+	// position is its only output is unreadable to a screen reader and
+	// imprecise for everyone, so the label is not optional decoration.
+	ValueLabel  string
+	Hint, Error string
+	Attrs       Attrs
+}
+
+// RangeInput renders a native slider with a text readout.
+templ RangeInput(o RangeInputOpts) {
+	<div class="flex items-center gap-3">
+		<input
+			{ root("range-input", "w-full", o.Attrs)... }
+			{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
+			type="range" id={ o.Name } name={ o.Name } value={ o.Value }
+			if o.Min != "" {
+				min={ o.Min }
+			}
+			if o.Max != "" {
+				max={ o.Max }
+			}
+			if o.Step != "" {
+				step={ o.Step }
+			}
+		/>
+		if o.ValueLabel != "" {
+			<span class="text-sm text-fg-muted tabular-nums">{ o.ValueLabel }</span>
+		}
+	</div>
+}

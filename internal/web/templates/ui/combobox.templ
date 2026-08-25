@@ -1,0 +1,33 @@
+package ui
+
+// ComboboxOpts is a filterable select.
+type ComboboxOpts struct {
+	Name        string
+	Value       string
+	Options     []Option
+	Placeholder string
+	Hint, Error string
+	Required    bool
+	Attrs       Attrs
+}
+
+// Combobox renders a text input backed by a native datalist.
+//
+// datalist is the engine-free choice: the browser supplies the filtering, the
+// popup, keyboard navigation and mobile behaviour, and the field still submits
+// a value with JavaScript disabled. A hand-built listbox has to reimplement all
+// of that and usually ships without the keyboard half.
+templ Combobox(o ComboboxOpts) {
+	<input
+		{ rootWith("combobox", "input", o.Attrs, "list", o.Name+"-options")... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="text" id={ o.Name } name={ o.Name } value={ o.Value }
+		placeholder={ o.Placeholder } required?={ o.Required }
+		autocomplete="off"
+	/>
+	<datalist id={ o.Name + "-options" }>
+		for _, opt := range o.Options {
+			<option value={ opt.Value }>{ opt.Label }</option>
+		}
+	</datalist>
+}

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/checkbox-group",
+    "kind": "component",
+    "name": "checkbox-group",
+    "revision": 1,
+    "contract": 1,
+    "title": "CheckboxGroup",
+    "description": "The CheckboxGroup renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/checkbox-group.templ",
+        "target": "internal/web/templates/ui/checkbox-group.templ",
+        "class": "templ",
+        "sha256": "8b07955233e5eff2f033b5640ba8780d030dc09e279548a8753d991f840c36a5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/checkbox-group_test.go",
+        "target": "internal/web/templates/ui/checkbox-group_test.go",
+        "class": "test",
+        "sha256": "d74ac82f19404833b0afdb2a513cb18a26f765e3238a75336d1cc0c6f4206930",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "checkbox-group",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

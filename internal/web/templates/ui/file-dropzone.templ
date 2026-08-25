@@ -1,0 +1,36 @@
+package ui
+
+// FileDropzoneOpts is a drag-and-drop upload area.
+type FileDropzoneOpts struct {
+	Name        string
+	Accept      string
+	Multiple    bool
+	Label       string
+	Hint, Error string
+	Attrs       Attrs
+}
+
+// FileDropzone renders a labelled drop target around a real file input.
+//
+// The input is a genuine <input type="file"> inside a <label>, so clicking the
+// zone opens the picker and the keyboard reaches the control with no script at
+// all. Drag-and-drop is added on top by the Alpine behaviour: a drop target
+// that is *only* droppable excludes every keyboard user.
+templ FileDropzone(o FileDropzoneOpts) {
+	<label
+		{ rootWith("file-dropzone", "block rounded-xl border-2 border-dashed border-border p-6 text-center cursor-pointer hover:bg-surface-raised", o.Attrs,
+			"x-data", "uiDropzone",
+			"for", o.Name)... }
+	>
+		@Icon(IconOpts{Name: IconUpload, Attrs: Attrs{Class: "w-6 h-6 mx-auto text-fg-muted"}})
+		<span class="mt-2 block text-sm text-fg-muted">{ o.Label }</span>
+		<input
+			{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
+			type="file" id={ o.Name } name={ o.Name } class="sr-only"
+			if o.Accept != "" {
+				accept={ o.Accept }
+			}
+			multiple?={ o.Multiple }
+		/>
+	</label>
+}

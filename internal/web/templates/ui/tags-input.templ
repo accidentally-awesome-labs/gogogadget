@@ -1,0 +1,35 @@
+package ui
+
+// TagsInputOpts is a comma-separated tag field.
+type TagsInputOpts struct {
+	Name  string
+	Value string
+	// Suggestions populate a datalist so the browser offers known tags without
+	// any custom popup.
+	Suggestions []Option
+	Hint, Error string
+	Attrs       Attrs
+}
+
+// TagsInput renders a comma-separated text field with suggestions.
+//
+// The value is one text field, so it submits and round-trips with no
+// JavaScript, and the server parses the separator. A chip widget that keeps its
+// real value in hidden inputs loses everything the moment the script fails to
+// load, and cannot be edited with a keyboard without a custom keymap.
+templ TagsInput(o TagsInputOpts) {
+	<input
+		{ rootWith("tags-input", "input", o.Attrs,
+			"x-data", "uiTags",
+			"list", o.Name+"-suggestions")... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
+		type="text" id={ o.Name } name={ o.Name } value={ o.Value }
+	/>
+	if len(o.Suggestions) > 0 {
+		<datalist id={ o.Name + "-suggestions" }>
+			for _, opt := range o.Suggestions {
+				<option value={ opt.Value }>{ opt.Label }</option>
+			}
+		</datalist>
+	}
+}

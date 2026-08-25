@@ -1,0 +1,33 @@
+package ui
+
+// FormActionsOpts configures the trailing action row of a form.
+type FormActionsOpts struct {
+	// Align defaults to end: the primary action sits where the eye finishes
+	// reading the form.
+	Align Align
+	Attrs Attrs
+}
+
+// FormActions renders a form's action row.
+templ FormActions(o FormActionsOpts) {
+	<div { root("form-actions", "flex items-center gap-2 pt-2 "+formActionsAlign(o.Align), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+// formActionsAlign defaults an *unset* alignment to end, which is where a
+// form's primary action belongs. The Align enum's own default is start, so the
+// empty case is checked before normalizing - otherwise the documented default
+// and the rendered one would disagree.
+func formActionsAlign(align Align) string {
+	if align == "" {
+		return "justify-end"
+	}
+	switch align.Value() {
+	case AlignCenter:
+		return "justify-center"
+	case AlignEnd:
+		return "justify-end"
+	}
+	return "justify-start"
+}

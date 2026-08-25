@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/color-input",
+    "kind": "component",
+    "name": "color-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "ColorInput",
+    "description": "The ColorInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/color-input.templ",
+        "target": "internal/web/templates/ui/color-input.templ",
+        "class": "templ",
+        "sha256": "ee0c8c2f1bc7f89277bb46e34e255787d986871debecbb3508d3a787c1b54d1a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "color-input",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

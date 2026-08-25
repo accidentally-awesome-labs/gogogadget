@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/date-field",
+    "kind": "component",
+    "name": "date-field",
+    "revision": 1,
+    "contract": 1,
+    "title": "DateField",
+    "description": "The DateField renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/date-field.templ",
+        "target": "internal/web/templates/ui/date-field.templ",
+        "class": "templ",
+        "sha256": "24fc5668ac910bfdb6847c0e9525a06715a15c9a84d97fe4224848fb09af4c7f",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "date-field",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

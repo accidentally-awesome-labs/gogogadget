@@ -1,0 +1,35 @@
+package ui
+
+import "fmt"
+
+// OTPInputOpts is a one-time-code field.
+type OTPInputOpts struct {
+	Name        string
+	Length      int
+	Hint, Error string
+	Attrs       Attrs
+}
+
+// OTPInput renders a single one-time-code input.
+//
+// One input, not one box per digit. A box-per-digit widget breaks paste, breaks
+// password-manager and SMS autofill, and gives a screen reader six unlabelled
+// fields instead of one. autocomplete="one-time-code" is what lets the platform
+// offer the code from a message, and inputmode numeric brings up the keypad.
+templ OTPInput(o OTPInputOpts) {
+	<input
+		{ root("otp-input", "input text-center tracking-[0.5em] font-mono", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: true})... }
+		type="text" id={ o.Name } name={ o.Name }
+		inputmode="numeric" autocomplete="one-time-code"
+		pattern="[0-9]*" maxlength={ fmt.Sprint(otpLength(o.Length)) }
+		required
+	/>
+}
+
+func otpLength(length int) int {
+	if length <= 0 {
+		return 6
+	}
+	return length
+}

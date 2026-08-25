@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/date-time-field",
+    "kind": "component",
+    "name": "date-time-field",
+    "revision": 1,
+    "contract": 1,
+    "title": "DateTimeField",
+    "description": "The DateTimeField renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/date-time-field.templ",
+        "target": "internal/web/templates/ui/date-time-field.templ",
+        "class": "templ",
+        "sha256": "e060bfc8997b0cc61a99733329d4b8dce7180c7b2f40f79cf8237b0e1ec6498e",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "date-time-field",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

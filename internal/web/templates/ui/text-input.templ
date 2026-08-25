@@ -6,16 +6,27 @@ type TextInputOpts struct {
 	Value       string
 	Placeholder string
 	Type        InputType
-	Required    bool
-	Error       string
-	Attrs       Attrs
+	// Hint and Error mirror the enclosing Field so the control can reference
+	// exactly the elements that Field renders. Without them the control would
+	// have to guess, and a guess produces a dangling aria-describedby.
+	Hint      string
+	Error     string
+	Required  bool
+	Disabled  bool
+	ReadOnly  bool
+	Autocomplete string
+	Attrs     Attrs
 }
 
 templ TextInput(o TextInputOpts) {
 	<input
 		{ root("text-input", "input", o.Attrs)... }
-		{ FieldARIA(o.Name, o.Error, o.Required)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
 		id={ o.Name } name={ o.Name } type={ string(o.Type.Value()) }
-		value={ o.Value } placeholder={ o.Placeholder } required?={ o.Required }
+		value={ o.Value } placeholder={ o.Placeholder }
+		required?={ o.Required } disabled?={ o.Disabled } readonly?={ o.ReadOnly }
+		if o.Autocomplete != "" {
+			autocomplete={ o.Autocomplete }
+		}
 	/>
 }

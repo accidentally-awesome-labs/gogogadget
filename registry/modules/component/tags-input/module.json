@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/tags-input",
+    "kind": "component",
+    "name": "tags-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "TagsInput",
+    "description": "The TagsInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tags-input.templ",
+        "target": "internal/web/templates/ui/tags-input.templ",
+        "class": "templ",
+        "sha256": "935f13d4e8c88ce35f39d87d0d350ca64996509ce1bfc94818786ff4c1aa3dbc",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "tags-input",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiTags",
+          "native_fallback": "native input"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

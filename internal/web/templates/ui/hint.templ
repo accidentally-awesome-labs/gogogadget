@@ -1,0 +1,23 @@
+package ui
+
+// HintOpts configures help text for a control.
+type HintOpts struct {
+	// For is the field name; the id is derived from it so the control's
+	// aria-describedby and this element cannot drift apart.
+	For   string
+	Text  string
+	Attrs Attrs
+}
+
+// Hint renders help text below a control.
+templ Hint(o HintOpts) {
+	<p { rootWith("hint", "text-sm text-fg-muted mt-1", o.Attrs, "id", hintID(o.For))... }>{ o.Text }</p>
+}
+
+func hintID(name string) string {
+	if name == "" {
+		return ""
+	}
+	_, hint, _ := FieldIDs(name)
+	return hint
+}

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/otp-input",
+    "kind": "component",
+    "name": "otp-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "OTPInput",
+    "description": "The OTPInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/otp-input.templ",
+        "target": "internal/web/templates/ui/otp-input.templ",
+        "class": "templ",
+        "sha256": "3d589376e1200f57ffb291d27240cac0a061c7a62ffe3e30f1ceda904362ecc1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/otp-input_test.go",
+        "target": "internal/web/templates/ui/otp-input_test.go",
+        "class": "test",
+        "sha256": "c6f465eea24657834dddd0890fd9c43639943d764aa945197ee087d62eb7ee08",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "otp-input",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

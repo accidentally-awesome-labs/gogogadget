@@ -1,0 +1,29 @@
+package ui
+
+// DateFieldOpts is a date input.
+type DateFieldOpts struct {
+	Name        string
+	Value       string
+	Min, Max    string
+	Hint, Error string
+	Required    bool
+	Attrs       Attrs
+}
+
+// DateField renders a native date input. The platform picker already handles
+// locale format, keyboard entry, and the mobile date wheel; a custom calendar
+// has to re-earn all three and usually loses the keyboard.
+templ DateField(o DateFieldOpts) {
+	<input
+		{ root("date-field", "input", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="date" id={ o.Name } name={ o.Name } value={ o.Value }
+		if o.Min != "" {
+			min={ o.Min }
+		}
+		if o.Max != "" {
+			max={ o.Max }
+		}
+		required?={ o.Required }
+	/>
+}

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/file-dropzone",
+    "kind": "component",
+    "name": "file-dropzone",
+    "revision": 1,
+    "contract": 1,
+    "title": "FileDropzone",
+    "description": "The FileDropzone renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/file-dropzone.templ",
+        "target": "internal/web/templates/ui/file-dropzone.templ",
+        "class": "templ",
+        "sha256": "7dbcbdf069ccb210fd9ecabfba96455ef10916ec57bb97cb53e6bb33b6808705",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/file-dropzone_test.go",
+        "target": "internal/web/templates/ui/file-dropzone_test.go",
+        "class": "test",
+        "sha256": "e788c46f22d2b25d1e9db9a9b22ec905f10250e607938946450f1266c596c88e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "file-dropzone",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiDropzone",
+          "native_fallback": "native input"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

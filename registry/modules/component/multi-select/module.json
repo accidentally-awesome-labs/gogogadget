@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/multi-select",
+    "kind": "component",
+    "name": "multi-select",
+    "revision": 1,
+    "contract": 1,
+    "title": "MultiSelect",
+    "description": "The MultiSelect renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/multi-select.templ",
+        "target": "internal/web/templates/ui/multi-select.templ",
+        "class": "templ",
+        "sha256": "577c67134fa6d701949fb3284312f2643417781c9e5022d463422dc7a665d8fe",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "multi-select",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

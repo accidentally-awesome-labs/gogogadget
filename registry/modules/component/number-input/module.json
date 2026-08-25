@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/number-input",
+    "kind": "component",
+    "name": "number-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "NumberInput",
+    "description": "The NumberInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/number-input.templ",
+        "target": "internal/web/templates/ui/number-input.templ",
+        "class": "templ",
+        "sha256": "ca886e55eb953ec6218c219e6c2c76dde3647669e8c3a2fb85642bbe42686d14",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/number-input_test.go",
+        "target": "internal/web/templates/ui/number-input_test.go",
+        "class": "test",
+        "sha256": "cbd4f14ecbeffce2191f997668df8957d18eb544feb2b438268f2559e1dfa911",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "number-input",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

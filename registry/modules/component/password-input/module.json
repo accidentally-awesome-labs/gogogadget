@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/password-input",
+    "kind": "component",
+    "name": "password-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "PasswordInput",
+    "description": "The PasswordInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/password-input.templ",
+        "target": "internal/web/templates/ui/password-input.templ",
+        "class": "templ",
+        "sha256": "00850597d487596b761d9cad0d3a169c66bccce372acaef2ad76689a8e0b3e79",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/password-input_test.go",
+        "target": "internal/web/templates/ui/password-input_test.go",
+        "class": "test",
+        "sha256": "a47c1c229c4e7ace27f14b4cf9ebfafa7a03b015d1cc6165a514532378fadac7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "password-input",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

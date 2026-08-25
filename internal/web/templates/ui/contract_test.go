@@ -247,6 +247,7 @@ func renderers() map[string]any {
 		"TableCard": TableCard, "TableEmpty": TableEmpty, "TerminalPage": TerminalPage, "TextInput": TextInput,
 		"Textarea": Textarea, "Tooltip": Tooltip,
 		"Button": Button, "ButtonLink": ButtonLink, "IconButton": IconButton, "Link": Link, "VisuallyHidden": VisuallyHidden, "Heading": Heading, "Text": Text, "Code": Code, "Kbd": Kbd, "Avatar": Avatar, "AvatarGroup": AvatarGroup, "Prose": Prose, "Truncate": Truncate, "ToggleButton": ToggleButton, "ToggleGroup": ToggleGroup, "ButtonGroup": ButtonGroup, "CopyButton": CopyButton,
+		"CharCounter": CharCounter, "CheckboxGroup": CheckboxGroup, "ColorInput": ColorInput, "Combobox": Combobox, "DateField": DateField, "DateRangeField": DateRangeField, "DateTimeField": DateTimeField, "FileDropzone": FileDropzone, "FileInput": FileInput, "FormActions": FormActions, "Hint": Hint, "InputAddon": InputAddon, "InputGroup": InputGroup, "Label": Label, "MultiSelect": MultiSelect, "NumberInput": NumberInput, "OTPInput": OTPInput, "PasswordInput": PasswordInput, "RangeInput": RangeInput, "SlugInput": SlugInput, "TagsInput": TagsInput, "TimeField": TimeField,
 	}
 }
 

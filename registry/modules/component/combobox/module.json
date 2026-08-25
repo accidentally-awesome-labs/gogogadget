@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/combobox",
+    "kind": "component",
+    "name": "combobox",
+    "revision": 1,
+    "contract": 1,
+    "title": "Combobox",
+    "description": "The Combobox renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/combobox.templ",
+        "target": "internal/web/templates/ui/combobox.templ",
+        "class": "templ",
+        "sha256": "7cac7ea58062ff7c4725e63d471ba7f0d7b9d5d46ca015ce7e192fcb6e668790",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/combobox_test.go",
+        "target": "internal/web/templates/ui/combobox_test.go",
+        "class": "test",
+        "sha256": "dbff2970aa6e66c7e1c8abc34cca2dcd51ca89d13719912926a69033c4fda90a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "combobox",
+          "family": "forms"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

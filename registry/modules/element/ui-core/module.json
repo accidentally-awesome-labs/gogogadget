@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "8b9c947c25cbf3c49635c5c802f075b8dd953c8802c191e391daa8dd814ae515",
+        "sha256": "ab3a1f272d255d667accef9623b4889395f8a2335efa84df3e75165d830eecaa",
         "rewrite_module": true,
         "contract": false
       },
@@ -99,6 +99,14 @@
         "contract": true
       },
       {
+        "source": "static/ui/forms.js",
+        "target": "static/ui/forms.js",
+        "class": "asset",
+        "sha256": "cc9d720427bd6ac2c6628984a29383233ff383ad6c7ca49a1dc794190fd00465",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "static/ui/overlays.js",
         "target": "static/ui/overlays.js",
         "class": "asset",
@@ -110,6 +118,11 @@
     "claims": {},
     "runtime": {
       "assets": [
+        {
+          "id": "ui-forms",
+          "path": "static/ui/forms.js",
+          "kind": "script"
+        },
         {
           "id": "ui-overlays",
           "path": "static/ui/overlays.js",

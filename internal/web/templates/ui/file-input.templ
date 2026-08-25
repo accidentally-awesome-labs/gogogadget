@@ -1,0 +1,26 @@
+package ui
+
+// FileInputOpts is a file picker.
+type FileInputOpts struct {
+	Name string
+	// Accept is advisory: the browser filters the picker but a determined user
+	// can still submit anything, so the server must validate the type again.
+	Accept      string
+	Multiple    bool
+	Hint, Error string
+	Required    bool
+	Attrs       Attrs
+}
+
+// FileInput renders a native file input.
+templ FileInput(o FileInputOpts) {
+	<input
+		{ root("file-input", "block w-full text-sm", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="file" id={ o.Name } name={ o.Name }
+		if o.Accept != "" {
+			accept={ o.Accept }
+		}
+		multiple?={ o.Multiple } required?={ o.Required }
+	/>
+}

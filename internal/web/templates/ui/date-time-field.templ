@@ -1,0 +1,31 @@
+package ui
+
+// DateTimeFieldOpts is a local date-and-time input.
+type DateTimeFieldOpts struct {
+	Name        string
+	Value       string
+	Min, Max    string
+	Hint, Error string
+	Required    bool
+	Attrs       Attrs
+}
+
+// DateTimeField renders a native datetime-local input.
+//
+// datetime-local, not datetime: the value carries no timezone, so the server
+// converts using the user's known zone rather than trusting a browser offset
+// that changes when the user travels.
+templ DateTimeField(o DateTimeFieldOpts) {
+	<input
+		{ root("date-time-field", "input", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="datetime-local" id={ o.Name } name={ o.Name } value={ o.Value }
+		if o.Min != "" {
+			min={ o.Min }
+		}
+		if o.Max != "" {
+			max={ o.Max }
+		}
+		required?={ o.Required }
+	/>
+}

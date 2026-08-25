@@ -16,9 +16,17 @@
         "source": "internal/web/templates/ui/field.templ",
         "target": "internal/web/templates/ui/field.templ",
         "class": "templ",
-        "sha256": "29cecbd8576a6ba53b0eae52bc373c9f6d01d1804271db44f96f520958c95699",
+        "sha256": "78a8ab5a1857338eaa80a38456261889f754404cc4c5b27a361398b17efeb4ba",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/field_test.go",
+        "target": "internal/web/templates/ui/field_test.go",
+        "class": "test",
+        "sha256": "97802f10c78757b65b6df9283bcbe79cdb6c7d94fb4d50fe6ea51776a273fc55",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},
@@ -33,7 +41,11 @@
     "migrations": [],
     "environment": [],
     "docs": [],
-    "tests": {},
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
     "data": [],
     "removal_policy": "free"
   }
