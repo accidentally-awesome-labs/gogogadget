@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/icon-button",
+    "kind": "element",
+    "name": "icon-button",
+    "revision": 1,
+    "contract": 1,
+    "title": "IconButton",
+    "description": "The IconButton renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/icon-button.templ",
+        "target": "internal/web/templates/ui/icon-button.templ",
+        "class": "templ",
+        "sha256": "68c2b024eb84e8301264ea741d34ee80afa66697a65392d488ec78fc2271d37f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/icon-button_test.go",
+        "target": "internal/web/templates/ui/icon-button_test.go",
+        "class": "test",
+        "sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "icon-button",
+          "family": "actions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

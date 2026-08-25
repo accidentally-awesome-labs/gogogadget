@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/truncate",
+    "kind": "element",
+    "name": "truncate",
+    "revision": 1,
+    "contract": 1,
+    "title": "Truncate",
+    "description": "The Truncate renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/truncate.templ",
+        "target": "internal/web/templates/ui/truncate.templ",
+        "class": "templ",
+        "sha256": "6eac4f1b08245408664d510c18f3f0b6ea0563080692b81738b0498ac3a8f8f1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/truncate_test.go",
+        "target": "internal/web/templates/ui/truncate_test.go",
+        "class": "test",
+        "sha256": "f8b11ad68ca2e7847cbacb64f08c37be86c5018c6f59918ba8abb1dc1053949c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "truncate",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

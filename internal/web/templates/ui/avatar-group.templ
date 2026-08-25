@@ -1,0 +1,61 @@
+package ui
+
+import (
+	"fmt"
+)
+
+// AvatarGroupOpts configures a cluster of avatars.
+type AvatarGroupOpts struct {
+	People []AvatarOpts
+	// Max caps how many are drawn; the rest become a "+N" chip. Zero means
+	// three, because an unbounded row of overlapping avatars pushes the rest of
+	// the row off screen.
+	Max   int
+	Size  Size
+	Attrs Attrs
+}
+
+// AvatarGroup renders overlapping avatars with an overflow count.
+templ AvatarGroup(o AvatarGroupOpts) {
+	<div
+		{ rootWith("avatar-group", "flex items-center", o.Attrs,
+			"role", "group",
+			"aria-label", avatarGroupLabel(o))... }
+	>
+		for _, person := range avatarGroupShown(o) {
+			<span class="-ml-2 first:ml-0 ring-2 ring-surface rounded-full">
+				@Avatar(AvatarOpts{Name: person.Name, Src: person.Src, Size: o.Size})
+			</span>
+		}
+		if avatarGroupOverflow(o) > 0 {
+			// The overflow chip is decorative: the group label already states
+			// the real total, so announcing "+2" as well would double-count.
+			<span
+				class={ "-ml-2 ring-2 ring-surface " + avatarClass(o.Size) + " bg-surface-raised text-fg-muted inline-flex items-center justify-center font-semibold" }
+				aria-hidden="true"
+			>{ "+" + fmt.Sprint(avatarGroupOverflow(o)) }</span>
+		}
+	</div>
+}
+
+func avatarGroupMax(o AvatarGroupOpts) int {
+	if o.Max <= 0 {
+		return 3
+	}
+	return o.Max
+}
+
+func avatarGroupShown(o AvatarGroupOpts) []AvatarOpts {
+	if len(o.People) <= avatarGroupMax(o) {
+		return o.People
+	}
+	return o.People[:avatarGroupMax(o)]
+}
+
+func avatarGroupOverflow(o AvatarGroupOpts) int {
+	return len(o.People) - len(avatarGroupShown(o))
+}
+
+func avatarGroupLabel(o AvatarGroupOpts) string {
+	return fmt.Sprintf("%d people", len(o.People))
+}

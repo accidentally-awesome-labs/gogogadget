@@ -199,7 +199,12 @@ func iconSwitch(name IconName, class string, extra templ.Attributes) templ.Compo
 	case IconSpinner:
 		return spinnerSVG(class, extra)
 	}
-	return nil
+	// An unregistered name renders nothing. Returning nil here panicked on
+	// render, so one misspelled icon anywhere took down the whole page - and
+	// components that pass a caller-supplied name through could not be rendered
+	// at all with an empty name. Nothing is the honest output: the mistake stays
+	// visible where it was made, without an outage.
+	return templ.NopComponent
 }
 
 func svgFill(class, d string, extra templ.Attributes) templ.Component {
@@ -256,7 +261,7 @@ func svgFill(class, d string, extra templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icon.templ`, Line: 174, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icon.templ`, Line: 179, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -324,7 +329,7 @@ func svgStroke(class, d string, extra templ.Attributes) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icon.templ`, Line: 180, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icon.templ`, Line: 185, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -403,7 +408,7 @@ func svgMulti(class string, paths []string, withCircle bool, extra templ.Attribu
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(d)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icon.templ`, Line: 190, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/icon.templ`, Line: 195, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {

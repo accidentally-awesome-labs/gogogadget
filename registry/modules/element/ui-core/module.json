@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "3b1473115c426a88ee1dae4720bf756703f89a21cbfd140d0d2a4bdc07e862dc",
+        "sha256": "8b9c947c25cbf3c49635c5c802f075b8dd953c8802c191e391daa8dd814ae515",
         "rewrite_module": true,
         "contract": false
       },
@@ -70,7 +70,7 @@
         "source": "internal/web/templates/ui/icons_test.go",
         "target": "internal/web/templates/ui/icons_test.go",
         "class": "test",
-        "sha256": "f5d3d6255245626d46a2f778a52756cf295e01529c4ceea99f16fbc45ed01c00",
+        "sha256": "3a48df4604c498775d1108d1e5b3ed06a325b3f5606d2902990ad15edcacabec",
         "rewrite_module": true,
         "contract": false
       },

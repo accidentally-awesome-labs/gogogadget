@@ -39,6 +39,6 @@
     "docs": [],
     "tests": {},
     "data": [],
-    "removal_policy": "replacement-required"
+    "removal_policy": "free"
   }
 }

@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/icon.templ",
         "target": "internal/web/templates/ui/icon.templ",
         "class": "templ",
-        "sha256": "c372771725c63bf3cef47daa6a4d1fbb7f810c5ee3b77ad9b833cb396b0bf645",
+        "sha256": "b877eb5561048c358540be0c76a43c29446b68296b0d871270e570d25d1fd59e",
         "rewrite_module": true,
         "contract": true
       }
@@ -35,6 +35,6 @@
     "docs": [],
     "tests": {},
     "data": [],
-    "removal_policy": "replacement-required"
+    "removal_policy": "free"
   }
 }

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/copy-button",
+    "kind": "element",
+    "name": "copy-button",
+    "revision": 1,
+    "contract": 1,
+    "title": "CopyButton",
+    "description": "The CopyButton renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/copy-button.templ",
+        "target": "internal/web/templates/ui/copy-button.templ",
+        "class": "templ",
+        "sha256": "1bf1df8a3e145cb24ecf31e45dd26ed91fb4b2a64b868631961e3e7c88213c47",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/copy-button_test.go",
+        "target": "internal/web/templates/ui/copy-button_test.go",
+        "class": "test",
+        "sha256": "06d0b36a5ce35270fea266c4061db95e3bfe0644e95f30417a6570b202321c77",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "copy-button",
+          "family": "actions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

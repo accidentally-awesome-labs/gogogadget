@@ -7,5 +7,7 @@
   "modules": [
     "profile/full"
   ],
-  "exclude": []
+  "exclude": [
+    "element/divider"
+  ]
 }

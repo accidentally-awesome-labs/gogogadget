@@ -69,3 +69,17 @@ func TestIconIsDecorativeUnlessLabelled(t *testing.T) {
 	assert.Contains(t, labelled, `role="img"`)
 	assert.Contains(t, labelled, `aria-label="Notifications"`)
 }
+
+// An unknown icon name must render nothing, not crash. iconSwitch returned a
+// nil templ.Component, and rendering nil panics - so a single misspelled icon
+// name anywhere took down the whole page render, including inside components
+// that pass a caller-supplied name through (IconButton, MenuItem).
+func TestUnknownIconRendersNothingWithoutPanicking(t *testing.T) {
+	for _, name := range []IconName{"", "trashcan", "Bell"} {
+		html := renderComponent(t, Icon(IconOpts{Name: name}))
+		assert.Empty(t, html, "an unregistered name %q must render nothing", name)
+	}
+	// The surrounding component must still render its own markup.
+	button := renderComponent(t, IconButton(IconButtonOpts{Label: "Delete"}))
+	assert.Contains(t, button, `aria-label="Delete"`)
+}

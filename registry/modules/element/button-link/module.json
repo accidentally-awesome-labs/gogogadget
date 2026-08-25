@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/button-link",
+    "kind": "element",
+    "name": "button-link",
+    "revision": 1,
+    "contract": 1,
+    "title": "ButtonLink",
+    "description": "The ButtonLink renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/button-link.templ",
+        "target": "internal/web/templates/ui/button-link.templ",
+        "class": "templ",
+        "sha256": "f8914c5d45e26f10f77caa3b0d2c2171e05ae063195e6a3cdeada6daf588eb6b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/button-link_test.go",
+        "target": "internal/web/templates/ui/button-link_test.go",
+        "class": "test",
+        "sha256": "1cc5da0ce3ee050b58fba7f37eb0565c81dfbc87ebfe525043b20d61e0969b09",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "button-link",
+          "family": "actions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

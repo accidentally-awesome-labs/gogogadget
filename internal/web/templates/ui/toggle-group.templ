@@ -1,0 +1,49 @@
+package ui
+
+// ToggleOption is one choice in a toggle group.
+type ToggleOption struct {
+	Value, Label string
+	Icon         IconName
+	Selected     bool
+}
+
+// ToggleGroupOpts configures a set of mutually exclusive toggles.
+type ToggleGroupOpts struct {
+	// Label names the group. Without it a screen reader announces each button
+	// with no indication of what the set controls.
+	Label   string
+	Options []ToggleOption
+	Size    Size
+	HX      HX
+	Attrs   Attrs
+}
+
+// ToggleGroup renders exclusive toggles as a labelled group.
+//
+// These are buttons with aria-pressed rather than role="radiogroup": a radio
+// group promises arrow-key navigation between options, and the buttons here are
+// each independently tabbable. Announcing the honest role is better than
+// claiming a keyboard contract that is not implemented.
+templ ToggleGroup(o ToggleGroupOpts) {
+	<div
+		{ rootWith("toggle-group", "inline-flex rounded-lg border border-border overflow-hidden", o.Attrs,
+			"role", "group",
+			"aria-label", o.Label)... }
+	>
+		for _, opt := range o.Options {
+			<button
+				type="button"
+				aria-pressed={ pressedAttr(&opt.Selected) }
+				value={ opt.Value }
+				class={ "px-3 py-1.5 text-sm border-r border-border last:border-r-0",
+					templ.KV("bg-selected text-selected-fg font-semibold", opt.Selected),
+					templ.KV("text-fg-muted hover:bg-surface-raised", !opt.Selected) }
+			>
+				if opt.Icon != "" {
+					@Icon(IconOpts{Name: opt.Icon, Attrs: Attrs{Class: "w-4 h-4 inline-block mr-1 align-text-bottom"}})
+				}
+				{ opt.Label }
+			</button>
+		}
+	</div>
+}

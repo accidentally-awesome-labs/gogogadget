@@ -1,0 +1,33 @@
+package ui
+
+// CopyButtonOpts configures a copy-to-clipboard control.
+type CopyButtonOpts struct {
+	// Value is the text placed on the clipboard. It rides on a data attribute,
+	// never inside an Alpine expression: under CSP the expression could not be
+	// evaluated, and a secret spliced into an attribute is one escaping bug
+	// away from the page's script surface.
+	Value string
+	// Label and CopiedLabel are both required for a real confirmation: a button
+	// whose text never changes gives no feedback that the copy happened.
+	Label       string
+	CopiedLabel string
+	Size        Size
+	Attrs       Attrs
+}
+
+// CopyButton renders a clipboard control with a confirmation state.
+templ CopyButton(o CopyButtonOpts) {
+	<button
+		{ rootWith("copy-button", buttonClass(ActionGhost, o.Size), o.Attrs,
+			"type", "button",
+			"x-data", "copy",
+			"data-copy", o.Value,
+			"@click", "copy")... }
+	>
+		<span x-show="!copied">{ o.Label }</span>
+		// aria-live is on the confirmation so the change is announced when it
+		// happens; without it the visual "Copied" is invisible to a screen
+		// reader and the user cannot tell whether the button worked.
+		<span x-show="copied" x-cloak aria-live="polite">{ o.CopiedLabel }</span>
+	</button>
+}

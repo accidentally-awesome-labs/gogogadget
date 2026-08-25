@@ -1,0 +1,14 @@
+package ui
+
+// CodeOpts configures an inline code span.
+type CodeOpts struct {
+	Text  string
+	Attrs Attrs
+}
+
+// Code renders an inline code span. The value is text content, never raw
+// markup: user-controlled content in a code span is still user-controlled
+// content, and templ escaping is the only reason this is safe.
+templ Code(o CodeOpts) {
+	<code { root("code", "code-chip", o.Attrs)... }>{ o.Text }</code>
+}

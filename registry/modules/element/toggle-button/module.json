@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/toggle-button",
+    "kind": "element",
+    "name": "toggle-button",
+    "revision": 1,
+    "contract": 1,
+    "title": "ToggleButton",
+    "description": "The ToggleButton renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/toggle-button.templ",
+        "target": "internal/web/templates/ui/toggle-button.templ",
+        "class": "templ",
+        "sha256": "3227f1a9f5ada198b809a43757db9e9a11e62ca9e1846146361eaedae161fd56",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "toggle-button",
+          "family": "actions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

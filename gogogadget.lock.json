@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+  "registry_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
   "order": [
     "element/ui-core",
     "component/alert-dialog",
@@ -43,9 +43,26 @@
     "component/text-input",
     "component/textarea",
     "component/tooltip",
-    "element/divider",
+    "element/avatar",
+    "element/avatar-group",
+    "element/button",
+    "element/button-group",
+    "element/button-link",
+    "element/code",
+    "element/copy-button",
+    "element/heading",
     "element/icon",
+    "element/icon-button",
+    "element/kbd",
+    "element/link",
+    "element/prose",
+    "element/separator",
     "element/spinner",
+    "element/text",
+    "element/toggle-button",
+    "element/toggle-group",
+    "element/truncate",
+    "element/visually-hidden",
     "system/apphost",
     "system/config",
     "system/analytics",
@@ -142,14 +159,15 @@
     "workflow/project-export",
     "workflow/projects",
     "page/project-edit",
-    "workflow/seo-discovery"
+    "workflow/seo-discovery",
+    "element/divider"
   ],
   "modules": [
     {
       "id": "component/alert-dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -190,7 +208,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -207,7 +225,7 @@
       "id": "component/badge",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -245,7 +263,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -262,7 +280,7 @@
       "id": "component/banner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -300,7 +318,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -317,7 +335,7 @@
       "id": "component/card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -363,7 +381,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -380,7 +398,7 @@
       "id": "component/checkbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -418,7 +436,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -435,7 +453,7 @@
       "id": "component/container",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -473,7 +491,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -490,7 +508,7 @@
       "id": "component/description-list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -528,7 +546,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -545,7 +563,7 @@
       "id": "component/dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -586,7 +604,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -603,7 +621,7 @@
       "id": "component/dropdown-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -644,7 +662,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -661,7 +679,7 @@
       "id": "component/empty-state",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -699,7 +717,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -716,7 +734,7 @@
       "id": "component/field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -754,7 +772,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -771,7 +789,7 @@
       "id": "component/field-error",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -809,7 +827,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -826,7 +844,7 @@
       "id": "component/fieldset",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -864,7 +882,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -881,7 +899,7 @@
       "id": "component/form",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -919,7 +937,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -936,7 +954,7 @@
       "id": "component/grid",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -974,7 +992,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -991,7 +1009,7 @@
       "id": "component/inline",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1029,7 +1047,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1046,7 +1064,7 @@
       "id": "component/key-value",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1084,7 +1102,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1101,7 +1119,7 @@
       "id": "component/list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1143,7 +1161,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1160,7 +1178,7 @@
       "id": "component/meter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1198,7 +1216,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1215,7 +1233,7 @@
       "id": "component/metric",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1253,7 +1271,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1270,7 +1288,7 @@
       "id": "component/nav-tabs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1308,7 +1326,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1325,7 +1343,7 @@
       "id": "component/notice",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1363,7 +1381,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1380,7 +1398,7 @@
       "id": "component/page-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1418,7 +1436,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1435,7 +1453,7 @@
       "id": "component/pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1473,7 +1491,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1490,7 +1508,7 @@
       "id": "component/plan-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1528,7 +1546,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1545,7 +1563,7 @@
       "id": "component/popover",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1586,7 +1604,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1603,7 +1621,7 @@
       "id": "component/radio-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1641,7 +1659,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1658,7 +1676,7 @@
       "id": "component/search-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1696,7 +1714,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1713,7 +1731,7 @@
       "id": "component/secret-reveal",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1751,7 +1769,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1768,7 +1786,7 @@
       "id": "component/section-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1806,7 +1824,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1823,7 +1841,7 @@
       "id": "component/select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1861,7 +1879,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1878,7 +1896,7 @@
       "id": "component/stack",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1916,7 +1934,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1933,7 +1951,7 @@
       "id": "component/switch",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1971,7 +1989,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -1988,7 +2006,7 @@
       "id": "component/table",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2026,7 +2044,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2043,7 +2061,7 @@
       "id": "component/table-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2081,7 +2099,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2098,7 +2116,7 @@
       "id": "component/table-empty",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2136,7 +2154,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2153,7 +2171,7 @@
       "id": "component/terminal-page",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2191,7 +2209,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2208,7 +2226,7 @@
       "id": "component/text-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2246,7 +2264,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2263,7 +2281,7 @@
       "id": "component/textarea",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2301,7 +2319,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2318,7 +2336,7 @@
       "id": "component/tooltip",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2356,7 +2374,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2370,29 +2388,251 @@
       "migrations": []
     },
     {
-      "id": "element/divider",
+      "id": "element/avatar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
-        "id": "element/divider",
+        "id": "element/avatar",
         "kind": "element",
-        "name": "divider",
+        "name": "avatar",
         "revision": 1,
         "contract": 1,
-        "title": "Divider",
-        "description": "The Divider renderer and its options.",
+        "title": "Avatar",
+        "description": "The Avatar renderer and its options.",
         "requires": [
           "element/ui-core"
         ],
         "files": [
           {
-            "source": "internal/web/templates/ui/divider.templ",
-            "target": "internal/web/templates/ui/divider.templ",
+            "source": "internal/web/templates/ui/avatar.templ",
+            "target": "internal/web/templates/ui/avatar.templ",
             "class": "templ",
-            "sha256": "b1045f144154b6442c95d11d71d4a37a12218596a94c256a042c8f700cb72bd0",
+            "sha256": "3fe8b6b3773669ac9b2b22dc11cd6bb7b88c92f3ed554530398c6cde6e6ba682",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/avatar_test.go",
+            "target": "internal/web/templates/ui/avatar_test.go",
+            "class": "test",
+            "sha256": "591a23c502f4bfa27708d2e6a18d11de6f2592a56958005460106b0279db7d66",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "avatar",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/avatar.templ",
+          "source": "internal/web/templates/ui/avatar.templ",
+          "base_sha256": "3fe8b6b3773669ac9b2b22dc11cd6bb7b88c92f3ed554530398c6cde6e6ba682",
+          "local_sha256": "3fe8b6b3773669ac9b2b22dc11cd6bb7b88c92f3ed554530398c6cde6e6ba682",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/avatar_test.go",
+          "source": "internal/web/templates/ui/avatar_test.go",
+          "base_sha256": "591a23c502f4bfa27708d2e6a18d11de6f2592a56958005460106b0279db7d66",
+          "local_sha256": "591a23c502f4bfa27708d2e6a18d11de6f2592a56958005460106b0279db7d66",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/avatar-group",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/avatar-group",
+        "kind": "element",
+        "name": "avatar-group",
+        "revision": 1,
+        "contract": 1,
+        "title": "AvatarGroup",
+        "description": "The AvatarGroup renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/avatar-group.templ",
+            "target": "internal/web/templates/ui/avatar-group.templ",
+            "class": "templ",
+            "sha256": "f7a2c16e048069a3b520523f8fe391e7cda08204485d290bbddf0d705ee420a2",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/avatar-group_test.go",
+            "target": "internal/web/templates/ui/avatar-group_test.go",
+            "class": "test",
+            "sha256": "11b1f482359a48a169500ac7250879060387ae3e54d708108de3ec604f94871f",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "avatar-group",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/avatar-group.templ",
+          "source": "internal/web/templates/ui/avatar-group.templ",
+          "base_sha256": "f7a2c16e048069a3b520523f8fe391e7cda08204485d290bbddf0d705ee420a2",
+          "local_sha256": "f7a2c16e048069a3b520523f8fe391e7cda08204485d290bbddf0d705ee420a2",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/avatar-group_test.go",
+          "source": "internal/web/templates/ui/avatar-group_test.go",
+          "base_sha256": "11b1f482359a48a169500ac7250879060387ae3e54d708108de3ec604f94871f",
+          "local_sha256": "11b1f482359a48a169500ac7250879060387ae3e54d708108de3ec604f94871f",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/button",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/button",
+        "kind": "element",
+        "name": "button",
+        "revision": 1,
+        "contract": 1,
+        "title": "Button",
+        "description": "The Button renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/button.templ",
+            "target": "internal/web/templates/ui/button.templ",
+            "class": "templ",
+            "sha256": "7688786a9888c3297f1dad6e19f5785a61ce40e549c8fd2303b5372035daa1e3",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/button_test.go",
+            "target": "internal/web/templates/ui/button_test.go",
+            "class": "test",
+            "sha256": "8c885650e1b9a202d547e41f02b8dd365e8f753c7a962d220e9ff714b33dbe53",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "button",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/button.templ",
+          "source": "internal/web/templates/ui/button.templ",
+          "base_sha256": "7688786a9888c3297f1dad6e19f5785a61ce40e549c8fd2303b5372035daa1e3",
+          "local_sha256": "7688786a9888c3297f1dad6e19f5785a61ce40e549c8fd2303b5372035daa1e3",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/button_test.go",
+          "source": "internal/web/templates/ui/button_test.go",
+          "base_sha256": "8c885650e1b9a202d547e41f02b8dd365e8f753c7a962d220e9ff714b33dbe53",
+          "local_sha256": "8c885650e1b9a202d547e41f02b8dd365e8f753c7a962d220e9ff714b33dbe53",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/button-group",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/button-group",
+        "kind": "element",
+        "name": "button-group",
+        "revision": 1,
+        "contract": 1,
+        "title": "ButtonGroup",
+        "description": "The ButtonGroup renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/button-group.templ",
+            "target": "internal/web/templates/ui/button-group.templ",
+            "class": "templ",
+            "sha256": "588ab4a48558f0392934f37c7e37ec89e840fc2427f79a70fe213c4c9d440183",
             "rewrite_module": true,
             "contract": true
           }
@@ -2401,7 +2641,136 @@
         "runtime": {
           "ui": [
             {
-              "name": "divider",
+              "name": "button-group",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/button-group.templ",
+          "source": "internal/web/templates/ui/button-group.templ",
+          "base_sha256": "588ab4a48558f0392934f37c7e37ec89e840fc2427f79a70fe213c4c9d440183",
+          "local_sha256": "588ab4a48558f0392934f37c7e37ec89e840fc2427f79a70fe213c4c9d440183",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/button-link",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/button-link",
+        "kind": "element",
+        "name": "button-link",
+        "revision": 1,
+        "contract": 1,
+        "title": "ButtonLink",
+        "description": "The ButtonLink renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/button-link.templ",
+            "target": "internal/web/templates/ui/button-link.templ",
+            "class": "templ",
+            "sha256": "f8914c5d45e26f10f77caa3b0d2c2171e05ae063195e6a3cdeada6daf588eb6b",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/button-link_test.go",
+            "target": "internal/web/templates/ui/button-link_test.go",
+            "class": "test",
+            "sha256": "1cc5da0ce3ee050b58fba7f37eb0565c81dfbc87ebfe525043b20d61e0969b09",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "button-link",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/button-link.templ",
+          "source": "internal/web/templates/ui/button-link.templ",
+          "base_sha256": "f8914c5d45e26f10f77caa3b0d2c2171e05ae063195e6a3cdeada6daf588eb6b",
+          "local_sha256": "f8914c5d45e26f10f77caa3b0d2c2171e05ae063195e6a3cdeada6daf588eb6b",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/button-link_test.go",
+          "source": "internal/web/templates/ui/button-link_test.go",
+          "base_sha256": "1cc5da0ce3ee050b58fba7f37eb0565c81dfbc87ebfe525043b20d61e0969b09",
+          "local_sha256": "1cc5da0ce3ee050b58fba7f37eb0565c81dfbc87ebfe525043b20d61e0969b09",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/code",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/code",
+        "kind": "element",
+        "name": "code",
+        "revision": 1,
+        "contract": 1,
+        "title": "Code",
+        "description": "The Code renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/code.templ",
+            "target": "internal/web/templates/ui/code.templ",
+            "class": "templ",
+            "sha256": "de84f3abc01506e3ad6b7b16202ca8a7482696d8cda79c0852e865db7d4cc68f",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "code",
               "family": "foundations"
             }
           ]
@@ -2411,14 +2780,191 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
-          "path": "internal/web/templates/ui/divider.templ",
-          "source": "internal/web/templates/ui/divider.templ",
-          "base_sha256": "b1045f144154b6442c95d11d71d4a37a12218596a94c256a042c8f700cb72bd0",
-          "local_sha256": "b1045f144154b6442c95d11d71d4a37a12218596a94c256a042c8f700cb72bd0",
+          "path": "internal/web/templates/ui/code.templ",
+          "source": "internal/web/templates/ui/code.templ",
+          "base_sha256": "de84f3abc01506e3ad6b7b16202ca8a7482696d8cda79c0852e865db7d4cc68f",
+          "local_sha256": "de84f3abc01506e3ad6b7b16202ca8a7482696d8cda79c0852e865db7d4cc68f",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/copy-button",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/copy-button",
+        "kind": "element",
+        "name": "copy-button",
+        "revision": 1,
+        "contract": 1,
+        "title": "CopyButton",
+        "description": "The CopyButton renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/copy-button.templ",
+            "target": "internal/web/templates/ui/copy-button.templ",
+            "class": "templ",
+            "sha256": "1bf1df8a3e145cb24ecf31e45dd26ed91fb4b2a64b868631961e3e7c88213c47",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/copy-button_test.go",
+            "target": "internal/web/templates/ui/copy-button_test.go",
+            "class": "test",
+            "sha256": "06d0b36a5ce35270fea266c4061db95e3bfe0644e95f30417a6570b202321c77",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "copy-button",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/copy-button.templ",
+          "source": "internal/web/templates/ui/copy-button.templ",
+          "base_sha256": "1bf1df8a3e145cb24ecf31e45dd26ed91fb4b2a64b868631961e3e7c88213c47",
+          "local_sha256": "1bf1df8a3e145cb24ecf31e45dd26ed91fb4b2a64b868631961e3e7c88213c47",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/copy-button_test.go",
+          "source": "internal/web/templates/ui/copy-button_test.go",
+          "base_sha256": "06d0b36a5ce35270fea266c4061db95e3bfe0644e95f30417a6570b202321c77",
+          "local_sha256": "06d0b36a5ce35270fea266c4061db95e3bfe0644e95f30417a6570b202321c77",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/divider",
+      "revision": 2,
+      "contract": 1,
+      "source_commit": "b82f0c324a4db72a899936f3abd568e40482bbfaddfc26da93dd293fb80d7f71",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "element/divider",
+        "kind": "element",
+        "name": "divider",
+        "revision": 2,
+        "contract": 1,
+        "title": "Divider",
+        "description": "Superseded by element/separator.",
+        "requires": [],
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
+      "id": "element/heading",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/heading",
+        "kind": "element",
+        "name": "heading",
+        "revision": 1,
+        "contract": 1,
+        "title": "Heading",
+        "description": "The Heading renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/heading.templ",
+            "target": "internal/web/templates/ui/heading.templ",
+            "class": "templ",
+            "sha256": "c44bf60934ef0a45eceee7ace0df1247e7942f16da0121ff03aeb4821cd6a6b1",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/heading_test.go",
+            "target": "internal/web/templates/ui/heading_test.go",
+            "class": "test",
+            "sha256": "9867030623397b6974941ab912418b76cd6774fbaa6fe9f244e1791bd0f48f74",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "heading",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/heading.templ",
+          "source": "internal/web/templates/ui/heading.templ",
+          "base_sha256": "c44bf60934ef0a45eceee7ace0df1247e7942f16da0121ff03aeb4821cd6a6b1",
+          "local_sha256": "c44bf60934ef0a45eceee7ace0df1247e7942f16da0121ff03aeb4821cd6a6b1",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/heading_test.go",
+          "source": "internal/web/templates/ui/heading_test.go",
+          "base_sha256": "9867030623397b6974941ab912418b76cd6774fbaa6fe9f244e1791bd0f48f74",
+          "local_sha256": "9867030623397b6974941ab912418b76cd6774fbaa6fe9f244e1791bd0f48f74",
           "state": "clean"
         }
       ],
@@ -2428,7 +2974,7 @@
       "id": "element/icon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2447,7 +2993,7 @@
             "source": "internal/web/templates/ui/icon.templ",
             "target": "internal/web/templates/ui/icon.templ",
             "class": "templ",
-            "sha256": "c372771725c63bf3cef47daa6a4d1fbb7f810c5ee3b77ad9b833cb396b0bf645",
+            "sha256": "b877eb5561048c358540be0c76a43c29446b68296b0d871270e570d25d1fd59e",
             "rewrite_module": true,
             "contract": true
           }
@@ -2466,14 +3012,346 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
           "path": "internal/web/templates/ui/icon.templ",
           "source": "internal/web/templates/ui/icon.templ",
-          "base_sha256": "c372771725c63bf3cef47daa6a4d1fbb7f810c5ee3b77ad9b833cb396b0bf645",
-          "local_sha256": "c372771725c63bf3cef47daa6a4d1fbb7f810c5ee3b77ad9b833cb396b0bf645",
+          "base_sha256": "b877eb5561048c358540be0c76a43c29446b68296b0d871270e570d25d1fd59e",
+          "local_sha256": "b877eb5561048c358540be0c76a43c29446b68296b0d871270e570d25d1fd59e",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/icon-button",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/icon-button",
+        "kind": "element",
+        "name": "icon-button",
+        "revision": 1,
+        "contract": 1,
+        "title": "IconButton",
+        "description": "The IconButton renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/icon-button.templ",
+            "target": "internal/web/templates/ui/icon-button.templ",
+            "class": "templ",
+            "sha256": "68c2b024eb84e8301264ea741d34ee80afa66697a65392d488ec78fc2271d37f",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/icon-button_test.go",
+            "target": "internal/web/templates/ui/icon-button_test.go",
+            "class": "test",
+            "sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "icon-button",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/icon-button.templ",
+          "source": "internal/web/templates/ui/icon-button.templ",
+          "base_sha256": "68c2b024eb84e8301264ea741d34ee80afa66697a65392d488ec78fc2271d37f",
+          "local_sha256": "68c2b024eb84e8301264ea741d34ee80afa66697a65392d488ec78fc2271d37f",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/icon-button_test.go",
+          "source": "internal/web/templates/ui/icon-button_test.go",
+          "base_sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+          "local_sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/kbd",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/kbd",
+        "kind": "element",
+        "name": "kbd",
+        "revision": 1,
+        "contract": 1,
+        "title": "Kbd",
+        "description": "The Kbd renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/kbd.templ",
+            "target": "internal/web/templates/ui/kbd.templ",
+            "class": "templ",
+            "sha256": "14ad7af9b0b0f7e7db751316a039c236616c7911c7c84af33ae83e3908606e74",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/kbd_test.go",
+            "target": "internal/web/templates/ui/kbd_test.go",
+            "class": "test",
+            "sha256": "02715e47aa22dd531667fe3d9820e72ac22fad90629e517a784e4ed216595ccf",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "kbd",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/kbd.templ",
+          "source": "internal/web/templates/ui/kbd.templ",
+          "base_sha256": "14ad7af9b0b0f7e7db751316a039c236616c7911c7c84af33ae83e3908606e74",
+          "local_sha256": "14ad7af9b0b0f7e7db751316a039c236616c7911c7c84af33ae83e3908606e74",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/kbd_test.go",
+          "source": "internal/web/templates/ui/kbd_test.go",
+          "base_sha256": "02715e47aa22dd531667fe3d9820e72ac22fad90629e517a784e4ed216595ccf",
+          "local_sha256": "02715e47aa22dd531667fe3d9820e72ac22fad90629e517a784e4ed216595ccf",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/link",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/link",
+        "kind": "element",
+        "name": "link",
+        "revision": 1,
+        "contract": 1,
+        "title": "Link",
+        "description": "The Link renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/link.templ",
+            "target": "internal/web/templates/ui/link.templ",
+            "class": "templ",
+            "sha256": "8d7ae63312fbd3418c59d461f91ebe0035d386eb516f10e30d5e4863d0f4569f",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "link",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/link.templ",
+          "source": "internal/web/templates/ui/link.templ",
+          "base_sha256": "8d7ae63312fbd3418c59d461f91ebe0035d386eb516f10e30d5e4863d0f4569f",
+          "local_sha256": "8d7ae63312fbd3418c59d461f91ebe0035d386eb516f10e30d5e4863d0f4569f",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/prose",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/prose",
+        "kind": "element",
+        "name": "prose",
+        "revision": 1,
+        "contract": 1,
+        "title": "Prose",
+        "description": "The Prose renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/prose.templ",
+            "target": "internal/web/templates/ui/prose.templ",
+            "class": "templ",
+            "sha256": "535c404db02a37775324a2c3fdc13e6579bdd8061c8156344ce7ae9ad31a8560",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "prose",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/prose.templ",
+          "source": "internal/web/templates/ui/prose.templ",
+          "base_sha256": "535c404db02a37775324a2c3fdc13e6579bdd8061c8156344ce7ae9ad31a8560",
+          "local_sha256": "535c404db02a37775324a2c3fdc13e6579bdd8061c8156344ce7ae9ad31a8560",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/separator",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/separator",
+        "kind": "element",
+        "name": "separator",
+        "revision": 1,
+        "contract": 1,
+        "title": "Separator",
+        "description": "The Separator renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/separator.templ",
+            "target": "internal/web/templates/ui/separator.templ",
+            "class": "templ",
+            "sha256": "4cd71c3d19b80c28be510568bdc1fb56228ecdd1615250973aa1e826937a9985",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/separator_test.go",
+            "target": "internal/web/templates/ui/separator_test.go",
+            "class": "test",
+            "sha256": "e63c08a8f0d54b1451215c17e601a7522def03869934168f3b1a1127c3dafca1",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "separator",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/separator.templ",
+          "source": "internal/web/templates/ui/separator.templ",
+          "base_sha256": "4cd71c3d19b80c28be510568bdc1fb56228ecdd1615250973aa1e826937a9985",
+          "local_sha256": "4cd71c3d19b80c28be510568bdc1fb56228ecdd1615250973aa1e826937a9985",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/separator_test.go",
+          "source": "internal/web/templates/ui/separator_test.go",
+          "base_sha256": "e63c08a8f0d54b1451215c17e601a7522def03869934168f3b1a1127c3dafca1",
+          "local_sha256": "e63c08a8f0d54b1451215c17e601a7522def03869934168f3b1a1127c3dafca1",
           "state": "clean"
         }
       ],
@@ -2483,7 +3361,7 @@
       "id": "element/spinner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2521,7 +3399,7 @@
         "docs": [],
         "tests": {},
         "data": [],
-        "removal_policy": "replacement-required"
+        "removal_policy": "free"
       },
       "files": [
         {
@@ -2535,10 +3413,268 @@
       "migrations": []
     },
     {
+      "id": "element/text",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/text",
+        "kind": "element",
+        "name": "text",
+        "revision": 1,
+        "contract": 1,
+        "title": "Text",
+        "description": "The Text renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/text.templ",
+            "target": "internal/web/templates/ui/text.templ",
+            "class": "templ",
+            "sha256": "dfaac1afaabc0420bb06d717fafc8ed85f6703466bf229af19642e30d5fa5d93",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "text",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/text.templ",
+          "source": "internal/web/templates/ui/text.templ",
+          "base_sha256": "dfaac1afaabc0420bb06d717fafc8ed85f6703466bf229af19642e30d5fa5d93",
+          "local_sha256": "dfaac1afaabc0420bb06d717fafc8ed85f6703466bf229af19642e30d5fa5d93",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/toggle-button",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/toggle-button",
+        "kind": "element",
+        "name": "toggle-button",
+        "revision": 1,
+        "contract": 1,
+        "title": "ToggleButton",
+        "description": "The ToggleButton renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/toggle-button.templ",
+            "target": "internal/web/templates/ui/toggle-button.templ",
+            "class": "templ",
+            "sha256": "3227f1a9f5ada198b809a43757db9e9a11e62ca9e1846146361eaedae161fd56",
+            "rewrite_module": true,
+            "contract": true
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "toggle-button",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/toggle-button.templ",
+          "source": "internal/web/templates/ui/toggle-button.templ",
+          "base_sha256": "3227f1a9f5ada198b809a43757db9e9a11e62ca9e1846146361eaedae161fd56",
+          "local_sha256": "3227f1a9f5ada198b809a43757db9e9a11e62ca9e1846146361eaedae161fd56",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/toggle-group",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/toggle-group",
+        "kind": "element",
+        "name": "toggle-group",
+        "revision": 1,
+        "contract": 1,
+        "title": "ToggleGroup",
+        "description": "The ToggleGroup renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/toggle-group.templ",
+            "target": "internal/web/templates/ui/toggle-group.templ",
+            "class": "templ",
+            "sha256": "29e088349a0db4deadee748c9f78cef782900daa365d7757767b223433f11a03",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/toggle-group_test.go",
+            "target": "internal/web/templates/ui/toggle-group_test.go",
+            "class": "test",
+            "sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "toggle-group",
+              "family": "actions"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/toggle-group.templ",
+          "source": "internal/web/templates/ui/toggle-group.templ",
+          "base_sha256": "29e088349a0db4deadee748c9f78cef782900daa365d7757767b223433f11a03",
+          "local_sha256": "29e088349a0db4deadee748c9f78cef782900daa365d7757767b223433f11a03",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/toggle-group_test.go",
+          "source": "internal/web/templates/ui/toggle-group_test.go",
+          "base_sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+          "local_sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
+      "id": "element/truncate",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/truncate",
+        "kind": "element",
+        "name": "truncate",
+        "revision": 1,
+        "contract": 1,
+        "title": "Truncate",
+        "description": "The Truncate renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/truncate.templ",
+            "target": "internal/web/templates/ui/truncate.templ",
+            "class": "templ",
+            "sha256": "6eac4f1b08245408664d510c18f3f0b6ea0563080692b81738b0498ac3a8f8f1",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/truncate_test.go",
+            "target": "internal/web/templates/ui/truncate_test.go",
+            "class": "test",
+            "sha256": "f8b11ad68ca2e7847cbacb64f08c37be86c5018c6f59918ba8abb1dc1053949c",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "truncate",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/truncate.templ",
+          "source": "internal/web/templates/ui/truncate.templ",
+          "base_sha256": "6eac4f1b08245408664d510c18f3f0b6ea0563080692b81738b0498ac3a8f8f1",
+          "local_sha256": "6eac4f1b08245408664d510c18f3f0b6ea0563080692b81738b0498ac3a8f8f1",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/truncate_test.go",
+          "source": "internal/web/templates/ui/truncate_test.go",
+          "base_sha256": "f8b11ad68ca2e7847cbacb64f08c37be86c5018c6f59918ba8abb1dc1053949c",
+          "local_sha256": "f8b11ad68ca2e7847cbacb64f08c37be86c5018c6f59918ba8abb1dc1053949c",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "component/alert-dialog",
@@ -2581,9 +3717,26 @@
         "component/text-input",
         "component/textarea",
         "component/tooltip",
-        "element/divider",
+        "element/avatar",
+        "element/avatar-group",
+        "element/button",
+        "element/button-group",
+        "element/button-link",
+        "element/code",
+        "element/copy-button",
+        "element/heading",
         "element/icon",
-        "element/spinner"
+        "element/icon-button",
+        "element/kbd",
+        "element/link",
+        "element/prose",
+        "element/separator",
+        "element/spinner",
+        "element/text",
+        "element/toggle-button",
+        "element/toggle-group",
+        "element/truncate",
+        "element/visually-hidden"
       ],
       "manifest": {
         "id": "element/ui-core",
@@ -2615,7 +3768,7 @@
             "source": "internal/web/templates/ui/contract_test.go",
             "target": "internal/web/templates/ui/contract_test.go",
             "class": "test",
-            "sha256": "3b1473115c426a88ee1dae4720bf756703f89a21cbfd140d0d2a4bdc07e862dc",
+            "sha256": "8b9c947c25cbf3c49635c5c802f075b8dd953c8802c191e391daa8dd814ae515",
             "rewrite_module": true,
             "contract": false
           },
@@ -2655,7 +3808,7 @@
             "source": "internal/web/templates/ui/icons_test.go",
             "target": "internal/web/templates/ui/icons_test.go",
             "class": "test",
-            "sha256": "f5d3d6255245626d46a2f778a52756cf295e01529c4ceea99f16fbc45ed01c00",
+            "sha256": "3a48df4604c498775d1108d1e5b3ed06a325b3f5606d2902990ad15edcacabec",
             "rewrite_module": true,
             "contract": false
           },
@@ -2727,8 +3880,8 @@
         {
           "path": "internal/web/templates/ui/contract_test.go",
           "source": "internal/web/templates/ui/contract_test.go",
-          "base_sha256": "3b1473115c426a88ee1dae4720bf756703f89a21cbfd140d0d2a4bdc07e862dc",
-          "local_sha256": "3b1473115c426a88ee1dae4720bf756703f89a21cbfd140d0d2a4bdc07e862dc",
+          "base_sha256": "8b9c947c25cbf3c49635c5c802f075b8dd953c8802c191e391daa8dd814ae515",
+          "local_sha256": "8b9c947c25cbf3c49635c5c802f075b8dd953c8802c191e391daa8dd814ae515",
           "state": "clean"
         },
         {
@@ -2762,8 +3915,8 @@
         {
           "path": "internal/web/templates/ui/icons_test.go",
           "source": "internal/web/templates/ui/icons_test.go",
-          "base_sha256": "f5d3d6255245626d46a2f778a52756cf295e01529c4ceea99f16fbc45ed01c00",
-          "local_sha256": "f5d3d6255245626d46a2f778a52756cf295e01529c4ceea99f16fbc45ed01c00",
+          "base_sha256": "3a48df4604c498775d1108d1e5b3ed06a325b3f5606d2902990ad15edcacabec",
+          "local_sha256": "3a48df4604c498775d1108d1e5b3ed06a325b3f5606d2902990ad15edcacabec",
           "state": "clean"
         },
         {
@@ -2798,10 +3951,84 @@
       "migrations": []
     },
     {
+      "id": "element/visually-hidden",
+      "revision": 1,
+      "contract": 1,
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
+      "reason": "profile",
+      "required_by": [],
+      "manifest": {
+        "id": "element/visually-hidden",
+        "kind": "element",
+        "name": "visually-hidden",
+        "revision": 1,
+        "contract": 1,
+        "title": "VisuallyHidden",
+        "description": "The VisuallyHidden renderer and its options.",
+        "requires": [
+          "element/ui-core"
+        ],
+        "files": [
+          {
+            "source": "internal/web/templates/ui/visually-hidden.templ",
+            "target": "internal/web/templates/ui/visually-hidden.templ",
+            "class": "templ",
+            "sha256": "d1740fdd0da5761405b896dab06bf72af74a5052aa6e54baf91ec2b1a72a23d0",
+            "rewrite_module": true,
+            "contract": true
+          },
+          {
+            "source": "internal/web/templates/ui/visually-hidden_test.go",
+            "target": "internal/web/templates/ui/visually-hidden_test.go",
+            "class": "test",
+            "sha256": "fb2042c5c382bb3f346c9ff4e178c9ef3eb175130c14d92aa4fd3c871ad01568",
+            "rewrite_module": true,
+            "contract": false
+          }
+        ],
+        "claims": {},
+        "runtime": {
+          "ui": [
+            {
+              "name": "visually-hidden",
+              "family": "foundations"
+            }
+          ]
+        },
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {
+          "go_packages": [
+            "internal/web/templates/ui"
+          ]
+        },
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [
+        {
+          "path": "internal/web/templates/ui/visually-hidden.templ",
+          "source": "internal/web/templates/ui/visually-hidden.templ",
+          "base_sha256": "d1740fdd0da5761405b896dab06bf72af74a5052aa6e54baf91ec2b1a72a23d0",
+          "local_sha256": "d1740fdd0da5761405b896dab06bf72af74a5052aa6e54baf91ec2b1a72a23d0",
+          "state": "clean"
+        },
+        {
+          "path": "internal/web/templates/ui/visually-hidden_test.go",
+          "source": "internal/web/templates/ui/visually-hidden_test.go",
+          "base_sha256": "fb2042c5c382bb3f346c9ff4e178c9ef3eb175130c14d92aa4fd3c871ad01568",
+          "local_sha256": "fb2042c5c382bb3f346c9ff4e178c9ef3eb175130c14d92aa4fd3c871ad01568",
+          "state": "clean"
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2951,7 +4178,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -3137,7 +4364,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3258,7 +4485,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3483,7 +4710,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3581,7 +4808,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3660,7 +4887,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3740,7 +4967,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -3940,7 +5167,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -4103,7 +5330,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -4235,7 +5462,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4343,7 +5570,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4486,7 +5713,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -4674,7 +5901,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4810,7 +6037,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4930,7 +6157,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5035,7 +6262,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5170,7 +6397,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5201,7 +6428,7 @@
             "source": "internal/web/templates/gallery.templ",
             "target": "internal/web/templates/gallery.templ",
             "class": "templ",
-            "sha256": "4c7700705533e3e5d72d6d938c2b75265dd003d29180ca70690effd50573f7e4",
+            "sha256": "96550dc9a330ebaa2a631c658a81bfe99c1cb7d20c90ab2acb5ca1023782f0a7",
             "rewrite_module": true,
             "contract": false
           }
@@ -5255,8 +6482,8 @@
         {
           "path": "internal/web/templates/gallery.templ",
           "source": "internal/web/templates/gallery.templ",
-          "base_sha256": "4c7700705533e3e5d72d6d938c2b75265dd003d29180ca70690effd50573f7e4",
-          "local_sha256": "4c7700705533e3e5d72d6d938c2b75265dd003d29180ca70690effd50573f7e4",
+          "base_sha256": "96550dc9a330ebaa2a631c658a81bfe99c1cb7d20c90ab2acb5ca1023782f0a7",
+          "local_sha256": "96550dc9a330ebaa2a631c658a81bfe99c1cb7d20c90ab2acb5ca1023782f0a7",
           "state": "clean"
         }
       ],
@@ -5266,7 +6493,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5367,7 +6594,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -5489,7 +6716,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5568,7 +6795,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -5721,7 +6948,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5939,7 +7166,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -6079,7 +7306,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6192,7 +7419,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6308,7 +7535,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6388,7 +7615,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6467,7 +7694,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6642,7 +7869,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -6813,7 +8040,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -6965,7 +8192,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -7133,7 +8360,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -7280,7 +8507,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7409,7 +8636,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -7601,7 +8828,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7717,7 +8944,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -7874,7 +9101,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -8003,7 +9230,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -8446,7 +9673,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -8545,7 +9772,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -8741,7 +9968,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -9191,7 +10418,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -9352,7 +10579,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -9851,7 +11078,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -10495,7 +11722,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -10690,7 +11917,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -10942,7 +12169,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -11109,7 +12336,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -12310,7 +13537,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -12464,7 +13691,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -12744,7 +13971,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -12908,7 +14135,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -13111,7 +14338,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13211,7 +14438,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13852,7 +15079,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -14149,7 +15376,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -14329,7 +15556,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -14646,7 +15873,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -14782,7 +16009,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -14942,7 +16169,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -15083,7 +16310,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15135,7 +16362,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -15189,7 +16416,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -16158,7 +17385,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16193,7 +17420,7 @@
             "source": "static/app.css",
             "target": "static/app.css",
             "class": "generated",
-            "sha256": "b31abd45657130b85f3bb8e0a396652c33bc193b15da5184aa5d663daf263346",
+            "sha256": "9f541256d840123d436d2b40a5ce753ed8a2a4ae0eba660ff2c0856ba837c22c",
             "rewrite_module": false,
             "contract": false
           },
@@ -16257,7 +17484,7 @@
             "source": "static/ui-components.js",
             "target": "static/ui-components.js",
             "class": "generated",
-            "sha256": "cd42479ba421e60237c61bd2fea1b1a61fe888783b0115fd8fb4f0c1f671b633",
+            "sha256": "85cbc0ff6e377f9ee4ef33711c812d33c738ebe75477a957320dbefa0a2c3e95",
             "rewrite_module": false,
             "contract": false
           },
@@ -16443,7 +17670,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -16651,7 +17878,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16707,7 +17934,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -16883,7 +18110,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -17152,7 +18379,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17236,7 +18463,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17332,7 +18559,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17466,7 +18693,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -17659,7 +18886,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17831,7 +19058,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17916,7 +19143,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18036,7 +19263,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18172,7 +19399,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18270,7 +19497,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18504,7 +19731,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18840,7 +20067,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -18939,7 +20166,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19066,7 +20293,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -19200,7 +20427,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19317,7 +20544,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19396,7 +20623,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -19512,7 +20739,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19697,7 +20924,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19804,7 +21031,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19937,7 +21164,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20072,7 +21299,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20153,7 +21380,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -20294,7 +21521,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -20417,7 +21644,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20593,7 +21820,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20713,7 +21940,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -20963,7 +22190,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "fd61e748a16781808309bf3d686818b9bfc93eb2105316ca52d2e4dd44f0aa01",
+      "source_commit": "00a0a4941c5abc4f11d7e2c8d3609c85f05bbeda631caa4a7878602102f9174b",
       "reason": "profile",
       "required_by": [],
       "manifest": {

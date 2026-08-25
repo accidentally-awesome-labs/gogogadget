@@ -8,10 +8,18 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// DividerOpts renders a horizontal rule.
-type DividerOpts struct{ Attrs Attrs }
+// ButtonGroupOpts configures related controls presented as one unit.
+type ButtonGroupOpts struct {
+	// Label names what the set of controls does. A group with no name is just
+	// adjacent buttons as far as assistive technology is concerned.
+	Label string
+	Attrs Attrs
+}
 
-func Divider(o DividerOpts) templ.Component {
+// ButtonGroup joins related controls visually and as one labelled group. Unlike
+// ToggleGroup the members are independent commands, not exclusive states, so
+// nothing here carries aria-pressed.
+func ButtonGroup(o ButtonGroupOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -32,15 +40,25 @@ func Divider(o DividerOpts) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<hr")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("divider", "border-t border-border my-4", o.Attrs))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("button-group", "inline-flex items-center gap-2", o.Attrs,
+			"role", "group",
+			"aria-label", o.Label))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var1.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

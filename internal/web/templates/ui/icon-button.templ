@@ -1,0 +1,64 @@
+package ui
+
+// IconButtonOpts configures a button whose only content is an icon.
+//
+// Label is required and is not optional by accident: an icon-only button with
+// no accessible name is announced as "button" and nothing else, which makes it
+// unusable by screen reader and unaddressable by test. The label is applied as
+// aria-label and the icon stays decorative, so the name is announced exactly
+// once.
+type IconButtonOpts struct {
+	Icon   IconName
+	Label  string
+	Type   ButtonType
+	Action Action
+	Size   Size
+	Busy   bool
+	// Pressed makes this a toggle: nil is a plain button, a pointer is the
+	// current state and renders aria-pressed.
+	Pressed  *bool
+	Disabled bool
+	HX       HX
+	Attrs    Attrs
+}
+
+// IconButton renders an icon-only control with an accessible name.
+templ IconButton(o IconButtonOpts) {
+	<button
+		{ rootWith("icon-button", buttonClass(o.Action, o.Size)+" btn-icon", o.Attrs,
+			"type", string(o.Type.Value()),
+			"aria-label", iconButtonLabel(o),
+			"aria-busy", boolAttr(o.Busy),
+			"aria-pressed", pressedAttr(o.Pressed))... }
+		disabled?={ o.Disabled }
+	>
+		if o.Busy {
+			@Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: "w-4 h-4 animate-spin"}})
+		} else {
+			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}})
+		}
+	</button>
+}
+
+// iconButtonLabel refuses to render a nameless control silently. A missing
+// label is a bug in the caller, and a visible placeholder is what gets it
+// noticed - an empty aria-label would not.
+func iconButtonLabel(o IconButtonOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return "unlabelled " + string(o.Icon) + " button"
+}
+
+// pressedAttr renders a toggle's state. A plain button omits aria-pressed
+// entirely: claiming a pressed state a control does not have tells a screen
+// reader user the button toggles something when it does not.
+func pressedAttr(pressed *bool) string {
+	if pressed == nil {
+		return ""
+	}
+	if *pressed {
+		return "true"
+	}
+	return "false"
+}

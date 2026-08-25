@@ -372,6 +372,81 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Actions — buttons") {
+			<div class="space-y-4">
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.Button(ui.ButtonOpts{Label: "Primary", Action: ui.ActionPrimary})
+					@ui.Button(ui.ButtonOpts{Label: "Ghost"})
+					@ui.Button(ui.ButtonOpts{Label: "Danger", Action: ui.ActionDanger, Icon: ui.IconDelete})
+					@ui.Button(ui.ButtonOpts{Label: "Saving", Action: ui.ActionPrimary, Busy: true})
+					@ui.Button(ui.ButtonOpts{Label: "Unavailable", Disabled: true})
+					@ui.Button(ui.ButtonOpts{Label: "Acts like a link", Action: ui.ActionLink})
+				</div>
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.ButtonLink(ui.ButtonLinkOpts{Label: "Docs", Href: "/docs", Action: ui.ActionPrimary})
+					@ui.ButtonLink(ui.ButtonLinkOpts{Label: "Status page", Href: "https://example.com", External: true})
+					@ui.Link(ui.LinkOpts{Label: "A text link", Href: "/pricing"})
+					@ui.Link(ui.LinkOpts{Label: "An external one", Href: "https://example.com", External: true})
+				</div>
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.IconButton(ui.IconButtonOpts{Icon: ui.IconEdit, Label: "Edit project"})
+					@ui.IconButton(ui.IconButtonOpts{Icon: ui.IconDelete, Label: "Delete project", Action: ui.ActionDanger})
+					@ui.IconButton(ui.IconButtonOpts{Icon: ui.IconRefresh, Label: "Refresh", Busy: true})
+					@ui.ToggleButton(ui.ToggleButtonOpts{Label: "Starred", On: true, Icon: ui.IconCheck})
+					@ui.ToggleButton(ui.ToggleButtonOpts{Label: "Not starred"})
+					@ui.CopyButton(ui.CopyButtonOpts{Value: "ggg_sk_example_value", Label: "Copy token", CopiedLabel: "Copied", Size: ui.SizeSM})
+				</div>
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.ToggleGroup(ui.ToggleGroupOpts{Label: "Density", Options: []ui.ToggleOption{
+						{Value: "cosy", Label: "Cosy", Selected: true},
+						{Value: "compact", Label: "Compact"},
+					}})
+					@ui.ButtonGroup(ui.ButtonGroupOpts{Label: "Row actions"}) {
+						@ui.Button(ui.ButtonOpts{Label: "Approve", Size: ui.SizeSM, Action: ui.ActionPrimary})
+						@ui.Button(ui.ButtonOpts{Label: "Reject", Size: ui.SizeSM})
+					}
+				</div>
+			</div>
+		}
+
+		@gallerySection("Foundations — text and identity") {
+			<div class="space-y-6">
+				<div class="space-y-1">
+					@ui.Heading(ui.HeadingOpts{Text: "h2 at page size", Level: 2})
+					@ui.Heading(ui.HeadingOpts{Text: "h3 at section size", Level: 3, Size: ui.SizeSM})
+					@ui.Text(ui.TextOpts{}) {
+						Body copy in a paragraph, so a screen reader can move through prose one paragraph at a time.
+					}
+					@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+						Secondary copy, quieter and smaller.
+					}
+				</div>
+				<div class="flex flex-wrap items-center gap-4">
+					@ui.Code(ui.CodeOpts{Text: "ggg add component/badge"})
+					@ui.Kbd(ui.KbdOpts{Keys: []string{"Ctrl", "K"}})
+					@ui.VisuallyHidden(ui.VisuallyHiddenOpts{}) {
+						This text is only for assistive technology.
+					}
+					<span class="text-sm text-fg-muted">(a visually hidden label sits to the left)</span>
+				</div>
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.Avatar(ui.AvatarOpts{Name: "Ada Lovelace"})
+					@ui.Avatar(ui.AvatarOpts{Name: "Grace Hopper", Size: ui.SizeSM})
+					@ui.AvatarGroup(ui.AvatarGroupOpts{People: []ui.AvatarOpts{
+						{Name: "Ada Lovelace"}, {Name: "Grace Hopper"},
+						{Name: "Alan Turing"}, {Name: "Katherine Johnson"}, {Name: "Jean Bartik"},
+					}})
+				</div>
+				<div class="max-w-xs">
+					@ui.Truncate(ui.TruncateOpts{Text: "a-very-long-project-identifier-that-will-not-fit-on-one-line"})
+				</div>
+				@ui.Separator(ui.SeparatorOpts{Label: "Long-form content"})
+				@ui.Prose(ui.ProseOpts{}) {
+					<p>Prose wraps generated content so headings, lists and code inherit typographic rhythm.</p>
+				}
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {
@@ -404,7 +479,7 @@ templ Gallery() {
 					<div class="card text-sm">Grid 3</div>
 				}
 				@ui.SectionHeader(ui.SectionHeaderOpts{Text: "Section header", Attrs: ui.Attrs{Class: "pt-2"}})
-				@ui.Divider(ui.DividerOpts{})
+				@ui.Separator(ui.SeparatorOpts{})
 			</div>
 		}
 

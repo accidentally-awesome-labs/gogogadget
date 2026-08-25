@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/avatar-group",
+    "kind": "element",
+    "name": "avatar-group",
+    "revision": 1,
+    "contract": 1,
+    "title": "AvatarGroup",
+    "description": "The AvatarGroup renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/avatar-group.templ",
+        "target": "internal/web/templates/ui/avatar-group.templ",
+        "class": "templ",
+        "sha256": "f7a2c16e048069a3b520523f8fe391e7cda08204485d290bbddf0d705ee420a2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/avatar-group_test.go",
+        "target": "internal/web/templates/ui/avatar-group_test.go",
+        "class": "test",
+        "sha256": "11b1f482359a48a169500ac7250879060387ae3e54d708108de3ec604f94871f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "avatar-group",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

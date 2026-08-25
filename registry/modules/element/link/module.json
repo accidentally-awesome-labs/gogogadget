@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/link",
+    "kind": "element",
+    "name": "link",
+    "revision": 1,
+    "contract": 1,
+    "title": "Link",
+    "description": "The Link renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/link.templ",
+        "target": "internal/web/templates/ui/link.templ",
+        "class": "templ",
+        "sha256": "8d7ae63312fbd3418c59d461f91ebe0035d386eb516f10e30d5e4863d0f4569f",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "link",
+          "family": "actions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

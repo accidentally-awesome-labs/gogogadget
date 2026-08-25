@@ -1,8 +1,0 @@
-package ui
-
-// DividerOpts renders a horizontal rule.
-type DividerOpts struct{ Attrs Attrs }
-
-templ Divider(o DividerOpts) {
-	<hr { root("divider", "border-t border-border my-4", o.Attrs)... }/>
-}

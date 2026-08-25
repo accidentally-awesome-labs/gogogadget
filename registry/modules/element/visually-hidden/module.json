@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/visually-hidden",
+    "kind": "element",
+    "name": "visually-hidden",
+    "revision": 1,
+    "contract": 1,
+    "title": "VisuallyHidden",
+    "description": "The VisuallyHidden renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/visually-hidden.templ",
+        "target": "internal/web/templates/ui/visually-hidden.templ",
+        "class": "templ",
+        "sha256": "d1740fdd0da5761405b896dab06bf72af74a5052aa6e54baf91ec2b1a72a23d0",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/visually-hidden_test.go",
+        "target": "internal/web/templates/ui/visually-hidden_test.go",
+        "class": "test",
+        "sha256": "fb2042c5c382bb3f346c9ff4e178c9ef3eb175130c14d92aa4fd3c871ad01568",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "visually-hidden",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

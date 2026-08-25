@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/toggle-group",
+    "kind": "element",
+    "name": "toggle-group",
+    "revision": 1,
+    "contract": 1,
+    "title": "ToggleGroup",
+    "description": "The ToggleGroup renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/toggle-group.templ",
+        "target": "internal/web/templates/ui/toggle-group.templ",
+        "class": "templ",
+        "sha256": "29e088349a0db4deadee748c9f78cef782900daa365d7757767b223433f11a03",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/toggle-group_test.go",
+        "target": "internal/web/templates/ui/toggle-group_test.go",
+        "class": "test",
+        "sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "toggle-group",
+          "family": "actions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

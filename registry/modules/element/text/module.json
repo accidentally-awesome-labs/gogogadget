@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/text",
+    "kind": "element",
+    "name": "text",
+    "revision": 1,
+    "contract": 1,
+    "title": "Text",
+    "description": "The Text renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/text.templ",
+        "target": "internal/web/templates/ui/text.templ",
+        "class": "templ",
+        "sha256": "dfaac1afaabc0420bb06d717fafc8ed85f6703466bf229af19642e30d5fa5d93",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "text",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

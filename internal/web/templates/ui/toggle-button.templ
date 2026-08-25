@@ -1,0 +1,29 @@
+package ui
+
+// ToggleButtonOpts configures a two-state button.
+type ToggleButtonOpts struct {
+	Label string
+	// On is the current state, rendered as aria-pressed. A toggle without it is
+	// indistinguishable from a plain button to a screen reader user, who then
+	// has no way to know the setting's current value.
+	On     bool
+	Action Action
+	Size   Size
+	Icon   IconName
+	HX     HX
+	Attrs  Attrs
+}
+
+// ToggleButton renders a button that reports its own pressed state.
+templ ToggleButton(o ToggleButtonOpts) {
+	<button
+		{ rootWith("toggle-button", buttonClass(o.Action, o.Size), o.Attrs,
+			"type", "button",
+			"aria-pressed", pressedAttr(&o.On))... }
+	>
+		if o.Icon != "" {
+			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}})
+		}
+		{ o.Label }
+	</button>
+}

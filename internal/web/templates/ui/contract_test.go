@@ -125,7 +125,7 @@ func optionsSamples() []any {
 		CardOpts{}, CardHeaderOpts{}, CardFooterOpts{}, TableOpts{}, KeyValueOpts{},
 		ListOpts{}, ContainerOpts{}, StackOpts{}, InlineOpts{}, GridOpts{},
 		DialogOpts{}, AlertDialogOpts{}, DropdownMenuOpts{}, PopoverOpts{}, TooltipOpts{},
-		IconOpts{}, ItemOpts{}, DividerOpts{},
+		IconOpts{}, ItemOpts{}, SeparatorOpts{},
 	}
 }
 
@@ -236,7 +236,7 @@ func renderers() map[string]any {
 	return map[string]any{
 		"AlertDialog": AlertDialog, "Badge": Badge, "Banner": Banner, "Card": Card,
 		"CardFooter": CardFooter, "CardHeader": CardHeader, "Checkbox": Checkbox, "Container": Container,
-		"DescriptionList": DescriptionList, "Dialog": Dialog, "Divider": Divider, "DropdownMenu": DropdownMenu,
+		"DescriptionList": DescriptionList, "Dialog": Dialog, "Separator": Separator, "DropdownMenu": DropdownMenu,
 		"EmptyState": EmptyState, "Field": Field, "FieldError": FieldError, "Fieldset": Fieldset,
 		"Form": Form, "Grid": Grid, "Icon": Icon, "Inline": Inline,
 		"Item": Item, "KeyValue": KeyValue, "List": List, "Meter": Meter,
@@ -246,6 +246,7 @@ func renderers() map[string]any {
 		"Spinner": Spinner, "Stack": Stack, "Switch": Switch, "Table": Table,
 		"TableCard": TableCard, "TableEmpty": TableEmpty, "TerminalPage": TerminalPage, "TextInput": TextInput,
 		"Textarea": Textarea, "Tooltip": Tooltip,
+		"Button": Button, "ButtonLink": ButtonLink, "IconButton": IconButton, "Link": Link, "VisuallyHidden": VisuallyHidden, "Heading": Heading, "Text": Text, "Code": Code, "Kbd": Kbd, "Avatar": Avatar, "AvatarGroup": AvatarGroup, "Prose": Prose, "Truncate": Truncate, "ToggleButton": ToggleButton, "ToggleGroup": ToggleGroup, "ButtonGroup": ButtonGroup, "CopyButton": CopyButton,
 	}
 }
 

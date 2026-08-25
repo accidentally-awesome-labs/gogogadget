@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/prose",
+    "kind": "element",
+    "name": "prose",
+    "revision": 1,
+    "contract": 1,
+    "title": "Prose",
+    "description": "The Prose renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/prose.templ",
+        "target": "internal/web/templates/ui/prose.templ",
+        "class": "templ",
+        "sha256": "535c404db02a37775324a2c3fdc13e6579bdd8061c8156344ce7ae9ad31a8560",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "prose",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,84 @@
+package ui
+
+// ButtonOpts configures a button that acts. It has no Href field: a control
+// with a destination is a link, and giving one element both roles is how a
+// "button" ends up unable to be opened in a new tab while a "link" ends up
+// unable to be triggered with Space.
+type ButtonOpts struct {
+	Label string
+	// Type defaults to button. HTML defaults to submit, so an untyped button
+	// inside a form submits it - a default nobody asks for and everybody is
+	// surprised by.
+	Type ButtonType
+	// Action is the emphasis: ghost by default, so a typo can never promote a
+	// control's importance or dress a harmless action as destructive.
+	Action Action
+	Size   Size
+	// Busy marks work in progress. It sets aria-busy and keeps the control
+	// focusable rather than disabling it: disabling a focused button throws
+	// focus to the top of the document, and a screen reader loses its place
+	// mid-action. The handler is responsible for ignoring repeat submissions.
+	Busy bool
+	// Disabled is for a control that is genuinely unavailable, which is a
+	// different statement from "working".
+	Disabled bool
+	// Icon is decorative - Label already names the command.
+	Icon  IconName
+	HX    HX
+	Attrs Attrs
+}
+
+// Button renders a control that acts.
+templ Button(o ButtonOpts) {
+	<button
+		{ rootWith("button", buttonClass(o.Action, o.Size), o.Attrs,
+			"type", string(o.Type.Value()),
+			"aria-busy", boolAttr(o.Busy))... }
+		disabled?={ o.Disabled }
+	>
+		if o.Busy {
+			@Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: "w-4 h-4 animate-spin"}})
+		} else if o.Icon != "" {
+			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}})
+		}
+		{ o.Label }
+	</button>
+}
+
+// buttonClass maps the emphasis and size axes onto the component classes. Both
+// values are normalized first, so an unrecognised action renders the quietest
+// variant rather than a class-less control with no affordance at all.
+func buttonClass(action Action, size Size) string {
+	cls := "btn"
+	switch action.Value() {
+	case ActionPrimary:
+		cls += " btn-primary"
+	case ActionDanger:
+		cls += " btn-danger"
+	case ActionInverse:
+		cls += " btn-inverse"
+	case ActionLink:
+		return "link"
+	default:
+		cls += " btn-ghost"
+	}
+	switch size.Value() {
+	case SizeXS:
+		cls += " btn-xs"
+	case SizeSM:
+		cls += " btn-sm"
+	case SizeLG:
+		cls += " btn-lg"
+	}
+	return cls
+}
+
+// boolAttr renders a boolean as an attribute value, or empty so rootWith drops
+// the attribute entirely. aria-busy="false" and no aria-busy mean the same
+// thing to a screen reader; emitting the former on every button is noise.
+func boolAttr(on bool) string {
+	if on {
+		return "true"
+	}
+	return ""
+}

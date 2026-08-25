@@ -1,0 +1,47 @@
+package ui
+
+// LinkOpts configures a text link.
+type LinkOpts struct {
+	Label    string
+	Href     string
+	External bool
+	// Boost opts the link into htmx navigation, which swaps only the content
+	// box. It is off by default because an anchor link (#section) must never be
+	// boosted: boosting repaints the box at the top before scrolling, flashing
+	// the wrong section.
+	Boost bool
+	Attrs Attrs
+}
+
+// Link renders a text link.
+templ Link(o LinkOpts) {
+	<a
+		href={ templ.SafeURL(o.Href) }
+		{ rootWith("link", "link", o.Attrs,
+			"target", externalTarget(o.External),
+			"rel", externalRel(o.External),
+			"hx-boost", boolAttr(o.Boost && !o.External),
+			"hx-target", boostTarget(o.Boost && !o.External),
+			"hx-select", boostTarget(o.Boost && !o.External),
+			"hx-swap", boostSwap(o.Boost && !o.External))... }
+	>
+		{ o.Label }
+		if o.External {
+			@Icon(IconOpts{Name: IconExternal, Attrs: Attrs{Class: "w-3 h-3 inline-block ml-1 align-baseline"}})
+		}
+	</a>
+}
+
+func boostTarget(boost bool) string {
+	if boost {
+		return NavTarget
+	}
+	return ""
+}
+
+func boostSwap(boost bool) string {
+	if boost {
+		return NavSwap
+	}
+	return ""
+}

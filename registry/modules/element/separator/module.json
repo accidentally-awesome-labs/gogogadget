@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/separator",
+    "kind": "element",
+    "name": "separator",
+    "revision": 1,
+    "contract": 1,
+    "title": "Separator",
+    "description": "The Separator renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/separator.templ",
+        "target": "internal/web/templates/ui/separator.templ",
+        "class": "templ",
+        "sha256": "4cd71c3d19b80c28be510568bdc1fb56228ecdd1615250973aa1e826937a9985",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/separator_test.go",
+        "target": "internal/web/templates/ui/separator_test.go",
+        "class": "test",
+        "sha256": "e63c08a8f0d54b1451215c17e601a7522def03869934168f3b1a1127c3dafca1",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "separator",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

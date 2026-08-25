@@ -4,37 +4,21 @@
     "id": "element/divider",
     "kind": "element",
     "name": "divider",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Divider",
-    "description": "The Divider renderer and its options.",
+    "description": "Superseded by element/separator.",
     "requires": [
       "element/ui-core"
     ],
-    "files": [
-      {
-        "source": "internal/web/templates/ui/divider.templ",
-        "target": "internal/web/templates/ui/divider.templ",
-        "class": "templ",
-        "sha256": "b1045f144154b6442c95d11d71d4a37a12218596a94c256a042c8f700cb72bd0",
-        "rewrite_module": true,
-        "contract": true
-      }
-    ],
+    "files": [],
     "claims": {},
-    "runtime": {
-      "ui": [
-        {
-          "name": "divider",
-          "family": "foundations"
-        }
-      ]
-    },
+    "runtime": {},
     "migrations": [],
     "environment": [],
     "docs": [],
     "tests": {},
     "data": [],
-    "removal_policy": "replacement-required"
+    "removal_policy": "free"
   }
 }

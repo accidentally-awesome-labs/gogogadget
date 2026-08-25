@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/heading",
+    "kind": "element",
+    "name": "heading",
+    "revision": 1,
+    "contract": 1,
+    "title": "Heading",
+    "description": "The Heading renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/heading.templ",
+        "target": "internal/web/templates/ui/heading.templ",
+        "class": "templ",
+        "sha256": "c44bf60934ef0a45eceee7ace0df1247e7942f16da0121ff03aeb4821cd6a6b1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/heading_test.go",
+        "target": "internal/web/templates/ui/heading_test.go",
+        "class": "test",
+        "sha256": "9867030623397b6974941ab912418b76cd6774fbaa6fe9f244e1791bd0f48f74",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "heading",
+          "family": "foundations"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}
