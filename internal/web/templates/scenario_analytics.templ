@@ -1,0 +1,403 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The analytics scenario: every chart shape the catalog installs, the range
+// filter above them and the numbers underneath.
+//
+// The organising rule is that the table is the data and the canvas is the
+// enhancement. Every figure here renders its caption, its summary and its
+// semantic table unconditionally - so this page is complete with the chart
+// engine blocked, with JavaScript off, and on paper. Nothing is measured only in
+// pixels.
+//
+// The fixture is six fixed weeks of literal numbers. A scenario that queried
+// anything would render differently on every machine, which makes it useless as
+// a visual baseline; two renders of this page are byte-identical.
+templ ScenarioAnalytics(gc GalleryContext) {
+	@analyticsRangeFilter(gc)
+	switch gc.State {
+		case "empty":
+			@analyticsNoDataInRange()
+		case "loading":
+			@analyticsFiguresArriving()
+		default:
+			@analyticsPopulatedFigures(gc)
+	}
+}
+
+// analyticsRangeFilter is the reporting window, present in every state.
+//
+// It stays through empty and loading on purpose: the filter is how a reader
+// leaves those states, so removing it strands them there.
+templ analyticsRangeFilter(gc GalleryContext) {
+	@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "analytics-filter"}}) {
+		// A real GET form. Submitting produces a URL a reader can share, which
+		// is the whole reason a report filter is a form and not client state.
+		<form method="get" action="/dev/scenarios/analytics" class="flex flex-wrap items-end gap-4">
+			// The state travels with the range, so applying a window does not
+			// silently drop the reader back onto the default surface.
+			<input type="hidden" name="state" value={ gc.State }/>
+			@ui.DateRangePicker(ui.DateRangePickerOpts{
+				Range: ui.DateRangeFieldOpts{
+					StartName:  "from",
+					EndName:    "to",
+					StartValue: "2026-02-02",
+					EndValue:   "2026-03-15",
+					Legend:     "Reporting window",
+				},
+				Locale:         "en-GB",
+				TriggerLabel:   "Choose a reporting window",
+				FirstDayOfWeek: 1,
+			})
+			@ui.Button(ui.ButtonOpts{
+				Label:  "Apply",
+				Type:   ui.TypeSubmit,
+				Action: ui.ActionPrimary,
+				Size:   ui.SizeSM,
+			})
+		</form>
+		@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+			{ "The fixture covers 2 February to 15 March 2026 and does not move. Applying a window re-renders the same figures, which is what keeps this page usable as a visual baseline." }
+		}
+	}
+}
+
+// analyticsPopulatedFigures renders the five shapes plus the grid.
+templ analyticsPopulatedFigures(gc GalleryContext) {
+	// One shared key above the figures rather than a legend inside each of
+	// them. The signup figures all plot the same two series, and repeating the
+	// same key five times trains the reader to stop reading it.
+	@ui.Section(ui.SectionOpts{
+		Title: "Series", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-key"},
+	}) {
+		@ui.ChartLegend(ui.ChartLegendOpts{
+			Series: analyticsSignupSeries(),
+			Attrs:  ui.Attrs{TestID: "analytics-legend"},
+		})
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Acquisition", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-acquisition"},
+	}) {
+		@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapLG}) {
+			@ui.BarChart(ui.BarChartOpts{Chart: analyticsSignupsChart(gc.LongContent)})
+			@ui.LineChart(ui.LineChartOpts{Chart: analyticsActiveOrgsChart(gc.LongContent)})
+			@ui.AreaChart(ui.AreaChartOpts{Chart: analyticsCumulativeChart(gc.LongContent)})
+			@ui.DonutChart(ui.DonutChartOpts{Chart: analyticsPlanMixChart(gc.LongContent)})
+		}
+		@ui.Sparkline(ui.SparklineOpts{Chart: analyticsTrendChart(gc.LongContent)})
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Underlying numbers", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-grid"},
+	}) {
+		@ui.DataGrid(analyticsGridOpts(len(analyticsGridRows()))) {
+			for _, row := range analyticsGridRows() {
+				<tr>
+					<th scope="row" class="px-4 py-3 font-medium">{ row.Week }</th>
+					<td class="px-4 py-3 text-right tabular-nums">{ row.Signups }</td>
+					<td class="px-4 py-3 text-right tabular-nums">{ row.Activations }</td>
+					<td class="px-4 py-3 text-right tabular-nums">{ row.Rate }</td>
+				</tr>
+			}
+		}
+	}
+}
+
+// analyticsNoDataInRange is a window that matched nothing.
+//
+// Each figure states which figure is empty and offers the way out. "No data" on
+// its own is indistinguishable from a figure that failed to render, and a
+// filtered-empty region whose only escape is the browser's back button is a
+// trap - which is why every notice here is Filtered with a real clear link
+// rather than a bare "nothing here".
+templ analyticsNoDataInRange() {
+	@ui.Section(ui.SectionOpts{
+		Title: "Acquisition", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-acquisition"},
+	}) {
+		@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapLG}) {
+			for _, figure := range analyticsAllCharts(false) {
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Title:      figure.Title,
+					Body:       "No events fall inside the selected window.",
+					Variant:    ui.EmptyCard,
+					Filtered:   true,
+					ClearURL:   "/dev/scenarios/analytics",
+					ClearLabel: "Show all six weeks",
+					Target:     ui.NavTarget,
+				})
+			}
+		}
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Underlying numbers", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-grid"},
+	}) {
+		// The grid keeps its header row: the columns are what the reader is
+		// looking for, and hiding them hides the shape of the missing data.
+		@ui.DataGrid(analyticsGridOpts(0))
+	}
+}
+
+// analyticsFiguresArriving is the first paint.
+//
+// Each placeholder reserves the height of the mount it replaces, so five figures
+// resolving at different moments do not walk the page up and down under the
+// reader's cursor. The titles are already known server-side, so they are shown
+// rather than greyed out - a skeleton over text nobody is waiting for hides
+// information for no reason.
+templ analyticsFiguresArriving() {
+	@ui.Section(ui.SectionOpts{
+		Title: "Acquisition", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-acquisition"},
+	}) {
+		@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapLG}) {
+			for _, figure := range analyticsAllCharts(false) {
+				@analyticsFigurePlaceholder(figure)
+			}
+		}
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Underlying numbers", Level: 2,
+		Attrs: ui.Attrs{ID: "analytics-grid"},
+	}) {
+		@ui.Card(ui.CardOpts{}) {
+			@ui.Skeleton(ui.SkeletonOpts{Lines: 8})
+		}
+	}
+}
+
+// analyticsFigurePlaceholder mirrors one figure's real box: caption, mount, and
+// the table beneath it.
+templ analyticsFigurePlaceholder(chart ui.ChartBase) {
+	@ui.Card(ui.CardOpts{}) {
+		<p class="font-semibold">{ chart.Title }</p>
+		<p class="text-sm text-fg-muted mt-1">{ chart.Summary }</p>
+		@ui.Skeleton(ui.SkeletonOpts{Lines: 10, Attrs: ui.Attrs{Class: "h-64 mt-3"}})
+		@ui.Skeleton(ui.SkeletonOpts{Lines: 5, Attrs: ui.Attrs{Class: "mt-3"}})
+	}
+}
+
+// The six weeks the whole page is built from. Labels are pre-formatted here
+// because ui never imports i18n, and Display is separate from Value because
+// "57.8%" is the right label while 0.578 is the wrong bar height.
+func analyticsWeekLabels() []string {
+	return []string{"2-8 Feb", "9-15 Feb", "16-22 Feb", "23 Feb-1 Mar", "2-8 Mar", "9-15 Mar"}
+}
+
+func analyticsWeekKeys() []string {
+	return []string{"2026-W06", "2026-W07", "2026-W08", "2026-W09", "2026-W10", "2026-W11"}
+}
+
+// analyticsPoints zips the fixed week axis onto one set of counts, so every
+// series shares one category order. A series with its own key set would produce
+// a ragged table, and the chart's own row pivot would fill the gap with an
+// em dash rather than inventing a zero.
+func analyticsPoints(values []int, suffix string) []ui.ChartPoint {
+	keys, labels := analyticsWeekKeys(), analyticsWeekLabels()
+	points := make([]ui.ChartPoint, 0, len(values))
+	for i, value := range values {
+		points = append(points, ui.ChartPoint{
+			Key:     keys[i],
+			Label:   labels[i],
+			Display: analyticsCount(value) + suffix,
+			Value:   float64(value),
+		})
+	}
+	return points
+}
+
+// analyticsSignupSeries is the shared two-series key: every acquisition figure
+// plots these, so the standalone legend above the grid describes all of them.
+func analyticsSignupSeries() []ui.ChartSeries {
+	return []ui.ChartSeries{
+		{ID: "signups", Label: "Signups", Kind: ui.KindBrand,
+			Points: analyticsPoints([]int{128, 141, 137, 166, 182, 174}, "")},
+		{ID: "activations", Label: "Activations", Kind: ui.KindSuccess,
+			Points: analyticsPoints([]int{74, 88, 81, 103, 119, 112}, "")},
+	}
+}
+
+func analyticsSignupsChart(long bool) ui.ChartBase {
+	return ui.ChartBase{
+		ID:    "analytics-signups",
+		Title: "Signups and activations by week",
+		Summary: analyticsStretch(long,
+			"928 signups over six weeks, 577 of them activated. Both rose every week except the week of 16 February.",
+			"928 signups over six weeks, 577 of them activated, a rate that climbed from 57.8% in the first week to 65.4% in the week of 2 March before easing to 64.4% - every week rose except the week of 16 February, which fell back to roughly the level of the week before it."),
+		XLabel: "Week",
+		YLabel: "Accounts",
+		Series: analyticsSignupSeries(),
+	}
+}
+
+func analyticsActiveOrgsChart(long bool) ui.ChartBase {
+	return ui.ChartBase{
+		ID:    "analytics-active-orgs",
+		Title: "Weekly active organisations",
+		Summary: analyticsStretch(long,
+			"411 to 511 over six weeks, rising every week.",
+			"411 to 511 over six weeks, rising every week, with the largest single jump in the week of 23 February when the self-serve trial changed length."),
+		XLabel: "Week",
+		YLabel: "Organisations",
+		Series: []ui.ChartSeries{
+			{ID: "active-orgs", Label: "Active organisations", Kind: ui.KindInfo,
+				Points: analyticsPoints([]int{412, 428, 441, 470, 498, 511}, "")},
+		},
+	}
+}
+
+func analyticsCumulativeChart(long bool) ui.ChartBase {
+	return ui.ChartBase{
+		ID:    "analytics-cumulative",
+		Title: "Cumulative signups",
+		Summary: analyticsStretch(long,
+			"Running total, 128 to 928.",
+			"Running total from 128 to 928, which is the same data as the bar figure above it accumulated rather than a second measurement."),
+		XLabel: "Week",
+		YLabel: "Signups to date",
+		Series: []ui.ChartSeries{
+			{ID: "cumulative", Label: "Signups to date", Kind: ui.KindBrand,
+				Points: analyticsPoints([]int{128, 269, 406, 572, 754, 928}, "")},
+		},
+	}
+}
+
+// analyticsPlanMixChart is the one figure that keeps its own legend: its
+// categories are plans, not the shared week axis, so the key above the grid does
+// not describe it.
+func analyticsPlanMixChart(long bool) ui.ChartBase {
+	return ui.ChartBase{
+		ID:    "analytics-plan-mix",
+		Title: "Signups by plan",
+		Summary: analyticsStretch(long,
+			"Free 612, Starter 214, Team 82, Enterprise 20.",
+			"Free 612, Starter 214, Team 82 and Enterprise 20 - two thirds of the six-week intake landed on the free plan, which is the number the activation figures have to be read against."),
+		XLabel: "Plan",
+		YLabel: "Signups",
+		Legend: true,
+		Series: []ui.ChartSeries{
+			{
+				ID: "plan-mix", Label: "Signups", Kind: ui.KindBrand,
+				Points: []ui.ChartPoint{
+					{Key: "free", Label: "Free", Display: "612", Value: 612},
+					{Key: "starter", Label: "Starter", Display: "214", Value: 214},
+					{Key: "team", Label: "Team", Display: "82", Value: 82},
+					{Key: "enterprise", Label: "Enterprise", Display: "20", Value: 20},
+				},
+			},
+		},
+	}
+}
+
+func analyticsTrendChart(long bool) ui.ChartBase {
+	return ui.ChartBase{
+		ID:    "analytics-trend",
+		Title: "Signup trend",
+		Summary: analyticsStretch(long,
+			"Six weeks, ending 36% above where it started.",
+			"Six weeks of weekly signups, ending 36% above where it started, shown compactly because the exact weekly values are already in the figures above."),
+		XLabel: "Week",
+		YLabel: "Signups",
+		Series: []ui.ChartSeries{
+			{ID: "trend", Label: "Signups", Kind: ui.KindBrand,
+				Points: analyticsPoints([]int{128, 141, 137, 166, 182, 174}, "")},
+		},
+	}
+}
+
+// analyticsAllCharts is the figure order, used by the empty and loading states
+// so a placeholder names exactly the figure it stands in for.
+func analyticsAllCharts(long bool) []ui.ChartBase {
+	return []ui.ChartBase{
+		analyticsSignupsChart(long),
+		analyticsActiveOrgsChart(long),
+		analyticsCumulativeChart(long),
+		analyticsPlanMixChart(long),
+	}
+}
+
+// analyticsGridRow is one row of the grid beneath the figures.
+type analyticsGridRow struct {
+	Week, Signups, Activations, Rate string
+}
+
+// analyticsGridRows is the same six weeks the figures plot, as numbers.
+//
+// The rate is pre-computed rather than derived at render time: a percentage
+// rounded in the template and rounded again in a chart summary is how the two
+// end up disagreeing by a tenth.
+func analyticsGridRows() []analyticsGridRow {
+	return []analyticsGridRow{
+		{Week: "2-8 Feb", Signups: "128", Activations: "74", Rate: "57.8%"},
+		{Week: "9-15 Feb", Signups: "141", Activations: "88", Rate: "62.4%"},
+		{Week: "16-22 Feb", Signups: "137", Activations: "81", Rate: "59.1%"},
+		{Week: "23 Feb-1 Mar", Signups: "166", Activations: "103", Rate: "62.0%"},
+		{Week: "2-8 Mar", Signups: "182", Activations: "119", Rate: "65.4%"},
+		{Week: "9-15 Mar", Signups: "174", Activations: "112", Rate: "64.4%"},
+	}
+}
+
+// analyticsGridOpts configures the grid.
+//
+// RowsURL is empty and TotalPages is zero because the whole fixture fits in one
+// window: there is no second page to fetch, and a pager offering one is a
+// control that leads nowhere. Sortable is off for the same reason - sorting is
+// server-owned in this grid, and this scenario has no server behind it, so
+// advertising a sort link would be advertising a no-op. Resize, reorder and the
+// column picker are client-side and genuinely work.
+func analyticsGridOpts(rows int) ui.DataGridOpts {
+	return ui.DataGridOpts{
+		ID:      "analytics-week-grid",
+		Caption: "Signups, activations and activation rate for the six weeks to 15 March 2026",
+		Columns: []ui.GridColumn{
+			{Key: "week", Label: "Week", Width: 180, MinWidth: 120, Resizable: true, Pinnable: true},
+			{Key: "signups", Label: "Signups", MinWidth: 96, Resizable: true, Reorderable: true, Numeric: true},
+			{Key: "activations", Label: "Activations", MinWidth: 96, Resizable: true, Reorderable: true, Numeric: true},
+			{Key: "rate", Label: "Activation rate", MinWidth: 120, Resizable: true, Reorderable: true, Numeric: true},
+		},
+		TotalRows:  rows,
+		RowCount:   rows,
+		WindowSize: 50,
+		RowHeight:  44,
+		Empty: ui.EmptyState(ui.EmptyStateOpts{
+			Title:      "No weeks in this window",
+			Body:       "The selected range contains no completed weeks.",
+			Variant:    ui.EmptyInline,
+			Filtered:   true,
+			ClearURL:   "/dev/scenarios/analytics",
+			ClearLabel: "Show all six weeks",
+			Target:     ui.NavTarget,
+		}),
+		Attrs: ui.Attrs{TestID: "analytics-week-grid"},
+	}
+}
+
+// analyticsCount formats a count. Every displayed number in this scenario goes
+// through one formatter so the figures and the grid cannot disagree about how a
+// value is written.
+func analyticsCount(value int) string {
+	digits := ""
+	if value == 0 {
+		return "0"
+	}
+	for value > 0 {
+		digits = string(rune('0'+value%10)) + digits
+		value /= 10
+	}
+	return digits
+}
+
+// analyticsStretch substitutes a deliberately long summary when the reader asked
+// for long content. Summaries are the strings a translation stretches most, and
+// they sit directly above a fixed-height chart mount - which is exactly where
+// overflow shows up.
+func analyticsStretch(long bool, normal, stretched string) string {
+	if long {
+		return stretched
+	}
+	return normal
+}

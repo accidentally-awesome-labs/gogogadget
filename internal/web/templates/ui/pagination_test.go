@@ -57,3 +57,47 @@ func TestPageWindowElidesTheMiddle(t *testing.T) {
 		"a bare digit is ambiguous in a row of numbers")
 	assert.Equal(t, 2, strings.Count(html, "…"))
 }
+
+// A caller who names no target wants plain link navigation. Emitting
+// hx-target="" makes htmx intercept the click and swap into an empty selector,
+// so the request lands nowhere and the href that would have worked is skipped.
+func TestUntargetedNavigationEmitsNoHTMX(t *testing.T) {
+	cases := map[string]string{
+		"pagination": renderComponent(t, Pagination(PaginationOpts{
+			Page: 2, TotalPages: 5, BaseURL: "/x",
+		})),
+		"column header": renderComponent(t, ColumnHeader(ColumnHeaderOpts{
+			Column: Column{Key: "name", Label: "Name", Sortable: true}, BaseURL: "/x",
+		})),
+		"search input": renderComponent(t, SearchInput(SearchInputOpts{
+			Name: "q", GetURL: "/x", AriaLabel: "Search",
+		})),
+		"cursor pagination": renderComponent(t, CursorPagination(CursorPaginationOpts{
+			NextURL: "/x?after=1", Label: "Pages",
+		})),
+	}
+	for name, html := range cases {
+		assert.NotContains(t, html, `hx-target=""`, "%s emits an empty target", name)
+		assert.NotContains(t, html, "hx-get", "%s should navigate, not swap", name)
+	}
+	// The link controls keep their href - that is the whole point of dropping
+	// the swap. The search input has none to keep: it is a named field, and
+	// what must survive is the caller's ability to wrap it in a form.
+	for _, name := range []string{"pagination", "column header", "cursor pagination"} {
+		assert.Contains(t, cases[name], "href=", "%s must still navigate", name)
+	}
+	assert.Contains(t, cases["search input"], `name="q"`)
+	assert.Contains(t, cases["search input"], `type="search"`)
+}
+
+// With a target the htmx contract is unchanged: these components are the
+// product's paging and sorting surface and must keep swapping.
+func TestTargetedNavigationStillSwaps(t *testing.T) {
+	html := renderComponent(t, Pagination(PaginationOpts{
+		Page: 2, TotalPages: 5, BaseURL: "/x", Target: "#content",
+	}))
+
+	assert.Contains(t, html, `hx-target="#content"`)
+	assert.Contains(t, html, "hx-get")
+	assert.Contains(t, html, `hx-swap="innerMorph"`)
+}

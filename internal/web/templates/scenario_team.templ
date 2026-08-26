@@ -1,0 +1,302 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// The team scenario exists for the one thing this surface gets wrong in every
+// product: the same page rendered for someone who may change it and someone who
+// may not. The read-only view therefore keeps every command visible and inert
+// with a stated reason. A menu that silently loses entries teaches a support
+// engineer that the feature is missing, when the real fact is that the viewer
+// lacks the role - and the two have completely different answers.
+
+// teamMember is this scenario's view of one person: display strings only.
+// Reaching for an identity or sqlc type here would pull a provider package into
+// the dev catalog, and a fixture that needs a provider is not a fixture.
+type teamMember struct {
+	Name  string
+	Email string
+	// Role is the display label and RoleKind is the badge colour. They are
+	// separate because "Billing" and "Member" are different roles that carry
+	// the same weight, so colour cannot be derived from the label.
+	Role     string
+	RoleKind ui.Kind
+	// Joined is the rendered date and JoinedMachine the datetime attribute
+	// value. Both are literals: a relative "3 months ago" computed from the
+	// clock would change this scenario's visual baseline every day it runs.
+	Joined        string
+	JoinedMachine string
+	// Owner marks the last remaining owner, whose removal command is inert for
+	// everyone - including an admin - because an organisation with no owner has
+	// nobody who can grant the role back.
+	Owner bool
+}
+
+// teamReadOnlyReason is stated once visibly and again inside each row menu's
+// accessible name. Stating it only in the notice would leave a screen-reader
+// user who tabs straight to a row menu with four unexplained dead entries.
+const teamReadOnlyReason = "You are a member of this organisation. Owners and admins can change roles, " +
+	"invite people and remove them; the commands below are shown so you know they exist."
+
+// teamRoster is the populated fixture, newest joiner last.
+func teamRoster(long bool) []teamMember {
+	roster := []teamMember{
+		{Name: "Ada Lovelace", Email: "ada@northwind.example", Role: "Owner", RoleKind: ui.KindBrand, Joined: "12 Jan 2025", JoinedMachine: "2025-01-12", Owner: true},
+		{Name: "Grace Hopper", Email: "grace@northwind.example", Role: "Admin", RoleKind: ui.KindInfo, Joined: "3 Feb 2025", JoinedMachine: "2025-02-03"},
+		{Name: "Alan Turing", Email: "alan@northwind.example", Role: "Member", RoleKind: ui.KindNeutral, Joined: "18 Mar 2025", JoinedMachine: "2025-03-18"},
+		{Name: "Katherine Johnson", Email: "katherine@northwind.example", Role: "Member", RoleKind: ui.KindNeutral, Joined: "2 Apr 2025", JoinedMachine: "2025-04-02"},
+		{Name: "Radia Perlman", Email: "radia@northwind.example", Role: "Billing", RoleKind: ui.KindNeutral, Joined: "21 May 2025", JoinedMachine: "2025-05-21"},
+	}
+	if long {
+		// One long row rather than five: the interesting failure is a single
+		// oversized cell shifting the columns its neighbours share, which a
+		// uniformly long table hides by making every column wide.
+		roster[3].Name = "Katherine Coleman Goble Johnson-Vaughan"
+		roster[3].Email = "katherine.coleman.goble.johnson-vaughan@northwind-aeronautics-research-division.example"
+		roster[3].Role = "Member with delegated billing approval"
+	}
+	return roster
+}
+
+// teamInvitations are sent but not accepted. They are a separate region rather
+// than extra table rows: an invitation has no join date, no avatar the product
+// has ever seen, and a different set of commands, so folding it into the members
+// table would mean three columns that are blank for half the rows.
+func teamInvitations(long bool) []teamMember {
+	invites := []teamMember{
+		{Name: "Barbara Liskov", Email: "barbara@northwind.example", Role: "Admin", RoleKind: ui.KindInfo, Joined: "14 Jun 2025", JoinedMachine: "2025-06-14"},
+		{Name: "Margaret Hamilton", Email: "margaret@northwind.example", Role: "Member", RoleKind: ui.KindNeutral, Joined: "16 Jun 2025", JoinedMachine: "2025-06-16"},
+	}
+	if long {
+		invites[1].Name = "Margaret Elaine Heafield Hamilton"
+		invites[1].Email = "margaret.heafield.hamilton@northwind-flight-software-assurance.example"
+	}
+	return invites
+}
+
+// ScenarioTeam renders members, invitations and roles.
+templ ScenarioTeam(gc GalleryContext) {
+	@ui.Stack(ui.StackOpts{Gap: ui.GapLG}) {
+		if teamReadOnly(gc) {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Attrs: ui.Attrs{TestID: "team-permission-notice"}}) {
+				{ teamReadOnlyReason }
+			}
+		}
+		@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "team-summary"}}) {
+			@ui.CardHeader(ui.CardHeaderOpts{Title: "Northwind Robotics"}) {
+				// The group summarises who is here before the table is read.
+				// No image sources: initials are generated from the name, so
+				// the scenario renders identically with no network at all,
+				// which is what keeps its visual baseline stable.
+				@ui.AvatarGroup(ui.AvatarGroupOpts{
+					People: teamAvatars(teamRosterFor(gc)),
+					Max:    4,
+					Size:   ui.SizeSM,
+					Attrs:  ui.Attrs{TestID: "team-avatars"},
+				})
+			}
+			@ui.Text(ui.TextOpts{Muted: true}) {
+				{ teamSummaryLine(gc) }
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Members", Level: 2, Attrs: ui.Attrs{ID: "team-members"}}) {
+			@ui.DataTable(ui.DataTableOpts{
+				Caption:  "People in Northwind Robotics",
+				Columns:  teamColumns(),
+				Density:  gc.Density,
+				RowCount: len(teamRosterFor(gc)),
+				Empty: ui.EmptyState(ui.EmptyStateOpts{
+					Variant: ui.EmptyInline,
+					Title:   "No members",
+					Body:    "An organisation always has at least its owner, so this state is unreachable in the product.",
+				}),
+				Attrs: ui.Attrs{TestID: "team-members-table"},
+			}) {
+				for _, member := range teamRosterFor(gc) {
+					@teamMemberRow(member, teamReadOnly(gc))
+				}
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Invitations", Level: 2, Attrs: ui.Attrs{ID: "team-invitations"}}) {
+			if len(teamInvitationsFor(gc)) == 0 {
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Variant: ui.EmptyCard,
+					Title:   "No invitations outstanding",
+					Body:    "Everyone who was invited has joined. Invite someone from the organisation settings.",
+					Attrs:   ui.Attrs{TestID: "team-invitations-empty"},
+				})
+			} else {
+				<ul class="card divide-y divide-border" data-testid="team-invitations-list">
+					for _, invite := range teamInvitationsFor(gc) {
+						@ui.MemberItem(ui.MemberItemOpts{
+							Name:         invite.Name,
+							Email:        invite.Email,
+							RoleLabel:    invite.Role,
+							Since:        "invited " + invite.Joined,
+							MachineTime:  invite.JoinedMachine,
+							Pending:      true,
+							PendingLabel: "invited",
+							Actions:      teamInviteActions(invite, teamReadOnly(gc)),
+							Attrs:        ui.Attrs{TestID: "team-invite-" + invite.Email},
+						})
+					}
+				</ul>
+			}
+		}
+	}
+}
+
+// teamMemberRow is one row of the members table.
+templ teamMemberRow(member teamMember, readOnly bool) {
+	<tr data-testid={ "team-row-" + member.Email }>
+		<td>
+			<div class="flex items-center gap-3 min-w-0">
+				@ui.Avatar(ui.AvatarOpts{Name: member.Name, Size: ui.SizeSM})
+				<div class="min-w-0">
+					<p class="font-medium truncate">{ member.Name }</p>
+					<p class="text-xs text-fg-muted truncate">{ member.Email }</p>
+				</div>
+			</div>
+		</td>
+		<td>
+			@ui.Badge(ui.BadgeOpts{Text: member.Role, Kind: member.RoleKind})
+		</td>
+		<td class="hidden sm:table-cell text-fg-muted">
+			<time datetime={ member.JoinedMachine }>{ member.Joined }</time>
+		</td>
+		<td class="text-right">
+			@ui.DropdownMenu(ui.DropdownMenuOpts{
+				Label: teamMenuLabel(member, readOnly),
+				Items: teamMenuItems(member, readOnly),
+				Attrs: ui.Attrs{TestID: "team-menu-" + member.Email},
+			})
+		</td>
+	</tr>
+}
+
+// teamInviteActions is the invitation's command cluster, built with the same
+// menu the members table uses so the read-only rule has one implementation
+// rather than two that can disagree.
+func teamInviteActions(invite teamMember, readOnly bool) templ.Component {
+	return ui.DropdownMenu(ui.DropdownMenuOpts{
+		Label: teamMenuLabel(invite, readOnly),
+		Items: teamInviteMenuItems(readOnly),
+		Attrs: ui.Attrs{TestID: "team-invite-menu-" + invite.Email},
+	})
+}
+
+func teamColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "member", Label: "Member"},
+		{Key: "role", Label: "Role"},
+		// The join date is the first thing to drop on a phone: it explains a
+		// row but nobody acts on it, and keeping it would push the role and the
+		// commands behind a horizontal scroll gesture.
+		{Key: "joined", Label: "Joined", HideBelow: ui.BreakpointSM},
+		{Key: "actions", Label: "Manage", Align: ui.AlignEnd},
+	}
+}
+
+// teamMenuItems are the row commands. Every entry has a real destination: a
+// menu item rendered as a handler-less button looks identical to a working one
+// and is the fastest way to teach a reader that the catalog is a mock-up.
+// "View as this member" and "Remove" point at the states that show their
+// outcome, which is the honest dev-catalog equivalent of performing them.
+func teamMenuItems(member teamMember, readOnly bool) []ui.MenuItem {
+	items := []ui.MenuItem{
+		{Label: "Change role", Icon: ui.IconSettings, Href: "/app/settings/org"},
+		{Label: "View as this member", Icon: ui.IconVisibility, Href: "/dev/scenarios/team?state=readonly"},
+		{Separator: true},
+		{Label: "Remove from organisation", Icon: ui.IconDelete, Kind: ui.KindDanger, Href: "/dev/scenarios/team?state=empty"},
+	}
+	if member.Owner {
+		// Inert for every viewer, including an admin, so the reason travels in
+		// the label rather than in a notice a reader may never see.
+		items[3].Label = "Remove from organisation (an organisation keeps one owner)"
+		items[3].Disabled = true
+	}
+	if readOnly {
+		for i := range items {
+			if items[i].Separator {
+				continue
+			}
+			items[i].Disabled = true
+		}
+	}
+	return items
+}
+
+// teamInviteMenuItems mirrors teamMenuItems for a person who has not joined:
+// there is no role to change and nothing to view as, so resend and revoke are
+// the whole command set.
+func teamInviteMenuItems(readOnly bool) []ui.MenuItem {
+	items := []ui.MenuItem{
+		{Label: "Resend invitation", Icon: ui.IconRefresh, Href: "/app/settings/org"},
+		{Label: "Revoke invitation", Icon: ui.IconClose, Kind: ui.KindDanger, Href: "/dev/scenarios/team?state=empty"},
+	}
+	if readOnly {
+		for i := range items {
+			items[i].Disabled = true
+		}
+	}
+	return items
+}
+
+// teamMenuLabel names the row, not the action: forty menus all called "Actions"
+// give a screen-reader user forty indistinguishable controls.
+func teamMenuLabel(member teamMember, readOnly bool) string {
+	if readOnly {
+		return "Manage " + member.Name + " - unavailable to members"
+	}
+	return "Manage " + member.Name
+}
+
+func teamReadOnly(gc GalleryContext) bool {
+	return gc.State == "readonly"
+}
+
+// teamRosterFor collapses the roster to the solo owner in the empty state: the
+// genuinely empty team is a founder on day one, not an organisation with no
+// members, which the product cannot produce.
+func teamRosterFor(gc GalleryContext) []teamMember {
+	roster := teamRoster(gc.LongContent)
+	if gc.State == "empty" {
+		return roster[:1]
+	}
+	return roster
+}
+
+func teamInvitationsFor(gc GalleryContext) []teamMember {
+	if gc.State == "empty" {
+		return nil
+	}
+	return teamInvitations(gc.LongContent)
+}
+
+func teamSummaryLine(gc GalleryContext) string {
+	members := len(teamRosterFor(gc))
+	invites := len(teamInvitationsFor(gc))
+	return fmt.Sprintf("%s, %s. Seats are billed monthly and an invitation holds one from the moment it is sent.",
+		teamCount(members, "member"), teamCount(invites, "invitation"))
+}
+
+// teamCount keeps the singular case correct. "1 members" is the kind of detail
+// that makes a product feel unfinished, and a scenario that ships it teaches
+// the pattern to whoever copies it.
+func teamCount(n int, noun string) string {
+	if n == 1 {
+		return "1 " + noun
+	}
+	return fmt.Sprintf("%d %ss", n, noun)
+}
+
+func teamAvatars(roster []teamMember) []ui.AvatarOpts {
+	out := make([]ui.AvatarOpts, 0, len(roster))
+	for _, member := range roster {
+		out = append(out, ui.AvatarOpts{Name: member.Name})
+	}
+	return out
+}

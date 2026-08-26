@@ -16,6 +16,16 @@ type PanelData struct {
 	// Collapsible allows the panel to be closed entirely, which is different
 	// from resized to its floor.
 	Collapsible bool
+	// Content is what the panel holds. Without it PanelGroup could only ever
+	// render titled empty boxes, which forced callers to hand-roll the group's
+	// root markup and Alpine hooks just to put something inside - two copies of
+	// a root that drifts the moment the group's classes change.
+	Content templ.Component
+	// Attrs are the panel's own attributes. Without them a panel built by
+	// PanelGroup would be less addressable than the same panel rendered
+	// directly, so composing through the group would cost the caller their test
+	// ids - a reason to hand-roll the group again.
+	Attrs Attrs
 }
 
 // PanelGroupOpts configures a resizable split.
@@ -44,7 +54,7 @@ templ PanelGroup(o PanelGroupOpts) {
 			"data-panel-orientation", string(o.Orientation.Value()))... }
 	>
 		for index, panel := range o.Panels {
-			@Panel(PanelOpts{Panel: panel})
+			@Panel(PanelOpts{Panel: panel, Attrs: panel.Attrs})
 			if index < len(o.Panels)-1 {
 				@PanelHandle(PanelHandleOpts{
 					ID:          o.ID + "-handle-" + fmt.Sprint(index+1),
@@ -75,6 +85,12 @@ templ Panel(o PanelOpts) {
 		aria-labelledby={ o.Panel.ID + "-title" }
 	>
 		<h3 id={ o.Panel.ID + "-title" } class="section-title text-sm mb-2">{ o.Panel.Title }</h3>
+		// Declared content first, then any children the caller passes directly.
+		// Both paths exist because a group builds its panels from data while a
+		// standalone Panel reads more naturally with children.
+		if o.Panel.Content != nil {
+			@o.Panel.Content
+		}
 		{ children... }
 	</section>
 }

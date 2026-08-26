@@ -132,11 +132,20 @@ templ Pagination(o PaginationOpts) {
 // pageLink is a real anchor with a real href as well as the hx-get, so the
 // pager works with JavaScript disabled, middle-clicks into a new tab, and can
 // be copied out of the address bar after an htmx swap pushes the URL.
+//
+// The htmx attributes appear only when the caller named a target. Emitting
+// hx-target="" makes htmx intercept the click and swap into an empty selector,
+// so a pager meant to be plain link navigation fires a request that lands
+// nowhere and the href that would have worked is never used.
 templ pageLink(o PaginationOpts, page int, label, class string) {
 	<a
 		href={ templ.SafeURL(PageURL(o.BaseURL, o.Param, page)) }
-		hx-get={ PageURL(o.BaseURL, o.Param, page) }
-		hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+		if o.Target != "" {
+			hx-get={ PageURL(o.BaseURL, o.Param, page) }
+			hx-target={ o.Target }
+			hx-swap="innerMorph"
+			hx-push-url="true"
+		}
 		aria-label={ o.Labels.pageLabel(page) }
 		class={ class }
 	>{ label }</a>

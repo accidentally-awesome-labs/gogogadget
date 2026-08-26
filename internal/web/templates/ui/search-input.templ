@@ -15,14 +15,24 @@ type SearchInputOpts struct {
 
 templ SearchInput(o SearchInputOpts) {
 	<div { root("search-input", "toolbar", Attrs{})... }>
+		// The htmx attributes appear only with a target. A search input with
+		// hx-target="" fires on every keystroke into an empty selector, so it
+		// looks live and filters nothing - worse than a plain field the caller
+		// wraps in a form.
 		<input
 			{ attributes(o.Attrs)... }
 			type="search" name={ o.Name } value={ o.Value } placeholder={ o.Placeholder }
 			class={ mergeClasses("input max-w-sm", o.Attrs.Class) }
-			hx-get={ o.GetURL } hx-trigger="input changed delay:300ms, search"
-			hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true" hx-include="this"
-			hx-sync="this:replace"
-			hx-indicator={ "#" + o.IndicatorID }
+			if o.Target != "" {
+				hx-get={ o.GetURL }
+				hx-trigger="input changed delay:300ms, search"
+				hx-target={ o.Target }
+				hx-swap="innerMorph"
+				hx-push-url="true"
+				hx-include="this"
+				hx-sync="this:replace"
+				hx-indicator={ "#" + o.IndicatorID }
+			}
 			aria-label={ o.AriaLabel }
 		/>
 		<span id={ o.IndicatorID } class="text-fg-muted">

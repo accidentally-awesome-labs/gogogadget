@@ -1,0 +1,358 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The operations surface: the two tables a platform engineer opens when
+// something is wrong, and the one question they are answering — what is failing
+// right now, and can I act on it?
+//
+// Jobs carry a Badge and schedules carry a StatusDot deliberately. A job's state
+// is a discrete lifecycle value the row is *about* ("failed", "running"), which
+// is what a pill states; a schedule's health is a continuous property of a thing
+// that keeps existing either way, which is what a dot beside its label states.
+// Using one component for both would make the two tables look interchangeable
+// when the questions they answer are not.
+
+// opsPageSize is small on purpose: the queue fixture has to span more than two
+// pages for the pager to be worth rendering at all, and a pager whose every page
+// is reachable without an ellipsis never exercises the windowing.
+const opsPageSize = 4
+
+// opsJob is one queue row. The fixture is literal so two renders are
+// byte-identical: a screenshot diff of this scenario has to mean a component
+// changed, never that the clock moved.
+type opsJob struct {
+	ID        string
+	Name      string
+	Kind      string
+	State     string
+	StateKind ui.Kind
+	Attempts  string
+	Updated   string
+}
+
+// opsSchedule is one schedule row.
+type opsSchedule struct {
+	ID         string
+	Name       string
+	Cadence    string
+	Health     string
+	HealthKind ui.Kind
+	NextRun    string
+}
+
+// ScenarioOperations renders the admin jobs and schedules surface.
+templ ScenarioOperations(gc GalleryContext) {
+	if gc.State == "readonly" {
+		// Stated once, at the top, rather than repeated as a tooltip on every
+		// inert control: a reader who cannot act needs to know why before they
+		// start reaching for controls, not after each one refuses.
+		@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Live: ui.LiveOff, Attrs: ui.Attrs{TestID: "ops-readonly-notice"}}) {
+			Signed in as support. Admin write is off for this role, so requeue, cancel, pause and resume are unavailable — the rows below are the same rows an admin sees.
+		}
+	}
+	@ui.Section(ui.SectionOpts{Title: "Job queue", Level: 2, Attrs: ui.Attrs{ID: "ops-jobs"}}) {
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:    "Background jobs, newest first",
+			Columns:    opsJobColumns(),
+			Density:    ui.DensityCompact,
+			SortKey:    "updated",
+			SortDir:    ui.SortDesc,
+			RowCount:   len(opsJobPage(gc)),
+			Toolbar:    opsJobToolbar(gc),
+			Empty:      opsJobsEmpty(),
+			Pagination: opsJobsPager(gc),
+			Attrs:      ui.Attrs{TestID: "ops-jobs-table"},
+		}) {
+			for _, job := range opsJobPage(gc) {
+				<tr class="border-t border-border" data-testid={ "ops-job-" + job.ID }>
+					<td class="px-4 py-3 font-medium">{ job.Name }</td>
+					<td class="px-4 py-3 text-fg-muted hidden md:table-cell">{ job.Kind }</td>
+					<td class="px-4 py-3">
+						@ui.Badge(ui.BadgeOpts{Text: job.State, Kind: job.StateKind})
+					</td>
+					<td class="px-4 py-3 text-right tabular-nums">{ job.Attempts }</td>
+					<td class="px-4 py-3 text-fg-muted hidden sm:table-cell">{ job.Updated }</td>
+					<td class="px-4 py-3">
+						@ui.RowActions(ui.RowActionsOpts{
+							Label: "Actions for " + job.Name,
+							Items: opsJobMenu(gc, job),
+						})
+					</td>
+				</tr>
+			}
+		}
+	}
+	@ui.Section(ui.SectionOpts{Title: "Schedules", Level: 2, Attrs: ui.Attrs{ID: "ops-schedules"}}) {
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:  "Recurring work and its next run",
+			Columns:  opsScheduleColumns(),
+			RowCount: len(opsSchedules(gc)),
+			Toolbar:  opsScheduleToolbar(gc),
+			Empty:    opsSchedulesEmpty(),
+			Attrs:    ui.Attrs{TestID: "ops-schedules-table"},
+		}) {
+			for _, schedule := range opsSchedules(gc) {
+				<tr class="border-t border-border" data-testid={ "ops-schedule-" + schedule.ID }>
+					<td class="px-4 py-3 font-medium">{ schedule.Name }</td>
+					<td class="px-4 py-3 text-fg-muted hidden md:table-cell">{ schedule.Cadence }</td>
+					<td class="px-4 py-3">
+						@ui.StatusDot(ui.StatusDotOpts{Kind: schedule.HealthKind, Label: schedule.Health})
+					</td>
+					<td class="px-4 py-3 text-fg-muted hidden sm:table-cell">{ schedule.NextRun }</td>
+					<td class="px-4 py-3">
+						@ui.RowActions(ui.RowActionsOpts{
+							Label: "Actions for " + schedule.Name,
+							Items: opsScheduleMenu(gc, schedule),
+						})
+					</td>
+				</tr>
+			}
+		}
+	}
+}
+
+// opsJobToolbar carries the queue-wide commands.
+//
+// In the read-only view the mutating buttons are absent rather than disabled.
+// A disabled button still occupies the eye and still has to be reached before
+// it refuses; a sentence where the buttons were says the same thing once and
+// costs nothing to skip.
+templ opsJobToolbar(gc GalleryContext) {
+	@ui.Toolbar(ui.ToolbarOpts{Label: "Queue actions", Attrs: ui.Attrs{TestID: "ops-jobs-toolbar"}}) {
+		if gc.State == "readonly" {
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
+				Queue actions require admin write.
+			}
+		} else {
+			@ui.Button(ui.ButtonOpts{
+				Label:  "Requeue failed",
+				Action: ui.ActionPrimary,
+				Size:   ui.SizeSM,
+				Icon:   ui.IconRefresh,
+				// Nothing has run on a fresh install, so there is nothing to
+				// requeue. Disabled states the reason the command is
+				// unavailable; hiding it would hide that the command exists.
+				Disabled: gc.State == "empty",
+			})
+			@ui.Button(ui.ButtonOpts{
+				Label:    "Pause queue",
+				Size:     ui.SizeSM,
+				Icon:     ui.IconPause,
+				Disabled: gc.State == "empty",
+			})
+			@ui.Badge(ui.BadgeOpts{Text: opsFailureCount(gc), Kind: opsFailureKind(gc)})
+		}
+	}
+}
+
+// opsScheduleToolbar mirrors the queue toolbar, so the two tables read as one
+// surface with one permission model rather than two conventions.
+templ opsScheduleToolbar(gc GalleryContext) {
+	@ui.Toolbar(ui.ToolbarOpts{Label: "Schedule actions", Attrs: ui.Attrs{TestID: "ops-schedules-toolbar"}}) {
+		if gc.State == "readonly" {
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
+				Schedule actions require admin write.
+			}
+		} else {
+			@ui.Button(ui.ButtonOpts{
+				Label:    "Pause all",
+				Size:     ui.SizeSM,
+				Icon:     ui.IconPause,
+				Disabled: gc.State == "empty",
+			})
+		}
+	}
+}
+
+// opsJobsPager pages the queue.
+//
+// The links point at this scenario's own path with no htmx target, which is
+// ordinary navigation: the href is the whole mechanism, so the pager works with
+// scripts disabled, survives a copied URL, and cannot swap a full page response
+// into a fragment-sized hole.
+templ opsJobsPager(gc GalleryContext) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page:       opsPage(gc),
+		TotalPages: opsTotalPages(gc),
+		BaseURL:    opsPagerURL(gc),
+		Numbered:   true,
+		Attrs:      ui.Attrs{TestID: "ops-jobs-pager"},
+	})
+}
+
+// opsJobsEmpty is the fresh-install state, which is not the same message as a
+// filter that matched nothing: nothing has run yet, so there is no filter to
+// clear and no failure to investigate.
+templ opsJobsEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Title:   "No jobs have run yet",
+		Body:    "This install has an empty queue. The first enqueue — a welcome email, an export, a webhook delivery — appears here within a few seconds of the worker claiming it.",
+		Variant: ui.EmptyInline,
+		Attrs:   ui.Attrs{TestID: "ops-jobs-empty"},
+	})
+}
+
+templ opsSchedulesEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Title:   "No schedules registered",
+		Body:    "Schedules are declared by installed modules. Adding a module that owns recurring work registers its schedule here on the next boot.",
+		Variant: ui.EmptyInline,
+		Attrs:   ui.Attrs{TestID: "ops-schedules-empty"},
+	})
+}
+
+func opsJobColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "job", Label: "Job", Sortable: true},
+		{Key: "kind", Label: "Kind", HideBelow: ui.BreakpointMD},
+		{Key: "state", Label: "State", Sortable: true},
+		{Key: "attempts", Label: "Attempts", Numeric: true, Align: ui.AlignEnd},
+		{Key: "updated", Label: "Updated", Sortable: true, HideBelow: ui.BreakpointSM},
+		{Key: "actions", Label: "Actions", Align: ui.AlignEnd},
+	}
+}
+
+func opsScheduleColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "schedule", Label: "Schedule", Sortable: true},
+		{Key: "cadence", Label: "Cadence", HideBelow: ui.BreakpointMD},
+		{Key: "health", Label: "Health"},
+		{Key: "next", Label: "Next run", Sortable: true, HideBelow: ui.BreakpointSM},
+		{Key: "actions", Label: "Actions", Align: ui.AlignEnd},
+	}
+}
+
+// opsJobs is the whole queue fixture. Every value is a literal, including the
+// timestamps: the scenario is a visual and accessibility baseline, and a clock
+// reading would make every comparison a diff.
+func opsJobs(gc GalleryContext) []opsJob {
+	if gc.State == "empty" {
+		return nil
+	}
+	return []opsJob{
+		{ID: "j-8841", Name: opsJobName(gc), Kind: "email.send", State: "failed", StateKind: ui.KindDanger, Attempts: "6", Updated: "15 Jan 2026, 09:24"},
+		{ID: "j-8840", Name: "Rebuild search index", Kind: "search.reindex", State: "running", StateKind: ui.KindInfo, Attempts: "1", Updated: "15 Jan 2026, 09:22"},
+		{ID: "j-8839", Name: "Export organisation data", Kind: "export.org", State: "queued", StateKind: ui.KindNeutral, Attempts: "0", Updated: "15 Jan 2026, 09:20"},
+		{ID: "j-8838", Name: "Deliver webhook to acme.example", Kind: "webhook.deliver", State: "retrying", StateKind: ui.KindWarn, Attempts: "3", Updated: "15 Jan 2026, 09:11"},
+		{ID: "j-8837", Name: "Nightly usage rollup", Kind: "usage.rollup", State: "done", StateKind: ui.KindSuccess, Attempts: "1", Updated: "15 Jan 2026, 03:00"},
+		{ID: "j-8836", Name: "Reconcile subscription state", Kind: "billing.reconcile", State: "done", StateKind: ui.KindSuccess, Attempts: "1", Updated: "15 Jan 2026, 02:40"},
+		{ID: "j-8835", Name: "Prune expired API tokens", Kind: "tokens.prune", State: "done", StateKind: ui.KindSuccess, Attempts: "1", Updated: "15 Jan 2026, 02:15"},
+		{ID: "j-8834", Name: "Send notification digest", Kind: "notify.digest", State: "done", StateKind: ui.KindSuccess, Attempts: "2", Updated: "14 Jan 2026, 23:00"},
+		{ID: "j-8833", Name: "Purge soft-deleted files", Kind: "files.purge", State: "dead", StateKind: ui.KindDanger, Attempts: "8", Updated: "14 Jan 2026, 22:31"},
+	}
+}
+
+// opsJobPage is the slice the current page shows. Paging the fixture rather
+// than re-rendering the same rows under a moving page number is the difference
+// between a pager and a decoration.
+func opsJobPage(gc GalleryContext) []opsJob {
+	all := opsJobs(gc)
+	start := (opsPage(gc) - 1) * opsPageSize
+	if start >= len(all) {
+		return nil
+	}
+	end := start + opsPageSize
+	if end > len(all) {
+		end = len(all)
+	}
+	return all[start:end]
+}
+
+// opsPage clamps the requested page into the fixture. Zero means unset, and a
+// page past the end would render an empty table that looks like the empty state
+// without being it.
+func opsPage(gc GalleryContext) int {
+	total := opsTotalPages(gc)
+	if gc.Page < 1 {
+		return 1
+	}
+	if gc.Page > total {
+		return total
+	}
+	return gc.Page
+}
+
+func opsTotalPages(gc GalleryContext) int {
+	rows := len(opsJobs(gc))
+	if rows == 0 {
+		return 1
+	}
+	return (rows + opsPageSize - 1) / opsPageSize
+}
+
+// opsPagerURL keeps the state the reader selected. Dropping it would make the
+// second page of the read-only view silently become the default view.
+func opsPagerURL(gc GalleryContext) string {
+	if gc.State == "" || gc.State == "default" {
+		return "/dev/scenarios/operations"
+	}
+	return "/dev/scenarios/operations?state=" + gc.State
+}
+
+// opsJobName substitutes a name long enough to force the truncation and wrap
+// decisions the ordinary fixture never exercises.
+func opsJobName(gc GalleryContext) string {
+	if gc.LongContent {
+		return "Send the quarterly platform usage digest to every billing contact on every organisation with an active subscription"
+	}
+	return "Send welcome email"
+}
+
+func opsSchedules(gc GalleryContext) []opsSchedule {
+	if gc.State == "empty" {
+		return nil
+	}
+	return []opsSchedule{
+		{ID: "s-usage", Name: "Usage rollup", Cadence: "Daily at 03:00 UTC", Health: "Healthy", HealthKind: ui.KindSuccess, NextRun: "16 Jan 2026, 03:00"},
+		{ID: "s-digest", Name: "Notification digest", Cadence: "Hourly", Health: "Healthy", HealthKind: ui.KindSuccess, NextRun: "15 Jan 2026, 10:00"},
+		{ID: "s-dunning", Name: "Billing dunning sweep", Cadence: "Daily at 07:00 UTC", Health: "Late by 2 runs", HealthKind: ui.KindWarn, NextRun: "16 Jan 2026, 07:00"},
+		{ID: "s-janitor", Name: "Queue janitor", Cadence: "Every 15 minutes", Health: "Paused", HealthKind: ui.KindNeutral, NextRun: "Not scheduled"},
+	}
+}
+
+// opsJobMenu keeps every command visible in the read-only view and marks it
+// disabled. A menu that empties itself teaches a support engineer that the
+// product has no requeue at all, which is the wrong lesson: the command exists,
+// their role does not carry it.
+func opsJobMenu(gc GalleryContext, job opsJob) []ui.MenuItem {
+	readonly := gc.State == "readonly"
+	return []ui.MenuItem{
+		{Label: "Requeue", Icon: ui.IconRefresh, Disabled: readonly},
+		{Label: "View payload", Icon: ui.IconVisibility, Href: opsPagerURL(gc), Disabled: readonly},
+		{Separator: true},
+		{Label: "Cancel", Icon: ui.IconClose, Kind: ui.KindDanger, Disabled: readonly, Confirm: "Cancel " + job.Name + "?"},
+	}
+}
+
+func opsScheduleMenu(gc GalleryContext, schedule opsSchedule) []ui.MenuItem {
+	readonly := gc.State == "readonly"
+	return []ui.MenuItem{
+		{Label: "Run now", Icon: ui.IconPlay, Disabled: readonly},
+		{Label: opsPauseLabel(schedule), Icon: ui.IconPause, Disabled: readonly},
+	}
+}
+
+// opsPauseLabel names what the command will do, not what the row is. "Pause" on
+// an already-paused schedule is a command whose effect the reader has to guess.
+func opsPauseLabel(schedule opsSchedule) string {
+	if schedule.Health == "Paused" {
+		return "Resume"
+	}
+	return "Pause"
+}
+
+// opsFailureCount states the number the toolbar exists to draw attention to.
+func opsFailureCount(gc GalleryContext) string {
+	if gc.State == "empty" {
+		return "0 failing"
+	}
+	return "2 failing"
+}
+
+func opsFailureKind(gc GalleryContext) ui.Kind {
+	if gc.State == "empty" {
+		return ui.KindNeutral
+	}
+	return ui.KindDanger
+}

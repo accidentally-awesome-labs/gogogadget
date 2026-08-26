@@ -20,7 +20,7 @@
         "source": "internal/web/dev_routes_test.go",
         "target": "internal/web/dev_routes_test.go",
         "class": "test",
-        "sha256": "31684aa9bac96ea8f37107847348530f2af9a7a4cf2269622c06a2893577d729",
+        "sha256": "0bdc0a2994a335c857e74b30ee9c77858987d8649986c3a93922393f83765c6a",
         "rewrite_module": true,
         "contract": false
       },
@@ -36,7 +36,7 @@
         "source": "internal/web/page_dev_catalog.go",
         "target": "internal/web/page_dev_catalog.go",
         "class": "go",
-        "sha256": "6db10e6045c4138ce4a1f0ba105f6e874fc77d888908a0edee66c9a2855c6c5e",
+        "sha256": "2ac683f8558fc88418208084b0031bd6e2e22b14ae4fd5b8344dfa225275884b",
         "rewrite_module": true,
         "contract": false
       },
@@ -100,7 +100,7 @@
         "source": "internal/web/templates/gallery_reference.go",
         "target": "internal/web/templates/gallery_reference.go",
         "class": "go",
-        "sha256": "ef38b6e7738b039321dbfd7cfcc51e93298a043c1587d0bc0e76d49abeba1e3b",
+        "sha256": "e629f57053f5a0b5fac5ef2e422c8b8d27a2d2dfc4c0b4f28e5a912a9e876905",
         "rewrite_module": true,
         "contract": false
       },
@@ -113,10 +113,106 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/scenario_analytics.templ",
+        "target": "internal/web/templates/scenario_analytics.templ",
+        "class": "templ",
+        "sha256": "8c694ed11531d14705681b94bc1ac133cf312ce127c7762adb3a452199fdc868",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_billing.templ",
+        "target": "internal/web/templates/scenario_billing.templ",
+        "class": "templ",
+        "sha256": "77f0ff4db4f81fb00262f10002797f7c80fdcc0f1cd18bfb8bdd2e062e0cb73d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_communication.templ",
+        "target": "internal/web/templates/scenario_communication.templ",
+        "class": "templ",
+        "sha256": "3b64333621bb06349f1335a40b6ee92fcf7fd0d5ea3a3c25b3e4880cd0196869",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_content.templ",
+        "target": "internal/web/templates/scenario_content.templ",
+        "class": "templ",
+        "sha256": "072ca2fd71b000f8e6febe550cedb75633148b353c16cf99b3429c2974cbd912",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_dashboard.templ",
+        "target": "internal/web/templates/scenario_dashboard.templ",
+        "class": "templ",
+        "sha256": "4b18f15fb18d268c143eda7f5a4314bf642872db31eb6dbd19e8a362117a5a81",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_developer.templ",
+        "target": "internal/web/templates/scenario_developer.templ",
+        "class": "templ",
+        "sha256": "e529b2cf0dc44c16373612ba778b6dd015f3d1b4fa29702a3810c69cd817a87c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_operations.templ",
+        "target": "internal/web/templates/scenario_operations.templ",
+        "class": "templ",
+        "sha256": "70e38d11469710e37317d1415b2ea737de7c79304418fae4bef5f8c8ee073404",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/scenario_page.templ",
         "target": "internal/web/templates/scenario_page.templ",
         "class": "templ",
-        "sha256": "36a8f17049d5397577478d0fab0bdf0780aa093d6f8528c44020c75743e08ce2",
+        "sha256": "4334528c0cacc20706ffe697b0459772656973c6322edde9b8ee6362968ffe19",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_planning.templ",
+        "target": "internal/web/templates/scenario_planning.templ",
+        "class": "templ",
+        "sha256": "4c68b712bab6df3ff9b3e23672bccaf840346545fa275932f942e5666f2d9859",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_resource_list.templ",
+        "target": "internal/web/templates/scenario_resource_list.templ",
+        "class": "templ",
+        "sha256": "d44ac51dcd833e05d8ef7d1ce31d5ff491a766b11179094d237a6fe60a685439",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_settings.templ",
+        "target": "internal/web/templates/scenario_settings.templ",
+        "class": "templ",
+        "sha256": "2ea0e9e851b0d1f5e9ab4a847d2db8ebdec6b0171fe9c892abae89a40cce0f03",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_system_states.templ",
+        "target": "internal/web/templates/scenario_system_states.templ",
+        "class": "templ",
+        "sha256": "589abbd62d8f5327ff414817464ccc7c6dc26a28a77df71ed13e4692a70585ae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_team.templ",
+        "target": "internal/web/templates/scenario_team.templ",
+        "class": "templ",
+        "sha256": "a0aa07271c4608f95dbc43b68ad71f48e5af168dc86fa9931d2eb9cfe34f5235",
         "rewrite_module": true,
         "contract": false
       },
@@ -124,7 +220,7 @@
         "source": "internal/web/templates/scenarios.go",
         "target": "internal/web/templates/scenarios.go",
         "class": "go",
-        "sha256": "53fd272ef929267a59b0e8089852059d17b69a8aa72ead95763fe1e548bfdb46",
+        "sha256": "e20e59c8527ae5d4525f019d19b4fc21cf0bed3df9d0c472463faa81393dfa65",
         "rewrite_module": true,
         "contract": false
       }

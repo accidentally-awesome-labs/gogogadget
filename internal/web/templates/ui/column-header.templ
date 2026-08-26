@@ -31,10 +31,17 @@ templ ColumnHeader(o ColumnHeaderOpts) {
 			"aria-sort", columnAriaSort(o.Sort))... }
 	>
 		if o.Column.Sortable && o.BaseURL != "" {
+			// The htmx attributes appear only with a target: hx-target="" makes
+			// htmx intercept the click and swap into an empty selector, so a
+			// sort link meant to navigate fires a request that lands nowhere.
 			<a
 				href={ templ.SafeURL(SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort)) }
-				hx-get={ SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort) }
-				hx-target={ o.Target } hx-swap="innerMorph" hx-push-url="true"
+				if o.Target != "" {
+					hx-get={ SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort) }
+					hx-target={ o.Target }
+					hx-swap="innerMorph"
+					hx-push-url="true"
+				}
 				class="inline-flex items-center gap-1 hover:text-fg"
 			>
 				{ o.Column.Label }

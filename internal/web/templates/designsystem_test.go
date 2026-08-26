@@ -617,3 +617,37 @@ func TestEngineAdaptersKeepInstancesOutOfReactiveState(t *testing.T) {
 			"%s must release its instance: Alpine calls destroy during DOM cleanup", path)
 	}
 }
+
+// A template must never hand-roll a component's root. Copying the Alpine hook,
+// the data attributes and the responsive classes produces a second root that
+// drifts the moment the component changes - and the copy silently loses
+// whatever the component computes, which for PanelGroup is the handle bounds
+// that stop one panel squeezing its neighbour below its floor.
+//
+// The Alpine component names are the tell: they belong to exactly one renderer
+// each, so seeing one outside internal/web/templates/ui means a caller rebuilt
+// that renderer's root by hand.
+func TestNoTemplateHandRollsAComponentRoot(t *testing.T) {
+	owned := map[string]string{
+		"uiPanels":   "ui.PanelGroup",
+		"uiGrid":     "ui.DataGrid",
+		"uiTree":     "ui.Tree or ui.TreeGrid",
+		"uiKanban":   "ui.Kanban",
+		"uiCarousel": "ui.Carousel",
+		"uiChart":    "a chart renderer",
+		"uiCommand":  "ui.CommandPalette",
+		"uiCalendar": "a calendar renderer",
+	}
+	files, err := filepath.Glob("*.templ")
+	require.NoError(t, err)
+	require.NotEmpty(t, files)
+
+	for _, file := range files {
+		body, err := os.ReadFile(file)
+		require.NoError(t, err)
+		for hook, renderer := range owned {
+			assert.NotContains(t, string(body), `x-data="`+hook+`"`,
+				"%s declares %s by hand; use %s instead", file, hook, renderer)
+		}
+	}
+}

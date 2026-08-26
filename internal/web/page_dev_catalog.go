@@ -90,7 +90,18 @@ func (s *Server) handleDevScenario(w http.ResponseWriter, r *http.Request) {
 	s.Render(w, r, Page{
 		Title:  scenario.Title,
 		Layout: layout,
-	}, templates.ScenarioPage(scenario, state))
+	}, templates.ScenarioPage(scenario, state, scenarioPage(r)))
+}
+
+// scenarioPage reads the 1-based page a paged scenario is showing. An
+// unparseable or out-of-range value clamps to the first page rather than 404ing:
+// unlike a state, a page is not a claim about which surface is rendered.
+func scenarioPage(r *http.Request) int {
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil || page < 1 {
+		return 1
+	}
+	return page
 }
 
 // scenarioRetryURL adds the one-shot marker while preserving the state the

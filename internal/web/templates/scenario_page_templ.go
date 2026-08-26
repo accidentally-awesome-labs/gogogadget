@@ -135,7 +135,7 @@ func ScenarioIndex() templ.Component {
 // how to reach it. Only the states the descriptor declares are offered, because
 // a control that selects a state the scenario does not have is a control that
 // must fail.
-func ScenarioPage(scenario Scenario, state string) templ.Component {
+func ScenarioPage(scenario Scenario, state string, page int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -296,6 +296,32 @@ func ScenarioPage(scenario Scenario, state string) templ.Component {
 				{Term: "States", Value: joinWith(scenarioStateOptions(scenario), ", ")},
 			},
 		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div class=\"space-y-8\" data-testid=\"scenario-surface\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if scenario.Render != nil {
+			templ_7745c5c3_Err = scenario.Render(GalleryContext{State: scenarioActiveState(state), Page: page}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "  ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{
+				Title: "This scenario has no composition yet.",
+				Body:  "It is declared in internal/web/templates/scenarios.go without a Render function.",
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

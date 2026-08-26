@@ -34,7 +34,7 @@ templ ScenarioIndex() {
 // how to reach it. Only the states the descriptor declares are offered, because
 // a control that selects a state the scenario does not have is a control that
 // must fail.
-templ ScenarioPage(scenario Scenario, state string) {
+templ ScenarioPage(scenario Scenario, state string, page int) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: scenario.Title}) {
 		<p class="text-sm text-fg-muted">{ scenario.Summary }</p>
 	}
@@ -62,6 +62,21 @@ templ ScenarioPage(scenario Scenario, state string) {
 			{Term: "States", Value: joinWith(scenarioStateOptions(scenario), ", ")},
 		},
 	})
+	// The surface itself. It renders inside #content only: the shell around it
+	// is the real layout, so a scenario cannot drift from the chrome the
+	// product ships.
+	<div class="space-y-8" data-testid="scenario-surface">
+		if scenario.Render != nil {
+			@scenario.Render(GalleryContext{State: scenarioActiveState(state), Page: page})
+		} else {
+			// Stated, not blank: an empty column is indistinguishable from a
+			// composition that failed to render.
+			@ui.EmptyState(ui.EmptyStateOpts{
+				Title: "This scenario has no composition yet.",
+				Body:  "It is declared in internal/web/templates/scenarios.go without a Render function.",
+			})
+		}
+	</div>
 }
 
 // scenarioStateOptions always begins with default, so the unfiltered view has a

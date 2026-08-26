@@ -24,6 +24,11 @@ type GalleryContext struct {
 	Direction   string
 	Density     ui.Density
 	LongContent bool
+	// Page is the 1-based page a paged surface is showing. It exists so a
+	// scenario's pager is a working control rather than links that render the
+	// same rows: a pager that does not move is worse than no pager, because it
+	// looks like the data ended.
+	Page int
 }
 
 // The stated substitutes for missing manifest data. Each names the file that

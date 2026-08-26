@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/panels.templ",
         "target": "internal/web/templates/ui/panels.templ",
         "class": "templ",
-        "sha256": "de089dcd1abcac8f6131316b398260be9d503c67b4e696b7059d5286e3f8296a",
+        "sha256": "217cc76a39da2cdd64b9980f7291c3de00fae3f952771a7f63700d27c3d4ffb8",
         "rewrite_module": true,
         "contract": true
       },
@@ -24,7 +24,7 @@
         "source": "internal/web/templates/ui/panels_test.go",
         "target": "internal/web/templates/ui/panels_test.go",
         "class": "test",
-        "sha256": "580e46dc6ea7fea6d9b18a446bfd33ab9947ba626e3e22bb3bd47ea4fd3d78de",
+        "sha256": "65fb4cf0abaa90f60aa6766496f77a678c5ed8015a5cedc94da806e7a5cce5f7",
         "rewrite_module": true,
         "contract": false
       },

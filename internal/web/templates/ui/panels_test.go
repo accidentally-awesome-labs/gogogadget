@@ -134,3 +134,24 @@ func TestInvalidOrientationNormalizes(t *testing.T) {
 	assert.Contains(t, html, `aria-orientation="horizontal"`)
 	assert.NotContains(t, html, "sideways")
 }
+
+// A panel must be able to hold something. Without declared content PanelGroup
+// could only render titled empty boxes, which forced callers to hand-roll the
+// group's root markup and Alpine hooks - two copies of a root that drifts the
+// moment the group's classes change.
+func TestPanelGroupRendersDeclaredContent(t *testing.T) {
+	html := renderComponent(t, PanelGroup(PanelGroupOpts{
+		ID: "pg", PersistKey: "demo",
+		Panels: []PanelData{
+			{ID: "left", Title: "List", Size: 40, Content: Text(TextOpts{})},
+			{ID: "right", Title: "Detail"},
+		},
+	}))
+
+	assert.Contains(t, html, `id="left"`)
+	assert.Contains(t, html, `id="right"`)
+	// The group still owns the root, so the controller and its persistence hook
+	// are declared exactly once.
+	assert.Equal(t, 1, strings.Count(html, `x-data="uiPanels"`))
+	assert.Contains(t, html, `data-panel-persist="demo"`)
+}

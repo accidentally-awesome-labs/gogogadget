@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/cursor-pagination.templ",
         "target": "internal/web/templates/ui/cursor-pagination.templ",
         "class": "templ",
-        "sha256": "3aba1a88514777a907235ddc0db877cec56553e2d3f46d9d224c784b9f4d3a27",
+        "sha256": "e429ef759cfb7cdbeaa9510a119598b0b006b979c16c5f5b0fcfde8e3e7ac0ae",
         "rewrite_module": true,
         "contract": true
       }

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -305,4 +306,99 @@ func TestScenarioSessionRetryDoesNotLoop(t *testing.T) {
 	require.Equal(t, http.StatusOK, code)
 	assert.Empty(t, headers.Get("Location"))
 	assert.Contains(t, body, "Billing")
+}
+
+// Every declared scenario must have a composition. A descriptor with no Render
+// renders a stated placeholder, which is honest but is not a scenario - so the
+// registry claiming twelve surfaces has to mean twelve.
+func TestEveryScenarioHasAComposition(t *testing.T) {
+	var missing []string
+	for _, scenario := range templates.ScenarioRegistry {
+		if scenario.Render == nil {
+			missing = append(missing, scenario.Slug)
+		}
+	}
+	assert.Empty(t, missing, "scenarios declared without a composition")
+}
+
+// Each declared state must render a materially different surface. A state
+// control that changes nothing is worse than no control: it teaches the reader
+// that the state does not matter.
+func TestEachScenarioStateRendersDifferently(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	for _, scenario := range templates.ScenarioRegistry {
+		seen := map[string]string{}
+		for _, state := range append([]string{"default"}, scenario.States...) {
+			url := "/dev/scenarios/" + scenario.Slug
+			if state != "default" {
+				url += "?state=" + state
+			}
+			code, _, body := serve(t, s, "GET", url, nil, nil, session)
+			require.Equal(t, http.StatusOK, code, "%s %s", scenario.Slug, state)
+			// The surface region only, so shell differences never count as a
+			// state difference.
+			surface := body
+			if i := strings.Index(body, `data-testid="scenario-surface"`); i >= 0 {
+				surface = body[i:]
+			}
+			for other, prior := range seen {
+				if other == state {
+					continue
+				}
+				assert.NotEqual(t, prior, surface,
+					"%s renders %q and %q identically", scenario.Slug, other, state)
+			}
+			seen[state] = surface
+		}
+	}
+}
+
+// A scenario renders inside #content. Emitting shell markup would let it drift
+// from the chrome the product actually ships.
+func TestScenariosRenderNoShellMarkup(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	for _, scenario := range templates.ScenarioRegistry {
+		_, _, body := serve(t, s, "GET", "/dev/scenarios/"+scenario.Slug, nil, nil, session)
+		i := strings.Index(body, `data-testid="scenario-surface"`)
+		require.GreaterOrEqual(t, i, 0, "%s has no surface region", scenario.Slug)
+		surface := body[i:]
+		// "<head" is deliberately not checked: it also matches <header>, which
+		// KanbanColumn legitimately renders inside content. The shell elements
+		// that must never appear are the document ones.
+		for _, forbidden := range []string{"<html", "<body", "<nav id=", "<aside"} {
+			assert.NotContains(t, surface, forbidden, "%s emits shell markup", scenario.Slug)
+		}
+	}
+}
+
+// Two renders of the same URL must be byte-identical, or the visual baselines
+// this feeds can never be trusted.
+func TestScenariosAreDeterministic(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	// The surface region only. The shell carries a fresh CSRF token on every
+	// response, which is correct and has nothing to do with whether the
+	// scenario's own fixture data is stable.
+	surfaceOf := func(body string) string {
+		i := strings.Index(body, `data-testid="scenario-surface"`)
+		if i < 0 {
+			return body
+		}
+		return body[i:]
+	}
+	for _, scenario := range templates.ScenarioRegistry {
+		url := "/dev/scenarios/" + scenario.Slug
+		_, _, first := serve(t, s, "GET", url, nil, nil, session)
+		_, _, second := serve(t, s, "GET", url, nil, nil, session)
+		assert.Equal(t, surfaceOf(first), surfaceOf(second),
+			"%s is not deterministic", scenario.Slug)
+	}
 }
