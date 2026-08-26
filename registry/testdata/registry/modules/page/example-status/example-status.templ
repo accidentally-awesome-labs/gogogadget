@@ -1,0 +1,20 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// ExampleStatus is the page body the example route renders inside the real
+// public shell. Its copy comes from keys this module owns in both locales, so
+// installing the page installs its strings and removing it takes them out of
+// the generated catalogs.
+templ ExampleStatus() {
+	<article class="page-narrow">
+		@ui.ExampleCallout(ui.ExampleCalloutOpts{
+			Title: i18n.T(ctx, "example.status.title"),
+			Body:  i18n.T(ctx, "example.status.body"),
+			Tone:  ui.ExampleToneCalm,
+		})
+	</article>
+}

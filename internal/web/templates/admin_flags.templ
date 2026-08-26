@@ -43,7 +43,13 @@ templ AdminFlagsPage(d FlagsData) {
 templ flagCreateCard(d FlagsData) {
 	<div id="flag-create-form" class="card mb-8 max-w-3xl">
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
-		<form hx-post="/admin/flags" hx-target="#flag-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="flag-create-form" class="space-y-4">
+		@ui.Form(ui.FormOpts{
+			Target: "#flag-create-form", Swap: "outerHTML",
+			Attrs: ui.Attrs{
+				Class: "space-y-4", TestID: "flag-create-form",
+				HX: ui.HX{Post: "/admin/flags", Disable: true},
+			},
+		}) {
 			if d.CreateErr != "" {
 				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
 					{ d.CreateErr }
@@ -64,7 +70,7 @@ templ flagCreateCard(d FlagsData) {
 				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
 				@ui.Spinner(ui.SpinnerOpts{})
 			}
-		</form>
+		}
 	</div>
 }
 
@@ -95,21 +101,27 @@ templ adminFlagsTable(d FlagsData) {
 				<td class="text-fg-muted text-xs">{ f.Description }</td>
 				<td>
 					if AdminWrite(ctx) {
-						<form hx-post={ fmt.Sprintf("/admin/flags/%s/toggle", f.Key) } hx-disable="this" class="inline">
+						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{
+							Class: "inline",
+							HX:    ui.HX{Post: fmt.Sprintf("/admin/flags/%s/toggle", f.Key), Disable: true},
+						}}) {
 							@ui.ToggleButton(ui.ToggleButtonOpts{
 								Label: onOffLabel(ctx, f.Enabled),
 								On:    f.Enabled,
 								Size:  ui.SizeXS,
 								Attrs: ui.Attrs{TestID: "flag-toggle-" + f.Key},
 							})
-						</form>
+						}
 					} else {
 						@ui.Badge(ui.BadgeOpts{Text: onOffLabel(ctx, f.Enabled), Kind: onOffKind(f.Enabled)})
 					}
 				</td>
 				<td>
 					if AdminWrite(ctx) {
-						<form hx-post={ fmt.Sprintf("/admin/flags/%s/rollout", f.Key) } hx-disable="this" class="flex items-center gap-2">
+						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{
+							Class: "flex items-center gap-2",
+							HX:    ui.HX{Post: fmt.Sprintf("/admin/flags/%s/rollout", f.Key), Disable: true},
+						}}) {
 							// Name stays "rollout" for every row because that is what
 							// the handler reads, so the element id comes from ID.
 							@ui.Field(ui.FieldOpts{
@@ -125,7 +137,7 @@ templ adminFlagsTable(d FlagsData) {
 								})
 							}
 							@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.set"), Type: ui.TypeSubmit, Size: ui.SizeXS})
-						</form>
+						}
 					} else {
 						<span class="text-xs text-fg-muted">{ fmt.Sprint(f.Rollout) }%</span>
 					}
@@ -221,7 +233,13 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 		}
 	}
 	if AdminWrite(ctx) {
-		<form hx-post={ "/admin/flags/" + flag.Key + "/overrides" } hx-swap="none" novalidate hx-disable="this" class="card max-w-3xl space-y-4" data-testid="flag-override-form">
+		@ui.Form(ui.FormOpts{
+			Swap: "none",
+			Attrs: ui.Attrs{
+				Class: "card max-w-3xl space-y-4", TestID: "flag-override-form",
+				HX: ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides", Disable: true},
+			},
+		}) {
 			<div class="grid sm:grid-cols-3 gap-4 items-end">
 				@ui.Field(ui.FieldOpts{Name: "org", Label: i18n.T(ctx, "flags.override_org_label")}) {
 					@ui.Select(ui.SelectOpts{Name: "org", Options: orgOptions(orgs)})
@@ -234,7 +252,7 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 				}
 				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.override_add"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
 			</div>
-		</form>
+		}
 	}
 }
 

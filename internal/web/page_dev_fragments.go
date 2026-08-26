@@ -40,9 +40,16 @@ func (s *Server) renderDevFragment(w http.ResponseWriter, r *http.Request, statu
 // POST /dev/ui/toast/show — the toast example.
 //
 // The kind is passed through rather than validated. An unrecognised kind is a
-// documented ui contract - the component renders its neutral variant and marks
-// itself data-ui-invalid - and rejecting it here would hide the behaviour a
-// reader on this page is looking for.
+// documented ui contract - NormalizeKind maps it to neutral, so the component
+// renders its neutral variant rather than composing a class that matches
+// nothing - and rejecting it here would hide the behaviour a reader on this page
+// came to see.
+//
+// This comment previously claimed the component also marks itself
+// data-ui-invalid. It does not: that marker appears nowhere in the tree, and a
+// comment describing behaviour that does not exist sends the next reader looking
+// for an attribute they will never find. The normalization itself is the whole
+// contract, and it is asserted directly in the enum tests.
 func (s *Server) handleDevToastShow(w http.ResponseWriter, r *http.Request) {
 	s.renderDevFragment(w, r, http.StatusOK, templates.DevToastFragment(r.FormValue("kind")))
 }

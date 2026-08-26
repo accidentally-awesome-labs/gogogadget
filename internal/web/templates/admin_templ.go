@@ -800,24 +800,7 @@ func roleForm(u sqlc.User) templ.Component {
 			templ_7745c5c3_Var28 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<form hx-post=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var29 string
-		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue("/admin/users/" + u.ClerkUserID + "/role")
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 242, Col: 58}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" hx-swap=\"none\" class=\"inline-block\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var30 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -829,35 +812,52 @@ func roleForm(u sqlc.User) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = ui.Select(ui.SelectOpts{
-				ID:   "role-" + u.ClerkUserID,
-				Name: "role",
-				Options: []ui.Option{
-					{Value: "", Label: i18n.T(ctx, "admin.users.role_none"), Selected: u.AdminRole == ""},
-					{Value: "support", Label: i18n.T(ctx, "admin.users.role_support"), Selected: u.AdminRole == "support"},
-					{Value: "admin", Label: i18n.T(ctx, "admin.users.role_admin"), Selected: u.AdminRole == "admin"},
-				},
-				Attrs: ui.Attrs{
-					Class:  "input-xs w-28",
-					TestID: "role-select-" + u.ClerkUserID,
-					HX:     ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role", Trigger: "change", Swap: "none"},
-				},
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Var30 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+				if !templ_7745c5c3_IsBuffer {
+					defer func() {
+						templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+						if templ_7745c5c3_Err == nil {
+							templ_7745c5c3_Err = templ_7745c5c3_BufErr
+						}
+					}()
+				}
+				ctx = templ.InitializeContext(ctx)
+				templ_7745c5c3_Err = ui.Select(ui.SelectOpts{
+					ID:   "role-" + u.ClerkUserID,
+					Name: "role",
+					Options: []ui.Option{
+						{Value: "", Label: i18n.T(ctx, "admin.users.role_none"), Selected: u.AdminRole == ""},
+						{Value: "support", Label: i18n.T(ctx, "admin.users.role_support"), Selected: u.AdminRole == "support"},
+						{Value: "admin", Label: i18n.T(ctx, "admin.users.role_admin"), Selected: u.AdminRole == "admin"},
+					},
+					Attrs: ui.Attrs{
+						Class:  "input-xs w-28",
+						TestID: "role-select-" + u.ClerkUserID,
+						HX:     ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role", Trigger: "change", Swap: "none"},
+					},
+				}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				return nil
+			})
+			templ_7745c5c3_Err = ui.Field(ui.FieldOpts{
+				ID:          "role-" + u.ClerkUserID,
+				Name:        "role",
+				Label:       i18n.T(ctx, "admin.users.role_aria", string(u.Email)),
+				HiddenLabel: true,
+			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = ui.Field(ui.FieldOpts{
-			ID:          "role-" + u.ClerkUserID,
-			Name:        "role",
-			Label:       i18n.T(ctx, "admin.users.role_aria", string(u.Email)),
-			HiddenLabel: true,
-		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</form>")
+		templ_7745c5c3_Err = ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{
+			Class: "inline-block",
+			HX:    ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role"},
+		}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

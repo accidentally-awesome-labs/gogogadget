@@ -31,14 +31,13 @@ templ AdminImpersonateForm(d ImpersonateData) {
 		if len(d.Orgs) == 0 {
 			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "impersonation.no_orgs"), Variant: ui.EmptyInline})
 		} else {
-			<form
-				hx-post={ "/admin/users/" + d.Target.ClerkUserID + "/impersonate" }
-				hx-target="#impersonate-form-wrap"
-				hx-swap="outerHTML"
-				novalidate
-				hx-disable="this"
-				class="space-y-4"
-			>
+			@ui.Form(ui.FormOpts{
+				Target: "#impersonate-form-wrap", Swap: "outerHTML",
+				Attrs: ui.Attrs{
+					Class: "space-y-4",
+					HX:    ui.HX{Post: "/admin/users/" + d.Target.ClerkUserID + "/impersonate", Disable: true},
+				},
+			}) {
 				@ui.Field(ui.FieldOpts{Name: "org", Label: i18n.T(ctx, "impersonation.org_label")}) {
 					@ui.Select(ui.SelectOpts{Name: "org", Options: orgOptions(d.Orgs)})
 				}
@@ -58,7 +57,7 @@ templ AdminImpersonateForm(d ImpersonateData) {
 					@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "impersonation.cancel"), Href: "/admin/users", Attrs: ui.Attrs{Class: "text-sm"}})
 					@ui.Spinner(ui.SpinnerOpts{})
 				}
-			</form>
+			}
 		}
 	</div>
 }

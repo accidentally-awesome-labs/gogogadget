@@ -4,7 +4,13 @@ tmp_dir = "tmp"
 [build]
   bin = "./tmp/server"
   cmd = "go build -o ./tmp/server ./cmd/server"
-  pre_cmd = ["go tool templ generate"]
+  # The narrow Make target, not `templ generate` restated: one definition of how
+  # this repo runs templ. Deliberately NOT `make generate` — air fires this
+  # before every rebuild, and all air needs is _templ.go fresh enough to
+  # compile. Tailwind has its own --watch process in scripts/dev.sh, sqlc has no
+  # .templ input, and `ggg sync` refuses on `sha256 mismatch` while a
+  # manifest-owned file is mid-edit, which is the normal state in this loop.
+  pre_cmd = ["make templ"]
   include_ext = ["go", "templ"]
   exclude_dir = ["tmp", "bin", "e2e", "static/vendor", "content"]
   exclude_regex = ["_templ.go", "_test.go"]

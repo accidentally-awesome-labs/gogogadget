@@ -767,3 +767,60 @@ func TestNoTemplateHandRollsAComponentRoot(t *testing.T) {
 		}
 	}
 }
+
+// The existing guard above catches a hand-rolled component root only when the
+// copy carries an Alpine hook, because that is the tell it looks for. A form
+// has no hook, so ui.Form was reachable past it - and a hand-rolled <form> is
+// the most expensive copy in the catalog, because every way it goes wrong is
+// invisible while scripting is on:
+//
+//   - `<form hx-post=...>` with no method attribute is a GET to a browser. With
+//     scripting off the click navigates instead of posting, and the mutation
+//     silently never happens.
+//   - a form with no action posts to the page it is on, not to the endpoint the
+//     htmx verb names, so even a form that does declare POST lands nowhere.
+//   - the CSRF token reaches htmx through the header inherited from <body>,
+//     which does not exist when htmx never loaded. A raw form that does post
+//     therefore gets a 403.
+//
+// ui.Form answers all three from one place: it derives method and action from
+// Attrs.HX, and renders the hidden token field for every unsafe method.
+//
+// Scope is the top-level directory, which is every production page template and
+// every dev reference surface. internal/web/templates/ui is excluded because
+// that is where forms are legitimately built: ui.Form itself, the
+// `method="dialog"` close forms inside Dialog/Drawer/AlertDialog/CommandPalette,
+// and the controls that wrap one.
+//
+// There are deliberately ZERO exemptions. The last candidate was the dev
+// content scenario's hidden multipart upload target, which needed a native
+// enctype ui.Form did not have; the answer was FormOpts.Enctype, not a skip.
+func TestNoTemplateHandRollsAForm(t *testing.T) {
+	files, err := filepath.Glob("*.templ")
+	require.NoError(t, err)
+	require.NotEmpty(t, files)
+
+	// Line-by-line rather than whole-file, because two templates explain in
+	// prose why they have no form. A rule that cannot tell markup from a
+	// comment is a rule the first person to hit it deletes.
+	tag := regexp.MustCompile(`<form\b`)
+	for _, file := range files {
+		body, err := os.ReadFile(file)
+		require.NoError(t, err)
+		for i, line := range strings.Split(string(body), "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "//") {
+				continue
+			}
+			if tag.MatchString(line) {
+				assert.Fail(t,
+					"hand-rolled form",
+					"%s:%d — a template must not open a <form> itself\n"+
+						"fix: @ui.Form(ui.FormOpts{...}) — the endpoint goes in Attrs.HX.Post "+
+						"(method and action are derived from it, and the CSRF field is rendered), "+
+						"hx-target/hx-swap go in Target/Swap, a native upload encoding goes in "+
+						"Enctype and htmx's in Attrs.HX.Encoding",
+					file, i+1)
+			}
+		}
+	}
+}

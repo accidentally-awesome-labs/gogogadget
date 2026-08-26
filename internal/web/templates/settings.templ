@@ -214,31 +214,32 @@ func choiceAction(selected bool) ui.Action {
 	return ui.ActionGhost
 }
 
-// themeChoice and localeChoice are one-field hx-post forms rather than a
-// select: the vendored Alpine CSP build forbids the inline expression that
-// would submit a select on change, and a form needs no JS at all. Both carry
-// returnTo, so the server hard-redirects and the shell re-renders with the
-// new <html> class / language.
+// themeChoice and localeChoice are one-field posts rather than a select: the
+// vendored Alpine CSP build forbids the inline expression that would submit a
+// select on change, and a form needs no JS at all. Both carry returnTo, so the
+// server hard-redirects and the shell re-renders with the new <html> class /
+// language — HX-Redirect for htmx, a 303 to returnTo for a plain submit, so the
+// no-script path lands back on this page rather than on a bare 204.
 templ themeChoice(value, label, current string) {
-	<form hx-post="/set-theme" hx-swap="none">
+	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: "/set-theme"}}}) {
 		<input type="hidden" name="theme" value={ value }/>
 		<input type="hidden" name="returnTo" value="/app/settings/account"/>
 		@ui.Button(ui.ButtonOpts{
 			Label: label, Type: ui.TypeSubmit, Action: choiceAction(current == value), Size: ui.SizeSM,
 			Attrs: ui.Attrs{TestID: "theme-" + value},
 		})
-	</form>
+	}
 }
 
 templ localeChoice(code, label, current string) {
-	<form hx-post="/set-locale" hx-swap="none">
+	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: "/set-locale"}}}) {
 		<input type="hidden" name="lang" value={ code }/>
 		<input type="hidden" name="returnTo" value="/app/settings/account"/>
 		@ui.Button(ui.ButtonOpts{
 			Label: label, Type: ui.TypeSubmit, Action: choiceAction(current == code), Size: ui.SizeSM,
 			Attrs: ui.Attrs{TestID: "locale-pref-" + localeTestID(code)},
 		})
-	</form>
+	}
 }
 
 // localeTestID keeps the "follow the browser" option addressable in tests.

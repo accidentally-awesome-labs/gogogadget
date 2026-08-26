@@ -1109,7 +1109,56 @@ func (c CLI) runRegistry(ctx context.Context, args []string) error {
 		ids = append(ids, profile.ID)
 	}
 	sort.Strings(ids)
-	return c.emit("registry validate", *asJSON, Envelope{OK: true, Resolved: ids, Exit: exitOK})
+
+	// Validating the shipped catalog only proves its data parses. The claim that
+	// a third party can install, modify and remove a module is a claim about
+	// behaviour, so it is proved by doing it: each example closure that
+	// registry/testdata publishes is installed into a throwaway derivative,
+	// generated, compiled, tested, removed, and the tree is compared byte for
+	// byte against what it was before.
+	//
+	// Progress goes to the human stream even under --json, because this takes
+	// minutes and a silent command that long reads as a hang.
+	progress := c.out()
+	if *asJSON {
+		progress = io.Discard
+	}
+	examples, err := ValidateExamples(ctx, c.root(), progress)
+	if err != nil {
+		return c.failure("registry validate", *asJSON, refusalError(err))
+	}
+
+	generated := make([]string, 0)
+	diagnostics := make([]Diagnostic, 0, len(examples))
+	for _, example := range examples {
+		ids = append(ids, example.ID)
+		generated = append(generated, example.Generated...)
+		message := fmt.Sprintf(
+			"%s closure %s: installed %d file(s), regenerated %d, compiled, %d tree entries restored byte for byte",
+			example.Kind, strings.Join(example.Modules, "+"),
+			len(example.Installed), len(example.Generated), example.Compared)
+		if len(example.Retained) != 0 {
+			message += ", retained migration(s) " + strings.Join(example.Retained, " ")
+		}
+		diagnostics = append(diagnostics, Diagnostic{
+			Code: "example_closure_verified", Severity: "info", Module: example.ID, Message: message,
+		})
+	}
+	sort.Strings(ids)
+	sort.Strings(generated)
+
+	// The heading only; the per-closure lines are the envelope's own diagnostics,
+	// which renderHuman prints. Printing them here as well would report the same
+	// result twice in two formats.
+	if !*asJSON {
+		if _, err := fmt.Fprintf(c.out(), "\nexercised %d example closure(s):\n", len(examples)); err != nil {
+			return err
+		}
+	}
+	return c.emit("registry validate", *asJSON, Envelope{
+		OK: true, Resolved: ids, Generated: dedupeSorted(generated),
+		Diagnostics: diagnostics, Exit: exitOK,
+	})
 }
 
 // refreshManifestDigests re-reads every manifest payload from disk and rewrites

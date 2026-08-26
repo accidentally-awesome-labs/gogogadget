@@ -89,14 +89,17 @@ templ AdminSchedulesPage(d SchedulesData) {
 				<td class="text-right tabular-nums">{ fmtI32(row.EverySeconds) }s</td>
 				<td>
 					if AdminWrite(ctx) {
-						<form hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/toggle" } hx-disable="this" class="inline">
+						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{
+							Class: "inline",
+							HX:    ui.HX{Post: "/admin/schedules/" + fmtI64(row.ID) + "/toggle", Disable: true},
+						}}) {
 							@ui.ToggleButton(ui.ToggleButtonOpts{
 								Label: scheduleOnOffLabel(ctx, row.Enabled),
 								On:    row.Enabled,
 								Size:  ui.SizeXS,
 								Attrs: ui.Attrs{TestID: "schedule-toggle-" + fmtI64(row.ID)},
 							})
-						</form>
+						}
 					} else {
 						@ui.Badge(ui.BadgeOpts{Text: scheduleOnOffLabel(ctx, row.Enabled), Kind: onOffKind(row.Enabled)})
 					}
@@ -156,7 +159,13 @@ templ adminSchedulesEmpty() {
 templ scheduleCreateCard(d SchedulesData) {
 	<div id="schedule-create-form" class="card mb-8 max-w-2xl">
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.schedules.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
-		<form hx-post="/admin/schedules" hx-target="#schedule-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="schedule-create-form" class="space-y-4">
+		@ui.Form(ui.FormOpts{
+			Target: "#schedule-create-form", Swap: "outerHTML",
+			Attrs: ui.Attrs{
+				Class: "space-y-4", TestID: "schedule-create-form",
+				HX: ui.HX{Post: "/admin/schedules", Disable: true},
+			},
+		}) {
 			if d.Invalid {
 				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
 					{ i18n.T(ctx, "admin.schedules.invalid") }
@@ -185,6 +194,6 @@ templ scheduleCreateCard(d SchedulesData) {
 				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "admin.schedules.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
 				@ui.Spinner(ui.SpinnerOpts{})
 			}
-		</form>
+		}
 	</div>
 }

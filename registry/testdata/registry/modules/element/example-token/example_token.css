@@ -1,0 +1,15 @@
+/* The example element's own style fragment. sync regenerates the import list in
+   internal/web/styles/modules_registry_gen.css from the installed set, so this
+   file is reachable from the Tailwind entry without anyone editing input.css —
+   which is the property the fragment exists to prove. */
+@layer components {
+  .example-tone-calm {
+    color: var(--color-info-subtle-fg);
+    background-color: var(--color-info-subtle);
+  }
+
+  .example-tone-urgent {
+    color: var(--color-danger-fg);
+    background-color: var(--color-danger);
+  }
+}

@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/form.templ",
         "target": "internal/web/templates/ui/form.templ",
         "class": "templ",
-        "sha256": "691959f4bd429012883f6d052bb17753fe7ebe9641112086008a3f7384b8e3ec",
+        "sha256": "97d2502dc0eb7f3edaf8a6cac729ebc2abfca295f676983e92e63c4f972a2c76",
         "rewrite_module": true,
         "contract": true
       },

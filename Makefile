@@ -1,5 +1,10 @@
 .DEFAULT_GOAL := help
 
+# `make setup` installs the pinned Tailwind binary under bin/. The Docker build
+# stage has it on PATH instead, and overriding this one variable lets that stage
+# call `make generate` rather than restating the pipeline.
+TAILWIND ?= bin/tailwindcss
+
 ## setup: one-time local setup — deps, tools, vendored assets, .env
 setup:
 	@go version | grep -q 'go1.2[6-9]' || (echo 'Go >= 1.26 required' && exit 1)
@@ -14,9 +19,24 @@ setup:
 ## generate: regenerate ALL generated code (registry aggregates, templ, sqlc, tailwind). Never edit generated files.
 generate:
 	go run ./cmd/ggg sync --offline
-	go tool templ generate
+	$(MAKE) --no-print-directory templ
 	go tool sqlc generate
-	bin/tailwindcss -i input.css -o static/app.css --minify
+	$(MAKE) --no-print-directory css
+
+# templ and css are separate targets because two other callers need exactly one
+# tool step and must not pay for the rest: air re-runs templ on every save, and
+# scripts/dev.sh pre-builds templ+css once before starting its watchers. Neither
+# can run `ggg sync`, which refuses with `sha256 mismatch` whenever a
+# manifest-owned source file has been edited without `ggg registry build` —
+# i.e. during ordinary development. `generate` calls both so each tool
+# invocation still has exactly one definition.
+## templ: regenerate *_templ.go only (the narrow step air's rebuild hook needs)
+templ:
+	go tool templ generate
+
+## css: rebuild static/app.css from input.css with the pinned Tailwind binary
+css:
+	$(TAILWIND) -i input.css -o static/app.css --minify
 
 ## dev: one-terminal dev loop — templ watch + tailwind watch + air (server restarts on save)
 dev:
@@ -81,4 +101,4 @@ docker-build:
 help:
 	@grep -E '^## ' Makefile | sed 's/## //' | column -t -s ':'
 
-.PHONY: setup generate dev check test fuzz e2e e2e-ui visual visual-update seed db-reset build smoke docker-build help
+.PHONY: setup generate templ css dev check test fuzz e2e e2e-ui visual visual-update seed db-reset build smoke docker-build help

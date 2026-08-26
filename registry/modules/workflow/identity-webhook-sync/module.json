@@ -29,6 +29,14 @@
         "sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/webhook_bypass_test.go",
+        "target": "internal/web/webhook_bypass_test.go",
+        "class": "test",
+        "sha256": "1abdbf33cb793afe8ccb918d6883dc33a4d171b3b195d07ee7bc00f9616da8d9",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

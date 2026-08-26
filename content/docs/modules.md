@@ -425,10 +425,32 @@ write. That is [its own page](/docs/module-removal).
 
 ## Authoring a module
 
-`ggg registry validate` loads the catalog and reports every id, refusing a
-malformed manifest or a duplicate catalog id. Namespace claim collisions are
-caught later, by the planner preflight, which is also a refusal with zero
-writes. The loop for a new module is:
+`ggg registry validate` does two things. First it loads the catalog and reports
+every id, refusing a malformed manifest or a duplicate catalog id; namespace
+claim collisions are caught later, by the planner preflight, which is also a
+refusal with zero writes. Then it proves the claim that data checks cannot: that
+a module can actually be installed, built and taken back out. `registry/testdata`
+is a second, self-contained registry publishing one example module of each kind —
+a leaf element, a component that depends on it, a static page, a job-backed
+workflow with a migration, and a provider-style system. For each of them the
+command copies this tree into a throwaway derivative, vendors the example into
+the copy's own catalog, installs the closure, generates, compiles `./...`, runs
+the module's own tests, removes it, and then requires the tree to come back byte
+for byte.
+
+Two differences are tolerated after removal, and both are asserted rather than
+ignored. An immutable migration stays on disk with the digest it was allocated
+under, because a database that has run it cannot be told to un-run it. And each
+generated aggregate's `index:`/`registry:` header still differs, because that
+header is a digest of the lock and the lock legitimately still carries the
+removal tombstone — the aggregate's *body* must be identical, which is where a
+leftover route, translation, component entry or environment key would show.
+
+The examples are never installable here. They live in their own registry root
+that no shipped index references, so this project's catalog cannot resolve one,
+no profile can list one, and nothing generated from the lock can reach them.
+
+The loop for a new module is:
 
 1. Write the source files where they belong in the tree.
 2. Write `registry/modules/<kind>/<name>/module.json` — declare `files`,
@@ -441,7 +463,9 @@ writes. The loop for a new module is:
 
 `registry build` derives the indexes from the tree rather than from the indexes
 it writes: deriving an index from itself would make a new module permanently
-invisible.
+invisible. It scans `registry/modules`, so it deliberately does not refresh the
+example manifests under `registry/testdata`; a test recomputes those digests and
+names the correct value when a payload changes.
 
 ## Where to go next
 

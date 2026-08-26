@@ -32,7 +32,7 @@
         "source": "internal/web/templates/locale.templ",
         "target": "internal/web/templates/locale.templ",
         "class": "templ",
-        "sha256": "2ff7e2119384444497a35347fa88d1c4768afa24f8edaeeacfe0faca2638028a",
+        "sha256": "9ec9b3f7783cf775eb0f529bdf7ae5bb0838c0623a31923748ea906114d3dd25",
         "rewrite_module": true,
         "contract": false
       }

@@ -21,7 +21,7 @@
         "source": "internal/web/templates/ui/questionnaire.templ",
         "target": "internal/web/templates/ui/questionnaire.templ",
         "class": "templ",
-        "sha256": "951e156c3a93fda509ca7d4382369eda5f518750deb5aefb1daaa10578d8859c",
+        "sha256": "9953bfb14d5cb2659e2059790b466f4f5627f4fe6f16b525e7378deed17d36ee",
         "rewrite_module": true,
         "contract": true
       },
@@ -70,8 +70,7 @@
             "loading"
           ]
         }
-      ],
-      "assets": []
+      ]
     },
     "migrations": [],
     "environment": [],

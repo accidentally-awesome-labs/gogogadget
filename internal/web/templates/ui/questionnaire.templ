@@ -51,6 +51,10 @@ templ Questionnaire(o QuestionnaireOpts) {
 		hx-swap="outerMorph"
 		hx-disable="this"
 	>
+		// A declared method="post" means a plain browser submit is checked, so the
+		// token has to be in the form: without it the no-script path this component
+		// advertises answers 403, which is a worse fallback than no form at all.
+		@CSRFField(CSRFFieldOpts{})
 		@Steps(StepsOpts{
 			Label:   "Questionnaire progress",
 			Steps:   questionnaireSteps(o),

@@ -1,10 +1,14 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"strings"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -132,6 +136,128 @@ func TestDevSurfaceIsCompletelyRegistered(t *testing.T) {
 		delete(want, route.Method+" "+route.Pattern)
 	}
 	assert.Empty(t, want, "documented dev routes missing from the registry")
+}
+
+// productionServer builds a Server from a configuration that actually passed
+// production validation, so the dev gate the tests below read is the value a
+// deployed binary computes rather than a literal the test chose. The identity
+// ports come from the real module constructor for the same reason.
+//
+// The helper checks its own output before returning. A helper that quietly
+// handed back a dev-configured server would make every assertion below pass
+// while proving nothing, which is the only way these tests can lie.
+func productionServer(t *testing.T) *Server {
+	t.Helper()
+	env := map[string]string{
+		"APP_ENV":               "production",
+		"APP_URL":               "https://app.example.com",
+		"DATABASE_URL":          "postgres://unused.example/production",
+		"CLERK_SECRET_KEY":      "sk_live_fixture",
+		"CLERK_WEBHOOK_SECRET":  testWebhookSecret,
+		"CLERK_PORTAL_URL":      "https://accounts.example.com",
+		"CLERK_PUBLISHABLE_KEY": "pk_live_fixture",
+	}
+	cfg, err := config.LoadFrom(func(k string) string { return env[k] })
+	require.NoError(t, err, "fixture must be a configuration production accepts")
+	require.True(t, cfg.Production(), "fixture must resolve to APP_ENV=production")
+	require.False(t, cfg.DevAuthBypass, "fixture must not carry the dev bypass")
+
+	ident, err := identity.NewModule(
+		context.Background(),
+		apphost.Map(env, cfg.Now(), "test"),
+		identity.Deps{Config: &cfg},
+	)
+	require.NoError(t, err)
+	require.IsType(t, &identity.ClerkVerifier{}, ident.Verifier,
+		"a production identity closure verifies against Clerk, not the fake")
+
+	s := integrationServer(t, func(d *Deps) {
+		d.Config = &cfg
+		d.Verifier = ident.Verifier
+		d.Fetcher = ident.Fetcher
+		d.IdentityDeleter = ident.Deleter
+	})
+	require.True(t, s.cfg.Production(), "the built server must carry the production config")
+	require.False(t, s.devAuthBypass(), "the built server must have the dev gate closed")
+	return s
+}
+
+// devLivePaths are the concrete dev URLs a zero-account clone serves. Listed
+// rather than derived from the patterns: a wildcard filled with a made-up
+// segment 404s in both configurations, so it would prove nothing.
+func devLivePaths() []string {
+	return []string{
+		"/dev/gallery",
+		"/dev/gallery/actions",
+		"/dev/gallery/actions/button",
+		"/dev/scenarios/system-states",
+		"/dev/login",
+		"/dev/switch-org",
+	}
+}
+
+// Guarantee one of two: the dev surface is absent from a production build's
+// route table. Asserted in both directions - the gate opens on a zero-account
+// server and closes on a production one - because a gate that is always shut
+// would pass a one-sided check while the surface it guards was already broken.
+func TestDevRoutesAreAbsentFromAProductionServer(t *testing.T) {
+	prod := productionServer(t)
+	dev := integrationServer(t, nil)
+	require.False(t, prod.devAuthBypass(), "production config must leave the dev gate closed")
+	require.True(t, dev.devAuthBypass())
+
+	// The route table, which covers the whole surface including the wildcard
+	// fragment routes no single URL can exercise.
+	gated := 0
+	for _, route := range RouteRegistry {
+		if route.Scope != ScopeDev && !strings.HasPrefix(route.Pattern, "/dev/") {
+			continue
+		}
+		gated++
+		require.NotNil(t, route.Enabled, "%s must declare an enable gate", route.ID)
+		assert.False(t, route.Enabled(prod), "%s must not register in production", route.ID)
+		assert.True(t, route.Enabled(dev), "%s must register in zero-account mode", route.ID)
+	}
+	require.NotZero(t, gated, "the registry must contain dev routes for this to mean anything")
+
+	// The responses. Every dev URL must answer with the ordinary not-found page,
+	// carrying none of the catalog's own markers. Byte equality with a control
+	// 404 is not asserted: the page embeds a fresh CSRF token per request.
+	for _, path := range devLivePaths() {
+		live, _, _ := serve(t, dev, "GET", path, nil, nil)
+		require.NotEqual(t, http.StatusNotFound, live,
+			"%s must be live in zero-account mode, or its 404 in production proves nothing", path)
+
+		code, _, body := serve(t, prod, "GET", path, nil, nil)
+		assert.Equal(t, http.StatusNotFound, code, "%s must 404 in production", path)
+		assert.Contains(t, body, "<title>Page not found",
+			"%s must render the ordinary not-found page", path)
+		for _, marker := range []string{"gallery-nav", "family-index", "scenario-surface"} {
+			assert.NotContains(t, body, marker, "%s must not leak %s", path, marker)
+		}
+	}
+}
+
+// Guarantee two of two: even if someone sets the gate deliberately, a
+// production configuration refuses to load, so no production process can reach
+// a Server whose dev gate is open. internal/config owns the rule
+// (TestLoadDevAuthBypassRefusedInProduction); this pins the dev surface's
+// dependency on it, because the gate above is only as good as the refusal.
+func TestDevGateCannotLoadUnderProduction(t *testing.T) {
+	env := map[string]string{
+		"APP_ENV":               "production",
+		"APP_URL":               "https://app.example.com",
+		"DATABASE_URL":          "postgres://unused.example/production",
+		"CLERK_SECRET_KEY":      "sk_live_fixture",
+		"CLERK_WEBHOOK_SECRET":  testWebhookSecret,
+		"CLERK_PORTAL_URL":      "https://accounts.example.com",
+		"CLERK_PUBLISHABLE_KEY": "pk_live_fixture",
+		"DEV_AUTH_BYPASS":       "true",
+	}
+	_, err := config.LoadFrom(func(k string) string { return env[k] })
+
+	require.Error(t, err)
+	assert.EqualError(t, err, "DEV_AUTH_BYPASS=true is refused when APP_ENV=production")
 }
 
 // Every internal link the dev catalog renders must resolve. A dead link in the

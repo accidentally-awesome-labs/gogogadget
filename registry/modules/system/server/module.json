@@ -108,7 +108,7 @@
         "source": "internal/web/public_routes_test.go",
         "target": "internal/web/public_routes_test.go",
         "class": "test",
-        "sha256": "b3a13fb7cede20ac65952b7dd822f73b25fce6410d5ea202018da2b57c741e3a",
+        "sha256": "9a00d8d61801b95b966494101e30961e29773993107aa7cc2f8a1a878061aa92",
         "rewrite_module": true,
         "contract": false
       },
@@ -140,7 +140,7 @@
         "source": "internal/web/routes.go",
         "target": "internal/web/routes.go",
         "class": "go",
-        "sha256": "ae50b9f7d6f8c2dc939f5e1ed3953c9145dfbfc848ccb89146bded8beea0661f",
+        "sha256": "d324e6e3dd282286bfecb77c317e0cd982b275779981d0c4bdec930e2d54e39b",
         "rewrite_module": true,
         "contract": false
       },
@@ -180,7 +180,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "b71cdb6e2b5ee647e71f9838cbabec2545a7c2af46eaf71f737aaea3d2aa7128",
+        "sha256": "e2924135b09d4a3fa74ac8a66b7c97b7bbabae2e457d72f4c6c5e0fe1f4b5dc6",
         "rewrite_module": true,
         "contract": false
       },
@@ -204,7 +204,7 @@
         "source": "internal/web/templates/layouts.templ",
         "target": "internal/web/templates/layouts.templ",
         "class": "templ",
-        "sha256": "5402fb6330ea973edc6a5acbf8fab65c7947a2102855c4cc23dbc2d5f7ee3741",
+        "sha256": "43c7532c1f717c6a617d571eb9087ab7d7f831fd49ffc15d5f94316aff2332bb",
         "rewrite_module": true,
         "contract": false
       },
@@ -244,7 +244,7 @@
         "source": "internal/web/templates/ui_adapters.go",
         "target": "internal/web/templates/ui_adapters.go",
         "class": "go",
-        "sha256": "ec7da0f26e5bc5b53a8e554d1c8987f05f7800f1c125264a5ec66cf8c3011153",
+        "sha256": "ad5e4406179608443121a5fb4a98630f2c48de1b406c218a934883feb4a739ee",
         "rewrite_module": true,
         "contract": false
       },

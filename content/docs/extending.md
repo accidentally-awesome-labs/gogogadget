@@ -215,7 +215,7 @@ Then build and validate:
 
 ```sh
 go run ./cmd/ggg registry build       # rescan registry/, refresh payload digests, verify vendored bytes
-go run ./cmd/ggg registry validate    # load and check the whole catalog
+go run ./cmd/ggg registry validate    # check the catalog, then prove the example lifecycle in a derivative
 go run ./cmd/ggg sync --offline       # install into this tree and regenerate
 ```
 

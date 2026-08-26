@@ -28,7 +28,7 @@
         "source": "internal/web/templates/settings.templ",
         "target": "internal/web/templates/settings.templ",
         "class": "templ",
-        "sha256": "4109ef4c280e63c476b2fc44158f0ebd2ad75bc0440fcbfc57b12a34d922723e",
+        "sha256": "9dbb5a38c3039315d7484ffc17ca573b205a3d40cd3b5ca5cf6a365cff986fcc",
         "rewrite_module": true,
         "contract": false
       }

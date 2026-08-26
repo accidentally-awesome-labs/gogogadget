@@ -1,0 +1,18 @@
+/* The example component's own style fragment, separate from the element's: two
+   modules each own one file under internal/web/styles, so the generated import
+   list has to order and remove them independently. */
+@layer components {
+  .example-callout {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-surface);
+    padding: 0.75rem 1rem;
+  }
+
+  .example-callout-title {
+    font-weight: 600;
+  }
+
+  .example-callout-body {
+    font-size: 0.875rem;
+  }
+}

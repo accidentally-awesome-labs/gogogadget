@@ -2,6 +2,7 @@ package templates
 
 import (
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 func localeItemClass(current bool) string {
@@ -19,10 +20,12 @@ func localeAriaCurrent(current bool) string {
 }
 
 // LocaleSwitcher is the language dropdown (public footer + app sidebar).
-// Each option is a tiny hx-post form to /set-locale: the CSRF token rides the
-// body-inherited X-CSRF-Token header, the response is a HARD redirect (locale
-// changes the shell, which boosted navigation never re-renders), and returnTo
-// brings the user back to the page they were on. Plain <details> — no JS,
+// Each option is a tiny ui.Form posting to /set-locale, and returnTo brings the
+// user back to the page they were on. The response is a HARD redirect because
+// the locale changes the SHELL, which boosted navigation never re-renders — and
+// that is also what makes the no-script path correct: a plain submit derives
+// method="post" action="/set-locale" from the htmx verb, carries the hidden
+// token field, and lands on a 303 back to returnTo. Plain <details> — no JS,
 // CSP-safe.
 templ LocaleSwitcher(path string) {
 	<details class="relative">
@@ -32,7 +35,7 @@ templ LocaleSwitcher(path string) {
 		</summary>
 		<div class="absolute left-0 mt-2 w-36 card p-2 flex flex-col gap-1 z-(--z-overlay)">
 			for _, l := range i18n.Locales {
-				<form hx-post="/set-locale" hx-swap="none">
+				@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{HX: ui.HX{Post: "/set-locale"}}}) {
 					<input type="hidden" name="lang" value={ l.Code }/>
 					<input type="hidden" name="returnTo" value={ path }/>
 					<button
@@ -41,7 +44,7 @@ templ LocaleSwitcher(path string) {
 						aria-current={ localeAriaCurrent(i18n.Tag(ctx) == l.Tag) }
 						data-testid={ "locale-option-" + l.Code }
 					>{ l.Label }</button>
-				</form>
+				}
 			}
 		</div>
 	</details>

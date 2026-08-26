@@ -20,7 +20,7 @@
         "source": "internal/web/templates/ui/composer.templ",
         "target": "internal/web/templates/ui/composer.templ",
         "class": "templ",
-        "sha256": "3cb08be38a13c9001018ea3126e72ffc46d7d8b52c631c55f1e7926acb216bdc",
+        "sha256": "517fad38fd6bf13257db5aefd43b4915f389f995bf34b7d3858fc2c253e8343d",
         "rewrite_module": true,
         "contract": true
       }

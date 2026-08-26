@@ -239,7 +239,10 @@ templ roleBadge(role string) {
 // aria-label: it names the control AND gives it a click target, and it goes
 // through the same catalog every other label does.
 templ roleForm(u sqlc.User) {
-	<form hx-post={ "/admin/users/" + u.ClerkUserID + "/role" } hx-swap="none" class="inline-block">
+	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{
+		Class: "inline-block",
+		HX:    ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role"},
+	}}) {
 		@ui.Field(ui.FieldOpts{
 			ID:          "role-" + u.ClerkUserID,
 			Name:        "role",
@@ -261,5 +264,5 @@ templ roleForm(u sqlc.User) {
 				},
 			})
 		}
-	</form>
+	}
 }

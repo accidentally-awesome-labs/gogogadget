@@ -160,7 +160,7 @@
         "source": "content/docs/cli.md",
         "target": "content/docs/cli.md",
         "class": "content",
-        "sha256": "b69c58df2c94438cbbe6035ff6ae698ed4d9f2acb1bffac46b40683953aec76b",
+        "sha256": "a341e4ad6163fabae42da4e2008c408759f6b03bd8accf3bf146f37f95248ab0",
         "rewrite_module": false,
         "contract": false
       },
@@ -200,7 +200,7 @@
         "source": "content/docs/deployment.md",
         "target": "content/docs/deployment.md",
         "class": "content",
-        "sha256": "701790021b94ea87c2d129552ee768559a5d9a8106f3ec6a50da2570ec75bce7",
+        "sha256": "f99c6b3a67929990bee04a834677413a72d0c940d4fee52613239104b02f9b99",
         "rewrite_module": false,
         "contract": false
       },
@@ -216,7 +216,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "24ce414726cfd0df0eec486d493aaba639008a0dd8949434cdbacef0ff92884b",
+        "sha256": "f74d15da31c6e80eedbd67b1738b97fb6d22553164b9f83eaf473f0b252a7504",
         "rewrite_module": false,
         "contract": false
       },
@@ -280,7 +280,7 @@
         "source": "content/docs/modules.md",
         "target": "content/docs/modules.md",
         "class": "content",
-        "sha256": "7734e10ad41bbcfa4b6fb43e7f6865791c9a2eeb8c6dab6874173df2a985c906",
+        "sha256": "c361c3fd3dc447853ba72e8ae12c7131289c45e6b68e7880ccced9b3b316ba98",
         "rewrite_module": false,
         "contract": false
       },

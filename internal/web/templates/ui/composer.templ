@@ -20,7 +20,20 @@ type ComposerOpts struct {
 // textarea where Enter submits makes multi-line messages impossible to write,
 // and a caller who wants it can add it deliberately.
 templ Composer(o ComposerOpts) {
-	<form { rootWith("composer", "space-y-2", o.Attrs, "novalidate", "novalidate")... } { composerHX(o.HX)... }>
+	// The verb lives in composerHX, so a browser with no script would submit this
+	// as a GET to the current URL - posting nothing, to the wrong place, without
+	// a token. Declaring the method and carrying the field is what makes the
+	// plain submit land on the endpoint the caller named.
+	<form
+		{ rootWith("composer", "space-y-2", o.Attrs,
+			"novalidate", "novalidate",
+			"method", composerMethod(o.HX),
+			"action", composerAction(o.HX))... }
+		{ composerHX(o.HX)... }
+	>
+		if composerMethod(o.HX) != "" {
+			@CSRFField(CSRFFieldOpts{})
+		}
 		<label for={ o.Name } class="sr-only">{ o.Placeholder }</label>
 		@Textarea(TextareaOpts{
 			Name: o.Name, Rows: composerRows(o.Rows), Placeholder: o.Placeholder,
@@ -45,4 +58,19 @@ func composerHX(hx HX) templ.Attributes {
 	out := templ.Attributes{}
 	applyHX(out, hx)
 	return out
+}
+
+// composerMethod and composerAction mirror ui.Form's derivation: the endpoint is
+// declared as an htmx verb, and a form that names no method is a GET to the page
+// it sits on. Reading the verb set rather than one field means a verb added to
+// HX later cannot quietly drop out of the no-script path.
+func composerMethod(hx HX) string {
+	if hxMutatingURL(hx) == "" {
+		return ""
+	}
+	return "post"
+}
+
+func composerAction(hx HX) string {
+	return hxMutatingURL(hx)
 }

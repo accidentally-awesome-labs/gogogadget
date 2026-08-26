@@ -347,20 +347,14 @@ templ AdminContentEditorPage(d ContentEditorData) {
 // a 422 re-render keeps the submitted values.
 templ AdminContentEditor(d ContentEditorData) {
 	<div id="content-editor" class="space-y-8">
-		<form
-			if d.ID == 0 {
-				hx-post="/admin/content"
-			} else {
-				hx-post={ fmt.Sprintf("/admin/content/%d", d.ID) }
-			}
-			hx-target="#content-editor"
-			hx-swap="outerHTML"
-			novalidate
-			hx-disable="this"
-			class="space-y-4"
-			data-testid="content-editor-form"
-			x-data="slugify"
-		>
+		@ui.Form(ui.FormOpts{
+			Target: "#content-editor", Swap: "outerHTML",
+			Attrs: ui.Attrs{
+				Class: "space-y-4", TestID: "content-editor-form",
+				Alpine: ui.Alpine{Data: "slugify"},
+				HX:     ui.HX{Post: contentEditorPost(d), Disable: true},
+			},
+		}) {
 			<input type="hidden" name="kind" value={ d.Type.Kind }/>
 			@ui.Field(ui.FieldOpts{Name: "title", Label: i18n.T(ctx, "admin.content.title_label"), Error: d.Errs.Title}) {
 				@ui.TextInput(ui.TextInputOpts{
@@ -451,7 +445,7 @@ templ AdminContentEditor(d ContentEditorData) {
 					}
 				}
 			}
-		</form>
+		}
 		if d.ID != 0 {
 			@contentRevisions(d)
 		}
@@ -484,6 +478,17 @@ templ contentPreviewPane(d ContentEditorData) {
 	@ui.EditorPreview(ui.EditorPreviewOpts{ID: "content-preview", Attrs: ui.Attrs{TestID: "content-preview"}}) {
 		@templ.Raw(d.PreviewHTML)
 	}
+}
+
+// contentEditorPost is the editor's endpoint: create has no id in the path,
+// update does. It is a function rather than a branch inside the markup because
+// the URL now travels through FormOpts, which also derives the no-script
+// action from it - two branches in two places would let those disagree.
+func contentEditorPost(d ContentEditorData) string {
+	if d.ID == 0 {
+		return "/admin/content"
+	}
+	return fmt.Sprintf("/admin/content/%d", d.ID)
 }
 
 // slugLockData marks an existing entry's slug as locked, so the slugify
@@ -691,18 +696,21 @@ templ adminMediaEmpty() {
 // MediaUploadCard is its own swap target so a rejected upload re-renders the
 // card alone. Without hx-target the 422 page would be swapped INSIDE the
 // form, duplicating the whole library below it.
+//
+// Enctype and HX.Encoding are both multipart, and both are load-bearing: htmx
+// reads hx-encoding, a plain browser submit reads enctype, and neither implies
+// the other. A file input in a form that sends the default encoding posts the
+// filename as text and leaves the bytes on the machine, with a 200 to say so.
 templ MediaUploadCard(d MediaData) {
 	<div id="media-form" class="mb-8 max-w-3xl">
-		<form
-			hx-post="/admin/media"
-			hx-encoding="multipart/form-data"
-			hx-target="#media-form"
-			hx-swap="outerHTML"
-			novalidate
-			hx-disable="this"
-			class="card space-y-4"
-			data-testid="media-upload-form"
-		>
+		@ui.Form(ui.FormOpts{
+			Enctype: "multipart/form-data",
+			Target:  "#media-form", Swap: "outerHTML",
+			Attrs: ui.Attrs{
+				Class: "card space-y-4", TestID: "media-upload-form",
+				HX: ui.HX{Post: "/admin/media", Encoding: "multipart/form-data", Disable: true},
+			},
+		}) {
 			if d.Err != "" {
 				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "media-error"}}) {
 					{ d.Err }
@@ -722,6 +730,6 @@ templ MediaUploadCard(d MediaData) {
 				})
 				@ui.Spinner(ui.SpinnerOpts{})
 			}
-		</form>
+		}
 	</div>
 }

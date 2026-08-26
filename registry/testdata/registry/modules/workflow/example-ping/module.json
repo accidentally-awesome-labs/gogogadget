@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/example-ping",
+    "kind": "workflow",
+    "name": "example-ping",
+    "revision": 1,
+    "contract": 1,
+    "title": "Example ping workflow",
+    "description": "The job-backed workflow of the example closure: a mutation route, a typed job declaration with its own attempt budget, a query fragment, a declared table, and one immutable migration. Its removal policy is retain-data, so removal deletes every authored file and keeps the migration ledger.",
+    "requires": [
+      "page/example-status",
+      "system/jobs",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "registry/modules/workflow/example-ping/example_ping_events.sql",
+        "target": "internal/db/queries/example_ping_events.sql",
+        "class": "query",
+        "sha256": "8a24ecb3d2ea733ac3ec47da73f3f47542ac0366e235c40bb9d76dd7dc6cba74",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "registry/modules/workflow/example-ping/example_ping.go",
+        "target": "internal/jobs/example_ping.go",
+        "class": "go",
+        "sha256": "59a573cbba4e718d16d113459e61a7317fca560dba3e3f4177887ecb5447172b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "registry/modules/workflow/example-ping/workflow_example_ping.go",
+        "target": "internal/web/workflow_example_ping.go",
+        "class": "go",
+        "sha256": "d8c53592dec3f19e83243ae45d7d0c723c585d883deb4040f603de777e4ac103",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "data": [
+        "example_ping_events"
+      ],
+      "jobs": [
+        "example.ping"
+      ],
+      "queries": [
+        "CountExamplePingEvents",
+        "InsertExamplePingEvent"
+      ],
+      "routes": [
+        "example-ping.create"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "example-ping.create",
+          "method": "POST",
+          "pattern": "/example-status/ping",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExamplePing"
+        }
+      ],
+      "jobs": [
+        {
+          "kind": "example.ping",
+          "package": "internal/jobs",
+          "handler": "defineExamplePing",
+          "schedulable": true,
+          "max_attempts": 3
+        }
+      ],
+      "queries": [
+        {
+          "name": "CountExamplePingEvents",
+          "table": "example_ping_events"
+        },
+        {
+          "name": "InsertExamplePingEvent",
+          "table": "example_ping_events"
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "example_ping_events",
+        "kind": "immutable",
+        "source": "registry/modules/workflow/example-ping/example_ping_events.migration.sql",
+        "sha256": "375000000b508ae895a80ef24c57e4c2e7d9855601d5c0d6c1ae2770f9d4ae15"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [
+      {
+        "table": "example_ping_events",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain",
+        "persisted_jobs": [
+          "example.ping"
+        ]
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
+}

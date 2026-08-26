@@ -35,7 +35,7 @@
         "source": "internal/web/templates/admin_announcements.templ",
         "target": "internal/web/templates/admin_announcements.templ",
         "class": "templ",
-        "sha256": "170c067edf4b7e3549a42c58fd9cfd9dba0c3f4ab5748cc35c9523de23755cb1",
+        "sha256": "544b7a36b17637dfcc53fe6a4ba543d73a3b93969d9dd08baae71d2fdd823cbb",
         "rewrite_module": true,
         "contract": false
       }

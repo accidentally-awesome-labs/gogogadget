@@ -37,7 +37,7 @@
         "source": "internal/web/templates/admin.templ",
         "target": "internal/web/templates/admin.templ",
         "class": "templ",
-        "sha256": "f1cd7b017eeb8723094062a56cd7e8ad76922765d55d593eccfb10a906262307",
+        "sha256": "25c28b6b80b0e3dbe138967ae246a55ac4431bb6d85d64c7c32e4330c1cedcc7",
         "rewrite_module": true,
         "contract": false
       }

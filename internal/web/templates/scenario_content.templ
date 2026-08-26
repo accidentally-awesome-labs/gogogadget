@@ -41,13 +41,19 @@ templ ScenarioContent(gc GalleryContext) {
 	// the picker's file input reaches this one through HTML's form attribute
 	// instead. Uploading a file and saving a draft are two different requests
 	// and each needs its own destination.
-	<form
-		id="content-media-upload"
-		action={ templ.SafeURL(contentAction()) }
-		method="post"
-		enctype="multipart/form-data"
-		hidden
-	></form>
+	//
+	// It renders no controls of its own - the picker owns those - so it is
+	// display:none rather than laid out. The id is what the picker's
+	// form= attribute names: renaming it breaks upload with no error anywhere.
+	// Enctype is mandatory, not decorative: a file input in a form sending the
+	// default encoding submits the filename as text and the bytes never leave
+	// the machine, and the request still succeeds.
+	@ui.Form(ui.FormOpts{
+		Method:  "post",
+		Action:  contentAction(),
+		Enctype: "multipart/form-data",
+		Attrs:   ui.Attrs{ID: "content-media-upload", Class: "hidden"},
+	})
 	@ui.Form(ui.FormOpts{Method: "post", Action: contentAction(), Attrs: ui.Attrs{TestID: "content-editor-form"}}) {
 		@ui.PanelGroup(ui.PanelGroupOpts{
 			ID:          "content-editor-panels",

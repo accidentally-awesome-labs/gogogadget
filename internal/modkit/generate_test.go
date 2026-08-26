@@ -706,6 +706,72 @@ func TestRoutesRegistryRejectsContentPathCollidingWithRoute(t *testing.T) {
 	}
 }
 
+// The smoke surface is generated so that adding a route changes what the smoke
+// run visits. A hand-kept list of paths is the drift this closes: it keeps
+// passing while covering less than it claims. Only a route a client can request
+// by a fixed URL with no session qualifies — an instance id and a runtime
+// predicate are not registry data.
+func TestSmokeCasesCoverRequestablePublicGetRoutes(t *testing.T) {
+	lock, graph := routeFixture(t,
+		RouteContribution{
+			ID: "sample.show", Method: "GET", Pattern: "/sample", Scope: RoutePublic,
+			Package: "internal/web", Handler: "handleSample",
+		},
+		RouteContribution{
+			ID: "sample.home", Method: "GET", Pattern: "/{$}", Scope: RoutePublic,
+			Package: "internal/web", Handler: "handleSampleHome",
+		},
+		RouteContribution{
+			ID: "sample.detail", Method: "GET", Pattern: "/sample/{slug}", Scope: RoutePublic,
+			Package: "internal/web", Handler: "handleSampleDetail",
+		},
+		RouteContribution{
+			ID: "sample.create", Method: "POST", Pattern: "/sample", Scope: RoutePublic,
+			Package: "internal/web", Handler: "handleSampleCreate",
+		},
+		RouteContribution{
+			ID: "sample.app", Method: "GET", Pattern: "/app/sample", Scope: RouteApp,
+			Package: "internal/web", Handler: "handleSampleApp",
+		},
+		RouteContribution{
+			ID: "sample.dev", Method: "GET", Pattern: "/dev/sample", Scope: RoutePublic,
+			Package: "internal/web", Handler: "handleSampleDev", Enabled: "devBypassEnabled",
+		},
+	)
+
+	files, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("GenerateAll: %v", err)
+	}
+	var content string
+	for _, file := range files {
+		if file.Path == "scripts/smoke_cases_registry_gen.txt" {
+			content = file.Content
+		}
+	}
+	if content == "" {
+		t.Fatal("smoke case list was not emitted")
+	}
+
+	cases := make([]string, 0, 2)
+	for _, line := range strings.Split(strings.TrimSpace(content), "\n") {
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+		cases = append(cases, line)
+	}
+	// Sorted by path, and "/{$}" is the root page rather than a parameter.
+	want := []string{"sample.home /", "sample.show /sample"}
+	if len(cases) != len(want) {
+		t.Fatalf("smoke cases = %q, want %q", cases, want)
+	}
+	for i := range want {
+		if cases[i] != want[i] {
+			t.Fatalf("smoke cases = %q, want %q", cases, want)
+		}
+	}
+}
+
 // The dispatch table is generated from job declarations so an uninstalled
 // module's kind is simply absent, which is what turns a stale queued row into an
 // immediate dead-letter instead of a retried handler that cannot exist.

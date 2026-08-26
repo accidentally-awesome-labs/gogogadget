@@ -28,7 +28,7 @@
         "source": "internal/web/dev_routes_test.go",
         "target": "internal/web/dev_routes_test.go",
         "class": "test",
-        "sha256": "11932da61aa4d26b758eb8174c46e4a208d4e7707d3409a6fcfad5690a1566a3",
+        "sha256": "74f4a92489bc55d94a938acd05312740a30a514788f00761c9436807574f56af",
         "rewrite_module": true,
         "contract": false
       },
@@ -52,7 +52,7 @@
         "source": "internal/web/page_dev_fragments.go",
         "target": "internal/web/page_dev_fragments.go",
         "class": "go",
-        "sha256": "3bc73a4da0ea4a2c4eaef3d1e7a8c68b7bddeb1eee82afb26504c64d57b39dba",
+        "sha256": "785542230e11bdacccf8b3c275111c0c58550bc2932d1a1f2b0f7f843d751044",
         "rewrite_module": true,
         "contract": false
       },
@@ -140,7 +140,7 @@
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "177b6e45f920c302e4c989b310ec5fe3fd08e40e2983e3b127923c33e507c285",
+        "sha256": "6f8e0c54efd2d92240c9a633a5807ff2e4a0fd42b4913b9727fe31493a0a89f8",
         "rewrite_module": true,
         "contract": false
       },
@@ -165,6 +165,14 @@
         "target": "internal/web/templates/gallery_family.templ",
         "class": "templ",
         "sha256": "77774198ba92ccced50def0ce7eb0b31c3dec925001abe11de26836d5c821d89",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_fixtures.go",
+        "target": "internal/web/templates/gallery_fixtures.go",
+        "class": "go",
+        "sha256": "e6f71d86fd48b396ad8bf3cb7b4c456c189e6dba0ed0255e739e131022f7d67c",
         "rewrite_module": true,
         "contract": false
       },
@@ -196,7 +204,7 @@
         "source": "internal/web/templates/scenario_analytics.templ",
         "target": "internal/web/templates/scenario_analytics.templ",
         "class": "templ",
-        "sha256": "8c694ed11531d14705681b94bc1ac133cf312ce127c7762adb3a452199fdc868",
+        "sha256": "3903a0cf3ba229cc8f011b943361545ef6aa7d4a6a075ff9f0624e2e447a94b3",
         "rewrite_module": true,
         "contract": false
       },
@@ -220,7 +228,7 @@
         "source": "internal/web/templates/scenario_content.templ",
         "target": "internal/web/templates/scenario_content.templ",
         "class": "templ",
-        "sha256": "d844a0c07495784cb039bf77d7e00f11e4d098021e875d620a1df4e2cfb132c9",
+        "sha256": "8ec8864c844b5075305ece0fb5bac66c88a2b62fcdff3b8536e838425d7a79d4",
         "rewrite_module": true,
         "contract": false
       },

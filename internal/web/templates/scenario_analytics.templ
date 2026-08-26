@@ -34,7 +34,10 @@ templ analyticsRangeFilter(gc GalleryContext) {
 	@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "analytics-filter"}}) {
 		// A real GET form. Submitting produces a URL a reader can share, which
 		// is the whole reason a report filter is a form and not client state.
-		<form method="get" action="/dev/scenarios/analytics" class="flex flex-wrap items-end gap-4">
+		@ui.Form(ui.FormOpts{
+			Method: "get", Action: "/dev/scenarios/analytics",
+			Attrs: ui.Attrs{Class: "flex flex-wrap items-end gap-4"},
+		}) {
 			// The state travels with the range, so applying a window does not
 			// silently drop the reader back onto the default surface.
 			<input type="hidden" name="state" value={ gc.State }/>
@@ -56,7 +59,7 @@ templ analyticsRangeFilter(gc GalleryContext) {
 				Action: ui.ActionPrimary,
 				Size:   ui.SizeSM,
 			})
-		</form>
+		}
 		@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
 			{ "The fixture covers 2 February to 15 March 2026 and does not move. Applying a window re-renders the same figures, which is what keeps this page usable as a visual baseline." }
 		}

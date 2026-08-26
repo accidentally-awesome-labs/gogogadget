@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/example-token",
+    "kind": "element",
+    "name": "example-token",
+    "revision": 1,
+    "contract": 1,
+    "title": "Example tone token",
+    "description": "The leaf element of the example closure: a closed tone enum, its normalizer, the class each tone contributes, and the CSS fragment that defines those classes. Imports nothing at all, which is the layering rule a leaf element exists to demonstrate.",
+    "requires": [],
+    "files": [
+      {
+        "source": "registry/modules/element/example-token/example_token.css",
+        "target": "internal/web/styles/example_token.css",
+        "class": "style",
+        "sha256": "7316a73eb2a6d7b707582071dff46f93f0347b5d49167dddaeb164854e8418b0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "registry/modules/element/example-token/example_token.go",
+        "target": "internal/web/templates/ui/example_token.go",
+        "class": "go",
+        "sha256": "408bbeabf79aa0c5ce83e233b8871411becb2197035a8b9fae24ac65562ec757",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/element/example-token/example_token_test.go",
+        "target": "internal/web/templates/ui/example_token_test.go",
+        "class": "test",
+        "sha256": "e0537ba8e7548314bbba458b7b13361b87092e239080235f453632a66167042a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

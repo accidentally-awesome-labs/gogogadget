@@ -116,7 +116,13 @@ func announcementKindLabel(ctx context.Context, kind string) string {
 templ AnnouncementForm(d AnnouncementsData) {
 	<div class="card mb-8 max-w-xl">
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.announcements.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
-		<form hx-post="/admin/announcements" hx-target="#announcement-form-wrap" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="announcement-create-form" class="space-y-4">
+		@ui.Form(ui.FormOpts{
+			Target: "#announcement-form-wrap", Swap: "outerHTML",
+			Attrs: ui.Attrs{
+				Class: "space-y-4", TestID: "announcement-create-form",
+				HX: ui.HX{Post: "/admin/announcements", Disable: true},
+			},
+		}) {
 			if d.Invalid {
 				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
 					{ i18n.T(ctx, "admin.announcements.invalid") }
@@ -142,6 +148,6 @@ templ AnnouncementForm(d AnnouncementsData) {
 				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "admin.announcements.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
 				@ui.Spinner(ui.SpinnerOpts{})
 			}
-		</form>
+		}
 	</div>
 }

@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -391,4 +392,84 @@ func TestActingMenuItemIsAButtonNotAnEmptyLink(t *testing.T) {
 	assert.Contains(t, html, `href="/projects/1"`, "a navigating item stays a link")
 	assert.Contains(t, html, `<button type="button"`, "an acting item must be a button")
 	assert.Contains(t, html, `hx-delete="/projects/1"`)
+}
+
+// A form whose submission the CSRF check applies to must carry the token, and
+// the only way a component can know is to render CSRFField. Production templates
+// are covered by the design-system guard, but ui/ is where forms are legitimately
+// built, so nothing watched these three renderers - and two of them shipped the
+// exact defect that guard exists to prevent: Composer submitted as a GET to the
+// current URL because its verb lived in an htmx attribute, and Questionnaire
+// declared method="post" with no field, so a plain submit answered 403.
+//
+// Scanning source rather than rendering is deliberate: a rendered form only
+// carries the token when a token is in the context, so a rendering test would
+// pass on an empty context for the wrong reason.
+func TestEveryUnsafeFormInThePackageRendersTheToken(t *testing.T) {
+	entries, err := filepath.Glob("*.templ")
+	if err != nil {
+		t.Fatalf("glob: %v", err)
+	}
+	if len(entries) == 0 {
+		t.Fatal("no templ sources found, so this test proves nothing")
+	}
+
+	// form.templ renders the field through formCarriesCSRF, and alert-dialog's
+	// form is method="dialog" - a platform close, never a request. Both are
+	// stated rather than pattern-matched, because each is a real decision.
+	exempt := map[string]string{
+		"form.templ":         "renders CSRFField itself, gated on the derived method",
+		"alert-dialog.templ": `method="dialog" closes the dialog and issues no request`,
+	}
+
+	for _, path := range entries {
+		body, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read %s: %v", path, err)
+		}
+		// Comment lines are stripped first. markdown-editor.templ documents the
+		// caller's obligation by showing the <form id=... action=...> the page
+		// must render, and a scan that counted prose would have reported a
+		// component with no form element at all as missing its token.
+		source := withoutCommentLines(string(body))
+		if !strings.Contains(source, "<form") {
+			continue
+		}
+		if reason, ok := exempt[filepath.Base(path)]; ok {
+			assert.NotEmpty(t, reason)
+			continue
+		}
+
+		// A form is unsafe if it declares a mutating method or carries a
+		// mutating htmx verb. Either one means a browser submit gets checked.
+		unsafe := strings.Contains(source, `method="post"`) ||
+			strings.Contains(source, "composerHX") ||
+			strings.Contains(source, "hx-post") ||
+			strings.Contains(source, "hx-put") ||
+			strings.Contains(source, "hx-patch") ||
+			strings.Contains(source, "hx-delete") ||
+			strings.Contains(source, "HX.Post") ||
+			strings.Contains(source, "hxMutatingURL")
+		if !unsafe {
+			continue
+		}
+
+		assert.Containsf(t, source, "CSRFField",
+			"%s renders a form whose submission is checked but never renders CSRFField, so its no-script path answers 403", path)
+	}
+}
+
+// withoutCommentLines drops whole-line comments so a scan reads markup rather
+// than prose. Anything a comment says about a form is documentation, not an
+// element the browser will ever submit.
+func withoutCommentLines(source string) string {
+	lines := strings.Split(source, "\n")
+	kept := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "//") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	return strings.Join(kept, "\n")
 }

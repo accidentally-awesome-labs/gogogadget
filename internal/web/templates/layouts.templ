@@ -187,9 +187,9 @@ templ AppLayout(page Page, content templ.Component) {
 				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "impersonation-banner"}}) {
 					<div class="flex items-center justify-center gap-3">
 						<span>{ i18n.T(ctx, "impersonation.banner") } <strong>{ page.User.Name }</strong></span>
-						<form hx-post="/app/impersonation/exit" hx-disable="this">
+						@ui.Form(ui.FormOpts{Attrs: ui.Attrs{HX: ui.HX{Post: "/app/impersonation/exit", Disable: true}}}) {
 							<button type="submit" class="font-semibold underline cursor-pointer" data-testid="impersonation-exit">{ i18n.T(ctx, "impersonation.exit") }</button>
-						</form>
+						}
 					</div>
 				}
 			}
@@ -283,14 +283,17 @@ templ docsBody(page Page, content templ.Component) {
 		<aside class="hidden md:block w-docnav shrink-0">
 			<nav class="sticky top-navbar pt-8 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
 				if page.Docs != nil {
-					<form action="/docs/search" method="get" class="mb-6" data-testid="docs-search-form">
+					@ui.Form(ui.FormOpts{
+						Method: "get", Action: "/docs/search",
+						Attrs: ui.Attrs{Class: "mb-6", TestID: "docs-search-form"},
+					}) {
 						<input
 							type="search" name="q"
 							placeholder={ i18n.T(ctx, "docs.search_placeholder") }
 							aria-label={ i18n.T(ctx, "docs.search_aria") }
 							class="input input-sm"
 						/>
-					</form>
+					}
 				}
 				if page.Docs != nil {
 					for _, section := range page.Docs.Sections {
