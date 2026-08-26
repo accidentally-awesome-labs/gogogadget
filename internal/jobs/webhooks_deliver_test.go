@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/netip"
 	"strconv"
 	"strings"
 	"testing"
@@ -66,6 +67,107 @@ func TestWebhookSSRFGuard(t *testing.T) {
 			assert.NoError(t, err, c.rawURL)
 		}
 	}
+}
+
+// isPublicIP is the whole SSRF boundary, and it is consulted twice: once in the
+// URL guard and again at dial time against a possible rebind. It is framed as an
+// allow-list — global unicast, then an explicit block list — so a range nobody
+// enumerated fails closed rather than open.
+func TestIsPublicIPClassification(t *testing.T) {
+	cases := []struct {
+		addr   string
+		public bool
+		why    string
+	}{
+		// RFC 6598 shared address space. Global-unicast and not IsPrivate, so the
+		// old deny-list let it through — and it is exactly what an EKS/GKE pod
+		// network and a Tailscale host answer on.
+		{"100.64.0.1", false, "RFC 6598 shared address space"},
+		{"100.100.100.100", false, "RFC 6598 shared address space"},
+		{"100.127.255.254", false, "RFC 6598 upper bound"},
+		// Just outside the /10 in both directions: these are ordinary public space.
+		{"100.63.255.255", true, "below RFC 6598"},
+		{"100.128.0.0", true, "above RFC 6598"},
+		// Already covered, and must stay covered.
+		{"127.0.0.1", false, "loopback"},
+		{"10.0.0.8", false, "RFC 1918"},
+		{"172.16.0.1", false, "RFC 1918"},
+		{"192.168.1.1", false, "RFC 1918"},
+		{"169.254.169.254", false, "link-local cloud metadata"},
+		{"0.0.0.0", false, "unspecified"},
+		{"224.0.0.1", false, "multicast"},
+		{"::1", false, "IPv6 loopback"},
+		{"fc00::1", false, "IPv6 unique local"},
+		{"fe80::1", false, "IPv6 link-local"},
+		{"::ffff:10.0.0.8", false, "IPv4-mapped private"},
+		{"::ffff:100.64.0.1", false, "IPv4-mapped RFC 6598"},
+		// Routable-looking IPv6 that reaches somewhere it should not.
+		{"64:ff9b::7f00:1", true, "NAT64 well-known prefix is ordinary unicast here"},
+		{"2002:0a00:0008::1", false, "6to4 embedding a private IPv4"},
+		{"2001:0:1::1", false, "Teredo"},
+		{"2001:db8::1", false, "documentation"},
+		{"100::1", false, "discard-only"},
+		{"198.18.0.1", false, "benchmarking"},
+		{"192.0.2.1", false, "documentation"},
+		{"240.0.0.1", false, "reserved"},
+		// Real public addresses must still pass, or delivery is broken outright.
+		{"93.184.216.34", true, "public IPv4"},
+		{"2606:2800:220:1:248:1893:25c8:1946", true, "public IPv6"},
+	}
+	for _, c := range cases {
+		addr, err := netip.ParseAddr(c.addr)
+		require.NoError(t, err, c.addr)
+		assert.Equal(t, c.public, isPublicIP(addr), "%s (%s)", c.addr, c.why)
+	}
+}
+
+// A delivery is a signed POST to one declared endpoint. Following a redirect
+// would hand that signed payload to a host the guard never classified, and Go's
+// default policy carries the request across schemes — so a customer endpoint
+// could 302 it to plain http://.
+func TestWebhookDeliveryRefusesRedirect(t *testing.T) {
+	var landed int
+	final := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		landed++
+		_, _ = io.ReadAll(r.Body)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer final.Close()
+
+	redirector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, final.URL+"/hook", http.StatusFound)
+	}))
+	defer redirector.Close()
+
+	w := &Worker{
+		WebhookGuard:     func(context.Context, string) error { return nil },
+		WebhookTransport: http.DefaultTransport.(*http.Transport).Clone(),
+	}
+	status, err := w.postWebhook(context.Background(), redirector.URL+"/hook", "msg_redirect",
+		[]string{"whsec_test"}, []byte(`{"type":"project.created"}`))
+	require.Error(t, err, "a redirected delivery must fail")
+	assert.Contains(t, err.Error(), "must not redirect")
+	assert.Zero(t, status, "a delivery that never reached its declared endpoint has no status")
+	assert.Zero(t, landed, "the signed payload reached the redirect target")
+}
+
+// The non-redirecting path must keep working; refusing redirects must not refuse
+// an ordinary 200.
+func TestWebhookDeliveryAcceptsDirectResponse(t *testing.T) {
+	receiver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.ReadAll(r.Body)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer receiver.Close()
+
+	w := &Worker{
+		WebhookGuard:     func(context.Context, string) error { return nil },
+		WebhookTransport: http.DefaultTransport.(*http.Transport).Clone(),
+	}
+	status, err := w.postWebhook(context.Background(), receiver.URL+"/hook", "msg_direct",
+		[]string{"whsec_test"}, []byte(`{"type":"project.created"}`))
+	require.NoError(t, err)
+	assert.Equal(t, int32(http.StatusOK), status)
 }
 
 // webhookTestSetup seeds an org+user+endpoint and returns the worker with the

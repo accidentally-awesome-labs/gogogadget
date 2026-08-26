@@ -21,12 +21,13 @@ import (
 
 // Middleware chain (outermost → innermost), assembled in Handler:
 //
-//	recover → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
+//	maxBytes → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
 //
 // The order is load-bearing. sessionLoad lands in the identity step, between
 // secureHeaders and csrf. maintenanceMode sits inside i18n.Detect (the 503
 // page needs the locale) but outside rateLimit (shed load before the limiter
-// churns).
+// churns). routeBodyLimit sits outside csrf because csrf parses the form, which
+// reads the body — a cap applied after that has already been bypassed.
 //
 // maintenanceMode returns 503 for everything when MAINTENANCE_MODE is on,
 // except /healthz, /readyz, /static/, and /favicon.ico (probes + CSS must

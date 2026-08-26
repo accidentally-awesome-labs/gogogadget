@@ -161,7 +161,7 @@ func reconcilePlannedState(
 	// any lock-state branching so fresh installs and reconciled updates fail
 	// the same way.
 	for _, payload := range payloads {
-		if isGeneratedOutput(payload.file.Target) {
+		if IsGeneratedOutputPath(payload.file.Target) {
 			return Lock{}, nil, nil, nil, nil, fmt.Errorf(
 				"module %s targets generated output %s; generated outputs are tool-owned and cannot be authored",
 				payload.module, payload.file.Target,

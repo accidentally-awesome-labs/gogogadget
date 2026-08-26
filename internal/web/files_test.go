@@ -179,7 +179,9 @@ func TestFileDeleteIsGatedByAnInPageDialog(t *testing.T) {
 	id := strconv.FormatInt(f.ID, 10)
 	code, _, body := serve(t, s, "GET", "/app/files", nil, nil, sessionCookie("user_fcfm", "org_fcfm", "org:admin"))
 	require.Equal(t, http.StatusOK, code)
-	assert.NotContains(t, body, "hx-confirm", "no page may fall back to window.confirm")
+	assert.NotContains(t, body, "hx-confirm",
+		"this page must not fall back to window.confirm; the repo-wide ban is "+
+			"TestNoProductionTemplateFallsBackToWindowConfirm in internal/web/templates")
 	assert.Contains(t, body, `data-ui="confirm-action"`)
 	assert.Contains(t, body, `id="file-delete-`+id+`"`, "one dialog per row, addressable by id")
 	// Unchanged delete contract: the request only moved onto the confirm button.

@@ -238,3 +238,58 @@ func TestImpersonationStopAuditCarriesReason(t *testing.T) {
 	assert.Contains(t, string(rows[0].Metadata), "Ticket #99", "stop entry reads standalone: it repeats the reason")
 	assert.Contains(t, string(rows[0].Metadata), "user_stp_target")
 }
+
+// The impersonation cookie must not be a bearer token. Every other check in
+// applyImpersonation validates a property of the session ROW, so without a
+// subject binding, possession of the id IS the authorization - and the id is not
+// secret enough for that. It is an opaque database id that lives for two hours
+// in a cookie any user can set in their own browser.
+//
+// The escalation this closes: the id used to be written into the org-scoped
+// impersonation.start audit entry, and /app/activity renders full audit metadata
+// to every member of that organization. So an ordinary member could read it and
+// assume the identity of whoever support was helping - typically the org owner.
+func TestImpersonationCookieIsRefusedForAnyoneButItsAdmin(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_bind_admin", "org_bind_admin")
+	seedMembership(t, s, "user_bind_target", "org_bind", "org:admin")
+	seedMembership(t, s, "user_bind_member", "org_bind", "org:member")
+
+	adminCookie := sessionCookie("user_bind_admin", "org_bind_admin", "org:admin")
+	imp := startImpersonation(t, s, adminCookie, "user_bind_target")
+
+	// The attacker is an ordinary member of the target organization presenting a
+	// stolen id alongside their OWN verified session.
+	code, _, body := serve(t, s, "GET", "/app", nil, nil,
+		sessionCookie("user_bind_member", "org_bind", "org:member"), imp)
+	require.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, "impersonation-banner",
+		"an unrelated member presenting the id must stay themselves; a switched identity means the cookie is a bearer token")
+
+	// The admin who started it still works, so the binding is a check, not a ban.
+	code, _, adminBody := serve(t, s, "GET", "/app", nil, nil, adminCookie, imp)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, adminBody, "impersonation-banner",
+		"the admin who started the session must still be able to use it")
+}
+
+// The credential must not be published to the people it can be used against:
+// the start entry is org-scoped and /app/activity renders its whole metadata
+// blob to every member of that organization.
+func TestImpersonationAuditDoesNotPublishTheSessionID(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_audit_admin", "org_audit_admin")
+	seedMembership(t, s, "user_audit_target", "org_audit", "org:admin")
+
+	adminCookie := sessionCookie("user_audit_admin", "org_audit_admin", "org:admin")
+	imp := startImpersonation(t, s, adminCookie, "user_audit_target")
+	require.NotEmpty(t, imp.Value)
+
+	rows, err := s.q.ListAuditAll(t.Context(), sqlc.ListAuditAllParams{Filter: "impersonation.start", Off: 0, Lim: 10})
+	require.NoError(t, err)
+	require.Len(t, rows, 1)
+	assert.NotContains(t, string(rows[0].Metadata), imp.Value,
+		"the entry is org-scoped and its metadata is rendered to every member, so it must not carry a live credential")
+	assert.Equal(t, "org_audit", rows[0].ClerkOrgID.String,
+		"the entry must be findable in the target org's own feed")
+}

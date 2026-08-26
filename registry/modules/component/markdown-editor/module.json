@@ -19,7 +19,7 @@
         "source": "internal/web/templates/ui/markdown-editor.templ",
         "target": "internal/web/templates/ui/markdown-editor.templ",
         "class": "templ",
-        "sha256": "4a7c48b60cc5a971eb4d7f501646fcb090e9dd866540e505448e5ade1312f44f",
+        "sha256": "3aade5e33782bbf31ddf0faf6d3095a70f5993e1267a634f0c4f0f8ff839438a",
         "rewrite_module": true,
         "contract": true
       },
@@ -27,7 +27,7 @@
         "source": "internal/web/templates/ui/markdown-editor_test.go",
         "target": "internal/web/templates/ui/markdown-editor_test.go",
         "class": "test",
-        "sha256": "ea4f24d2767535b9350fc2029cb3800a64131a3f26ba72655af1a1c0f7dd7a21",
+        "sha256": "70d12a30efb967747479a28b152b7d1a58ad8b5af069cc74310940a0ef857f61",
         "rewrite_module": true,
         "contract": false
       },

@@ -62,10 +62,14 @@ templ SearchInput(o SearchInputOpts) {
 		// hx-target="" fires on every keystroke into an empty selector, so it
 		// looks live and filters nothing - worse than the plain field the form
 		// around it already makes submittable.
+		//
+		// One class attribute, merged: the spread map already carries
+		// Attrs.Class, so a second class= beside it was invalid HTML - and the
+		// browser keeps the FIRST, which meant any caller who set Attrs.Class
+		// silently lost the field's own `input max-w-sm`.
 		<input
-			{ attributes(o.Attrs)... }
+			{ attributes(withClass(o.Attrs, "input max-w-sm"))... }
 			type="search" name={ o.Name } value={ o.Value } placeholder={ o.Placeholder }
-			class={ mergeClasses("input max-w-sm", o.Attrs.Class) }
 			if o.Target != "" {
 				hx-get={ o.GetURL }
 				hx-trigger="input changed delay:300ms, search"

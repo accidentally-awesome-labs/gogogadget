@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
@@ -823,4 +824,60 @@ func TestNoTemplateHandRollsAForm(t *testing.T) {
 			}
 		}
 	}
+}
+
+// No production surface may fall back to window.confirm.
+//
+// hx-confirm calls window.confirm: copy that cannot be translated, cannot be
+// styled, cannot be asserted on, and which on some platforms offers a "prevent
+// further dialogs" checkbox that silently disables every later confirmation.
+// ConfirmAction is the product pattern, and the docs state the ban repo-wide.
+//
+// That claim was defended by two integration tests that each rendered ONE page
+// and asserted the absence in that page's body - so the promise covered
+// /app/projects, /app/files, and nothing else. A source scan is what actually
+// covers the surface the sentence describes.
+//
+// Two spellings reach the attribute, and both are checked: a literal hx-confirm
+// in markup, and a Confirm field on a ui.MenuItem or ui.HX literal. The dev
+// gallery, its fragments and the scenario pages are excluded by design - their
+// prompts are demonstrations rather than product copy, and frontend.md says so.
+func TestNoProductionTemplateFallsBackToWindowConfirm(t *testing.T) {
+	files, err := filepath.Glob("*.templ")
+	require.NoError(t, err)
+	require.NotEmpty(t, files)
+
+	// A dev-only surface names itself. A new one that forgets the prefix is
+	// scanned as production and fails here, which is the safe direction to be
+	// wrong in.
+	devPrefixes := []string{"dev_", "gallery", "scenario_"}
+	confirms := regexp.MustCompile(`hx-confirm|\bConfirm:`)
+
+	scanned := 0
+	for _, file := range files {
+		if slices.ContainsFunc(devPrefixes, func(p string) bool { return strings.HasPrefix(file, p) }) {
+			continue
+		}
+		body, err := os.ReadFile(file)
+		require.NoError(t, err)
+		scanned++
+		// Line-by-line, skipping comments: several production templates explain
+		// in prose why hx-confirm is gone, and a rule that cannot tell markup
+		// from a comment is a rule the first person to hit it deletes.
+		for i, line := range strings.Split(string(body), "\n") {
+			if strings.HasPrefix(strings.TrimSpace(line), "//") {
+				continue
+			}
+			if confirms.MatchString(line) {
+				assert.Fail(t,
+					"window.confirm fallback",
+					"%s:%d — a production surface must not gate an action with hx-confirm\n"+
+						"fix: @ui.ConfirmAction(ui.ConfirmActionOpts{...}) — the same HX rides the "+
+						"dialog's confirm control, and the copy becomes translatable and assertable",
+					file, i+1)
+			}
+		}
+	}
+	require.Greater(t, scanned, 20,
+		"the scan found suspiciously few production templates, so it is looking in the wrong place")
 }

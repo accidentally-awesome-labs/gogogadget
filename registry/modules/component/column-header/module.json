@@ -17,7 +17,7 @@
         "source": "internal/web/templates/ui/column-header.templ",
         "target": "internal/web/templates/ui/column-header.templ",
         "class": "templ",
-        "sha256": "f5be2f5e4cf312a3bc5b4e169f0358b2bf29a83267000bf971de327727fbd7ae",
+        "sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
         "rewrite_module": true,
         "contract": true
       },

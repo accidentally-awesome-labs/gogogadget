@@ -154,7 +154,15 @@ templ TreeGrid(o TreeGridOpts) {
 			<thead>
 				<tr>
 					for _, column := range o.Columns {
-						<th scope="col" class="px-3 py-2 text-left font-medium">{ column.Label }</th>
+						// The declared width is honoured here too, through the
+						// one helper: a Column that sizes itself in DataTable
+						// and sizes itself nowhere else is a contract that
+						// depends on which renderer the caller reached for.
+						if style := columnWidthStyle(column); style != "" {
+							<th scope="col" class="px-3 py-2 text-left font-medium" style={ style }>{ column.Label }</th>
+						} else {
+							<th scope="col" class="px-3 py-2 text-left font-medium">{ column.Label }</th>
+						}
 					}
 				</tr>
 			</thead>

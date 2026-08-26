@@ -277,8 +277,13 @@ The rest of the file closes gaps that were all real at some point:
   component computes.
 - **`TestIconRegistryIsComplete`** — an icon const with no switch arm renders
   nothing, which is a silently missing icon.
+- **`TestNoProductionTemplateFallsBackToWindowConfirm`** — no production surface
+  may gate an action with `hx-confirm`, in markup or through a `Confirm:` field.
+  The ban was documented repo-wide and defended by two integration tests that
+  each rendered one page, so it held for `/app/projects`, `/app/files`, and
+  nowhere else.
 
-### Two things this page does not claim
+### One thing this page does not claim
 
 The normalization contract is "unknown value renders the neutral or default
 variant". Components do **not** currently emit a `data-ui-invalid` marker
@@ -286,15 +291,20 @@ alongside it; there is a source comment in the dev fragment handlers that
 describes one, but no renderer produces it. Read `Value()` and `Valid()` as the
 contract.
 
-And the seven pattern rules are scoped to `internal/web/templates/*.templ`:
-`templFiles` reads that one directory rather than walking into it, so the
-renderers under `internal/web/templates/ui` are **not** covered by the raw-hex,
-`dark:`, palette-ramp, `!`-override, or arbitrary-length checks. They are
-covered by the rest of the file — the Alpine registration scan globs
-`ui/*.templ` explicitly, and the kind/size matrices, gallery coverage, and
-hand-rolled-root tests all reach them. Treat the seven rules as binding
-convention everywhere and enforced automatically in one place, not as a
-guarantee about `ui/`.
+The seven pattern rules do reach `internal/web/templates/ui`: `templFiles` walks
+the tree rather than reading one directory. It read only `.` for a long time,
+which meant the raw-hex, `dark:`, palette-ramp, `!`-override and
+arbitrary-length checks were enforced on the page templates and on none of the
+172 renderers where the design system actually lives — the tests passed because
+they were looking at the wrong files.
+
+Two rules are scoped to the top-level directory on purpose, because that is
+where they mean something: **`TestNoTemplateHandRollsAForm`** (forms are
+legitimately built inside `ui/`, which is where `ui.Form` and the
+`method="dialog"` close forms live) and
+**`TestNoProductionTemplateFallsBackToWindowConfirm`**, which additionally skips
+the `dev_`, `gallery` and `scenario_` surfaces — their prompts are
+demonstrations, not product copy.
 
 ## Where to go next
 

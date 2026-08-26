@@ -99,15 +99,31 @@ func (t scopeTargets) target(scope Scope) (*http.ServeMux, func(http.Handler) ht
 	return nil, nil, false
 }
 
-// registerRoutes installs every route whose Enabled predicate passes onto the
-// mux its scope selects. ServeMux panics on a duplicate pattern, which is the
-// property that makes migrating routes out of the hand-written table safe: a
-// pattern registered in both places fails loudly instead of shadowing.
-func registerRoutes(s *Server, registry []Route, targets scopeTargets) error {
+// enabledRoutes returns the routes whose Enabled gate passes. It exists so the
+// policy matcher and the mux are fed the same slice: indexing a route that was
+// never registered makes its declared exemptions resolve for a path that answers
+// 404, which in production left /metrics and the five /debug/pprof/* patterns
+// rate-exempt and maintenance-exempt while being unreachable.
+func enabledRoutes(s *Server, registry []Route) []Route {
+	enabled := make([]Route, 0, len(registry))
 	for _, route := range registry {
 		if route.Enabled != nil && !route.Enabled(s) {
 			continue
 		}
+		enabled = append(enabled, route)
+	}
+	return enabled
+}
+
+// registerRoutes installs every supplied route onto the mux its scope selects.
+// ServeMux panics on a duplicate pattern, which is the property that makes
+// migrating routes out of the hand-written table safe: a pattern registered in
+// both places fails loudly instead of shadowing.
+//
+// It filters on Enabled itself as well, so a caller that skips enabledRoutes
+// cannot install a gated route by accident.
+func registerRoutes(s *Server, registry []Route, targets scopeTargets) error {
+	for _, route := range enabledRoutes(s, registry) {
 		mux, wrap, ok := targets.target(route.Scope)
 		if !ok {
 			return fmt.Errorf("route %s: scope %q has no registration target", route.ID, route.Scope)

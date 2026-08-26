@@ -25,7 +25,7 @@
         "source": "internal/web/impersonation_test.go",
         "target": "internal/web/impersonation_test.go",
         "class": "test",
-        "sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+        "sha256": "517b1ed90bb131d9df76a601a5ac73663912be28c7166edfffdb089647e61f2c",
         "rewrite_module": true,
         "contract": false
       }
@@ -70,18 +70,6 @@
       }
     ],
     "environment": [],
-    "docs": [],
-    "tests": {},
-    "data": [
-      {
-        "table": "impersonation_sessions",
-        "scope": "user",
-        "export": false,
-        "account_delete": "manual",
-        "organization_delete": "retain"
-      }
-    ],
-    "removal_policy": "retain-data",
     "locales": {
       "en": {
         "impersonation.banner": "Viewing as",
@@ -111,6 +99,18 @@
         "impersonation.start_intro": "Vas a ver la app como %s. La sesión dura 2 horas, te aparecerá un aviso y queda registrada.",
         "impersonation.start_title": "Ver como usuario"
       }
-    }
+    },
+    "docs": [],
+    "tests": {},
+    "data": [
+      {
+        "table": "impersonation_sessions",
+        "scope": "user",
+        "export": false,
+        "account_delete": "manual",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data"
   }
 }

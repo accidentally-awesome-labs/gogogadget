@@ -46,7 +46,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "73294303c6cc6b23f366e635bea00acad6a35e9fe359d3a042c2fc9fc03cdc44",
+        "sha256": "ba40eb319904060db51e6bc9cc2d839eabd4a70ca3d61a19587e576dd7e7f33f",
         "rewrite_module": true,
         "contract": false
       },
@@ -134,7 +134,7 @@
         "source": "internal/web/templates/ui/shared.go",
         "target": "internal/web/templates/ui/shared.go",
         "class": "go",
-        "sha256": "c0e619ea26ef911a902c506eedbdf634b605914d5dc1a3471b203607a3ee112c",
+        "sha256": "06a38321628f176326a9e79233519006785a0f230d4e413b2aebb5d769f31ddf",
         "rewrite_module": false,
         "contract": false
       },
@@ -150,7 +150,7 @@
         "source": "static/ui/engines.js",
         "target": "static/ui/engines.js",
         "class": "asset",
-        "sha256": "b4be2c5ba14e6d4a3a68351d18cb2f3bd636cb025c88f0c5c5237a3b31ca4a12",
+        "sha256": "46f5d6c40764c98cfe86ada9c92442b2b8e7e019e8e6498d00e29031c0a53950",
         "rewrite_module": false,
         "contract": false
       },
@@ -166,7 +166,7 @@
         "source": "static/ui/navigation.js",
         "target": "static/ui/navigation.js",
         "class": "asset",
-        "sha256": "8906d1d6a9c62ab3de0a2efb601300675b9b98bcb00e0f309ba44d2aa34d2a20",
+        "sha256": "67a482a0085d3028b97400394f73e7f86b6b4b610c676bbff62b9c7e3f351212",
         "rewrite_module": false,
         "contract": false
       },

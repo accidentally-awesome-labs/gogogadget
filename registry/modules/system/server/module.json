@@ -76,7 +76,7 @@
         "source": "internal/web/i18n_test.go",
         "target": "internal/web/i18n_test.go",
         "class": "test",
-        "sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+        "sha256": "7ec64107bba9af5d75ab22737d7932e89cf036c8a1aca752f8ddabe763664076",
         "rewrite_module": true,
         "contract": false
       },
@@ -116,7 +116,7 @@
         "source": "internal/web/route.go",
         "target": "internal/web/route.go",
         "class": "go",
-        "sha256": "64b2761a1c4062e6346b0a577480cc05344f93e97cfbb547233dd66466a3c1ec",
+        "sha256": "6db952423dd271e7c554214b6ae61e099d25fc60331b16872bcdb586e11ba9ee",
         "rewrite_module": true,
         "contract": true
       },
@@ -132,7 +132,7 @@
         "source": "internal/web/route_test.go",
         "target": "internal/web/route_test.go",
         "class": "test",
-        "sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+        "sha256": "6b82ab161994341151e59a9855aafe6e3d82fa31a90d90d2df4047aafff77745",
         "rewrite_module": true,
         "contract": false
       },
@@ -140,7 +140,7 @@
         "source": "internal/web/routes.go",
         "target": "internal/web/routes.go",
         "class": "go",
-        "sha256": "d324e6e3dd282286bfecb77c317e0cd982b275779981d0c4bdec930e2d54e39b",
+        "sha256": "706df7a3c142fd9aa56767d50b3dfe8f1c7fbc7d98fb7b4ba5f3774650d5f50f",
         "rewrite_module": true,
         "contract": false
       },
@@ -148,7 +148,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
+        "sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
         "rewrite_module": true,
         "contract": true
       },
@@ -180,7 +180,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "e2924135b09d4a3fa74ac8a66b7c97b7bbabae2e457d72f4c6c5e0fe1f4b5dc6",
+        "sha256": "357924cfe0b79aa4695aa2d84e13aa045b207cdccc364891c1c8b8b7f4e93487",
         "rewrite_module": true,
         "contract": false
       },

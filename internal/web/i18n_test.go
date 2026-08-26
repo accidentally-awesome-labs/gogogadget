@@ -126,6 +126,41 @@ func TestSetLocaleValidation(t *testing.T) {
 	assert.Equal(t, "/", hdr.Get("Location"))
 }
 
+// safeReturnTo used to prefix-match: `strings.HasPrefix(s, "/") &&
+// !strings.HasPrefix(s, "//")`. That accepts `/\evil.com`, which WHATWG URL
+// parsers — and therefore every browser — resolve to the authority `evil.com`,
+// because a backslash is a path separator in a special scheme. Both current
+// callers sit behind CSRF-protected POSTs, so it was latent, but the helper
+// reads as reusable and the next caller may not be.
+func TestSafeReturnToRejectsOffOrigin(t *testing.T) {
+	cases := []struct{ in, want string }{
+		// The one that got through.
+		{`/\evil.com`, "/"},
+		{`/\\evil.com`, "/"},
+		{`/\/evil.com`, "/"},
+		{`/foo\bar`, "/"},
+		// Already refused, and must stay refused.
+		{"//evil.com", "/"},
+		{"//evil.com/path", "/"},
+		{"https://evil.com", "/"},
+		{"http://evil.com", "/"},
+		{"javascript:alert(1)", "/"},
+		{"mailto:a@b.c", "/"},
+		{"evil.com", "/"},
+		{"", "/"},
+		// Genuine same-origin destinations must survive intact, or the switcher
+		// dumps every user on the home page.
+		{"/", "/"},
+		{"/pricing", "/pricing"},
+		{"/app/projects?page=2", "/app/projects?page=2"},
+		{"/docs/frontend#tokens", "/docs/frontend#tokens"},
+		{"/app/files?q=a%20b", "/app/files?q=a%20b"},
+	}
+	for _, c := range cases {
+		assert.Equal(t, c.want, safeReturnTo(c.in), "safeReturnTo(%q)", c.in)
+	}
+}
+
 func TestSetLocaleRequiresCSRF(t *testing.T) {
 	s := integrationServer(t, nil)
 	form := url.Values{"lang": {"es"}, "returnTo": {"/"}}

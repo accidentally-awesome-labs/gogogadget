@@ -195,9 +195,9 @@ func (s *Server) invalidateAnnouncementCache() {
 }
 
 // Handler applies the global middleware stack. The order is load-bearing —
-// see docs/architecture: recover → requestID → accessLog → i18n.Detect →
-// maintenanceMode → rateLimit → secureHeaders → sessionLoad (identity step) →
-// csrf → routes.
+// see docs/architecture: maxBytes → recover → routeBodyLimit → requestID →
+// accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders →
+// sessionLoad (identity step) → csrf → routes.
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
@@ -208,8 +208,31 @@ func (s *Server) Handler() http.Handler {
 	h = i18n.Detect(h)       // locale resolution: ?lang= → cookie → Accept-Language
 	h = s.accessLog(h)
 	h = s.requestID(h)
+	h = s.routeBodyLimit(h) // per-route declared cap, tighter than the global one
 	h = s.recover(h)
-	return maxBytes(h, 10<<20) // 10 MB request cap on every route
+	return maxBytes(h, globalMaxBodyBytes) // global request cap on every route
+}
+
+// globalMaxBodyBytes is the cap every route gets. A route may declare a tighter
+// one; none may raise it.
+const globalMaxBodyBytes int64 = 10 << 20
+
+// routeBodyLimit applies the cap the matched route declared. Without this,
+// RoutePolicy.MaxBodyBytes was generated, validated, and never read: the
+// webhook receivers declare 1 MiB and would still let io.ReadAll buffer 10 MB
+// before signature verification had a chance to reject it.
+//
+// It runs outside csrf on purpose — csrf parses the form, and parsing reads the
+// body — and it narrows rather than replaces the global cap, so a policy value
+// above globalMaxBodyBytes cannot widen anything.
+func (s *Server) routeBodyLimit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		policy, declared := s.policies.policyFor(r)
+		if declared && policy.MaxBodyBytes > 0 && policy.MaxBodyBytes < globalMaxBodyBytes {
+			r.Body = http.MaxBytesReader(w, r.Body, policy.MaxBodyBytes)
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func maxBytes(next http.Handler, n int64) http.Handler {

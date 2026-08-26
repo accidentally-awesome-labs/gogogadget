@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -56,18 +57,6 @@ func TestEveryExportedRendererTakesOneOptionsStruct(t *testing.T) {
 	require.Greater(t, checked, 20, "the scan found suspiciously few renderers")
 }
 
-// Attrs must be reachable as a field called Attrs on every options struct, so
-// callers set id/class/test-id/Alpine/HTMX the same way everywhere.
-func TestEveryOptionsStructEmbedsAttrs(t *testing.T) {
-	for _, sample := range optionsSamples() {
-		typ := reflect.TypeOf(sample)
-		field, ok := typ.FieldByName("Attrs")
-		require.True(t, ok, "%s has no Attrs field", typ.Name())
-		assert.Equal(t, reflect.TypeOf(Attrs{}), field.Type,
-			"%s.Attrs must be ui.Attrs", typ.Name())
-	}
-}
-
 // Attrs deliberately has no arbitrary attribute map: with one, any caller could
 // set role, aria-*, tabindex or type and silently change what a component means
 // to assistive technology.
@@ -112,37 +101,6 @@ func returnsTemplComponent(fn *ast.FuncDecl) bool {
 	return ok && pkg.Name == "templ" && sel.Sel.Name == "Component"
 }
 
-// optionsSamples lists one zero value per options struct. Kept explicit rather
-// than reflected out of the package so a new renderer's options struct is a
-// deliberate addition here.
-func optionsSamples() []any {
-	return []any{
-		SpinnerOpts{}, BadgeOpts{}, NoticeOpts{}, BannerOpts{}, PageHeaderOpts{},
-		SectionHeaderOpts{}, TableCardOpts{}, MetricOpts{},
-		EmptyStateOpts{}, FieldErrorOpts{}, MeterOpts{}, SecretRevealOpts{},
-		DescriptionListOpts{}, PaginationOpts{}, NavTabsOpts{}, TerminalPageOpts{},
-		FormOpts{}, FieldsetOpts{}, FieldOpts{}, TextInputOpts{}, SearchInputOpts{},
-		TextareaOpts{}, SelectOpts{}, CheckboxOpts{}, RadioGroupOpts{}, SwitchOpts{},
-		CardOpts{}, CardHeaderOpts{}, CardFooterOpts{}, TableOpts{}, KeyValueOpts{},
-		ListOpts{}, ContainerOpts{}, StackOpts{}, InlineOpts{}, GridOpts{},
-		DialogOpts{}, AlertDialogOpts{}, DropdownMenuOpts{}, PopoverOpts{}, TooltipOpts{},
-		IconOpts{}, ItemOpts{}, SeparatorOpts{}, CSRFFieldOpts{},
-	}
-}
-
-func TestOptionsSamplesCoverEveryRenderer(t *testing.T) {
-	// A renderer whose options struct is missing from the sample list would
-	// escape the Attrs check above, so the two are tied together.
-	assert.NotEmpty(t, optionsSamples())
-	seen := map[string]bool{}
-	for _, sample := range optionsSamples() {
-		name := reflect.TypeOf(sample).Name()
-		assert.False(t, seen[name], "duplicate sample %s", name)
-		seen[name] = true
-		assert.True(t, strings.HasSuffix(name, "Opts"), "%s is not an options struct", name)
-	}
-}
-
 // A modal must always be dismissible without JavaScript. Both alert-dialog
 // buttons submit the enclosing form method="dialog", which is what closes the
 // dialog and records the choice - they were once type="button" with no handler
@@ -177,11 +135,17 @@ func TestAlertDialogNormalizesItsKind(t *testing.T) {
 	assert.Contains(t, html, "text-neutral-text")
 }
 
-// A declared TestID must reach the DOM. Every renderer accepts Attrs, so a
-// renderer that ignores them looks configurable while silently dropping the
-// caller's class, test id and ARIA overrides - which is how Tooltip shipped
-// with an Attrs field nothing read. Reflection covers every renderer, so a new
-// one cannot regress this quietly.
+// A declared TestID must reach the DOM, and a declared Class must reach the
+// component's ROOT element. Every renderer accepts Attrs, so a renderer that
+// ignores them looks configurable while silently dropping the caller's class and
+// test id - which is how Tooltip shipped with an Attrs field nothing read.
+//
+// This is the only Attrs contract test. There used to be a second one over a
+// hand-kept list of 44 options structs, guarded by a test whose comment claimed
+// the list was tied to the package and which only checked that the list was
+// non-empty, free of duplicates, and full of names ending in "Opts" - so three
+// quarters of the package was exempt and nothing said so. Reflection over the
+// AST-checked renderers table covers all of them, including the field's type.
 func TestEveryRendererPropagatesItsAttrs(t *testing.T) {
 	table := renderers()
 	// The AST scan is the authority: a renderer missing from the table below
@@ -204,7 +168,9 @@ func TestEveryRendererPropagatesItsAttrs(t *testing.T) {
 				opts.Set(reflect.ValueOf(seed))
 			}
 			attrs := opts.FieldByName("Attrs")
-			require.True(t, attrs.IsValid(), "options must embed Attrs")
+			require.True(t, attrs.IsValid(), "%sOpts has no Attrs field", name)
+			require.Equal(t, reflect.TypeOf(Attrs{}), attrs.Type(),
+				"%sOpts.Attrs must be ui.Attrs, or callers set id/class/test-id/Alpine/HTMX differently here", name)
 			attrs.FieldByName("TestID").SetString("probe-id")
 			attrs.FieldByName("Class").SetString("probe-class")
 
@@ -215,11 +181,44 @@ func TestEveryRendererPropagatesItsAttrs(t *testing.T) {
 			html := renderComponent(t, component)
 			assert.Contains(t, html, `data-testid="probe-id"`,
 				"%s ignores Attrs.TestID, so no test can target it", name)
-			assert.Contains(t, html, "probe-class",
-				"%s ignores Attrs.Class, so callers cannot extend it", name)
+			// On the element the caller actually addressed, in a class
+			// attribute. Searching the whole document passes when the string
+			// merely appears somewhere - inside a data-* value, or as text -
+			// which is not the contract. TestID and Class come from one Attrs
+			// and are flattened into one attribute map, so they land on the same
+			// element by construction: asserting them together is what makes the
+			// class assertion mean "reached the element" rather than "reached
+			// the output".
+			assert.Contains(t, classOfProbedElement(t, html), "probe-class",
+				"%s drops Attrs.Class from the element that carries Attrs.TestID", name)
 		})
 	}
 }
+
+// classOfProbedElement returns the class attribute of the element carrying the
+// probe test id, and refuses an element carrying two.
+//
+// Two class attributes on one tag is invalid HTML and the browser keeps the
+// FIRST, so a component that writes its own class beside a spread map loses its
+// own styling to any caller who sets Attrs.Class - which is exactly what
+// Checkbox and Switch did to their `h-4 w-4`. The failure is invisible in a
+// substring search over the whole document, because both strings are present.
+func classOfProbedElement(t *testing.T, html string) string {
+	t.Helper()
+	at := strings.Index(html, `data-testid="probe-id"`)
+	require.GreaterOrEqual(t, at, 0, "the probe test id is not in the output")
+	open := strings.LastIndex(html[:at], "<")
+	require.GreaterOrEqual(t, open, 0, "the probe test id is not inside a tag")
+	end := strings.Index(html[open:], ">")
+	require.Greater(t, end, 0, "unterminated tag around the probe test id")
+	tag := html[open : open+end]
+	matches := probedClassAttr.FindAllStringSubmatch(tag, -1)
+	require.Len(t, matches, 1,
+		"probed element must carry exactly one class attribute, got %d: %s", len(matches), tag)
+	return matches[0][1]
+}
+
+var probedClassAttr = regexp.MustCompile(`\sclass="([^"]*)"`)
 
 // rendererSeeds supplies the minimum options for renderers whose zero value
 // legitimately produces no output.
@@ -354,25 +353,97 @@ func TestSharedDataContractShapes(t *testing.T) {
 	assert.Equal(t, reflect.TypeOf(Breakpoint("")), hide.Type)
 	align, _ := col.FieldByName("Align")
 	assert.Equal(t, reflect.TypeOf(Align("")), align.Type)
+
+	width, ok := col.FieldByName("Width")
+	require.True(t, ok, "a column with no width cannot stop a timestamp column wrapping")
+	assert.Equal(t, reflect.String, width.Type.Kind(),
+		"Width is a CSS length, so it is a string rather than a pixel count")
+	// A declared field is only a contract if a renderer honours it. Width was
+	// declared, documented and populated while every renderer dropped it, so the
+	// shape check alone is what let that ship.
+	for name, html := range map[string]string{
+		"ColumnHeader": renderComponent(t, ColumnHeader(ColumnHeaderOpts{
+			Column: Column{Key: "when", Label: "When", Width: "12rem"},
+		})),
+		"TreeGrid": renderComponent(t, TreeGrid(TreeGridOpts{
+			ID: "effort", Label: "Effort", Columns: []Column{{Key: "when", Label: "When", Width: "12rem"}},
+		})),
+	} {
+		// The trailing quote is deliberately not asserted: templ's style
+		// attribute expression appends a semicolon and the attribute map does
+		// not, so the two renderers differ by one character after the value.
+		assert.Contains(t, html, `style="width:12rem`, "%s drops Column.Width", name)
+	}
+	// The width is a length, not an inline-style hook: a declaration list would
+	// let a caller reach past every rule the design system enforces on classes.
+	bogus := renderComponent(t, ColumnHeader(ColumnHeaderOpts{
+		Column: Column{Key: "k", Label: "K", Width: "8rem;position:fixed"},
+	}))
+	assert.NotContains(t, bogus, "position:fixed",
+		"Width must carry a bare length, never a declaration list")
 }
 
 // A separator is not a command: it carries no label, no href and no handler, so
 // rendering it as an item would put an empty, focusable row in the menu.
+//
+// This test used to spend its last assertion on hx-confirm - on an item with an
+// href and no request, where the attribute gates nothing - and asserted nothing
+// about the separator beyond the role. What a divider must be is the subject
+// here: an <hr> with the separator role, no accessible name, and no tab stop.
 func TestMenuSeparatorRendersAsSeparator(t *testing.T) {
 	html := renderComponent(t, DropdownMenu(DropdownMenuOpts{
 		Label: "Actions",
 		Items: []MenuItem{
 			{Label: "Rename", Href: "/x"},
 			{Separator: true},
-			{Label: "Delete", Href: "/y", Kind: KindDanger, Confirm: "Delete this?"},
+			{Label: "Delete", Href: "/y", Kind: KindDanger},
 		},
 	}))
 
-	assert.Contains(t, html, `role="separator"`)
+	assert.Contains(t, html, `<hr role="separator"`,
+		"a divider is an hr: a div with the role is a line assistive technology reads as content")
+	assert.Equal(t, 1, strings.Count(html, `role="separator"`),
+		"one separator in, one separator out")
 	assert.Equal(t, 2, strings.Count(html, "<a "),
 		"a separator must not render as a link")
-	assert.Contains(t, html, `hx-confirm="Delete this?"`,
-		"a destructive item declares its confirmation in the contract")
+	assert.Equal(t, 2, strings.Count(html, `class="block px-3 py-2 text-sm`),
+		"a separator must not take an item's padding, hover or text styling")
+	// The two commands survive around it, in order, so a separator between them
+	// is a divider rather than a truncation point.
+	assert.Less(t, strings.Index(html, "Rename"), strings.Index(html, `role="separator"`))
+	assert.Less(t, strings.Index(html, `role="separator"`), strings.Index(html, "Delete"))
+}
+
+// hx-confirm gates an htmx request and nothing else. On a plain link or an inert
+// button htmx never processes the activation, so the attribute promises a prompt
+// that never appears and an action that never runs - which is what the
+// Operations scenario shipped. The component refuses the combination.
+func TestMenuConfirmOnlyRidesARealRequest(t *testing.T) {
+	acting := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{{Label: "Delete", Kind: KindDanger, Confirm: "Delete this?", HX: HX{Delete: "/x"}}},
+	}))
+	assert.Contains(t, acting, `hx-confirm="Delete this?"`,
+		"an item that issues a request keeps its declared confirmation")
+
+	for name, item := range map[string]MenuItem{
+		"navigating": {Label: "Delete", Href: "/y", Confirm: "Delete this?"},
+		"inert":      {Label: "Cancel", Confirm: "Cancel this?"},
+		// Target and swap modify a request some other attribute has to declare.
+		"modifiers only": {Label: "Cancel", Confirm: "Cancel this?", HX: HX{Target: "#t", Swap: "outerHTML"}},
+	} {
+		html := renderComponent(t, DropdownMenu(DropdownMenuOpts{Label: "Actions", Items: []MenuItem{item}}))
+		assert.NotContains(t, html, "hx-confirm",
+			"a %s item cannot show a confirmation, so it must not claim one", name)
+	}
+
+	// A boosted link is the exception: htmx handles its navigation, so the
+	// prompt does gate something.
+	boosted := renderComponent(t, DropdownMenu(DropdownMenuOpts{
+		Label: "Actions",
+		Items: []MenuItem{{Label: "Leave", Href: "/y", Confirm: "Discard changes?", HX: HX{Boost: true}}},
+	}))
+	assert.Contains(t, boosted, `hx-confirm="Discard changes?"`)
 }
 
 // A menu item that acts is a button; one that navigates is a link. Rendering an

@@ -47,7 +47,9 @@ func (w *Worker) deliverWebhook(ctx context.Context, p WebhookDeliverPayload, at
 		return w.q.MarkDeliveryDead(ctx, sqlc.MarkDeliveryDeadParams{ID: d.ID, LastError: "endpoint disabled"})
 	}
 
-	status, attemptErr := w.postWebhook(ctx, ep.Url, signingSecrets(ep, time.Now()), d.Payload)
+	// One id per delivery row, stable across every retry of it.
+	msgID := webhookMessageID(d.ID)
+	status, attemptErr := w.postWebhook(ctx, ep.Url, msgID, signingSecrets(ep, time.Now()), d.Payload)
 	pgStatus := pgtype.Int4{Int32: status, Valid: status > 0}
 	if attemptErr == nil {
 		return w.q.MarkDeliverySuccess(ctx, sqlc.MarkDeliverySuccessParams{ID: d.ID, LastResponseStatus: pgStatus})
@@ -82,11 +84,23 @@ func signingSecrets(ep sqlc.WebhookEndpoint, now time.Time) []string {
 // postWebhook signs and POSTs, returning the HTTP status (0 when the request
 // never reached the server). 2xx → nil error. Multiple secrets produce a
 // space-delimited signature list (standard-webhooks §signature).
-func (w *Worker) postWebhook(ctx context.Context, rawURL string, secrets []string, payload []byte) (int32, error) {
+//
+// msgID is the DELIVERY id, not a fresh value per attempt. standard-webhooks
+// defines webhook-id as unique per message but identical when the same message
+// is resent after a failure, and that stability is the whole basis of receiver
+// deduplication. Generating it here from the clock gave every retry under the
+// 2^n backoff a different id, so a receiver could not tell a retry from a new
+// event - while this same product relies on exactly that contract for its own
+// inbound traffic, keying `webhook_events` on the incoming message id. Telling
+// customers to deduplicate and then defeating it is the worst of both.
+//
+// The 5-minute visibility lease makes it matter more, not less: a duplicated
+// claim produces two POSTs of one delivery, and a stable id is what lets the
+// receiver collapse them.
+func (w *Worker) postWebhook(ctx context.Context, rawURL string, msgID string, secrets []string, payload []byte) (int32, error) {
 	if err := w.WebhookGuard(ctx, rawURL); err != nil {
 		return 0, err
 	}
-	msgID := "msg_" + strconv.FormatInt(time.Now().UnixNano(), 36)
 	ts := time.Now()
 	sigs := make([]string, 0, len(secrets))
 	for _, secret := range secrets {
@@ -111,7 +125,19 @@ func (w *Worker) postWebhook(ctx context.Context, rawURL string, secrets []strin
 	req.Header.Set("webhook-timestamp", strconv.FormatInt(ts.Unix(), 10))
 	req.Header.Set("webhook-signature", sig)
 
-	client := &http.Client{Timeout: 10 * time.Second, Transport: w.WebhookTransport}
+	client := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: w.WebhookTransport,
+		// A delivery is a signed POST to one declared endpoint, not a fetch.
+		// Following a redirect would let a customer endpoint send that signed
+		// payload somewhere the guard never classified — including back to
+		// http://, because Go's default policy carries the request across
+		// schemes. There is no legitimate reason for a webhook receiver to
+		// redirect, so this refuses rather than re-validating a hop.
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return fmt.Errorf("webhook endpoint redirected to %s; delivery targets must not redirect", req.URL.Redacted())
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, err
@@ -152,9 +178,53 @@ func guardWebhookURL(ctx context.Context, rawURL string) error {
 	return nil
 }
 
+// isPublicIP is an allow-list: an address must be global unicast to pass, and
+// then must not fall inside a range that is globally routable on paper but
+// internal in practice. Framing it this way rather than as a deny-list is the
+// point — a new address family or a range nobody enumerated fails closed.
 func isPublicIP(a netip.Addr) bool {
 	a = a.Unmap() // ::ffff:0.0.0.0 must classify like 0.0.0.0
-	return !(a.IsLoopback() || a.IsPrivate() || a.IsLinkLocalUnicast() || a.IsUnspecified() || a.IsMulticast())
+	// IsGlobalUnicast already excludes loopback, link-local, multicast, and the
+	// unspecified address, in both families.
+	if !a.IsGlobalUnicast() {
+		return false
+	}
+	if a.IsPrivate() || a.IsInterfaceLocalMulticast() || a.IsLinkLocalMulticast() {
+		return false
+	}
+	for _, block := range nonRoutableBlocks {
+		if block.Contains(a) {
+			return false
+		}
+	}
+	return true
+}
+
+// nonRoutableBlocks are global-unicast ranges that must never be a delivery
+// target. IsPrivate covers RFC 1918 and fc00::/7 and nothing else, so these are
+// the gaps that matter for a hosted deployment.
+var nonRoutableBlocks = []netip.Prefix{
+	// RFC 6598 shared address space. Routable-looking and internal in practice:
+	// it is what EKS/GKE hand pod networks and what a Tailscale host answers on,
+	// so a hosted deployment reaches its own cluster through it.
+	netip.MustParsePrefix("100.64.0.0/10"),
+	// RFC 6890 "this host on this network" — 0.0.0.0/8 beyond the unspecified
+	// address IsGlobalUnicast already rejects.
+	netip.MustParsePrefix("0.0.0.0/8"),
+	// RFC 5737 documentation ranges and RFC 6890 benchmarking.
+	netip.MustParsePrefix("192.0.0.0/24"),
+	netip.MustParsePrefix("192.0.2.0/24"),
+	netip.MustParsePrefix("198.18.0.0/15"),
+	netip.MustParsePrefix("198.51.100.0/24"),
+	netip.MustParsePrefix("203.0.113.0/24"),
+	// RFC 1112 reserved former class E.
+	netip.MustParsePrefix("240.0.0.0/4"),
+	// IPv6: unspecified/loopback block, documentation, and 6to4/Teredo, which
+	// embed an IPv4 address the guard would otherwise never see.
+	netip.MustParsePrefix("100::/64"),
+	netip.MustParsePrefix("2001:db8::/32"),
+	netip.MustParsePrefix("2001::/32"),
+	netip.MustParsePrefix("2002::/16"),
 }
 
 // guardedTransport dials only approved IPs — a DNS rebind between the guard
@@ -180,4 +250,12 @@ func guardedTransport() *http.Transport {
 		return d.DialContext(ctx, network, net.JoinHostPort(ips[0].String(), port))
 	}
 	return t
+}
+
+// webhookMessageID derives the standard-webhooks message id from the delivery
+// row's primary key. Deriving rather than storing keeps it stable for free: the
+// row already exists before the first attempt and its id never changes, so every
+// retry recomputes the same value with nothing to persist and nothing to migrate.
+func webhookMessageID(deliveryID int64) string {
+	return "msg_" + strconv.FormatInt(deliveryID, 36)
 }

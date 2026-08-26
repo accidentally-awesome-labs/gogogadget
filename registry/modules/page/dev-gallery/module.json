@@ -260,7 +260,7 @@
         "source": "internal/web/templates/scenario_operations.templ",
         "target": "internal/web/templates/scenario_operations.templ",
         "class": "templ",
-        "sha256": "ba1f9fa9344cbd1729a92de1cdd6f057b61ff884128d3707388167210669e473",
+        "sha256": "03a5e87b641d014d5f10dfa0cb67eb71fb32c2b7ed1877a1f0916811d40c8b62",
         "rewrite_module": true,
         "contract": false
       },

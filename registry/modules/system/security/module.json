@@ -43,7 +43,7 @@
         "source": "internal/web/middleware.go",
         "target": "internal/web/middleware.go",
         "class": "go",
-        "sha256": "e2940068a654a8849416f4b4f2477ad5ffe37a988dc01ccf4dc29bfe345bc03f",
+        "sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
         "rewrite_module": true,
         "contract": true
       }

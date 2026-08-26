@@ -82,17 +82,102 @@ func TestGenerateAllIsDeterministic(t *testing.T) {
 	}
 }
 
-func TestGeneratedPathsAreToolOwned(t *testing.T) {
+// TestEveryEmittedPathIsRegistryOwned holds the emitters to the predicate that
+// authorises sync to delete a stale aggregate. If an emitter grows a new output
+// and nobody teaches IsRegistryOwnedOutputPath about it, the stale sweep would
+// delete that file on every run.
+func TestEveryEmittedPathIsRegistryOwned(t *testing.T) {
 	lock, graph := genFixtureLock(t)
 	files, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)
 	if err != nil {
 		t.Fatalf("GenerateAll: %v", err)
 	}
 	for _, f := range files {
-		if !isGeneratedOutput(f.Path) {
-			t.Fatalf("generated file %s is not classified as a generated output", f.Path)
+		if !IsRegistryOwnedOutputPath(f.Path) {
+			t.Fatalf("generated file %s is not registry-owned; the stale sweep would delete it", f.Path)
+		}
+		if !IsGeneratedOutputPath(f.Path) {
+			t.Fatalf("registry-owned path %s is not a generated output", f.Path)
 		}
 	}
+}
+
+// A failing generation has to be reproducible. Both of these iterated a map, so
+// the operator fixed whatever came out first, reran, and got a different
+// complaint — with no signal that more than one thing was wrong.
+func TestGenerationErrorsAreDeterministic(t *testing.T) {
+	t.Run("navigation area order", func(t *testing.T) {
+		lock, graph := genFixtureLock(t)
+		// Two areas, each with an entry ordered after an id that does not exist.
+		// Whichever area is reported, it must be the same one every run.
+		nav := []NavigationContribution{
+			{ID: "beta.public", Area: NavAreaPublic, RouteID: "beta.show",
+				LabelKey: "nav.beta", After: []string{"nowhere.public"}},
+			{ID: "beta.app", Area: NavAreaApp, RouteID: "beta.show",
+				LabelKey: "nav.beta", After: []string{"nowhere.app"}},
+		}
+		graph[1].Runtime.Navigation = nav
+		lock.Modules[1].Manifest.Runtime.Navigation = nav
+
+		first := ""
+		for range 40 {
+			_, err := resolveNavigation(lock, graph)
+			if err == nil {
+				t.Fatal("resolveNavigation accepted an entry ordered after an unknown id")
+			}
+			if first == "" {
+				first = err.Error()
+				continue
+			}
+			if err.Error() != first {
+				t.Fatalf("navigation error is not reproducible:\n%s\n%s", first, err)
+			}
+		}
+	})
+
+	t.Run("undocumented API routes are all named", func(t *testing.T) {
+		lock, graph := genFixtureLock(t)
+		routes := []RouteContribution{
+			{ID: "api.alpha", Method: "GET", Pattern: "/api/v1/alpha", Scope: RouteAPIRead,
+				Policy: RoutePolicy{}, Package: "internal/beta", Handler: "Alpha"},
+			{ID: "api.gamma", Method: "GET", Pattern: "/api/v1/gamma", Scope: RouteAPIRead,
+				Policy: RoutePolicy{}, Package: "internal/beta", Handler: "Gamma"},
+			{ID: "api.zeta", Method: "GET", Pattern: "/api/v1/zeta", Scope: RouteAPIRead,
+				Policy: RoutePolicy{}, Package: "internal/beta", Handler: "Zeta"},
+		}
+		graph[1].Runtime.Routes = routes
+		lock.Modules[1].Manifest.Runtime.Routes = routes
+		// A module has to contribute an info block for the document to be built
+		// at all; it documents none of the three routes.
+		contribution := &OpenAPIContribution{
+			Info: json.RawMessage(`{"title":"Fixture","version":"1"}`),
+		}
+		graph[1].OpenAPI = contribution
+		lock.Modules[1].Manifest.OpenAPI = contribution
+
+		first := ""
+		for range 40 {
+			_, err := buildOpenAPIDocument(lock, graph)
+			if err == nil {
+				t.Fatal("buildOpenAPIDocument accepted three undocumented API routes")
+			}
+			for _, id := range []string{"api.alpha", "api.gamma", "api.zeta"} {
+				if !strings.Contains(err.Error(), id) {
+					t.Fatalf("error does not name %s: %v", id, err)
+				}
+			}
+			if !strings.Contains(err.Error(), "3 API route(s)") {
+				t.Fatalf("error does not count the undocumented routes: %v", err)
+			}
+			if first == "" {
+				first = err.Error()
+				continue
+			}
+			if err.Error() != first {
+				t.Fatalf("openapi error is not reproducible:\n%s\n%s", first, err)
+			}
+		}
+	})
 }
 
 func TestBootstrapRegistryIsEmitted(t *testing.T) {

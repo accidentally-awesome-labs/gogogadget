@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/switch.templ",
         "target": "internal/web/templates/ui/switch.templ",
         "class": "templ",
-        "sha256": "c1889d4aca708532d974e9f00d11933d8346ab6cba62602b0efebba7abe61c22",
+        "sha256": "70183904fd0443ba72240f72875be2fda04f2c83831348981c08f9c040f67b73",
         "rewrite_module": true,
         "contract": true
       }

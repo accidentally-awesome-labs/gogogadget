@@ -11,8 +11,11 @@ import "github.com/a-h/templ"
 // and TreeGrid.
 type Column struct {
 	Key, Label string
-	// Width is a CSS length for one column (e.g. "8rem"), not the container
-	// measure enum: a table column is sized in absolute terms.
+	// Width is one column's starting measure as an absolute CSS length (e.g.
+	// "8rem"), not the container measure enum: a timestamp column that must not
+	// wrap knows its own width, and the spacing scale has no entry for it. It
+	// renders as an inline width on the header cell - see columnWidthStyle for
+	// why that is the same property the grid controller writes.
 	Width string
 	Align Align
 	// Sortable marks the column as a sort target; Numeric right-aligns figures
@@ -40,7 +43,8 @@ type MenuItem struct {
 	Separator bool
 	// Confirm is the prompt shown before the action runs. It lives in the
 	// contract because a destructive item must not depend on the caller
-	// remembering to add one.
+	// remembering to add one. It gates an htmx request and nothing else, so it
+	// is honoured only on an item that issues one - see menuItemAttrs.
 	Confirm string
 	// HX issues the request for items that act rather than navigate.
 	HX    HX
@@ -75,10 +79,39 @@ type Option struct {
 func menuItemAttrs(item MenuItem, extraClass string) templ.Attributes {
 	out := attributes(withClass(item.Attrs, mergeClasses(menuItemClass(item), extraClass)))
 	applyHX(out, item.HX)
-	if item.Confirm != "" {
+	// Only on an item that issues a request. hx-confirm is htmx's gate on an
+	// htmx request: on a plain link or an inert button htmx never processes the
+	// click, so the attribute renders, promises a prompt, and produces neither
+	// the prompt nor the action. It was emitted unconditionally, and the rule
+	// against it survived only as a comment two files away - which is exactly
+	// how the Operations scenario shipped a destructive "Cancel" that did
+	// nothing and asked nothing. The component refuses the combination rather
+	// than rendering a promise it cannot keep.
+	if item.Confirm != "" && menuItemRequests(item) {
 		out["hx-confirm"] = item.Confirm
 	}
 	return out
+}
+
+// menuItemRequests reports whether htmx will process this item's activation.
+//
+// Both HX sources count: a caller may declare the request on the item or inside
+// its Attrs, and both reach the same element.
+//
+// A verb is one way; a boosted link is the other - htmx handles a boosted
+// anchor's navigation, so a confirmation on one does gate something. Target,
+// swap and the rest are modifiers on a request that some other attribute has to
+// declare, so they are deliberately not enough.
+func menuItemRequests(item MenuItem) bool {
+	for _, hx := range []HX{item.HX, item.Attrs.HX} {
+		switch {
+		case hx.Get != "", hx.Post != "", hx.Put != "", hx.Patch != "", hx.Delete != "":
+			return true
+		case hx.Boost && item.Href != "":
+			return true
+		}
+	}
+	return false
 }
 
 func gapClass(gap Gap) string {

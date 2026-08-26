@@ -48,6 +48,23 @@ func (s *Server) applyImpersonation(w http.ResponseWriter, r *http.Request, ctx 
 		clear()
 		return ctx
 	}
+	// The session must belong to the caller presenting it. Without this the
+	// cookie is a pure bearer token: every other check below validates
+	// properties of the session ROW, so possession of the id would be the whole
+	// authorization, and anyone who learned it would become the target.
+	//
+	// The id is not secret enough for that. It is an opaque database id, it
+	// travels in a cookie that a user can set in their own browser, and it lives
+	// for two hours. HttpOnly stops a script reading the admin's copy; it does
+	// nothing to stop a third party setting their own.
+	//
+	// The caller's identity here is the one sessionLoad already verified from the
+	// Clerk session, so it cannot be forged alongside the cookie.
+	caller := identity.ClaimsFrom(ctx)
+	if caller == nil || caller.UserID != sess.AdminUserID {
+		clear()
+		return ctx
+	}
 	// The admin must STILL hold the full role: demotion mid-session — to
 	// 'support' or to nothing — kills the impersonation.
 	admin, err := s.q.GetUserByClerkID(ctx, sess.AdminUserID)
@@ -182,7 +199,12 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 		MaxAge: 2 * 60 * 60,
 	})
 	audit.Log(ctx, s.q, orgID, admin.ClerkUserID, "impersonation.start", map[string]any{
-		"target_user_id": targetID, "target_org_id": orgID, "session_id": sess.ID, "reason": reason,
+		// The session id is deliberately absent. It is a live credential for the
+		// duration of the impersonation, and this entry is org-scoped - every
+		// member of the target organization reads it on /app/activity, where the
+		// full metadata blob is rendered. Recording that an impersonation
+		// happened is the audit requirement; handing out the credential is not.
+		"target_user_id": targetID, "target_org_id": orgID, "reason": reason,
 	})
 	// HARD redirect: the banner and the org switcher both live in the shell,
 	// which a soft Navigate never re-renders — the target view must boot fresh.
@@ -198,12 +220,20 @@ func (s *Server) handleImpersonationExit(w http.ResponseWriter, r *http.Request)
 		if err := s.q.EndImpersonationSession(ctx, imp.SessionID); err != nil {
 			s.log.Error("impersonation end", "error", err)
 		}
-		meta := map[string]any{"session_id": imp.SessionID}
+		// The org id is what makes an entry findable: /app/activity and
+		// RecentAuditByOrg both filter on it. Passing the session id here put
+		// the stop event in no organization at all, so an org saw its
+		// impersonation begin and never end - the trail read as a session still
+		// open. And the session id does not belong in the metadata either, for
+		// the same reason it was removed from the start entry.
+		meta := map[string]any{}
+		orgID := ""
 		if sess, err := s.q.GetImpersonationSession(ctx, imp.SessionID); err == nil {
 			meta["reason"] = sess.Reason
 			meta["target_user_id"] = sess.TargetUserID
+			orgID = sess.TargetOrgID
 		}
-		audit.Log(ctx, s.q, imp.SessionID, imp.AdminUserID, "impersonation.stop", meta)
+		audit.Log(ctx, s.q, orgID, imp.AdminUserID, "impersonation.stop", meta)
 	}
 	http.SetCookie(w, &http.Cookie{Name: impersonationCookieName, Value: "", Path: "/", MaxAge: -1})
 	Redirect(w, r, "/admin")

@@ -22,7 +22,7 @@
         "source": "internal/web/handlers_impersonation.go",
         "target": "internal/web/handlers_impersonation.go",
         "class": "go",
-        "sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+        "sha256": "8b9cf44af0586384fae45e6b1f2693fffc4cc650a8b5d4c7ac81e28d15e20a7c",
         "rewrite_module": true,
         "contract": false
       },

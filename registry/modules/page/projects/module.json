@@ -28,7 +28,7 @@
         "source": "internal/web/projects_test.go",
         "target": "internal/web/projects_test.go",
         "class": "test",
-        "sha256": "3164465ea33b772921823b7c761d2aef7c31de4a82e401fe3da7836b0209bbbe",
+        "sha256": "131476df7a6ad0734d29446af475ae28711baab5e1c102f87382bff24a1e3026",
         "rewrite_module": true,
         "contract": false
       },

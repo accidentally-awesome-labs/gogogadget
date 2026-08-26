@@ -285,6 +285,17 @@ exit 0 means every generated output on disk is exactly what generation produces,
 regardless of what the lock recorded — and it is blind to a hand-written file no
 module generates, for which `ggg diff` is the only probe.
 
+`generated_stale` is actionable: `ggg sync` deletes the outputs the selected
+graph no longer renders. Several emitters produce nothing at all once their
+input set empties, so removing the last module that declared a scenario, an API
+operation, or a locale used to leave an aggregate on disk that still compiled
+into the build and still referenced renderers the removal had deleted. The set
+that sweep is allowed to delete is `IsRegistryOwnedOutputPath` in
+`internal/modkit` — the same predicate `GenerateAll` checks every emitted path
+against, so the pipeline cannot render an output the sweep would then delete.
+templ, sqlc, and Tailwind outputs are deliberately outside it: this pipeline
+does not render them, so their absence from a render means nothing.
+
 ## The lifecycle
 
 ### Install
@@ -299,7 +310,8 @@ the graph, verifies every payload digest, rewrites import prefixes, allocates
 migration numbers, preflights every namespace claim, and classifies each
 destination — all without writing. Then `Apply` snapshots every path it can
 touch, stages output, atomically replaces files, runs the generator pipeline
-once, and writes the lock last. Any failure restores the exact pre-run bytes.
+once, and writes the lock last. Any failure restores the exact pre-run bytes and
+modes, and names any path it could not restore.
 
 Use `--dry-run` to see the plan and stop.
 

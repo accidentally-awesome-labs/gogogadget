@@ -170,13 +170,43 @@ func TestEmptyMediaPickerExplainsItself(t *testing.T) {
 }
 
 // The character count needs the limit the textarea enforces, or the two disagree
-// and the author is stopped by a limit the counter never showed.
+// and the author is stopped by a limit the counter never showed. The counter's
+// own limit is asserted separately from the textarea's: `Contains(html, "500")`
+// was already satisfied by maxlength, so the counter could have been rendered
+// with no limit at all and this test would still have passed.
 func TestCharacterLimitIsEnforcedAndCounted(t *testing.T) {
 	html := renderComponent(t, MarkdownEditor(MarkdownEditorOpts{Name: "body_md", MaxLength: 500}))
 
-	assert.Contains(t, html, `maxlength="500"`)
-	assert.Contains(t, html, "500")
-	assert.Contains(t, html, "char-counter")
+	assert.Contains(t, html, `maxlength="500"`, "the native control is what enforces the limit")
+	assert.Contains(t, html, `data-ui="char-counter"`)
+	assert.Contains(t, html, `data-max="500"`, "the counter must carry the same limit the control enforces")
+	assert.Contains(t, html, `data-for="body_md"`, "a counter watching no control counts nothing")
+	assert.Contains(t, html, "/ 500 characters", "the limit has to be readable, not only machine-readable")
+}
+
+// A hint must be an element that exists. FieldARIA points the textarea at
+// "<control>-hint" the moment a hint is set, and an editor that took the option
+// without rendering the paragraph left aria-describedby dangling - well-formed,
+// so no axe rule reports it, and announced as nothing by the assistive
+// technology it was written for.
+func TestEditorHintIsAnElementTheControlPointsAt(t *testing.T) {
+	html := renderComponent(t, MarkdownEditor(MarkdownEditorOpts{
+		Name: "body_md", Hint: "Markdown is supported.",
+	}))
+
+	assert.Contains(t, html, `aria-describedby="body_md-hint"`)
+	assert.Contains(t, html, `id="body_md-hint"`)
+	assert.Contains(t, html, "Markdown is supported.")
+
+	// The error replaces the hint, as it does in Field: two descriptions read in
+	// sequence bury the actionable one, so the id the control names must be the
+	// error's and the hint paragraph must not be rendered alongside it.
+	both := renderComponent(t, MarkdownEditor(MarkdownEditorOpts{
+		Name: "body_md", Hint: "Markdown is supported.", Error: "Body is required.",
+	}))
+	assert.Contains(t, both, `aria-describedby="body_md-error"`)
+	assert.Contains(t, both, `id="body_md-error"`)
+	assert.NotContains(t, both, `id="body_md-hint"`)
 }
 
 // The media button targets a container the editor renders. Pointing htmx at an

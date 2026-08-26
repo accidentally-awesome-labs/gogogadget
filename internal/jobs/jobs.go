@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"math/rand/v2"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -162,9 +163,22 @@ func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
 	return w
 }
 
-// Run polls until ctx is done; a daily janitor pass deletes finished jobs
-// older than 7 days and webhook events older than 30 days.
+// Run polls until ctx is done; a janitor pass deletes finished jobs older than
+// 7 days and webhook events older than 30 days.
+//
+// The first pass runs immediately, and that is load-bearing rather than
+// cosmetic. A ticker alone put the first sweep 24 hours after PROCESS START and
+// reset the clock on every restart, so any deployment that recycles more often
+// than daily - a daily container recycle, a normal deploy cadence, a
+// crash-restart loop - never reached the janitor at all. Every failure was
+// silent: finished jobs accumulated forever, the inbound webhook idempotency
+// table grew without bound, AUDIT_RETENTION_DAYS was never enforced, expired
+// idempotency keys were never swept, and rotated webhook secrets were never
+// cleared past their grace window. Retention that only holds on a
+// long-uptime host is not retention.
 func (w *Worker) Run(ctx context.Context) {
+	w.janitorPass(ctx)
+
 	janitor := time.NewTicker(24 * time.Hour)
 	defer janitor.Stop()
 	for {
@@ -213,6 +227,14 @@ type Janitor struct {
 // failure does not stop the others: an unreachable table must not strand the
 // cleanup of every other one.
 func (w *Worker) janitorPass(ctx context.Context) {
+	// A sweep that panics must not end the claim loop. The passes are
+	// independent maintenance, and losing retention is a much smaller failure
+	// than losing the worker.
+	defer func() {
+		if r := recover(); r != nil {
+			w.log.Error("janitor panicked", "panic", r, "stack", string(debug.Stack()))
+		}
+	}()
 	w.runJanitors(ctx, workerJanitors(w))
 }
 
@@ -254,7 +276,7 @@ func (w *Worker) ProcessOne(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
-	if err := w.dispatch(ctx, job); err != nil {
+	if err := w.dispatchSafely(ctx, job); err != nil {
 		w.log.Error("job failed", "id", job.ID, "kind", job.Kind, "attempts", job.Attempts, "error", err)
 
 		// An uninstalled module's queued rows die on the first claim. Retrying a
@@ -285,18 +307,55 @@ func (w *Worker) ProcessOne(ctx context.Context) (bool, error) {
 	return true, w.q.CompleteJob(ctx, job.ID)
 }
 
+// dispatchSafely turns a panicking handler into a failed job. Without it a
+// single bad handler takes down the whole process: Run is started in a goroutine
+// by Module.Start with no recover above it, so the panic unwinds past the web
+// server too. A background worker must not be able to kill the thing serving
+// traffic, and the queue already has the right answer for a handler that cannot
+// complete - fail it, back off, and dead-letter at the attempt budget.
+//
+// The stack is logged because a recovered panic with no stack is a bug report
+// with the evidence removed.
+func (w *Worker) dispatchSafely(ctx context.Context, job sqlc.Job) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			w.log.Error("job handler panicked", "id", job.ID, "kind", job.Kind,
+				"panic", r, "stack", string(debug.Stack()))
+			err = fmt.Errorf("handler panicked: %v", r)
+		}
+	}()
+	return w.dispatch(ctx, job)
+}
+
 // schedulerPass claims due schedules (next_run_at advanced in the same
 // statement — missed ticks are skipped by design) and enqueues their kind
 // with the wrapped payload. Runs every poll cycle.
+//
+// A failing enqueue logs and continues rather than returning. The claim already
+// advanced next_run_at for EVERY row it returned, so returning on the first
+// error abandoned the rest: five due schedules with a transient error on the
+// third meant two fired, three did not, and all five had their tick consumed.
+// One failure taking out its unrelated siblings is the same mistake the janitor
+// pass was corrected for.
+//
+// The remaining hole is honest and stated: the claim and the enqueue are not one
+// transaction, so a process killed between them loses that tick with no record.
+// The design comment above covers skipping ticks during DOWNTIME, which is a
+// different thing from a claim whose enqueue never happened.
 func (w *Worker) schedulerPass(ctx context.Context) error {
 	due, err := w.q.ClaimDueSchedules(ctx)
 	if err != nil {
 		return err
 	}
+	var failed int
 	for _, s := range due {
 		if err := Enqueue(ctx, w.q, s.Kind, SchedulePayload{ScheduleID: s.ID, Payload: s.Payload}); err != nil {
-			return err
+			failed++
+			w.log.Error("schedule enqueue", "schedule_id", s.ID, "kind", s.Kind, "error", err)
 		}
+	}
+	if failed > 0 {
+		return fmt.Errorf("enqueued %d of %d due schedules", len(due)-failed, len(due))
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 	"runtime"
@@ -82,7 +83,12 @@ type poolStats struct {
 // nothing — internal Go stats must not be public by default.
 func (s *Server) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	if s.cfg.MetricsToken != "" {
-		if r.Header.Get("Authorization") != "Bearer "+s.cfg.MetricsToken {
+		// Constant-time: `!=` on strings returns at the first differing byte, so
+		// a scraper endpoint with no rate limit (it is RateExempt by policy) hands
+		// an attacker a timing oracle over the token.
+		presented := []byte(r.Header.Get("Authorization"))
+		expected := []byte("Bearer " + s.cfg.MetricsToken)
+		if subtle.ConstantTimeCompare(presented, expected) != 1 {
 			w.Header().Set("WWW-Authenticate", `Bearer realm="metrics"`)
 			http.Error(w, "metrics token required", http.StatusUnauthorized)
 			return

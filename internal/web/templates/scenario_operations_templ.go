@@ -203,7 +203,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 					}
 					templ_7745c5c3_Err = ui.RowActions(ui.RowActionsOpts{
 						Label: "Actions for " + job.Name,
-						Items: opsJobMenu(gc, job),
+						Items: opsJobMenu(gc),
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -773,13 +773,18 @@ func opsSchedules(gc GalleryContext) []opsSchedule {
 // disabled. A menu that empties itself teaches a support engineer that the
 // product has no requeue at all, which is the wrong lesson: the command exists,
 // their role does not carry it.
-func opsJobMenu(gc GalleryContext, job opsJob) []ui.MenuItem {
+//
+// Cancel carries no Confirm. hx-confirm gates an htmx request, and these
+// scenario commands issue none, so the prompt would never appear - the menu
+// would simply look like it asked. The confirmed destructive pattern is
+// ConfirmAction, which the settings scenario's danger zone renders.
+func opsJobMenu(gc GalleryContext) []ui.MenuItem {
 	readonly := gc.State == "readonly"
 	return []ui.MenuItem{
 		{Label: "Requeue", Icon: ui.IconRefresh, Disabled: readonly},
 		{Label: "View payload", Icon: ui.IconVisibility, Href: opsPagerURL(gc), Disabled: readonly},
 		{Separator: true},
-		{Label: "Cancel", Icon: ui.IconClose, Kind: ui.KindDanger, Disabled: readonly, Confirm: "Cancel " + job.Name + "?"},
+		{Label: "Cancel", Icon: ui.IconClose, Kind: ui.KindDanger, Disabled: readonly},
 	}
 }
 

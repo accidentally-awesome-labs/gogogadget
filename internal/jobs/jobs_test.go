@@ -396,3 +396,74 @@ func TestDunningEmailSkippedWithoutSubscription(t *testing.T) {
 	assert.True(t, done)
 	assert.Empty(t, sender.sent)
 }
+
+// A ticker alone put the first janitor sweep 24 hours after process start and
+// reset that clock on every restart, so any deployment recycling more often than
+// daily never reached it. Retention that only holds on a long-uptime host is not
+// retention, and every consequence was silent: unbounded job rows, an unbounded
+// inbound-idempotency table, AUDIT_RETENTION_DAYS never enforced, rotated
+// webhook secrets never cleared.
+func TestJanitorRunsBeforeItsFirstTick(t *testing.T) {
+	pool, q := testdb.Open(t, "jobs")
+	defer pool.Close()
+
+	stale := time.Now().Add(-30 * 24 * time.Hour)
+	_, err := pool.Exec(t.Context(),
+		`INSERT INTO jobs (kind, payload, attempts, max_attempts, run_at, done_at, created_at)
+		 VALUES ('email.digest', '{}', 1, 8, $1, $1, $1)`, stale)
+	require.NoError(t, err)
+
+	before := countJobs(t, pool)
+	require.Positive(t, before, "the fixture row must exist, or this proves nothing")
+
+	// Run with a live context and stop as soon as the sweep is observable. A
+	// cancelled context would make the sweep a no-op, which would pass for the
+	// wrong reason: the query would fail rather than the row being kept.
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	log := slog.New(slog.DiscardHandler)
+	go NewWorker(q, mail.NewDevSender(log, t.TempDir()), log).Run(ctx)
+
+	deadline := time.Now().Add(10 * time.Second)
+	for countJobs(t, pool) >= before && time.Now().Before(deadline) {
+		time.Sleep(50 * time.Millisecond)
+	}
+	assert.Less(t, countJobs(t, pool), before,
+		"the janitor must sweep on start; waiting for the first 24h tick means it never runs on a host that restarts daily")
+}
+
+func countJobs(t *testing.T, pool *pgxpool.Pool) int {
+	t.Helper()
+	var n int
+	require.NoError(t, pool.QueryRow(t.Context(), `SELECT count(*) FROM jobs`).Scan(&n))
+	return n
+}
+
+// Run is started in a goroutine by Module.Start with no recover above it, so
+// before this a panicking handler unwound past the web server and took the whole
+// process down. A background worker must not be able to kill the thing serving
+// traffic, and the queue already has the right answer for a handler that cannot
+// complete: fail it, back off, dead-letter at the budget.
+func TestAPanickingHandlerFailsItsJobRatherThanTheProcess(t *testing.T) {
+	pool, q := testdb.Open(t, "jobs")
+	defer pool.Close()
+
+	log := slog.New(slog.DiscardHandler)
+	w := NewWorker(q, mail.NewDevSender(log, t.TempDir()), log)
+	w.definitions["test.panic"] = Define("test.panic", false, 2,
+		func(context.Context, struct{}) error { panic("handler exploded") })
+
+	require.NoError(t, Enqueue(t.Context(), q, "test.panic", struct{}{}))
+
+	handled, err := w.ProcessOne(t.Context())
+	require.True(t, handled, "the job must be claimed and handled")
+	require.NoError(t, err, "a panicking handler is a failed job, not a failed worker")
+
+	var attempts int
+	var lastError pgtype.Text
+	require.NoError(t, pool.QueryRow(t.Context(),
+		`SELECT attempts, last_error FROM jobs WHERE kind = 'test.panic'`).Scan(&attempts, &lastError))
+	assert.Equal(t, 1, attempts, "the attempt must be recorded so the backoff schedule advances")
+	assert.Contains(t, lastError.String, "panicked",
+		"the recorded error must name the panic, or the operator sees a failure with no cause")
+}

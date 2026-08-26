@@ -229,7 +229,9 @@ func TestProjectDeleteIsGatedByAnInPageDialog(t *testing.T) {
 
 	code, _, body := serve(t, s, "GET", "/app/projects", nil, nil, sessionCookie("user_cfm", "org_cfm", "org:admin"))
 	require.Equal(t, http.StatusOK, code)
-	assert.NotContains(t, body, "hx-confirm", "no page may fall back to window.confirm")
+	assert.NotContains(t, body, "hx-confirm",
+		"this page must not fall back to window.confirm; the repo-wide ban is "+
+			"TestNoProductionTemplateFallsBackToWindowConfirm in internal/web/templates")
 	assert.Contains(t, body, `data-ui="confirm-action"`)
 	assert.Contains(t, body, fmt.Sprintf(`id="project-delete-%d"`, p.ID), "one dialog per row, addressable by id")
 	// The delete contract is unchanged: same method, same target, same swap —

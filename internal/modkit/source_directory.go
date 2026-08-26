@@ -77,7 +77,7 @@ func (s DirectorySource) Resolve(ctx context.Context, _, _ string) (Snapshot, er
 		// state and tool-owned output are excluded: including them would let
 		// writing the lock invalidate the lock that was just written, and
 		// `sync --check` could never be clean.
-		if !entry.IsDir() && (name == ProjectFileName || name == LockFileName || isGeneratedOutput(name)) {
+		if !entry.IsDir() && (name == ProjectFileName || name == LockFileName || IsGeneratedOutputPath(name)) {
 			return nil
 		}
 		if !fs.ValidPath(name) {

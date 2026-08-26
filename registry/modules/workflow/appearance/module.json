@@ -35,7 +35,7 @@
         "source": "internal/web/handlers_locale.go",
         "target": "internal/web/handlers_locale.go",
         "class": "go",
-        "sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+        "sha256": "41c73566bcf534703fd2830d481466be084ca6194e677acbe673bf89b6a9cd0e",
         "rewrite_module": true,
         "contract": false
       }

@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/checkbox.templ",
         "target": "internal/web/templates/ui/checkbox.templ",
         "class": "templ",
-        "sha256": "8e5fc885f32e668872ce3f6255279ea13a8e6295ec682b396311954c9b5f26a4",
+        "sha256": "10c424a9c97345e0306fd3b4a0aedaf80c2fd6674ac6c3ffdb2ef8f4b28c8971",
         "rewrite_module": true,
         "contract": true
       }

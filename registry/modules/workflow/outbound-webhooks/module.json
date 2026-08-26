@@ -20,7 +20,7 @@
         "source": "internal/jobs/webhooks_deliver.go",
         "target": "internal/jobs/webhooks_deliver.go",
         "class": "go",
-        "sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+        "sha256": "6d8fc1f1ffa459e951d9f7c5ea656a63fe531964000a48e7b28a7274c3db6643",
         "rewrite_module": true,
         "contract": false
       },
@@ -28,7 +28,7 @@
         "source": "internal/jobs/webhooks_deliver_test.go",
         "target": "internal/jobs/webhooks_deliver_test.go",
         "class": "test",
-        "sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+        "sha256": "e7d48756c7e4884d07b10f834f423fe36e641c997b92709bd99990fc54c278db",
         "rewrite_module": true,
         "contract": false
       }

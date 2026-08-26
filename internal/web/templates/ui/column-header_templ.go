@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -59,6 +60,7 @@ func ColumnHeader(o ColumnHeaderOpts) templ.Component {
 		}
 		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("column-header", columnHeaderClass(o.Column), o.Attrs,
 			"scope", "col",
+			"style", columnWidthStyle(o.Column),
 			"aria-sort", columnAriaSort(o.Sort)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -75,7 +77,7 @@ func ColumnHeader(o ColumnHeaderOpts) templ.Component {
 			var templ_7745c5c3_Var2 templ.SafeURL
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 38, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 40, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -93,7 +95,7 @@ func ColumnHeader(o ColumnHeaderOpts) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(SortURL(o.BaseURL, o.Param, o.Column.Key, o.Sort))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 40, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 42, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 				if templ_7745c5c3_Err != nil {
@@ -106,7 +108,7 @@ func ColumnHeader(o ColumnHeaderOpts) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Target)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 41, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 43, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 				if templ_7745c5c3_Err != nil {
@@ -124,7 +126,7 @@ func ColumnHeader(o ColumnHeaderOpts) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(o.Column.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 47, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 49, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -142,7 +144,7 @@ func ColumnHeader(o ColumnHeaderOpts) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(o.Column.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 51, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/column-header.templ`, Line: 53, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -227,6 +229,29 @@ func columnHeaderClass(column Column) string {
 	}
 	return cls
 }
+
+// columnWidthStyle sizes one column from its declared width, or renders nothing
+// when the caller declared none.
+//
+// An inline style rather than a class: the value is data, and a utility class
+// cannot carry an arbitrary length without the arbitrary-value syntax the design
+// system forbids in templates. It is also deliberately the same property the
+// grid controller writes when a user drags a column edge, so one measure has one
+// owner and a stored user width simply overrides the declared start - which is
+// the precedence a preference has to have.
+//
+// A value that is not a bare CSS length is dropped. Callers are Go source rather
+// than user input, so this is not an escaping defence: it is what keeps the
+// field a length instead of an inline-style hook able to carry any declaration
+// the rest of the design system exists to forbid.
+func columnWidthStyle(column Column) string {
+	if !cssLength.MatchString(column.Width) {
+		return ""
+	}
+	return "width:" + column.Width
+}
+
+var cssLength = regexp.MustCompile(`^[0-9]+(\.[0-9]+)?(px|rem|em|ch|%)$`)
 
 // breakpointHideClass hides a column below a breakpoint. Without this a wide
 // table can only scroll sideways on a phone, which puts data behind a gesture

@@ -14,9 +14,14 @@ document.addEventListener("alpine:init", () => {
   // bar nothing can operate is a row of dead buttons.
   //
   // Every reference lives in this closure rather than on the component object.
-  // A property declared in the returned literal is per element, but one
-  // introduced by assignment inside init() is not - two tab widgets on one page
-  // would share a single `tabs` array and each would drive the other's panels.
+  // Not because assignment in init() would be shared - it is not: Alpine.data's
+  // callback runs once per element, so `this` is that element's own object, and
+  // five uiChart roots on /dev/scenarios/analytics each carry their own
+  // `_onTheme` assigned exactly this way. The reason is reactivity: a property
+  // on the component object is wrapped in Alpine's proxy, so parking DOM node
+  // arrays there makes every read proxied and every mutation schedule effects,
+  // for state no template ever binds to. It is the same rule the engine
+  // adapters follow when they keep third-party instances in a WeakMap.
   Alpine.data("uiTabs", () => ({
     init() {
       const root = this.$root;

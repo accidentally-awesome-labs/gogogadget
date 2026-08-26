@@ -167,7 +167,7 @@ func planMigrations(ctx context.Context, root string, registryFS fs.FS, modules 
 		if owner, collision := usedPaths[migrationPath]; collision {
 			return nil, nil, fmt.Errorf("migration target %q collides with immutable mapping owned by %s", migrationPath, owner)
 		}
-		if isGeneratedOutput(migrationPath) {
+		if IsGeneratedOutputPath(migrationPath) {
 			return nil, nil, fmt.Errorf("migration target %q is a generated output and cannot be authored", migrationPath)
 		}
 		mappingValue := LockedMigration{
@@ -242,30 +242,45 @@ func sanitizeMigrationID(id string) string {
 	return strings.Trim(result.String(), "_")
 }
 
-// isGeneratedOutput reports whether a target path is a tool-owned generated
-// output. Authored module targets must never claim these.
 // IsGeneratedOutputPath reports whether a path is build output rather than
-// distributed source. Exported because the ownership guard needs the same
-// answer the snapshot and the emitters use — a second copy of this rule would
-// drift from the one that matters.
-func IsGeneratedOutputPath(path string) bool { return isGeneratedOutput(path) }
+// distributed source. Authored module targets must never claim one. Exported
+// because the ownership guard needs the same answer the snapshot and the
+// emitters use — a second copy of this rule would drift from the one that
+// matters.
+func IsGeneratedOutputPath(path string) bool {
+	return isExternalToolOutput(path) || IsRegistryOwnedOutputPath(path)
+}
 
-func isGeneratedOutput(path string) bool {
-	if strings.HasSuffix(path, "_templ.go") || strings.Contains(path, "_registry_gen.") {
+// isExternalToolOutput covers the outputs templ, sqlc, and Tailwind produce.
+// They are generated, but this pipeline never renders them, so the stale sweep
+// must not treat their absence from a render as "no longer owned".
+func isExternalToolOutput(path string) bool {
+	if strings.HasSuffix(path, "_templ.go") {
 		return true
 	}
-	if strings.HasPrefix(path, "internal/db/sqlc/") || path == "static/app.css" ||
-		path == "static/ui-components.js" || path == "static/ui-engines.js" {
+	return strings.HasPrefix(path, "internal/db/sqlc/") || path == "static/app.css"
+}
+
+// IsRegistryOwnedOutputPath reports whether a path is rendered by GenerateAll.
+// This is the set `ggg sync` writes AND, when the selected graph stops rendering
+// one, deletes: an aggregate nothing owns still compiles into the project and
+// still references renderers the removal deleted. It is therefore the one
+// answer to "is this ours", and TestEveryEmittedPathIsRegistryOwned holds the
+// emitters to it.
+//
+// Listed explicitly rather than matched by pattern beyond the `_registry_gen.`
+// infix: this predicate is what stops an emitter from overwriting authored
+// source and what authorises a delete, so widening it stays deliberate.
+func IsRegistryOwnedOutputPath(path string) bool {
+	if strings.Contains(path, "_registry_gen.") {
 		return true
 	}
-	// Rendered from the same declarations as the code that reads them. Listed
-	// explicitly rather than matched by pattern: this predicate is what stops an
-	// emitter from overwriting authored source, so widening it stays deliberate.
 	switch path {
-	case ".env.example", "content/docs/configuration-reference.md",
+	case "static/ui-components.js", "static/ui-engines.js",
+		".env.example", "content/docs/configuration-reference.md",
 		"content/docs/module-reference.md", "content/docs/component-reference.md",
-		"e2e/generated/personas.ts",
-		"e2e/generated/surfaces.ts", "internal/web/templates/scenarios_gen.go",
+		"e2e/generated/personas.ts", "e2e/generated/surfaces.ts",
+		"internal/web/templates/scenarios_gen.go",
 		"internal/web/templates/ui/reference_gen.go":
 		return true
 	}

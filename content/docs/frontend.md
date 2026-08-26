@@ -203,9 +203,16 @@ The handler returns `200` with an empty body; htmx replaces the `<tr>` with
 nothing. Note the trigger label carries the row's subject: forty controls all
 called "Delete" are indistinguishable to a screen reader and to a test.
 
-`Attrs.HX.Confirm` still exists and still emits `hx-confirm`; it is for
-dev-only surfaces and menu items where the prompt is not user-facing product
-copy.
+The ban is enforced, not just documented:
+`TestNoProductionTemplateFallsBackToWindowConfirm` scans every production
+template for `hx-confirm` and for a `Confirm:` field.
+
+`Attrs.HX.Confirm` and `ui.MenuItem.Confirm` still exist and still emit
+`hx-confirm`; they are for dev-only surfaces and menu items where the prompt is
+not user-facing product copy. `MenuItem.Confirm` is honoured only on an item
+that actually issues a request — a boosted link or an `HX` verb. On a plain link
+or an inert button htmx never processes the click, so the attribute would promise
+a prompt that never appears, and the component drops it instead.
 
 ## Search and pagination
 
@@ -412,11 +419,13 @@ it once on its root; `Class` is additive and `Data` reserves `data-ui` and
 `data-ui-*`. Primary content is templ children; named secondary slots are
 `templ.Component` fields that omit their wrapper when nil.
 
-Four tests in `internal/web/templates/ui/contract_test.go` hold that line:
+Three tests in `internal/web/templates/ui/contract_test.go` hold that line:
 `TestEveryExportedRendererTakesOneOptionsStruct`,
-`TestEveryOptionsStructEmbedsAttrs`,
 `TestAttrsHasNoArbitraryAttributeEscapeHatch` and
-`TestEveryRendererPropagatesItsAttrs`.
+`TestEveryRendererPropagatesItsAttrs` — the last one reflects over every
+renderer the AST scan finds, so it covers the whole package rather than a
+hand-kept sample of it, and it asserts the caller's class lands on the element
+that carries the caller's test id.
 
 Values come from closed enums: `Kind` in `ui/ui.go`, and `Size`, `Emphasis`,
 `Action`, `ButtonType`, `InputType`, `Live`, `Density`, `Orientation`,

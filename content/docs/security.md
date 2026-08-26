@@ -182,6 +182,14 @@ why it is CSRF-exempt. See [API](/docs/api).
 Every route is capped by `http.MaxBytesReader` at **10 MB** — a memory-
 exhaustion vector closed by default, not per-handler.
 
+A route may declare a tighter cap through `RoutePolicy.MaxBodyBytes`, which
+`routeBodyLimit` applies outside CSRF (parsing a form reads the body, so a cap
+applied after that has already been bypassed). It only ever narrows: a declared
+value at or above the global cap changes nothing. The webhook receivers are why
+it exists — they `io.ReadAll` the body before verifying a signature, so
+`/webhooks/clerk` and `/webhooks/polar` declare **1 MiB** and an oversized
+delivery is refused before any HMAC work happens.
+
 ## Dependency policy
 
 Every dependency is load-bearing and listed in the manifest

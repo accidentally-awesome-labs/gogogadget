@@ -17,7 +17,7 @@
         "source": "internal/web/templates/ui/tree.templ",
         "target": "internal/web/templates/ui/tree.templ",
         "class": "templ",
-        "sha256": "c81a22fe0c80517a3f448c613a3ee1665ae9fac46aa9ebab7b338fcfbe5cbf31",
+        "sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
         "rewrite_module": true,
         "contract": true
       },

@@ -335,8 +335,16 @@ func validateRoutes(routes []RouteContribution, canonical bool) error {
 		if !route.Policy.CSRFExempt && route.Policy.CSRFReason != "" {
 			return fmt.Errorf("manifest runtime routes[%d] policy csrf_reason requires csrf_exempt", i)
 		}
+		// The declared cap only ever narrows the global 10 MB reader, so a value
+		// at or above it is a no-op that reads like a limit. Refuse it rather than
+		// let a manifest claim a bound the runtime will not apply.
 		if route.Policy.MaxBodyBytes < 0 {
 			return fmt.Errorf("manifest runtime routes[%d] policy max_body_bytes is negative", i)
+		}
+		if route.Policy.MaxBodyBytes >= GlobalRequestBodyLimit {
+			return fmt.Errorf(
+				"manifest runtime routes[%d] policy max_body_bytes %d does not narrow the global %d-byte cap",
+				i, route.Policy.MaxBodyBytes, GlobalRequestBodyLimit)
 		}
 		if _, ok := seen[route.ID]; ok {
 			return fmt.Errorf("manifest runtime routes contain duplicate id %q", route.ID)

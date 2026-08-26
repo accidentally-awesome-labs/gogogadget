@@ -61,20 +61,34 @@ function scan(root) {
 // is not a document load.
 document.addEventListener("DOMContentLoaded", () => scan(document));
 document.addEventListener("htmx:after:process", (event) => scan(event.target));
-// A widget mounted by Alpine after boot - a dialog's contents, say - still needs
-// its engine, and alpine:initialized fires once Alpine has walked the tree.
+// Alpine's own directives insert DOM while it walks the tree on boot - an x-if
+// or x-for holding a widget root - and that walk can finish after
+// DOMContentLoaded, so those roots are not in the first scan.
+// alpine:initialized fires once, after that walk, which is exactly the window
+// this covers and the whole of it: a root Alpine reveals LATER (an x-if that
+// flips on interaction) is not covered here, because the event has already
+// fired. htmx-inserted content has its own hook above; an Alpine-revealed root
+// has none, and would need one before it could be claimed.
 document.addEventListener("alpine:initialized", () => scan(document));
 
 // pending holds one promise per engine, so ten charts on a page trigger one
 // fetch. Keyed by name rather than by element: the second widget must wait on
 // the first request, not start a second.
 //
-// A REJECTED entry is evicted. Caching a rejection means one dropped request -
+// A rejected FETCH is evicted. Caching a rejection means one dropped request -
 // a flaky connection, a proxy hiccup, a cold cache under load - permanently
 // disables the widget for the rest of the page's life, and every widget that
 // mounts afterwards receives the cached failure instantly without a single byte
 // being retried. That reads exactly like a broken build and is nothing of the
-// kind. Resolved entries are kept forever: the runtime is loaded, and loading it
+// kind.
+//
+// The one rejection that is KEPT is an engine the registry does not declare
+// (see the !asset branch below). There is nothing to retry: the registry is a
+// generated object in the page, so the answer is deterministic for this
+// document's life, and re-deriving it per widget would only repeat the same
+// verdict.
+//
+// Resolved entries are kept forever: the runtime is loaded, and loading it
 // twice would re-run a bundle that defines custom elements.
 const pending = new Map();
 
@@ -86,6 +100,10 @@ function loadEngine(name) {
   if (!asset) {
     // An undeclared engine is a manifest bug, and it must fail loudly here
     // rather than resolving to a runtime that never arrives.
+    //
+    // This rejection is cached and never evicted, unlike a failed fetch: the
+    // registry is a generated object already in the page, so there is no
+    // request to retry and the verdict cannot change while the document lives.
     const failure = Promise.reject(new Error("engine " + name + " is not installed"));
     pending.set(name, failure);
     return failure;

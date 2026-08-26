@@ -10,7 +10,9 @@ type SwitchOpts struct {
 // Switch is a labelled toggle.
 templ Switch(o SwitchOpts) {
 	<label { root("switch", "flex items-center gap-2 text-sm", Attrs{})... }>
-		<input { attributes(o.Attrs)... } type="checkbox" name={ o.Name } checked?={ o.On } class="h-4 w-4"/>
+		// Merged, not a second class attribute: see Checkbox for what two class
+		// attributes on one element cost.
+		<input { attributes(withClass(o.Attrs, "h-4 w-4"))... } type="checkbox" name={ o.Name } checked?={ o.On }/>
 		{ o.Label }
 	</label>
 }

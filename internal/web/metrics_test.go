@@ -74,11 +74,28 @@ func TestMetricsTokenGatesScrape(t *testing.T) {
 	code, _, _ := serve(t, s, "GET", "/metrics", nil, nil)
 	assert.Equal(t, http.StatusUnauthorized, code, "no bearer → 401")
 
-	h := http.Header{}
-	h.Set("Authorization", "Bearer wrong")
-	code, _, _ = serve(t, s, "GET", "/metrics", nil, h)
-	assert.Equal(t, http.StatusUnauthorized, code, "wrong bearer → 401")
+	// Near misses. The comparison is crypto/subtle.ConstantTimeCompare, which
+	// returns 0 for a length mismatch as well as a content mismatch, so a prefix,
+	// a suffix, and a one-byte difference must all be rejected. `!=` on strings
+	// returned at the first differing byte, which on a route that is RateExempt
+	// by policy is a timing oracle over the token.
+	for _, presented := range []string{
+		"Bearer wrong",
+		"Bearer sekres", // differs only in the last byte
+		"Bearer sekre",  // prefix
+		"Bearer sekrets",
+		"sekret", // no scheme
+		"Basic sekret",
+		"bearer sekret", // scheme is case-sensitive here by construction
+		"Bearer  sekret",
+	} {
+		h := http.Header{}
+		h.Set("Authorization", presented)
+		code, _, _ = serve(t, s, "GET", "/metrics", nil, h)
+		assert.Equal(t, http.StatusUnauthorized, code, "Authorization: %q must be rejected", presented)
+	}
 
+	h := http.Header{}
 	h.Set("Authorization", "Bearer sekret")
 	code, _, body := serve(t, s, "GET", "/metrics", nil, h)
 	assert.Equal(t, http.StatusOK, code)

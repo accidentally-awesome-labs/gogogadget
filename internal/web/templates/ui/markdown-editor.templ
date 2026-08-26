@@ -105,6 +105,18 @@ templ MarkdownEditor(o MarkdownEditorOpts) {
 				@EditorPreview(EditorPreviewOpts{ID: markdownControlID(o) + "-preview"})
 			}
 		</div>
+		// The hint the textarea's aria-describedby names. FieldARIA points at
+		// "<control>-hint" whenever a hint is set, so an editor that accepted the
+		// option and rendered no such element left the control describing
+		// nothing - which some assistive technology announces as silence and no
+		// axe rule reports, because the attribute is well-formed.
+		//
+		// The error replaces it rather than joining it, exactly as Field does:
+		// FieldAriaDescribedBy names one element, and two descriptions read in
+		// sequence bury the actionable one.
+		if o.Hint != "" && o.Error == "" {
+			<p id={ markdownHintID(o) } class="text-sm text-fg-muted mt-1">{ o.Hint }</p>
+		}
 		// The media panel is swapped in here rather than beside the editor: the
 		// insert buttons act on this textarea, so they have to live inside the
 		// controller's root or their clicks reach nothing. It ships hidden for
@@ -336,6 +348,14 @@ func markdownControlID(o MarkdownEditorOpts) string {
 func markdownErrorID(o MarkdownEditorOpts) string {
 	_, _, errID := FieldIDs(markdownControlID(o))
 	return errID
+}
+
+// markdownHintID is the other id FieldARIA can name. It resolves through the
+// same FieldIDs call as the error, so the element the editor renders and the
+// element the textarea points at cannot drift apart.
+func markdownHintID(o MarkdownEditorOpts) string {
+	_, hint, _ := FieldIDs(markdownControlID(o))
+	return hint
 }
 
 func markdownPreviewTarget(o MarkdownEditorOpts) string {

@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -28,6 +29,7 @@ templ ColumnHeader(o ColumnHeaderOpts) {
 	<th
 		{ rootWith("column-header", columnHeaderClass(o.Column), o.Attrs,
 			"scope", "col",
+			"style", columnWidthStyle(o.Column),
 			"aria-sort", columnAriaSort(o.Sort))... }
 	>
 		if o.Column.Sortable && o.BaseURL != "" {
@@ -123,6 +125,29 @@ func columnHeaderClass(column Column) string {
 	}
 	return cls
 }
+
+// columnWidthStyle sizes one column from its declared width, or renders nothing
+// when the caller declared none.
+//
+// An inline style rather than a class: the value is data, and a utility class
+// cannot carry an arbitrary length without the arbitrary-value syntax the design
+// system forbids in templates. It is also deliberately the same property the
+// grid controller writes when a user drags a column edge, so one measure has one
+// owner and a stored user width simply overrides the declared start - which is
+// the precedence a preference has to have.
+//
+// A value that is not a bare CSS length is dropped. Callers are Go source rather
+// than user input, so this is not an escaping defence: it is what keeps the
+// field a length instead of an inline-style hook able to carry any declaration
+// the rest of the design system exists to forbid.
+func columnWidthStyle(column Column) string {
+	if !cssLength.MatchString(column.Width) {
+		return ""
+	}
+	return "width:" + column.Width
+}
+
+var cssLength = regexp.MustCompile(`^[0-9]+(\.[0-9]+)?(px|rem|em|ch|%)$`)
 
 // breakpointHideClass hides a column below a breakpoint. Without this a wide
 // table can only scroll sideways on a phone, which puts data behind a gesture

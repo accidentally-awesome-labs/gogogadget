@@ -51,9 +51,12 @@ func (s *Server) routes() error {
 		// patterns cannot be reached by a deployed runtime.
 		registry = append(append([]Route{}, registry...), testOnlyRoutes()...)
 	}
-	// The matcher is built from the same slice that gets registered, so the
+	// The matcher and the mux are built from the same enabled slice, so the
 	// policy the middleware consults can never drift from the route that was
-	// actually installed.
+	// actually installed. A route whose Enabled gate refused registration must
+	// not resolve to a policy: /metrics and /debug/pprof/* declare rate and
+	// maintenance exemptions, and in production they are not registered at all.
+	registry = enabledRoutes(s, registry)
 	s.policies = newPolicyMatcher(registry)
 
 	if err := registerRoutes(s, registry, scopeTargets{

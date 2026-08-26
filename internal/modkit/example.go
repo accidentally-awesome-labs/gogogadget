@@ -187,8 +187,6 @@ func ValidateExamples(ctx context.Context, root string, log io.Writer) ([]Exampl
 	return results, nil
 }
 
-// exampleWorkDir is the stable per-repository scratch path. The digest keeps two
-// checkouts of this repository from sharing one derivative.
 // acquireValidateLock refuses a second concurrent run and reclaims a lock whose
 // owner is gone. The lock records the pid, because a lock that only a deferred
 // cleanup can release is permanent the moment a run is killed - Ctrl-C, a CI
@@ -204,13 +202,9 @@ func ValidateExamples(ctx context.Context, root string, log io.Writer) ([]Exampl
 // refusing until a human intervenes - is the failure this exists to remove.
 func acquireValidateLock(lockPath string) error {
 	for attempt := range 2 {
-		lockFile, err := os.OpenFile(lockPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+		err := publishValidateLock(lockPath)
 		if err == nil {
-			_, writeErr := fmt.Fprintf(lockFile, "%d\n", os.Getpid())
-			if closeErr := lockFile.Close(); closeErr != nil && writeErr == nil {
-				writeErr = closeErr
-			}
-			return writeErr
+			return nil
 		}
 		if !errors.Is(err, fs.ErrExist) {
 			return err
@@ -234,9 +228,38 @@ func acquireValidateLock(lockPath string) error {
 	return nil
 }
 
+// publishValidateLock creates lockPath containing this run's pid, atomically.
+// The pid must be in the file before the file exists under that name: with
+// O_EXCL followed by a separate write, a second run landing in that window reads
+// an empty file, validateLockOwner classifies it as malformed and therefore
+// stale, and it deletes a live run's lock. So the content is written to a temp
+// file and hard-linked into place — link, not rename, because rename would
+// silently clobber an existing lock instead of reporting fs.ErrExist.
+func publishValidateLock(lockPath string) error {
+	staged, err := os.CreateTemp(filepath.Dir(lockPath), ".validate-lock-*")
+	if err != nil {
+		return err
+	}
+	stagedName := staged.Name()
+	defer func() { _ = os.Remove(stagedName) }()
+	if _, err := fmt.Fprintf(staged, "%d\n", os.Getpid()); err != nil {
+		staged.Close()
+		return err
+	}
+	if err := staged.Close(); err != nil {
+		return err
+	}
+	return os.Link(stagedName, lockPath)
+}
+
 // validateLockOwner reads the recorded pid and reports whether it is still
 // running. An unreadable or malformed lock is treated as stale: it cannot name a
 // process to wait for, so refusing on its behalf would block for nothing.
+//
+// A lock recording THIS pid is also treated as stale. One process never runs two
+// validations concurrently, so seeing our own pid means an earlier run in this
+// process left the file behind - and waiting for ourselves would deadlock the
+// command outright.
 func validateLockOwner(lockPath string) (int, bool) {
 	raw, err := os.ReadFile(lockPath)
 	if err != nil {
@@ -253,6 +276,8 @@ func validateLockOwner(lockPath string) (int, bool) {
 	return pid, process.Signal(syscall.Signal(0)) == nil
 }
 
+// exampleWorkDir is the stable per-repository scratch path. The digest keeps two
+// checkouts of this repository from sharing one derivative.
 func exampleWorkDir(root string) string {
 	sum := sha256.Sum256([]byte(root))
 	return filepath.Join(os.TempDir(), "ggg-registry-validate-"+hex.EncodeToString(sum[:8]))

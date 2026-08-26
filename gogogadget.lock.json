@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "registry_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+  "registry_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
   "order": [
     "element/ui-core",
     "component/accordion",
@@ -250,7 +250,7 @@
       "id": "component/accordion",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -329,7 +329,7 @@
       "id": "component/activity-item",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -390,7 +390,7 @@
       "id": "component/alert-dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/confirm-action"
@@ -459,7 +459,7 @@
       "id": "component/aspect-ratio",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -520,7 +520,7 @@
       "id": "component/attachment",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -583,7 +583,7 @@
       "id": "component/back-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -644,7 +644,7 @@
       "id": "component/badge",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/kanban",
@@ -709,7 +709,7 @@
       "id": "component/banner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -771,7 +771,7 @@
       "id": "component/breadcrumbs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -851,7 +851,7 @@
       "id": "component/calendar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1063,7 +1063,7 @@
       "id": "component/card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1141,7 +1141,7 @@
       "id": "component/carousel",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1262,7 +1262,7 @@
       "id": "component/center",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1323,7 +1323,7 @@
       "id": "component/char-counter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/markdown-editor"
@@ -1408,7 +1408,7 @@
       "id": "component/chart",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1617,7 +1617,7 @@
       "id": "component/chat-log",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1698,7 +1698,7 @@
       "id": "component/chat-message",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1758,7 +1758,7 @@
       "id": "component/checkbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1777,7 +1777,7 @@
             "source": "internal/web/templates/ui/checkbox.templ",
             "target": "internal/web/templates/ui/checkbox.templ",
             "class": "templ",
-            "sha256": "8e5fc885f32e668872ce3f6255279ea13a8e6295ec682b396311954c9b5f26a4",
+            "sha256": "10c424a9c97345e0306fd3b4a0aedaf80c2fd6674ac6c3ffdb2ef8f4b28c8971",
             "rewrite_module": true,
             "contract": true
           }
@@ -1807,8 +1807,8 @@
         {
           "path": "internal/web/templates/ui/checkbox.templ",
           "source": "internal/web/templates/ui/checkbox.templ",
-          "base_sha256": "8e5fc885f32e668872ce3f6255279ea13a8e6295ec682b396311954c9b5f26a4",
-          "local_sha256": "8e5fc885f32e668872ce3f6255279ea13a8e6295ec682b396311954c9b5f26a4",
+          "base_sha256": "10c424a9c97345e0306fd3b4a0aedaf80c2fd6674ac6c3ffdb2ef8f4b28c8971",
+          "local_sha256": "10c424a9c97345e0306fd3b4a0aedaf80c2fd6674ac6c3ffdb2ef8f4b28c8971",
           "state": "clean"
         }
       ],
@@ -1818,7 +1818,7 @@
       "id": "component/checkbox-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1900,7 +1900,7 @@
       "id": "component/collapsible",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1961,7 +1961,7 @@
       "id": "component/color-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2023,7 +2023,7 @@
       "id": "component/column-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/data-grid",
@@ -2046,7 +2046,7 @@
             "source": "internal/web/templates/ui/column-header.templ",
             "target": "internal/web/templates/ui/column-header.templ",
             "class": "templ",
-            "sha256": "f5be2f5e4cf312a3bc5b4e169f0358b2bf29a83267000bf971de327727fbd7ae",
+            "sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
             "rewrite_module": true,
             "contract": true
           },
@@ -2089,8 +2089,8 @@
         {
           "path": "internal/web/templates/ui/column-header.templ",
           "source": "internal/web/templates/ui/column-header.templ",
-          "base_sha256": "f5be2f5e4cf312a3bc5b4e169f0358b2bf29a83267000bf971de327727fbd7ae",
-          "local_sha256": "f5be2f5e4cf312a3bc5b4e169f0358b2bf29a83267000bf971de327727fbd7ae",
+          "base_sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
+          "local_sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
           "state": "clean"
         },
         {
@@ -2107,7 +2107,7 @@
       "id": "component/combobox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2189,7 +2189,7 @@
       "id": "component/command",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2312,7 +2312,7 @@
       "id": "component/comment",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2373,7 +2373,7 @@
       "id": "component/comment-thread",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2434,7 +2434,7 @@
       "id": "component/composer",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2500,7 +2500,7 @@
       "id": "component/confirm-action",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2588,7 +2588,7 @@
       "id": "component/container",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2648,7 +2648,7 @@
       "id": "component/context-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2716,7 +2716,7 @@
       "id": "component/cursor-pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2776,7 +2776,7 @@
       "id": "component/data-grid",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2904,7 +2904,7 @@
       "id": "component/data-table",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2966,7 +2966,7 @@
       "id": "component/date-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/calendar"
@@ -3030,7 +3030,7 @@
       "id": "component/date-range-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/calendar"
@@ -3097,7 +3097,7 @@
       "id": "component/date-time-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/calendar"
@@ -3161,7 +3161,7 @@
       "id": "component/delivery-status",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3222,7 +3222,7 @@
       "id": "component/description-list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3282,7 +3282,7 @@
       "id": "component/dialog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3347,7 +3347,7 @@
       "id": "component/disclosure",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3408,7 +3408,7 @@
       "id": "component/drawer",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3472,7 +3472,7 @@
       "id": "component/dropdown-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/context-menu",
@@ -3562,7 +3562,7 @@
       "id": "component/empty-state",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3642,7 +3642,7 @@
       "id": "component/error-state",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3704,7 +3704,7 @@
       "id": "component/field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/questionnaire"
@@ -3787,7 +3787,7 @@
       "id": "component/field-error",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/composer",
@@ -3851,7 +3851,7 @@
       "id": "component/fieldset",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3911,7 +3911,7 @@
       "id": "component/file-dropzone",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/markdown-editor"
@@ -3997,7 +3997,7 @@
       "id": "component/file-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4058,7 +4058,7 @@
       "id": "component/form",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4134,7 +4134,7 @@
       "id": "component/form-actions",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/composer"
@@ -4215,7 +4215,7 @@
       "id": "component/grid",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4275,7 +4275,7 @@
       "id": "component/hint",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4335,7 +4335,7 @@
       "id": "component/hover-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4420,7 +4420,7 @@
       "id": "component/inline",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4480,7 +4480,7 @@
       "id": "component/input-addon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4560,7 +4560,7 @@
       "id": "component/input-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4621,7 +4621,7 @@
       "id": "component/kanban",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4782,7 +4782,7 @@
       "id": "component/key-value",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4842,7 +4842,7 @@
       "id": "component/label",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4903,7 +4903,7 @@
       "id": "component/list",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4972,7 +4972,7 @@
       "id": "component/markdown-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4994,7 +4994,7 @@
             "source": "internal/web/templates/ui/markdown-editor.templ",
             "target": "internal/web/templates/ui/markdown-editor.templ",
             "class": "templ",
-            "sha256": "4a7c48b60cc5a971eb4d7f501646fcb090e9dd866540e505448e5ade1312f44f",
+            "sha256": "3aade5e33782bbf31ddf0faf6d3095a70f5993e1267a634f0c4f0f8ff839438a",
             "rewrite_module": true,
             "contract": true
           },
@@ -5002,7 +5002,7 @@
             "source": "internal/web/templates/ui/markdown-editor_test.go",
             "target": "internal/web/templates/ui/markdown-editor_test.go",
             "class": "test",
-            "sha256": "ea4f24d2767535b9350fc2029cb3800a64131a3f26ba72655af1a1c0f7dd7a21",
+            "sha256": "70d12a30efb967747479a28b152b7d1a58ad8b5af069cc74310940a0ef857f61",
             "rewrite_module": true,
             "contract": false
           },
@@ -5088,15 +5088,15 @@
         {
           "path": "internal/web/templates/ui/markdown-editor.templ",
           "source": "internal/web/templates/ui/markdown-editor.templ",
-          "base_sha256": "4a7c48b60cc5a971eb4d7f501646fcb090e9dd866540e505448e5ade1312f44f",
-          "local_sha256": "4a7c48b60cc5a971eb4d7f501646fcb090e9dd866540e505448e5ade1312f44f",
+          "base_sha256": "3aade5e33782bbf31ddf0faf6d3095a70f5993e1267a634f0c4f0f8ff839438a",
+          "local_sha256": "3aade5e33782bbf31ddf0faf6d3095a70f5993e1267a634f0c4f0f8ff839438a",
           "state": "clean"
         },
         {
           "path": "internal/web/templates/ui/markdown-editor_test.go",
           "source": "internal/web/templates/ui/markdown-editor_test.go",
-          "base_sha256": "ea4f24d2767535b9350fc2029cb3800a64131a3f26ba72655af1a1c0f7dd7a21",
-          "local_sha256": "ea4f24d2767535b9350fc2029cb3800a64131a3f26ba72655af1a1c0f7dd7a21",
+          "base_sha256": "70d12a30efb967747479a28b152b7d1a58ad8b5af069cc74310940a0ef857f61",
+          "local_sha256": "70d12a30efb967747479a28b152b7d1a58ad8b5af069cc74310940a0ef857f61",
           "state": "clean"
         },
         {
@@ -5113,7 +5113,7 @@
       "id": "component/member-item",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5176,7 +5176,7 @@
       "id": "component/mention-chip",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5237,7 +5237,7 @@
       "id": "component/menubar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5300,7 +5300,7 @@
       "id": "component/meter",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/usage-card"
@@ -5363,7 +5363,7 @@
       "id": "component/metric",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5423,7 +5423,7 @@
       "id": "component/multi-select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5486,7 +5486,7 @@
       "id": "component/nav-tabs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5547,7 +5547,7 @@
       "id": "component/navigation-menu",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5608,7 +5608,7 @@
       "id": "component/notice",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/kanban"
@@ -5673,7 +5673,7 @@
       "id": "component/notification-item",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5751,7 +5751,7 @@
       "id": "component/number-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5833,7 +5833,7 @@
       "id": "component/onboarding-checklist",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5896,7 +5896,7 @@
       "id": "component/otp-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5977,7 +5977,7 @@
       "id": "component/page-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6037,7 +6037,7 @@
       "id": "component/pagination",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/data-grid"
@@ -6119,7 +6119,7 @@
       "id": "component/panels",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6241,7 +6241,7 @@
       "id": "component/password-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6322,7 +6322,7 @@
       "id": "component/plan-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6383,7 +6383,7 @@
       "id": "component/popover",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6448,7 +6448,7 @@
       "id": "component/progress-bar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/onboarding-checklist"
@@ -6531,7 +6531,7 @@
       "id": "component/progress-circle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6592,7 +6592,7 @@
       "id": "component/questionnaire",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6696,7 +6696,7 @@
       "id": "component/radio-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6757,7 +6757,7 @@
       "id": "component/range-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6818,7 +6818,7 @@
       "id": "component/row-actions",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6880,7 +6880,7 @@
       "id": "component/scroll-area",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6962,7 +6962,7 @@
       "id": "component/search-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/data-grid"
@@ -6985,7 +6985,7 @@
             "source": "internal/web/templates/ui/search-input.templ",
             "target": "internal/web/templates/ui/search-input.templ",
             "class": "templ",
-            "sha256": "0d56d9b2501f570d32aad0f628cc0ff7c63a11eaa51c16829b75b5859bba3e09",
+            "sha256": "b1af4d13b74ae9123693965d6819adce9e085950b84e0d76249f1a12897b322a",
             "rewrite_module": true,
             "contract": true
           },
@@ -7025,8 +7025,8 @@
         {
           "path": "internal/web/templates/ui/search-input.templ",
           "source": "internal/web/templates/ui/search-input.templ",
-          "base_sha256": "0d56d9b2501f570d32aad0f628cc0ff7c63a11eaa51c16829b75b5859bba3e09",
-          "local_sha256": "0d56d9b2501f570d32aad0f628cc0ff7c63a11eaa51c16829b75b5859bba3e09",
+          "base_sha256": "b1af4d13b74ae9123693965d6819adce9e085950b84e0d76249f1a12897b322a",
+          "local_sha256": "b1af4d13b74ae9123693965d6819adce9e085950b84e0d76249f1a12897b322a",
           "state": "clean"
         },
         {
@@ -7043,7 +7043,7 @@
       "id": "component/secret-reveal",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7105,7 +7105,7 @@
       "id": "component/section",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7167,7 +7167,7 @@
       "id": "component/section-header",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7227,7 +7227,7 @@
       "id": "component/select",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/questionnaire"
@@ -7290,7 +7290,7 @@
       "id": "component/selection-bar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7351,7 +7351,7 @@
       "id": "component/settings-section",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7412,7 +7412,7 @@
       "id": "component/skeleton",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7493,7 +7493,7 @@
       "id": "component/skip-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7573,7 +7573,7 @@
       "id": "component/slug-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7638,7 +7638,7 @@
       "id": "component/split",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7699,7 +7699,7 @@
       "id": "component/stack",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7759,7 +7759,7 @@
       "id": "component/stat-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7819,7 +7819,7 @@
       "id": "component/status-dot",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/calendar",
@@ -7904,7 +7904,7 @@
       "id": "component/steps",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/questionnaire"
@@ -7986,7 +7986,7 @@
       "id": "component/sticky-bar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8047,7 +8047,7 @@
       "id": "component/switch",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8066,7 +8066,7 @@
             "source": "internal/web/templates/ui/switch.templ",
             "target": "internal/web/templates/ui/switch.templ",
             "class": "templ",
-            "sha256": "c1889d4aca708532d974e9f00d11933d8346ab6cba62602b0efebba7abe61c22",
+            "sha256": "70183904fd0443ba72240f72875be2fda04f2c83831348981c08f9c040f67b73",
             "rewrite_module": true,
             "contract": true
           }
@@ -8096,8 +8096,8 @@
         {
           "path": "internal/web/templates/ui/switch.templ",
           "source": "internal/web/templates/ui/switch.templ",
-          "base_sha256": "c1889d4aca708532d974e9f00d11933d8346ab6cba62602b0efebba7abe61c22",
-          "local_sha256": "c1889d4aca708532d974e9f00d11933d8346ab6cba62602b0efebba7abe61c22",
+          "base_sha256": "70183904fd0443ba72240f72875be2fda04f2c83831348981c08f9c040f67b73",
+          "local_sha256": "70183904fd0443ba72240f72875be2fda04f2c83831348981c08f9c040f67b73",
           "state": "clean"
         }
       ],
@@ -8107,7 +8107,7 @@
       "id": "component/tab-panels",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8191,7 +8191,7 @@
       "id": "component/table",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8252,7 +8252,7 @@
       "id": "component/table-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8341,7 +8341,7 @@
       "id": "component/table-of-contents",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8402,7 +8402,7 @@
       "id": "component/table-toolbar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8462,7 +8462,7 @@
       "id": "component/tags-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8528,7 +8528,7 @@
       "id": "component/terminal-page",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8590,7 +8590,7 @@
       "id": "component/text-input",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/questionnaire"
@@ -8655,7 +8655,7 @@
       "id": "component/textarea",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/composer",
@@ -8718,7 +8718,7 @@
       "id": "component/tile",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8779,7 +8779,7 @@
       "id": "component/time-field",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8840,7 +8840,7 @@
       "id": "component/timeline",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8901,7 +8901,7 @@
       "id": "component/toast",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8984,7 +8984,7 @@
       "id": "component/toolbar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9045,7 +9045,7 @@
       "id": "component/tooltip",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9106,7 +9106,7 @@
       "id": "component/tree",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9126,7 +9126,7 @@
             "source": "internal/web/templates/ui/tree.templ",
             "target": "internal/web/templates/ui/tree.templ",
             "class": "templ",
-            "sha256": "c81a22fe0c80517a3f448c613a3ee1665ae9fac46aa9ebab7b338fcfbe5cbf31",
+            "sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
             "rewrite_module": true,
             "contract": true
           },
@@ -9206,8 +9206,8 @@
         {
           "path": "internal/web/templates/ui/tree.templ",
           "source": "internal/web/templates/ui/tree.templ",
-          "base_sha256": "c81a22fe0c80517a3f448c613a3ee1665ae9fac46aa9ebab7b338fcfbe5cbf31",
-          "local_sha256": "c81a22fe0c80517a3f448c613a3ee1665ae9fac46aa9ebab7b338fcfbe5cbf31",
+          "base_sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
+          "local_sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
           "state": "clean"
         },
         {
@@ -9231,7 +9231,7 @@
       "id": "component/usage-card",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9292,7 +9292,7 @@
       "id": "element/avatar",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/comment",
@@ -9374,7 +9374,7 @@
       "id": "element/avatar-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/kanban"
@@ -9455,7 +9455,7 @@
       "id": "element/button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/composer",
@@ -9539,7 +9539,7 @@
       "id": "element/button-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9600,7 +9600,7 @@
       "id": "element/button-link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9679,7 +9679,7 @@
       "id": "element/code",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9740,7 +9740,7 @@
       "id": "element/copy-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9848,7 +9848,7 @@
       "id": "element/heading",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/section"
@@ -9929,7 +9929,7 @@
       "id": "element/icon",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/activity-item",
@@ -10006,7 +10006,7 @@
       "id": "element/icon-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/toast"
@@ -10089,7 +10089,7 @@
       "id": "element/kbd",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10169,7 +10169,7 @@
       "id": "element/link",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10244,7 +10244,7 @@
       "id": "element/prose",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10305,7 +10305,7 @@
       "id": "element/separator",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10384,7 +10384,7 @@
       "id": "element/spinner",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/search-input"
@@ -10447,7 +10447,7 @@
       "id": "element/text",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10523,7 +10523,7 @@
       "id": "element/toggle-button",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10583,7 +10583,7 @@
       "id": "element/toggle-group",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10663,7 +10663,7 @@
       "id": "element/truncate",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10744,7 +10744,7 @@
       "id": "element/ui-core",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "component/accordion",
@@ -10936,7 +10936,7 @@
             "source": "internal/web/templates/ui/contract_test.go",
             "target": "internal/web/templates/ui/contract_test.go",
             "class": "test",
-            "sha256": "73294303c6cc6b23f366e635bea00acad6a35e9fe359d3a042c2fc9fc03cdc44",
+            "sha256": "ba40eb319904060db51e6bc9cc2d839eabd4a70ca3d61a19587e576dd7e7f33f",
             "rewrite_module": true,
             "contract": false
           },
@@ -11024,7 +11024,7 @@
             "source": "internal/web/templates/ui/shared.go",
             "target": "internal/web/templates/ui/shared.go",
             "class": "go",
-            "sha256": "c0e619ea26ef911a902c506eedbdf634b605914d5dc1a3471b203607a3ee112c",
+            "sha256": "06a38321628f176326a9e79233519006785a0f230d4e413b2aebb5d769f31ddf",
             "rewrite_module": false,
             "contract": false
           },
@@ -11040,7 +11040,7 @@
             "source": "static/ui/engines.js",
             "target": "static/ui/engines.js",
             "class": "asset",
-            "sha256": "b4be2c5ba14e6d4a3a68351d18cb2f3bd636cb025c88f0c5c5237a3b31ca4a12",
+            "sha256": "46f5d6c40764c98cfe86ada9c92442b2b8e7e019e8e6498d00e29031c0a53950",
             "rewrite_module": false,
             "contract": false
           },
@@ -11056,7 +11056,7 @@
             "source": "static/ui/navigation.js",
             "target": "static/ui/navigation.js",
             "class": "asset",
-            "sha256": "8906d1d6a9c62ab3de0a2efb601300675b9b98bcb00e0f309ba44d2aa34d2a20",
+            "sha256": "67a482a0085d3028b97400394f73e7f86b6b4b610c676bbff62b9c7e3f351212",
             "rewrite_module": false,
             "contract": false
           },
@@ -11133,8 +11133,8 @@
         {
           "path": "internal/web/templates/ui/contract_test.go",
           "source": "internal/web/templates/ui/contract_test.go",
-          "base_sha256": "73294303c6cc6b23f366e635bea00acad6a35e9fe359d3a042c2fc9fc03cdc44",
-          "local_sha256": "73294303c6cc6b23f366e635bea00acad6a35e9fe359d3a042c2fc9fc03cdc44",
+          "base_sha256": "ba40eb319904060db51e6bc9cc2d839eabd4a70ca3d61a19587e576dd7e7f33f",
+          "local_sha256": "ba40eb319904060db51e6bc9cc2d839eabd4a70ca3d61a19587e576dd7e7f33f",
           "state": "clean"
         },
         {
@@ -11210,8 +11210,8 @@
         {
           "path": "internal/web/templates/ui/shared.go",
           "source": "internal/web/templates/ui/shared.go",
-          "base_sha256": "c0e619ea26ef911a902c506eedbdf634b605914d5dc1a3471b203607a3ee112c",
-          "local_sha256": "c0e619ea26ef911a902c506eedbdf634b605914d5dc1a3471b203607a3ee112c",
+          "base_sha256": "06a38321628f176326a9e79233519006785a0f230d4e413b2aebb5d769f31ddf",
+          "local_sha256": "06a38321628f176326a9e79233519006785a0f230d4e413b2aebb5d769f31ddf",
           "state": "clean"
         },
         {
@@ -11224,8 +11224,8 @@
         {
           "path": "static/ui/engines.js",
           "source": "static/ui/engines.js",
-          "base_sha256": "b4be2c5ba14e6d4a3a68351d18cb2f3bd636cb025c88f0c5c5237a3b31ca4a12",
-          "local_sha256": "b4be2c5ba14e6d4a3a68351d18cb2f3bd636cb025c88f0c5c5237a3b31ca4a12",
+          "base_sha256": "46f5d6c40764c98cfe86ada9c92442b2b8e7e019e8e6498d00e29031c0a53950",
+          "local_sha256": "46f5d6c40764c98cfe86ada9c92442b2b8e7e019e8e6498d00e29031c0a53950",
           "state": "clean"
         },
         {
@@ -11238,8 +11238,8 @@
         {
           "path": "static/ui/navigation.js",
           "source": "static/ui/navigation.js",
-          "base_sha256": "8906d1d6a9c62ab3de0a2efb601300675b9b98bcb00e0f309ba44d2aa34d2a20",
-          "local_sha256": "8906d1d6a9c62ab3de0a2efb601300675b9b98bcb00e0f309ba44d2aa34d2a20",
+          "base_sha256": "67a482a0085d3028b97400394f73e7f86b6b4b610c676bbff62b9c7e3f351212",
+          "local_sha256": "67a482a0085d3028b97400394f73e7f86b6b4b610c676bbff62b9c7e3f351212",
           "state": "clean"
         },
         {
@@ -11256,7 +11256,7 @@
       "id": "element/visually-hidden",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11336,7 +11336,7 @@
       "id": "page/activity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11488,7 +11488,7 @@
       "id": "page/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/admin-announcements"
@@ -11694,7 +11694,7 @@
       "id": "page/admin-audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11829,7 +11829,7 @@
       "id": "page/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12086,7 +12086,7 @@
       "id": "page/admin-content-editor",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12199,7 +12199,7 @@
       "id": "page/admin-content-preview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12278,7 +12278,7 @@
       "id": "page/admin-flag-detail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12358,7 +12358,7 @@
       "id": "page/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/admin-flags"
@@ -12568,7 +12568,7 @@
       "id": "page/admin-jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/admin-job-requeue"
@@ -12735,7 +12735,7 @@
       "id": "page/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/admin-media"
@@ -12873,7 +12873,7 @@
       "id": "page/admin-organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12983,7 +12983,7 @@
       "id": "page/admin-overview",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13168,7 +13168,7 @@
       "id": "page/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/admin-schedules"
@@ -13378,7 +13378,7 @@
       "id": "page/admin-users",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13528,7 +13528,7 @@
       "id": "page/blog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13672,7 +13672,7 @@
       "id": "page/changelog",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13790,7 +13790,7 @@
       "id": "page/dashboard",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13953,7 +13953,7 @@
       "id": "page/dev-gallery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14216,7 +14216,7 @@
             "source": "internal/web/templates/scenario_operations.templ",
             "target": "internal/web/templates/scenario_operations.templ",
             "class": "templ",
-            "sha256": "ba1f9fa9344cbd1729a92de1cdd6f057b61ff884128d3707388167210669e473",
+            "sha256": "03a5e87b641d014d5f10dfa0cb67eb71fb32c2b7ed1877a1f0916811d40c8b62",
             "rewrite_module": true,
             "contract": false
           },
@@ -14889,8 +14889,8 @@
         {
           "path": "internal/web/templates/scenario_operations.templ",
           "source": "internal/web/templates/scenario_operations.templ",
-          "base_sha256": "ba1f9fa9344cbd1729a92de1cdd6f057b61ff884128d3707388167210669e473",
-          "local_sha256": "ba1f9fa9344cbd1729a92de1cdd6f057b61ff884128d3707388167210669e473",
+          "base_sha256": "03a5e87b641d014d5f10dfa0cb67eb71fb32c2b7ed1877a1f0916811d40c8b62",
+          "local_sha256": "03a5e87b641d014d5f10dfa0cb67eb71fb32c2b7ed1877a1f0916811d40c8b62",
           "state": "clean"
         },
         {
@@ -14949,7 +14949,7 @@
       "id": "page/docs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15065,7 +15065,7 @@
       "id": "page/docs-index",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/docs",
@@ -15187,7 +15187,7 @@
       "id": "page/docs-search",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15268,7 +15268,7 @@
       "id": "page/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/files"
@@ -15293,7 +15293,7 @@
             "source": "internal/web/files_test.go",
             "target": "internal/web/files_test.go",
             "class": "test",
-            "sha256": "e92f20c07b702a48270065941a42d78e6c8b77cc9718f043db318c06c152aa94",
+            "sha256": "7e2560e89bb7fd24199f164bf49f4df2c34a152d46aa5ecbc482b86223bece50",
             "rewrite_module": true,
             "contract": false
           },
@@ -15408,8 +15408,8 @@
         {
           "path": "internal/web/files_test.go",
           "source": "internal/web/files_test.go",
-          "base_sha256": "e92f20c07b702a48270065941a42d78e6c8b77cc9718f043db318c06c152aa94",
-          "local_sha256": "e92f20c07b702a48270065941a42d78e6c8b77cc9718f043db318c06c152aa94",
+          "base_sha256": "7e2560e89bb7fd24199f164bf49f4df2c34a152d46aa5ecbc482b86223bece50",
+          "local_sha256": "7e2560e89bb7fd24199f164bf49f4df2c34a152d46aa5ecbc482b86223bece50",
           "state": "clean"
         },
         {
@@ -15433,7 +15433,7 @@
       "id": "page/home",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15664,7 +15664,7 @@
       "id": "page/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/notification-inbox"
@@ -15806,7 +15806,7 @@
       "id": "page/pricing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15932,7 +15932,7 @@
       "id": "page/privacy",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16048,7 +16048,7 @@
       "id": "page/project-edit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16128,7 +16128,7 @@
       "id": "page/project-new",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16207,7 +16207,7 @@
       "id": "page/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16238,7 +16238,7 @@
             "source": "internal/web/projects_test.go",
             "target": "internal/web/projects_test.go",
             "class": "test",
-            "sha256": "3164465ea33b772921823b7c761d2aef7c31de4a82e401fe3da7836b0209bbbe",
+            "sha256": "131476df7a6ad0734d29446af475ae28711baab5e1c102f87382bff24a1e3026",
             "rewrite_module": true,
             "contract": false
           },
@@ -16398,8 +16398,8 @@
         {
           "path": "internal/web/projects_test.go",
           "source": "internal/web/projects_test.go",
-          "base_sha256": "3164465ea33b772921823b7c761d2aef7c31de4a82e401fe3da7836b0209bbbe",
-          "local_sha256": "3164465ea33b772921823b7c761d2aef7c31de4a82e401fe3da7836b0209bbbe",
+          "base_sha256": "131476df7a6ad0734d29446af475ae28711baab5e1c102f87382bff24a1e3026",
+          "local_sha256": "131476df7a6ad0734d29446af475ae28711baab5e1c102f87382bff24a1e3026",
           "state": "clean"
         },
         {
@@ -16416,7 +16416,7 @@
       "id": "page/settings-account",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete"
@@ -16593,7 +16593,7 @@
       "id": "page/settings-api-tokens",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/api-token-lifecycle"
@@ -16755,7 +16755,7 @@
       "id": "page/settings-billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/billing-checkout"
@@ -16933,7 +16933,7 @@
       "id": "page/settings-notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/notification-preferences"
@@ -17094,7 +17094,7 @@
       "id": "page/settings-organization",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17227,7 +17227,7 @@
       "id": "page/settings-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/outbound-webhooks"
@@ -17437,7 +17437,7 @@
       "id": "page/terms",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17553,7 +17553,7 @@
       "id": "system/analytics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -17710,7 +17710,7 @@
       "id": "system/announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-announcements",
@@ -17839,7 +17839,7 @@
       "id": "system/api",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/settings-api-tokens",
@@ -18282,7 +18282,7 @@
       "id": "system/apphost",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -18381,7 +18381,7 @@
       "id": "system/audit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -18577,7 +18577,7 @@
       "id": "system/billing",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -19027,7 +19027,7 @@
       "id": "system/config",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/analytics",
@@ -19188,7 +19188,7 @@
       "id": "system/content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-content",
@@ -19687,7 +19687,7 @@
       "id": "system/content-assets",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/blog",
@@ -19825,7 +19825,7 @@
             "source": "content/docs/architecture.md",
             "target": "content/docs/architecture.md",
             "class": "content",
-            "sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
+            "sha256": "59578c4a53882dd33ab210839f2b006c920e6f1932f14b1895fb28ee72fd8a1c",
             "rewrite_module": false,
             "contract": false
           },
@@ -19841,7 +19841,7 @@
             "source": "content/docs/background-jobs.md",
             "target": "content/docs/background-jobs.md",
             "class": "content",
-            "sha256": "aa34dd4452fa2691bb8d7ba9a670170c2e9e88e9757fe94192ca391cb08852cc",
+            "sha256": "392df02098fe07e103327d1989c4df0e1edec113fa86f9015007bc7b68386f9b",
             "rewrite_module": false,
             "contract": false
           },
@@ -19857,7 +19857,7 @@
             "source": "content/docs/cli.md",
             "target": "content/docs/cli.md",
             "class": "content",
-            "sha256": "a341e4ad6163fabae42da4e2008c408759f6b03bd8accf3bf146f37f95248ab0",
+            "sha256": "349a9511d44d91a9ac1d8b95f7b1a8391015aade65106c762f1ef49af70cb284",
             "rewrite_module": false,
             "contract": false
           },
@@ -19929,7 +19929,7 @@
             "source": "content/docs/frontend.md",
             "target": "content/docs/frontend.md",
             "class": "content",
-            "sha256": "29603b53e75b28e9c892647e3060225e9a8ce3f861d3d6ffecd5163bcc55dfdf",
+            "sha256": "1ce2bf42e3a4acd310cfb550d3f9fb97fd202fad0397ad88aeda19b3da0dab31",
             "rewrite_module": false,
             "contract": false
           },
@@ -19977,7 +19977,7 @@
             "source": "content/docs/modules.md",
             "target": "content/docs/modules.md",
             "class": "content",
-            "sha256": "c361c3fd3dc447853ba72e8ae12c7131289c45e6b68e7880ccced9b3b316ba98",
+            "sha256": "8ae77541cb058736f96d4a25b338df5e49801e01b0b2efa187bbb0d4f133af27",
             "rewrite_module": false,
             "contract": false
           },
@@ -20017,7 +20017,7 @@
             "source": "content/docs/security.md",
             "target": "content/docs/security.md",
             "class": "content",
-            "sha256": "567e14c39e1f21cd51c9c34c27024314e17c6d66e199b4c9555c78694fb456db",
+            "sha256": "04a4c9b8a8f3db94971c0ab555b6e597ecefdf80c41c05b68ab0986307c8bdb6",
             "rewrite_module": false,
             "contract": false
           },
@@ -20057,7 +20057,7 @@
             "source": "content/docs/ui-foundations.md",
             "target": "content/docs/ui-foundations.md",
             "class": "content",
-            "sha256": "d790f3a8e05d5a0c48895dc977007bbabbc0ced3e2224aa3e5a1e5f0ccf56dfa",
+            "sha256": "a46b809d076972aa0a42d1b871f4021e68a989e1af310328d8d64a81cc3171bb",
             "rewrite_module": false,
             "contract": false
           },
@@ -20193,8 +20193,8 @@
         {
           "path": "content/docs/architecture.md",
           "source": "content/docs/architecture.md",
-          "base_sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
-          "local_sha256": "583ab15a1e6824e00a851f8c5d93d706518bfa7469658b4b22801215e455b8b1",
+          "base_sha256": "59578c4a53882dd33ab210839f2b006c920e6f1932f14b1895fb28ee72fd8a1c",
+          "local_sha256": "59578c4a53882dd33ab210839f2b006c920e6f1932f14b1895fb28ee72fd8a1c",
           "state": "clean"
         },
         {
@@ -20207,8 +20207,8 @@
         {
           "path": "content/docs/background-jobs.md",
           "source": "content/docs/background-jobs.md",
-          "base_sha256": "aa34dd4452fa2691bb8d7ba9a670170c2e9e88e9757fe94192ca391cb08852cc",
-          "local_sha256": "aa34dd4452fa2691bb8d7ba9a670170c2e9e88e9757fe94192ca391cb08852cc",
+          "base_sha256": "392df02098fe07e103327d1989c4df0e1edec113fa86f9015007bc7b68386f9b",
+          "local_sha256": "392df02098fe07e103327d1989c4df0e1edec113fa86f9015007bc7b68386f9b",
           "state": "clean"
         },
         {
@@ -20221,8 +20221,8 @@
         {
           "path": "content/docs/cli.md",
           "source": "content/docs/cli.md",
-          "base_sha256": "a341e4ad6163fabae42da4e2008c408759f6b03bd8accf3bf146f37f95248ab0",
-          "local_sha256": "a341e4ad6163fabae42da4e2008c408759f6b03bd8accf3bf146f37f95248ab0",
+          "base_sha256": "349a9511d44d91a9ac1d8b95f7b1a8391015aade65106c762f1ef49af70cb284",
+          "local_sha256": "349a9511d44d91a9ac1d8b95f7b1a8391015aade65106c762f1ef49af70cb284",
           "state": "clean"
         },
         {
@@ -20284,8 +20284,8 @@
         {
           "path": "content/docs/frontend.md",
           "source": "content/docs/frontend.md",
-          "base_sha256": "29603b53e75b28e9c892647e3060225e9a8ce3f861d3d6ffecd5163bcc55dfdf",
-          "local_sha256": "29603b53e75b28e9c892647e3060225e9a8ce3f861d3d6ffecd5163bcc55dfdf",
+          "base_sha256": "1ce2bf42e3a4acd310cfb550d3f9fb97fd202fad0397ad88aeda19b3da0dab31",
+          "local_sha256": "1ce2bf42e3a4acd310cfb550d3f9fb97fd202fad0397ad88aeda19b3da0dab31",
           "state": "clean"
         },
         {
@@ -20326,8 +20326,8 @@
         {
           "path": "content/docs/modules.md",
           "source": "content/docs/modules.md",
-          "base_sha256": "c361c3fd3dc447853ba72e8ae12c7131289c45e6b68e7880ccced9b3b316ba98",
-          "local_sha256": "c361c3fd3dc447853ba72e8ae12c7131289c45e6b68e7880ccced9b3b316ba98",
+          "base_sha256": "8ae77541cb058736f96d4a25b338df5e49801e01b0b2efa187bbb0d4f133af27",
+          "local_sha256": "8ae77541cb058736f96d4a25b338df5e49801e01b0b2efa187bbb0d4f133af27",
           "state": "clean"
         },
         {
@@ -20361,8 +20361,8 @@
         {
           "path": "content/docs/security.md",
           "source": "content/docs/security.md",
-          "base_sha256": "567e14c39e1f21cd51c9c34c27024314e17c6d66e199b4c9555c78694fb456db",
-          "local_sha256": "567e14c39e1f21cd51c9c34c27024314e17c6d66e199b4c9555c78694fb456db",
+          "base_sha256": "04a4c9b8a8f3db94971c0ab555b6e597ecefdf80c41c05b68ab0986307c8bdb6",
+          "local_sha256": "04a4c9b8a8f3db94971c0ab555b6e597ecefdf80c41c05b68ab0986307c8bdb6",
           "state": "clean"
         },
         {
@@ -20396,8 +20396,8 @@
         {
           "path": "content/docs/ui-foundations.md",
           "source": "content/docs/ui-foundations.md",
-          "base_sha256": "d790f3a8e05d5a0c48895dc977007bbabbc0ced3e2224aa3e5a1e5f0ccf56dfa",
-          "local_sha256": "d790f3a8e05d5a0c48895dc977007bbabbc0ced3e2224aa3e5a1e5f0ccf56dfa",
+          "base_sha256": "a46b809d076972aa0a42d1b871f4021e68a989e1af310328d8d64a81cc3171bb",
+          "local_sha256": "a46b809d076972aa0a42d1b871f4021e68a989e1af310328d8d64a81cc3171bb",
           "state": "clean"
         },
         {
@@ -20421,7 +20421,7 @@
       "id": "system/database",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/files",
@@ -20616,7 +20616,7 @@
       "id": "system/feature-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -20868,7 +20868,7 @@
       "id": "system/i18n",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -21035,7 +21035,7 @@
       "id": "system/identity",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-overview",
@@ -22803,7 +22803,7 @@
       "id": "system/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/account-delete",
@@ -22834,7 +22834,7 @@
             "source": "internal/web/impersonation_test.go",
             "target": "internal/web/impersonation_test.go",
             "class": "test",
-            "sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+            "sha256": "517b1ed90bb131d9df76a601a5ac73663912be28c7166edfffdb089647e61f2c",
             "rewrite_module": true,
             "contract": false
           }
@@ -22933,8 +22933,8 @@
         {
           "path": "internal/web/impersonation_test.go",
           "source": "internal/web/impersonation_test.go",
-          "base_sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
-          "local_sha256": "23b7f77ea15f415a953210c22c51ce60a1371b59ccd083e30f2cd722d641e898",
+          "base_sha256": "517b1ed90bb131d9df76a601a5ac73663912be28c7166edfffdb089647e61f2c",
+          "local_sha256": "517b1ed90bb131d9df76a601a5ac73663912be28c7166edfffdb089647e61f2c",
           "state": "clean"
         }
       ],
@@ -22957,7 +22957,7 @@
       "id": "system/jobs",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-jobs",
@@ -23020,7 +23020,7 @@
             "source": "internal/jobs/jobs.go",
             "target": "internal/jobs/jobs.go",
             "class": "go",
-            "sha256": "59c036807164c98760f08d2fb6e570d5d3d6d941d768a7f230735168bcec67ba",
+            "sha256": "18c424ae2d292946e1f7f5223b5944bb51eaaa98b01822c5006d001067bae7db",
             "rewrite_module": true,
             "contract": true
           },
@@ -23028,7 +23028,7 @@
             "source": "internal/jobs/jobs_test.go",
             "target": "internal/jobs/jobs_test.go",
             "class": "test",
-            "sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
+            "sha256": "79d51b5026b6f5747200fd81e22df247697198569f7d0f72b04ee2231ab2de4e",
             "rewrite_module": true,
             "contract": false
           },
@@ -23205,15 +23205,15 @@
         {
           "path": "internal/jobs/jobs.go",
           "source": "internal/jobs/jobs.go",
-          "base_sha256": "59c036807164c98760f08d2fb6e570d5d3d6d941d768a7f230735168bcec67ba",
-          "local_sha256": "59c036807164c98760f08d2fb6e570d5d3d6d941d768a7f230735168bcec67ba",
+          "base_sha256": "18c424ae2d292946e1f7f5223b5944bb51eaaa98b01822c5006d001067bae7db",
+          "local_sha256": "18c424ae2d292946e1f7f5223b5944bb51eaaa98b01822c5006d001067bae7db",
           "state": "clean"
         },
         {
           "path": "internal/jobs/jobs_test.go",
           "source": "internal/jobs/jobs_test.go",
-          "base_sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
-          "local_sha256": "47f1b8944e4f4b2bc7550d886769281d15bef68cf37e369047b99e299ad9b8d6",
+          "base_sha256": "79d51b5026b6f5747200fd81e22df247697198569f7d0f72b04ee2231ab2de4e",
+          "local_sha256": "79d51b5026b6f5747200fd81e22df247697198569f7d0f72b04ee2231ab2de4e",
           "state": "clean"
         },
         {
@@ -23237,7 +23237,7 @@
       "id": "system/llm",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/server",
@@ -23401,7 +23401,7 @@
       "id": "system/mail",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/jobs"
@@ -23604,7 +23604,7 @@
       "id": "system/metrics",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23623,7 +23623,7 @@
             "source": "internal/web/metrics.go",
             "target": "internal/web/metrics.go",
             "class": "go",
-            "sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
+            "sha256": "4cc539f0df540306583f509883e6f2fdd6930d6c25a8ca972da075bb79638353",
             "rewrite_module": true,
             "contract": true
           },
@@ -23631,7 +23631,7 @@
             "source": "internal/web/metrics_test.go",
             "target": "internal/web/metrics_test.go",
             "class": "test",
-            "sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
+            "sha256": "f5c7bf4acfd614203323481de18b9e4fb3155951665afef6b9b6c4fffaeabc2f",
             "rewrite_module": true,
             "contract": false
           }
@@ -23686,15 +23686,15 @@
         {
           "path": "internal/web/metrics.go",
           "source": "internal/web/metrics.go",
-          "base_sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
-          "local_sha256": "c31bc493cdb80784bbdc39e15866842325bee2fdac0f64b48aab449a5463cff9",
+          "base_sha256": "4cc539f0df540306583f509883e6f2fdd6930d6c25a8ca972da075bb79638353",
+          "local_sha256": "4cc539f0df540306583f509883e6f2fdd6930d6c25a8ca972da075bb79638353",
           "state": "clean"
         },
         {
           "path": "internal/web/metrics_test.go",
           "source": "internal/web/metrics_test.go",
-          "base_sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
-          "local_sha256": "c321ecf7c3a34b392281e0073a6ea20f72eaec18be5c3290d094111c09b06bc9",
+          "base_sha256": "f5c7bf4acfd614203323481de18b9e4fb3155951665afef6b9b6c4fffaeabc2f",
+          "local_sha256": "f5c7bf4acfd614203323481de18b9e4fb3155951665afef6b9b6c4fffaeabc2f",
           "state": "clean"
         }
       ],
@@ -23704,7 +23704,7 @@
       "id": "system/modkit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -23737,7 +23737,7 @@
             "source": "internal/modkit/apply.go",
             "target": "internal/modkit/apply.go",
             "class": "go",
-            "sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
+            "sha256": "726b9359afb6d305525080ee80c7217a51eecd61be4caf797f20e6bff210a630",
             "rewrite_module": true,
             "contract": true
           },
@@ -23745,7 +23745,7 @@
             "source": "internal/modkit/apply_test.go",
             "target": "internal/modkit/apply_test.go",
             "class": "test",
-            "sha256": "d9dc14460a139411b0043bf8093cdb6ad34783ebe706fff37e7a7bf1303c75cd",
+            "sha256": "fdf35944fd559e2836732c9009ea41c33689c702af9761a0d23c42a89e34bd58",
             "rewrite_module": true,
             "contract": false
           },
@@ -23761,7 +23761,7 @@
             "source": "internal/modkit/cli.go",
             "target": "internal/modkit/cli.go",
             "class": "go",
-            "sha256": "dbe464a8299502aeff2b7514acdc7ed99840806fc6671d1bd68bc03786fc42d8",
+            "sha256": "ebca0d72dd2ccb40339dedb3d3b5724fcf4f8caad12b6c455e91cddb7433d66b",
             "rewrite_module": true,
             "contract": true
           },
@@ -23793,7 +23793,7 @@
             "source": "internal/modkit/example.go",
             "target": "internal/modkit/example.go",
             "class": "go",
-            "sha256": "cac3e7e5c5271668747cd40367fb96fc60c79b090c0e0ce90aa9076d8598d668",
+            "sha256": "865ee58f9a6b5577b5c002e6888561b53d41c219fb943b6651b326521b6a2701",
             "rewrite_module": true,
             "contract": false
           },
@@ -23801,7 +23801,7 @@
             "source": "internal/modkit/example_test.go",
             "target": "internal/modkit/example_test.go",
             "class": "test",
-            "sha256": "05954f8b9e3b91a700b0870d44d2a55679b48d0190dd93552403a4be546638e9",
+            "sha256": "339db8c89ccf2b6932383f8b8041a1b9405b13e107509761783537bc1f3b5f9e",
             "rewrite_module": true,
             "contract": false
           },
@@ -23809,7 +23809,7 @@
             "source": "internal/modkit/generate.go",
             "target": "internal/modkit/generate.go",
             "class": "go",
-            "sha256": "b1fad5b1d2c77022c48e1ddd30a115d44946649edb91a8d874918c528a0a07f7",
+            "sha256": "b0b57bd9ed7ae545de60f53d2a725a4dc2edd237dad0ca8a5cc6209845b9c0bd",
             "rewrite_module": true,
             "contract": false
           },
@@ -23817,7 +23817,7 @@
             "source": "internal/modkit/generate_test.go",
             "target": "internal/modkit/generate_test.go",
             "class": "test",
-            "sha256": "bae9c4f8f84d863c648453875af2b29141b634575ad4fb2e8d69f9ce07d2a628",
+            "sha256": "e29ff35c30a4aa71b36ec81c9fdbdb8f9370eb605b401f1faa92c2f49b0e0a76",
             "rewrite_module": true,
             "contract": false
           },
@@ -23833,7 +23833,7 @@
             "source": "internal/modkit/generator.go",
             "target": "internal/modkit/generator.go",
             "class": "go",
-            "sha256": "204d275f4cbdf48609b85ef3c13ddd141a8511697705126a8e7ff644d3ba4ef9",
+            "sha256": "b06d7af898c45c66ba798edebc1be9c8a98eaeaebf5a2e0f1e9f52ec9c8117d9",
             "rewrite_module": true,
             "contract": false
           },
@@ -23865,7 +23865,7 @@
             "source": "internal/modkit/migration_plan.go",
             "target": "internal/modkit/migration_plan.go",
             "class": "go",
-            "sha256": "d672fed29b89cbb5705b2aa40e092d8f392c2f4d0d065f7f35a73b9bd40f995e",
+            "sha256": "4c3e3a96427f365e177dbab10e2cc58ba3ef2c040f5f8b1c45aceb71cfe8d994",
             "rewrite_module": true,
             "contract": false
           },
@@ -23873,7 +23873,7 @@
             "source": "internal/modkit/model.go",
             "target": "internal/modkit/model.go",
             "class": "go",
-            "sha256": "e79b5f157970f5842b0bc5e25bcb94988ec3755bd421c38131430c7dab2aef1d",
+            "sha256": "e64a77d3bacfdace3553a09d3e3202f9c52597d7e07b5c56d11e493c384ff6e6",
             "rewrite_module": true,
             "contract": true
           },
@@ -23937,7 +23937,7 @@
             "source": "internal/modkit/reconcile.go",
             "target": "internal/modkit/reconcile.go",
             "class": "go",
-            "sha256": "20ee25266074031606b8bb7192edcd47015d9aece6762794e1f334c1aa43cb09",
+            "sha256": "c58c8b7d455a77197e04538b27088fc057a80b023c0710364b3f8c71cd4ca968",
             "rewrite_module": true,
             "contract": false
           },
@@ -24025,7 +24025,7 @@
             "source": "internal/modkit/source_directory.go",
             "target": "internal/modkit/source_directory.go",
             "class": "go",
-            "sha256": "844729f1663533e04be6a9d88964165123daed55a0ef74c6a309b7b9562a821c",
+            "sha256": "bec470a69db4c4c41670063ceaad61fc0f6b752d6e82eaa701e4ff95afb4f525",
             "rewrite_module": true,
             "contract": false
           },
@@ -24065,7 +24065,7 @@
             "source": "internal/modkit/validate.go",
             "target": "internal/modkit/validate.go",
             "class": "go",
-            "sha256": "048a2b8a566bc0bb35bdab940515f67a28739441aed110991277cf91f4e140f9",
+            "sha256": "fa74699610ffb9ab59a7be6169823ff724a538e12f0a34f4f84673447f026534",
             "rewrite_module": true,
             "contract": false
           },
@@ -24131,15 +24131,15 @@
         {
           "path": "internal/modkit/apply.go",
           "source": "internal/modkit/apply.go",
-          "base_sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
-          "local_sha256": "6bc0e200041803e254010963deb1ba11602de899c366191416f2a5d821543ccb",
+          "base_sha256": "726b9359afb6d305525080ee80c7217a51eecd61be4caf797f20e6bff210a630",
+          "local_sha256": "726b9359afb6d305525080ee80c7217a51eecd61be4caf797f20e6bff210a630",
           "state": "clean"
         },
         {
           "path": "internal/modkit/apply_test.go",
           "source": "internal/modkit/apply_test.go",
-          "base_sha256": "d9dc14460a139411b0043bf8093cdb6ad34783ebe706fff37e7a7bf1303c75cd",
-          "local_sha256": "d9dc14460a139411b0043bf8093cdb6ad34783ebe706fff37e7a7bf1303c75cd",
+          "base_sha256": "fdf35944fd559e2836732c9009ea41c33689c702af9761a0d23c42a89e34bd58",
+          "local_sha256": "fdf35944fd559e2836732c9009ea41c33689c702af9761a0d23c42a89e34bd58",
           "state": "clean"
         },
         {
@@ -24152,8 +24152,8 @@
         {
           "path": "internal/modkit/cli.go",
           "source": "internal/modkit/cli.go",
-          "base_sha256": "dbe464a8299502aeff2b7514acdc7ed99840806fc6671d1bd68bc03786fc42d8",
-          "local_sha256": "dbe464a8299502aeff2b7514acdc7ed99840806fc6671d1bd68bc03786fc42d8",
+          "base_sha256": "ebca0d72dd2ccb40339dedb3d3b5724fcf4f8caad12b6c455e91cddb7433d66b",
+          "local_sha256": "ebca0d72dd2ccb40339dedb3d3b5724fcf4f8caad12b6c455e91cddb7433d66b",
           "state": "clean"
         },
         {
@@ -24180,29 +24180,29 @@
         {
           "path": "internal/modkit/example.go",
           "source": "internal/modkit/example.go",
-          "base_sha256": "cac3e7e5c5271668747cd40367fb96fc60c79b090c0e0ce90aa9076d8598d668",
-          "local_sha256": "cac3e7e5c5271668747cd40367fb96fc60c79b090c0e0ce90aa9076d8598d668",
+          "base_sha256": "865ee58f9a6b5577b5c002e6888561b53d41c219fb943b6651b326521b6a2701",
+          "local_sha256": "865ee58f9a6b5577b5c002e6888561b53d41c219fb943b6651b326521b6a2701",
           "state": "clean"
         },
         {
           "path": "internal/modkit/example_test.go",
           "source": "internal/modkit/example_test.go",
-          "base_sha256": "05954f8b9e3b91a700b0870d44d2a55679b48d0190dd93552403a4be546638e9",
-          "local_sha256": "05954f8b9e3b91a700b0870d44d2a55679b48d0190dd93552403a4be546638e9",
+          "base_sha256": "339db8c89ccf2b6932383f8b8041a1b9405b13e107509761783537bc1f3b5f9e",
+          "local_sha256": "339db8c89ccf2b6932383f8b8041a1b9405b13e107509761783537bc1f3b5f9e",
           "state": "clean"
         },
         {
           "path": "internal/modkit/generate.go",
           "source": "internal/modkit/generate.go",
-          "base_sha256": "b1fad5b1d2c77022c48e1ddd30a115d44946649edb91a8d874918c528a0a07f7",
-          "local_sha256": "b1fad5b1d2c77022c48e1ddd30a115d44946649edb91a8d874918c528a0a07f7",
+          "base_sha256": "b0b57bd9ed7ae545de60f53d2a725a4dc2edd237dad0ca8a5cc6209845b9c0bd",
+          "local_sha256": "b0b57bd9ed7ae545de60f53d2a725a4dc2edd237dad0ca8a5cc6209845b9c0bd",
           "state": "clean"
         },
         {
           "path": "internal/modkit/generate_test.go",
           "source": "internal/modkit/generate_test.go",
-          "base_sha256": "bae9c4f8f84d863c648453875af2b29141b634575ad4fb2e8d69f9ce07d2a628",
-          "local_sha256": "bae9c4f8f84d863c648453875af2b29141b634575ad4fb2e8d69f9ce07d2a628",
+          "base_sha256": "e29ff35c30a4aa71b36ec81c9fdbdb8f9370eb605b401f1faa92c2f49b0e0a76",
+          "local_sha256": "e29ff35c30a4aa71b36ec81c9fdbdb8f9370eb605b401f1faa92c2f49b0e0a76",
           "state": "clean"
         },
         {
@@ -24215,8 +24215,8 @@
         {
           "path": "internal/modkit/generator.go",
           "source": "internal/modkit/generator.go",
-          "base_sha256": "204d275f4cbdf48609b85ef3c13ddd141a8511697705126a8e7ff644d3ba4ef9",
-          "local_sha256": "204d275f4cbdf48609b85ef3c13ddd141a8511697705126a8e7ff644d3ba4ef9",
+          "base_sha256": "b06d7af898c45c66ba798edebc1be9c8a98eaeaebf5a2e0f1e9f52ec9c8117d9",
+          "local_sha256": "b06d7af898c45c66ba798edebc1be9c8a98eaeaebf5a2e0f1e9f52ec9c8117d9",
           "state": "clean"
         },
         {
@@ -24243,15 +24243,15 @@
         {
           "path": "internal/modkit/migration_plan.go",
           "source": "internal/modkit/migration_plan.go",
-          "base_sha256": "d672fed29b89cbb5705b2aa40e092d8f392c2f4d0d065f7f35a73b9bd40f995e",
-          "local_sha256": "d672fed29b89cbb5705b2aa40e092d8f392c2f4d0d065f7f35a73b9bd40f995e",
+          "base_sha256": "4c3e3a96427f365e177dbab10e2cc58ba3ef2c040f5f8b1c45aceb71cfe8d994",
+          "local_sha256": "4c3e3a96427f365e177dbab10e2cc58ba3ef2c040f5f8b1c45aceb71cfe8d994",
           "state": "clean"
         },
         {
           "path": "internal/modkit/model.go",
           "source": "internal/modkit/model.go",
-          "base_sha256": "e79b5f157970f5842b0bc5e25bcb94988ec3755bd421c38131430c7dab2aef1d",
-          "local_sha256": "e79b5f157970f5842b0bc5e25bcb94988ec3755bd421c38131430c7dab2aef1d",
+          "base_sha256": "e64a77d3bacfdace3553a09d3e3202f9c52597d7e07b5c56d11e493c384ff6e6",
+          "local_sha256": "e64a77d3bacfdace3553a09d3e3202f9c52597d7e07b5c56d11e493c384ff6e6",
           "state": "clean"
         },
         {
@@ -24306,8 +24306,8 @@
         {
           "path": "internal/modkit/reconcile.go",
           "source": "internal/modkit/reconcile.go",
-          "base_sha256": "20ee25266074031606b8bb7192edcd47015d9aece6762794e1f334c1aa43cb09",
-          "local_sha256": "20ee25266074031606b8bb7192edcd47015d9aece6762794e1f334c1aa43cb09",
+          "base_sha256": "c58c8b7d455a77197e04538b27088fc057a80b023c0710364b3f8c71cd4ca968",
+          "local_sha256": "c58c8b7d455a77197e04538b27088fc057a80b023c0710364b3f8c71cd4ca968",
           "state": "clean"
         },
         {
@@ -24383,8 +24383,8 @@
         {
           "path": "internal/modkit/source_directory.go",
           "source": "internal/modkit/source_directory.go",
-          "base_sha256": "844729f1663533e04be6a9d88964165123daed55a0ef74c6a309b7b9562a821c",
-          "local_sha256": "844729f1663533e04be6a9d88964165123daed55a0ef74c6a309b7b9562a821c",
+          "base_sha256": "bec470a69db4c4c41670063ceaad61fc0f6b752d6e82eaa701e4ff95afb4f525",
+          "local_sha256": "bec470a69db4c4c41670063ceaad61fc0f6b752d6e82eaa701e4ff95afb4f525",
           "state": "clean"
         },
         {
@@ -24418,8 +24418,8 @@
         {
           "path": "internal/modkit/validate.go",
           "source": "internal/modkit/validate.go",
-          "base_sha256": "048a2b8a566bc0bb35bdab940515f67a28739441aed110991277cf91f4e140f9",
-          "local_sha256": "048a2b8a566bc0bb35bdab940515f67a28739441aed110991277cf91f4e140f9",
+          "base_sha256": "fa74699610ffb9ab59a7be6169823ff724a538e12f0a34f4f84673447f026534",
+          "local_sha256": "fa74699610ffb9ab59a7be6169823ff724a538e12f0a34f4f84673447f026534",
           "state": "clean"
         },
         {
@@ -24450,7 +24450,7 @@
       "id": "system/notifications",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/notifications",
@@ -24747,7 +24747,7 @@
       "id": "system/observability",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -24927,7 +24927,7 @@
       "id": "system/organizations",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-flag-detail",
@@ -25244,7 +25244,7 @@
       "id": "system/rate-limit",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/api",
@@ -25380,7 +25380,7 @@
       "id": "system/schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-schedules",
@@ -25540,7 +25540,7 @@
       "id": "system/security",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -25635,7 +25635,7 @@
             "source": "internal/web/middleware.go",
             "target": "internal/web/middleware.go",
             "class": "go",
-            "sha256": "e2940068a654a8849416f4b4f2477ad5ffe37a988dc01ccf4dc29bfe345bc03f",
+            "sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
             "rewrite_module": true,
             "contract": true
           }
@@ -25685,8 +25685,8 @@
         {
           "path": "internal/web/middleware.go",
           "source": "internal/web/middleware.go",
-          "base_sha256": "e2940068a654a8849416f4b4f2477ad5ffe37a988dc01ccf4dc29bfe345bc03f",
-          "local_sha256": "e2940068a654a8849416f4b4f2477ad5ffe37a988dc01ccf4dc29bfe345bc03f",
+          "base_sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
+          "local_sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
           "state": "clean"
         }
       ],
@@ -25696,7 +25696,7 @@
       "id": "system/seed",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -25748,7 +25748,7 @@
       "id": "system/seo",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/seo-discovery"
@@ -25802,7 +25802,7 @@
       "id": "system/server",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/activity",
@@ -25950,7 +25950,7 @@
             "source": "internal/web/i18n_test.go",
             "target": "internal/web/i18n_test.go",
             "class": "test",
-            "sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+            "sha256": "7ec64107bba9af5d75ab22737d7932e89cf036c8a1aca752f8ddabe763664076",
             "rewrite_module": true,
             "contract": false
           },
@@ -25990,7 +25990,7 @@
             "source": "internal/web/route.go",
             "target": "internal/web/route.go",
             "class": "go",
-            "sha256": "64b2761a1c4062e6346b0a577480cc05344f93e97cfbb547233dd66466a3c1ec",
+            "sha256": "6db952423dd271e7c554214b6ae61e099d25fc60331b16872bcdb586e11ba9ee",
             "rewrite_module": true,
             "contract": true
           },
@@ -26006,7 +26006,7 @@
             "source": "internal/web/route_test.go",
             "target": "internal/web/route_test.go",
             "class": "test",
-            "sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+            "sha256": "6b82ab161994341151e59a9855aafe6e3d82fa31a90d90d2df4047aafff77745",
             "rewrite_module": true,
             "contract": false
           },
@@ -26014,7 +26014,7 @@
             "source": "internal/web/routes.go",
             "target": "internal/web/routes.go",
             "class": "go",
-            "sha256": "d324e6e3dd282286bfecb77c317e0cd982b275779981d0c4bdec930e2d54e39b",
+            "sha256": "706df7a3c142fd9aa56767d50b3dfe8f1c7fbc7d98fb7b4ba5f3774650d5f50f",
             "rewrite_module": true,
             "contract": false
           },
@@ -26022,7 +26022,7 @@
             "source": "internal/web/server.go",
             "target": "internal/web/server.go",
             "class": "go",
-            "sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
+            "sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
             "rewrite_module": true,
             "contract": true
           },
@@ -26054,7 +26054,7 @@
             "source": "internal/web/templates/designsystem_test.go",
             "target": "internal/web/templates/designsystem_test.go",
             "class": "test",
-            "sha256": "e2924135b09d4a3fa74ac8a66b7c97b7bbabae2e457d72f4c6c5e0fe1f4b5dc6",
+            "sha256": "357924cfe0b79aa4695aa2d84e13aa045b207cdccc364891c1c8b8b7f4e93487",
             "rewrite_module": true,
             "contract": false
           },
@@ -26607,8 +26607,8 @@
         {
           "path": "internal/web/i18n_test.go",
           "source": "internal/web/i18n_test.go",
-          "base_sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
-          "local_sha256": "923385950fc8059ce3619c3ed70795efa7b323412147c868bb57f0b4c427df73",
+          "base_sha256": "7ec64107bba9af5d75ab22737d7932e89cf036c8a1aca752f8ddabe763664076",
+          "local_sha256": "7ec64107bba9af5d75ab22737d7932e89cf036c8a1aca752f8ddabe763664076",
           "state": "clean"
         },
         {
@@ -26642,8 +26642,8 @@
         {
           "path": "internal/web/route.go",
           "source": "internal/web/route.go",
-          "base_sha256": "64b2761a1c4062e6346b0a577480cc05344f93e97cfbb547233dd66466a3c1ec",
-          "local_sha256": "64b2761a1c4062e6346b0a577480cc05344f93e97cfbb547233dd66466a3c1ec",
+          "base_sha256": "6db952423dd271e7c554214b6ae61e099d25fc60331b16872bcdb586e11ba9ee",
+          "local_sha256": "6db952423dd271e7c554214b6ae61e099d25fc60331b16872bcdb586e11ba9ee",
           "state": "clean"
         },
         {
@@ -26656,22 +26656,22 @@
         {
           "path": "internal/web/route_test.go",
           "source": "internal/web/route_test.go",
-          "base_sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
-          "local_sha256": "2aabca8fe638d4566564ec882ba52373211ded6d8c293ae2ee7e61e653ef64ae",
+          "base_sha256": "6b82ab161994341151e59a9855aafe6e3d82fa31a90d90d2df4047aafff77745",
+          "local_sha256": "6b82ab161994341151e59a9855aafe6e3d82fa31a90d90d2df4047aafff77745",
           "state": "clean"
         },
         {
           "path": "internal/web/routes.go",
           "source": "internal/web/routes.go",
-          "base_sha256": "d324e6e3dd282286bfecb77c317e0cd982b275779981d0c4bdec930e2d54e39b",
-          "local_sha256": "d324e6e3dd282286bfecb77c317e0cd982b275779981d0c4bdec930e2d54e39b",
+          "base_sha256": "706df7a3c142fd9aa56767d50b3dfe8f1c7fbc7d98fb7b4ba5f3774650d5f50f",
+          "local_sha256": "706df7a3c142fd9aa56767d50b3dfe8f1c7fbc7d98fb7b4ba5f3774650d5f50f",
           "state": "clean"
         },
         {
           "path": "internal/web/server.go",
           "source": "internal/web/server.go",
-          "base_sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
-          "local_sha256": "e32e3fbffa28d15ffb9944d4a2d93375d41b364f8c5721c5c46497afbd775cd4",
+          "base_sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
+          "local_sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
           "state": "clean"
         },
         {
@@ -26698,8 +26698,8 @@
         {
           "path": "internal/web/templates/designsystem_test.go",
           "source": "internal/web/templates/designsystem_test.go",
-          "base_sha256": "e2924135b09d4a3fa74ac8a66b7c97b7bbabae2e457d72f4c6c5e0fe1f4b5dc6",
-          "local_sha256": "e2924135b09d4a3fa74ac8a66b7c97b7bbabae2e457d72f4c6c5e0fe1f4b5dc6",
+          "base_sha256": "357924cfe0b79aa4695aa2d84e13aa045b207cdccc364891c1c8b8b7f4e93487",
+          "local_sha256": "357924cfe0b79aa4695aa2d84e13aa045b207cdccc364891c1c8b8b7f4e93487",
           "state": "clean"
         },
         {
@@ -26786,7 +26786,7 @@
       "id": "system/static",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -27136,7 +27136,7 @@
       "id": "system/storage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "system/jobs",
@@ -27344,7 +27344,7 @@
       "id": "system/testdb",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -27415,7 +27415,7 @@
       "id": "system/usage",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/settings-billing"
@@ -27591,7 +27591,7 @@
       "id": "system/webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/settings-webhooks",
@@ -27860,7 +27860,7 @@
       "id": "workflow/account-delete",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -27944,7 +27944,7 @@
       "id": "workflow/account-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28040,7 +28040,7 @@
       "id": "workflow/admin-announcements",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28174,7 +28174,7 @@
       "id": "workflow/admin-content",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/admin-content-editor",
@@ -28367,7 +28367,7 @@
       "id": "workflow/admin-flags",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28539,7 +28539,7 @@
       "id": "workflow/admin-job-requeue",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28624,7 +28624,7 @@
       "id": "workflow/admin-media",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28744,7 +28744,7 @@
       "id": "workflow/admin-schedules",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28880,7 +28880,7 @@
       "id": "workflow/admin-user-governance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -28978,7 +28978,7 @@
       "id": "workflow/api-ai-chat",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -29212,7 +29212,7 @@
       "id": "workflow/api-projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -29548,7 +29548,7 @@
       "id": "workflow/api-token-lifecycle",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -29647,7 +29647,7 @@
       "id": "workflow/appearance",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -29685,7 +29685,7 @@
             "source": "internal/web/handlers_locale.go",
             "target": "internal/web/handlers_locale.go",
             "class": "go",
-            "sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+            "sha256": "41c73566bcf534703fd2830d481466be084ca6194e677acbe673bf89b6a9cd0e",
             "rewrite_module": true,
             "contract": false
           }
@@ -29763,8 +29763,8 @@
         {
           "path": "internal/web/handlers_locale.go",
           "source": "internal/web/handlers_locale.go",
-          "base_sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
-          "local_sha256": "05524786a46f75f30103c32db72287a46c3854e833c7fb98226acd50d6dd5b49",
+          "base_sha256": "41c73566bcf534703fd2830d481466be084ca6194e677acbe673bf89b6a9cd0e",
+          "local_sha256": "41c73566bcf534703fd2830d481466be084ca6194e677acbe673bf89b6a9cd0e",
           "state": "clean"
         }
       ],
@@ -29774,7 +29774,7 @@
       "id": "workflow/auth-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/settings-account",
@@ -29908,7 +29908,7 @@
       "id": "workflow/billing-checkout",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30025,7 +30025,7 @@
       "id": "workflow/billing-webhook",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30104,7 +30104,7 @@
       "id": "workflow/dev-session",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/dev-gallery"
@@ -30220,7 +30220,7 @@
       "id": "workflow/files",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30405,7 +30405,7 @@
       "id": "workflow/identity-webhook-sync",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30527,7 +30527,7 @@
       "id": "workflow/impersonation",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30552,7 +30552,7 @@
             "source": "internal/web/handlers_impersonation.go",
             "target": "internal/web/handlers_impersonation.go",
             "class": "go",
-            "sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+            "sha256": "8b9cf44af0586384fae45e6b1f2693fffc4cc650a8b5d4c7ac81e28d15e20a7c",
             "rewrite_module": true,
             "contract": false
           },
@@ -30642,8 +30642,8 @@
         {
           "path": "internal/web/handlers_impersonation.go",
           "source": "internal/web/handlers_impersonation.go",
-          "base_sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
-          "local_sha256": "d2d40226b30339270c6bb368a22d803ab73cd456d2e7a2b68e9c711122a96e3f",
+          "base_sha256": "8b9cf44af0586384fae45e6b1f2693fffc4cc650a8b5d4c7ac81e28d15e20a7c",
+          "local_sha256": "8b9cf44af0586384fae45e6b1f2693fffc4cc650a8b5d4c7ac81e28d15e20a7c",
           "state": "clean"
         },
         {
@@ -30660,7 +30660,7 @@
       "id": "workflow/notification-inbox",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30795,7 +30795,7 @@
       "id": "workflow/notification-preferences",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30876,7 +30876,7 @@
       "id": "workflow/openapi-contract",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "workflow/api-ai-chat",
@@ -31017,7 +31017,7 @@
       "id": "workflow/organization-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/settings-organization"
@@ -31140,7 +31140,7 @@
       "id": "workflow/outbound-webhooks",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -31163,7 +31163,7 @@
             "source": "internal/jobs/webhooks_deliver.go",
             "target": "internal/jobs/webhooks_deliver.go",
             "class": "go",
-            "sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+            "sha256": "6d8fc1f1ffa459e951d9f7c5ea656a63fe531964000a48e7b28a7274c3db6643",
             "rewrite_module": true,
             "contract": false
           },
@@ -31171,7 +31171,7 @@
             "source": "internal/jobs/webhooks_deliver_test.go",
             "target": "internal/jobs/webhooks_deliver_test.go",
             "class": "test",
-            "sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+            "sha256": "e7d48756c7e4884d07b10f834f423fe36e641c997b92709bd99990fc54c278db",
             "rewrite_module": true,
             "contract": false
           }
@@ -31298,15 +31298,15 @@
         {
           "path": "internal/jobs/webhooks_deliver.go",
           "source": "internal/jobs/webhooks_deliver.go",
-          "base_sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
-          "local_sha256": "249c8afd3cefa919a418dc49da99a12b0583d1be396ce10fb69539508ebcb405",
+          "base_sha256": "6d8fc1f1ffa459e951d9f7c5ea656a63fe531964000a48e7b28a7274c3db6643",
+          "local_sha256": "6d8fc1f1ffa459e951d9f7c5ea656a63fe531964000a48e7b28a7274c3db6643",
           "state": "clean"
         },
         {
           "path": "internal/jobs/webhooks_deliver_test.go",
           "source": "internal/jobs/webhooks_deliver_test.go",
-          "base_sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
-          "local_sha256": "4688cfe77e8caf635f49a066b5386ca6f64820e2a8ab2052704be5e7cfa95d4c",
+          "base_sha256": "e7d48756c7e4884d07b10f834f423fe36e641c997b92709bd99990fc54c278db",
+          "local_sha256": "e7d48756c7e4884d07b10f834f423fe36e641c997b92709bd99990fc54c278db",
           "state": "clean"
         }
       ],
@@ -31316,7 +31316,7 @@
       "id": "workflow/project-export",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -31436,7 +31436,7 @@
       "id": "workflow/projects",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [
         "page/project-edit"
@@ -31686,7 +31686,7 @@
       "id": "workflow/seo-discovery",
       "revision": 1,
       "contract": 1,
-      "source_commit": "5bd28b25adaf3d5d2ef26c740bbb3842daadfa3cb0b2c1d39accb5c48b985e88",
+      "source_commit": "0684d4f45ede6baea0150008445340ada6b567f616d48518ae1439f5c984f2dc",
       "reason": "profile",
       "required_by": [],
       "manifest": {

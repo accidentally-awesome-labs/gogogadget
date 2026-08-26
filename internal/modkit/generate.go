@@ -122,8 +122,8 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		}
 		for i := range emitted {
 			file := emitted[i]
-			if !isGeneratedOutput(file.Path) {
-				return nil, fmt.Errorf("emitter %s produced non-generated path %s", emitter.name, file.Path)
+			if !IsRegistryOwnedOutputPath(file.Path) {
+				return nil, fmt.Errorf("emitter %s produced a path this pipeline does not own: %s", emitter.name, file.Path)
 			}
 			formatted, err := formatGo(&file)
 			if err != nil {
@@ -1033,8 +1033,16 @@ func resolveNavigation(lock Lock, graph []Manifest) (map[NavArea][]navEntry, err
 		}
 	}
 
-	for area, entries := range byArea {
-		ordered, err := orderNavEntries(entries)
+	// Sorted, so a failing generation is reproducible. Map iteration order made
+	// the operator fix one area, rerun, and get a different one — with no signal
+	// that more than one was broken.
+	areas := make([]NavArea, 0, len(byArea))
+	for area := range byArea {
+		areas = append(areas, area)
+	}
+	sort.Slice(areas, func(i, j int) bool { return areas[i] < areas[j] })
+	for _, area := range areas {
+		ordered, err := orderNavEntries(byArea[area])
 		if err != nil {
 			return nil, fmt.Errorf("navigation area %s: %w", area, err)
 		}
@@ -1540,12 +1548,21 @@ func buildOpenAPIDocument(lock Lock, graph []Manifest) (map[string]any, error) {
 		return nil, errors.New("openapi document has no info block; exactly one module must declare it")
 	}
 
-	// An API route with no operation ships an undocumented endpoint.
+	// An API route with no operation ships an undocumented endpoint. Every one is
+	// named, sorted: reporting whichever route map iteration reached first made
+	// the operator document it, rerun, and get a different one, with no signal
+	// that there were three.
+	undocumented := make([]string, 0)
 	for id, r := range apiRoutes {
 		if _, ok := documented[id]; !ok {
-			return nil, fmt.Errorf("API route %s (%s %s) has no openapi operation",
-				id, r.contrib.Method, r.contrib.Pattern)
+			undocumented = append(undocumented,
+				fmt.Sprintf("%s (%s %s)", id, r.contrib.Method, r.contrib.Pattern))
 		}
+	}
+	if len(undocumented) != 0 {
+		sort.Strings(undocumented)
+		return nil, fmt.Errorf("%d API route(s) have no openapi operation: %s",
+			len(undocumented), strings.Join(undocumented, ", "))
 	}
 
 	// The security scheme belongs to the document, not to a module: every

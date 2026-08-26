@@ -497,7 +497,11 @@ func (c CLI) applyOperation(ctx context.Context, command string, asJSON bool, op
 		env := planEnvelope(plan, exitRollback)
 		env.OK = false
 		_ = c.emit(command, asJSON, env)
-		if result.RolledBack {
+		// A transaction that reached the journal is exit 5 whether the restore
+		// completed or not. An incomplete restore is the MORE severe outcome, so
+		// downgrading it to exit 1 would hide the one case that needs a human:
+		// the error text names every path that could not be put back.
+		if result.Exit == exitRollback {
 			return rollbackError(err)
 		}
 		return runtimeError(err)
@@ -552,40 +556,21 @@ func generatedDriftDiagnostics(ctx context.Context, engine *Engine, plan Plan) (
 	}
 
 	// A stale aggregate left behind by a removed module is drift too: it still
-	// compiles into the project while nothing owns it any more.
-	for _, path := range staleGeneratedAggregates(plan.Root, expected) {
+	// compiles into the project while nothing owns it any more. `ggg sync`
+	// deletes these, so reporting one here is an instruction the operator can
+	// actually act on.
+	stale, err := StaleRegistryOutputs(plan.Root, expected)
+	if err != nil {
+		return nil, err
+	}
+	for _, path := range stale {
 		diagnostics = append(diagnostics, Diagnostic{
 			Code: "generated_stale", Severity: "error", Path: path,
-			Message: "generated output is no longer owned by the selected graph; run ggg sync",
+			Message: "generated output is no longer owned by the selected graph; run ggg sync to delete it",
 		})
 	}
 	sort.Slice(diagnostics, func(i, j int) bool { return diagnostics[i].Path < diagnostics[j].Path })
 	return diagnostics, nil
-}
-
-// staleGeneratedAggregates finds registry aggregates on disk that the current
-// selection no longer renders.
-func staleGeneratedAggregates(root string, expected map[string]struct{}) []string {
-	stale := make([]string, 0)
-	_ = filepath.WalkDir(root, func(full string, entry fs.DirEntry, err error) error {
-		if err != nil || entry.IsDir() {
-			return nil
-		}
-		rel, relErr := filepath.Rel(root, full)
-		if relErr != nil {
-			return nil
-		}
-		slashed := filepath.ToSlash(rel)
-		if !strings.Contains(slashed, "_registry_gen.") {
-			return nil
-		}
-		if _, ok := expected[slashed]; !ok {
-			stale = append(stale, slashed)
-		}
-		return nil
-	})
-	sort.Strings(stale)
-	return stale
 }
 
 // planHasDrift reports whether the plan would change anything on disk.
@@ -1008,7 +993,8 @@ func (c CLI) runResolve(ctx context.Context, args []string) error {
 		env := planEnvelope(plan, exitRollback)
 		env.OK = false
 		_ = c.emit("resolve", *asJSON, env)
-		if result.RolledBack {
+		// Exit 5 regardless of whether the restore completed; see applyOperation.
+		if result.Exit == exitRollback {
 			return rollbackError(err)
 		}
 		return runtimeError(err)

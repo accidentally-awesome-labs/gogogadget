@@ -222,8 +222,15 @@ Exit 4 has two distinct sources and both are honest reports rather than errors:
   now `conflicted` with an upstream candidate staged. Local bytes are untouched;
   run `ggg diff --upstream` and then `ggg resolve`.
 
-Exit 5 means the transaction rolled back. Pre-existing dirty generated files are
-restored to exactly the bytes they had, and unrelated work is never touched.
+Exit 5 means the transaction rolled back. Every journalled path is restored to
+exactly the bytes *and the mode* it had, directories the run created are
+removed, and unrelated work is never touched.
+
+A restore can itself fail — a full disk is as likely to defeat the write-back as
+it was to cause the failure that triggered it. When it does, the error names
+every path that could not be restored and the JSON envelope reports
+`rolled_back: false`. That is the one case where the tree needs looking at by
+hand; a plain exit 5 does not.
 
 ## Where to go next
 

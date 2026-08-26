@@ -296,3 +296,86 @@ func TestValidateLockTreatsAnUnreadableLockAsStale(t *testing.T) {
 		assert.NoErrorf(t, acquireValidateLock(lockPath), "%s lock must be reclaimed", name)
 	}
 }
+
+// The pid must be in the file before the file exists under lockPath. With
+// O_EXCL followed by a separate write, a second run landing in that window reads
+// an empty file, validateLockOwner classifies it as malformed-and-therefore-
+// stale, and it deletes a live run's lock — the exact reclaim path
+// TestValidateLockTreatsAnUnreadableLockAsStale relies on, turned against a live
+// owner. Two runs then share one work directory, which is the corruption the
+// lock exists to prevent.
+//
+// A watcher polling the path while it is published and removed in a tight loop
+// is what makes that window observable. The probe is deliberately one-
+// directional: a correct publish can NEVER be caught, so this cannot flake into
+// a failure. It can in principle miss a violation, which is why the invariant is
+// also enforced structurally below.
+func TestValidateLockIsNeverVisibleWithoutItsOwner(t *testing.T) {
+	lockPath := filepath.Join(t.TempDir(), "validate.lock")
+	stop := make(chan struct{})
+	caught := make(chan struct{}, 1)
+	watching := make(chan struct{})
+
+	go func() {
+		close(watching)
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			if info, err := os.Stat(lockPath); err == nil && info.Size() == 0 {
+				caught <- struct{}{}
+				return
+			}
+		}
+	}()
+	<-watching
+
+	for range 3000 {
+		require.NoError(t, publishValidateLock(lockPath))
+		require.NoError(t, os.Remove(lockPath))
+	}
+	close(stop)
+
+	select {
+	case <-caught:
+		t.Fatal("the lock became visible with no owner recorded; a concurrent run reads that as stale and steals a live lock")
+	default:
+	}
+}
+
+// A published lock always names its owner, and publishing over a live one is
+// refused without touching the incumbent's bytes — link, not rename.
+func TestValidateLockPublishIsExclusiveAndNamesItsOwner(t *testing.T) {
+	lockPath := filepath.Join(t.TempDir(), "validate.lock")
+	require.NoError(t, publishValidateLock(lockPath))
+
+	owner, err := os.ReadFile(lockPath)
+	require.NoError(t, err)
+	assert.Equal(t, strconv.Itoa(os.Getpid()), strings.TrimSpace(string(owner)),
+		"the lock existed without naming its owner")
+
+	err = publishValidateLock(lockPath)
+	require.Error(t, err)
+	assert.ErrorIs(t, err, fs.ErrExist)
+	after, readErr := os.ReadFile(lockPath)
+	require.NoError(t, readErr)
+	assert.Equal(t, string(owner), string(after), "a refused publish rewrote the live lock")
+
+	// No staged temp file survives in the lock directory.
+	entries, err := os.ReadDir(filepath.Dir(lockPath))
+	require.NoError(t, err)
+	for _, entry := range entries {
+		assert.Equal(t, "validate.lock", entry.Name(), "publishValidateLock leaked a staged file")
+	}
+}
+
+// A lock naming THIS pid is stale by construction: one process never runs two
+// validations concurrently, so it is debris from an earlier run in this process.
+// Waiting for ourselves would deadlock the command outright.
+func TestValidateLockTreatsOurOwnPidAsStale(t *testing.T) {
+	lockPath := filepath.Join(t.TempDir(), "validate.lock")
+	require.NoError(t, os.WriteFile(lockPath, []byte(strconv.Itoa(os.Getpid())+"\n"), 0o644))
+	assert.NoError(t, acquireValidateLock(lockPath))
+}
