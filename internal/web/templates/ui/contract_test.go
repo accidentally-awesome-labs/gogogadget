@@ -260,6 +260,7 @@ func renderers() map[string]any {
 		"BarChart": BarChart, "LineChart": LineChart, "AreaChart": AreaChart, "DonutChart": DonutChart, "Sparkline": Sparkline, "ChartLegend": ChartLegend,
 		"MonthGrid": MonthGrid, "DatePicker": DatePicker, "DateTimePicker": DateTimePicker, "DateRangePicker": DateRangePicker, "Scheduler": Scheduler, "AvailabilityGrid": AvailabilityGrid,
 		"MarkdownEditor": MarkdownEditor, "EditorToolbar": EditorToolbar, "EditorPreview": EditorPreview, "MediaPicker": MediaPicker,
+		"DataGrid": DataGrid, "GridToolbar": GridToolbar, "ColumnPicker": ColumnPicker,
 	}
 }
 

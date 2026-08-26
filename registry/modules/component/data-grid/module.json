@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/data-grid",
+    "kind": "component",
+    "name": "data-grid",
+    "revision": 1,
+    "contract": 1,
+    "title": "Data grid",
+    "description": "A progressive layer over DataTable: roving cell focus, column visibility and width, and windowed row fetches. Sort, search and pagination stay server-owned, and the pager is never removed.",
+    "requires": [
+      "component/column-header",
+      "component/pagination",
+      "component/search-input",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/data-grid.templ",
+        "target": "internal/web/templates/ui/data-grid.templ",
+        "class": "templ",
+        "sha256": "648c694027a5e6529ca3f1e1a12859e096a961ab9a2ab01bf0988984ff5166ec",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/data-grid_test.go",
+        "target": "internal/web/templates/ui/data-grid_test.go",
+        "class": "test",
+        "sha256": "d2cf0e9a3664086f16155085b887485a58f06990930935aab992b79f2afe3896",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/grid.js",
+        "target": "static/ui/grid.js",
+        "class": "asset",
+        "sha256": "56d129602b66a81da940b8f339c1ad8c05456b1e1b50c7b4bb9be1b6228bf923",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "column-picker",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiGrid"
+        },
+        {
+          "name": "data-grid",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiGrid",
+          "native_fallback": "semantic table with pagination"
+        },
+        {
+          "name": "grid-toolbar",
+          "family": "advanced"
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-grid",
+          "path": "static/ui/grid.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

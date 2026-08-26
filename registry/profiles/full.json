@@ -38,6 +38,7 @@
       "component/container",
       "component/context-menu",
       "component/cursor-pagination",
+      "component/data-grid",
       "component/data-table",
       "component/date-field",
       "component/date-range-field",

@@ -30,7 +30,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "19fc1430dfd29c5aa9e912e871a2ccdd44caa018e5686fd4a38e6c3bc9839035",
+        "sha256": "b63ec4ff1b92502ee96143abe9d5ed46c132cb29d8c8c3948c39db96fece3206",
         "rewrite_module": true,
         "contract": false
       },

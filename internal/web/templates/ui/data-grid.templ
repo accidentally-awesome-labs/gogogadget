@@ -1,0 +1,283 @@
+package ui
+
+import "fmt"
+
+// GridColumn declares one column's capabilities.
+//
+// Resizable, Reorderable and Pinnable are separate flags because they are
+// separate promises: a column can be safe to widen but pointless to pin, and
+// advertising a control that does nothing is worse than omitting it.
+type GridColumn struct {
+	Key, Label string
+	// Width is the starting width in pixels; MinWidth is the floor a resize
+	// cannot cross. A column dragged to zero is data the user can no longer
+	// reach.
+	Width, MinWidth                            int
+	Sortable, Resizable, Reorderable, Pinnable bool
+	// Numeric right-aligns and keeps figures comparable down the column.
+	Numeric bool
+}
+
+// DataGridOpts configures the grid.
+//
+// This is a progressive layer over DataTable, not a replacement. With no
+// JavaScript the first window renders as an ordinary semantic table with
+// ordinary pagination, which is the whole reason the windowing is allowed to
+// exist: virtualized rows must never be the only way to reach the data.
+type DataGridOpts struct {
+	// ID is required: the toolbar, column picker and row region reference it.
+	ID      string
+	Caption string
+	// RowsURL serves the next window; Target is the region it swaps into.
+	RowsURL string
+	Target  string
+	Columns []GridColumn
+	// TotalRows is the server's count, so the position readout is honest even
+	// though only a window is loaded.
+	TotalRows int
+	// WindowSize is the rows per fetch; RowHeight lets the controller size the
+	// scroll area before rows arrive.
+	WindowSize, RowHeight int
+	// Page and TotalPages drive the no-JavaScript pager.
+	Page, TotalPages int
+	// SortKey and Sort are server-owned: sorting is a URL, not client state, so
+	// a sorted grid is shareable and survives reload.
+	SortKey string
+	Sort    SortDirection
+	// BaseURL builds sort and page links.
+	BaseURL    string
+	Selectable bool
+	Toolbar    templ.Component
+	Empty      templ.Component
+	RowCount   int
+	Attrs      Attrs
+}
+
+// DataGrid renders the grid surface.
+//
+// The table is a real table with real headers, and the enhancement adds cell
+// focus and column controls on top of it. It is deliberately not role="grid":
+// that role promises a full two-dimensional keyboard model, and claiming it
+// while the page still behaves like a table is worse for a screen-reader user
+// than the honest table semantics they already understand.
+templ DataGrid(o DataGridOpts) {
+	<div
+		{ rootWith("data-grid", "space-y-3", o.Attrs,
+			"x-data", "uiGrid",
+			"id", o.ID,
+			"data-grid-rows-url", o.RowsURL,
+			"data-grid-window", fmt.Sprint(gridWindow(o.WindowSize)),
+			"data-grid-row-height", fmt.Sprint(gridRowHeight(o.RowHeight)),
+			"data-grid-total", fmt.Sprint(o.TotalRows))... }
+	>
+		if o.Toolbar != nil {
+			@o.Toolbar
+		}
+		<div class="table-card overflow-x-auto" data-grid-viewport>
+			<table class="w-full text-sm" data-grid-table>
+				<caption class="sr-only">{ gridCaption(o) }</caption>
+				<thead>
+					<tr>
+						if o.Selectable {
+							<th scope="col" class="w-8">
+								<span class="sr-only">Select</span>
+							</th>
+						}
+						for _, column := range o.Columns {
+							@ColumnHeader(ColumnHeaderOpts{
+								Column:  gridToColumn(column),
+								Sort:    gridSortFor(o, column),
+								BaseURL: o.BaseURL,
+								Target:  o.Target,
+								Attrs: Attrs{Data: map[string]string{
+									"grid-column":      column.Key,
+									"grid-resizable":   gridFlag(column.Resizable),
+									"grid-reorderable": gridFlag(column.Reorderable),
+									"grid-pinnable":    gridFlag(column.Pinnable),
+									"grid-min-width":   fmt.Sprint(gridMinWidth(column)),
+								}},
+							})
+						}
+					</tr>
+				</thead>
+				<tbody data-grid-rows>
+					{ children... }
+				</tbody>
+			</table>
+			if o.RowCount == 0 && o.Empty != nil {
+				@o.Empty
+			}
+		</div>
+		// The ordinary pager, always rendered. The controller may fetch further
+		// windows on scroll, but the pager stays: it is the path that works with
+		// no script, and it is also the only path a keyboard user can rely on.
+		if o.TotalPages > 1 {
+			@Pagination(PaginationOpts{
+				Page:       o.Page,
+				TotalPages: o.TotalPages,
+				BaseURL:    o.BaseURL,
+				Target:     o.Target,
+			})
+		}
+		// A count the user can read. A scrollbar communicates "more rows" only
+		// to someone who can see it.
+		<p class="text-sm text-fg-muted" data-grid-status role="status" aria-live="polite">
+			{ fmt.Sprintf("Showing %d of %d rows", o.RowCount, o.TotalRows) }
+		</p>
+	</div>
+}
+
+// GridToolbarOpts configures the grid's controls.
+type GridToolbarOpts struct {
+	// For is the grid's ID.
+	For string
+	// SearchURL and Target wire the search field; search is server-owned.
+	SearchURL, Target, SearchParam, SearchValue string
+	Columns                                     []GridColumn
+	// Hidden lists column keys the user has hidden.
+	Hidden []string
+	Attrs  Attrs
+}
+
+// GridToolbar renders search plus the column picker trigger.
+templ GridToolbar(o GridToolbarOpts) {
+	<div
+		{ rootWith("grid-toolbar", "flex flex-wrap items-center gap-2", o.Attrs,
+			"role", "group",
+			"aria-label", "Table controls")... }
+		data-grid-for={ o.For }
+	>
+		if o.SearchURL != "" {
+			@SearchInput(SearchInputOpts{
+				Name:      gridSearchParam(o),
+				Value:     o.SearchValue,
+				AriaLabel: "Search rows",
+				GetURL:    o.SearchURL,
+				Target:    o.Target,
+			})
+		}
+		@ColumnPicker(ColumnPickerOpts{
+			For:     o.For,
+			Columns: o.Columns,
+			Hidden:  o.Hidden,
+		})
+	</div>
+}
+
+// ColumnPickerOpts configures column visibility.
+type ColumnPickerOpts struct {
+	For     string
+	Columns []GridColumn
+	Hidden  []string
+	Attrs   Attrs
+}
+
+// ColumnPicker renders per-column visibility checkboxes inside a native
+// disclosure.
+//
+// Checkboxes in a details element, not a custom menu: the state is a set of
+// independent toggles, which is exactly what a checkbox group is, and the
+// platform already supplies the keyboard model. The picker starts hidden
+// because hiding a column has no effect without the controller.
+templ ColumnPicker(o ColumnPickerOpts) {
+	<details
+		{ rootWith("column-picker", "relative", o.Attrs, "hidden", "hidden")... }
+		data-grid-column-picker
+		data-grid-for={ o.For }
+	>
+		<summary class="btn btn-ghost btn-xs">Columns</summary>
+		<div class="absolute right-0 mt-1 card p-3 z-(--z-overlay) min-w-48">
+			<fieldset class="space-y-1">
+				<legend class="text-xs text-fg-muted mb-1">Visible columns</legend>
+				for _, column := range o.Columns {
+					<label class="flex items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							data-grid-toggle-column={ column.Key }
+							checked?={ !gridContains(o.Hidden, column.Key) }
+						/>
+						<span>{ column.Label }</span>
+					</label>
+				}
+			</fieldset>
+		</div>
+	</details>
+}
+
+// gridToColumn maps a grid column onto the shared table column, so headers and
+// sort links behave identically to every other table in the product.
+func gridToColumn(column GridColumn) Column {
+	width := ""
+	if column.Width > 0 {
+		width = fmt.Sprintf("%dpx", column.Width)
+	}
+	return Column{
+		Key:      column.Key,
+		Label:    column.Label,
+		Width:    width,
+		Sortable: column.Sortable,
+		Numeric:  column.Numeric,
+	}
+}
+
+// gridSortFor reports a direction only for the sorted column. Passing the
+// table's direction to every header would claim all of them are sorted.
+func gridSortFor(o DataGridOpts, column GridColumn) SortDirection {
+	if o.SortKey != column.Key {
+		return SortNone
+	}
+	return o.Sort.Value()
+}
+
+func gridCaption(o DataGridOpts) string {
+	if o.Caption != "" {
+		return o.Caption
+	}
+	return "Data grid"
+}
+
+func gridWindow(size int) int {
+	if size <= 0 {
+		return 50
+	}
+	return size
+}
+
+func gridRowHeight(height int) int {
+	if height <= 0 {
+		return 40
+	}
+	return height
+}
+
+func gridSearchParam(o GridToolbarOpts) string {
+	if o.SearchParam != "" {
+		return o.SearchParam
+	}
+	return "q"
+}
+
+// gridMinWidth floors a resize. Without a floor a column can be dragged to zero
+// width, which hides data with no way to discover it is missing.
+func gridMinWidth(column GridColumn) int {
+	if column.MinWidth > 0 {
+		return column.MinWidth
+	}
+	return 48
+}
+
+func gridFlag(on bool) string {
+	if on {
+		return "true"
+	}
+	return "false"
+}
+
+func gridContains(keys []string, key string) bool {
+	for _, candidate := range keys {
+		if candidate == key {
+			return true
+		}
+	}
+	return false
+}

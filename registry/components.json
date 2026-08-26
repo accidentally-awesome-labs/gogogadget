@@ -31,6 +31,7 @@
     "registry/modules/component/container/module.json",
     "registry/modules/component/context-menu/module.json",
     "registry/modules/component/cursor-pagination/module.json",
+    "registry/modules/component/data-grid/module.json",
     "registry/modules/component/data-table/module.json",
     "registry/modules/component/date-field/module.json",
     "registry/modules/component/date-range-field/module.json",

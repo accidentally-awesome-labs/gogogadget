@@ -164,3 +164,13 @@ func galleryScheduler() ui.SchedulerOpts {
 		},
 	}
 }
+
+// galleryGridRows is fixed demo data for the grid: the component owns no rows.
+func galleryGridRows() [][4]string {
+	return [][4]string{
+		{"Apollo Launch Pad", "Ada", "1284", "eu-west-1"},
+		{"Borealis", "Grace", "312", "us-east-1"},
+		{"Cassini", "Alan", "58", "ap-south-1"},
+		{"Deimos", "Katherine", "9", "eu-central-1"},
+	}
+}
