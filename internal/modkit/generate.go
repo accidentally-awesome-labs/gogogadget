@@ -1878,8 +1878,8 @@ func emitEngineRegistry(ctx context.Context, modulePath string, lock Lock, graph
 				return nil, fmt.Errorf("engine %q declared by both %s and %s", a.Engine, prior, m.ID)
 			}
 			owner[a.Engine] = m.ID
-			fmt.Fprintf(&b, "window.__gggEngines[%s] = { src: %s, integrity: %s };\n",
-				jsString(a.Engine), jsString("/"+a.Path), jsString(a.Integrity))
+			fmt.Fprintf(&b, "window.__gggEngines[%s] = { src: %s, integrity: %s, esm: %t };\n",
+				jsString(a.Engine), jsString("/"+a.Path), jsString(a.Integrity), a.ESM)
 		}
 	}
 	_ = ctx

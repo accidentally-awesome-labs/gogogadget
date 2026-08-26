@@ -112,3 +112,55 @@ func gallerySingleSeries(id, title string) ui.ChartBase {
 		Series: []ui.ChartSeries{{ID: "share", Label: "Share", Kind: ui.KindBrand, Points: points}},
 	}
 }
+
+// galleryMonthGrid builds a fixed January 2026 for the demo, so the visual
+// baseline is deterministic.
+func galleryMonthGrid() ui.MonthGridOpts {
+	weeks := [][]ui.MonthDay{}
+	day := 1
+	for week := 0; week < 5; week++ {
+		row := make([]ui.MonthDay, 0, 7)
+		for column := 0; column < 7; column++ {
+			if week == 0 && column < 3 {
+				row = append(row, ui.MonthDay{})
+				continue
+			}
+			if day > 31 {
+				row = append(row, ui.MonthDay{})
+				continue
+			}
+			row = append(row, ui.MonthDay{
+				Date:     fmt.Sprintf("2026-01-%02d", day),
+				Label:    fmt.Sprint(day),
+				Today:    day == 15,
+				Selected: day == 20,
+				Disabled: day == 21,
+			})
+			day++
+		}
+		weeks = append(weeks, row)
+	}
+	return ui.MonthGridOpts{
+		ID: "gallery-month", Month: "2026-01", Caption: "January 2026",
+		DayNames: []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"},
+		Weeks:    weeks,
+	}
+}
+
+// galleryScheduler builds a two-day agenda, including an empty day so the empty
+// case is visible in the gallery rather than only in a test.
+func galleryScheduler() ui.SchedulerOpts {
+	return ui.SchedulerOpts{
+		ID: "gallery-schedule", Label: "Upcoming maintenance",
+		Days: []ui.ScheduleDay{
+			{
+				Date: "2026-02-02", Label: "Monday, 2 February",
+				Entries: []ui.ScheduleEntry{
+					{Start: "09:00", End: "09:30", MachineStart: "2026-02-02T09:00", Title: "Database migration", Kind: ui.KindWarn, Href: "/dev/gallery"},
+					{Start: "14:00", MachineStart: "2026-02-02T14:00", Title: "Cache warm", Kind: ui.KindInfo},
+				},
+			},
+			{Date: "2026-02-03", Label: "Tuesday, 3 February", Empty: "Nothing scheduled."},
+		},
+	}
+}

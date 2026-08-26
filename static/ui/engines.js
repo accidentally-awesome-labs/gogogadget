@@ -93,7 +93,14 @@ function loadEngine(name) {
     const script = document.createElement("script");
     script.src = asset.src;
     script.integrity = asset.integrity;
-    script.defer = true;
+    if (asset.esm) {
+      // A module is not a classic script: injected without type="module" the
+      // browser rejects it outright for its export statement. Modules are
+      // deferred by definition, so `defer` is meaningless here.
+      script.type = "module";
+    } else {
+      script.defer = true;
+    }
     script.dataset.uiEngineSrc = name;
     script.addEventListener("load", () => resolve(), { once: true });
     script.addEventListener("error", () => reject(new Error("failed to load engine " + name)), {

@@ -458,9 +458,14 @@ type AssetContribution struct {
 	// Integrity is the subresource integrity value for an engine asset. It is
 	// required alongside Engine: a lazily injected script with no integrity is
 	// a file that can be swapped without anything noticing.
-	Integrity string   `json:"integrity,omitempty"`
-	Before    []string `json:"before,omitempty"`
-	After     []string `json:"after,omitempty"`
+	Integrity string `json:"integrity,omitempty"`
+	// ESM marks an engine that ships as an ES module. Only the manifest knows
+	// which build a vendor publishes, and the distinction is not cosmetic: a
+	// module injected as a classic script is rejected outright for its export
+	// statement.
+	ESM    bool     `json:"esm,omitempty"`
+	Before []string `json:"before,omitempty"`
+	After  []string `json:"after,omitempty"`
 }
 
 // ManifestMigration declares a reviewed, forward-only migration payload.

@@ -47,6 +47,15 @@ fetch "chart.js@4.5.1" \
   "static/vendor/chartjs-4.5.1.umd.min.js" \
   "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a"
 
+# Cally is an ES module that self-registers <calendar-*> custom elements, so the
+# loader must inject it with type="module". Lazily loaded like Chart.js: a page
+# with no date picker never fetches it. MIT, with the bundled Atomico 1.79.2
+# notice travelling inside the committed file.
+fetch "cally@0.9.2" \
+  "https://cdn.jsdelivr.net/npm/cally@0.9.2/dist/cally.js" \
+  "static/vendor/cally-0.9.2.js" \
+  "4dcba6a3b8ec63b66ff2fbfc6cf47b7dee1eb4896eac89fe7487d82e28e15870"
+
 fetch "inter-variable@5.3.0" \
   "https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.3.0/files/inter-latin-wght-normal.woff2" \
   "static/fonts/inter-var.woff2" \

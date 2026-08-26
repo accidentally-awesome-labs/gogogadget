@@ -1997,3 +1997,26 @@ func TestAlpineFragmentRegistryExcludesEngineAssets(t *testing.T) {
 		t.Fatalf("an engine asset in the shell list defeats the whole lazy design:\n%s", f.Content)
 	}
 }
+
+// Cally is an ES module that self-registers custom elements, and a module cannot
+// be injected as a classic script: the browser rejects its export statement. The
+// registry therefore carries the module flag, because only the manifest knows
+// which build a vendor ships.
+func TestEngineRegistryCarriesModuleFlag(t *testing.T) {
+	mods := []Manifest{{
+		ID: "component/calendar", Kind: ModuleComponent, Name: "calendar", Revision: 1, Contract: 1,
+		Runtime: RuntimeContributions{Assets: []AssetContribution{{
+			ID: "cally", Path: "static/vendor/cally-0.9.2.js", Kind: AssetScript,
+			Engine: "cally", Integrity: "sha256-AAAA", ESM: true,
+		}}},
+	}}
+	lock := Lock{Order: []string{"component/calendar"}, Modules: []LockedModule{{ID: "component/calendar"}}}
+
+	f, err := emitEngineRegistry(context.Background(), "example.com/app", lock, mods)
+	if err != nil {
+		t.Fatalf("emit: %v", err)
+	}
+	if !strings.Contains(f.Content, "esm: true") {
+		t.Fatalf("an ES module engine must be marked:\n%s", f.Content)
+	}
+}

@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/calendar",
+    "kind": "component",
+    "name": "calendar",
+    "revision": 1,
+    "contract": 1,
+    "title": "Calendar and date pickers",
+    "description": "Native date, datetime-local and two-input range fields stay authoritative; Cally adds a calendar in a first-party popover. Also a static month grid, an agenda scheduler and a checkbox availability grid.",
+    "requires": [
+      "component/date-field",
+      "component/date-range-field",
+      "component/date-time-field",
+      "component/status-dot",
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/calendar.templ",
+        "target": "internal/web/templates/ui/calendar.templ",
+        "class": "templ",
+        "sha256": "4027396dd73e6f5f7814d4c67b7474014eac7487f858a44d363ada7c0e59563c",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/calendar_test.go",
+        "target": "internal/web/templates/ui/calendar_test.go",
+        "class": "test",
+        "sha256": "b06c95af9e388eed26dcdd5055e8d2f05c8be20d32627affc9569d19eeda9717",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/calendar.js",
+        "target": "static/ui/calendar.js",
+        "class": "asset",
+        "sha256": "a802bd28020478203d016d2735a8839f7bbdbff0c8ce6f9444cdeb066bbf2953",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/cally-0.9.2.js",
+        "target": "static/vendor/cally-0.9.2.js",
+        "class": "asset",
+        "sha256": "4dcba6a3b8ec63b66ff2fbfc6cf47b7dee1eb4896eac89fe7487d82e28e15870",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "availability-grid",
+          "family": "advanced"
+        },
+        {
+          "name": "date-picker",
+          "family": "advanced",
+          "engine": "cally",
+          "alpine": "uiCalendar",
+          "vendor": "cally@0.9.2",
+          "native_fallback": "native date input"
+        },
+        {
+          "name": "date-range-picker",
+          "family": "advanced",
+          "engine": "cally",
+          "alpine": "uiCalendar",
+          "vendor": "cally@0.9.2",
+          "native_fallback": "native date input"
+        },
+        {
+          "name": "date-time-picker",
+          "family": "advanced",
+          "engine": "cally",
+          "alpine": "uiCalendar",
+          "vendor": "cally@0.9.2",
+          "native_fallback": "native date input"
+        },
+        {
+          "name": "month-grid",
+          "family": "advanced"
+        },
+        {
+          "name": "scheduler",
+          "family": "advanced"
+        }
+      ],
+      "assets": [
+        {
+          "id": "cally",
+          "path": "static/vendor/cally-0.9.2.js",
+          "kind": "script",
+          "engine": "cally",
+          "integrity": "sha256-Tcumo7jsY7Zv8vv8bPR7fe4etIlurIn+dIfYLijhWHA=",
+          "esm": true
+        },
+        {
+          "id": "ui-calendar",
+          "path": "static/ui/calendar.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

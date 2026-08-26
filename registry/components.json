@@ -11,6 +11,7 @@
     "registry/modules/component/badge/module.json",
     "registry/modules/component/banner/module.json",
     "registry/modules/component/breadcrumbs/module.json",
+    "registry/modules/component/calendar/module.json",
     "registry/modules/component/card/module.json",
     "registry/modules/component/center/module.json",
     "registry/modules/component/char-counter/module.json",

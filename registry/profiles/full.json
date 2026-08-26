@@ -18,6 +18,7 @@
       "component/badge",
       "component/banner",
       "component/breadcrumbs",
+      "component/calendar",
       "component/card",
       "component/center",
       "component/char-counter",
