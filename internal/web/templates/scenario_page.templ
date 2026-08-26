@@ -1,0 +1,119 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// ScenarioIndex lists the declared scenarios.
+templ ScenarioIndex() {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: "Scenarios"}) {
+		<p class="text-sm text-fg-muted">Realistic product surfaces, each built from installed components.</p>
+	}
+	<ul class="space-y-2" data-testid="scenario-index">
+		for _, scenario := range ScenarioRegistry {
+			<li>
+				<a
+					href={ templ.SafeURL("/dev/scenarios/" + scenario.Slug) }
+					class="card p-4 block hover:bg-surface-raised"
+					data-testid={ "scenario-" + scenario.Slug }
+				>
+					<span class="font-medium">{ scenario.Title }</span>
+					<span class="block text-sm text-fg-muted">{ scenario.Summary }</span>
+				</a>
+			</li>
+		}
+	</ul>
+}
+
+// ScenarioPage renders one scenario's surface.
+//
+// The state controls are real links, so a state is addressable: a reader can
+// send someone the error state of the billing scenario rather than describing
+// how to reach it. Only the states the descriptor declares are offered, because
+// a control that selects a state the scenario does not have is a control that
+// must fail.
+templ ScenarioPage(scenario Scenario, state string) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: scenario.Title}) {
+		<p class="text-sm text-fg-muted">{ scenario.Summary }</p>
+	}
+	<nav class="flex flex-wrap items-center gap-2" aria-label="Scenario state" data-testid="scenario-states">
+		for _, candidate := range scenarioStateOptions(scenario) {
+			<a
+				href={ templ.SafeURL(scenarioStateURL(scenario, candidate)) }
+				class={ scenarioStateClass(candidate == scenarioActiveState(state)) }
+				aria-current={ scenarioCurrent(candidate == scenarioActiveState(state)) }
+				data-testid={ "state-" + candidate }
+			>{ candidate }</a>
+		}
+	</nav>
+	<p class="text-sm text-fg-muted" data-testid="scenario-slug">
+		{ fmt.Sprintf("%s · %s state", scenario.Slug, scenarioActiveState(state)) }
+	</p>
+	// The components this scenario exists to exercise, named from the
+	// descriptor. The visual matrix and the accessibility sweep read the same
+	// list, so what is claimed here is what gets covered.
+	@ui.DescriptionList(ui.DescriptionListOpts{
+		Attrs: ui.Attrs{TestID: "scenario-surfaces"},
+		Items: []ui.DescriptionItem{
+			{Term: "Layout", Value: scenario.Layout},
+			{Term: "Components", Value: joinWith(scenario.Surfaces, ", ")},
+			{Term: "States", Value: joinWith(scenarioStateOptions(scenario), ", ")},
+		},
+	})
+}
+
+// scenarioStateOptions always begins with default, so the unfiltered view has a
+// control of its own rather than being "no control selected".
+func scenarioStateOptions(scenario Scenario) []string {
+	out := []string{"default"}
+	for _, state := range scenario.States {
+		if state == "default" {
+			continue
+		}
+		out = append(out, state)
+	}
+	return out
+}
+
+func scenarioActiveState(state string) string {
+	if state == "" {
+		return "default"
+	}
+	return state
+}
+
+// scenarioStateURL keeps default as the bare path rather than ?state=default:
+// one canonical URL per view, so a shared link and a clicked link match.
+func scenarioStateURL(scenario Scenario, state string) string {
+	if state == "default" {
+		return "/dev/scenarios/" + scenario.Slug
+	}
+	return "/dev/scenarios/" + scenario.Slug + "?state=" + state
+}
+
+func scenarioStateClass(active bool) string {
+	if active {
+		return "btn btn-primary btn-xs"
+	}
+	return "btn btn-ghost btn-xs"
+}
+
+func scenarioCurrent(active bool) string {
+	if active {
+		return "page"
+	}
+	return "false"
+}
+
+func joinWith(values []string, sep string) string {
+	out := ""
+	for i, value := range values {
+		if i > 0 {
+			out += sep
+		}
+		out += value
+	}
+	return out
+}

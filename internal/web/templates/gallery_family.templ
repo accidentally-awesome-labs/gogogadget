@@ -1,0 +1,136 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// FamilyIndex lists the families and what each holds.
+//
+// Counts come from the installed registry rather than a hand-kept list, so a
+// family that lost its last component reads as empty instead of linking to a
+// page with nothing on it.
+templ FamilyIndex() {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: "Component families"}) {
+		<p class="text-sm text-fg-muted">{ fmt.Sprintf("%d components installed.", len(ui.ComponentRegistry)) }</p>
+	}
+	<ul class="grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="family-index">
+		for _, family := range ui.GalleryFamilies {
+			<li>
+				<a
+					href={ templ.SafeURL("/dev/gallery/" + string(family)) }
+					class="card p-4 block hover:bg-surface-raised"
+					data-testid={ "family-" + string(family) }
+				>
+					<span class="font-medium capitalize">{ string(family) }</span>
+					<span class="block text-sm text-fg-muted">
+						{ fmt.Sprintf("%d components", len(ui.ComponentsInFamily(family))) }
+					</span>
+				</a>
+			</li>
+		}
+	</ul>
+}
+
+// FamilyPage lists one family's components.
+//
+// Every entry is a link to the component's own page, and each states its engine
+// and native fallback: those two facts decide whether a component can be used on
+// a surface that has to work without JavaScript, and they are the first thing an
+// adopter needs.
+templ FamilyPage(family ui.GalleryFamily) {
+	@ui.Breadcrumbs(ui.BreadcrumbsOpts{Crumbs: []ui.Crumb{
+		{Label: "Gallery", Href: "/dev/gallery"},
+		{Label: string(family)},
+	}})
+	@ui.PageHeader(ui.PageHeaderOpts{Title: familyTitle(family)}) {
+		<p class="text-sm text-fg-muted">{ fmt.Sprintf("%d components.", len(ui.ComponentsInFamily(family))) }</p>
+	}
+	if len(ui.ComponentsInFamily(family)) == 0 {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Title: "No components installed in this family.",
+			Body:  "Install one with ggg add, or remove the family from the profile.",
+		})
+	} else {
+		<ul class="space-y-2" data-testid="family-components">
+			for _, component := range ui.ComponentsInFamily(family) {
+				<li>
+					<a
+						href={ templ.SafeURL(fmt.Sprintf("/dev/gallery/%s/%s", family, component.Name)) }
+						class="card p-3 flex items-baseline justify-between gap-3 hover:bg-surface-raised"
+						data-testid={ "component-" + component.Name }
+					>
+						<span class="font-mono text-sm">{ component.Name }</span>
+						<span class="text-xs text-fg-muted">{ componentRuntimeNote(component) }</span>
+					</a>
+				</li>
+			}
+		</ul>
+	}
+}
+
+// ComponentPage renders one component's reference.
+//
+// The module is stated because that is what an adopter installs; the engine and
+// fallback are stated because they decide where the component may be used. Both
+// come from the installed manifest, so this page cannot describe a component the
+// project does not have.
+templ ComponentPage(component ui.Component) {
+	@ui.Breadcrumbs(ui.BreadcrumbsOpts{Crumbs: []ui.Crumb{
+		{Label: "Gallery", Href: "/dev/gallery"},
+		{Label: string(component.Family), Href: "/dev/gallery/" + string(component.Family)},
+		{Label: component.Name},
+	}})
+	@ui.PageHeader(ui.PageHeaderOpts{Title: component.Name})
+	@ui.DescriptionList(ui.DescriptionListOpts{
+		Attrs: ui.Attrs{TestID: "component-facts"},
+		Items: componentFacts(component),
+	})
+}
+
+// familyTitle capitalises the family for a heading without inventing a second
+// name for it: the URL segment and the heading stay the same word.
+func familyTitle(family ui.GalleryFamily) string {
+	name := string(family)
+	if name == "" {
+		return "Components"
+	}
+	return string(name[0]-32) + name[1:]
+}
+
+// componentRuntimeNote states the one fact that decides whether a component can
+// be used where scripting is unavailable.
+func componentRuntimeNote(component ui.Component) string {
+	if component.Engine == "" {
+		return "no script"
+	}
+	if component.NativeFallback != "" {
+		return "enhanced — " + component.NativeFallback
+	}
+	return "needs " + component.Engine
+}
+
+// componentFacts lists what the manifest actually knows. Absent fields are
+// omitted rather than shown empty: a blank row reads as missing data instead of
+// a component that has no engine.
+func componentFacts(component ui.Component) []ui.DescriptionItem {
+	items := []ui.DescriptionItem{
+		{Term: "Module", Value: component.Module},
+		{Term: "Family", Value: string(component.Family)},
+		{Term: "Attribute", Value: `data-ui="` + component.Name + `"`},
+	}
+	if component.Engine != "" {
+		items = append(items, ui.DescriptionItem{Term: "Engine", Value: component.Engine})
+	}
+	if component.Alpine != "" {
+		items = append(items, ui.DescriptionItem{Term: "Alpine component", Value: component.Alpine})
+	}
+	if component.Vendor != "" {
+		items = append(items, ui.DescriptionItem{Term: "Vendor", Value: component.Vendor})
+	}
+	if component.NativeFallback != "" {
+		items = append(items, ui.DescriptionItem{Term: "Without JavaScript", Value: component.NativeFallback})
+	}
+	return items
+}

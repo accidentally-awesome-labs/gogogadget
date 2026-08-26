@@ -17,6 +17,22 @@
     ],
     "files": [
       {
+        "source": "internal/web/dev_routes_test.go",
+        "target": "internal/web/dev_routes_test.go",
+        "class": "test",
+        "sha256": "31684aa9bac96ea8f37107847348530f2af9a7a4cf2269622c06a2893577d729",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_dev_catalog.go",
+        "target": "internal/web/page_dev_catalog.go",
+        "class": "go",
+        "sha256": "6db10e6045c4138ce4a1f0ba105f6e874fc77d888908a0edee66c9a2855c6c5e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_dev_gallery.go",
         "target": "internal/web/page_dev_gallery.go",
         "class": "go",
@@ -36,7 +52,7 @@
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "3868243fee17cc022dfb733cf62a5b9e3a413779b5d1cf1dd2672d97d331f108",
+        "sha256": "1b1882e2fda38ad089b3fb3f841789b2c00f5e60f5dab2cdc637dcd85d34f222",
         "rewrite_module": true,
         "contract": false
       },
@@ -55,16 +71,89 @@
         "sha256": "c84ec12ef8fd5ea33c1564a51d334d55ecfb0e78ed35efec0bd9f35dab54f92a",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_family.templ",
+        "target": "internal/web/templates/gallery_family.templ",
+        "class": "templ",
+        "sha256": "c48ac9be3c873332e0ef4109bb4cdf0fd7b2d1c05f7a87a79c77e320fd6b6637",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_pager.templ",
+        "target": "internal/web/templates/gallery_pager.templ",
+        "class": "templ",
+        "sha256": "3fd4b3f371e68a6a772dbb85993899b0f6faa36c88a0c65c75151ea4ccc7ceae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenario_page.templ",
+        "target": "internal/web/templates/scenario_page.templ",
+        "class": "templ",
+        "sha256": "36a8f17049d5397577478d0fab0bdf0780aa093d6f8528c44020c75743e08ce2",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/scenarios.go",
+        "target": "internal/web/templates/scenarios.go",
+        "class": "go",
+        "sha256": "53fd272ef929267a59b0e8089852059d17b69a8aa72ead95763fe1e548bfdb46",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
       "routes": [
+        "dev-gallery.component",
+        "dev-gallery.family",
         "dev-gallery.index",
-        "dev-gallery.kanban_move"
+        "dev-gallery.scenario",
+        "dev-gallery.ui_action_delete",
+        "dev-gallery.ui_action_get",
+        "dev-gallery.ui_action_post"
       ]
     },
     "runtime": {
       "routes": [
+        {
+          "id": "dev-gallery.component",
+          "method": "GET",
+          "pattern": "/dev/gallery/{family}/{component}",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevGalleryComponent",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev-gallery.family",
+          "method": "GET",
+          "pattern": "/dev/gallery/{family}",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevGalleryFamily",
+          "enabled": "devAuthBypass"
+        },
         {
           "id": "dev-gallery.index",
           "method": "GET",
@@ -84,9 +173,9 @@
           "enabled": "devAuthBypass"
         },
         {
-          "id": "dev-gallery.kanban_move",
-          "method": "POST",
-          "pattern": "/dev/ui/kanban/move",
+          "id": "dev-gallery.scenario",
+          "method": "GET",
+          "pattern": "/dev/scenarios/{scenario}",
           "scope": "dev",
           "policy": {
             "csrf_exempt": false,
@@ -98,7 +187,61 @@
             "admin_write": false
           },
           "package": "internal/web",
-          "handler": "handleDevKanbanMove",
+          "handler": "handleDevScenario",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev-gallery.ui_action_delete",
+          "method": "DELETE",
+          "pattern": "/dev/ui/{component}/{action}",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevUIAction",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev-gallery.ui_action_get",
+          "method": "GET",
+          "pattern": "/dev/ui/{component}/{action}",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevUIAction",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev-gallery.ui_action_post",
+          "method": "POST",
+          "pattern": "/dev/ui/{component}/{action}",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevUIAction",
           "enabled": "devAuthBypass"
         }
       ]

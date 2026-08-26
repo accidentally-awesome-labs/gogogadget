@@ -43,9 +43,12 @@ var galleryPlan = billing.Plan{
 	Features: []string{"Unlimited projects", "10 team members", "Priority support"},
 }
 
+// galleryTabs demonstrates NavTabs against real destinations. The second tab
+// used to point at /dev/gallery/other, which never existed: a dead link in the
+// reference for a navigation component is the worst possible example.
 var galleryTabs = []NavItem{
 	{LabelKey: "settings.tab_account", Href: "/dev/gallery"},
-	{LabelKey: "settings.tab_org", Href: "/dev/gallery/other"},
+	{LabelKey: "settings.tab_org", Href: "/dev/gallery/actions"},
 }
 
 templ Gallery() {
@@ -53,6 +56,14 @@ templ Gallery() {
 		<div>
 			<p class="eyebrow">Design system</p>
 			<h1 class="display-title mt-2">Component gallery</h1>
+			<nav class="mt-4 flex flex-wrap gap-2" aria-label="Catalog" data-testid="gallery-nav">
+				for _, family := range ui.GalleryFamilies {
+					<a href={ templ.SafeURL("/dev/gallery/" + string(family)) } class="btn btn-ghost btn-xs capitalize">
+						{ string(family) }
+					</a>
+				}
+				<a href="/dev/scenarios/dashboard" class="btn btn-ghost btn-xs">scenarios</a>
+			</nav>
 			<p class="mt-4 text-fg-muted max-w-narrow">
 				Every token and component, in every variant. Toggle the theme in the
 				header: nothing on this page carries a per-theme variant class, so
@@ -237,12 +248,12 @@ templ Gallery() {
 			</div>
 		}
 
-		@gallerySection("Pagination") {
-			@ui.Pagination(ui.PaginationOpts{Page: 2, TotalPages: 5, BaseURL: "/dev/gallery", Target: "#gallery-pager", Labels: pagerLabels(ctx)})
-		}
-
-		@gallerySection("Search toolbar") {
-			@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: "", Placeholder: "Search…", AriaLabel: "Gallery search", GetURL: "/dev/gallery", Target: "#gallery-pager", IndicatorID: "gallery-search-indicator", Attrs: ui.Attrs{TestID: "gallery-search"}})
+		// Both of these used to target #gallery-pager, which no page rendered,
+		// so the swap reached nothing. They now swap a real region served by a
+		// fragment route - pointing them at the page itself would nest the whole
+		// gallery inside the pager, which looks like a working swap and is not.
+		@gallerySection("Pagination and search") {
+			@GalleryPager(2, "")
 		}
 
 		@gallerySection("Empty state") {
