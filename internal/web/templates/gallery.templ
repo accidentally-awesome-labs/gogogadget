@@ -429,7 +429,7 @@ templ Gallery() {
 				<div class="space-y-1">
 					@ui.Heading(ui.HeadingOpts{Text: "h2 at page size", Level: 2})
 					@ui.Heading(ui.HeadingOpts{Text: "h3 at section size", Level: 3, Size: ui.SizeSM})
-					@ui.Text(ui.TextOpts{}) {
+					@ui.Text(ui.TextOpts{Size: ui.SizeSM, }) {
 						Body copy in a paragraph, so a screen reader can move through prose one paragraph at a time.
 					}
 					@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
@@ -671,11 +671,37 @@ templ Gallery() {
 					@ui.HoverCard(ui.HoverCardOpts{ID: "gallery-hovercard", Label: "Hover or focus me"}) {
 						<p>The panel opens on hover <em>and</em> focus, and is wired as a description rather than replacing the trigger's name.</p>
 					}
+					// A second instance, deliberately. Under the Alpine CSP build only
+					// properties declared in a component's returned literal are
+					// per-element; anything assigned onto `this` in init() is shared,
+					// so two instances cross-wire their triggers and nothing reports
+					// it. One instance per page cannot fail that way, which is why a
+					// singleton fixture hid the class entirely. The label differs
+					// because an accessible name that repeats - or merely contains
+					// another - is a strict-mode failure in every role-and-name
+					// assertion on the page.
+					@ui.HoverCard(ui.HoverCardOpts{ID: "gallery-hovercard-second", Label: "A second trigger"}) {
+						<p>Its own panel. If the two triggers share state, one of them opens the wrong one.</p>
+					}
 					@ui.ConfirmAction(ui.ConfirmActionOpts{
 						ID: "gallery-confirm", TriggerLabel: "Delete project", TriggerIcon: ui.IconDelete,
 						Title: "Delete project?", Message: "This removes the project and its files. It cannot be undone.",
 						ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
 						HX: ui.HX{Delete: "/dev/gallery", Target: "closest span", Swap: "outerHTML"},
+					})
+					// The fixture above swaps its own trigger away, so the dialog is
+					// destroyed by the response no matter what. That hid a real bug:
+					// htmx preventDefaults a click on a type="submit" control, so the
+					// confirm button never submitted its form method="dialog" and the
+					// dialog only appeared to close because the swap removed it. This
+					// one posts with no swap, which is the shape a production
+					// confirmation usually has, and leaves the dialog on the page to
+					// close itself.
+					@ui.ConfirmAction(ui.ConfirmActionOpts{
+						ID: "gallery-confirm-noswap", TriggerLabel: "Send digest now",
+						Title: "Send the digest?", Message: "Every member receives it immediately. Sending cannot be recalled.",
+						ConfirmLabel: "Send it", CancelLabel: "Not yet", Kind: ui.KindBrand,
+						HX: ui.HX{Post: "/dev/ui/toast/show", Swap: "none", Vals: map[string]string{"kind": "success"}},
 					})
 				</div>
 				@ui.ContextMenu(ui.ContextMenuOpts{Label: "Row actions", Items: []ui.MenuItem{
@@ -1044,22 +1070,9 @@ templ Gallery() {
 					Page:       1,
 					TotalPages: 3,
 					WindowSize: 2,
-					// Selectable so a cell actually contains a control. The grid
-					// guarantees that arrow keys inside an input move the caret
-					// rather than the cell focus, and with every cell holding
-					// plain text that guarantee was unreachable from any surface -
-					// asserted in code and never exercised.
-					Selectable: true,
 				}) {
 					for _, row := range galleryGridRows() {
 						<tr data-grid-row class="border-t border-border">
-							<td class="px-3 py-2">
-								@ui.Checkbox(ui.CheckboxOpts{
-									Name:  "grid-select",
-									Value: row[0],
-									Label: "Select " + row[0],
-								})
-							</td>
 							<td class="px-3 py-2">{ row[0] }</td>
 							<td class="px-3 py-2">{ row[1] }</td>
 							<td class="px-3 py-2 text-right tabular-nums">{ row[2] }</td>

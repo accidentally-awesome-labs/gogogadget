@@ -10,16 +10,18 @@ type ToggleButtonOpts struct {
 	Action Action
 	Size   Size
 	Icon   IconName
-	HX     HX
-	Attrs  Attrs
+	// HX issues the request the toggle makes. It is applied after Attrs.HX, so
+	// a value set here wins per attribute when both carry the same one.
+	HX    HX
+	Attrs Attrs
 }
 
 // ToggleButton renders a button that reports its own pressed state.
 templ ToggleButton(o ToggleButtonOpts) {
 	<button
-		{ rootWith("toggle-button", buttonClass(o.Action, o.Size), o.Attrs,
+		{ withRequest(rootWith("toggle-button", buttonClass(o.Action, o.Size), o.Attrs,
 			"type", "button",
-			"aria-pressed", pressedAttr(&o.On))... }
+			"aria-pressed", pressedAttr(&o.On)), o.HX)... }
 	>
 		if o.Icon != "" {
 			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}})

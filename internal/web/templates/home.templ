@@ -1,112 +1,191 @@
 package templates
 
 import (
+	"context"
+
 	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
-templ Home(plans []billing.Plan) {
-	<!-- Hero -->
-	<section class="max-w-page mx-auto px-4 pt-20 pb-16 text-center">
-		<h1 class="hero-title" data-testid="hero">
-			{ i18n.T(ctx, "home.hero.title1") }<span class="text-brand-text">{ i18n.T(ctx, "home.hero.title2") }</span>
-		</h1>
-		<p class="mt-6 text-lg text-fg-muted max-w-2xl mx-auto">
-			{ i18n.T(ctx, "home.hero.subtitle") }
-		</p>
-		<div class="mt-8 flex justify-center gap-4">
-			<a href="/signup" class="btn btn-primary text-base px-6 py-3">{ i18n.T(ctx, "home.cta.start") }</a>
-			<a href="/docs" class="btn btn-ghost text-base px-6 py-3">{ i18n.T(ctx, "home.cta.docs") }</a>
-		</div>
-		<div class="mt-12 card aspect-video flex items-center justify-center text-fg-muted" aria-hidden="true">
-			{ i18n.T(ctx, "home.screenshot") }
-		</div>
-	</section>
+// homeCopy is one title/body pair from the catalog, resolved for the request.
+// The feature grid and the how-it-works row both take this shape, so they share
+// one type rather than declaring two anonymous structs that happen to match.
+type homeCopy struct {
+	Title, Body string
+}
 
-	<!-- Logo cloud -->
+templ Home(plans []billing.Plan) {
+	// Hero. The heading carries its own markup rather than a flattened string:
+	// the second clause is brand-coloured, and that emphasis is part of the
+	// sentence, not decoration on top of it.
+	<section class="max-w-page mx-auto px-4 pt-20 pb-16 text-center">
+		@ui.Heading(ui.HeadingOpts{
+			Level: 1, Unstyled: true,
+			Attrs: ui.Attrs{Class: "hero-title", TestID: "hero"},
+		}) {
+			{ i18n.T(ctx, "home.hero.title1") }<span class="text-brand-text">{ i18n.T(ctx, "home.hero.title2") }</span>
+		}
+		@ui.Text(ui.TextOpts{Size: ui.SizeLG, Muted: true, Attrs: ui.Attrs{Class: "mt-6 max-w-2xl mx-auto"}}) {
+			{ i18n.T(ctx, "home.hero.subtitle") }
+		}
+		@ui.Inline(ui.InlineOpts{Attrs: ui.Attrs{Class: "mt-8 justify-center"}}) {
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "home.cta.start"), Href: "/signup",
+				Action: ui.ActionPrimary, Size: ui.SizeLG,
+			})
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "home.cta.docs"), Href: "/docs",
+				Size: ui.SizeLG,
+			})
+		}
+		// AspectRatio reserves the frame so the hero does not reflow when a real
+		// screenshot replaces this filler, and Decorative takes the placeholder
+		// text out of the accessibility tree: it names nothing a non-sighted
+		// reader needs, and there is no control inside it to strand.
+		@ui.AspectRatio(ui.AspectRatioOpts{
+			Ratio: ui.RatioVideo,
+			Attrs: ui.Attrs{
+				Class:      "mt-12 card flex items-center justify-center text-fg-muted",
+				Decorative: true,
+			},
+		}) {
+			{ i18n.T(ctx, "home.screenshot") }
+		}
+	</section>
+	// Logo cloud. The row keeps its own asymmetric gap: Inline exposes one Gap
+	// axis, and a wordmark row needs more horizontal air than vertical.
 	<section class="max-w-page mx-auto px-4 py-8">
-		<p class="text-center text-sm text-fg-muted mb-6">{ i18n.T(ctx, "home.stack") }</p>
+		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "text-center mb-6"}}) {
+			{ i18n.T(ctx, "home.stack") }
+		}
 		<div class="flex flex-wrap justify-center gap-x-10 gap-y-4 text-fg-muted font-semibold">
 			<span>Go</span><span>HTMX</span><span>templ</span><span>Tailwind v4</span><span>Postgres</span><span>Clerk</span><span>Polar</span><span>Resend</span><span>PostHog</span><span>Sentry</span>
 		</div>
 	</section>
-
-	<!-- Feature grid -->
+	// Feature grid. Tile rather than a hand-built card: the summary shape is
+	// the same one the dashboard uses, and it has no destination here, so it
+	// renders as a plain card instead of faking clickability.
 	<section id="features" class="page-section">
-		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.features.title") }</h2>
-		<div class="mt-10 grid md:grid-cols-3 gap-6">
-			for _, f := range []struct{ Title, Body string }{
-				{i18n.T(ctx, "home.f1.title"), i18n.T(ctx, "home.f1.body")},
-				{i18n.T(ctx, "home.f2.title"), i18n.T(ctx, "home.f2.body")},
-				{i18n.T(ctx, "home.f3.title"), i18n.T(ctx, "home.f3.body")},
-				{i18n.T(ctx, "home.f4.title"), i18n.T(ctx, "home.f4.body")},
-				{i18n.T(ctx, "home.f5.title"), i18n.T(ctx, "home.f5.body")},
-				{i18n.T(ctx, "home.f6.title"), i18n.T(ctx, "home.f6.body")},
-			} {
-				<div class="card">
-					<h3 class="font-semibold">{ f.Title }</h3>
-					<p class="mt-2 text-sm text-fg-muted">{ f.Body }</p>
-				</div>
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "home.features.title"), Level: 2, Unstyled: true,
+			Attrs: ui.Attrs{Class: "text-3xl font-bold text-center"},
+		})
+		@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapLG, Attrs: ui.Attrs{Class: "mt-10"}}) {
+			for _, feature := range homeFeatures(ctx) {
+				@ui.Tile(ui.TileOpts{Title: feature.Title, Body: feature.Body})
 			}
-		</div>
+		}
 	</section>
-
-	<!-- How it works -->
+	// How it works. Not Steps: that component is a progress trail through a
+	// flow the reader is inside, and this is three parallel explanations of a
+	// flow they have not started.
 	<section class="page-section">
-		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.how.title") }</h2>
-		<div class="mt-10 grid md:grid-cols-3 gap-6 text-center">
-			for i, s := range []struct{ Title, Body string }{
-				{i18n.T(ctx, "home.step1.title"), i18n.T(ctx, "home.step1.body")},
-				{i18n.T(ctx, "home.step2.title"), i18n.T(ctx, "home.step2.body")},
-				{i18n.T(ctx, "home.step3.title"), i18n.T(ctx, "home.step3.body")},
-			} {
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "home.how.title"), Level: 2, Unstyled: true,
+			Attrs: ui.Attrs{Class: "text-3xl font-bold text-center"},
+		})
+		@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapLG, Attrs: ui.Attrs{Class: "mt-10 text-center"}}) {
+			for i, step := range homeSteps(ctx) {
 				<div>
 					<div class="w-10 h-10 mx-auto rounded-full bg-brand text-brand-fg flex items-center justify-center font-bold">{ i + 1 }</div>
-					<h3 class="mt-4 font-semibold">{ s.Title }</h3>
-					<p class="mt-2 text-sm text-fg-muted">{ s.Body }</p>
+					@ui.Heading(ui.HeadingOpts{
+						Text: step.Title, Level: 3, Unstyled: true,
+						Attrs: ui.Attrs{Class: "mt-4 font-semibold"},
+					})
+					@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
+						{ step.Body }
+					}
 				</div>
 			}
-		</div>
+		}
 	</section>
-
-	<!-- Pricing preview -->
+	// Pricing preview. The same PlanCard the pricing page renders, with a
+	// signup link instead of a checkout: the card is presentation only, so the
+	// action is the caller's to choose.
 	<section class="page-section">
-		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.pricing.title") }</h2>
-		<div class="mt-10 grid md:grid-cols-3 gap-6">
-			for _, p := range plans {
-				@ui.PlanCard(uiPlanCard(ctx, p, false)) {
-					<a href="/signup" class="btn btn-ghost w-full">{ i18n.T(ctx, "home.pricing.get_started") }</a>
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "home.pricing.title"), Level: 2, Unstyled: true,
+			Attrs: ui.Attrs{Class: "text-3xl font-bold text-center"},
+		})
+		@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapLG, Attrs: ui.Attrs{Class: "mt-10"}}) {
+			for _, plan := range plans {
+				@ui.PlanCard(uiPlanCard(ctx, plan, false)) {
+					@ui.ButtonLink(ui.ButtonLinkOpts{
+						Label: i18n.T(ctx, "home.pricing.get_started"), Href: "/signup",
+						Attrs: ui.Attrs{Class: "w-full"},
+					})
 				}
 			}
-		</div>
+		}
 	</section>
-
-	<!-- FAQ -->
+	// FAQ. Native details, so the answers are still in the DOM for the
+	// browser's own find-in-page and print expanded - and the panels are not
+	// exclusive, because comparing two answers is the reason people read a FAQ.
 	<section class="page-narrow">
-		<h2 class="text-3xl font-bold text-center">{ i18n.T(ctx, "home.faq.title") }</h2>
-		<div class="mt-10 space-y-6">
-			for _, q := range []struct{ Q, A string }{
-				{i18n.T(ctx, "home.faq.q1"), i18n.T(ctx, "home.faq.a1")},
-				{i18n.T(ctx, "home.faq.q2"), i18n.T(ctx, "home.faq.a2")},
-				{i18n.T(ctx, "home.faq.q3"), i18n.T(ctx, "home.faq.a3")},
-				{i18n.T(ctx, "home.faq.q4"), i18n.T(ctx, "home.faq.a4")},
-				{i18n.T(ctx, "home.faq.q5"), i18n.T(ctx, "home.faq.a5")},
-			} {
-				<div class="card">
-					<h3 class="font-semibold">{ q.Q }</h3>
-					<p class="mt-2 text-sm text-fg-muted">{ q.A }</p>
-				</div>
-			}
-		</div>
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "home.faq.title"), Level: 2, Unstyled: true,
+			Attrs: ui.Attrs{Class: "text-3xl font-bold text-center"},
+		})
+		@ui.Accordion(ui.AccordionOpts{
+			Panels: homeFAQ(ctx),
+			Attrs:  ui.Attrs{Class: "mt-10"},
+		})
 	</section>
-
-	<!-- CTA band -->
+	// CTA band.
 	<section class="bg-brand text-brand-fg">
 		<div class="page-section text-center">
-			<h2 class="text-3xl font-bold">{ i18n.T(ctx, "home.cta_band.title") }</h2>
-			<p class="mt-4 text-brand-fg-muted">{ i18n.T(ctx, "home.cta_band.body") }</p>
-			<a href="/signup" class="btn btn-inverse mt-8 text-base px-6 py-3">{ i18n.T(ctx, "home.cta_band.button") }</a>
+			@ui.Heading(ui.HeadingOpts{
+				Text: i18n.T(ctx, "home.cta_band.title"), Level: 2, Unstyled: true,
+				Attrs: ui.Attrs{Class: "text-3xl font-bold"},
+			})
+			// SizeMD is text-base: the original markup carried no size class, and
+			// this is the only supporting sentence under a 3xl heading.
+			@ui.Text(ui.TextOpts{Size: ui.SizeMD, Attrs: ui.Attrs{Class: "mt-4 text-brand-fg-muted"}}) {
+				{ i18n.T(ctx, "home.cta_band.body") }
+			}
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "home.cta_band.button"), Href: "/signup",
+				Action: ui.ActionInverse, Size: ui.SizeLG,
+				Attrs: ui.Attrs{Class: "mt-8"},
+			})
 		</div>
 	</section>
+}
+
+// homeFeatures resolves the six feature cards. The keys are enumerated rather
+// than generated from a counter: a missing translation must be a visible
+// catalog failure at the key, not a card that silently disappears because the
+// loop stopped early.
+func homeFeatures(ctx context.Context) []homeCopy {
+	return []homeCopy{
+		{i18n.T(ctx, "home.f1.title"), i18n.T(ctx, "home.f1.body")},
+		{i18n.T(ctx, "home.f2.title"), i18n.T(ctx, "home.f2.body")},
+		{i18n.T(ctx, "home.f3.title"), i18n.T(ctx, "home.f3.body")},
+		{i18n.T(ctx, "home.f4.title"), i18n.T(ctx, "home.f4.body")},
+		{i18n.T(ctx, "home.f5.title"), i18n.T(ctx, "home.f5.body")},
+		{i18n.T(ctx, "home.f6.title"), i18n.T(ctx, "home.f6.body")},
+	}
+}
+
+// homeSteps resolves the three how-it-works steps, in order.
+func homeSteps(ctx context.Context) []homeCopy {
+	return []homeCopy{
+		{i18n.T(ctx, "home.step1.title"), i18n.T(ctx, "home.step1.body")},
+		{i18n.T(ctx, "home.step2.title"), i18n.T(ctx, "home.step2.body")},
+		{i18n.T(ctx, "home.step3.title"), i18n.T(ctx, "home.step3.body")},
+	}
+}
+
+// homeFAQ resolves the five questions as accordion panels. None is open: the
+// list is a scannable index of questions, and pre-opening one pushes the other
+// four below the fold for a reader who wanted to see all five.
+func homeFAQ(ctx context.Context) []ui.AccordionPanel {
+	return []ui.AccordionPanel{
+		{Summary: i18n.T(ctx, "home.faq.q1"), Body: i18n.T(ctx, "home.faq.a1")},
+		{Summary: i18n.T(ctx, "home.faq.q2"), Body: i18n.T(ctx, "home.faq.a2")},
+		{Summary: i18n.T(ctx, "home.faq.q3"), Body: i18n.T(ctx, "home.faq.a3")},
+		{Summary: i18n.T(ctx, "home.faq.q4"), Body: i18n.T(ctx, "home.faq.a4")},
+		{Summary: i18n.T(ctx, "home.faq.q5"), Body: i18n.T(ctx, "home.faq.a5")},
+	}
 }

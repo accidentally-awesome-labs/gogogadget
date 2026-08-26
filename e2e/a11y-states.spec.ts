@@ -30,6 +30,14 @@ async function scan(page: Page, label?: string) {
   expect(violations, `${label ?? 'state'}\n${JSON.stringify(violations, null, 2)}`).toEqual([]);
 }
 
+// Asset and console activity per page, recorded from creation so a failure can
+// say WHY an engine never arrived. A bare "waitForFunction timed out" cannot
+// distinguish a slow fetch from a failed request from a loader that cached a
+// rejection and will never retry — and that is the difference between machine
+// contention and a product bug. Keyed on the page object, so it cannot outlive
+// the context it describes.
+const assetNotes = new WeakMap<Page, string[]>();
+
 async function open(
   browser: Browser,
   persona: string,
@@ -39,6 +47,22 @@ async function open(
     ? await loginAs(browser, persona as TestUser)
     : await browser.newContext();
   const page = await context.newPage();
+  const notes: string[] = [];
+  assetNotes.set(page, notes);
+  page.on('requestfailed', (request) => {
+    if (request.url().includes('/static/')) {
+      notes.push(`requestfailed ${request.url()} ${request.failure()?.errorText ?? ''}`);
+    }
+  });
+  page.on('response', (response) => {
+    if (response.url().includes('/static/') && !response.ok()) {
+      notes.push(`response ${response.status()} ${response.url()}`);
+    }
+  });
+  page.on('console', (message) => {
+    if (message.type() === 'error') notes.push(`console ${message.text()}`);
+  });
+  page.on('pageerror', (error) => notes.push(`pageerror ${error.message}`));
   if (theme === 'dark') {
     await page.addInitScript(() => localStorage.setItem('theme', 'dark'));
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -76,23 +100,40 @@ interface StateCase {
   // proportional to its passes or it times out on a loaded machine while
   // everything it asserts is fine.
   scans?: number;
+  // Whether reaching the state requires a lazily fetched vendor bundle. That
+  // fetch queues behind the gallery's own two dozen scripts, so the case needs
+  // an allowance on top of its scan budget; without it the enclosing test
+  // expires mid-fetch on a busy machine and reports a widget defect that is
+  // really contention.
+  awaitsVendor?: boolean;
   run: (page: Page) => Promise<void>;
 }
 
 const interactionCases: StateCase[] = [
+  // Overlays are located by the id the trigger opens, not by
+  // `[data-ui="…"][open]`. /dev/gallery renders three alert-dialogs and two
+  // drawers, so a state-based locator proves only that SOME overlay of that
+  // family is open — never that it is the one this case opened — and it
+  // resolves to nothing rather than failing usefully when the click is lost.
+  // The data-ui assertion keeps the fixture honest: rename the component that
+  // id belongs to and this case says so instead of quietly testing something
+  // else.
   {
     id: 'dialog open',
     run: async (page) => {
-      await page.getByRole('button', { name: 'Open dialog' }).click();
-      await expect(page.locator('dialog[data-ui="dialog"][open]')).toBeVisible();
+      await page.getByRole('button', { name: 'Open dialog', exact: true }).click();
+      const dialog = page.locator('#gallery-dialog');
+      await expect(dialog).toHaveAttribute('data-ui', 'dialog');
+      await expect(dialog).toBeVisible();
       await scan(page, 'dialog open');
     },
   },
   {
     id: 'alert-dialog open',
     run: async (page) => {
-      await page.getByRole('button', { name: 'Confirm delete' }).click();
-      const dialog = page.locator('dialog[data-ui="alert-dialog"][open]');
+      await page.getByRole('button', { name: 'Confirm delete', exact: true }).click();
+      const dialog = page.locator('#gallery-alert');
+      await expect(dialog).toHaveAttribute('data-ui', 'alert-dialog');
       await expect(dialog).toBeVisible();
       // role="alertdialog" only helps if the consequence is actually wired as
       // the description, which is a scan-visible property of the open state.
@@ -103,16 +144,23 @@ const interactionCases: StateCase[] = [
   {
     id: 'drawer open',
     run: async (page) => {
-      await page.getByRole('button', { name: 'Open drawer' }).click();
-      await expect(page.locator('dialog[data-ui="drawer"][open]')).toBeVisible();
+      await page.getByRole('button', { name: 'Open drawer', exact: true }).click();
+      const drawer = page.locator('#gallery-drawer');
+      await expect(drawer).toHaveAttribute('data-ui', 'drawer');
+      await expect(drawer).toBeVisible();
       await scan(page, 'drawer open');
     },
   },
   {
     id: 'dropdown-menu open',
     run: async (page) => {
-      // exact: the file input on this page also exposes a button role, and its
-      // accessible name contains "File".
+      // Every name here is matched exactly. getByRole's name option is a
+      // substring match by default, so a control that merely gains a longer
+      // name containing one of these — "File actions", "Details panel" —
+      // silently makes the locator ambiguous and trips strict mode in a run
+      // nobody connected to that change. It already happened once here: the
+      // page's file input also exposes a button role whose name contains
+      // "File".
       const trigger = page.getByRole('button', { name: 'File', exact: true });
       await trigger.click();
       await expect(trigger).toHaveAttribute('aria-expanded', 'true');
@@ -134,7 +182,7 @@ const interactionCases: StateCase[] = [
   {
     id: 'popover open',
     run: async (page) => {
-      const trigger = page.getByRole('button', { name: 'Details' });
+      const trigger = page.getByRole('button', { name: 'Details', exact: true });
       await trigger.click();
       await expect(trigger).toHaveAttribute('aria-expanded', 'true');
       await expect(page.locator('[data-ui="popover"] [data-ui-menu-panel]')).toBeVisible();
@@ -143,14 +191,30 @@ const interactionCases: StateCase[] = [
   },
   {
     id: 'hover-card open',
+    // One scan per instance; the gallery renders two.
+    scans: 2,
     run: async (page) => {
-      // Focus, not hover: hover is absent on touch and unreachable by
-      // keyboard, so the focus path is the one that has to be correct — and it
-      // is the one that works under both projects.
-      const trigger = page.locator('[data-ui="hover-card"] [data-ui-hovercard-trigger]');
-      await trigger.focus();
-      await expect(page.locator('[data-ui="hover-card"] [data-ui-hovercard-panel]')).toBeVisible();
-      await scan(page, 'hover-card open');
+      // Every instance, one at a time. The gallery deliberately renders two
+      // hover cards because a controller that keeps its trigger or panel on the
+      // shared Alpine component object instead of a per-element closure opens
+      // the wrong instance's panel — and a page with one instance cannot show
+      // that, which is why it survived until a second one existed.
+      const cards = page.locator('[data-ui="hover-card"]');
+      const count = await cards.count();
+      expect(count, 'no hover card renders here').toBeGreaterThan(0);
+      for (let i = 0; i < count; i++) {
+        const card = cards.nth(i);
+        // Focus, not hover: hover is absent on touch and unreachable by
+        // keyboard, so the focus path is the one that has to be correct — and
+        // it is the one that works under both projects.
+        await card.locator('[data-ui-hovercard-trigger]').focus();
+        await expect(card.locator('[data-ui-hovercard-panel]')).toBeVisible();
+        // Exactly one panel open in the whole page. Cross-wiring shows up as a
+        // second visible panel, never as a missing one, so asserting only that
+        // this card opened would pass while another card opened too.
+        await expect(page.locator('[data-ui="hover-card"] [data-ui-hovercard-panel]:visible')).toHaveCount(1);
+        await scan(page, `hover-card ${i + 1} of ${count} open`);
+      }
     },
   },
   {
@@ -159,7 +223,7 @@ const interactionCases: StateCase[] = [
       // The tooltip is always in the DOM at opacity 0, so a page-load scan
       // reads its contrast against nothing. Focusing the trigger makes
       // group-focus-within paint it, which is when the contrast is real.
-      const trigger = page.getByRole('button', { name: 'Hover me' });
+      const trigger = page.getByRole('button', { name: 'Hover me', exact: true });
       await trigger.focus();
       const tip = page.locator('[data-ui="tooltip"] [role="tooltip"]');
       await expect(async () => {
@@ -172,7 +236,7 @@ const interactionCases: StateCase[] = [
     id: 'command-palette open via trigger',
     run: async (page) => {
       await page.locator('[data-command-open]').click();
-      await expect(page.locator('dialog[data-command-dialog][open]')).toBeVisible();
+      await expect(page.locator('#gallery-command')).toBeVisible();
       // The combobox/listbox roles are applied by the controller, so they only
       // exist once it has run — the state a scan has to see.
       await expect(page.locator('[data-command-input]')).toHaveRole('combobox');
@@ -186,7 +250,7 @@ const interactionCases: StateCase[] = [
       // document-level handler, so it can regress while the trigger still
       // works.
       await page.keyboard.press('Control+k');
-      await expect(page.locator('dialog[data-command-dialog][open]')).toBeVisible();
+      await expect(page.locator('#gallery-command')).toBeVisible();
       await expect(page.locator('[data-command-input]')).toBeFocused();
       await scan(page, 'command-palette open via Ctrl+K');
     },
@@ -227,13 +291,36 @@ const interactionCases: StateCase[] = [
   },
   {
     id: 'date-picker calendar open',
+    awaitsVendor: true,
     run: async (page) => {
-      // The trigger is rendered hidden and only un-hidden once the vendored
-      // Cally bundle has loaded, so its visibility is the engine-ready signal.
-      // The calendar lives in shadow DOM, which a page-load scan never reaches
-      // because the element does not exist yet.
+      // The calendar and its whole shadow tree are built by the adapter, so a
+      // page-load scan cannot reach them: at load the element does not exist.
+      // This is the one case gated on a lazily fetched vendor bundle: the
+      // trigger is rendered hidden and the adapter un-hides it only after
+      // Cally's custom elements are defined, because a trigger that opened
+      // nothing would be a dead control. Waiting on the definition rather than
+      // on the button is waiting for the actual precondition — the un-hide
+      // happens in the same handler — and the longer budget covers the network
+      // fetch, not a race.
       const picker = page.locator('[data-ui="date-picker"]').filter({ has: page.locator('#starts_on') });
-      const trigger = picker.getByRole('button', { name: 'Open calendar' });
+      try {
+        await page.waitForFunction(() => window.customElements.get('calendar-date') !== undefined, null, {
+          timeout: 20_000,
+        });
+      } catch (error) {
+        // Say which of the three it was rather than leaving a bare timeout. The
+        // loader keys one promise per engine and never retries a rejection, so
+        // a single failed request disables the widget for the whole page load —
+        // that is a product bug and must not read the same as a slow fetch.
+        const notes = assetNotes.get(page) ?? [];
+        throw new Error(
+          `the cally engine never defined <calendar-date> within 20s. Recorded asset/console activity:\n${
+            notes.join('\n') || '(none — no request failed and nothing errored, so the fetch was merely slow)'
+          }`,
+          { cause: error },
+        );
+      }
+      const trigger = picker.getByRole('button', { name: 'Open calendar', exact: true });
       await expect(trigger).toBeVisible();
       await trigger.click();
       await expect(trigger).toHaveAttribute('aria-expanded', 'true');
@@ -277,7 +364,7 @@ const interactionCases: StateCase[] = [
       const picker = page.locator('[data-ui="column-picker"]');
       await expect(picker).toBeVisible();
       await picker.locator('summary').click();
-      await picker.getByRole('checkbox', { name: 'Region' }).uncheck();
+      await picker.getByRole('checkbox', { name: 'Region', exact: true }).uncheck();
       // Hiding a column rewrites every row's cells and recomputes the grid's
       // single tab stop, so the table's header/cell association is being
       // rebuilt in the browser rather than rendered by the server.
@@ -335,7 +422,7 @@ for (const theme of THEMES) {
           c.desktopOnly === true && test.info().project.name === 'mobile',
           'the control does not exist below the md breakpoint',
         );
-        test.setTimeout(30_000 * (c.scans ?? 1));
+        test.setTimeout(30_000 * (c.scans ?? 1) + (c.awaitsVendor === true ? 30_000 : 0));
         const { page, close } = await open(browser, '', theme);
         try {
           await galleryReady(page);

@@ -2,7 +2,11 @@ package ui
 
 // SelectOpts configures a select control.
 type SelectOpts struct {
-	Name     string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID       string
 	Options  []Option
 	Required bool
 	Attrs    Attrs
@@ -11,8 +15,9 @@ type SelectOpts struct {
 // Select is a native select.
 templ Select(o SelectOpts) {
 	<select
-		{ root("select", "input", o.Attrs)... }
-		id={ o.Name } name={ o.Name }
+		{ controlRoot("select", "input", o.Attrs)... }
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
 		required?={ o.Required }
 	>
 		for _, opt := range o.Options {

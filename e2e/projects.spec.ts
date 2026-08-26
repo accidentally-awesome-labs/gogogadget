@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers';
 
 // HTMX CRUD against the pro org (5 seeded projects, unlimited plan).
@@ -103,17 +103,52 @@ test.describe('projects', () => {
     await context.close();
   });
 
+  // The confirmation is an in-page AlertDialog, not window.confirm: there is
+  // deliberately no page.on('dialog') handler here, so a regression that
+  // resurrects the native prompt hangs this test instead of passing quietly.
+  // Scoped to [open] because one dialog exists per row.
+  const openDialog = (page: Page) => page.locator('dialog[data-ui="alert-dialog"][open]');
+
   test('delete with confirm removes the row', async ({ browser }) => {
     const context = await loginAs(browser, 'pro');
     const page = await context.newPage();
-    page.on('dialog', (dialog) => dialog.accept());
     await page.goto('/app/projects');
 
     const row = page.getByTestId('project-row').filter({ hasText: 'Delta' });
     await row.getByRole('button', { name: 'Delete' }).click();
 
+    // The whole point of a confirmation is that the destructive thing has NOT
+    // happened yet. Assert that before confirming, or a broken ConfirmAction
+    // that deletes on the first click passes this test.
+    await expect(openDialog(page)).toBeVisible();
+    await expect(row).toHaveCount(1);
+
+    await openDialog(page).getByRole('button', { name: 'Delete permanently' }).click();
+
     await expect(row).toHaveCount(0);
     await expect(page.getByTestId('toast').first()).toBeVisible();
+    await context.close();
+  });
+
+  // A confirmation nobody can decline is theatre. Bravo is touched by no other
+  // case, so this one is safe to run in parallel with the rest of the file.
+  test('cancelling the delete dialog keeps the row and returns focus', async ({ browser }) => {
+    const context = await loginAs(browser, 'pro');
+    const page = await context.newPage();
+    await page.goto('/app/projects');
+
+    const row = page.getByTestId('project-row').filter({ hasText: 'Bravo' });
+    const trigger = row.getByRole('button', { name: 'Delete' });
+    await trigger.click();
+    await expect(openDialog(page)).toBeVisible();
+
+    await openDialog(page).getByRole('button', { name: 'Cancel' }).click();
+
+    await expect(openDialog(page)).toHaveCount(0);
+    await expect(row).toHaveCount(1);
+    // Focus returns to the control that opened it — a keyboard user who
+    // declines must not be stranded at the top of the document.
+    await expect(trigger).toBeFocused();
     await context.close();
   });
 

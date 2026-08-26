@@ -1,13 +1,14 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // ContentListData is the admin content table. Types comes straight from the
@@ -114,127 +115,197 @@ func typeLabel(types []content.Type, kind string) string {
 
 // mediaMarkdown is the string the copy button puts on the clipboard.
 func mediaMarkdown(m sqlc.ContentMedium) string {
-	alt := m.Alt
-	if alt == "" {
-		alt = m.Filename
+	return fmt.Sprintf("![%s](%s)", mediaAlt(m), mediaURL(m))
+}
+
+func mediaURL(m sqlc.ContentMedium) string {
+	return fmt.Sprintf("/media/%d/%s", m.ID, m.Filename)
+}
+
+// mediaAlt falls back to the filename: an image inserted with no description
+// is invisible to a screen reader, and the filename is the only description
+// available at this point.
+func mediaAlt(m sqlc.ContentMedium) string {
+	if m.Alt == "" {
+		return m.Filename
 	}
-	return fmt.Sprintf("![%s](/media/%d/%s)", alt, m.ID, m.Filename)
+	return m.Alt
+}
+
+// contentFilterClass marks the active filter. It is computed in Go rather than
+// with templ.KV because ui.Attrs takes a class string, not a class list.
+func contentFilterClass(active bool) string {
+	if active {
+		return "font-semibold text-fg"
+	}
+	return ""
+}
+
+func adminContentColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "title", Label: i18n.T(ctx, "admin.content.col_title")},
+		{Key: "type", Label: i18n.T(ctx, "admin.content.col_type")},
+		{Key: "locale", Label: i18n.T(ctx, "admin.content.col_locale"), HideBelow: ui.BreakpointSM},
+		{Key: "status", Label: i18n.T(ctx, "admin.content.col_status")},
+		{Key: "published", Label: i18n.T(ctx, "admin.content.col_published"), HideBelow: ui.BreakpointMD},
+		{Key: "actions", Label: i18n.T(ctx, "admin.content.col_actions"), Align: ui.AlignEnd},
+	}
 }
 
 templ AdminContentPage(d ContentListData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.content.title")}) {
 		if AdminWrite(ctx) {
-			<div class="flex items-center gap-2 flex-wrap">
-				<a href="/admin/media" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="btn btn-ghost" data-testid="content-media-link">{ i18n.T(ctx, "admin.media.title") }</a>
+			@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.content.actions_aria")}) {
+				@ui.ButtonLink(ui.ButtonLinkOpts{
+					Label: i18n.T(ctx, "admin.media.title"), Href: "/admin/media",
+					Attrs: ui.Attrs{
+						TestID: "content-media-link",
+						HX:     ui.HX{Boost: true, Target: ui.NavTarget, Select: ui.NavTarget, Swap: ui.NavSwap},
+					},
+				})
 				for _, t := range d.Types {
-					// Labelled "+ <Type>" rather than "<New> <Type>": composing
-					// two catalog strings yields "Nuevo Publicación", and
-					// gender agreement is not something a template can fix.
-					<a
-						href={ templ.SafeURL("/admin/content/new?kind=" + t.Kind) }
-						hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
-						class="btn btn-primary"
-						aria-label={ i18n.T(ctx, "admin.content.new") + " — " + i18n.T(ctx, t.LabelKey) }
-						data-testid={ "content-new-" + t.Kind }
-					>{ "+ " + i18n.T(ctx, t.LabelKey) }</a>
+					// The plus is an icon, not copy. Composing "New" with the
+					// type label yields "Nuevo Publicación" in Spanish, and
+					// gender agreement is not something a template can fix, so
+					// the accessible name is the type's own singular label.
+					@ui.ButtonLink(ui.ButtonLinkOpts{
+						Label: i18n.T(ctx, t.LabelKey), Href: "/admin/content/new?kind=" + t.Kind,
+						Action: ui.ActionPrimary, Icon: ui.IconAdd,
+						Attrs: ui.Attrs{
+							TestID: "content-new-" + t.Kind,
+							HX:     ui.HX{Boost: true, Target: ui.NavTarget, Select: ui.NavTarget, Swap: ui.NavSwap},
+						},
+					})
 				}
-			</div>
+			}
 		}
 	}
-	<div class="toolbar flex-wrap">
-		<a
-			href="/admin/content"
-			hx-get="/admin/content" hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
-			class={ "btn btn-ghost btn-sm", templ.KV("font-semibold text-fg", d.Kind == "") }
-			data-testid="content-filter-all"
-		>{ i18n.T(ctx, "admin.content.all") }</a>
+	@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.content.filter_aria")}) {
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: i18n.T(ctx, "admin.content.all"), Href: "/admin/content", Size: ui.SizeSM,
+			Attrs: ui.Attrs{
+				TestID: "content-filter-all",
+				Class:  contentFilterClass(d.Kind == ""),
+				HX:     ui.HX{Get: "/admin/content", Target: "#table-container", Swap: "innerMorph", PushURL: "true"},
+			},
+		})
 		for _, t := range d.Types {
-			<a
-				href={ templ.SafeURL("/admin/content?kind=" + t.Kind) }
-				hx-get={ "/admin/content?kind=" + t.Kind } hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true"
-				class={ "btn btn-ghost btn-sm", templ.KV("font-semibold text-fg", d.Kind == t.Kind) }
-				data-testid={ "content-filter-" + t.Kind }
-			>{ i18n.T(ctx, t.PluralKey) }</a>
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, t.PluralKey), Href: "/admin/content?kind=" + t.Kind, Size: ui.SizeSM,
+				Attrs: ui.Attrs{
+					TestID: "content-filter-" + t.Kind,
+					Class:  contentFilterClass(d.Kind == t.Kind),
+					HX:     ui.HX{Get: "/admin/content?kind=" + t.Kind, Target: "#table-container", Swap: "innerMorph", PushURL: "true"},
+				},
+			})
 		}
-	</div>
-	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.content.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.content.search_aria"), GetURL: "/admin/content?kind="+d.Kind, Target: "#table-container", IndicatorID: "content-search-indicator", Attrs: ui.Attrs{TestID: "content-search"}})
+	}
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.content.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.content.search_aria"), GetURL: "/admin/content?kind=" + d.Kind, Target: "#table-container", IndicatorID: "content-search-indicator", Attrs: ui.Attrs{TestID: "content-search"}})
 	@AdminContentTable(d)
 }
 
 templ AdminContentTable(d ContentListData) {
 	<div id="table-container">
-		@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-			<table class="table" data-testid="content-table">
-				<thead>
-					<tr>
-						<th>{ i18n.T(ctx, "admin.content.col_title") }</th>
-						<th>{ i18n.T(ctx, "admin.content.col_type") }</th>
-						<th>{ i18n.T(ctx, "admin.content.col_locale") }</th>
-						<th>{ i18n.T(ctx, "admin.content.col_status") }</th>
-						<th>{ i18n.T(ctx, "admin.content.col_published") }</th>
-						<th class="text-right">{ i18n.T(ctx, "admin.content.col_actions") }</th>
-					</tr>
-				</thead>
-				<tbody>
-					if len(d.Items) == 0 {
-						<tr><td colspan="6" class="text-center text-fg-muted py-6" data-testid="content-empty">{ i18n.T(ctx, "admin.content.empty") }</td></tr>
-					}
-					for _, e := range d.Items {
-						<tr id={ fmt.Sprintf("content-row-%d", e.ID) } data-testid={ fmt.Sprintf("content-row-%d", e.ID) }>
-							<td class="font-medium">
-								<a href={ templ.SafeURL(fmt.Sprintf("/admin/content/%d", e.ID)) } hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="link">{ e.Title }</a>
-							</td>
-							<td class="text-fg-muted text-xs">
-								if key := typeLabel(d.Types, e.Kind); key != "" {
-									{ i18n.T(ctx, key) }
-								} else {
-									{ e.Kind }
-								}
-							</td>
-							<td class="text-fg-muted text-xs">
-								if e.Locale == "" {
-									{ i18n.T(ctx, "admin.content.locale_all") }
-								} else {
-									{ e.Locale }
-								}
-							</td>
-							<td>
-								@contentStatusBadge(contentStatus(e, contentNow(d)))
-							</td>
-							<td class="text-fg-muted text-xs">
-								if e.PublishedAt.Valid {
-									<time datetime={ e.PublishedAt.Time.UTC().Format("2006-01-02") }>{ e.PublishedAt.Time.UTC().Format("Jan 2, 2006 15:04") }</time>
-								} else {
-									—
-								}
-							</td>
-							<td class="text-right">
-								if AdminWrite(ctx) {
-									<div class="card-actions">
-										if e.Status == "published" {
-											<button type="button" hx-post={ fmt.Sprintf("/admin/content/%d/unpublish", e.ID) } class="btn btn-ghost btn-xs" data-testid={ fmt.Sprintf("content-unpublish-%d", e.ID) }>{ i18n.T(ctx, "admin.content.unpublish") }</button>
-										} else {
-											<button type="button" hx-post={ fmt.Sprintf("/admin/content/%d/publish", e.ID) } class="btn btn-ghost btn-xs" data-testid={ fmt.Sprintf("content-publish-%d", e.ID) }>{ i18n.T(ctx, "admin.content.publish") }</button>
-										}
-										<button
-											type="button"
-											hx-post={ fmt.Sprintf("/admin/content/%d/delete", e.ID) }
-											hx-confirm={ i18n.T(ctx, "admin.content.delete_confirm") }
-											class="btn btn-ghost btn-xs text-danger-text"
-											data-testid={ fmt.Sprintf("content-delete-%d", e.ID) }
-										>{ i18n.T(ctx, "admin.content.delete") }</button>
-									</div>
-								} else {
-									<span class="text-xs text-fg-muted" data-testid="admin-readonly">{ i18n.T(ctx, "admin.read_only") }</span>
-								}
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:       i18n.T(ctx, "admin.content.title"),
+			HiddenCaption: true,
+			Columns:       adminContentColumns(ctx),
+			RowCount:      len(d.Items),
+			Empty:         adminContentEmpty(d),
+			Target:        "#table-container",
+			Attrs:         ui.Attrs{TestID: "content-table"},
+			Pagination: ui.Pagination(ui.PaginationOpts{
+				Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/content?q=" + d.Query,
+				Target: "#table-container", Labels: pagerLabels(ctx),
+			}),
+		}) {
+			for _, e := range d.Items {
+				<tr id={ fmt.Sprintf("content-row-%d", e.ID) } data-testid={ fmt.Sprintf("content-row-%d", e.ID) }>
+					<td class="font-medium">
+						@ui.Link(ui.LinkOpts{Label: e.Title, Href: fmt.Sprintf("/admin/content/%d", e.ID), Boost: true})
+					</td>
+					<td class="text-fg-muted text-xs">
+						if key := typeLabel(d.Types, e.Kind); key != "" {
+							{ i18n.T(ctx, key) }
+						} else {
+							{ e.Kind }
+						}
+					</td>
+					<td class="text-fg-muted text-xs hidden sm:table-cell">
+						if e.Locale == "" {
+							{ i18n.T(ctx, "admin.content.locale_all") }
+						} else {
+							{ e.Locale }
+						}
+					</td>
+					<td>
+						@contentStatusBadge(contentStatus(e, contentNow(d)))
+					</td>
+					<td class="text-fg-muted text-xs hidden md:table-cell">
+						if e.PublishedAt.Valid {
+							<time datetime={ e.PublishedAt.Time.UTC().Format("2006-01-02") }>{ e.PublishedAt.Time.UTC().Format("Jan 2, 2006 15:04") }</time>
+						} else {
+							—
+						}
+					</td>
+					<td class="text-right">
+						if AdminWrite(ctx) {
+							@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.content.row_actions_aria", e.Title), Attrs: ui.Attrs{Class: "justify-end"}}) {
+								@contentPublishButton(e.ID, e.Status, ui.SizeXS)
+								@ui.ConfirmAction(ui.ConfirmActionOpts{
+									ID:           fmt.Sprintf("content-delete-dialog-%d", e.ID),
+									TriggerLabel: i18n.T(ctx, "admin.content.delete_row", e.Title),
+									Title:        i18n.T(ctx, "admin.content.delete_title"),
+									Message:      i18n.T(ctx, "admin.content.delete_confirm"),
+									ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+									CancelLabel:  i18n.T(ctx, "admin.cancel"),
+									Kind:         ui.KindDanger,
+									HX:           ui.HX{Post: fmt.Sprintf("/admin/content/%d/delete", e.ID)},
+									Attrs:        ui.Attrs{TestID: fmt.Sprintf("content-delete-%d", e.ID)},
+								})
+							}
+						} else {
+							<span class="text-xs text-fg-muted" data-testid="admin-readonly">{ i18n.T(ctx, "admin.read_only") }</span>
+						}
+					</td>
+				</tr>
+			}
 		}
-		@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/content?q="+d.Query, Target: "#table-container", Labels: pagerLabels(ctx)})
 	</div>
+}
+
+// contentPublishButton is the publish/unpublish control, shared by the table
+// row and the editor's action bar so the two cannot drift.
+templ contentPublishButton(id int64, status string, size ui.Size) {
+	if status == "published" {
+		@ui.Button(ui.ButtonOpts{
+			Label: i18n.T(ctx, "admin.content.unpublish"), Size: size,
+			Attrs: ui.Attrs{
+				TestID: fmt.Sprintf("content-unpublish-%d", id),
+				HX:     ui.HX{Post: fmt.Sprintf("/admin/content/%d/unpublish", id)},
+			},
+		})
+	} else {
+		@ui.Button(ui.ButtonOpts{
+			Label: i18n.T(ctx, "admin.content.publish"), Size: size,
+			Attrs: ui.Attrs{
+				TestID: fmt.Sprintf("content-publish-%d", id),
+				HX:     ui.HX{Post: fmt.Sprintf("/admin/content/%d/publish", id)},
+			},
+		})
+	}
+}
+
+templ adminContentEmpty(d ContentListData) {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Body:       i18n.T(ctx, "admin.content.empty"),
+		Variant:    ui.EmptyInline,
+		Filtered:   d.Query != "" || d.Kind != "",
+		ClearURL:   "/admin/content",
+		ClearLabel: i18n.T(ctx, "admin.clear_search"),
+		Target:     "#table-container",
+		Attrs:      ui.Attrs{TestID: "content-empty"},
+	})
 }
 
 templ contentStatusBadge(status string) {
@@ -253,22 +324,29 @@ templ contentStatusBadge(status string) {
 // AdminContentEditorPage wraps the editor with its heading and back link.
 templ AdminContentEditorPage(d ContentEditorData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, d.Type.LabelKey)}) {
-		<div class="form-actions">
+		@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.content.actions_aria")}) {
 			if d.ID != 0 && d.Type.Path != "" {
 				// Deliberately NOT boosted: boosting would swap the public
-				// chrome into #content inside the admin shell.
-				<a href={ templ.SafeURL(fmt.Sprintf("/admin/content/%d/preview", d.ID)) } target="_blank" rel="noopener" class="btn btn-ghost" data-testid="content-preview-link">{ i18n.T(ctx, "admin.content.preview") }</a>
+				// chrome into #content inside the admin shell. External opens
+				// it in its own tab with rel="noopener".
+				@ui.ButtonLink(ui.ButtonLinkOpts{
+					Label:    i18n.T(ctx, "admin.content.preview"),
+					Href:     fmt.Sprintf("/admin/content/%d/preview", d.ID),
+					External: true,
+					Attrs:    ui.Attrs{TestID: "content-preview-link"},
+				})
 			}
-			<a href="/admin/content" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="link text-sm">{ i18n.T(ctx, "admin.content.title") }</a>
-		</div>
+			@ui.BackLink(ui.BackLinkOpts{Label: i18n.T(ctx, "admin.content.title"), Href: "/admin/content"})
+		}
 	}
 	@AdminContentEditor(d)
 }
 
-// AdminContentEditor is the two-column form: fields left, live preview right.
-// It is its own swap target so a 422 re-render keeps the submitted values.
+// AdminContentEditor is the editor surface: metadata first, then a resizable
+// body/preview split, then the revision history. It is its own swap target so
+// a 422 re-render keeps the submitted values.
 templ AdminContentEditor(d ContentEditorData) {
-	<div id="content-editor" class="grid lg:grid-cols-2 gap-8 items-start">
+	<div id="content-editor" class="space-y-8">
 		<form
 			if d.ID == 0 {
 				hx-post="/admin/content"
@@ -284,272 +362,330 @@ templ AdminContentEditor(d ContentEditorData) {
 			x-data="slugify"
 		>
 			<input type="hidden" name="kind" value={ d.Type.Kind }/>
-			<div>
-				<label class="label" for="content-title">{ i18n.T(ctx, "admin.content.title_label") }</label>
-				<input id="content-title" name="title" type="text" value={ d.Title } class="input" data-testid="content-title" @input="onTitle"/>
-				if d.Errs.Title != "" {
-					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Title})
-				}
-			</div>
-			<div>
-				<label class="label" for="content-slug">{ i18n.T(ctx, "admin.content.slug_label") }</label>
-				<input
-					id="content-slug" name="slug" type="text" value={ d.Slug } class="input" data-testid="content-slug"
-					x-ref="slug"
-					@input="onSlug"
-					if d.ID != 0 {
-						data-slug-locked="true"
-					}
-				/>
-				<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.slug_hint") }</p>
-				if d.Errs.Slug != "" {
-					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Slug})
-				}
-			</div>
-			<div>
-				<label class="label" for="content-locale">{ i18n.T(ctx, "admin.content.locale_label") }</label>
-				<select id="content-locale" name="locale" class="input" data-testid="content-locale">
-					for _, code := range d.Locales {
-						<option value={ code } selected?={ d.Locale == code }>
-							if code == "" {
-								{ i18n.T(ctx, "admin.content.locale_all") }
-							} else {
-								{ code }
-							}
-						</option>
-					}
-				</select>
-				<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.locale_hint") }</p>
-				if d.Errs.Locale != "" {
-					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Locale})
-				}
-			</div>
-			<div>
-				<label class="label" for="content-summary">{ i18n.T(ctx, "admin.content.summary_label") }</label>
-				<input id="content-summary" name="summary" type="text" value={ d.Summary } class="input" data-testid="content-summary"/>
-				if d.Errs.Summary != "" {
-					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Summary})
-				}
-			</div>
+			@ui.Field(ui.FieldOpts{Name: "title", Label: i18n.T(ctx, "admin.content.title_label"), Error: d.Errs.Title}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "title", Value: d.Title, Error: d.Errs.Title,
+					Attrs: ui.Attrs{TestID: "content-title", Alpine: ui.Alpine{On: map[string]string{"input": "onTitle"}}},
+				})
+			}
+			@ui.Field(ui.FieldOpts{Name: "slug", Label: i18n.T(ctx, "admin.content.slug_label"), Hint: i18n.T(ctx, "admin.content.slug_hint"), Error: d.Errs.Slug}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "slug", Value: d.Slug, Hint: i18n.T(ctx, "admin.content.slug_hint"), Error: d.Errs.Slug,
+					Attrs: ui.Attrs{
+						TestID: "content-slug",
+						Data:   slugLockData(d),
+						Alpine: ui.Alpine{Ref: "slug", On: map[string]string{"input": "onSlug"}},
+					},
+				})
+			}
+			@ui.Field(ui.FieldOpts{Name: "locale", Label: i18n.T(ctx, "admin.content.locale_label"), Hint: i18n.T(ctx, "admin.content.locale_hint"), Error: d.Errs.Locale}) {
+				@ui.Select(ui.SelectOpts{Name: "locale", Options: localeOptions(ctx, d), Attrs: ui.Attrs{TestID: "content-locale"}})
+			}
+			@ui.Field(ui.FieldOpts{Name: "summary", Label: i18n.T(ctx, "admin.content.summary_label"), Error: d.Errs.Summary}) {
+				@ui.TextInput(ui.TextInputOpts{Name: "summary", Value: d.Summary, Error: d.Errs.Summary, Attrs: ui.Attrs{TestID: "content-summary"}})
+			}
 			for _, f := range d.Type.Fields {
 				@contentField(f, d.Meta[f.Key], d.Errs.Meta[f.Key])
 			}
-			<div class="grid sm:grid-cols-2 gap-4">
-				<div>
-					<label class="label" for="content-published-at">{ i18n.T(ctx, "admin.content.published_at_label") }</label>
-					<input id="content-published-at" name="published_at" type="datetime-local" value={ d.PublishedAt } class="input" data-testid="content-published-at"/>
-					<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.published_at_hint") }</p>
-					if d.Errs.PublishedAt != "" {
-						@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.PublishedAt})
-					}
-				</div>
-				<div>
-					<label class="label" for="content-unpublish-at">{ i18n.T(ctx, "admin.content.unpublish_at_label") }</label>
-					<input id="content-unpublish-at" name="unpublish_at" type="datetime-local" value={ d.UnpublishAt } class="input" data-testid="content-unpublish-at"/>
-					<p class="mt-1 text-xs text-fg-muted">{ i18n.T(ctx, "admin.content.unpublish_at_hint") }</p>
-					if d.Errs.UnpublishAt != "" {
-						@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.UnpublishAt})
-					}
-				</div>
-			</div>
-			<div>
-				<label class="label" for="content-body">{ i18n.T(ctx, "admin.content.body_label") }</label>
-				<textarea
-					id="content-body" name="body_md" rows="18" class="input font-mono text-sm" data-testid="content-body"
-					hx-post="/admin/content/preview"
-					hx-trigger="input changed delay:400ms"
-					hx-target="#content-preview"
-					hx-swap="innerHTML"
-					hx-include="closest form"
-				>{ d.BodyMd }</textarea>
-				if d.Errs.Body != "" {
-					@ui.FieldError(ui.FieldErrorOpts{Error: d.Errs.Body})
+			@ui.Grid(ui.GridOpts{Cols: 2}) {
+				@ui.Field(ui.FieldOpts{Name: "published_at", Label: i18n.T(ctx, "admin.content.published_at_label"), Hint: i18n.T(ctx, "admin.content.published_at_hint"), Error: d.Errs.PublishedAt}) {
+					@ui.DateTimePicker(ui.DateTimePickerOpts{
+						TriggerLabel: i18n.T(ctx, "admin.content.published_at_calendar"),
+						Field: ui.DateTimeFieldOpts{
+							Name: "published_at", Value: d.PublishedAt,
+							Hint: i18n.T(ctx, "admin.content.published_at_hint"), Error: d.Errs.PublishedAt,
+							Attrs: ui.Attrs{TestID: "content-published-at"},
+						},
+					})
 				}
-			</div>
+				@ui.Field(ui.FieldOpts{Name: "unpublish_at", Label: i18n.T(ctx, "admin.content.unpublish_at_label"), Hint: i18n.T(ctx, "admin.content.unpublish_at_hint"), Error: d.Errs.UnpublishAt}) {
+					@ui.DateTimePicker(ui.DateTimePickerOpts{
+						TriggerLabel: i18n.T(ctx, "admin.content.unpublish_at_calendar"),
+						Field: ui.DateTimeFieldOpts{
+							Name: "unpublish_at", Value: d.UnpublishAt,
+							Hint: i18n.T(ctx, "admin.content.unpublish_at_hint"), Error: d.Errs.UnpublishAt,
+							Attrs: ui.Attrs{TestID: "content-unpublish-at"},
+						},
+					})
+				}
+			}
+			// Body and preview are the resizable split. The textarea is still
+			// the form value and the preview is still produced by the server's
+			// own goldmark pipeline — the panels only decide how much room each
+			// pane gets, and the split degrades to two stacked blocks with no
+			// JavaScript at all.
+			@ui.PanelGroup(ui.PanelGroupOpts{
+				ID:         "content-editor-panels",
+				PersistKey: "admin-content-editor",
+				Panels: []ui.PanelData{
+					{
+						ID: "content-body-panel", Title: i18n.T(ctx, "admin.content.body_label"), Level: 2,
+						Size: 55, MinSize: 30, Content: contentBodyEditor(d),
+					},
+					{
+						ID: "content-preview-panel", Title: i18n.T(ctx, "admin.content.preview_heading"), Level: 2,
+						Size: 45, MinSize: 25, Content: contentPreviewPane(d),
+					},
+				},
+			})
 			if AdminWrite(ctx) {
-				<div class="form-actions flex-wrap">
-					<button type="submit" class="btn btn-primary" data-testid="content-save">
-						if d.ID == 0 {
-							{ i18n.T(ctx, "admin.content.save_draft") }
-						} else {
-							{ i18n.T(ctx, "admin.content.save") }
-						}
-					</button>
+				@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart, Attrs: ui.Attrs{Class: "flex-wrap"}}) {
+					@ui.Button(ui.ButtonOpts{
+						Label: contentSaveLabel(ctx, d), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+						Attrs: ui.Attrs{TestID: "content-save"},
+					})
 					@ui.Spinner(ui.SpinnerOpts{})
 					if d.ID != 0 {
-						if d.Status == "published" {
-							<button type="button" hx-post={ fmt.Sprintf("/admin/content/%d/unpublish", d.ID) } class="btn btn-ghost" data-testid={ fmt.Sprintf("content-unpublish-%d", d.ID) }>{ i18n.T(ctx, "admin.content.unpublish") }</button>
-						} else {
-							<button type="button" hx-post={ fmt.Sprintf("/admin/content/%d/publish", d.ID) } class="btn btn-ghost" data-testid={ fmt.Sprintf("content-publish-%d", d.ID) }>{ i18n.T(ctx, "admin.content.publish") }</button>
-						}
-						<button
-							type="button"
-							hx-post={ fmt.Sprintf("/admin/content/%d/delete", d.ID) }
-							hx-confirm={ i18n.T(ctx, "admin.content.delete_confirm") }
-							class="btn btn-ghost text-danger-text"
-							data-testid={ fmt.Sprintf("content-delete-%d", d.ID) }
-						>{ i18n.T(ctx, "admin.content.delete") }</button>
+						@contentPublishButton(d.ID, d.Status, ui.SizeMD)
+						@ui.ConfirmAction(ui.ConfirmActionOpts{
+							ID:           fmt.Sprintf("content-editor-delete-dialog-%d", d.ID),
+							TriggerLabel: i18n.T(ctx, "admin.content.delete_row", d.Title),
+							Title:        i18n.T(ctx, "admin.content.delete_title"),
+							Message:      i18n.T(ctx, "admin.content.delete_confirm"),
+							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+							CancelLabel:  i18n.T(ctx, "admin.cancel"),
+							Kind:         ui.KindDanger,
+							HX:           ui.HX{Post: fmt.Sprintf("/admin/content/%d/delete", d.ID)},
+							Attrs:        ui.Attrs{TestID: fmt.Sprintf("content-delete-%d", d.ID)},
+						})
 					}
-				</div>
+				}
 			}
 		</form>
-		<div class="space-y-6">
-			<div class="card">
-				@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.preview_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
-				<div id="content-preview" class="prose" data-testid="content-preview">
-					@templ.Raw(d.PreviewHTML)
-				</div>
-			</div>
-			if d.ID != 0 {
-				@contentRevisions(d)
-			}
-			@contentMediaPicker(d)
-		</div>
+		if d.ID != 0 {
+			@contentRevisions(d)
+		}
 	</div>
+}
+
+// contentBodyEditor is the Markdown surface. Target points the debounced
+// preview request at the sibling panel, which is also what suppresses the
+// editor's own inline preview pane.
+templ contentBodyEditor(d ContentEditorData) {
+	@ui.MarkdownEditor(ui.MarkdownEditorOpts{
+		Name:       "body_md",
+		Value:      d.BodyMd,
+		Rows:       18,
+		PreviewURL: "/admin/content/preview",
+		Target:     "#content-preview",
+		Error:      d.Errs.Body,
+		Attrs:      ui.Attrs{TestID: "content-body"},
+	}) {
+		@contentMediaPicker(d)
+	}
+}
+
+// contentPreviewPane renders the server's HTML. templ.Raw is safe here for one
+// reason and it is worth stating: PreviewHTML is goldmark output produced
+// WITHOUT html.WithUnsafe, so raw HTML in the author's Markdown was already
+// dropped upstream. No author-supplied string reaches this call unrendered,
+// and nothing on this page renders Markdown client-side.
+templ contentPreviewPane(d ContentEditorData) {
+	@ui.EditorPreview(ui.EditorPreviewOpts{ID: "content-preview", Attrs: ui.Attrs{TestID: "content-preview"}}) {
+		@templ.Raw(d.PreviewHTML)
+	}
+}
+
+// slugLockData marks an existing entry's slug as locked, so the slugify
+// behaviour stops rewriting it from the title.
+func slugLockData(d ContentEditorData) map[string]string {
+	if d.ID == 0 {
+		return nil
+	}
+	return map[string]string{"slug-locked": "true"}
+}
+
+func localeOptions(ctx context.Context, d ContentEditorData) []ui.Option {
+	out := make([]ui.Option, 0, len(d.Locales))
+	for _, code := range d.Locales {
+		label := code
+		if code == "" {
+			label = i18n.T(ctx, "admin.content.locale_all")
+		}
+		out = append(out, ui.Option{Value: code, Label: label, Selected: d.Locale == code})
+	}
+	return out
+}
+
+func contentSaveLabel(ctx context.Context, d ContentEditorData) string {
+	if d.ID == 0 {
+		return i18n.T(ctx, "admin.content.save_draft")
+	}
+	return i18n.T(ctx, "admin.content.save")
 }
 
 // contentField renders one type-declared field. The meta_ prefix keeps a
 // field named "title" or "slug" from colliding with a core input.
 templ contentField(f content.Field, value, err string) {
-	<div>
-		<label class="label" for={ "content-meta-" + f.Key }>{ i18n.T(ctx, f.LabelKey) }</label>
+	@ui.Field(ui.FieldOpts{Name: "meta_" + f.Key, Label: i18n.T(ctx, f.LabelKey), Error: err}) {
 		switch f.Kind {
 			case content.FieldTextarea:
-				<textarea id={ "content-meta-" + f.Key } name={ "meta_" + f.Key } rows="3" class="input" data-testid={ "content-meta-" + f.Key }>{ value }</textarea>
+				@ui.Textarea(ui.TextareaOpts{Name: "meta_" + f.Key, Value: value, Rows: 3, Attrs: ui.Attrs{TestID: "content-meta-" + f.Key}})
 			case content.FieldSelect:
-				<select id={ "content-meta-" + f.Key } name={ "meta_" + f.Key } class="input" data-testid={ "content-meta-" + f.Key }>
-					<option value="" selected?={ value == "" }></option>
-					for _, o := range f.Options {
-						<option value={ o } selected?={ value == o }>{ i18n.T(ctx, f.LabelKey+"_"+o) }</option>
-					}
-				</select>
+				@ui.Select(ui.SelectOpts{Name: "meta_" + f.Key, Options: metaSelectOptions(ctx, f, value), Attrs: ui.Attrs{TestID: "content-meta-" + f.Key}})
 			case content.FieldBool:
-				<select id={ "content-meta-" + f.Key } name={ "meta_" + f.Key } class="input" data-testid={ "content-meta-" + f.Key }>
-					<option value="false" selected?={ value != "true" }>{ i18n.T(ctx, "flags.off") }</option>
-					<option value="true" selected?={ value == "true" }>{ i18n.T(ctx, "flags.on") }</option>
-				</select>
+				@ui.Select(ui.SelectOpts{Name: "meta_" + f.Key, Options: metaBoolOptions(ctx, value), Attrs: ui.Attrs{TestID: "content-meta-" + f.Key}})
 			case content.FieldURL:
-				<input id={ "content-meta-" + f.Key } name={ "meta_" + f.Key } type="url" value={ value } class="input" data-testid={ "content-meta-" + f.Key }/>
+				@ui.TextInput(ui.TextInputOpts{Name: "meta_" + f.Key, Type: ui.InputTypeURL, Value: value, Error: err, Attrs: ui.Attrs{TestID: "content-meta-" + f.Key}})
 			default:
-				<input id={ "content-meta-" + f.Key } name={ "meta_" + f.Key } type="text" value={ value } class="input" data-testid={ "content-meta-" + f.Key }/>
+				@ui.TextInput(ui.TextInputOpts{Name: "meta_" + f.Key, Value: value, Error: err, Attrs: ui.Attrs{TestID: "content-meta-" + f.Key}})
 		}
-		if err != "" {
-			@ui.FieldError(ui.FieldErrorOpts{Error: err})
-		}
-	</div>
+	}
+}
+
+// metaSelectOptions keeps the empty first choice: a declared field is optional
+// unless the type says otherwise, and without a blank option the first value is
+// submitted by accident.
+func metaSelectOptions(ctx context.Context, f content.Field, value string) []ui.Option {
+	out := make([]ui.Option, 0, len(f.Options)+1)
+	out = append(out, ui.Option{Value: "", Label: "", Selected: value == ""})
+	for _, o := range f.Options {
+		out = append(out, ui.Option{Value: o, Label: i18n.T(ctx, f.LabelKey+"_"+o), Selected: value == o})
+	}
+	return out
+}
+
+func metaBoolOptions(ctx context.Context, value string) []ui.Option {
+	return []ui.Option{
+		{Value: "false", Label: i18n.T(ctx, "flags.off"), Selected: value != "true"},
+		{Value: "true", Label: i18n.T(ctx, "flags.on"), Selected: value == "true"},
+	}
 }
 
 templ contentRevisions(d ContentEditorData) {
-	<div class="card">
+	@ui.Card(ui.CardOpts{}) {
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.revisions_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
 		if len(d.Revisions) == 0 {
-			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.content.revisions_empty") }</p>
+			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.content.revisions_empty"), Variant: ui.EmptyInline})
 		} else {
-			<ul class="space-y-2 text-sm">
+			@ui.List(ui.ListOpts{Attrs: ui.Attrs{Class: "text-sm"}}) {
 				for i, rev := range d.Revisions {
-					<li class="flex items-center justify-between gap-3" data-testid={ fmt.Sprintf("content-revision-%d", rev.ID) }>
+					@ui.Item(ui.ItemOpts{
+						Attrs: ui.Attrs{
+							Class:  "flex items-center justify-between gap-3",
+							TestID: fmt.Sprintf("content-revision-%d", rev.ID),
+						},
+					}) {
 						<span class="truncate">
 							{ rev.Title }
 							<span class="text-fg-muted text-xs ml-2">{ rev.CreatedAt.Time.UTC().Format("Jan 2, 2006 15:04") }</span>
 						</span>
 						if i == 0 {
-							<span class="badge badge-neutral shrink-0">{ i18n.T(ctx, "admin.content.revision_current") }</span>
+							@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.content.revision_current"), Kind: ui.KindNeutral, Attrs: ui.Attrs{Class: "shrink-0"}})
 						} else if AdminWrite(ctx) {
-							<button
-								type="button"
-								hx-post={ fmt.Sprintf("/admin/content/%d/revisions/%d/restore", d.ID, rev.ID) }
-								hx-confirm={ i18n.T(ctx, "admin.content.restore_confirm") }
-								class="btn btn-ghost btn-xs shrink-0"
-								data-testid={ fmt.Sprintf("content-restore-%d", rev.ID) }
-							>{ i18n.T(ctx, "admin.content.restore") }</button>
+							@ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID:           fmt.Sprintf("content-restore-dialog-%d", rev.ID),
+								TriggerLabel: i18n.T(ctx, "admin.content.restore_row", rev.Title),
+								Title:        i18n.T(ctx, "admin.content.restore_title"),
+								Message:      i18n.T(ctx, "admin.content.restore_confirm"),
+								ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+								CancelLabel:  i18n.T(ctx, "admin.cancel"),
+								Kind:         ui.KindWarn,
+								HX:           ui.HX{Post: fmt.Sprintf("/admin/content/%d/revisions/%d/restore", d.ID, rev.ID)},
+								Attrs:        ui.Attrs{TestID: fmt.Sprintf("content-restore-%d", rev.ID), Class: "shrink-0"},
+							})
 						}
-					</li>
+					}
 				}
-			</ul>
+			}
 		}
-	</div>
+	}
 }
 
+// contentMediaPicker rides inside the editor's own root: the insert controls
+// write at the caret, so they have to be where the editor controller can reach
+// them. Upload is deliberately absent — a file input inside this form would be
+// submitted with the entry, and the library owns uploads.
 templ contentMediaPicker(d ContentEditorData) {
-	<div class="card">
-		<div class="flex items-center justify-between mb-3">
-			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.content.media_heading"), Attrs: ui.Attrs{Class: ""}})
-			<a href="/admin/media" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="link text-sm">{ i18n.T(ctx, "admin.media.title") }</a>
-		</div>
-		if len(d.Media) == 0 {
-			<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.media.empty") }</p>
-		} else {
-			<ul class="space-y-2 text-sm">
-				for _, m := range d.Media {
-					<li class="flex items-center justify-between gap-3">
-						<span class="truncate">{ m.Filename }</span>
-						<button type="button" x-data="copy" data-copy={ mediaMarkdown(m) } @click="copy()" class="btn btn-ghost btn-xs shrink-0" data-testid={ fmt.Sprintf("content-media-copy-%d", m.ID) }>
-							<span x-show="!copied">{ i18n.T(ctx, "admin.content.media_copy") }</span>
-							<span x-show="copied" x-cloak>{ i18n.T(ctx, "api.copied") }</span>
-						</button>
-					</li>
-				}
-			</ul>
-		}
-	</div>
+	@ui.MediaPicker(ui.MediaPickerOpts{
+		ID:         "content-media",
+		Items:      mediaItems(d.Media),
+		EmptyLabel: i18n.T(ctx, "admin.media.empty"),
+	})
+}
+
+func mediaItems(media []sqlc.ContentMedium) []ui.MediaItem {
+	out := make([]ui.MediaItem, 0, len(media))
+	for _, m := range media {
+		out = append(out, ui.MediaItem{
+			URL: mediaURL(m), Alt: mediaAlt(m), Name: m.Filename, Thumb: mediaURL(m),
+		})
+	}
+	return out
+}
+
+func adminMediaColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "preview", Label: i18n.T(ctx, "admin.media.col_preview")},
+		{Key: "filename", Label: i18n.T(ctx, "admin.media.col_filename")},
+		{Key: "size", Label: i18n.T(ctx, "admin.media.col_size"), Numeric: true},
+		{Key: "uploaded", Label: i18n.T(ctx, "admin.media.col_uploaded"), HideBelow: ui.BreakpointSM},
+		{Key: "actions", Label: i18n.T(ctx, "admin.media.col_actions"), Align: ui.AlignEnd},
+	}
 }
 
 // AdminMediaPage is the platform image library: upload, copy, delete.
 templ AdminMediaPage(d MediaData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.media.title")}) {
-		<a href="/admin/content" hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap } class="link text-sm">{ i18n.T(ctx, "admin.media.back_to_content") }</a>
+		@ui.BackLink(ui.BackLinkOpts{Label: i18n.T(ctx, "admin.media.back_to_content"), Href: "/admin/content"})
 	}
 	if AdminWrite(ctx) {
 		@MediaUploadCard(d)
 	}
 	<div id="table-container">
-		@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-			<table class="table" data-testid="media-table">
-				<thead>
-					<tr>
-						<th>{ i18n.T(ctx, "admin.media.col_preview") }</th>
-						<th>{ i18n.T(ctx, "admin.media.col_filename") }</th>
-						<th>{ i18n.T(ctx, "admin.media.col_size") }</th>
-						<th>{ i18n.T(ctx, "admin.media.col_uploaded") }</th>
-						<th class="text-right">{ i18n.T(ctx, "admin.media.col_actions") }</th>
-					</tr>
-				</thead>
-				<tbody>
-					if len(d.Items) == 0 {
-						<tr><td colspan="5" class="text-center text-fg-muted py-6" data-testid="media-empty">{ i18n.T(ctx, "admin.media.empty") }</td></tr>
-					}
-					for _, m := range d.Items {
-						<tr id={ fmt.Sprintf("media-row-%d", m.ID) } data-testid={ fmt.Sprintf("media-row-%d", m.ID) }>
-							<td>
-								<img src={ fmt.Sprintf("/media/%d/%s", m.ID, m.Filename) } alt={ m.Alt } class="h-10 w-10 object-cover rounded" loading="lazy"/>
-							</td>
-							<td class="font-medium">{ m.Filename }</td>
-							<td class="text-fg-muted text-xs">{ humanBytes(m.SizeBytes) }</td>
-							<td class="text-fg-muted text-xs"><span data-testid="relative-time">{ RelTime(mediaNow(d), m.CreatedAt.Time) }</span></td>
-							<td class="text-right">
-								<div class="card-actions">
-									<button type="button" x-data="copy" data-copy={ mediaMarkdown(m) } @click="copy()" class="btn btn-ghost btn-xs" data-testid={ fmt.Sprintf("media-copy-%d", m.ID) }>
-										<span x-show="!copied">{ i18n.T(ctx, "admin.content.media_copy") }</span>
-										<span x-show="copied" x-cloak>{ i18n.T(ctx, "api.copied") }</span>
-									</button>
-									if AdminWrite(ctx) {
-										<button
-											type="button"
-											hx-post={ fmt.Sprintf("/admin/media/%d/delete", m.ID) }
-											hx-confirm={ i18n.T(ctx, "admin.media.delete_confirm") }
-											class="btn btn-ghost btn-xs text-danger-text"
-											data-testid={ fmt.Sprintf("media-delete-%d", m.ID) }
-										>{ i18n.T(ctx, "admin.content.delete") }</button>
-									}
-								</div>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:       i18n.T(ctx, "admin.media.title"),
+			HiddenCaption: true,
+			Columns:       adminMediaColumns(ctx),
+			RowCount:      len(d.Items),
+			Empty:         adminMediaEmpty(),
+			Target:        "#table-container",
+			Attrs:         ui.Attrs{TestID: "media-table"},
+			Pagination: ui.Pagination(ui.PaginationOpts{
+				Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/media",
+				Target: "#table-container", Labels: pagerLabels(ctx),
+			}),
+		}) {
+			for _, m := range d.Items {
+				<tr id={ fmt.Sprintf("media-row-%d", m.ID) } data-testid={ fmt.Sprintf("media-row-%d", m.ID) }>
+					<td>
+						<img src={ mediaURL(m) } alt={ m.Alt } class="h-10 w-10 object-cover rounded" loading="lazy"/>
+					</td>
+					<td class="font-medium">{ m.Filename }</td>
+					<td class="text-fg-muted text-xs text-right tabular-nums">{ humanBytes(m.SizeBytes) }</td>
+					<td class="text-fg-muted text-xs hidden sm:table-cell"><span data-testid="relative-time">{ RelTime(mediaNow(d), m.CreatedAt.Time) }</span></td>
+					<td class="text-right">
+						@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.media.row_actions_aria", m.Filename), Attrs: ui.Attrs{Class: "justify-end"}}) {
+							@ui.CopyButton(ui.CopyButtonOpts{
+								Value:       mediaMarkdown(m),
+								Label:       i18n.T(ctx, "admin.content.media_copy"),
+								CopiedLabel: i18n.T(ctx, "api.copied"),
+								Size:        ui.SizeXS,
+								Attrs:       ui.Attrs{TestID: fmt.Sprintf("media-copy-%d", m.ID)},
+							})
+							if AdminWrite(ctx) {
+								@ui.ConfirmAction(ui.ConfirmActionOpts{
+									ID:           fmt.Sprintf("media-delete-dialog-%d", m.ID),
+									TriggerLabel: i18n.T(ctx, "admin.media.delete_row", m.Filename),
+									Title:        i18n.T(ctx, "admin.media.delete_title"),
+									Message:      i18n.T(ctx, "admin.media.delete_confirm"),
+									ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+									CancelLabel:  i18n.T(ctx, "admin.cancel"),
+									Kind:         ui.KindDanger,
+									HX:           ui.HX{Post: fmt.Sprintf("/admin/media/%d/delete", m.ID)},
+									Attrs:        ui.Attrs{TestID: fmt.Sprintf("media-delete-%d", m.ID)},
+								})
+							}
+						}
+					</td>
+				</tr>
+			}
 		}
-		@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/media", Target: "#table-container", Labels: pagerLabels(ctx)})
 	</div>
+}
+
+templ adminMediaEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.media.empty"), Variant: ui.EmptyInline, Attrs: ui.Attrs{TestID: "media-empty"}})
 }
 
 // MediaUploadCard is its own swap target so a rejected upload re-renders the
@@ -568,18 +704,24 @@ templ MediaUploadCard(d MediaData) {
 			data-testid="media-upload-form"
 		>
 			if d.Err != "" {
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: "media-error"}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "media-error"}}) {
 					{ d.Err }
 				}
 			}
-			<div>
-				<label class="label" for="media-file">{ i18n.T(ctx, "admin.media.upload_label") }</label>
-				<input id="media-file" type="file" name="file" accept="image/png,image/jpeg,image/gif,image/webp" class="input" data-testid="media-file"/>
-			</div>
-			<div class="form-actions">
-				<button type="submit" class="btn btn-primary" data-testid="media-upload">{ i18n.T(ctx, "admin.media.upload") }</button>
+			@ui.Field(ui.FieldOpts{Name: "file", Label: i18n.T(ctx, "admin.media.upload_label")}) {
+				@ui.FileInput(ui.FileInputOpts{
+					Name:   "file",
+					Accept: "image/png,image/jpeg,image/gif,image/webp",
+					Attrs:  ui.Attrs{TestID: "media-file"},
+				})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{
+					Label: i18n.T(ctx, "admin.media.upload"), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+					Attrs: ui.Attrs{TestID: "media-upload"},
+				})
 				@ui.Spinner(ui.SpinnerOpts{})
-			</div>
+			}
 		</form>
 	</div>
 }

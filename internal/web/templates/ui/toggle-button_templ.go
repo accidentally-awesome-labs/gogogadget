@@ -18,8 +18,10 @@ type ToggleButtonOpts struct {
 	Action Action
 	Size   Size
 	Icon   IconName
-	HX     HX
-	Attrs  Attrs
+	// HX issues the request the toggle makes. It is applied after Attrs.HX, so
+	// a value set here wins per attribute when both carry the same one.
+	HX    HX
+	Attrs Attrs
 }
 
 // ToggleButton renders a button that reports its own pressed state.
@@ -48,9 +50,9 @@ func ToggleButton(o ToggleButtonOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("toggle-button", buttonClass(o.Action, o.Size), o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, withRequest(rootWith("toggle-button", buttonClass(o.Action, o.Size), o.Attrs,
 			"type", "button",
-			"aria-pressed", pressedAttr(&o.On)))
+			"aria-pressed", pressedAttr(&o.On)), o.HX))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +69,7 @@ func ToggleButton(o ToggleButtonOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/toggle-button.templ`, Line: 27, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/toggle-button.templ`, Line: 29, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

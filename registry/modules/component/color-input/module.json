@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/color-input.templ",
         "target": "internal/web/templates/ui/color-input.templ",
         "class": "templ",
-        "sha256": "ee0c8c2f1bc7f89277bb46e34e255787d986871debecbb3508d3a787c1b54d1a",
+        "sha256": "8f5d5d269bfca44d74aca0269b660cf434354bec15fbd037c531c4069e43098d",
         "rewrite_module": true,
         "contract": true
       }

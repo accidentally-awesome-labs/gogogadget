@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/file-input.templ",
         "target": "internal/web/templates/ui/file-input.templ",
         "class": "templ",
-        "sha256": "6c8740055f2786df514a70b6dfa6a32149463089ce3aa64a2e3560717b6b1bd4",
+        "sha256": "47cb00394611277d0563f26ce37193824f032ef1f7fd01243950de32338c1c24",
         "rewrite_module": true,
         "contract": true
       }

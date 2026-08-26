@@ -58,6 +58,43 @@ func TestPageWindowElidesTheMiddle(t *testing.T) {
 	assert.Equal(t, 2, strings.Count(html, "…"))
 }
 
+// aria-label overrides text content, so labelling every link "Page N" left the
+// prev and next controls announcing as "Page 1"/"Page 3" — indistinguishable
+// from the numbered link beside them, with the direction they exist to convey
+// destroyed. axe never caught it: it asserts a name is PRESENT, never that it
+// is right.
+func TestPrevAndNextKeepTheirOwnAccessibleNames(t *testing.T) {
+	labels := PagerLabels{
+		Prev: func(int, int) string { return "← Previous" },
+		Next: func(int, int) string { return "Next →" },
+	}
+	opts := func(numbered bool) PaginationOpts {
+		return PaginationOpts{
+			Page: 2, TotalPages: 5, BaseURL: "/app", Target: "#t",
+			Numbered: numbered, Labels: labels,
+		}
+	}
+
+	// The direction controls carry no aria-label at all, in either layout, so
+	// their visible text IS the accessible name.
+	for _, numbered := range []bool{false, true} {
+		html := renderComponent(t, Pagination(opts(numbered)))
+		assert.Contains(t, html, `class="btn btn-ghost">← Previous</a>`)
+		assert.Contains(t, html, `class="btn btn-ghost">Next →</a>`)
+	}
+
+	// Page 2 of 5 with no numbers is two links, neither of them a bare digit,
+	// so no link needs naming after a page.
+	assert.NotContains(t, renderComponent(t, Pagination(opts(false))), `aria-label="Page`)
+
+	// Numbered adds links to 1, 3, 4 and 5 — four bare digits, four labels, and
+	// still none on prev or next.
+	html := renderComponent(t, Pagination(opts(true)))
+	assert.Equal(t, 4, strings.Count(html, `aria-label="Page `),
+		"exactly one label per bare digit, and none on the direction controls")
+	assert.Contains(t, html, `aria-label="Page 4"`)
+}
+
 // A caller who names no target wants plain link navigation. Emitting
 // hx-target="" makes htmx intercept the click and swap into an empty selector,
 // so the request lands nowhere and the href that would have worked is skipped.

@@ -8,24 +8,68 @@ import (
 
 templ Pricing(plans []billing.Plan, authed bool, currentPlanKey string) {
 	<section class="page-section">
-		<h1 class="display-title text-center">{ i18n.T(ctx, "home.pricing.heading") }</h1>
-		<p class="mt-4 text-center text-fg-muted">{ i18n.T(ctx, "home.pricing.subtitle") }</p>
-		<div class="mt-12 grid md:grid-cols-3 gap-6">
-			for _, p := range plans {
-				@ui.PlanCard(uiPlanCard(ctx, p, authed && p.Key == currentPlanKey)) {
-					if !authed {
-						<a href="/signup" class="btn btn-primary w-full">{ i18n.T(ctx, "home.pricing.choose", p.Name) }</a>
-					} else if p.Key == currentPlanKey {
-						<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "home.pricing.current") }</span>
-					} else if p.PolarProductID != "" {
-						<form hx-post="/app/billing/checkout" hx-disable="this">
-							<input type="hidden" name="plan" value={ p.Key }/>
-							<button type="submit" class="btn btn-primary w-full">{ i18n.T(ctx, "home.pricing.upgrade", p.Name) }</button>
-						</form>
-					}
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "home.pricing.heading"), Level: 1, Size: ui.SizeLG,
+			Attrs: ui.Attrs{Class: "text-center"},
+		})
+		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-4 text-center"}}) {
+			{ i18n.T(ctx, "home.pricing.subtitle") }
+		}
+		@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapLG, Attrs: ui.Attrs{Class: "mt-12"}}) {
+			for _, plan := range plans {
+				@ui.PlanCard(uiPlanCard(ctx, plan, authed && plan.Key == currentPlanKey)) {
+					@pricingAction(plan, authed, currentPlanKey)
 				}
 			}
-		</div>
-		<p class="mt-8 text-center text-sm text-fg-muted">{ i18n.T(ctx, "home.pricing.taxes") }</p>
+		}
+		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-8 text-center"}}) {
+			{ i18n.T(ctx, "home.pricing.taxes") }
+		}
 	</section>
+}
+
+// pricingAction is the one control at the foot of a plan card, and which one it
+// is depends entirely on who is reading.
+//
+// The current plan renders a disabled Button rather than a span dressed as one.
+// The card already states the plan is current through PlanCard's badge, so this
+// control exists to keep the three cards the same height - but a span with
+// button classes is announced as text, and a keyboard user tabbing the grid
+// finds two controls in three cards with no explanation for the gap. A disabled
+// button is the honest version of the same shape.
+//
+// A plan with no Polar product renders nothing at all: checkout is hosted, and
+// offering a control that cannot reach the merchant of record is worse than
+// offering none.
+templ pricingAction(plan billing.Plan, authed bool, currentPlanKey string) {
+	if !authed {
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: i18n.T(ctx, "home.pricing.choose", plan.Name), Href: "/signup",
+			Action: ui.ActionPrimary,
+			Attrs:  ui.Attrs{Class: "w-full"},
+		})
+	} else if plan.Key == currentPlanKey {
+		@ui.Button(ui.ButtonOpts{
+			Label:    i18n.T(ctx, "home.pricing.current"),
+			Disabled: true,
+			Attrs:    ui.Attrs{Class: "w-full"},
+		})
+	} else if plan.PolarProductID != "" {
+		// Target and Swap restate htmx's own defaults - the form itself,
+		// innerHTML - because Form always emits hx-target, and an empty one
+		// resolves through querySelector("") and throws. On success the handler
+		// answers with a redirect to Polar, so the swap only ever runs for the
+		// 422 the server renders back into this form.
+		@ui.Form(ui.FormOpts{
+			Target: "this", Swap: "innerHTML",
+			Attrs: ui.Attrs{HX: ui.HX{Post: "/app/billing/checkout", Disable: true}},
+		}) {
+			<input type="hidden" name="plan" value={ plan.Key }/>
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "home.pricing.upgrade", plan.Name),
+				Type:  ui.TypeSubmit, Action: ui.ActionPrimary,
+				Attrs: ui.Attrs{Class: "w-full"},
+			})
+		}
+	}
 }

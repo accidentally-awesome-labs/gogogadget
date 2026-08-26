@@ -125,7 +125,7 @@ func optionsSamples() []any {
 		CardOpts{}, CardHeaderOpts{}, CardFooterOpts{}, TableOpts{}, KeyValueOpts{},
 		ListOpts{}, ContainerOpts{}, StackOpts{}, InlineOpts{}, GridOpts{},
 		DialogOpts{}, AlertDialogOpts{}, DropdownMenuOpts{}, PopoverOpts{}, TooltipOpts{},
-		IconOpts{}, ItemOpts{}, SeparatorOpts{},
+		IconOpts{}, ItemOpts{}, SeparatorOpts{}, CSRFFieldOpts{},
 	}
 }
 
@@ -230,6 +230,9 @@ func rendererSeeds() map[string]any {
 		"CursorPagination": CursorPaginationOpts{NextURL: "/x?after=1", Target: "#t"},
 		// An empty selection has no bulk actions to offer.
 		"SelectionBar": SelectionBarOpts{Count: 2, CountLabel: "2 selected"},
+		// No request context in a unit render, so the field has no token to
+		// draw and correctly renders nothing.
+		"CSRFField": CSRFFieldOpts{Token: "probe-token"},
 	}
 }
 
@@ -240,6 +243,7 @@ func renderers() map[string]any {
 	return map[string]any{
 		"AlertDialog": AlertDialog, "Badge": Badge, "Banner": Banner, "Card": Card,
 		"CardFooter": CardFooter, "CardHeader": CardHeader, "Checkbox": Checkbox, "Container": Container,
+		"CSRFField":       CSRFField,
 		"DescriptionList": DescriptionList, "Dialog": Dialog, "Separator": Separator, "DropdownMenu": DropdownMenu,
 		"EmptyState": EmptyState, "Field": Field, "FieldError": FieldError, "Fieldset": Fieldset,
 		"Form": Form, "Grid": Grid, "Icon": Icon, "Inline": Inline,

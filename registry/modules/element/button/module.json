@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/button.templ",
         "target": "internal/web/templates/ui/button.templ",
         "class": "templ",
-        "sha256": "7688786a9888c3297f1dad6e19f5785a61ce40e549c8fd2303b5372035daa1e3",
+        "sha256": "be2667d7e86b0244ecc8e61b707dc4b87b7956c9164275e57f0ec5c3eff90957",
         "rewrite_module": true,
         "contract": true
       },

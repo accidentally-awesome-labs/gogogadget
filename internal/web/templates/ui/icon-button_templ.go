@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 // IconButtonOpts configures a button whose only content is an icon.
-//
 // Label is required and is not optional by accident: an icon-only button with
 // no accessible name is announced as "button" and nothing else, which makes it
 // unusable by screen reader and unaddressable by test. The label is applied as
@@ -26,8 +25,10 @@ type IconButtonOpts struct {
 	// current state and renders aria-pressed.
 	Pressed  *bool
 	Disabled bool
-	HX       HX
-	Attrs    Attrs
+	// HX issues the request the button makes. It is applied after Attrs.HX, so
+	// a value set here wins per attribute when both carry the same one.
+	HX    HX
+	Attrs Attrs
 }
 
 // IconButton renders an icon-only control with an accessible name.
@@ -56,11 +57,11 @@ func IconButton(o IconButtonOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("icon-button", buttonClass(o.Action, o.Size)+" btn-icon", o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, withRequest(rootWith("icon-button", buttonClass(o.Action, o.Size)+" btn-icon", o.Attrs,
 			"type", string(o.Type.Value()),
 			"aria-label", iconButtonLabel(o),
 			"aria-busy", boolAttr(o.Busy),
-			"aria-pressed", pressedAttr(o.Pressed)))
+			"aria-pressed", pressedAttr(o.Pressed)), o.HX))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

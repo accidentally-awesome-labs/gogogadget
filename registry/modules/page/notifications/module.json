@@ -28,7 +28,7 @@
         "source": "internal/web/page_notifications.go",
         "target": "internal/web/page_notifications.go",
         "class": "go",
-        "sha256": "62ac5f5e05bf75b8a6fa8b9ede150cbc36a5b43387ff203c745f7dd8ba254f97",
+        "sha256": "048399492453c24b42a7d241ca67a5dd9268f7f529eb493a5baa5b87e4a33b30",
         "rewrite_module": true,
         "contract": false
       },
@@ -36,7 +36,7 @@
         "source": "internal/web/templates/notifications.templ",
         "target": "internal/web/templates/notifications.templ",
         "class": "templ",
-        "sha256": "68019b60070cef1bb487009fe5d2302a6994990520558b6fec1e8346040a1c51",
+        "sha256": "b1d147bf2529f444367ca3d2b661267aff9a23be6cce61a48a808dd3b1486a25",
         "rewrite_module": true,
         "contract": false
       }
@@ -81,6 +81,7 @@
         "notifications.open": "Open",
         "notifications.read_all": "Mark all read",
         "notifications.title": "Notifications",
+        "notifications.unread": "Unread",
         "notifications.unread_aria": "%d unread notifications"
       },
       "es": {
@@ -94,6 +95,7 @@
         "notifications.open": "Abrir",
         "notifications.read_all": "Marcar todo como leído",
         "notifications.title": "Notificaciones",
+        "notifications.unread": "Sin leer",
         "notifications.unread_aria": "%d notificaciones sin leer"
       }
     },

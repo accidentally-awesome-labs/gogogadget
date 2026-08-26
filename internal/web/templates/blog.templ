@@ -3,27 +3,48 @@ package templates
 import (
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 templ BlogIndex(posts []content.Post) {
 	<section class="page-narrow">
-		<h1 class="display-title">{ i18n.T(ctx, "blog.title") }</h1>
+		@ui.Heading(ui.HeadingOpts{Text: i18n.T(ctx, "blog.title"), Level: 1, Size: ui.SizeLG})
 		<div class="mt-10 space-y-8">
 			if len(posts) == 0 {
-				<p class="text-fg-muted">{ i18n.T(ctx, "blog.empty") }</p>
+				// Card rather than page: the heading above it is the page, and
+				// an empty state that fills the viewport would push it off the
+				// screen. Title is left empty so the existing one-line copy
+				// stays one line instead of becoming a headline with no body.
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Body:    i18n.T(ctx, "blog.empty"),
+					Variant: ui.EmptyCard,
+				})
 			}
-			for _, p := range posts {
+			for _, post := range posts {
 				<article>
-					<h2 class="text-2xl font-bold">
-						<a href={ "/blog/" + p.Slug } class="hover:text-brand-text">{ p.Title }</a>
-					</h2>
-					<p class="text-sm text-fg-muted mt-1">
-						<time datetime={ p.Date.Format("2006-01-02") }>{ p.Date.Format("January 2, 2006") }</time>
-						if p.Author != "" {
-							{ " · " + p.Author }
+					// Unstyled: element/link owns the anchor and the boost
+					// decision, and Heading owns the level. Without Unstyled the
+					// component's brand-colour-plus-underline treatment lands on
+					// a 2xl bold title, which is body-copy styling on something
+					// that is not body copy.
+					@ui.Heading(ui.HeadingOpts{Level: 2, Unstyled: true, Attrs: ui.Attrs{Class: "text-2xl font-bold"}}) {
+						@ui.Link(ui.LinkOpts{
+							Label: post.Title, Href: "/blog/" + post.Slug, Unstyled: true,
+							Attrs: ui.Attrs{Class: "hover:text-brand-text"},
+						})
+					}
+					@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-1"}}) {
+						<time datetime={ post.Date.Format("2006-01-02") }>{ post.Date.Format("January 2, 2006") }</time>
+						if post.Author != "" {
+							{ " · " + post.Author }
 						}
-					</p>
-					<p class="mt-2 text-fg-muted">{ p.Description }</p>
+					}
+					// SizeMD is text-base, which is what the description was
+					// before this page was migrated: it is the entry's summary,
+					// not a secondary annotation on it.
+					@ui.Text(ui.TextOpts{Size: ui.SizeMD, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
+						{ post.Description }
+					}
 				</article>
 			}
 		</div>
@@ -32,15 +53,18 @@ templ BlogIndex(posts []content.Post) {
 
 templ BlogPost(post content.Post) {
 	<article class="page-narrow">
-		<h1 class="display-title">{ post.Title }</h1>
-		<p class="text-sm text-fg-muted mt-2">
+		@ui.Heading(ui.HeadingOpts{Text: post.Title, Level: 1, Size: ui.SizeLG})
+		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
 			<time datetime={ post.Date.Format("2006-01-02") }>{ post.Date.Format("January 2, 2006") }</time>
 			if post.Author != "" {
 				{ " · " + post.Author }
 			}
-		</p>
-		<div class="prose mt-8">
+		}
+		// Prose is the wrapper the rendered Markdown needs: goldmark emits bare
+		// elements with no classes of their own, so the typography has to come
+		// from the container.
+		@ui.Prose(ui.ProseOpts{Attrs: ui.Attrs{Class: "mt-8"}}) {
 			@templ.Raw(post.Body)
-		</div>
+		}
 	</article>
 }

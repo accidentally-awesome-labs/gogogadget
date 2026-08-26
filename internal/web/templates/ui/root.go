@@ -67,6 +67,57 @@ func defaultTestID(a Attrs, fallback string) Attrs {
 	return a
 }
 
+// withRequest applies a component's dedicated HX field on top of an already
+// built root map.
+//
+// Several components declare an HX field beside Attrs, and root/rootWith only
+// flatten Attrs.HX - so the dedicated field reached nothing. Applying it last
+// means it wins per attribute when both are set: a caller who wrote `HX:` on
+// this button is naming this button's request, and losing to a value that
+// arrived inside an Attrs literal is the surprise, not the reverse.
+func withRequest(out templ.Attributes, hx HX) templ.Attributes {
+	applyHX(out, hx)
+	return out
+}
+
+// controlID is the id a form control renders on its input element.
+//
+// Name is the default because a singleton form addresses its control by field
+// name, and that must stay true for every existing caller. It has to be
+// overridable: the same control repeated once per table row - a role select on
+// every admin user, a rollout input on every flag - otherwise emits one
+// identical id on every row, and `for=` and `aria-describedby` both resolve to
+// the first match, so forty rows of labels and errors all point at row one.
+// A label pointing at the wrong control is worse than no label.
+//
+// Attrs.ID is honoured as the fallback so a caller who already set the id there
+// keeps working instead of suddenly emitting two id attributes on one element.
+func controlID(id string, a Attrs, name string) string {
+	switch {
+	case id != "":
+		return id
+	case a.ID != "":
+		return a.ID
+	}
+	return name
+}
+
+// controlRoot is root for a form control: the resolved control id is
+// authoritative, so Attrs.ID is dropped from the map rather than emitted
+// alongside the explicit id the control renders itself.
+func controlRoot(name, baseClass string, a Attrs) templ.Attributes {
+	out := root(name, baseClass, a)
+	delete(out, "id")
+	return out
+}
+
+// controlRootWith is controlRoot plus component-owned attribute pairs.
+func controlRootWith(name, baseClass string, a Attrs, pairs ...string) templ.Attributes {
+	out := rootWith(name, baseClass, a, pairs...)
+	delete(out, "id")
+	return out
+}
+
 // clampPercent keeps a meter inside its track. An out-of-range value is a
 // caller bug, but rendering a bar wider than its container is a visual break in
 // production, so it is clamped rather than trusted.

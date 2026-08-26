@@ -36,6 +36,18 @@ templ ScenarioContent(gc GalleryContext) {
 			The draft was not published. One field needs attention, and the body has been kept exactly as you left it.
 		}
 	}
+	// The media upload's owning form, and deliberately a sibling of the save
+	// form rather than a child: a nested <form> is discarded by the parser, so
+	// the picker's file input reaches this one through HTML's form attribute
+	// instead. Uploading a file and saving a draft are two different requests
+	// and each needs its own destination.
+	<form
+		id="content-media-upload"
+		action={ templ.SafeURL(contentAction()) }
+		method="post"
+		enctype="multipart/form-data"
+		hidden
+	></form>
 	@ui.Form(ui.FormOpts{Method: "post", Action: contentAction(), Attrs: ui.Attrs{TestID: "content-editor-form"}}) {
 		@ui.PanelGroup(ui.PanelGroupOpts{
 			ID:          "content-editor-panels",
@@ -103,7 +115,7 @@ templ contentDraftPanelBody(gc GalleryContext) {
 	}) {
 		@ui.MediaPicker(ui.MediaPickerOpts{
 			ID:          "content-media",
-			UploadURL:   contentAction(),
+			UploadForm:  "content-media-upload",
 			UploadLabel: "Drop an image here, or choose a file",
 			EmptyLabel:  "No media in this space yet.",
 			Items:       contentMedia(gc),

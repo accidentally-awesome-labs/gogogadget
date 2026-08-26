@@ -132,7 +132,7 @@ func ChatMessage(o ChatMessageOpts) templ.Component {
 }
 
 func chatMessageClass(role ChatRole) string {
-	base := "rounded-lg px-3 py-2 max-w-[42rem]"
+	base := "rounded-lg px-3 py-2 max-w-message"
 	switch role.Value() {
 	case ChatRoleUser:
 		return base + " bg-selected ml-auto"

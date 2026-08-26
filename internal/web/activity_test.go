@@ -48,7 +48,13 @@ func TestActivityPaginationFragment(t *testing.T) {
 	h.Set("HX-Request", "true")
 	code, _, body := serve(t, s, "GET", "/app/activity?page=2", nil, h, sessionCookie("user_pg", "org_pg", "org:admin"))
 	require.Equal(t, http.StatusOK, code)
-	assert.Contains(t, body, "table-container")
+	assert.Contains(t, body, `data-testid="activity-table"`, "the fragment is the table, not a page")
+	// The pager swaps innerMorph, which morphs the target's children against the
+	// response. A fragment that repeats its own wrapper therefore leaves a
+	// SECOND element carrying id="table-container" inside the first — proved in
+	// a browser against the vendored htmx. The wrapper is the page's to render.
+	assert.NotContains(t, body, `id="table-container"`,
+		"the innerMorph target's wrapper must not be repeated inside its own fragment")
 	assert.Contains(t, body, "Page 2 of 2")
 	assert.NotContains(t, body, `<html lang="en">`)
 

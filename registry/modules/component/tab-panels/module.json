@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/tab-panels.templ",
         "target": "internal/web/templates/ui/tab-panels.templ",
         "class": "templ",
-        "sha256": "a6cee4a69137c60623d4c1efc64424d550f7a772ae402a14f36c37e292e334b1",
+        "sha256": "b2dcb81261ca1844f4fa59990e5b5779a2450b96bd137ce19c234b9550f306a6",
         "rewrite_module": true,
         "contract": true
       },
@@ -24,7 +24,7 @@
         "source": "internal/web/templates/ui/tab-panels_test.go",
         "target": "internal/web/templates/ui/tab-panels_test.go",
         "class": "test",
-        "sha256": "8f3d3b921cd63eb0b648ce65f4dde5722a24d0238e4227eb925590b43a95edd5",
+        "sha256": "714210a05c00d3a8f1a52078b8b56fd94b1ad1f327a29be6cbc8276698dbbb11",
         "rewrite_module": true,
         "contract": false
       }
@@ -40,7 +40,7 @@
           "native_fallback": "sequential panels",
           "signature": "templ TabPanels(o TabPanelsOpts)",
           "summary": "Renders the ARIA tab widget.",
-          "guidance": "This is the one navigation component that genuinely needs script, and it claims role=\"tablist\" only because it implements the whole contract: a single tab stop for the set (roving tabindex), Left/Right to move between tabs, Home/End to jump to the ends, and aria-selected plus aria-controls wiring the tab to its panel. NavTabs is the alternative for navigation between URLs - tabs that are really links should stay links.",
+          "guidance": "This is the one navigation component that genuinely needs script, and it claims role=\"tablist\" only because it implements the whole contract: a single tab stop for the set (roving tabindex), Left/Right to move between tabs, Home/End to jump to the ends, and aria-selected plus aria-controls wiring the tab to its panel. NavTabs is the alternative for navigation between URLs - tabs that are really links should stay links. The server renders the fallback rather than the enhanced state: every panel open, in order, with the tab bar hidden. Collapsing to one panel before the controller exists would lose every panel but the first, and offering tabs only a controller can operate would be a row of dead buttons; uiTabs reveals the bar and collapses to the selected panel on init.",
           "keyboard": "A roving tabindex gives the set one tab stop; Left/Right move and activate the adjacent tab, and Home/End jump to the first or last.",
           "states": [
             "default"

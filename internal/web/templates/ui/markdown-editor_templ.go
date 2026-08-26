@@ -18,7 +18,15 @@ import "fmt"
 // Editing Markdown text keeps the stored value something the server can render
 // safely, which a saved HTML blob is not.
 type MarkdownEditorOpts struct {
-	Name        string
+	Name string
+	// ID overrides the textarea's element id, which defaults to Name. Two
+	// editors for the same field name - one per revision in a comparison view,
+	// say - would otherwise emit one identical id, and the label's for= and
+	// aria-describedby both resolve to the first match.
+	//
+	// Attrs are deliberately not consulted: they land on the editor's wrapper,
+	// so Attrs.ID names the wrapper rather than the control.
+	ID          string
 	Label       string
 	Value       string
 	Placeholder string
@@ -27,12 +35,16 @@ type MarkdownEditorOpts struct {
 	// what readers get - a client-side Markdown renderer would be a second
 	// implementation that disagrees with the first.
 	PreviewURL string
-	// Target is the element the preview swaps into.
+	// Target is the element the preview swaps into. Setting it means the preview
+	// lives somewhere else on the page - the other half of a split editor, say -
+	// so the editor renders no pane of its own: a second, permanently empty
+	// preview region inside the editor is a component that looks broken.
 	Target string
-	// MediaURL lists existing uploads; UploadURL accepts new ones. Both are
-	// optional: an editor without media is still an editor.
+	// MediaURL lists existing uploads, fetched into the media panel by the
+	// toolbar's Media button. Optional: an editor without media is still an
+	// editor. The upload destination is not the editor's business - the picker
+	// names the form that owns its upload control.
 	MediaURL  string
-	UploadURL string
 	Rows      int
 	MaxLength int
 	// Hint and Error mirror the enclosing Field so the control describes only
@@ -49,7 +61,12 @@ type MarkdownEditorOpts struct {
 // The textarea is the form value, always. Every toolbar button and shortcut
 // edits that text in place, so with no JavaScript the author types Markdown into
 // a plain textarea and the form submits unchanged - the toolbar is the part that
-// is optional, not the editing.
+// is optional, not the editing. The toolbar and the media panel are hidden until
+// the controller reveals them: every toolbar control and every media insert
+// writes at the caret, which nothing but the controller can do, and the panel's
+// upload does work without script but would navigate away and abandon whatever
+// the author has typed. A MediaPicker rendered outside an editor stays visible
+// and fully usable; it is this slot that hides, not the picker.
 func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -86,13 +103,13 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if o.Label != "" {
-			templ_7745c5c3_Err = Label(LabelOpts{For: o.Name, Text: o.Label, Required: o.Required}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Label(LabelOpts{For: markdownControlID(o), Text: o.Label, Required: o.Required}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		templ_7745c5c3_Err = EditorToolbar(EditorToolbarOpts{
-			For:      o.Name,
+			For:      markdownControlID(o),
 			Disabled: o.Disabled || o.ReadOnly,
 			MediaURL: o.MediaURL,
 		}).Render(ctx, templ_7745c5c3_Buffer)
@@ -103,7 +120,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required}))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, FieldARIA(markdownFieldOpts(o)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -112,9 +129,9 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(markdownControlID(o))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 67, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 84, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -127,7 +144,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 68, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 85, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -140,7 +157,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprint(markdownRows(o.Rows)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 69, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 86, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -153,7 +170,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Placeholder)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 71, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 88, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
@@ -189,7 +206,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprint(o.MaxLength))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 77, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 94, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
@@ -208,7 +225,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.PreviewURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 80, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 97, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -221,7 +238,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(markdownPreviewTarget(o))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 82, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 99, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
@@ -239,7 +256,7 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(o.Value)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 86, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 103, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -249,8 +266,8 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if o.PreviewURL != "" {
-			templ_7745c5c3_Err = EditorPreview(EditorPreviewOpts{ID: o.Name + "-preview"}).Render(ctx, templ_7745c5c3_Buffer)
+		if o.PreviewURL != "" && o.Target == "" {
+			templ_7745c5c3_Err = EditorPreview(EditorPreviewOpts{ID: markdownControlID(o) + "-preview"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -260,15 +277,15 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name + "-media")
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(markdownControlID(o) + "-media")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 94, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 112, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" data-editor-media>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" data-editor-media hidden>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -281,13 +298,13 @@ func MarkdownEditor(o MarkdownEditorOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if o.MaxLength > 0 {
-			templ_7745c5c3_Err = CharCounter(CharCounterOpts{For: o.Name, Max: o.MaxLength, Label: "characters"}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = CharCounter(CharCounterOpts{For: markdownControlID(o), Max: o.MaxLength, Label: "characters"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if o.Error != "" {
-			templ_7745c5c3_Err = FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: o.Name + "-error"}}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: markdownErrorID(o)}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -359,7 +376,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(control.Action)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 133, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 151, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -372,7 +389,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(control.Prefix)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 134, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 152, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {
@@ -385,7 +402,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(control.Suffix)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 135, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 153, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
@@ -398,7 +415,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(control.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 136, Col: 30}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 154, Col: 30}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 			if templ_7745c5c3_Err != nil {
@@ -411,7 +428,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(control.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 137, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 155, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 			if templ_7745c5c3_Err != nil {
@@ -434,7 +451,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(control.Text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 139, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 157, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -453,7 +470,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.MediaURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 147, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 165, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 			if templ_7745c5c3_Err != nil {
@@ -466,7 +483,7 @@ func EditorToolbar(o EditorToolbarOpts) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue("#" + o.For + "-media")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 148, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 166, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 			if templ_7745c5c3_Err != nil {
@@ -560,9 +577,18 @@ func EditorPreview(o EditorPreviewOpts) templ.Component {
 type MediaPickerOpts struct {
 	ID    string
 	Items []MediaItem
-	// UploadURL accepts a new file; the input is a real file input so upload
-	// works without drag and drop.
-	UploadURL   string
+	// UploadForm is the id of the form that submits the upload control. It is a
+	// form id rather than a URL because the picker is normally rendered inside
+	// a MarkdownEditor, which is itself inside the page's save form, and a
+	// nested <form> is discarded by the HTML parser. HTML's form attribute lets
+	// the control name an owner that is not its ancestor, so the caller renders
+	//
+	//	<form id="..." action="/upload" method="post" enctype="multipart/form-data">
+	//
+	// outside its own form and passes that id here. Empty means no upload
+	// control at all: a file input with nowhere to post is a control that
+	// silently drops the file into whatever form happens to enclose it.
+	UploadForm  string
 	UploadLabel string
 	EmptyLabel  string
 	Attrs       Attrs
@@ -582,6 +608,11 @@ type MediaItem struct {
 // text is part of the item rather than something the author is prompted for
 // later, because a prompt that can be dismissed produces images with no
 // description.
+//
+// The insert buttons need a controller - they write at the caret - but the
+// upload does not: it is a real file input and a real submit, both owned by the
+// caller's upload form, so choosing a file and sending it works with no script
+// at all.
 func MediaPicker(o MediaPickerOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -615,113 +646,131 @@ func MediaPicker(o MediaPickerOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if o.UploadURL != "" {
+		if o.UploadForm != "" {
 			templ_7745c5c3_Err = FileDropzone(FileDropzoneOpts{
 				Name:   o.ID + "-upload",
+				Form:   o.UploadForm,
 				Label:  o.UploadLabel,
 				Accept: "image/*",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		if len(o.Items) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "<p class=\"text-sm text-fg-muted\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "     <button type=\"submit\" form=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var22 string
-			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(o.EmptyLabel)
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.UploadForm)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 223, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 258, Col: 44}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" class=\"btn btn-ghost btn-sm\">Upload</button> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if len(o.Items) == 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<p class=\"text-sm text-fg-muted\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var23 string
+			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(o.EmptyLabel)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 263, Col: 50}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "</p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<ul class=\"grid grid-cols-2 sm:grid-cols-4 gap-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "<ul class=\"grid grid-cols-2 sm:grid-cols-4 gap-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, item := range o.Items {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "<li><button type=\"button\" class=\"w-full rounded-lg border border-border p-2 text-left text-xs hover:bg-surface-raised\" data-editor-action=\"insert\" data-editor-insert=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<li><button type=\"button\" class=\"w-full rounded-lg border border-border p-2 text-left text-xs hover:bg-surface-raised\" data-editor-action=\"insert\" data-editor-insert=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var23 string
-				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(mediaMarkdown(item))
+				var templ_7745c5c3_Var24 string
+				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(mediaMarkdown(item))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 232, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 272, Col: 47}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if item.Thumb != "" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "<img src=\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					var templ_7745c5c3_Var24 string
-					templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.Thumb)
-					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 235, Col: 29}
-					}
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" alt=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<img src=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var25 string
-					templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.Alt)
+					templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.Thumb)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 235, Col: 46}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 275, Col: 29}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "\" loading=\"lazy\" class=\"w-full h-16 object-cover rounded mb-1\"> ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "\" alt=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var26 string
+					templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(item.Alt)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 275, Col: 46}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "\" loading=\"lazy\" class=\"w-full h-16 object-cover rounded mb-1\"> ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "<span class=\"block truncate\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "<span class=\"block truncate\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var26 string
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
+				var templ_7745c5c3_Var27 string
+				templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(item.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 237, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/markdown-editor.templ`, Line: 277, Col: 47}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "</span></button></li>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</span></button></li>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "</ul>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 57, "</ul>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 56, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 58, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -756,11 +805,39 @@ func markdownRows(rows int) int {
 	return rows
 }
 
+// markdownFieldOpts is the field contract the textarea presents: one value that
+// FieldARIA, the label's for= and the hint/error ids are all derived from, so a
+// caller setting ID cannot make them disagree.
+//
+// This hand-lists the fields it forwards, which is the shape that silently falls
+// behind its type the next time FieldOpts grows one. The omissions are therefore
+// deliberate and named: Label, Optional and HiddenLabel belong to the enclosing
+// Field or to this editor's own Label call, and Attrs land on the editor's
+// wrapper rather than on the control. Anything added to FieldOpts that FieldARIA
+// reads has to be added here too, or the textarea is the one control in the
+// package that quietly does not get it.
+func markdownFieldOpts(o MarkdownEditorOpts) FieldOpts {
+	return FieldOpts{Name: o.Name, ID: o.ID, Hint: o.Hint, Error: o.Error, Required: o.Required}
+}
+
+// markdownControlID is the textarea's id. Everything the editor points at the
+// control with - label, counter, media panel, preview - resolves through here.
+func markdownControlID(o MarkdownEditorOpts) string {
+	return FieldControlID(markdownFieldOpts(o))
+}
+
+// markdownErrorID is the id FieldARIA's aria-describedby names, so the rendered
+// error is the element the control actually points at.
+func markdownErrorID(o MarkdownEditorOpts) string {
+	_, _, errID := FieldIDs(markdownControlID(o))
+	return errID
+}
+
 func markdownPreviewTarget(o MarkdownEditorOpts) string {
 	if o.Target != "" {
 		return o.Target
 	}
-	return "#" + o.Name + "-preview"
+	return "#" + markdownControlID(o) + "-preview"
 }
 
 // mediaMarkdown builds the insertion text. The alt text is not optional: an

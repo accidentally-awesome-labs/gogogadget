@@ -13,7 +13,7 @@ import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
 // the reference rather than diffing the whole page.
 templ ComponentReference(o referenceView) {
 	<div class="space-y-8" data-testid="component-reference">
-		@ui.Text(ui.TextOpts{Attrs: ui.Attrs{TestID: "component-summary"}}) {
+		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Attrs: ui.Attrs{TestID: "component-summary"}}) {
 			{ o.Summary }
 		}
 		@ui.Section(ui.SectionOpts{Title: "Signature", Level: 2, Attrs: ui.Attrs{
@@ -36,7 +36,7 @@ templ ComponentReference(o referenceView) {
 		@ui.Section(ui.SectionOpts{Title: "When to use it", Level: 2, Attrs: ui.Attrs{
 			ID: "reference-guidance", TestID: "component-guidance",
 		}}) {
-			@ui.Text(ui.TextOpts{}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, }) {
 				{ o.Guidance }
 			}
 		}
@@ -44,11 +44,11 @@ templ ComponentReference(o referenceView) {
 			ID: "reference-keyboard", TestID: "component-keyboard",
 		}}) {
 			if o.Keyboard != "" {
-				@ui.Text(ui.TextOpts{}) {
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, }) {
 					{ o.Keyboard }
 				}
 			} else {
-				@ui.Text(ui.TextOpts{Muted: true}) {
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
 					{ referenceNoKeyboard }
 				}
 			}
@@ -57,7 +57,7 @@ templ ComponentReference(o referenceView) {
 			ID: "reference-states", TestID: "component-states",
 		}}) {
 			if len(o.States) == 0 {
-				@ui.Text(ui.TextOpts{Muted: true}) {
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
 					{ referenceNoStates }
 				}
 			} else {
@@ -69,7 +69,7 @@ templ ComponentReference(o referenceView) {
 			}
 			// Said out loud, because a list of states that silently excludes two
 			// of the most-asked-about ones reads as a complete list.
-			@ui.Text(ui.TextOpts{Muted: true, Attrs: ui.Attrs{TestID: "component-states-note"}}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{TestID: "component-states-note"}}) {
 				{ referenceStatesNote }
 			}
 		}

@@ -16,9 +16,17 @@
         "source": "internal/web/templates/ui/dropdown-menu.templ",
         "target": "internal/web/templates/ui/dropdown-menu.templ",
         "class": "templ",
-        "sha256": "a13acf9ada2fbc7cc1829b49ec820b4b89dd30dafb9109afe3c66ee3718cf388",
+        "sha256": "2c7d9a258c107a1cd0d4673fab55a55ff7c681517a71ac7bd3367276f11bd2d2",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/dropdown-menu_test.go",
+        "target": "internal/web/templates/ui/dropdown-menu_test.go",
+        "class": "test",
+        "sha256": "0d5080b4e8e6d0ef1b8f4065136a3a4198c500fd19a0106429076f226bc6cb2e",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},
@@ -29,10 +37,10 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiMenu",
-          "native_fallback": "details element",
+          "native_fallback": "popover attribute",
           "signature": "templ DropdownMenu(o DropdownMenuOpts)",
           "summary": "Renders a button that toggles a panel of links.",
-          "guidance": "This is a disclosure, not an ARIA menu: it deliberately does not claim role=\"menu\", because that role promises arrow-key navigation between menuitems, and claiming a keyboard contract the widget does not implement is worse for a screen-reader user than presenting an honest expandable button. The trigger and panel carry data hooks so the Alpine component can move focus in on open and return it to the trigger on close.",
+          "guidance": "This is a disclosure, not an ARIA menu: it deliberately does not claim role=\"menu\", because that role promises arrow-key navigation between menuitems, and claiming a keyboard contract the widget does not implement is worse for a screen-reader user than presenting an honest expandable button. The panel is a native popover and the trigger opens it declaratively with popovertarget, so the commands disclose, and every link among them works, with no script at all; the platform also supplies light dismiss, Escape and the top layer, so the panel is never clipped by a scrolling table cell. The Alpine component adds focus into the panel on open, focus back to the trigger on close, arrow keys, typeahead, and keeping aria-expanded in step.",
           "keyboard": "Focus moves into the panel on open and back to the trigger on close, Escape closes it, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next command starting with it.",
           "states": [
             "default",
@@ -44,7 +52,11 @@
     "migrations": [],
     "environment": [],
     "docs": [],
-    "tests": {},
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
     "data": [],
     "removal_policy": "free"
   }

@@ -1,13 +1,13 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // Admin job-queue viewer. Status comes from the ListJobs projection: a
@@ -41,52 +41,83 @@ func jobStatusLabel(ctx context.Context, status string) string {
 	return i18n.T(ctx, jobStatusKey(status))
 }
 
+func adminJobColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "kind", Label: i18n.T(ctx, "admin.jobs.col_kind")},
+		{Key: "status", Label: i18n.T(ctx, "admin.jobs.col_status")},
+		{Key: "attempts", Label: i18n.T(ctx, "admin.jobs.col_attempts"), Numeric: true},
+		{Key: "run_at", Label: i18n.T(ctx, "admin.jobs.col_run_at")},
+		{Key: "error", Label: i18n.T(ctx, "admin.jobs.col_error"), HideBelow: ui.BreakpointMD},
+		{Key: "actions", Label: i18n.T(ctx, "admin.jobs.col_actions"), Align: ui.AlignEnd},
+	}
+}
+
 templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
 	<div id="table-container">
-		if len(rows) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Level: 2, Title: i18n.T(ctx, "admin.jobs.title"), Body: i18n.T(ctx, "admin.jobs.empty")}) {
-			}
-		} else {
-			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "jobs-table"}}) {
-				<table class="table">
-					<thead>
-						<tr><th>{ i18n.T(ctx, "admin.jobs.col_kind") }</th><th>{ i18n.T(ctx, "admin.jobs.col_status") }</th><th>{ i18n.T(ctx, "admin.jobs.col_attempts") }</th><th>{ i18n.T(ctx, "admin.jobs.col_run_at") }</th><th>{ i18n.T(ctx, "admin.jobs.col_error") }</th><th class="text-right">{ i18n.T(ctx, "admin.jobs.col_actions") }</th></tr>
-					</thead>
-					<tbody>
-						for _, row := range rows {
-							<tr id={ fmt.Sprintf("job-row-%d", row.ID) }>
-								<td class="font-medium">{ row.Kind }</td>
-								<td>
-									@ui.Badge(ui.BadgeOpts{Text: jobStatusLabel(ctx, row.Status), Kind: jobKind(row.Status), Attrs: ui.Attrs{TestID: "job-status"}})
-								</td>
-								<td>{ fmt.Sprintf("%d/%d", row.Attempts, row.MaxAttempts) }</td>
-								<td>
-									<span data-testid="relative-time" title={ row.RunAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.RunAt.Time) }</span>
-								</td>
-								<td class="max-w-xs truncate text-fg-muted" title={ row.LastError.String }>{ row.LastError.String }</td>
-								<td class="text-right">
-									if row.Status == "dead" && AdminWrite(ctx) {
-										<button
-											type="button"
-											hx-post={ fmt.Sprintf("/admin/jobs/%d/requeue", row.ID) }
-											hx-confirm={ i18n.T(ctx, "admin.jobs.requeue_confirm") }
-											class="btn btn-ghost btn-xs"
-											data-testid={ fmt.Sprintf("job-requeue-%d", row.ID) }
-										>{ i18n.T(ctx, "admin.jobs.requeue") }</button>
-									}
-								</td>
-							</tr>
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:       i18n.T(ctx, "admin.jobs.title"),
+			HiddenCaption: true,
+			Columns:       adminJobColumns(ctx),
+			RowCount:      len(rows),
+			Empty:         adminJobsEmpty(filter),
+			Target:        "#table-container",
+			Attrs:         ui.Attrs{TestID: "jobs-table"},
+			Pagination: ui.Pagination(ui.PaginationOpts{
+				Page: page, TotalPages: totalPages, BaseURL: "/admin/jobs?q=" + filter,
+				Target: "#table-container", Labels: pagerLabels(ctx),
+			}),
+		}) {
+			for _, row := range rows {
+				<tr id={ fmt.Sprintf("job-row-%d", row.ID) }>
+					<td class="font-medium">{ row.Kind }</td>
+					<td>
+						@ui.StatusDot(ui.StatusDotOpts{
+							Kind:  jobKind(row.Status),
+							Label: jobStatusLabel(ctx, row.Status),
+							Attrs: ui.Attrs{TestID: "job-status"},
+						})
+					</td>
+					<td class="text-right tabular-nums">{ fmt.Sprintf("%d/%d", row.Attempts, row.MaxAttempts) }</td>
+					<td>
+						<span data-testid="relative-time" title={ row.RunAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.RunAt.Time) }</span>
+					</td>
+					<td class="max-w-xs hidden md:table-cell">
+						@ui.Truncate(ui.TruncateOpts{Text: row.LastError.String, Attrs: ui.Attrs{Class: "text-fg-muted"}})
+					</td>
+					<td class="text-right">
+						if row.Status == "dead" && AdminWrite(ctx) {
+							@ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID:           fmt.Sprintf("job-requeue-dialog-%d", row.ID),
+								TriggerLabel: i18n.T(ctx, "admin.jobs.requeue_row", row.Kind),
+								Title:        i18n.T(ctx, "admin.jobs.requeue_title"),
+								Message:      i18n.T(ctx, "admin.jobs.requeue_confirm"),
+								ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+								CancelLabel:  i18n.T(ctx, "admin.cancel"),
+								Kind:         ui.KindWarn,
+								HX:           ui.HX{Post: fmt.Sprintf("/admin/jobs/%d/requeue", row.ID)},
+								Attrs:        ui.Attrs{TestID: fmt.Sprintf("job-requeue-%d", row.ID)},
+							})
 						}
-					</tbody>
-				</table>
+					</td>
+				</tr>
 			}
-			@ui.Pagination(ui.PaginationOpts{Page: page, TotalPages: totalPages, BaseURL: "/admin/jobs?q="+filter, Target: "#table-container", Labels: pagerLabels(ctx)})
 		}
 	</div>
 }
 
+templ adminJobsEmpty(filter string) {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Body:       i18n.T(ctx, "admin.jobs.empty"),
+		Variant:    ui.EmptyInline,
+		Filtered:   filter != "",
+		ClearURL:   "/admin/jobs",
+		ClearLabel: i18n.T(ctx, "admin.clear_search"),
+		Target:     "#table-container",
+	})
+}
+
 templ AdminJobsPage(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.jobs.title")})
-	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: filter, Placeholder: i18n.T(ctx, "admin.jobs.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.jobs.search_aria"), GetURL: "/admin/jobs", Target: "#table-container", IndicatorID: "admin-jobs-search-indicator", Attrs: ui.Attrs{TestID: ""}})
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: filter, Placeholder: i18n.T(ctx, "admin.jobs.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.jobs.search_aria"), GetURL: "/admin/jobs", Target: "#table-container", IndicatorID: "admin-jobs-search-indicator"})
 	@AdminJobsTable(rows, now, filter, page, totalPages)
 }

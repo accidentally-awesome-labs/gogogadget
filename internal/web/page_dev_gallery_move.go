@@ -21,6 +21,27 @@ func (s *Server) handleDevKanbanMove(w http.ResponseWriter, r *http.Request) {
 	card := r.FormValue("card")
 	to := r.FormValue("to")
 
+	// A fragment endpoint answering a full-page navigation leaves the browser on
+	// a layout-less board: no shell, no stylesheet, no way back. With scripting
+	// off the card's move buttons are ordinary form submits, so that is exactly
+	// where a no-script move landed. Redirect to the page instead.
+	//
+	// The move is not carried into the redirect, and that is not an omission:
+	// this endpoint holds no state, so there is nothing to carry. The scripted
+	// path appears to move the card only because the response is swapped in
+	// place - reload the gallery and the card is back in its original column
+	// there too. A demo that faked persistence through a query parameter would
+	// be claiming a durability the component's real callers have to provide
+	// themselves.
+	//
+	// 303 and not 307: the follow-up must be a GET. A 307 would repeat the POST
+	// on reload, and reloading is the first thing anyone does after landing
+	// somewhere unexpected.
+	if r.Header.Get("HX-Request") == "" {
+		http.Redirect(w, r, "/dev/gallery", http.StatusSeeOther)
+		return
+	}
+
 	// An unknown destination is refused, and refusal re-renders the board
 	// unchanged. That is the whole reason the response is authoritative: a
 	// rejected move has to put the card back.

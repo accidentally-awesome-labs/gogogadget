@@ -15,6 +15,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"github.com/justinas/nosurf"
 )
 
@@ -235,11 +236,22 @@ func (s *Server) secureHeaders(next http.Handler) http.Handler {
 // route declared, not by a path pattern; see structurallyCSRFExempt for the two
 // surfaces that are registered outside the route table by design.
 //
+// The token is published to the page along two paths, and both are live: an
+// inherited request header for htmx (the only path a fragment request has, since
+// a button with hx-delete has no form) and a hidden field inside every unsafe
+// ui.Form (the only path a submit has when htmx never loaded). This middleware
+// owns the second one: it puts the masked token into the request context, so
+// ui.Form can render the field without any handler having to remember to pass a
+// token in. nosurf has already computed that token by the time next runs, so
+// this is a context lookup, not extra work per request.
+//
 // Cookie name differs by environment on purpose: production uses the
 // __Host- prefix (requires Secure); a __Host- cookie without Secure is
 // REJECTED by Safari, which would silently break non-localhost dev.
 func (s *Server) csrf(next http.Handler) http.Handler {
-	ns := nosurf.New(next)
+	ns := nosurf.New(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(ui.WithCSRFToken(r.Context(), nosurf.Token(r))))
+	}))
 	ns.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		detail := "Your session expired or the form token was invalid. Go back and try again."
 		if !s.cfg.Production() {

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -733,6 +734,8 @@ func (c CLI) runInfo(ctx context.Context, args []string) error {
 	if *asJSON {
 		return c.emitPayload("info", commit, map[string]any{
 			"module": found, "state": state,
+			"links":  surfaceLinks(*found),
+			"verify": verificationCommands(*found),
 		})
 	}
 	out := c.out()
@@ -745,6 +748,18 @@ func (c CLI) runInfo(ctx context.Context, args []string) error {
 	}
 	for _, file := range found.Files {
 		fmt.Fprintf(out, "  file %s\n", file.Target)
+	}
+	// The same derived facts the JSON envelope carries. A human reading this is
+	// usually about to change the module, and the two questions they ask next
+	// are where to look at it and what to run.
+	links := surfaceLinks(*found)
+	for _, key := range []string{"gallery", "scenario", "route"} {
+		for _, link := range links[key] {
+			fmt.Fprintf(out, "  %-8s %s\n", key, link)
+		}
+	}
+	for _, command := range verificationCommands(*found) {
+		fmt.Fprintf(out, "  verify   %s\n", command)
 	}
 	return nil
 }
@@ -895,6 +910,18 @@ func (c CLI) collectDiff(modules []string, upstream bool) ([]DiffEntry, string, 
 			}
 		}
 		for _, file := range module.Files {
+			// A generated target has no base digest - the snapshot excludes
+			// generated outputs, so there are no canonical bytes to compare
+			// against. Comparing anyway meant every generated payload read
+			// `modified` in every repository, forever, because the comparison
+			// was always against the empty string. Three permanent phantom rows
+			// teach the reader that `ggg diff` output is noise, which is the
+			// last thing it should teach. Whether generated output is stale is
+			// `sync --check`'s question: it re-renders and compares bytes, and
+			// never consults this digest.
+			if file.State == FileGenerated {
+				continue
+			}
 			_, digest, missing, stateErr := currentTargetState(c.root(), file.Path)
 			state := "clean"
 			switch {
@@ -1141,6 +1168,20 @@ func refreshManifestDocument(root, rel string) (bool, error) {
 
 	changed := false
 	for i, file := range document.Module.Files {
+		// A generated payload's digest is read by nothing: readPlannedPayloads
+		// returns early on FileClassGenerated, before the verification that
+		// raises "payload ... sha256 mismatch", because the registry does not
+		// distribute bytes the build produces. Recording one rewrote manifests
+		// on every build for no consumer, and a stale value sitting there reads
+		// as authoritative when nothing will ever check it. Cleared once, then
+		// left alone.
+		if file.Class == FileClassGenerated {
+			if file.SHA256 != "" {
+				document.Module.Files[i].SHA256 = ""
+				changed = true
+			}
+			continue
+		}
 		digest, err := payloadDigest(root, file.Source)
 		if err != nil {
 			return false, fmt.Errorf("%s: %w", rel, err)
@@ -1263,4 +1304,69 @@ func (e usageError) Error() string {
 
 func (usageError) ExitCode() int {
 	return exitUsage
+}
+
+// surfaceLinks reports where a module can be looked at rather than read. An
+// agent told only which files a component owns still has to guess whether the
+// thing is visible anywhere, and the gallery and scenario URLs are derived data:
+// storing them in manifests would let them drift from the routes that serve
+// them.
+func surfaceLinks(m Manifest) map[string][]string {
+	links := map[string][]string{}
+	add := func(key, value string) {
+		for _, existing := range links[key] {
+			if existing == value {
+				return
+			}
+		}
+		links[key] = append(links[key], value)
+	}
+	for _, item := range m.Runtime.UI {
+		if item.Family == "" || item.Name == "" {
+			continue
+		}
+		add("gallery", "/dev/gallery/"+string(item.Family))
+		add("gallery", "/dev/gallery/"+string(item.Family)+"/"+item.Name)
+	}
+	for _, scenario := range m.Runtime.Scenarios {
+		if scenario.Slug != "" {
+			add("scenario", "/dev/scenarios/"+scenario.Slug)
+		}
+	}
+	// A page's own routes are the surface it is. Only GET is a place to look;
+	// a POST pattern is an endpoint, not a page.
+	for _, route := range m.Runtime.Routes {
+		if route.Method == http.MethodGet && !strings.Contains(route.Pattern, "{") {
+			add("route", route.Pattern)
+		}
+	}
+	return links
+}
+
+// verificationCommands turns the declared test inventory into commands that can
+// be run as written. The inventory names packages and specs; a reader still has
+// to know that this project runs Go tests by package, that Playwright lives in a
+// sibling directory with its own runner, and that visual baselines are
+// regenerated inside a pinned container rather than asserted in place. Printing
+// the command removes three chances to get it wrong.
+func verificationCommands(m Manifest) []string {
+	var commands []string
+	if packages := m.Tests.GoPackages; len(packages) > 0 {
+		commands = append(commands, "go test -count=1 ./"+strings.Join(packages, " ./"))
+	}
+	for _, spec := range m.Tests.E2E {
+		commands = append(commands, "cd e2e && npx playwright test "+spec+" --reporter=line")
+	}
+	for _, spec := range m.Tests.Accessibility {
+		commands = append(commands, "cd e2e && npx playwright test "+spec+" --reporter=line")
+	}
+	if len(m.Tests.Visual) > 0 {
+		// Visual is deliberately not a plain test invocation: baselines are
+		// font-rendering sensitive and only match inside the pinned container.
+		commands = append(commands, "./scripts/visual.sh")
+	}
+	for _, target := range m.Tests.Smoke {
+		commands = append(commands, "make smoke BASE_URL="+target)
+	}
+	return commands
 }

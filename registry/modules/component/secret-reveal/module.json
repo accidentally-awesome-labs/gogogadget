@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/secret-reveal.templ",
         "target": "internal/web/templates/ui/secret-reveal.templ",
         "class": "templ",
-        "sha256": "3d7b609c00f4de952f295090c20e1a4839434487a1d9b769449e1ae7dfbe8886",
+        "sha256": "596e49043640350459ce642aa9fb64bf042eeb91ab365dc76093fa51195e1ec0",
         "rewrite_module": true,
         "contract": true
       }

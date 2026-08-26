@@ -48,8 +48,11 @@ func (s *Server) handleFiles(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
+	// The pager swaps innerMorph into #table-container, so the fragment is the
+	// box's CONTENTS. FilesTable repeats the wrapper because the upload targets
+	// it with outerHTML; returning that here would nest a duplicate id.
 	if wantsFragment(r) {
-		s.Render(w, r, Page{Title: "Files", Layout: templates.LayoutApp}, templates.FilesTable(d))
+		s.Render(w, r, Page{Title: "Files", Layout: templates.LayoutApp}, templates.FilesTableBody(d))
 		return
 	}
 	s.Render(w, r, Page{Title: "Files", Layout: templates.LayoutApp}, templates.FilesPage(d))

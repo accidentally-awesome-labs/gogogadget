@@ -4,7 +4,11 @@ import "fmt"
 
 // MultiSelectOpts is a multiple-choice select.
 type MultiSelectOpts struct {
-	Name        string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
 	Options     []Option
 	Size        int
 	Hint, Error string
@@ -20,9 +24,11 @@ type MultiSelectOpts struct {
 // they can expand.
 templ MultiSelect(o MultiSelectOpts) {
 	<select
-		{ root("multi-select", "input h-auto", o.Attrs)... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
-		id={ o.Name } name={ o.Name } multiple
+		{ controlRoot("multi-select", "input h-auto", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		multiple
 		size={ fmt.Sprint(multiSelectSize(o.Size, len(o.Options))) }
 		required?={ o.Required }
 	>

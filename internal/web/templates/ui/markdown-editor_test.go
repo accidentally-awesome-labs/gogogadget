@@ -35,6 +35,18 @@ func TestEditorToolbarIsHiddenUntilScripted(t *testing.T) {
 	assert.Contains(t, html, `aria-label="Formatting"`)
 }
 
+// The media panel is the toolbar's twin: every control in it inserts at the
+// caret, so it is the controller or nothing. A slot shipped visible fills with
+// buttons an unscripted page cannot honour - and the panel is only ever fetched
+// by a toolbar button, so there is nothing there to lose by hiding it.
+func TestEditorMediaSlotIsHiddenUntilScripted(t *testing.T) {
+	html := renderComponent(t, MarkdownEditor(MarkdownEditorOpts{
+		Name: "body_md", MediaURL: "/admin/media",
+	}))
+
+	assert.Contains(t, html, `data-editor-media hidden`)
+}
+
 // A toolbar of icon glyphs reads as nothing. Every control needs a name, and
 // the shortcut belongs in the title where a pointer user can discover it.
 func TestEveryToolbarControlIsNamed(t *testing.T) {
@@ -97,6 +109,18 @@ func TestNoPreviewURLRendersNoPreviewRegion(t *testing.T) {
 	assert.NotContains(t, html, `aria-label="Preview"`)
 }
 
+// A caller that puts the preview elsewhere - the other half of a split editor -
+// must not also get one inside the editor. Two regions with one target means the
+// inner one never fills, which looks exactly like the feature failing.
+func TestExternalPreviewTargetLeavesNoEmptyPaneBehind(t *testing.T) {
+	html := renderComponent(t, MarkdownEditor(MarkdownEditorOpts{
+		Name: "body_md", PreviewURL: "/admin/content/preview", Target: "#editor-preview-pane",
+	}))
+
+	assert.Contains(t, html, `hx-target="#editor-preview-pane"`)
+	assert.NotContains(t, html, `aria-label="Preview"`)
+}
+
 // Alt text is filled in at the point where it is known. A prompt shown after
 // insertion can be dismissed, and dismissed prompts produce undescribed images.
 func TestMediaInsertsAltTextWithTheImage(t *testing.T) {
@@ -107,14 +131,34 @@ func TestMediaInsertsAltTextWithTheImage(t *testing.T) {
 	assert.Contains(t, html, `data-editor-insert="![A wiring diagram](/u/a.png)"`)
 }
 
-// Upload is a real file input, so choosing a file never depends on a drag
-// gesture that a keyboard user cannot perform.
-func TestMediaUploadWorksWithoutDragging(t *testing.T) {
+// Upload is a real file input plus a real submit, and both name the form that
+// owns them. Asserting only that a file input exists proved nothing about where
+// the bytes go - which is exactly how this control shipped for so long
+// submitting into whatever form happened to enclose it.
+func TestMediaUploadNamesTheFormThatOwnsIt(t *testing.T) {
 	html := renderComponent(t, MediaPicker(MediaPickerOpts{
-		ID: "m", UploadURL: "/admin/media", UploadLabel: "Choose a file",
+		ID: "m", UploadForm: "media-upload", UploadLabel: "Choose a file",
 	}))
 
 	assert.Contains(t, html, `type="file"`)
+	// The input reaches the owning form without being its descendant, which is
+	// what a picker nested inside the page's save form needs.
+	assert.Contains(t, html, `form="media-upload"`)
+	// And the control that sends it names the same owner, so choosing and
+	// sending are one action in one place.
+	assert.Contains(t, html, `<button type="submit" form="media-upload"`)
+}
+
+// No owning form means no upload control. A file input with nowhere to post
+// drops the file into whatever form encloses it - here, the body-save endpoint.
+func TestNoUploadFormRendersNoUploadControl(t *testing.T) {
+	html := renderComponent(t, MediaPicker(MediaPickerOpts{
+		ID: "m", UploadLabel: "Choose a file", EmptyLabel: "No uploads yet.",
+	}))
+
+	assert.NotContains(t, html, `type="file"`)
+	assert.NotContains(t, html, `type="submit"`)
+	assert.NotContains(t, html, "Choose a file")
 }
 
 // An empty gallery must say so. A blank area is indistinguishable from a

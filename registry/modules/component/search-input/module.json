@@ -7,8 +7,10 @@
     "revision": 1,
     "contract": 1,
     "title": "SearchInput",
-    "description": "The SearchInput renderer and its options.",
+    "description": "The SearchInput renderer and its options. The field lives inside its own GET form, so the query can be sent with no scripting at all.",
     "requires": [
+      "element/button",
+      "element/spinner",
       "element/ui-core"
     ],
     "files": [
@@ -16,9 +18,17 @@
         "source": "internal/web/templates/ui/search-input.templ",
         "target": "internal/web/templates/ui/search-input.templ",
         "class": "templ",
-        "sha256": "abeaf0bb868ced1b1d1d2f96f21cfd49702053ab486fef10fea1219a7bd28f53",
+        "sha256": "0d56d9b2501f570d32aad0f628cc0ff7c63a11eaa51c16829b75b5859bba3e09",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/search-input_test.go",
+        "target": "internal/web/templates/ui/search-input_test.go",
+        "class": "test",
+        "sha256": "ebade3742785dc878d0d1ec87cf28ef78457f4ebfde3b483948a179691df0f24",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},
@@ -28,8 +38,8 @@
           "name": "search-input",
           "family": "forms",
           "signature": "templ SearchInput(o SearchInputOpts)",
-          "summary": "The debounced table search.",
-          "guidance": "It morphs Target and pushes the URL, so a search is shareable and the Back button works.",
+          "summary": "The debounced table search, inside its own GET form.",
+          "guidance": "It morphs Target and pushes the URL, so a search is shareable and the Back button works. The form is not decoration: a bare input has no submit path whatsoever, so with no scripting the query the user typed cannot leave the page. The form gives the browser the same job htmx does - send Name to GetURL - and any parameters GetURL already carries travel as hidden fields, because a native GET submit replaces the query string rather than adding to it. The submit control is visually hidden until focused: a permanently visible button beside a field that filters as you type says the live filtering does not work, and a button that only exists in JavaScript is one a keyboard or no-script user cannot reach.",
           "states": [
             "default",
             "loading"

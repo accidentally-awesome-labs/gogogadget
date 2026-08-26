@@ -45,8 +45,11 @@ func (s *Server) handleNotifications(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
+	// The pager swaps innerMorph into #notif-list, so the fragment is the box's
+	// CONTENTS. NotificationsList repeats the wrapper because read and read-all
+	// target it with outerHTML; returning that here would nest a duplicate id.
 	if wantsFragment(r) {
-		s.Render(w, r, Page{Title: "Notifications", Layout: templates.LayoutApp}, templates.NotificationsList(d))
+		s.Render(w, r, Page{Title: "Notifications", Layout: templates.LayoutApp}, templates.NotificationsListBody(d))
 		return
 	}
 	s.Render(w, r, Page{Title: "Notifications", Layout: templates.LayoutApp}, templates.NotificationsPage(d))

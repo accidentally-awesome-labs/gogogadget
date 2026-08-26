@@ -2,7 +2,11 @@ package ui
 
 // NumberInputOpts is a numeric input.
 type NumberInputOpts struct {
-	Name  string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID    string
 	Value string
 	// Min, Max and Step are strings so an unset bound renders no attribute at
 	// all. With numeric types a zero bound and an absent bound are the same
@@ -19,9 +23,12 @@ type NumberInputOpts struct {
 // in JavaScript would be strictly worse.
 templ NumberInput(o NumberInputOpts) {
 	<input
-		{ root("number-input", "input", o.Attrs)... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
-		type="number" id={ o.Name } name={ o.Name } value={ o.Value }
+		{ controlRoot("number-input", "input", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="number"
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		value={ o.Value }
 		if o.Min != "" {
 			min={ o.Min }
 		}
@@ -31,6 +38,7 @@ templ NumberInput(o NumberInputOpts) {
 		if o.Step != "" {
 			step={ o.Step }
 		}
-		required?={ o.Required } disabled?={ o.Disabled }
+		required?={ o.Required }
+		disabled?={ o.Disabled }
 	/>
 }

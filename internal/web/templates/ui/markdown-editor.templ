@@ -10,7 +10,15 @@ import "fmt"
 // Editing Markdown text keeps the stored value something the server can render
 // safely, which a saved HTML blob is not.
 type MarkdownEditorOpts struct {
-	Name        string
+	Name string
+	// ID overrides the textarea's element id, which defaults to Name. Two
+	// editors for the same field name - one per revision in a comparison view,
+	// say - would otherwise emit one identical id, and the label's for= and
+	// aria-describedby both resolve to the first match.
+	//
+	// Attrs are deliberately not consulted: they land on the editor's wrapper,
+	// so Attrs.ID names the wrapper rather than the control.
+	ID string
 	Label       string
 	Value       string
 	Placeholder string
@@ -19,12 +27,16 @@ type MarkdownEditorOpts struct {
 	// what readers get - a client-side Markdown renderer would be a second
 	// implementation that disagrees with the first.
 	PreviewURL string
-	// Target is the element the preview swaps into.
+	// Target is the element the preview swaps into. Setting it means the preview
+	// lives somewhere else on the page - the other half of a split editor, say -
+	// so the editor renders no pane of its own: a second, permanently empty
+	// preview region inside the editor is a component that looks broken.
 	Target string
-	// MediaURL lists existing uploads; UploadURL accepts new ones. Both are
-	// optional: an editor without media is still an editor.
+	// MediaURL lists existing uploads, fetched into the media panel by the
+	// toolbar's Media button. Optional: an editor without media is still an
+	// editor. The upload destination is not the editor's business - the picker
+	// names the form that owns its upload control.
 	MediaURL  string
-	UploadURL string
 	Rows      int
 	MaxLength int
 	// Hint and Error mirror the enclosing Field so the control describes only
@@ -41,7 +53,12 @@ type MarkdownEditorOpts struct {
 // The textarea is the form value, always. Every toolbar button and shortcut
 // edits that text in place, so with no JavaScript the author types Markdown into
 // a plain textarea and the form submits unchanged - the toolbar is the part that
-// is optional, not the editing.
+// is optional, not the editing. The toolbar and the media panel are hidden until
+// the controller reveals them: every toolbar control and every media insert
+// writes at the caret, which nothing but the controller can do, and the panel's
+// upload does work without script but would navigate away and abandon whatever
+// the author has typed. A MediaPicker rendered outside an editor stays visible
+// and fully usable; it is this slot that hides, not the picker.
 templ MarkdownEditor(o MarkdownEditorOpts) {
 	<div
 		{ rootWith("markdown-editor", "space-y-2", o.Attrs,
@@ -52,19 +69,19 @@ templ MarkdownEditor(o MarkdownEditorOpts) {
 		// named only by its placeholder and title - a label a screen reader may
 		// not use and a sighted user loses the moment they start typing.
 		if o.Label != "" {
-			@Label(LabelOpts{For: o.Name, Text: o.Label, Required: o.Required})
+			@Label(LabelOpts{For: markdownControlID(o), Text: o.Label, Required: o.Required})
 		}
 		// The toolbar starts hidden: its buttons do nothing without the
 		// controller, and a row of inert buttons is worse than none.
 		@EditorToolbar(EditorToolbarOpts{
-			For:      o.Name,
+			For:      markdownControlID(o),
 			Disabled: o.Disabled || o.ReadOnly,
 			MediaURL: o.MediaURL,
 		})
 		<div data-editor-panes class="grid grid-cols-1 gap-3">
 			<textarea
-				{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
-				id={ o.Name }
+				{ FieldARIA(markdownFieldOpts(o))... }
+				id={ markdownControlID(o) }
 				name={ o.Name }
 				rows={ fmt.Sprint(markdownRows(o.Rows)) }
 				class="input font-mono text-sm"
@@ -84,21 +101,22 @@ templ MarkdownEditor(o MarkdownEditorOpts) {
 					hx-include="closest form"
 				}
 			>{ o.Value }</textarea>
-			if o.PreviewURL != "" {
-				@EditorPreview(EditorPreviewOpts{ID: o.Name + "-preview"})
+			if o.PreviewURL != "" && o.Target == "" {
+				@EditorPreview(EditorPreviewOpts{ID: markdownControlID(o) + "-preview"})
 			}
 		</div>
 		// The media panel is swapped in here rather than beside the editor: the
 		// insert buttons act on this textarea, so they have to live inside the
-		// controller's root or their clicks reach nothing.
-		<div id={ o.Name + "-media" } data-editor-media>
+		// controller's root or their clicks reach nothing. It ships hidden for
+		// the reason given above the renderer, and the controller reveals it.
+		<div id={ markdownControlID(o) + "-media" } data-editor-media hidden>
 			{ children... }
 		</div>
 		if o.MaxLength > 0 {
-			@CharCounter(CharCounterOpts{For: o.Name, Max: o.MaxLength, Label: "characters"})
+			@CharCounter(CharCounterOpts{For: markdownControlID(o), Max: o.MaxLength, Label: "characters"})
 		}
 		if o.Error != "" {
-			@FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: o.Name + "-error"}})
+			@FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: markdownErrorID(o)}})
 		}
 	</div>
 }
@@ -188,9 +206,18 @@ templ EditorPreview(o EditorPreviewOpts) {
 type MediaPickerOpts struct {
 	ID    string
 	Items []MediaItem
-	// UploadURL accepts a new file; the input is a real file input so upload
-	// works without drag and drop.
-	UploadURL   string
+	// UploadForm is the id of the form that submits the upload control. It is a
+	// form id rather than a URL because the picker is normally rendered inside
+	// a MarkdownEditor, which is itself inside the page's save form, and a
+	// nested <form> is discarded by the HTML parser. HTML's form attribute lets
+	// the control name an owner that is not its ancestor, so the caller renders
+	//
+	//	<form id="..." action="/upload" method="post" enctype="multipart/form-data">
+	//
+	// outside its own form and passes that id here. Empty means no upload
+	// control at all: a file input with nowhere to post is a control that
+	// silently drops the file into whatever form happens to enclose it.
+	UploadForm  string
 	UploadLabel string
 	EmptyLabel  string
 	Attrs       Attrs
@@ -210,14 +237,27 @@ type MediaItem struct {
 // text is part of the item rather than something the author is prompted for
 // later, because a prompt that can be dismissed produces images with no
 // description.
+//
+// The insert buttons need a controller - they write at the caret - but the
+// upload does not: it is a real file input and a real submit, both owned by the
+// caller's upload form, so choosing a file and sending it works with no script
+// at all.
 templ MediaPicker(o MediaPickerOpts) {
 	<div { rootWith("media-picker", "space-y-3", o.Attrs, "id", o.ID)... }>
-		if o.UploadURL != "" {
+		if o.UploadForm != "" {
 			@FileDropzone(FileDropzoneOpts{
-				Name:  o.ID + "-upload",
-				Label: o.UploadLabel,
+				Name:   o.ID + "-upload",
+				Form:   o.UploadForm,
+				Label:  o.UploadLabel,
 				Accept: "image/*",
 			})
+			// The submit belongs beside the zone, not wherever the owning form
+			// happens to sit: a file chosen here and sent from elsewhere on the
+			// page is two halves of one action. It names the same owner, so no
+			// script is involved in connecting them.
+			<button type="submit" form={ o.UploadForm } class="btn btn-ghost btn-sm">
+				Upload
+			</button>
 		}
 		if len(o.Items) == 0 {
 			<p class="text-sm text-fg-muted">{ o.EmptyLabel }</p>
@@ -270,11 +310,39 @@ func markdownRows(rows int) int {
 	return rows
 }
 
+// markdownFieldOpts is the field contract the textarea presents: one value that
+// FieldARIA, the label's for= and the hint/error ids are all derived from, so a
+// caller setting ID cannot make them disagree.
+//
+// This hand-lists the fields it forwards, which is the shape that silently falls
+// behind its type the next time FieldOpts grows one. The omissions are therefore
+// deliberate and named: Label, Optional and HiddenLabel belong to the enclosing
+// Field or to this editor's own Label call, and Attrs land on the editor's
+// wrapper rather than on the control. Anything added to FieldOpts that FieldARIA
+// reads has to be added here too, or the textarea is the one control in the
+// package that quietly does not get it.
+func markdownFieldOpts(o MarkdownEditorOpts) FieldOpts {
+	return FieldOpts{Name: o.Name, ID: o.ID, Hint: o.Hint, Error: o.Error, Required: o.Required}
+}
+
+// markdownControlID is the textarea's id. Everything the editor points at the
+// control with - label, counter, media panel, preview - resolves through here.
+func markdownControlID(o MarkdownEditorOpts) string {
+	return FieldControlID(markdownFieldOpts(o))
+}
+
+// markdownErrorID is the id FieldARIA's aria-describedby names, so the rendered
+// error is the element the control actually points at.
+func markdownErrorID(o MarkdownEditorOpts) string {
+	_, _, errID := FieldIDs(markdownControlID(o))
+	return errID
+}
+
 func markdownPreviewTarget(o MarkdownEditorOpts) string {
 	if o.Target != "" {
 		return o.Target
 	}
-	return "#" + o.Name + "-preview"
+	return "#" + markdownControlID(o) + "-preview"
 }
 
 // mediaMarkdown builds the insertion text. The alt text is not optional: an

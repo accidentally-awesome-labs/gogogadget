@@ -34,7 +34,7 @@
         "source": "internal/web/templates/admin_jobs.templ",
         "target": "internal/web/templates/admin_jobs.templ",
         "class": "templ",
-        "sha256": "2f6902cce2ca6e7c80a3b746db715fc541214625bb2eaeb28de53189426aef82",
+        "sha256": "b5a3c6e8186eabea7a0b9066ddfe3264f503eb214236ac94f4fe73c819f01cfa",
         "rewrite_module": true,
         "contract": false
       }
@@ -89,6 +89,8 @@
         "admin.jobs.empty": "No jobs match.",
         "admin.jobs.requeue": "Requeue",
         "admin.jobs.requeue_confirm": "Requeue this dead-lettered job? It will be claimed immediately.",
+        "admin.jobs.requeue_row": "Requeue %s",
+        "admin.jobs.requeue_title": "Requeue this job?",
         "admin.jobs.requeued": "Job requeued.",
         "admin.jobs.search_aria": "Search jobs",
         "admin.jobs.search_placeholder": "Filter by kind…",
@@ -109,6 +111,8 @@
         "admin.jobs.empty": "No hay trabajos que coincidan.",
         "admin.jobs.requeue": "Reencolar",
         "admin.jobs.requeue_confirm": "¿Reencolar este trabajo fallido? Se reclamará de inmediato.",
+        "admin.jobs.requeue_row": "Reencolar %s",
+        "admin.jobs.requeue_title": "¿Reencolar este trabajo?",
         "admin.jobs.requeued": "Trabajo reencolado.",
         "admin.jobs.search_aria": "Buscar trabajos",
         "admin.jobs.search_placeholder": "Filtrar por tipo…",

@@ -17,9 +17,17 @@
         "source": "internal/web/templates/ui/notification-item.templ",
         "target": "internal/web/templates/ui/notification-item.templ",
         "class": "templ",
-        "sha256": "126d8fe82603acdfb0ac7af42c495c25e1f26463cd5edd979d4805084029ca1b",
+        "sha256": "0e8800f4aa7401b178411837fd2e011faf9b92b461bd667aa8b584d1d9ed5f1f",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/notification-item_test.go",
+        "target": "internal/web/templates/ui/notification-item_test.go",
+        "class": "test",
+        "sha256": "d08ad6402940a920cbb8137127548ce32fe9937989d989d07c02b9107918ef01",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},

@@ -3,6 +3,7 @@ package templates
 import (
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // Generic public rendering for any registered content type. A type keeps
@@ -13,21 +14,33 @@ import (
 // ContentIndex lists a ModePages type's entries, newest first.
 templ ContentIndex(t content.Type, entries []content.Entry) {
 	<section class="page-narrow">
-		<h1 class="display-title">{ i18n.T(ctx, t.PluralKey) }</h1>
+		@ui.Heading(ui.HeadingOpts{Text: i18n.T(ctx, t.PluralKey), Level: 1, Size: ui.SizeLG})
 		<div class="mt-10 space-y-8">
 			if len(entries) == 0 {
-				<p class="text-fg-muted" data-testid="content-index-empty">{ i18n.T(ctx, "content.empty") }</p>
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Body:    i18n.T(ctx, "content.empty"),
+					Variant: ui.EmptyCard,
+					Attrs:   ui.Attrs{TestID: "content-index-empty"},
+				})
 			}
-			for _, e := range entries {
+			for _, entry := range entries {
 				<article data-testid="content-index-entry">
-					<h2 class="text-2xl font-bold">
-						<a href={ templ.SafeURL(t.Path + "/" + e.Slug) } class="hover:text-brand-text">{ e.Title }</a>
-					</h2>
-					<p class="text-sm text-fg-muted mt-1">
-						<time datetime={ e.PublishedAt.Format("2006-01-02") }>{ e.PublishedAt.Format("January 2, 2006") }</time>
-					</p>
-					if e.Summary != "" {
-						<p class="mt-2 text-fg-muted">{ e.Summary }</p>
+					// Unstyled on both: Heading owns the level, Link owns the
+					// anchor, and neither imposes its own typography on a 2xl
+					// bold entry title.
+					@ui.Heading(ui.HeadingOpts{Level: 2, Unstyled: true, Attrs: ui.Attrs{Class: "text-2xl font-bold"}}) {
+						@ui.Link(ui.LinkOpts{
+							Label: entry.Title, Href: t.Path + "/" + entry.Slug, Unstyled: true,
+							Attrs: ui.Attrs{Class: "hover:text-brand-text"},
+						})
+					}
+					@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-1"}}) {
+						<time datetime={ entry.PublishedAt.Format("2006-01-02") }>{ entry.PublishedAt.Format("January 2, 2006") }</time>
+					}
+					if entry.Summary != "" {
+						@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
+							{ entry.Summary }
+						}
 					}
 				</article>
 			}
@@ -38,13 +51,13 @@ templ ContentIndex(t content.Type, entries []content.Entry) {
 // ContentDetail renders one entry of a ModePages type.
 templ ContentDetail(t content.Type, e content.Entry) {
 	<article class="page-narrow" data-testid="content-detail">
-		<h1 class="display-title">{ e.Title }</h1>
-		<p class="text-sm text-fg-muted mt-2">
+		@ui.Heading(ui.HeadingOpts{Text: e.Title, Level: 1, Size: ui.SizeLG})
+		@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
 			<time datetime={ e.PublishedAt.Format("2006-01-02") }>{ e.PublishedAt.Format("January 2, 2006") }</time>
-		</p>
-		<div class="prose mt-8">
+		}
+		@ui.Prose(ui.ProseOpts{Attrs: ui.Attrs{Class: "mt-8"}}) {
 			@templ.Raw(e.Body)
-		</div>
+		}
 	</article>
 }
 
@@ -52,27 +65,39 @@ templ ContentDetail(t content.Type, e content.Entry) {
 // scrollable page, each with a stable anchor to link at.
 templ ContentSinglePage(t content.Type, entries []content.Entry) {
 	<article class="page-narrow">
-		<h1 class="display-title">{ i18n.T(ctx, t.PluralKey) }</h1>
+		@ui.Heading(ui.HeadingOpts{Text: i18n.T(ctx, t.PluralKey), Level: 1, Size: ui.SizeLG})
 		<div class="mt-12 space-y-16">
 			if len(entries) == 0 {
-				<p class="text-fg-muted" data-testid="content-index-empty">{ i18n.T(ctx, "content.empty") }</p>
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Body:    i18n.T(ctx, "content.empty"),
+					Variant: ui.EmptyCard,
+					Attrs:   ui.Attrs{TestID: "content-index-empty"},
+				})
 			}
-			for _, e := range entries {
-				<section id={ e.Anchor } class="scroll-mt-24" data-testid="content-entry">
+			for _, entry := range entries {
+				<section id={ entry.Anchor } class="scroll-mt-24" data-testid="content-entry">
 					<div class="flex items-baseline gap-3 flex-wrap">
-						<h2 class="text-2xl font-bold">
-							<a href={ templ.SafeURL("#" + e.Anchor) } class="hover:text-brand-text">{ e.Title }</a>
-						</h2>
-						<time datetime={ e.PublishedAt.Format("2006-01-02") } class="text-sm text-fg-muted">
-							{ e.PublishedAt.Format("January 2, 2006") }
+						@ui.Heading(ui.HeadingOpts{Level: 2, Unstyled: true, Attrs: ui.Attrs{Class: "text-2xl font-bold"}}) {
+							// Boost stays off: this is an in-page fragment, and
+							// boosting it repaints the content box at the top
+							// before scrolling, flashing the wrong entry.
+							@ui.Link(ui.LinkOpts{
+								Label: entry.Title, Href: "#" + entry.Anchor, Unstyled: true,
+								Attrs: ui.Attrs{Class: "hover:text-brand-text"},
+							})
+						}
+						<time datetime={ entry.PublishedAt.Format("2006-01-02") } class="text-sm text-fg-muted">
+							{ entry.PublishedAt.Format("January 2, 2006") }
 						</time>
 					</div>
-					if e.Summary != "" {
-						<p class="mt-2 text-fg-muted">{ e.Summary }</p>
+					if entry.Summary != "" {
+						@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
+							{ entry.Summary }
+						}
 					}
-					<div class="prose mt-6">
-						@templ.Raw(e.Body)
-					</div>
+					@ui.Prose(ui.ProseOpts{Attrs: ui.Attrs{Class: "mt-6"}}) {
+						@templ.Raw(entry.Body)
+					}
 				</section>
 			}
 		</div>

@@ -1,5 +1,7 @@
 package ui
 
+import "strings"
+
 // FormOpts renders a form wrapper; children are the fields. novalidate is
 // always set: server validation is authoritative, and letting the browser block
 // submission first means the server's rules never run.
@@ -12,12 +14,39 @@ type FormOpts struct {
 }
 
 templ Form(o FormOpts) {
+	// Every attribute is dropped when its option is empty, through the same
+	// pair mechanism the rest of the package uses. An emitted hx-target="" is
+	// not the absence of a target: htmx reads the attribute as present and
+	// swaps into nothing, so a form that simply did not want htmx behaviour
+	// silently posts into a void.
 	<form
-		{ root("form", "", o.Attrs)... }
-		method={ o.Method } action={ o.Action }
-		hx-target={ o.Target } hx-swap={ o.Swap }
+		{ rootWith("form", "", o.Attrs,
+			"method", o.Method,
+			"action", o.Action,
+			"hx-target", o.Target,
+			"hx-swap", o.Swap)... }
 		novalidate
 	>
+		// Every unsafe form carries its own token. Rendering it here rather than
+		// asking callers to add a field is what makes the no-script path real:
+		// the header htmx sends is unreachable when htmx never loaded, and a
+		// form the server then refuses with 403 is a worse fallback than no
+		// form at all.
+		if formCarriesCSRF(o.Method) {
+			@CSRFField(CSRFFieldOpts{})
+		}
 		{ children... }
 	</form>
+}
+
+// formCarriesCSRF reports whether the browser's own submission of this form
+// would be checked. GET and HEAD are safe methods that the check skips, and a
+// token in a GET is a token in the URL bar, the browser history, the Referer
+// header and every access log along the way.
+func formCarriesCSRF(method string) bool {
+	switch strings.ToLower(strings.TrimSpace(method)) {
+	case "", "get", "head":
+		return false
+	}
+	return true
 }

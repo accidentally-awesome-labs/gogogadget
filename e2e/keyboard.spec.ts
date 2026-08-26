@@ -230,14 +230,19 @@ test.describe('focus return', () => {
 
   test('hover-card opens on focus and Escape closes it without moving focus', async ({ page }) => {
     await boot(page);
-    // The trigger is a focusable span with no role, so there is no role/name
-    // handle for it; the controller's own hook is the only stable identity.
-    const trigger = page.locator('[data-ui-hovercard-trigger]');
+    // Scoped to the first of the catalog's two hover cards by the panel it
+    // controls. The second one is what makes this a real test of instance
+    // isolation rather than of "a hover card opened": a controller that shared
+    // state between instances would open both from one focus, and an unscoped
+    // trigger locator could not tell the difference.
+    const trigger = page.locator('[data-ui-hovercard-trigger][aria-describedby="gallery-hovercard"]');
     const panel = page.locator('#gallery-hovercard');
+    const otherPanel = page.locator('#gallery-hovercard-second');
 
     await expect(panel).toBeHidden();
     await trigger.focus();
     await expect(panel).toBeVisible();
+    await expect(otherPanel).toBeHidden();
 
     await page.keyboard.press('Escape');
     await expect(panel).toBeHidden();

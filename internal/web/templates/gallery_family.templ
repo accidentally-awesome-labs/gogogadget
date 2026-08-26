@@ -67,7 +67,7 @@ templ FamilyPage(family ui.GalleryFamily) {
 			@ui.Section(ui.SectionOpts{Title: "In a narrow column", Level: 2, Attrs: ui.Attrs{
 				ID: "family-constrained", TestID: "family-constrained",
 			}}) {
-				@ui.Text(ui.TextOpts{Muted: true}) {
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
 					The same entries in a sidebar-width column. Anything that clips,
 					overflows or stops being readable here does the same on a phone.
 				}

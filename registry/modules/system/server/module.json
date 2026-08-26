@@ -180,7 +180,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "378504468e021610a67ea56025b1defe1a7f301c3e9686403a2f252cb7ee27e8",
+        "sha256": "b71cdb6e2b5ee647e71f9838cbabec2545a7c2af46eaf71f737aaea3d2aa7128",
         "rewrite_module": true,
         "contract": false
       },
@@ -228,7 +228,7 @@
         "source": "internal/web/templates/sidebar.templ",
         "target": "internal/web/templates/sidebar.templ",
         "class": "templ",
-        "sha256": "354be38414fa211da4b06ff9a2c9642c2d58c99af87fdbe56a07dc9c7a0d538b",
+        "sha256": "03b0c578b39736abebfa9cfde0dae88e9189740931eaa35b7399979bc9935b2a",
         "rewrite_module": true,
         "contract": false
       },

@@ -2,7 +2,11 @@ package ui
 
 // ColorInputOpts is a colour picker.
 type ColorInputOpts struct {
-	Name        string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
 	Value       string
 	Hint, Error string
 	Attrs       Attrs
@@ -15,9 +19,12 @@ type ColorInputOpts struct {
 templ ColorInput(o ColorInputOpts) {
 	<div class="flex items-center gap-3">
 		<input
-			{ root("color-input", "h-9 w-12 rounded-lg border border-border bg-surface", o.Attrs)... }
-			{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
-			type="color" id={ o.Name } name={ o.Name } value={ o.Value }
+			{ controlRoot("color-input", "h-9 w-12 rounded-lg border border-border bg-surface", o.Attrs)... }
+			{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error})... }
+			type="color"
+			id={ controlID(o.ID, o.Attrs, o.Name) }
+			name={ o.Name }
+			value={ o.Value }
 		/>
 		if o.Value != "" {
 			// The readout only appears when there is a value to read: an empty

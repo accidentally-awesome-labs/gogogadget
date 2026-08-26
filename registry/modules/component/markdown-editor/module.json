@@ -19,7 +19,7 @@
         "source": "internal/web/templates/ui/markdown-editor.templ",
         "target": "internal/web/templates/ui/markdown-editor.templ",
         "class": "templ",
-        "sha256": "aa930281d05e54d7164f7966c4186707525a48563a9bf82efa82f59320da5272",
+        "sha256": "4a7c48b60cc5a971eb4d7f501646fcb090e9dd866540e505448e5ade1312f44f",
         "rewrite_module": true,
         "contract": true
       },
@@ -27,7 +27,7 @@
         "source": "internal/web/templates/ui/markdown-editor_test.go",
         "target": "internal/web/templates/ui/markdown-editor_test.go",
         "class": "test",
-        "sha256": "d42e65a027067d1f41d07baaf57236381fb8c198d0b24330bf433c4bcb2fcd92",
+        "sha256": "ea4f24d2767535b9350fc2029cb3800a64131a3f26ba72655af1a1c0f7dd7a21",
         "rewrite_module": true,
         "contract": false
       },
@@ -35,7 +35,7 @@
         "source": "static/ui/markdown-editor.js",
         "target": "static/ui/markdown-editor.js",
         "class": "asset",
-        "sha256": "dbc4b9d3885a94c1881089b4dcbea6942897102ab49e0637db67daca44df766b",
+        "sha256": "448b69641cad7a56e8738cfe8a4bd2f99e2598a9dc3ddc589007da431351c737",
         "rewrite_module": false,
         "contract": false
       }
@@ -72,7 +72,7 @@
           "native_fallback": "plain textarea",
           "signature": "templ MarkdownEditor(o MarkdownEditorOpts)",
           "summary": "Renders a textarea with Markdown affordances.",
-          "guidance": "The textarea is the form value, always. Every toolbar button and shortcut edits that text in place, so with no JavaScript the author types Markdown into a plain textarea and the form submits unchanged - the toolbar is the part that is optional, not the editing.",
+          "guidance": "The textarea is the form value, always. Every toolbar button and shortcut edits that text in place, so with no JavaScript the author types Markdown into a plain textarea and the form submits unchanged - the toolbar is the part that is optional, not the editing. The toolbar and the media panel are hidden until the controller reveals them: every toolbar control and every media insert writes at the caret, which nothing but the controller can do, and the panel's upload does work without script but would navigate away and abandon whatever the author has typed. A MediaPicker rendered outside an editor stays visible and fully usable; it is this slot that hides, not the picker.",
           "keyboard": "Cmd/Ctrl+B, Cmd/Ctrl+I and Cmd/Ctrl+K wrap the selection in bold, italic and link syntax; every other key stays the textarea's own.",
           "states": [
             "default",
@@ -86,7 +86,7 @@
           "family": "advanced",
           "signature": "templ MediaPicker(o MediaPickerOpts)",
           "summary": "Renders existing media plus an upload control.",
-          "guidance": "Every item inserts a Markdown image with its alt text already filled in. Alt text is part of the item rather than something the author is prompted for later, because a prompt that can be dismissed produces images with no description.",
+          "guidance": "Every item inserts a Markdown image with its alt text already filled in. Alt text is part of the item rather than something the author is prompted for later, because a prompt that can be dismissed produces images with no description. The insert buttons need a controller - they write at the caret - but the upload does not: it is a real file input and a real submit, both owned by the caller's upload form, so choosing a file and sending it works with no script at all.",
           "states": [
             "default",
             "empty",

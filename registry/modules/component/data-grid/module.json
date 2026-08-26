@@ -35,7 +35,7 @@
         "source": "static/ui/grid.js",
         "target": "static/ui/grid.js",
         "class": "asset",
-        "sha256": "56d129602b66a81da940b8f339c1ad8c05456b1e1b50c7b4bb9be1b6228bf923",
+        "sha256": "11452fb0bbe0e6fe5938f548d5e5fcbabf48daba09c5b4fd073f388495e22fe9",
         "rewrite_module": false,
         "contract": false
       }

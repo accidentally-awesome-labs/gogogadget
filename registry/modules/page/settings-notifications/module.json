@@ -36,7 +36,7 @@
         "source": "internal/web/templates/settings_notifications.templ",
         "target": "internal/web/templates/settings_notifications.templ",
         "class": "templ",
-        "sha256": "d0083e865c7d6844102cf363778082e0b634910bf0d2aad23793a752d2d54d5b",
+        "sha256": "e15a9d44b0cb39fa90424ac875f06f82f5e57c3521b866cc6b683b3f2cde9f68",
         "rewrite_module": true,
         "contract": false
       }

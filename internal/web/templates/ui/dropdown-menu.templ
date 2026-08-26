@@ -1,5 +1,11 @@
 package ui
 
+import (
+	"fmt"
+	"hash/fnv"
+	"strconv"
+)
+
 // DropdownMenuOpts configures a trigger + menu.
 type DropdownMenuOpts struct {
 	ID, Label string
@@ -13,15 +19,22 @@ type DropdownMenuOpts struct {
 // role="menu", because that role promises arrow-key navigation between
 // menuitems, and claiming a keyboard contract the widget does not implement is
 // worse for a screen-reader user than presenting an honest expandable button.
-// The trigger and panel carry data hooks so the Alpine component can move focus
-// in on open and return it to the trigger on close.
+//
+// The panel is a native popover and the trigger opens it declaratively with
+// popovertarget, so the commands disclose, and every link among them works,
+// with no script at all. The platform also supplies light dismiss, Escape and
+// the top layer - which is why the panel is never clipped by a scrolling table
+// cell the way an in-flow panel was. The Alpine controller adds only what the
+// platform does not: focus into the panel on open, focus back to the trigger on
+// close, arrow keys, typeahead, and keeping aria-expanded in step.
 templ DropdownMenu(o DropdownMenuOpts) {
+	{{ panelID := menuPanelID(o.ID, o.Attrs, menuPanelSeed(o)) }}
 	<div { rootWith("dropdown-menu", "relative inline-block", o.Attrs, "x-data", "uiMenu")... }>
-		<button type="button" class="btn btn-ghost btn-icon" data-ui-menu-trigger :aria-expanded="open.toString()" @click="toggle">
+		<button type="button" class="btn btn-ghost btn-icon" data-ui-menu-trigger popovertarget={ panelID }>
 			@Icon(IconOpts{Name: IconMore, Attrs: Attrs{Class: "w-4 h-4"}})
 			<span class="sr-only">{ o.Label }</span>
 		</button>
-		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)">
+		<div { menuPanelAttrs(panelID, "right", "w-48 card p-1")... }>
 			for _, item := range o.Items {
 				if item.Separator {
 					<hr role="separator" class="my-1 border-t border-border"/>
@@ -32,20 +45,89 @@ templ DropdownMenu(o DropdownMenuOpts) {
 						@menuItemBody(item)
 					</span>
 				} else if item.Href != "" {
-					<a href={ templ.SafeURL(item.Href) } class={ menuItemClass(item) } { menuItemHX(item)... }>
+					<a href={ templ.SafeURL(item.Href) } { menuItemAttrs(item, "")... }>
 						@menuItemBody(item)
 					</a>
 				} else {
 					// No destination: this item acts rather than navigates, so it
 					// is a button. An <a href=""> would point at the current page
 					// and reload it on click before HTMX had loaded.
-					<button type="button" class={ menuItemClass(item) + " w-full text-left" } { menuItemHX(item)... }>
+					<button type="button" { menuItemAttrs(item, "w-full text-left")... }>
 						@menuItemBody(item)
 					</button>
 				}
 			}
 		</div>
 	</div>
+}
+
+// menuPanelID gives a popover panel a stable id.
+//
+// popovertarget addresses its panel by id, so the id has to be unique on the
+// page AND identical between two renders of the same page. A counter satisfied
+// the first and failed the second, which made every rendered surface
+// byte-unstable - `TestScenariosAreDeterministic` caught it, and the visual
+// baselines it feeds could never have settled.
+//
+// So it is derived from what the caller already owns: an explicit id where
+// there is one, otherwise a digest of what the menu shows. Two menus that
+// digest alike would have to present the same accessible name and the same
+// commands, and two controls sharing an accessible name on one page is already
+// forbidden - so the fallback cannot collide without a louder bug existing
+// first.
+func menuPanelID(id string, a Attrs, seed string) string {
+	for _, named := range []string{id, a.ID, a.TestID} {
+		if named != "" {
+			return named + "-panel"
+		}
+	}
+	digest := fnv.New32a()
+	// hash.Hash.Write never returns an error.
+	_, _ = digest.Write([]byte(seed))
+	return "ui-menu-" + strconv.FormatUint(uint64(digest.Sum32()), 36) + "-panel"
+}
+
+// menuPanelSeed identifies an unnamed menu by everything it was given: the
+// trigger's accessible name and every field of every command. The component
+// name leads, so a menu and a popover with the same label do not digest alike.
+//
+// Every field, not a chosen few. Seeding from label and href alone collided for
+// the case this fallback exists to serve: a row-action menu whose commands
+// ACT rather than navigate carries the row's identity in its request, not in an
+// href, so forty rows offering "Archive"/"Delete" digested identically and row
+// forty's popovertarget resolved to row one's panel. Enumerating HX and Attrs
+// instead would leave the next field added to MenuItem out of the seed with
+// nothing to catch it; formatting the whole slice cannot fall behind the type.
+// fmt sorts map keys, so this is stable across renders and processes.
+func menuPanelSeed(o DropdownMenuOpts) string {
+	return fmt.Sprintf("dropdown-menu\x00%s\x00%+v", o.Label, o.Items)
+}
+
+// menuPanelAttrs builds the popover panel's root attributes.
+//
+// The positioning is a style attribute rather than utility classes because it
+// is the popover mechanism's own contract, not a design choice: an open popover
+// is in the top layer, where the containing block is the viewport, so a
+// positioned ancestor no longer places it and the offsets have to come from
+// anchor() against the invoker. The colour is restated for the same reason -
+// the UA popover rule sets `color: CanvasText`, which would otherwise win over
+// the inherited foreground token and go black on a dark surface.
+//
+// side is the edge the panel aligns to: "right" hangs it off the trigger's
+// right edge, "left" off its left.
+func menuPanelAttrs(id, side, class string) templ.Attributes {
+	inline := "left:auto;right:anchor(right)"
+	if side == "left" {
+		inline = "left:anchor(left);right:auto"
+	}
+	return templ.Attributes{
+		"id":                  id,
+		"popover":             true,
+		"data-ui-menu-panel":  true,
+		"class":               class,
+		"style": "position:absolute;position-anchor:auto;top:anchor(bottom);bottom:auto;" +
+			inline + ";margin:calc(var(--spacing) * 1) 0 0;color:var(--color-fg)",
+	}
 }
 
 // menuItemBody renders the optional icon and the label. The icon is decorative:
@@ -55,17 +137,6 @@ templ menuItemBody(item MenuItem) {
 		@Icon(IconOpts{Name: item.Icon, Attrs: Attrs{Class: "w-4 h-4 inline-block mr-2 align-text-bottom"}})
 	}
 	{ item.Label }
-}
-
-// menuItemHX builds the request attributes for an acting item, plus the
-// confirmation the contract carries.
-func menuItemHX(item MenuItem) templ.Attributes {
-	out := templ.Attributes{}
-	applyHX(out, item.HX)
-	if item.Confirm != "" {
-		out["hx-confirm"] = item.Confirm
-	}
-	return out
 }
 
 // menuItemClass colours a destructive command. The kind is normalized, so a

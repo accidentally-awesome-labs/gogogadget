@@ -2,6 +2,7 @@ package templates
 
 import (
 	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -129,20 +130,31 @@ func TestIconRegistryIsComplete(t *testing.T) {
 
 // Every semantic kind must resolve to a real component class, in every family
 // that takes a ui.Kind. A typo'd or unregistered kind renders "badge-" and no
+// templFiles walks the whole tree, not just this directory. It read only `.`
+// for a long time, which meant every rule below - raw hex, `dark:` variants,
+// palette ramps, `!` overrides, arbitrary lengths, templ expressions inside
+// quoted attributes - was enforced on the page templates and on none of the 172
+// renderers in ui/, where the design system actually lives. The tests passed
+// because they were looking at the wrong files.
 func templFiles(t *testing.T) map[string]string {
 	t.Helper()
 	// go test runs with cwd = the package directory.
-	entries, err := os.ReadDir(".")
-	require.NoError(t, err)
 	out := map[string]string{}
-	for _, e := range entries {
-		if e.IsDir() || !strings.HasSuffix(e.Name(), ".templ") {
-			continue
+	require.NoError(t, filepath.WalkDir(".", func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
 		}
-		b, err := os.ReadFile(e.Name())
-		require.NoError(t, err)
-		out[e.Name()] = string(b)
-	}
+		if entry.IsDir() || !strings.HasSuffix(path, ".templ") {
+			return nil
+		}
+		body, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		out[path] = string(body)
+		return nil
+	}))
+	require.NotEmpty(t, out)
 	return out
 }
 
@@ -188,6 +200,110 @@ func TestEveryKindIsStyledForEveryStateFamily(t *testing.T) {
 				"kind %q does not define %s, so a family reading it renders with no value", kind, variable)
 		}
 	}
+}
+
+// The Kind axis has a matrix above; the Size axis had nothing, and the gap was
+// real: buttonClass emitted `btn btn-lg` for Size: ui.SizeLG on Button,
+// ButtonLink and IconButton, while input.css defined only .btn-sm, .btn-xs and
+// .btn-icon. The entire large size axis was a dead class - a declared, typed,
+// reachable enum value that rendered a control indistinguishable from the
+// default.
+//
+// Two things have to hold, and the second is the one that matters. Naming a
+// class in some other rule's selector list is not styling it: .btn-lg appeared
+// in the base, disabled and focus lists the whole time, so a test that only
+// looked for the string passed while the size did nothing. A size therefore has
+// to contribute a class the default does not, and that class has to carry its
+// own declaration block.
+//
+// The class lists come from what the components actually render, so a new size
+// or a renamed class cannot pass by agreeing with the test instead of with the
+// stylesheet.
+func TestEverySizeIsStyledForEveryControlFamily(t *testing.T) {
+	source := readInputCSS(t)
+
+	families := map[string]func(ui.Action, ui.Size) templ.Component{
+		"Button": func(a ui.Action, s ui.Size) templ.Component {
+			return ui.Button(ui.ButtonOpts{Label: "Save", Action: a, Size: s})
+		},
+		"ButtonLink": func(a ui.Action, s ui.Size) templ.Component {
+			return ui.ButtonLink(ui.ButtonLinkOpts{Label: "Save", Href: "/x", Action: a, Size: s})
+		},
+		"IconButton": func(a ui.Action, s ui.Size) templ.Component {
+			return ui.IconButton(ui.IconButtonOpts{Icon: ui.IconCheck, Label: "Save", Action: a, Size: s})
+		},
+	}
+
+	for family, render := range families {
+		for _, action := range ui.Actions {
+			// ActionLink renders a text link, which has no size axis at all.
+			if action == ui.ActionLink {
+				continue
+			}
+
+			base := rootClasses(t, renderComponent(t, render(action, ui.SizeMD)))
+			for _, class := range base {
+				assert.Containsf(t, source, "."+class,
+					"%s/%s renders .%s, which input.css never mentions", family, action, class)
+			}
+
+			for _, size := range ui.Sizes {
+				if size == ui.SizeMD {
+					continue
+				}
+
+				added := addedClasses(base, rootClasses(t, renderComponent(t, render(action, size))))
+				require.NotEmptyf(t, added,
+					"%s with Size %q renders exactly what SizeMD renders, so the size is unreachable from CSS",
+					family, size)
+
+				for _, class := range added {
+					assert.Truef(t, hasOwnRule(source, class),
+						"%s with Action %q and Size %q renders .%s, which input.css names in other selector "+
+							"lists but never declares on its own - the size is a dead class and the control "+
+							"renders at the default size",
+						family, action, size, class)
+				}
+			}
+		}
+	}
+}
+
+// hasOwnRule reports whether class heads its own declaration block, rather than
+// merely appearing inside another rule's selector list.
+func hasOwnRule(source, class string) bool {
+	return regexp.MustCompile(`\.` + regexp.QuoteMeta(class) + `\s*\{`).MatchString(source)
+}
+
+// addedClasses returns the classes present in got and absent from base.
+func addedClasses(base, got []string) []string {
+	seen := map[string]struct{}{}
+	for _, class := range base {
+		seen[class] = struct{}{}
+	}
+
+	var added []string
+	for _, class := range got {
+		if _, ok := seen[class]; !ok {
+			added = append(added, class)
+		}
+	}
+	return added
+}
+
+// rootClasses returns the class list on the first element of a rendered
+// component.
+func rootClasses(t *testing.T, html string) []string {
+	t.Helper()
+
+	marker := ` class="`
+	start := strings.Index(html, marker)
+	require.GreaterOrEqual(t, start, 0, "no class attribute in %q", html)
+	start += len(marker)
+	end := strings.Index(html[start:], `"`)
+	require.Greater(t, end, 0, "unterminated class attribute in %q", html)
+
+	return strings.Fields(html[start : start+end])
 }
 
 // The built stylesheet must actually carry the variables: a rule that exists in

@@ -25,7 +25,7 @@
         "source": "internal/web/templates/privacy.templ",
         "target": "internal/web/templates/privacy.templ",
         "class": "templ",
-        "sha256": "fb098f2b20072350ea71b17ba0fafeafdafaf08d5a7bbee2ef26f6b3573399e6",
+        "sha256": "c2a9f5987230f169404ff266f01197796060416f490134a5de09dc444bc4c2ad",
         "rewrite_module": true,
         "contract": false
       }
@@ -59,9 +59,9 @@
         {
           "id": "footer.legal.privacy",
           "area": "footer",
-          "group": "footer.legal",
           "route_id": "privacy.show",
           "label_key": "footer.privacy",
+          "group": "footer.legal",
           "after": [
             "footer.legal.terms"
           ]
@@ -70,14 +70,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "legal.privacy.body": "Account data is stored with Clerk; payment data with Polar (merchant of record); analytics, when enabled, with PostHog behind an explicit consent gate.",
@@ -89,6 +81,14 @@
         "legal.privacy.placeholder": "Política de privacidad provisional. Sustitúyela por un texto revisado por un abogado antes del lanzamiento.",
         "legal.privacy.title": "Política de privacidad"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

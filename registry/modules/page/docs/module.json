@@ -26,7 +26,7 @@
         "source": "internal/web/templates/docs.templ",
         "target": "internal/web/templates/docs.templ",
         "class": "templ",
-        "sha256": "620a02532e14531f0bdd9f5b51501269e4e6f5db84095b717d9845435863bd90",
+        "sha256": "443312e43dbcae9138a4a7b0ea992b0be54e71be39b2abed9435acf4a65a1f93",
         "rewrite_module": true,
         "contract": false
       }
@@ -74,10 +74,12 @@
     "environment": [],
     "locales": {
       "en": {
-        "docs.edit_page": "Edit this page →"
+        "docs.edit_page": "Edit this page →",
+        "docs.pager_aria": "Previous and next page"
       },
       "es": {
-        "docs.edit_page": "Editar esta página →"
+        "docs.edit_page": "Editar esta página →",
+        "docs.pager_aria": "Página anterior y siguiente"
       }
     },
     "docs": [],

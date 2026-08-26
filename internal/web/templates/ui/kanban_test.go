@@ -78,6 +78,49 @@ func TestMoveFormWorksWithoutScript(t *testing.T) {
 	assert.Contains(t, html, `action="/board/move"`)
 }
 
+// A method and an action are not a fallback on their own: a form with nothing
+// submittable in it cannot be sent. Each destination is a submit control naming
+// itself, which is what makes a move one click with no script running.
+func TestMoveDestinationsAreSubmitControls(t *testing.T) {
+	html := renderComponent(t, KanbanCard(KanbanCardOpts{
+		Card: KanbanCardData{ID: "c1", Title: "T"},
+		From: "todo", MoveURL: "/board/move",
+		Columns: boardOpts().Columns,
+	}))
+
+	assert.Contains(t, html, `<button type="submit" name="to" value="doing"`)
+	assert.Contains(t, html, `<button type="submit" name="to" value="done"`)
+	// Visible in the markup. The controller hides the form once the card menu is
+	// operable; a form hidden by the server is a fallback nobody can reach.
+	assert.NotContains(t, html, `class="hidden"`)
+}
+
+// Exactly one destination may reach the server. The field a drop writes carries
+// the same name as those buttons, so shipping it enabled would send a blank "to"
+// alongside the chosen one - and the server reads the first.
+func TestOnlyTheChosenDestinationIsSubmitted(t *testing.T) {
+	html := renderComponent(t, KanbanCard(KanbanCardOpts{
+		Card: KanbanCardData{ID: "c1", Title: "T"},
+		From: "todo", MoveURL: "/board/move",
+		Columns: boardOpts().Columns,
+	}))
+
+	assert.Contains(t, html, `name="to" value="" data-kanban-to disabled`)
+}
+
+// Every card offers the same destinations, so the buttons are told apart by the
+// group they sit in rather than by their own labels - which have to keep naming
+// the destination, not the card.
+func TestMoveButtonsAreGroupedUnderTheirCard(t *testing.T) {
+	html := renderComponent(t, KanbanCard(KanbanCardOpts{
+		Card: KanbanCardData{ID: "c1", Title: "Wire the seam"},
+		From: "todo", MoveURL: "/board/move",
+		Columns: boardOpts().Columns,
+	}))
+
+	assert.Contains(t, html, `role="group" aria-label="Move Wire the seam"`)
+}
+
 // The server decides. Swapping the board rather than the card is what lets a
 // rejected move put the card back where it was.
 func TestRejectedMoveCanRerenderTheBoard(t *testing.T) {

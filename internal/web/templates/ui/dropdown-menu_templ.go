@@ -8,6 +8,12 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import (
+	"fmt"
+	"hash/fnv"
+	"strconv"
+)
+
 // DropdownMenuOpts configures a trigger + menu.
 type DropdownMenuOpts struct {
 	ID, Label string
@@ -21,8 +27,14 @@ type DropdownMenuOpts struct {
 // role="menu", because that role promises arrow-key navigation between
 // menuitems, and claiming a keyboard contract the widget does not implement is
 // worse for a screen-reader user than presenting an honest expandable button.
-// The trigger and panel carry data hooks so the Alpine component can move focus
-// in on open and return it to the trigger on close.
+//
+// The panel is a native popover and the trigger opens it declaratively with
+// popovertarget, so the commands disclose, and every link among them works,
+// with no script at all. The platform also supplies light dismiss, Escape and
+// the top layer - which is why the panel is never clipped by a scrolling table
+// cell the way an in-flow panel was. The Alpine controller adds only what the
+// platform does not: focus into the panel on open, focus back to the trigger on
+// close, arrow keys, typeahead, and keeping aria-expanded in step.
 func DropdownMenu(o DropdownMenuOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -44,6 +56,7 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		panelID := menuPanelID(o.ID, o.Attrs, menuPanelSeed(o))
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -52,7 +65,20 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "><button type=\"button\" class=\"btn btn-ghost btn-icon\" data-ui-menu-trigger :aria-expanded=\"open.toString()\" @click=\"toggle\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "><button type=\"button\" class=\"btn btn-ghost btn-icon\" data-ui-menu-trigger popovertarget=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(panelID)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 33, Col: 99}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -60,31 +86,39 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"sr-only\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<span class=\"sr-only\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 22, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 35, Col: 34}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></button><div x-show=\"open\" x-cloak data-ui-menu-panel @click.outside=\"close\" @keydown.escape.window=\"close\" class=\"absolute right-0 mt-1 w-48 card p-1 z-(--z-overlay)\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</span></button><div")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, menuPanelAttrs(panelID, "right", "w-48 card p-1"))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, ">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, item := range o.Items {
 			if item.Separator {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<hr role=\"separator\" class=\"my-1 border-t border-border\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<hr role=\"separator\" class=\"my-1 border-t border-border\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else if item.Disabled {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "  <span class=\"block px-3 py-2 text-sm text-fg-muted\" aria-disabled=\"true\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "  <span class=\"block px-3 py-2 text-sm text-fg-muted\" aria-disabled=\"true\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -92,51 +126,33 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else if item.Href != "" {
-				var templ_7745c5c3_Var3 = []any{menuItemClass(item)}
-				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 templ.SafeURL
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(item.Href))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 35, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 48, Col: 39}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" class=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.CSSClasses(templ_7745c5c3_Var3).String())
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 1, Col: 0}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, menuItemAttrs(item, ""))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, menuItemHX(item))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, ">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, ">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -144,42 +160,20 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "   ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "   <button type=\"button\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 = []any{menuItemClass(item) + " w-full text-left"}
-				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
+				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, menuItemAttrs(item, "w-full text-left"))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "<button type=\"button\" class=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(templ.CSSClasses(templ_7745c5c3_Var6).String())
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 1, Col: 0}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, menuItemHX(item))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, ">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -187,18 +181,87 @@ func DropdownMenu(o DropdownMenuOpts) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</button>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</button>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+// menuPanelID gives a popover panel a stable id.
+//
+// popovertarget addresses its panel by id, so the id has to be unique on the
+// page AND identical between two renders of the same page. A counter satisfied
+// the first and failed the second, which made every rendered surface
+// byte-unstable - `TestScenariosAreDeterministic` caught it, and the visual
+// baselines it feeds could never have settled.
+//
+// So it is derived from what the caller already owns: an explicit id where
+// there is one, otherwise a digest of what the menu shows. Two menus that
+// digest alike would have to present the same accessible name and the same
+// commands, and two controls sharing an accessible name on one page is already
+// forbidden - so the fallback cannot collide without a louder bug existing
+// first.
+func menuPanelID(id string, a Attrs, seed string) string {
+	for _, named := range []string{id, a.ID, a.TestID} {
+		if named != "" {
+			return named + "-panel"
+		}
+	}
+	digest := fnv.New32a()
+	// hash.Hash.Write never returns an error.
+	_, _ = digest.Write([]byte(seed))
+	return "ui-menu-" + strconv.FormatUint(uint64(digest.Sum32()), 36) + "-panel"
+}
+
+// menuPanelSeed identifies an unnamed menu by everything it was given: the
+// trigger's accessible name and every field of every command. The component
+// name leads, so a menu and a popover with the same label do not digest alike.
+//
+// Every field, not a chosen few. Seeding from label and href alone collided for
+// the case this fallback exists to serve: a row-action menu whose commands
+// ACT rather than navigate carries the row's identity in its request, not in an
+// href, so forty rows offering "Archive"/"Delete" digested identically and row
+// forty's popovertarget resolved to row one's panel. Enumerating HX and Attrs
+// instead would leave the next field added to MenuItem out of the seed with
+// nothing to catch it; formatting the whole slice cannot fall behind the type.
+// fmt sorts map keys, so this is stable across renders and processes.
+func menuPanelSeed(o DropdownMenuOpts) string {
+	return fmt.Sprintf("dropdown-menu\x00%s\x00%+v", o.Label, o.Items)
+}
+
+// menuPanelAttrs builds the popover panel's root attributes.
+//
+// The positioning is a style attribute rather than utility classes because it
+// is the popover mechanism's own contract, not a design choice: an open popover
+// is in the top layer, where the containing block is the viewport, so a
+// positioned ancestor no longer places it and the offsets have to come from
+// anchor() against the invoker. The colour is restated for the same reason -
+// the UA popover rule sets `color: CanvasText`, which would otherwise win over
+// the inherited foreground token and go black on a dark surface.
+//
+// side is the edge the panel aligns to: "right" hangs it off the trigger's
+// right edge, "left" off its left.
+func menuPanelAttrs(id, side, class string) templ.Attributes {
+	inline := "left:auto;right:anchor(right)"
+	if side == "left" {
+		inline = "left:anchor(left);right:auto"
+	}
+	return templ.Attributes{
+		"id":                 id,
+		"popover":            true,
+		"data-ui-menu-panel": true,
+		"class":              class,
+		"style": "position:absolute;position-anchor:auto;top:anchor(bottom);bottom:auto;" +
+			inline + ";margin:calc(var(--spacing) * 1) 0 0;color:var(--color-fg)",
+	}
 }
 
 // menuItemBody renders the optional icon and the label. The icon is decorative:
@@ -219,9 +282,9 @@ func menuItemBody(item MenuItem) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		if item.Icon != "" {
@@ -230,28 +293,17 @@ func menuItemBody(item MenuItem) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 57, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dropdown-menu.templ`, Line: 139, Col: 13}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
-}
-
-// menuItemHX builds the request attributes for an acting item, plus the
-// confirmation the contract carries.
-func menuItemHX(item MenuItem) templ.Attributes {
-	out := templ.Attributes{}
-	applyHX(out, item.HX)
-	if item.Confirm != "" {
-		out["hx-confirm"] = item.Confirm
-	}
-	return out
 }
 
 // menuItemClass colours a destructive command. The kind is normalized, so a

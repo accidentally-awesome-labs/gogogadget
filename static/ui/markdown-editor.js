@@ -18,11 +18,15 @@ document.addEventListener("alpine:init", () => {
       const root = this.$root;
       const input = root.querySelector("[data-editor-input]");
       const toolbar = root.querySelector("[data-editor-toolbar]");
+      const media = root.querySelector("[data-editor-media]");
       if (!input || !toolbar) return;
 
       // Revealed only now: the buttons do nothing without this controller, and
-      // a row of inert buttons is worse than none.
+      // a row of inert buttons is worse than none. The media panel is the same
+      // bargain - its insert buttons write at the caret, which nothing but this
+      // controller can do.
       toolbar.hidden = false;
+      if (media) media.hidden = false;
 
       this._onClick = (event) => {
         // Anywhere inside this editor, not only the toolbar: the media panel is

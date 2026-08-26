@@ -7,14 +7,14 @@
     "revision": 1,
     "contract": 1,
     "title": "UI core",
-    "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
+    "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, the request-scoped CSRF token accessor and its hidden-field renderer, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
     "requires": [],
     "files": [
       {
         "source": "internal/web/templates/ui/attrs.go",
         "target": "internal/web/templates/ui/attrs.go",
         "class": "go",
-        "sha256": "182e7374071b2803481174215338c94bb3089897bb14eacadda8c6fbbdbf44c1",
+        "sha256": "23efc5838054a5e3feefc6de3e336289913af1f7733c4f1711452803d168b8a9",
         "rewrite_module": true,
         "contract": true
       },
@@ -22,7 +22,7 @@
         "source": "internal/web/templates/ui/attrs_build.go",
         "target": "internal/web/templates/ui/attrs_build.go",
         "class": "go",
-        "sha256": "0c6af45cdbd326491aa572ae7a9db08e6570973053070074a813779508bd8e5e",
+        "sha256": "d2ad26ed1873342e0a3db3d7761cde04a836898de5a44601046af4329ff05aca",
         "rewrite_module": true,
         "contract": false
       },
@@ -35,12 +35,36 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/ui/attrs_test.go",
+        "target": "internal/web/templates/ui/attrs_test.go",
+        "class": "test",
+        "sha256": "acf23f8286c3bdb5276c29f70a214dcca55c0483d9a902cebfd2b2ef24da07c3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "0819f84780fccf9784d243486bf26690d2a6722216aeae0d717e32acd680ec9b",
+        "sha256": "6e837282fc1d857be3d9aa0d99c5f0621d9fd05e899c8d3cf820bef605460cb1",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/control-id_test.go",
+        "target": "internal/web/templates/ui/control-id_test.go",
+        "class": "test",
+        "sha256": "6c865b4b1313271adc80699df9c793ededc828978559124eb033c62ab5314bfd",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/csrf.templ",
+        "target": "internal/web/templates/ui/csrf.templ",
+        "class": "templ",
+        "sha256": "1a8acb2a0a162a40d3d32fcf20aaf7c326083e04e0daf41a0bca4496c68c4925",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/web/templates/ui/enums.go",
@@ -83,10 +107,26 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/ui/menu-item_test.go",
+        "target": "internal/web/templates/ui/menu-item_test.go",
+        "class": "test",
+        "sha256": "552f606b66ef9931e02959ee23d7c8ef63eac5f38548a4da68e48820b119dcb6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/opts_hx_test.go",
+        "target": "internal/web/templates/ui/opts_hx_test.go",
+        "class": "test",
+        "sha256": "ae4e0d3ed73198aeb39113787e06320dee25c01d0719ea6954fbbaa0e4c3d00d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/ui/root.go",
         "target": "internal/web/templates/ui/root.go",
         "class": "go",
-        "sha256": "62ecafd18abf67a6186654e1f3a896522e7cbcff4e3714753d4d2b4adb2af51f",
+        "sha256": "64c565ff82ffe53c293c7378ad8f6314f7eb73da0fa2200dc41e165cad12f40e",
         "rewrite_module": true,
         "contract": true
       },
@@ -94,7 +134,7 @@
         "source": "internal/web/templates/ui/shared.go",
         "target": "internal/web/templates/ui/shared.go",
         "class": "go",
-        "sha256": "0ca54651824b4e57a7aded588e1a3e8c57400d5f78831c06de23a98debd29f6b",
+        "sha256": "c0e619ea26ef911a902c506eedbdf634b605914d5dc1a3471b203607a3ee112c",
         "rewrite_module": false,
         "contract": false
       },
@@ -110,7 +150,7 @@
         "source": "static/ui/engines.js",
         "target": "static/ui/engines.js",
         "class": "asset",
-        "sha256": "ce8f15028622710c4969e321df2e54c40740ad70272cda1732db90bcc0aaa5ab",
+        "sha256": "b4be2c5ba14e6d4a3a68351d18cb2f3bd636cb025c88f0c5c5237a3b31ca4a12",
         "rewrite_module": false,
         "contract": false
       },
@@ -126,7 +166,7 @@
         "source": "static/ui/navigation.js",
         "target": "static/ui/navigation.js",
         "class": "asset",
-        "sha256": "c87d51297fa6bd0dada46399e90931ba417e195f2ff1c73335e29ce248b26028",
+        "sha256": "8906d1d6a9c62ab3de0a2efb601300675b9b98bcb00e0f309ba44d2aa34d2a20",
         "rewrite_module": false,
         "contract": false
       },
@@ -134,7 +174,7 @@
         "source": "static/ui/overlays.js",
         "target": "static/ui/overlays.js",
         "class": "asset",
-        "sha256": "9a272abaf6a4aca67d27c92ddcca538cc299b5b504c472fb61072b5e6b5dbf3c",
+        "sha256": "34a27b357e9c0aae29c6259e95a89def337c59eb877914fcba6bb758766846ff",
         "rewrite_module": false,
         "contract": false
       }

@@ -1,13 +1,14 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // RelTime renders a relative timestamp (masked in visual tests).
@@ -39,44 +40,73 @@ func prettyMetadata(raw []byte) string {
 	return string(pretty)
 }
 
+// ActivityTable is the pager's fragment: the CONTENTS of #table-container, not
+// the box itself. Pagination swaps innerMorph, which morphs the target's
+// children against the response — so a fragment that repeats its own wrapper
+// nests a second element carrying the same id, permanently. The wrapper is
+// rendered once, by ActivityPage.
 templ ActivityTable(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPages int) {
-	<div id="table-container">
-		if len(rows) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "activity.empty_title"), Body: i18n.T(ctx, "activity.empty_body")}) {
-			}
-		} else {
-			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-				<table class="table">
-					<thead>
-						<tr><th>{ i18n.T(ctx, "activity.col_actor") }</th><th>{ i18n.T(ctx, "activity.col_action") }</th><th>{ i18n.T(ctx, "activity.col_when") }</th><th>{ i18n.T(ctx, "activity.col_details") }</th></tr>
-					</thead>
-					<tbody>
-						for _, row := range rows {
-							<tr id={ fmt.Sprintf("audit-%d", row.ID) }>
-								<td>{ row.ActorEmail }</td>
-								<td>@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})</td>
-								<td>
-									<span data-testid="relative-time" title={ row.CreatedAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.CreatedAt.Time) }</span>
-								</td>
-								<td>
-									if len(row.Metadata) > 2 {
-										<details>
-											<summary class="cursor-pointer text-fg-muted">{ i18n.T(ctx, "activity.metadata") }</summary>
-											<pre class="text-xs mt-1 overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
-										</details>
-									}
-								</td>
-							</tr>
+	@ui.DataTable(activityTable(ctx, rows, page, totalPages)) {
+		for _, row := range rows {
+			<tr id={ fmt.Sprintf("audit-%d", row.ID) }>
+				<td class="px-4 py-3">{ row.ActorEmail }</td>
+				<td class="px-4 py-3">
+					@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})
+				</td>
+				<td class="px-4 py-3">
+					<span data-testid="relative-time" title={ row.CreatedAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.CreatedAt.Time) }</span>
+				</td>
+				<td class="px-4 py-3">
+					if len(row.Metadata) > 2 {
+						@ui.Disclosure(ui.DisclosureOpts{Summary: i18n.T(ctx, "activity.metadata")}) {
+							<pre class="text-xs overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
 						}
-					</tbody>
-				</table>
-			}
-			@ui.Pagination(ui.PaginationOpts{Page: page, TotalPages: totalPages, BaseURL: "/app/activity", Target: "#table-container", Labels: pagerLabels(ctx)})
+					}
+				</td>
+			</tr>
 		}
-	</div>
+	}
 }
 
 templ ActivityPage(rows []sqlc.ListAuditByOrgRow, now time.Time, page, totalPages int) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "activity.title")})
-	@ActivityTable(rows, now, page, totalPages)
+	<div id="table-container">
+		@ActivityTable(rows, now, page, totalPages)
+	</div>
+}
+
+// activityTable assembles the audit table and its pager. Empty and Pagination
+// are passed for every state: keeping the pager as a slot on the table is what
+// stops a caller re-implementing the arrangement per page.
+func activityTable(ctx context.Context, rows []sqlc.ListAuditByOrgRow, page, totalPages int) ui.DataTableOpts {
+	return ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "activity.caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "actor", Label: i18n.T(ctx, "activity.col_actor")},
+			{Key: "action", Label: i18n.T(ctx, "activity.col_action")},
+			{Key: "when", Label: i18n.T(ctx, "activity.col_when")},
+			{Key: "details", Label: i18n.T(ctx, "activity.col_details")},
+		},
+		RowCount:   len(rows),
+		Empty:      activityEmpty(),
+		Pagination: activityPager(page, totalPages),
+		Attrs:      ui.Attrs{ID: "activity-table", TestID: "activity-table"},
+	}
+}
+
+templ activityEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Level: 2, Variant: ui.EmptyInline,
+		Title: i18n.T(ctx, "activity.empty_title"),
+		Body:  i18n.T(ctx, "activity.empty_body"),
+	})
+}
+
+templ activityPager(page, totalPages int) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page: page, TotalPages: totalPages,
+		BaseURL: "/app/activity", Target: "#table-container",
+		Labels: pagerLabels(ctx),
+	})
 }

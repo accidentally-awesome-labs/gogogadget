@@ -1,12 +1,24 @@
 package templates
 
-import "github.com/gogogadget/gogogadget/internal/i18n"
+import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
 
-
+// LegalPrivacy is long-form legal copy, so the body is a Prose region rather
+// than a stack of typed paragraphs: Prose exists to style bare elements that
+// carry no classes of their own, and ui.Text would size these paragraphs as
+// secondary copy in a document whose paragraphs are the whole point.
+//
+// Prose renders a div, so the article element stays outside it: a legal
+// document is a self-contained composition and dropping the landmark to save
+// one wrapper would take it out of every screen reader's article list.
 templ LegalPrivacy() {
-	<article class="page-narrow prose">
-		<h1>{ i18n.T(ctx, "legal.privacy.title") }</h1>
-		<p>{ i18n.T(ctx, "legal.privacy.placeholder") }</p>
-		<p>{ i18n.T(ctx, "legal.privacy.body") }</p>
+	<article class="page-narrow">
+		@ui.Prose(ui.ProseOpts{}) {
+			@ui.Heading(ui.HeadingOpts{Text: i18n.T(ctx, "legal.privacy.title"), Level: 1, Unstyled: true})
+			<p>{ i18n.T(ctx, "legal.privacy.placeholder") }</p>
+			<p>{ i18n.T(ctx, "legal.privacy.body") }</p>
+		}
 	</article>
 }

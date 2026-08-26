@@ -28,7 +28,7 @@
         "source": "internal/web/templates/api_tokens.templ",
         "target": "internal/web/templates/api_tokens.templ",
         "class": "templ",
-        "sha256": "c4e5b63745c9bcaedbb781a08df6d3423acad621a0c895a11afc3f2bacabcc98",
+        "sha256": "30835f69e26d8ae18d79209e5a6d521806caccf97b87d644194ab5720453afc1",
         "rewrite_module": true,
         "contract": false
       }
@@ -74,6 +74,7 @@
     "environment": [],
     "locales": {
       "en": {
+        "api.col_actions": "Actions",
         "api.col_created": "Created",
         "api.col_last_used": "Last used",
         "api.col_name": "Name",
@@ -88,13 +89,18 @@
         "api.never_used": "never",
         "api.reveal_note": "This is the only time the plaintext is shown.",
         "api.reveal_title": "Token created — copy it now",
-        "api.revoke": "Revoke",
-        "api.revoke_confirm": "Revoke this token? API calls with it will start failing.",
+        "api.revoke_cancel": "Keep token",
+        "api.revoke_confirm": "API calls using this token start failing immediately, and it cannot be restored.",
+        "api.revoke_cta": "Revoke token",
+        "api.revoke_named": "Revoke %s",
+        "api.revoke_title": "Revoke this token?",
         "api.revoked": "revoked",
         "api.scope_label": "Scope",
+        "api.table_caption": "API tokens for this organization, with their scope and last use",
         "api.title": "API tokens"
       },
       "es": {
+        "api.col_actions": "Acciones",
         "api.col_created": "Creado",
         "api.col_last_used": "Último uso",
         "api.col_name": "Nombre",
@@ -103,16 +109,20 @@
         "api.copy": "Copiar",
         "api.create": "Crear",
         "api.create_title": "Crear un token",
-        "api.empty": "Aún no hay tokens.",
+        "api.empty": "Todavía no hay tokens.",
         "api.name_label": "Nombre",
         "api.name_placeholder": "Despliegues de CI",
         "api.never_used": "nunca",
         "api.reveal_note": "Esta es la única vez que se muestra el texto plano.",
         "api.reveal_title": "Token creado — cópialo ahora",
-        "api.revoke": "Revocar",
-        "api.revoke_confirm": "¿Revocar este token? Las llamadas a la API con este token empezarán a fallar.",
+        "api.revoke_cancel": "Conservar token",
+        "api.revoke_confirm": "Las llamadas a la API que usen este token empezarán a fallar de inmediato y no se puede restaurar.",
+        "api.revoke_cta": "Revocar token",
+        "api.revoke_named": "Revocar %s",
+        "api.revoke_title": "¿Revocar este token?",
         "api.revoked": "revocado",
         "api.scope_label": "Alcance",
+        "api.table_caption": "Tokens de API de esta organización, con su alcance y su último uso",
         "api.title": "Tokens de API"
       }
     },

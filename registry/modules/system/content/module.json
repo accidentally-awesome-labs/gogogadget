@@ -65,7 +65,7 @@
         "source": "internal/content/docs_check_test.go",
         "target": "internal/content/docs_check_test.go",
         "class": "go",
-        "sha256": "468cb20676cea08824ce3bf0599aa7966eb2dce44a59d5b9005a2130e06f2608",
+        "sha256": "7dcb6fe880315151c9ecb154fd66bca61b1c93537390430a9a6e8cc2b89bcd54",
         "rewrite_module": true,
         "contract": false
       },
@@ -169,7 +169,7 @@
         "source": "internal/web/templates/content.templ",
         "target": "internal/web/templates/content.templ",
         "class": "templ",
-        "sha256": "0bf7311256db6072fe2eb26fefb38a136beb5fc306357a217c297c154b06158b",
+        "sha256": "d25af13b4b0999381775cd555ff0606567eb22cbb414b975ce614677aeb3cc12",
         "rewrite_module": true,
         "contract": false
       }
@@ -273,6 +273,28 @@
       }
     ],
     "environment": [],
+    "locales": {
+      "en": {
+        "content.empty": "Nothing published yet.",
+        "content.field.author": "Author",
+        "content.published_on": "Published on",
+        "content.read_more": "Read more",
+        "content.type.post": "Post",
+        "content.type.posts": "Posts",
+        "content.type.release": "Release",
+        "content.type.releases": "Releases"
+      },
+      "es": {
+        "content.empty": "Todavía no hay nada publicado.",
+        "content.field.author": "Autor",
+        "content.published_on": "Publicado el",
+        "content.read_more": "Leer más",
+        "content.type.post": "Publicación",
+        "content.type.posts": "Publicaciones",
+        "content.type.release": "Versión",
+        "content.type.releases": "Versiones"
+      }
+    },
     "docs": [],
     "tests": {
       "go_packages": [
@@ -305,28 +327,6 @@
         "organization_delete": "retain"
       }
     ],
-    "removal_policy": "retain-data",
-    "locales": {
-      "en": {
-        "content.empty": "Nothing published yet.",
-        "content.field.author": "Author",
-        "content.published_on": "Published on",
-        "content.read_more": "Read more",
-        "content.type.post": "Post",
-        "content.type.posts": "Posts",
-        "content.type.release": "Release",
-        "content.type.releases": "Releases"
-      },
-      "es": {
-        "content.empty": "Todavía no hay nada publicado.",
-        "content.field.author": "Autor",
-        "content.published_on": "Publicado el",
-        "content.read_more": "Leer más",
-        "content.type.post": "Publicación",
-        "content.type.posts": "Publicaciones",
-        "content.type.release": "Versión",
-        "content.type.releases": "Versiones"
-      }
-    }
+    "removal_policy": "retain-data"
   }
 }

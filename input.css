@@ -27,10 +27,18 @@
   --color-brand-900: #312e81;
   --color-brand-950: #1e1b4b;
 
+  /* A one-time code is read digit by digit, so the digits are separated far
+     more than any prose tracking step. It is a token rather than an arbitrary
+     value because it is a decision about how codes are read, not a nudge. */
+  --tracking-otp: 0.5em;
+
   /* Structural tokens. Layout dimensions are tokens so a shell restyle is a
      value edit, not a hunt through three template files. */
-  --container-page:   72rem;   /* max-w-page   — was max-w-6xl */
-  --container-narrow: 48rem;   /* max-w-narrow — was max-w-3xl */
+  --container-page:   72rem;   /* max-w-page    — was max-w-6xl */
+  --container-narrow: 48rem;   /* max-w-narrow  — was max-w-3xl */
+  /* A chat bubble stops growing well before the page does: past roughly 80
+     characters the eye loses the line it was reading on the way back. */
+  --container-message: 42rem;  /* max-w-message — was max-w-[42rem] */
   --spacing-sidebar:  15rem;   /* w-sidebar    — was w-60 */
   --spacing-docnav:   14rem;   /* w-docnav     — was w-56 */
   --spacing-topbar:   3.5rem;  /* h-topbar / top-topbar — was h-14 / top-14 */
@@ -232,7 +240,7 @@
      variants so a bare variant class still renders the full component. The
      size axis (sm/xs/icon) is what removes ad-hoc !padding overrides. */
   .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
-  .btn-sm, .btn-xs, .btn-icon {
+  .btn-sm, .btn-xs, .btn-lg, .btn-icon {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold
       transition-colors cursor-pointer disabled:pointer-events-none;
     border-radius: var(--radius-control);
@@ -241,7 +249,7 @@
   }
   .btn:disabled, .btn-primary:disabled, .btn-ghost:disabled,
   .btn-danger:disabled, .btn-inverse:disabled,
-  .btn-sm:disabled, .btn-xs:disabled, .btn-icon:disabled {
+  .btn-sm:disabled, .btn-xs:disabled, .btn-lg:disabled, .btn-icon:disabled {
     opacity: var(--disabled-opacity);
   }
   .btn-primary { @apply bg-brand text-brand-fg hover:bg-brand-hover; }
@@ -250,6 +258,10 @@
   .btn-inverse { @apply bg-surface text-brand-text hover:bg-surface-raised; }
   .btn-sm      { @apply px-3 py-1.5 text-sm; }
   .btn-xs      { @apply px-2 py-1 text-xs; }
+  /* The base rule pins min-height to the md rung, so a large button has to
+     raise it as well as its padding - otherwise Size: SizeLG produced a button
+     with roomier text at exactly the default height. */
+  .btn-lg      { @apply px-5 py-2.5 text-base; min-height: var(--control-height-lg); }
   .btn-icon    { @apply px-2 py-2; }
 
   .input {
@@ -267,7 +279,7 @@
      focus-visible (not focus) is what keeps a mouse click from painting a ring
      the user did not ask for. */
   .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
-  .btn-sm, .btn-xs, .btn-icon,
+  .btn-sm, .btn-xs, .btn-lg, .btn-icon,
   .input, .input-sm, .input-xs,
   .nav-link, .doc-link, .tab, .link,
   a:focus-visible, button:focus-visible, summary:focus-visible,
@@ -276,7 +288,8 @@
   }
   .btn:focus-visible, .btn-primary:focus-visible, .btn-ghost:focus-visible,
   .btn-danger:focus-visible, .btn-inverse:focus-visible,
-  .btn-sm:focus-visible, .btn-xs:focus-visible, .btn-icon:focus-visible,
+  .btn-sm:focus-visible, .btn-xs:focus-visible, .btn-lg:focus-visible,
+  .btn-icon:focus-visible,
   .input:focus-visible, .input-sm:focus-visible, .input-xs:focus-visible,
   .nav-link:focus-visible, .doc-link:focus-visible, .tab:focus-visible,
   .link:focus-visible,

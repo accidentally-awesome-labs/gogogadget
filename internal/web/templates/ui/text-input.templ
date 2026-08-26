@@ -2,29 +2,38 @@ package ui
 
 // TextInputOpts is a single-line text input.
 type TextInputOpts struct {
-	Name        string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
 	Value       string
 	Placeholder string
 	Type        InputType
 	// Hint and Error mirror the enclosing Field so the control can reference
 	// exactly the elements that Field renders. Without them the control would
 	// have to guess, and a guess produces a dangling aria-describedby.
-	Hint      string
-	Error     string
-	Required  bool
-	Disabled  bool
-	ReadOnly  bool
+	Hint         string
+	Error        string
+	Required     bool
+	Disabled     bool
+	ReadOnly     bool
 	Autocomplete string
-	Attrs     Attrs
+	Attrs        Attrs
 }
 
 templ TextInput(o TextInputOpts) {
 	<input
-		{ root("text-input", "input", o.Attrs)... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
-		id={ o.Name } name={ o.Name } type={ string(o.Type.Value()) }
-		value={ o.Value } placeholder={ o.Placeholder }
-		required?={ o.Required } disabled?={ o.Disabled } readonly?={ o.ReadOnly }
+		{ controlRoot("text-input", "input", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		type={ string(o.Type.Value()) }
+		value={ o.Value }
+		placeholder={ o.Placeholder }
+		required?={ o.Required }
+		disabled?={ o.Disabled }
+		readonly?={ o.ReadOnly }
 		if o.Autocomplete != "" {
 			autocomplete={ o.Autocomplete }
 		}

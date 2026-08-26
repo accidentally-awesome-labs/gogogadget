@@ -30,7 +30,7 @@
         "source": "internal/web/templates/admin_impersonate.templ",
         "target": "internal/web/templates/admin_impersonate.templ",
         "class": "templ",
-        "sha256": "e71886768c29134d1d3140571e6ff221696e8b60ef97fbfe49503fe8b2b635fe",
+        "sha256": "5b1837ba7969968298e6d113c7fe305634d5166a3705f2b07a6c5c5d440b8178",
         "rewrite_module": true,
         "contract": false
       }

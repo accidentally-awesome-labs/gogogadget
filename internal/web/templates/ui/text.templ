@@ -15,11 +15,21 @@ templ Text(o TextOpts) {
 	<p { root("text", textClass(o), o.Attrs)... }>{ children... }</p>
 }
 
+// textClass maps the size axis onto one class per rung. SizeSM and SizeMD both
+// returned text-sm, which cost two things at once: text-base had no typed
+// representation at all, so base-size body copy could not be expressed, and one
+// of the four declared enum values was silently redundant.
+//
+// Changing MD - the normalize default - moves an unsized caller from 14px to
+// 16px, so every call site that relied on the default was pinned to SizeSM in
+// the same change and renders byte-identically. New callers get the ladder.
 func textClass(o TextOpts) string {
-	cls := "text-sm"
+	cls := "text-base"
 	switch o.Size.Value() {
 	case SizeXS:
 		cls = "text-xs"
+	case SizeSM:
+		cls = "text-sm"
 	case SizeLG:
 		cls = "text-lg"
 	}

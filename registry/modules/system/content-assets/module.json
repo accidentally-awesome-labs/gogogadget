@@ -157,6 +157,22 @@
         "contract": false
       },
       {
+        "source": "content/docs/cli.md",
+        "target": "content/docs/cli.md",
+        "class": "content",
+        "sha256": "b69c58df2c94438cbbe6035ff6ae698ed4d9f2acb1bffac46b40683953aec76b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/components.md",
+        "target": "content/docs/components.md",
+        "class": "content",
+        "sha256": "bd5e4c76424c09112fccd16b921f35820dbac900257fd0707c0632ed76140208",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "content/docs/configuration.md",
         "target": "content/docs/configuration.md",
         "class": "content",
@@ -200,7 +216,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "d15dd047c78ee468b7b8ddca9b5f520608e5064c74177eea68c52540fba0651e",
+        "sha256": "24ce414726cfd0df0eec486d493aaba639008a0dd8949434cdbacef0ff92884b",
         "rewrite_module": false,
         "contract": false
       },
@@ -216,7 +232,15 @@
         "source": "content/docs/frontend.md",
         "target": "content/docs/frontend.md",
         "class": "content",
-        "sha256": "787d9f4270acfde1f734a403a6a2acb9c23b7cb38243ae9b0bdb4d9269361c03",
+        "sha256": "29603b53e75b28e9c892647e3060225e9a8ce3f861d3d6ffecd5163bcc55dfdf",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/gallery.md",
+        "target": "content/docs/gallery.md",
+        "class": "content",
+        "sha256": "91cdf44a9d32f2bccca04ecccd59b9e4e6c47e00575204460fa69153d531ee46",
         "rewrite_module": false,
         "contract": false
       },
@@ -241,6 +265,22 @@
         "target": "content/docs/index.md",
         "class": "content",
         "sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/module-removal.md",
+        "target": "content/docs/module-removal.md",
+        "class": "content",
+        "sha256": "93edf2051603b695d2131fad235d4cfcf1c26cef4e7aff7aaf4fdae2f2095be9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/modules.md",
+        "target": "content/docs/modules.md",
+        "class": "content",
+        "sha256": "7734e10ad41bbcfa4b6fb43e7f6865791c9a2eeb8c6dab6874173df2a985c906",
         "rewrite_module": false,
         "contract": false
       },
@@ -304,7 +344,7 @@
         "source": "content/docs/testing.md",
         "target": "content/docs/testing.md",
         "class": "content",
-        "sha256": "48b09c7d78c3c51ed14ef2071a1d313947ea0ba45b6c4939c512455661d85c12",
+        "sha256": "c4b5c0561dcaa4131e1e6f21fad6ae0c7113ebe4bfb2a54890bcb38c934cd1ed",
         "rewrite_module": false,
         "contract": false
       },
@@ -312,7 +352,15 @@
         "source": "content/docs/troubleshooting.md",
         "target": "content/docs/troubleshooting.md",
         "class": "content",
-        "sha256": "3b3c71d7cc4a16610ead31e19f03a00f28cf925797b63e35539e2cf28dd76937",
+        "sha256": "5c2796679ce8d40188297c090744609dd142a5eeca9bb0e8e20c67cc16b00fab",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "content/docs/ui-foundations.md",
+        "target": "content/docs/ui-foundations.md",
+        "class": "content",
+        "sha256": "d790f3a8e05d5a0c48895dc977007bbabbc0ced3e2224aa3e5a1e5f0ccf56dfa",
         "rewrite_module": false,
         "contract": false
       },

@@ -49,6 +49,8 @@ Browser ──▶ Go (net/http) ──▶ Postgres
 - **Content** — markdown blog + RSS + sitemap + OG; docs section rendered in-app (`/docs`) with ranked search (`/docs/search`), plus a `/changelog` collection rendered newest-first with per-release anchors.
 - **Platform** — Postgres job queue + schedules admin, audit log (configurable retention), rate limiting, strict CSP, CSRF, structured logs, Sentry + PostHog hooks, `/healthz` + `/readyz` + `/metrics` (Prometheus, bearer-gated).
 - **Testing** — unit + integration (per-package test DBs) + seam contract suites + fuzz tests for trust-boundary parsers + race detector + Playwright e2e + docker-pinned visual baselines + a11y (axe) + smoke and docker-build CI jobs.
+- **Module registry + `ggg` CLI** — the whole product is 240 installable source modules (elements, components, pages, workflows, systems). `ggg add`/`update`/`remove`/`diff`/`sync` install real source you own and edit; update never overwrites a local edit, it stages the upstream candidate and reports a conflict. Declared intent in `gogogadget.json`, resolved truth in a committed lock, and every cross-cutting registry (routes, jobs, env, i18n, OpenAPI, queries, nav, static, seeds) generated from the manifests.
+- **Typed UI catalog** — 172 templ renderers in `internal/web/templates/ui`, one options struct each (`templ Badge(o BadgeOpts)`), closed enums instead of stringly variants, and `Attrs` with no arbitrary-attribute escape hatch so a caller cannot override a component's own `role`/`aria-*`. Live reference at `/dev/gallery`, twelve realistic product scenarios at `/dev/scenarios`, and both feed the generated visual + axe matrices.
 
 ## Quick start
 
@@ -66,6 +68,37 @@ A fresh clone runs the **full app with zero SaaS accounts** —
 login) and you land in the seeded demo org.
 
 The day-to-day gate is one command: `make check` (generate + vet + test + build).
+
+## Modules and the `ggg` CLI
+
+Everything in this repository is an installable module with one owner, a
+declared contract, and a stated cost of removal. `ggg` is the CLI that resolves,
+installs, inspects, and removes them. It ships source — files you own and edit —
+not a dependency you call.
+
+```sh
+go run ./cmd/ggg catalog --kind component     # what exists, and its state
+go run ./cmd/ggg info component/data-table    # contract, files, links, verify commands
+go run ./cmd/ggg add component/data-table     # install it and its dependency closure
+go run ./cmd/ggg diff                         # what have I changed since install?
+go run ./cmd/ggg update                       # advance; never overwrites a local edit
+go run ./cmd/ggg sync --check --offline       # does the tree match the lock?
+```
+
+Intent lives in `gogogadget.json`; resolved truth lives in the committed
+`gogogadget.lock.json`, which records a per-file digest ledger — that is what
+lets update tell your bytes from upstream's and refuse to clobber them. Every
+command speaks `--json` with a fixed envelope and branchable exit codes, so an
+agent can drive it without scraping output.
+
+- [CLI and registry](content/docs/cli.md) — every command, flag, envelope key, exit code
+- [Module anatomy and lifecycle](content/docs/modules.md) — manifests, closure resolution, the lock
+- [Module removal and data retention](content/docs/module-removal.md) — policies and migration guarantees
+- [Module reference](content/docs/module-reference.md) — all 240 modules, generated
+- [UI foundations](content/docs/ui-foundations.md) — three layers, one options struct, closed enums
+- [Component usage](content/docs/components.md) — finding a component, `native_fallback`, progressive enhancement
+- [Component reference](content/docs/component-reference.md) — all 172 signatures, generated
+- [Gallery and scenarios](content/docs/gallery.md) — `/dev/gallery`, `/dev/scenarios`, the generated test matrices
 
 ## Connect real services
 
@@ -103,6 +136,23 @@ The full docs ship **in the app** at `/docs` (and in `content/docs/`):
 [deployment](content/docs/deployment.md) ·
 [extending](content/docs/extending.md) (the recipe hub) ·
 [troubleshooting](content/docs/troubleshooting.md)
+
+The **Modules** section documents the stable interfaces of the registry and the
+UI catalog:
+[CLI and registry](content/docs/cli.md) ·
+[module anatomy and lifecycle](content/docs/modules.md) ·
+[module removal and data retention](content/docs/module-removal.md) ·
+[UI foundations](content/docs/ui-foundations.md) ·
+[component usage](content/docs/components.md) ·
+[gallery and scenarios](content/docs/gallery.md) ·
+[module reference](content/docs/module-reference.md) ·
+[component reference](content/docs/component-reference.md)
+
+Four of those pages are generated from the module manifests —
+`configuration-reference`, `module-reference`, `component-reference`, and the
+`.env.example` they share their source with — so an inventory of 240 modules and
+172 components cannot drift from what is installed. Do not edit them; edit the
+declaring module's manifest and run `make generate`.
 
 ## Deployment
 

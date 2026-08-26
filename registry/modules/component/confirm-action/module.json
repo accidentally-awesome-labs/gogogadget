@@ -26,7 +26,7 @@
         "source": "internal/web/templates/ui/confirm-action_test.go",
         "target": "internal/web/templates/ui/confirm-action_test.go",
         "class": "test",
-        "sha256": "1152c43a0281d8e6c5a0c6d20bb40b48d80db65b07deec21254e1457b5d0466a",
+        "sha256": "fd0cb9eb2301f2dc5e538dbf28a73927d0fdf65f9d57e8fd786972d32ea05cdf",
         "rewrite_module": true,
         "contract": false
       }

@@ -53,6 +53,7 @@
     "locales": {
       "en": {
         "docs.search_aria": "Search the docs",
+        "docs.search_clear": "Clear the search",
         "docs.search_no_results": "No pages matched your search.",
         "docs.search_placeholder": "Search the docs…",
         "docs.search_prompt": "Type a term to search the documentation.",
@@ -61,6 +62,7 @@
       },
       "es": {
         "docs.search_aria": "Buscar en los docs",
+        "docs.search_clear": "Borrar la búsqueda",
         "docs.search_no_results": "Ninguna página coincide con tu búsqueda.",
         "docs.search_placeholder": "Buscar en los docs…",
         "docs.search_prompt": "Escribe un término para buscar en la documentación.",

@@ -18,7 +18,7 @@ type OTPInputOpts struct {
 // offer the code from a message, and inputmode numeric brings up the keypad.
 templ OTPInput(o OTPInputOpts) {
 	<input
-		{ root("otp-input", "input text-center tracking-[0.5em] font-mono", o.Attrs)... }
+		{ root("otp-input", "input text-center tracking-otp font-mono", o.Attrs)... }
 		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: true})... }
 		type="text" id={ o.Name } name={ o.Name }
 		inputmode="numeric" autocomplete="one-time-code"

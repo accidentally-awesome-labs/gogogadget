@@ -1,5 +1,7 @@
 package ui
 
+import "github.com/a-h/templ"
+
 // Shared data contracts. These are data types, not renderers: several
 // components read the same shape, so the shape is declared once here in the
 // required core rather than per consumer. A consumer that needed its own field
@@ -52,6 +54,31 @@ type Option struct {
 	Group    string
 	Disabled bool
 	Selected bool
+}
+
+// menuItemAttrs builds the one attribute map a menu item's element spreads.
+//
+// MenuItem carried an Attrs field that no menu rendered, so no item could hold
+// a data-testid, an id or a title - the caller wrote it, read it back in the
+// struct literal, and never learned it was dropped. Every menu in the catalog
+// (ContextMenu, Menubar, RowActions, Kanban) delegates to DropdownMenu, so
+// merging here is what fixes all of them at once.
+//
+// The class is merged inside, which means the element must not also carry a
+// literal class attribute: two class attributes on one tag is what a caller
+// appending Attrs.Class would otherwise produce. extraClass is the branch's own
+// contribution ("w-full text-left" on an acting item).
+//
+// This is for the active branches only. A disabled item must not go through it:
+// applying item.HX to an aria-disabled element would make htmx fire the request
+// the disabled state promises it will not.
+func menuItemAttrs(item MenuItem, extraClass string) templ.Attributes {
+	out := attributes(withClass(item.Attrs, mergeClasses(menuItemClass(item), extraClass)))
+	applyHX(out, item.HX)
+	if item.Confirm != "" {
+		out["hx-confirm"] = item.Confirm
+	}
+	return out
 }
 
 func gapClass(gap Gap) string {

@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/toggle-group.templ",
         "target": "internal/web/templates/ui/toggle-group.templ",
         "class": "templ",
-        "sha256": "29e088349a0db4deadee748c9f78cef782900daa365d7757767b223433f11a03",
+        "sha256": "d558f1aec7560ea404d7a8c21926f779ce891c924ab5a834a9338dc585a6aeea",
         "rewrite_module": true,
         "contract": true
       },

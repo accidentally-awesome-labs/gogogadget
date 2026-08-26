@@ -7,10 +7,19 @@ type PopoverOpts struct {
 }
 
 // Popover renders a trigger with a positioned panel.
+//
+// The panel is a native popover opened declaratively with popovertarget, so its
+// content discloses with no script at all - the previous script-toggled panel
+// left arbitrary caller content permanently display:none without one. The
+// platform supplies light dismiss, Escape and the top layer; the Alpine
+// controller adds only the focus handling and keeps aria-expanded in step,
+// because a declarative popovertarget button does not write that attribute and
+// an expandable button that never reports its state is a bug.
 templ Popover(o PopoverOpts) {
+	{{ panelID := menuPanelID(o.ID, o.Attrs, "popover\x00"+o.Label) }}
 	<div { rootWith("popover", "relative inline-block", o.Attrs, "x-data", "uiMenu")... }>
-		<button type="button" class="btn btn-ghost btn-sm" data-ui-menu-trigger :aria-expanded="open.toString()" @click="toggle">{ o.Label }</button>
-		<div x-show="open" x-cloak data-ui-menu-panel @click.outside="close" @keydown.escape.window="close" class="absolute left-0 mt-1 card p-3 z-(--z-overlay)">
+		<button type="button" class="btn btn-ghost btn-sm" data-ui-menu-trigger popovertarget={ panelID }>{ o.Label }</button>
+		<div { menuPanelAttrs(panelID, "left", "card p-3")... }>
 			{ children... }
 		</div>
 	</div>

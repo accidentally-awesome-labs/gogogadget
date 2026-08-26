@@ -1,5 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { loginAs } from './helpers';
+
+// Destructive admin actions are gated by ui.ConfirmAction, which opens a real
+// in-page <dialog> instead of window.confirm. These specs therefore never
+// register a page.on('dialog') handler: if one were left in place, a
+// regression that resurrected the native confirm would pass silently.
+//
+// The locator is scoped to [open] deliberately. A table renders one dialog per
+// destructive row, so [data-ui="alert-dialog"] alone matches every row and
+// trips strict mode; [open] is both unique and the state being asserted.
+const openDialog = (page: Page) => page.locator('dialog[data-ui="alert-dialog"][open]');
 
 test.describe('admin', () => {
   test('admin home renders stat cards', async ({ browser }) => {
@@ -20,15 +30,19 @@ test.describe('admin', () => {
     await page.goto('/admin/users');
 
     await page.getByLabel('Search users').fill('pro@gogogadget.dev');
-    await expect(page.getByText('pro@gogogadget.dev')).toBeVisible();
-    await expect(page.getByText('free@gogogadget.dev')).toHaveCount(0);
+    // Exact, and scoped to the cell. Row controls now name the user they act
+    // on — the actions cell is labelled "Actions for pro@…" and its Disable
+    // trigger "Disable pro@…" — so both a bare getByText and a substring cell
+    // match resolve to several nodes. Naming the identity cell exactly is also
+    // the stronger claim: the user is IN the table, not merely mentioned.
+    await expect(page.getByRole('cell', { name: 'pro@gogogadget.dev', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'free@gogogadget.dev', exact: true })).toHaveCount(0);
     await context.close();
   });
 
   test('disable toggle flips state and audits', async ({ browser }) => {
     const context = await loginAs(browser, 'admin');
     const page = await context.newPage();
-    page.on('dialog', (dialog) => dialog.accept());
     // Dedicated user: other specs keep running against untouched fixtures.
     await page.goto('/admin/users?q=toggle@gogogadget.dev');
 
@@ -36,12 +50,22 @@ test.describe('admin', () => {
     await expect(toggle).toContainText('Disable');
     await toggle.click();
 
+    // The trigger must only OPEN the confirmation. Asserting the account is
+    // still active here is the whole point: a ConfirmAction that fired the
+    // request on the first click would satisfy every assertion below it, so
+    // without this the confirmation would be a rubber stamp.
+    await expect(openDialog(page)).toBeVisible();
+    await expect(page.getByTestId('toast')).toHaveCount(0);
+    await expect(page.getByText('active').first()).toBeVisible();
+
+    await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
     await expect(page.getByText('disabled').first()).toBeVisible();
 
     // Toggle back so re-runs find the same initial state.
     await page.goto('/admin/users?q=toggle@gogogadget.dev');
     await page.getByTestId('admin-disable-toggle').click();
+    await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
     await context.close();
   });
@@ -83,20 +107,26 @@ test.describe('admin', () => {
     const page = await context.newPage();
     await page.goto('/admin/jobs');
 
-    // The queue is live state (other specs enqueue export jobs) — the table
-    // itself with its header row is the stable contract.
-    await expect(page.getByTestId('jobs-table').or(page.getByText('No jobs match.'))).toBeVisible();
+    // The DataTable surface is always rendered now — it keeps the toolbar and
+    // pager in place when a filter matches nothing — so `.or(empty text)` used
+    // to resolve to both nodes and trip strict mode whenever the queue drained.
+    // Assert the surface, then assert it settled into exactly one of its two
+    // legitimate states. The queue itself is live: other specs enqueue export
+    // jobs, so a row count is not a contract.
+    await expect(page.getByTestId('jobs-table')).toBeVisible();
+    await expect(
+      page.locator('[id^="job-row-"]').first().or(page.getByText('No jobs match.')),
+    ).toBeVisible();
     await context.close();
   });
 
   test('announcements: create, activate, banner, dismiss, deactivate', async ({ browser }) => {
     const context = await loginAs(browser, 'admin');
     const page = await context.newPage();
-    page.on('dialog', (dialog) => dialog.accept());
 
     // Create (inactive).
     await page.goto('/admin/announcements');
-    await page.getByTestId('announcement-create-form').locator('#announcement-message').fill('E2E maintenance window');
+    await page.getByTestId('announcement-create-form').locator('#message').fill('E2E maintenance window');
     await page.getByTestId('announcement-create-form').getByRole('button', { name: 'Create' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
     // Retry-safe: a previous failed run may have left rows behind — always
@@ -131,6 +161,9 @@ test.describe('admin', () => {
         await expect(page.getByTestId('toast').first()).toBeVisible();
       }
       await current.getByRole('button', { name: 'Delete' }).click();
+      // Still present while the confirmation is up — the delete has not run yet.
+      await expect(page.locator(`[id="${rowId}"]`)).toHaveCount(1);
+      await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
       await expect(page.locator(`[id="${rowId}"]`)).toHaveCount(0);
     }
     await expect(stale()).toHaveCount(0);
@@ -140,23 +173,26 @@ test.describe('admin', () => {
   test('flags: create, override per org, delete', async ({ browser }) => {
     const context = await loginAs(browser, 'admin');
     const page = await context.newPage();
-    page.on('dialog', (dialog) => dialog.accept());
     const key = 'flag-e2e-flow';
 
     // Create (retry-safe: delete leftovers from a failed prior run first).
     await page.goto('/admin/flags');
     const leftover = page.locator(`[data-testid="flag-delete-${key}"]`);
-    if (await leftover.count()) await leftover.click();
+    if (await leftover.count()) {
+      await leftover.click();
+      await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
+      await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(0);
+    }
 
-    await page.getByTestId('flag-create-form').locator('#flag-key').fill(key);
-    await page.getByTestId('flag-create-form').locator('#flag-description').fill('e2e flow flag');
+    await page.getByTestId('flag-create-form').locator('#key').fill(key);
+    await page.getByTestId('flag-create-form').locator('#description').fill('e2e flow flag');
     await page.getByTestId('flag-create-form').getByRole('button', { name: 'Create flag' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
 
     // Detail: set an ON override for Free Org (global is off).
     await page.goto(`/admin/flags/${key}`);
-    await page.locator('#override-org').selectOption({ label: 'Free Org' });
-    await page.locator('#override-state').selectOption('on');
+    await page.locator('#org').selectOption({ label: 'Free Org' });
+    await page.locator('#state').selectOption('on');
     await page.getByTestId('flag-override-form').getByRole('button', { name: 'Set override' }).click();
     await expect(page.getByTestId('flag-override-org_free')).toBeVisible();
     await expect(page.getByTestId('flag-override-org_free')).toContainText('on');
@@ -164,6 +200,9 @@ test.describe('admin', () => {
     // Delete the flag — overrides cascade.
     await page.goto('/admin/flags');
     await page.getByTestId(`flag-delete-${key}`).click();
+    // The flag survives an open confirmation: the request rides on Confirm.
+    await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(1);
+    await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
     await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(0);
     await context.close();
@@ -172,15 +211,14 @@ test.describe('admin', () => {
   test('schedules: create, run now, toggle, delete', async ({ browser }) => {
     const context = await loginAs(browser, 'admin');
     const page = await context.newPage();
-    page.on('dialog', (dialog) => dialog.accept());
 
     await page.goto('/admin/schedules');
     await expect(page.getByTestId('schedules-table')).toBeVisible();
 
     // Create a system-wide hourly schedule.
-    await page.getByTestId('schedule-create-form').locator('#schedule-name').fill('E2E flush');
-    await page.getByTestId('schedule-create-form').locator('#schedule-kind').selectOption('usage.flush');
-    await page.getByTestId('schedule-create-form').locator('#schedule-every').fill('3600');
+    await page.getByTestId('schedule-create-form').locator('#name').fill('E2E flush');
+    await page.getByTestId('schedule-create-form').locator('#kind').selectOption('usage.flush');
+    await page.getByTestId('schedule-create-form').locator('#every_seconds').fill('3600');
     await page.getByTestId('schedule-create-form').getByRole('button', { name: 'Create schedule' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
 
@@ -208,11 +246,53 @@ test.describe('admin', () => {
       if ((await stale().count()) === 0) break;
       const rowId = await stale().first().getAttribute('data-testid');
       await stale().first().getByRole('button', { name: 'Delete' }).click();
+      // Row intact while the confirmation is open.
+      await expect(page.locator(`[data-testid="${rowId}"]`)).toHaveCount(1);
+      await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
       await expect(page.getByTestId('toast').first()).toBeVisible();
       await expect(page.locator(`[data-testid="${rowId}"]`)).toHaveCount(0);
     }
     await page.goto('/admin/schedules');
     await expect(stale()).toHaveCount(0);
+    await context.close();
+  });
+
+  // One cancel case for the whole admin slice. Every destructive admin control
+  // is the same ui.ConfirmAction, so covering the decline path once per slice
+  // proves the mechanism; repeating it per row would only re-test the
+  // component. A confirmation nobody can decline is theatre.
+  test('cancelling a destructive confirmation leaves the row alone', async ({ browser }) => {
+    const context = await loginAs(browser, 'admin');
+    const page = await context.newPage();
+    const key = 'flag-e2e-cancel';
+
+    await page.goto('/admin/flags');
+    await page.getByTestId('flag-create-form').locator('#key').fill(key);
+    await page.getByTestId('flag-create-form').locator('#description').fill('e2e cancel flag');
+    await page.getByTestId('flag-create-form').getByRole('button', { name: 'Create flag' }).click();
+    await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(1);
+
+    const trigger = page.getByTestId(`flag-delete-${key}`).getByRole('button');
+    await trigger.click();
+    await expect(openDialog(page)).toBeVisible();
+    await openDialog(page).getByRole('button', { name: 'Cancel' }).click();
+
+    // Dismissed, no request issued, flag still there.
+    await expect(openDialog(page)).toHaveCount(0);
+    await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(1);
+    // Focus returns to the control that opened the dialog, or a keyboard user
+    // is dropped at the top of the document with no way back to the row.
+    await expect(trigger).toBeFocused();
+
+    // Reload proves the cancel was not merely a client-side no-op that the
+    // server had already acted on.
+    await page.goto('/admin/flags');
+    await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(1);
+
+    // Clean up through the confirm path.
+    await page.getByTestId(`flag-delete-${key}`).click();
+    await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
+    await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(0);
     await context.close();
   });
 });
@@ -221,8 +301,6 @@ test.describe('content', () => {
   test('post: create, live preview, publish, restore a revision, delete', async ({ browser }) => {
     const context = await loginAs(browser, 'admin');
     const page = await context.newPage();
-    // Registered before the first hx-confirm action — restore and delete both ask.
-    page.on('dialog', (dialog) => dialog.accept());
 
     // Parallel workers share one e2e database, so the title (and the slug it
     // derives) must be unique per run: a fixed slug hits the
@@ -253,7 +331,9 @@ test.describe('content', () => {
     // An explicit publish date before the frozen TEST_NOW clock keeps the
     // computed status badge deterministic instead of tracking wall time.
     await page.getByTestId('content-published-at').fill('2026-01-10T09:00');
-    await page.getByTestId('content-body').fill(`**Bold body** for ${title}.`);
+    // data-testid names the MarkdownEditor root; the textarea inside it is
+    // still the form value, so that is what gets filled.
+    await page.getByTestId('content-body').locator('textarea').fill(`**Bold body** for ${title}.`);
 
     // The preview pane round-trips the markdown through the server
     // (hx-post /admin/content/preview), so a <strong> here proves the same
@@ -305,6 +385,10 @@ test.describe('content', () => {
     // Two revisions: the newest is badged "current", so exactly one is restorable.
     await expect(restore).toHaveCount(1);
     await restore.click();
+    // The older revision is still only offered, not applied.
+    await expect(openDialog(page)).toBeVisible();
+    await expect(page.getByTestId('content-title')).toHaveValue(edited);
+    await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
     await expect(page.getByTestId('toast').first()).toBeVisible();
     await expect(rowFor(title)).toBeVisible();
     await expect(rowFor(edited)).toHaveCount(0);
@@ -319,6 +403,9 @@ test.describe('content', () => {
       if ((await stale().count()) === 0) break;
       const staleID = await stale().first().getAttribute('data-testid');
       await stale().first().getByRole('button', { name: 'Delete' }).click();
+      // Row intact while the confirmation is open.
+      await expect(page.locator(`[data-testid="${staleID}"]`)).toHaveCount(1);
+      await openDialog(page).getByRole('button', { name: 'Confirm' }).click();
       await expect(page.locator(`[data-testid="${staleID}"]`)).toHaveCount(0);
     }
     await page.goto('/admin/content');

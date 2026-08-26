@@ -10,9 +10,22 @@ type Attrs struct {
 	Class  string
 	TestID string
 	Title  string
-	Data   map[string]string
-	Alpine Alpine
-	HX     HX
+	// Decorative removes the element and its whole subtree from the
+	// accessibility tree AND from the tab order. It is deliberately not named
+	// AriaHidden and deliberately not a bare aria-hidden: aria-hidden alone on
+	// a focusable element leaves the control tabbable while hiding it from
+	// assistive technology, which strands a screen-reader user on a control
+	// that announces nothing - the worst outcome of any accessibility change.
+	// Emitting inert alongside it makes the two statements impossible to
+	// disagree: inert removes descendants from the tab order, so a caller who
+	// marks something decorative cannot accidentally hide a live control while
+	// leaving it reachable. Use it for filler that carries no information a
+	// non-sighted reader needs - a screenshot placeholder, a repeated
+	// glyph - never to quiet a control that does something.
+	Decorative bool
+	Data       map[string]string
+	Alpine     Alpine
+	HX         HX
 }
 
 // Alpine carries CSP-safe named Alpine directives. Only the listed directives

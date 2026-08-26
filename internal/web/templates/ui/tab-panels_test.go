@@ -35,8 +35,34 @@ func TestTabPanelsImplementsTheAriaTabContract(t *testing.T) {
 	// Each tab names its panel and each panel names its tab.
 	assert.Contains(t, html, `aria-controls="stg"`)
 	assert.Contains(t, html, `aria-labelledby="stg-tab"`)
+}
 
-	// Unselected panels are hidden, not merely invisible: an invisible panel
-	// left in the tab order is a focus trap.
-	assert.Equal(t, 2, strings.Count(html, "hidden"))
+// The declared native fallback is sequential panels, and the server renders it
+// rather than the enhanced state: every panel open, in order, with the tab bar
+// hidden. Hiding panels server-side would lose all but one with scripting off,
+// and showing a tab bar only uiTabs can operate would offer dead buttons. This
+// asserts the direction of the enhancement, which is the part a well-meaning
+// change is most likely to reverse.
+func TestTabPanelsServerRendersTheSequentialFallback(t *testing.T) {
+	html := renderComponent(t, TabPanels(TabPanelsOpts{
+		Label: "Environment", Selected: 1,
+		Panels: []TabPanel{
+			{ID: "dev", Label: "Development", Body: "first body"},
+			{ID: "stg", Label: "Staging", Body: "second body"},
+			{ID: "prd", Label: "Production", Body: "third body"},
+		},
+	}))
+
+	// Every panel's content is present and none of them is hidden.
+	for _, body := range []string{"first body", "second body", "third body"} {
+		assert.Contains(t, html, body)
+	}
+	assert.Equal(t, 1, strings.Count(html, "hidden"),
+		"the tab bar is the only hidden element; a hidden panel is content lost without script")
+	assert.Contains(t, html, `data-ui-tablist hidden`)
+
+	// The hooks uiTabs reveals and collapses through must be on the markup, or
+	// the enhancement never happens and the page keeps the fallback forever.
+	assert.Equal(t, 3, strings.Count(html, `class="tab" data-ui-tab>`))
+	assert.Equal(t, 3, strings.Count(html, "data-ui-tabpanel"))
 }

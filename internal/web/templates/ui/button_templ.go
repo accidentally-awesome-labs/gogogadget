@@ -31,7 +31,9 @@ type ButtonOpts struct {
 	// different statement from "working".
 	Disabled bool
 	// Icon is decorative - Label already names the command.
-	Icon  IconName
+	Icon IconName
+	// HX issues the request the button makes. It is applied after Attrs.HX, so
+	// a value set here wins per attribute when both carry the same one.
 	HX    HX
 	Attrs Attrs
 }
@@ -62,9 +64,9 @@ func Button(o ButtonOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("button", buttonClass(o.Action, o.Size), o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, withRequest(rootWith("button", buttonClass(o.Action, o.Size), o.Attrs,
 			"type", string(o.Type.Value()),
-			"aria-busy", boolAttr(o.Busy)))
+			"aria-busy", boolAttr(o.Busy)), o.HX))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -92,7 +94,7 @@ func Button(o ButtonOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/button.templ`, Line: 44, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/button.templ`, Line: 46, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

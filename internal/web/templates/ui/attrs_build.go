@@ -25,6 +25,14 @@ func attributes(a Attrs) templ.Attributes {
 	if a.Title != "" {
 		out["title"] = a.Title
 	}
+	// Both attributes or neither. inert is what makes the promise honest: a
+	// caller who hides a focusable subtree from assistive technology would
+	// otherwise leave it in the tab order, and a control that receives focus
+	// while announcing nothing is unusable rather than merely invisible.
+	if a.Decorative {
+		out["aria-hidden"] = "true"
+		out["inert"] = true
+	}
 	for k, v := range a.Data {
 		if k == "ui" {
 			// data-ui is reserved for the component registry.
@@ -157,4 +165,11 @@ func indicatorSelector(value string) string {
 		return value
 	}
 	return "#" + value
+}
+
+// hxIsSet reports whether an HX carries any instruction. A component that must
+// behave differently when a request is attached cannot ask "is this the zero
+// value" directly, because HX contains maps and is not comparable.
+func hxIsSet(hx HX) bool {
+	return len(attributes(Attrs{HX: hx})) > 0
 }

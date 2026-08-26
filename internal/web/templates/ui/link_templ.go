@@ -18,7 +18,13 @@ type LinkOpts struct {
 	// boosted: boosting repaints the box at the top before scrolling, flashing
 	// the wrong section.
 	Boost bool
-	Attrs Attrs
+	// Unstyled renders the anchor and the caller's own classes with no link
+	// class. A component that owns its typography still needs a real anchor for
+	// navigation, and forcing brand colour plus an underline on it would change
+	// how it looks to fix how it behaves - two unrelated decisions. A linked
+	// 2xl heading underlined at brand colour is the case that proved it.
+	Unstyled bool
+	Attrs    Attrs
 }
 
 // Link renders a text link.
@@ -50,7 +56,7 @@ func Link(o LinkOpts) templ.Component {
 		var templ_7745c5c3_Var2 templ.SafeURL
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(o.Href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/link.templ`, Line: 19, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/link.templ`, Line: 25, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -60,7 +66,7 @@ func Link(o LinkOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("link", "link", o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("link", linkClass(o), o.Attrs,
 			"target", externalTarget(o.External),
 			"rel", externalRel(o.External),
 			"hx-boost", boolAttr(o.Boost && !o.External),
@@ -77,7 +83,7 @@ func Link(o LinkOpts) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/link.templ`, Line: 28, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/link.templ`, Line: 34, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -99,6 +105,15 @@ func Link(o LinkOpts) templ.Component {
 		}
 		return nil
 	})
+}
+
+// linkClass is the base class the anchor carries. An unstyled link contributes
+// none, leaving the caller's own class the whole of it.
+func linkClass(o LinkOpts) string {
+	if o.Unstyled {
+		return ""
+	}
+	return "link"
 }
 
 func boostTarget(boost bool) string {

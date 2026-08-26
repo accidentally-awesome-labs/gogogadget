@@ -51,6 +51,15 @@ export default defineConfig({
       DATABASE_URL: databaseURL,
       DEV_AUTH_BYPASS: 'true',
       CLERK_PORTAL_URL: 'https://accounts.example.test',
+      // Blanked deliberately. The server auto-loads `.env` in development, so a
+      // developer with a real Clerk dev key gets clerk-js booted into every
+      // page — and csp.spec.ts asserts that a page loads no third-party
+      // origin, so it fails on their machine and passes in CI, which has no
+      // `.env`. A test environment that configures a third-party provider
+      // cannot check "no third-party requests". DEV_AUTH_BYPASS above is what
+      // supplies identity here, so nothing needs the keys.
+      CLERK_PUBLISHABLE_KEY: '',
+      CLERK_SECRET_KEY: '',
       TEST_NOW: '2026-01-15T00:00:00Z',
       // One IP drives the whole suite in parallel; the production default
       // (100/min) sheds e2e traffic as abuse.

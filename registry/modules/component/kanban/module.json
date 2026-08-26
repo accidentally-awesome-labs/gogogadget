@@ -20,7 +20,7 @@
         "source": "internal/web/templates/ui/kanban.templ",
         "target": "internal/web/templates/ui/kanban.templ",
         "class": "templ",
-        "sha256": "d57056b2cf3510cb01fd35e5ede05dc242f91835f45802106ddbadadfc9fa65d",
+        "sha256": "fbe920fb38fad746e6c3c309f55bdf835f40ee13b70432f00f64e7b7a4969ba9",
         "rewrite_module": true,
         "contract": true
       },
@@ -28,7 +28,7 @@
         "source": "internal/web/templates/ui/kanban_test.go",
         "target": "internal/web/templates/ui/kanban_test.go",
         "class": "test",
-        "sha256": "83a917c1cc367cdece5dd5ec39805d63218401b6544b57ffa3d86f1ade6d6c18",
+        "sha256": "d14a9bf9d2bbea0377f490b1500ff9605703794078e5c486f66313c98e161ecc",
         "rewrite_module": true,
         "contract": false
       },
@@ -36,7 +36,7 @@
         "source": "static/ui/kanban.js",
         "target": "static/ui/kanban.js",
         "class": "asset",
-        "sha256": "e64683e13372fb03d4524288a957e05f601cd628838ebafd7e59f2003019469b",
+        "sha256": "f68ae7673e487c8fedb28d29c1d2af4063e38833b0f6316aef71069a60720eec",
         "rewrite_module": false,
         "contract": false
       },
@@ -58,10 +58,10 @@
           "engine": "sortablejs",
           "alpine": "uiKanban",
           "vendor": "sortablejs@1.15.7",
-          "native_fallback": "move menu on every card",
+          "native_fallback": "move buttons in every card's form",
           "signature": "templ Kanban(o KanbanOpts)",
           "summary": "Renders the board.",
-          "guidance": "Dragging is never the only way to move a card. Every card carries a keyboard-operable \"Move to...\" menu that posts to the same endpoint, because a board that can only be operated by dragging excludes keyboard users, screen reader users, and anyone on a touch screen where a drag competes with scroll. The drag is a shortcut layered on top of that menu, not a replacement for it.",
+          "guidance": "Dragging is never the only way to move a card, and neither is scripting. Every card renders its destinations as real submit buttons inside the card's own move form, so a move is one click and one POST with nothing but HTML. The keyboard-operable \"Move to...\" menu offers that same list in a tidier place, and the controller hides the buttons once the menu is operable so one command is not offered twice. The drag is a shortcut on top of both, not a replacement: a board that can only be operated by dragging excludes keyboard users, screen reader users, and anyone on a touch screen where a drag competes with scroll.",
           "states": [
             "default",
             "overflow"
@@ -72,7 +72,7 @@
           "family": "advanced",
           "signature": "templ KanbanCard(o KanbanCardOpts)",
           "summary": "Renders one card.",
-          "guidance": "The card is a list item carrying a real form. The form is what both paths use: the menu submits it by navigation, and a drag fills in the destination and submits the same form. The server's response is authoritative, so a rejected move re-renders the board rather than leaving the card where it was dropped.",
+          "guidance": "The card is a list item carrying a real form, and that one form is what every path uses: the no-script buttons inside it submit it by navigation, the menu posts the same fields to the same endpoint, and a drag fills in the destination and submits it. The server's response is authoritative, so a rejected move re-renders the board rather than leaving the card where it was dropped.",
           "states": [
             "default"
           ]

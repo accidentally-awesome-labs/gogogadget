@@ -16,9 +16,17 @@
         "source": "internal/web/templates/ui/text.templ",
         "target": "internal/web/templates/ui/text.templ",
         "class": "templ",
-        "sha256": "dfaac1afaabc0420bb06d717fafc8ed85f6703466bf229af19642e30d5fa5d93",
+        "sha256": "2397b4e5ff90e6d49e75b247d9247b9ab3c786ca23479dfad0068b4e2fb7f1a5",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/text_test.go",
+        "target": "internal/web/templates/ui/text_test.go",
+        "class": "test",
+        "sha256": "abdf59f4da6e69a1c2a4662e3b8d25c815a98ae9710d25f38f0abafabcaa6039",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},

@@ -1,36 +1,34 @@
 package ui
 
-// CollapsibleOpts configures a region toggled by a separate control.
+// CollapsibleOpts configures a region and the control that discloses it.
 type CollapsibleOpts struct {
-	// ID is the region's id; the trigger references it with aria-controls so
-	// the relationship is announced rather than merely visual.
-	ID      string
-	Label   string
-	Open    bool
-	Attrs   Attrs
+	// ID names the region, not the disclosure: a caller that swaps the content
+	// with htmx or scrolls to it needs a handle on the region itself, and the
+	// platform already wires the control to it.
+	ID    string
+	Label string
+	Open  bool
+	Attrs Attrs
 }
 
-// Collapsible renders a button plus the region it controls.
+// Collapsible renders a native details/summary around a region.
 //
-// Unlike Disclosure this is for a region whose trigger sits elsewhere in the
-// layout - a filter panel toggled from a toolbar, for instance. The trigger
-// carries aria-expanded and aria-controls, and the region uses the `hidden`
-// attribute rather than a class so it is removed from the accessibility tree
-// and from tab order when closed.
+// It is the same platform primitive as Disclosure, differing only in that the
+// summary is dressed as a button and the region carries a caller-supplied id.
+// That is deliberate: a hand-built button plus a script-toggled region left the
+// content permanently display:none with scripting off, so the one thing the
+// component exists to reveal was unreachable. <details> supplies the toggle,
+// the button semantics, keyboard activation and the expanded-state
+// announcement with no script at all, which is why this component has no
+// Alpine controller to declare.
 templ Collapsible(o CollapsibleOpts) {
-	<div { rootWith("collapsible", "", o.Attrs, "x-data", "uiCollapsible")... }>
-		<button
-			type="button"
-			class="btn btn-ghost btn-sm"
-			aria-controls={ o.ID }
-			:aria-expanded="open.toString()"
-			@click="toggle"
-		>
+	<details { root("collapsible", "", o.Attrs)... } open?={ o.Open }>
+		<summary class="btn btn-ghost btn-sm cursor-pointer">
 			{ o.Label }
 			@Icon(IconOpts{Name: IconChevronDown, Attrs: Attrs{Class: "w-4 h-4"}})
-		</button>
-		<div id={ o.ID } x-show="open" x-cloak class="mt-2">
+		</summary>
+		<div id={ o.ID } class="mt-2">
 			{ children... }
 		</div>
-	</div>
+	</details>
 }

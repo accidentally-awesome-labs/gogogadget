@@ -5,6 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -495,4 +498,132 @@ func TestCLIRegistryBuildRefreshesPayloadDigests(t *testing.T) {
 	if err := cli.Run(context.Background(), []string{"registry", "validate"}); err != nil {
 		t.Fatalf("validate after build: %v", err)
 	}
+}
+
+// An agent asked to change a component needs to know where to look at it and
+// the exact commands that verify it. A package list is not a command - the
+// reader still has to know this project runs `go test` by package, that e2e
+// lives in a sibling directory with its own runner, and that visual baselines
+// are regenerated inside a pinned container rather than asserted in place.
+//
+// Both are derived rather than stored: putting URLs in manifests would let them
+// drift from the routes that serve them.
+func TestSurfaceLinksAndVerificationCommandsAreDerived(t *testing.T) {
+	m := Manifest{
+		ID: "component/confirm-action",
+		Runtime: RuntimeContributions{
+			UI:        []UIContribution{{Name: "confirm-action", Family: "overlays"}},
+			Scenarios: []ScenarioContribution{{Slug: "billing"}},
+			Routes: []RouteContribution{
+				{Method: http.MethodGet, Pattern: "/pricing"},
+				{Method: http.MethodPost, Pattern: "/pricing/checkout"},
+				{Method: http.MethodGet, Pattern: "/projects/{id}"},
+			},
+		},
+		Tests: TestMetadata{
+			GoPackages: []string{"internal/web/templates/ui"},
+			E2E:        []string{"keyboard.spec.ts"},
+			Visual:     []string{"gallery"},
+		},
+	}
+
+	links := surfaceLinks(m)
+	assert.Equal(t, []string{"/dev/gallery/overlays", "/dev/gallery/overlays/confirm-action"}, links["gallery"])
+	assert.Equal(t, []string{"/dev/scenarios/billing"}, links["scenario"])
+	assert.Equal(t, []string{"/pricing"}, links["route"],
+		"a POST is an endpoint, not a place to look, and a pattern with a parameter is not a URL")
+
+	commands := verificationCommands(m)
+	assert.Contains(t, commands, "go test -count=1 ./internal/web/templates/ui")
+	assert.Contains(t, commands, "cd e2e && npx playwright test keyboard.spec.ts --reporter=line")
+	assert.Contains(t, commands, "./scripts/visual.sh",
+		"visual baselines only match inside the pinned container, so the command must not look like a plain test run")
+}
+
+// A module with nothing to look at and nothing to run must report empty rather
+// than absent keys, so a consumer can distinguish "no surface" from "field not
+// implemented".
+func TestSurfaceLinksAreEmptyNotMissing(t *testing.T) {
+	links := surfaceLinks(Manifest{ID: "system/observability"})
+	assert.NotNil(t, links)
+	assert.Empty(t, links)
+	assert.Empty(t, verificationCommands(Manifest{ID: "system/observability"}))
+}
+
+// The CLI must actually carry both, or the derivation is unreachable.
+func TestCLIInfoCarriesLinksAndVerify(t *testing.T) {
+	root, engine := cliProject(t)
+	var out bytes.Buffer
+	cli := CLI{Out: &out, Root: root, Engine: engine}
+	if err := cli.Run(context.Background(), []string{"info", "component/card", "--json"}); err != nil {
+		t.Fatalf("info: %v", err)
+	}
+	var payload map[string]json.RawMessage
+	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
+		t.Fatalf("decode info payload: %v", err)
+	}
+	for _, key := range []string{"links", "verify", "state", "module"} {
+		if _, ok := payload[key]; !ok {
+			t.Fatalf("info payload has no %q key: %s", key, out.String())
+		}
+	}
+}
+
+// A generated target has no base digest, so comparing one against a base always
+// reports "modified" - in every repository, forever. Three permanent phantom
+// rows in `ggg diff` teach the reader that its output is noise, which is the one
+// thing a change-report must not do. Whether generated output is stale is
+// `sync --check`'s question: it re-renders and compares bytes.
+func TestDiffIgnoresGeneratedTargets(t *testing.T) {
+	entries := []DiffEntry{}
+	lock := Lock{Modules: []LockedModule{{
+		ID: "system/static",
+		Files: []LockedFile{
+			{Path: "static/app.css", State: FileGenerated, BaseSHA256: ""},
+			{Path: "internal/thing.go", State: FileClean, BaseSHA256: "abc"},
+		},
+	}}}
+
+	for _, module := range lock.Modules {
+		for _, file := range module.Files {
+			if file.State == FileGenerated {
+				continue
+			}
+			entries = append(entries, DiffEntry{Module: module.ID, Path: file.Path})
+		}
+	}
+
+	require.Len(t, entries, 1, "a generated payload must not appear in a change report")
+	assert.Equal(t, "internal/thing.go", entries[0].Path)
+}
+
+// The manifest digest of a generated payload is written by `registry build` and
+// read by nothing: readPlannedPayloads returns early on FileClassGenerated,
+// before the check that raises "payload ... sha256 mismatch". Recording one
+// rewrote manifests on every build for no consumer.
+func TestRegistryBuildRecordsNoDigestForGeneratedPayloads(t *testing.T) {
+	root := repoRootFromTest(t)
+	raw, err := os.ReadFile(filepath.Join(root, "registry", "modules", "system", "static", "module.json"))
+	require.NoError(t, err)
+
+	var document ModuleDocument
+	require.NoError(t, decodeStrict(raw, &document))
+
+	generated := 0
+	for _, file := range document.Module.Files {
+		if file.Class != FileClassGenerated {
+			continue
+		}
+		generated++
+		assert.Emptyf(t, file.SHA256,
+			"%s is generated, so its digest is never verified; recording one is churn that rewrites this manifest on every build", file.Target)
+	}
+	require.Positive(t, generated, "system/static declares no generated payload, so this proves nothing")
+}
+
+func repoRootFromTest(t *testing.T) string {
+	t.Helper()
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+	return filepath.Join(wd, "..", "..")
 }

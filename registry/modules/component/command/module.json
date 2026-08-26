@@ -33,7 +33,7 @@
         "source": "static/ui/command.js",
         "target": "static/ui/command.js",
         "class": "asset",
-        "sha256": "51e8c32db57468f7dc1197f3c9360e9c1f8ebe648a56b9a71d971e427adf5f64",
+        "sha256": "1268d11a3b1a64d06c5aec4d54eb962a4a5470950664bb7a0a45d6992700d82d",
         "rewrite_module": false,
         "contract": false
       }

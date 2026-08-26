@@ -1,11 +1,12 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"context"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // FlagsData carries the flag table plus the create-form state (kept on 422
@@ -44,178 +45,214 @@ templ flagCreateCard(d FlagsData) {
 		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
 		<form hx-post="/admin/flags" hx-target="#flag-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="flag-create-form" class="space-y-4">
 			if d.CreateErr != "" {
-				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
 					{ d.CreateErr }
 				}
 			}
-			<div class="grid sm:grid-cols-2 gap-4">
-				<div>
-					<label class="label" for="flag-key">{ i18n.T(ctx, "flags.key_label") }</label>
-					<input id="flag-key" type="text" name="key" value={ d.CreateKey } placeholder={ i18n.T(ctx, "flags.key_placeholder") } class="input"/>
-				</div>
-				<div>
-					<label class="label" for="flag-rollout">{ i18n.T(ctx, "flags.rollout_label") }</label>
-					<input id="flag-rollout" type="number" name="rollout" value="100" min="0" max="100" class="input"/>
-				</div>
-			</div>
-			<div>
-				<label class="label" for="flag-description">{ i18n.T(ctx, "flags.description_label") }</label>
-				<input id="flag-description" type="text" name="description" value={ d.CreateDescription } placeholder={ i18n.T(ctx, "flags.description_placeholder") } class="input"/>
-			</div>
-			<div class="form-actions">
-				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "flags.create") }</button>
+			@ui.Grid(ui.GridOpts{Cols: 2}) {
+				@ui.Field(ui.FieldOpts{Name: "key", Label: i18n.T(ctx, "flags.key_label")}) {
+					@ui.TextInput(ui.TextInputOpts{Name: "key", Value: d.CreateKey, Placeholder: i18n.T(ctx, "flags.key_placeholder")})
+				}
+				@ui.Field(ui.FieldOpts{Name: "rollout", Label: i18n.T(ctx, "flags.rollout_label")}) {
+					@ui.NumberInput(ui.NumberInputOpts{Name: "rollout", Value: "100", Min: "0", Max: "100"})
+				}
+			}
+			@ui.Field(ui.FieldOpts{Name: "description", Label: i18n.T(ctx, "flags.description_label")}) {
+				@ui.TextInput(ui.TextInputOpts{Name: "description", Value: d.CreateDescription, Placeholder: i18n.T(ctx, "flags.description_placeholder")})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
 				@ui.Spinner(ui.SpinnerOpts{})
-			</div>
+			}
 		</form>
 	</div>
 }
 
+func adminFlagColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "key", Label: i18n.T(ctx, "flags.col_key")},
+		{Key: "description", Label: i18n.T(ctx, "flags.col_description")},
+		{Key: "enabled", Label: i18n.T(ctx, "flags.col_enabled")},
+		{Key: "rollout", Label: i18n.T(ctx, "flags.col_rollout")},
+		{Key: "actions", Label: i18n.T(ctx, "flags.col_actions"), Align: ui.AlignEnd},
+	}
+}
+
 templ adminFlagsTable(d FlagsData) {
-	<div class="table-card max-w-3xl">
-		<table class="table" data-testid="flags-table">
-			<thead>
-				<tr>
-					<th>{ i18n.T(ctx, "flags.col_key") }</th>
-					<th>{ i18n.T(ctx, "flags.col_description") }</th>
-					<th>{ i18n.T(ctx, "flags.col_enabled") }</th>
-					<th>{ i18n.T(ctx, "flags.col_rollout") }</th>
-					<th class="text-right">{ i18n.T(ctx, "flags.col_actions") }</th>
-				</tr>
-			</thead>
-			<tbody>
-				if len(d.Flags) == 0 {
-					<tr><td colspan="5" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "flags.empty") }</td></tr>
-				}
-				for _, f := range d.Flags {
-					<tr data-testid="flag-row">
-						<td><a href={ "/admin/flags/" + f.Key } class="font-medium text-brand-text"><code class="code-chip">{ f.Key }</code></a></td>
-						<td class="text-fg-muted text-xs">{ f.Description }</td>
-						<td>
-							if AdminWrite(ctx) {
-								<form hx-post={ fmt.Sprintf("/admin/flags/%s/toggle", f.Key) } hx-disable="this" class="inline">
-									<button type="submit" class={ "badge", "badge-" + string(onOffKind(f.Enabled)), "cursor-pointer" } data-testid={ "flag-toggle-" + f.Key }>
-										if f.Enabled {
-											{ i18n.T(ctx, "flags.on") }
-										} else {
-											{ i18n.T(ctx, "flags.off") }
-										}
-									</button>
-								</form>
-							} else {
-								if f.Enabled {
-									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
-								} else {
-									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindNeutral})
-								}
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "flags.title"),
+		HiddenCaption: true,
+		Columns:       adminFlagColumns(ctx),
+		RowCount:      len(d.Flags),
+		Empty:         adminFlagsEmpty(),
+		Attrs:         ui.Attrs{TestID: "flags-table", Class: "max-w-3xl"},
+	}) {
+		for _, f := range d.Flags {
+			<tr id={ "flag-row-" + f.Key } data-testid="flag-row">
+				<td>
+					@ui.Link(ui.LinkOpts{Label: f.Key, Href: "/admin/flags/" + f.Key, Attrs: ui.Attrs{Class: "font-medium"}})
+				</td>
+				<td class="text-fg-muted text-xs">{ f.Description }</td>
+				<td>
+					if AdminWrite(ctx) {
+						<form hx-post={ fmt.Sprintf("/admin/flags/%s/toggle", f.Key) } hx-disable="this" class="inline">
+							@ui.ToggleButton(ui.ToggleButtonOpts{
+								Label: onOffLabel(ctx, f.Enabled),
+								On:    f.Enabled,
+								Size:  ui.SizeXS,
+								Attrs: ui.Attrs{TestID: "flag-toggle-" + f.Key},
+							})
+						</form>
+					} else {
+						@ui.Badge(ui.BadgeOpts{Text: onOffLabel(ctx, f.Enabled), Kind: onOffKind(f.Enabled)})
+					}
+				</td>
+				<td>
+					if AdminWrite(ctx) {
+						<form hx-post={ fmt.Sprintf("/admin/flags/%s/rollout", f.Key) } hx-disable="this" class="flex items-center gap-2">
+							// Name stays "rollout" for every row because that is what
+							// the handler reads, so the element id comes from ID.
+							@ui.Field(ui.FieldOpts{
+								ID:          "rollout-" + f.Key,
+								Name:        "rollout",
+								Label:       i18n.T(ctx, "flags.rollout_aria", f.Key),
+								HiddenLabel: true,
+							}) {
+								@ui.NumberInput(ui.NumberInputOpts{
+									ID: "rollout-" + f.Key, Name: "rollout",
+									Value: fmt.Sprint(f.Rollout), Min: "0", Max: "100",
+									Attrs: ui.Attrs{Class: "input-xs w-20", TestID: "flag-rollout-" + f.Key},
+								})
 							}
-						</td>
-						<td>
-							if AdminWrite(ctx) {
-								<form hx-post={ fmt.Sprintf("/admin/flags/%s/rollout", f.Key) } hx-disable="this" class="flex items-center gap-2">
-									<input type="number" name="rollout" value={ fmt.Sprint(f.Rollout) } min="0" max="100" class="input input-xs w-20" data-testid={ "flag-rollout-" + f.Key }/>
-									<button type="submit" class="btn btn-ghost btn-xs">{ i18n.T(ctx, "flags.set") }</button>
-								</form>
-							} else {
-								<span class="text-xs text-fg-muted">{ fmt.Sprint(f.Rollout) }%</span>
-							}
-						</td>
-						<td class="text-right">
-							if AdminWrite(ctx) {
-								<button
-									type="button"
-									hx-post={ fmt.Sprintf("/admin/flags/%s/delete", f.Key) }
-									hx-confirm={ i18n.T(ctx, "flags.delete_confirm") }
-									class="btn btn-ghost btn-xs text-danger-text"
-									data-testid={ "flag-delete-" + f.Key }
-								>
-									{ i18n.T(ctx, "flags.delete") }
-								</button>
-							}
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
-	<p class="text-xs text-fg-muted mt-3">{ i18n.T(ctx, "flags.hint") }</p>
+							@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.set"), Type: ui.TypeSubmit, Size: ui.SizeXS})
+						</form>
+					} else {
+						<span class="text-xs text-fg-muted">{ fmt.Sprint(f.Rollout) }%</span>
+					}
+				</td>
+				<td class="text-right">
+					if AdminWrite(ctx) {
+						@ui.ConfirmAction(ui.ConfirmActionOpts{
+							ID:           "flag-delete-dialog-" + f.Key,
+							TriggerLabel: i18n.T(ctx, "flags.delete_row", f.Key),
+							Title:        i18n.T(ctx, "flags.delete_title"),
+							Message:      i18n.T(ctx, "flags.delete_confirm"),
+							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+							CancelLabel:  i18n.T(ctx, "admin.cancel"),
+							Kind:         ui.KindDanger,
+							HX:           ui.HX{Post: fmt.Sprintf("/admin/flags/%s/delete", f.Key)},
+							Attrs:        ui.Attrs{TestID: "flag-delete-" + f.Key},
+						})
+					}
+				</td>
+			</tr>
+		}
+	}
+	@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true, Attrs: ui.Attrs{Class: "mt-3"}}) {
+		{ i18n.T(ctx, "flags.hint") }
+	}
+}
+
+templ adminFlagsEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "flags.empty"), Variant: ui.EmptyInline})
+}
+
+func onOffLabel(ctx context.Context, on bool) string {
+	if on {
+		return i18n.T(ctx, "flags.on")
+	}
+	return i18n.T(ctx, "flags.off")
 }
 
 // AdminFlagDetailPage shows one flag and its per-org overrides. Overrides
 // win over the global setting in both directions and are read per
 // evaluation (no cache), so they apply immediately.
 templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverridesByFlagRow, orgs []sqlc.Org) {
-	<h1 class="page-title mb-2"><code class="text-xl">{ flag.Key }</code></h1>
-	<p class="text-fg-muted text-sm mb-1">{ flag.Description }</p>
-	<p class="text-sm mb-8">
-		if flag.Enabled {
-			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
-		} else {
-			@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindNeutral})
-		}
-		<span class="text-fg-muted ml-2">{ i18n.T(ctx, "flags.col_rollout") }: { fmt.Sprint(flag.Rollout) }%</span>
-		<a href="/admin/flags" class="link ml-4 text-sm">{ i18n.T(ctx, "flags.back") }</a>
-	</p>
-
+	@ui.PageHeader(ui.PageHeaderOpts{Title: flag.Key})
+	@ui.DescriptionList(ui.DescriptionListOpts{
+		Items: []ui.DescriptionItem{
+			{Term: i18n.T(ctx, "flags.col_description"), Value: flag.Description},
+			{Term: i18n.T(ctx, "flags.col_enabled"), ValueSlot: flagStateBadge(flag)},
+			{Term: i18n.T(ctx, "flags.col_rollout"), Value: fmt.Sprint(flag.Rollout) + "%"},
+		},
+		Columns: 3,
+		Attrs:   ui.Attrs{Class: "mb-6"},
+	})
+	@ui.BackLink(ui.BackLinkOpts{Label: i18n.T(ctx, "flags.back"), Href: "/admin/flags", Attrs: ui.Attrs{Class: "mb-8"}})
 	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "flags.overrides_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
-	<div class="table-card max-w-3xl mb-6" data-testid="flag-overrides">
-		if len(overrides) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "flags.overrides_empty"), Variant: ui.EmptyInline})
-		} else {
-			<table class="table">
-				<thead>
-					<tr><th>{ i18n.T(ctx, "flags.col_org") }</th><th>{ i18n.T(ctx, "flags.col_override") }</th><th class="text-right">{ i18n.T(ctx, "flags.col_actions") }</th></tr>
-				</thead>
-				<tbody>
-					for _, o := range overrides {
-						<tr data-testid={ "flag-override-" + o.ClerkOrgID }>
-							<td class="font-medium">{ o.Name }</td>
-							<td>
-								if o.OverrideEnabled {
-									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
-								} else {
-									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindDanger})
-								}
-							</td>
-							<td class="text-right">
-								if AdminWrite(ctx) {
-									<button
-										type="button"
-										hx-post={ "/admin/flags/" + flag.Key + "/overrides/" + o.ClerkOrgID + "/delete" }
-										hx-confirm={ i18n.T(ctx, "flags.override_delete_confirm") }
-										class="btn btn-ghost btn-xs text-danger-text"
-										data-testid={ "flag-override-delete-" + o.ClerkOrgID }
-									>
-										{ i18n.T(ctx, "flags.override_delete") }
-									</button>
-								}
-							</td>
-						</tr>
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "flags.overrides_heading"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "org", Label: i18n.T(ctx, "flags.col_org")},
+			{Key: "override", Label: i18n.T(ctx, "flags.col_override")},
+			{Key: "actions", Label: i18n.T(ctx, "flags.col_actions"), Align: ui.AlignEnd},
+		},
+		RowCount: len(overrides),
+		Empty:    adminFlagOverridesEmpty(),
+		Attrs:    ui.Attrs{TestID: "flag-overrides", Class: "max-w-3xl mb-6"},
+	}) {
+		for _, o := range overrides {
+			<tr id={ "flag-override-row-" + o.ClerkOrgID } data-testid={ "flag-override-" + o.ClerkOrgID }>
+				<td class="font-medium">{ o.Name }</td>
+				<td>
+					if o.OverrideEnabled {
+						@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.on"), Kind: ui.KindSuccess})
+					} else {
+						@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "flags.off"), Kind: ui.KindDanger})
 					}
-				</tbody>
-			</table>
+				</td>
+				<td class="text-right">
+					if AdminWrite(ctx) {
+						@ui.ConfirmAction(ui.ConfirmActionOpts{
+							ID:           "flag-override-delete-dialog-" + o.ClerkOrgID,
+							TriggerLabel: i18n.T(ctx, "flags.override_delete_row", o.Name),
+							Title:        i18n.T(ctx, "flags.override_delete_title"),
+							Message:      i18n.T(ctx, "flags.override_delete_confirm"),
+							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+							CancelLabel:  i18n.T(ctx, "admin.cancel"),
+							Kind:         ui.KindDanger,
+							HX:           ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides/" + o.ClerkOrgID + "/delete"},
+							Attrs:        ui.Attrs{TestID: "flag-override-delete-" + o.ClerkOrgID},
+						})
+					}
+				</td>
+			</tr>
 		}
-	</div>
-
+	}
 	if AdminWrite(ctx) {
 		<form hx-post={ "/admin/flags/" + flag.Key + "/overrides" } hx-swap="none" novalidate hx-disable="this" class="card max-w-3xl space-y-4" data-testid="flag-override-form">
 			<div class="grid sm:grid-cols-3 gap-4 items-end">
-				<div>
-					<label class="label" for="override-org">{ i18n.T(ctx, "flags.override_org_label") }</label>
-					<select id="override-org" name="org" class="input">
-						for _, o := range orgs {
-							<option value={ o.ClerkOrgID }>{ o.Name }</option>
-						}
-					</select>
-				</div>
-				<div>
-					<label class="label" for="override-state">{ i18n.T(ctx, "flags.override_state_label") }</label>
-					<select id="override-state" name="state" class="input">
-						<option value="on">{ i18n.T(ctx, "flags.on") }</option>
-						<option value="off">{ i18n.T(ctx, "flags.off") }</option>
-					</select>
-				</div>
-				<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "flags.override_add") }</button>
+				@ui.Field(ui.FieldOpts{Name: "org", Label: i18n.T(ctx, "flags.override_org_label")}) {
+					@ui.Select(ui.SelectOpts{Name: "org", Options: orgOptions(orgs)})
+				}
+				@ui.Field(ui.FieldOpts{Name: "state", Label: i18n.T(ctx, "flags.override_state_label")}) {
+					@ui.Select(ui.SelectOpts{Name: "state", Options: []ui.Option{
+						{Value: "on", Label: i18n.T(ctx, "flags.on")},
+						{Value: "off", Label: i18n.T(ctx, "flags.off")},
+					}})
+				}
+				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.override_add"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
 			</div>
 		</form>
 	}
+}
+
+templ flagStateBadge(flag sqlc.FeatureFlag) {
+	@ui.Badge(ui.BadgeOpts{Text: onOffLabel(ctx, flag.Enabled), Kind: onOffKind(flag.Enabled)})
+}
+
+templ adminFlagOverridesEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "flags.overrides_empty"), Variant: ui.EmptyInline})
+}
+
+// orgOptions turns the org list into select options. Declared here rather than
+// inline so both the override form and the schedule scope select read the same
+// shape.
+func orgOptions(orgs []sqlc.Org) []ui.Option {
+	out := make([]ui.Option, 0, len(orgs))
+	for _, o := range orgs {
+		out = append(out, ui.Option{Value: o.ClerkOrgID, Label: o.Name})
+	}
+	return out
 }

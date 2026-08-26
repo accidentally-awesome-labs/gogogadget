@@ -19,7 +19,7 @@
         "source": "internal/web/templates/changelog.templ",
         "target": "internal/web/templates/changelog.templ",
         "class": "templ",
-        "sha256": "30af1bcf10a5cff8eb7d3061a0afafe64ed91a3e844f4521a4d957ff60cb6705",
+        "sha256": "419b3d6dc1f0df1b73871c95232566ad9cce287b0d9e21b701449386cc6d058b",
         "rewrite_module": true,
         "contract": false
       }

@@ -47,8 +47,14 @@ rm -f tmp/e2e-visual-server
 go build -o tmp/e2e-visual-server ./cmd/server
 
 echo "==> Starting test server on :18080"
+# CLERK_* are blanked deliberately. The server auto-loads `.env` in development,
+# so a developer with a real Clerk dev key boots clerk-js into every page - which
+# mounts a user button and a portal that CI, having no `.env`, never renders.
+# Baselines recorded here would then differ from CI's by real pixels, and the
+# person who regenerated them would have no idea why.
 APP_ENV=test PORT=18080 DATABASE_URL="${HOST_DB}" \
   DEV_AUTH_BYPASS=true CLERK_PORTAL_URL=https://accounts.example.test \
+  CLERK_PUBLISHABLE_KEY= CLERK_SECRET_KEY= \
   TEST_NOW=2026-01-15T00:00:00Z RATE_LIMIT_RPM=100000 \
   ./tmp/e2e-visual-server &
 SERVER_PID=$!

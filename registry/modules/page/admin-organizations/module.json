@@ -78,6 +78,7 @@
         "admin.orgs.col_name": "Name",
         "admin.orgs.col_plan": "Plan",
         "admin.orgs.col_slug": "Slug",
+        "admin.orgs.empty": "No organizations yet.",
         "admin.orgs.title": "Organizations"
       },
       "es": {
@@ -86,6 +87,7 @@
         "admin.orgs.col_name": "Nombre",
         "admin.orgs.col_plan": "Plan",
         "admin.orgs.col_slug": "Slug",
+        "admin.orgs.empty": "Aún no hay organizaciones.",
         "admin.orgs.title": "Organizaciones"
       }
     }

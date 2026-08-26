@@ -2,7 +2,11 @@ package ui
 
 // DateFieldOpts is a date input.
 type DateFieldOpts struct {
-	Name        string
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
 	Value       string
 	Min, Max    string
 	Hint, Error string
@@ -15,9 +19,12 @@ type DateFieldOpts struct {
 // has to re-earn all three and usually loses the keyboard.
 templ DateField(o DateFieldOpts) {
 	<input
-		{ root("date-field", "input", o.Attrs)... }
-		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
-		type="date" id={ o.Name } name={ o.Name } value={ o.Value }
+		{ controlRoot("date-field", "input", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="date"
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		value={ o.Value }
 		if o.Min != "" {
 			min={ o.Min }
 		}

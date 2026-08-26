@@ -5,8 +5,9 @@ section: Features
 weight: 12
 ---
 
-The frontend is server-rendered templ with htmx for partial updates and ~5 KB
-of Alpine.js (CSP build) for client state. No bundler, no SPA, no hydration.
+The frontend is server-rendered templ with htmx for partial updates and the
+Alpine.js CSP build (`static/vendor/alpine-csp.min.js`, 61,522 bytes on the
+wire, ~20 KB gzipped) for client state. No bundler, no SPA, no hydration.
 
 ## The fragment rule
 
@@ -175,19 +176,36 @@ htmx dispatches a bubbling `toast` event; the `toastRoot` component in
 
 ## Row deletes
 
-Deletes are row swaps, confirmed in the browser:
+Deletes are row swaps, confirmed in a real dialog. `hx-confirm` is gone from
+production: it calls `window.confirm`, whose copy cannot be translated,
+styled or asserted on, and which only ever gated an htmx request. The
+contract itself is unchanged — the same `hx-delete` now rides the dialog's
+confirm control:
 
-```html
-<button
-  hx-delete="/app/projects/42"
-  hx-confirm="Delete this project? This cannot be undone."
-  hx-target="closest tr"
-  hx-swap="outerHTML"
->Delete</button>
+```go
+@ui.ConfirmAction(ui.ConfirmActionOpts{
+	ID:           fmt.Sprintf("project-delete-%d", p.ID),
+	TriggerLabel: i18n.T(ctx, "projects.delete_row", p.Name),
+	TriggerIcon:  ui.IconDelete,
+	Title:        i18n.T(ctx, "projects.delete_title"),
+	Message:      i18n.T(ctx, "projects.delete_confirm"),
+	ConfirmLabel: i18n.T(ctx, "projects.delete_action"),
+	CancelLabel:  i18n.T(ctx, "projects.cancel"),
+	Kind:         ui.KindDanger,
+	HX: ui.HX{
+		Delete: fmt.Sprintf("/app/projects/%d", p.ID),
+		Target: "closest tr", Swap: "outerHTML",
+	},
+})
 ```
 
 The handler returns `200` with an empty body; htmx replaces the `<tr>` with
-nothing.
+nothing. Note the trigger label carries the row's subject: forty controls all
+called "Delete" are indistinguishable to a screen reader and to a test.
+
+`Attrs.HX.Confirm` still exists and still emits `hx-confirm`; it is for
+dev-only surfaces and menu items where the prompt is not user-facing product
+copy.
 
 ## Search and pagination
 
@@ -215,7 +233,7 @@ nothing.
 
 The content security policy is `script-src 'self'`: **no inline scripts and
 no inline Alpine expressions**. All component logic is registered with
-`Alpine.data` in `static/app.js`; templates only reference it:
+`Alpine.data`; templates only reference it by name:
 
 ```html
 <div x-data="dropdown">
@@ -224,12 +242,27 @@ no inline Alpine expressions**. All component logic is registered with
 </div>
 ```
 
-Shipped components: `themeToggle`, `mobileNav`, `dismissible`, `copy`,
-`slugify`, `selectOrg`, `toastRoot`, `phConsent`. `x-cloak` hides pre-boot
-markup (a CSS rule in `input.css`), and the vendored `@alpinejs/focus` plugin
-is loaded for focus trapping on modal-style components. New client behavior
-means a new `Alpine.data` registration — never an inline `x-data="{ … }"`
-object literal.
+Client logic has two owners. The **shell** is hand-owned in `static/app.js`:
+`themeToggle`, `mobileNav`, `dismissible`, `copy`, `slugify`, `selectOrg`,
+`toastRoot`. Everything else belongs to the component module that needs it,
+in `static/ui/*.js`, and registers on `alpine:init`: `uiDialog`, `uiMenu`,
+`uiContextMenu`, `uiHoverCard`, `uiTabs`, `uiTree`, `uiPanels`, `uiGrid`,
+`uiCarousel`, `uiCommand`, `uiKanban`, `uiChart`, `uiCalendar`,
+`uiDateRange`, `uiMarkdownEditor`, `uiDropzone`, `uiCharCounter`, `uiSlug`,
+`uiTags`.
+
+`headScripts` in `layouts.templ` loads them in a load-bearing order:
+`app.js` (no `defer`, so the theme IIFE runs pre-paint) → htmx →
+`@alpinejs/focus` → every `ui.AlpineFragments` entry → the generated
+`ui-engines.js` and `ui-components.js` → `alpine-csp.min.js` last. A
+fragment that ran after Alpine booted would register a component nothing can
+see, and under CSP an unregistered `x-data` name is silently inert rather
+than an error — which is why `ui-components.js` publishes the expected names
+for a dev check to compare against.
+
+`x-cloak` hides pre-boot markup (a CSS rule in `input.css`). New client
+behavior means a new `Alpine.data` registration in the owning module's
+fragment — never an inline `x-data="{ … }"` object literal.
 
 Two rules the CSP build forces:
 
@@ -258,8 +291,9 @@ Every colour a template can name is a token, and the `.dark` block in
 `.templ` file is a build failure (see [Enforcement](#enforcement)): it means a
 token is missing, and the fix is to add the token — not the variant.
 
-Open `/dev/gallery` and toggle the theme: nothing on that page carries a
-per-theme class, so everything that changes changed because a token did.
+Open any `/dev/gallery/{family}` page and toggle the theme: nothing there
+carries a per-theme class, so everything that changes changed because a token
+did.
 
 ## Design system
 
@@ -269,7 +303,7 @@ Three layers, one home each. Nothing lives in two places.
 |---|---|---|
 | **Tokens** | `input.css` `@theme` + `.dark`; `theme.go` for email | every colour, the layout dimensions, the z-index scale |
 | **Component classes** | `input.css` `@layer components` | every recurring visual: `.btn`, `.badge`, `.alert`, `.card`, `.table-card`, `.page-title` … |
-| **templ components** | `components.templ`, `icons.templ` | every recurring *structure*: `@PageHeader`, `@TableCard`, `@Pagination`, `@Icon` … |
+| **templ components** | `internal/web/templates/ui/*.templ` (package `ui`), plus `icons.templ` | every recurring *structure*: `@ui.PageHeader`, `@ui.DataTable`, `@ui.Pagination`, `@ui.Icon` … |
 
 Templates consume those and nothing else — no raw hex, no palette ramp, no
 `dark:` variant, no `!` override, no arbitrary length.
@@ -327,11 +361,20 @@ variant class still renders the whole component (`class="btn-primary"` works;
 `class="btn btn-primary"` is the house style).
 
 - **Buttons** — `.btn` + `.btn-primary` / `.btn-ghost` / `.btn-danger` /
-  `.btn-inverse`, crossed with `.btn-sm` / `.btn-xs` / `.btn-icon`. The size
-  axis is what removed 26 `!padding` overrides.
+  `.btn-inverse`, crossed with `.btn-sm` / `.btn-xs` / `.btn-lg` /
+  `.btn-icon`. The size axis is what removed 26 `!padding` overrides, and
+  each rung names a `--control-height-*` so a button and the input beside it
+  line up.
 - **Inputs** — `.input` + `.input-sm` / `.input-xs`, `.label`, `.field-error`.
-- **State** — `.badge-*` (six kinds), `.alert-*`, `.banner-*` (full-bleed shell
-  notices), `.toast-*`.
+- **State** — one shared matrix. `.k-brand|info|success|warn|danger|neutral`
+  (and the per-family aliases `.badge-*`, `.alert-*`, `.banner-*`,
+  `.toast-*`) each declare the same six variables — `--ui-solid`,
+  `--ui-solid-fg`, `--ui-tint`, `--ui-tint-fg`, `--ui-line`, `--ui-text` —
+  and `.badge`, `.alert`, `.banner` and `.toast` read them. Every family
+  therefore supports every kind by construction, instead of needing a rule
+  per family-kind pair. It did not before, and `alert-brand`,
+  `alert-neutral`, `banner-brand`, `banner-success` and `banner-neutral`
+  rendered unstyled.
 - **Structure** — `.page-section`, `.page-narrow`, `.page-header`,
   `.table-card`, `.table-empty`, `.card`, `.card-actions`, `.toolbar`,
   `.form-actions`, `.meter` / `.meter-fill`, `.count-badge`, `.code-chip`.
@@ -345,45 +388,67 @@ variant class still renders the whole component (`class="btn-primary"` works;
 Utility layer beats component layer in Tailwind v4, so `text-danger-text` on a
 `.btn-ghost` wins with no `!` needed. That is why the `!` rule can be absolute.
 
-### templ components
+### The component contract
 
-`Kind` is the semantic colour axis shared by `Badge`, `Alert` and `Banner`:
-`KindBrand`, `KindInfo`, `KindSuccess`, `KindWarn`, `KindDanger`,
-`KindNeutral`. Domain values map onto it next to their data (`jobKind`,
-`subKind`, `announcementKind`, `contentStatusKind`, `onOffKind`) — that mapping
-is the only domain-specific part; the shades are not.
+Reusable presentation lives in `internal/web/templates/ui` (`package ui`),
+which imports templ and stdlib leaf packages and **never**
+`internal/web/templates`, `billing`, `identity`, sqlc or any other domain
+package. Page and domain templates stay in `package templates` and import
+`ui`. The compiler enforces that direction, which is what a single
+`components.templ` could not do.
+
+Every exported renderer has exactly one shape:
 
 ```go
-templ Badge(text string, kind Kind)
-templ BadgeTagged(text string, kind Kind, testID string)
-templ Alert(kind Kind, role, class, testID string)   // children
-templ Banner(kind Kind, role, testID string)         // children
-templ PageHeader(title string)                       // children = right-hand actions
-templ SectionHeading(text, class string)
-templ TableCard(testID string)                       // children
-templ TableEmpty(text string)
-templ Pagination(page, totalPages int, baseURL, target string)
-templ SearchToolbar(name, value, placeholder, ariaLabel, getURL, target, indicatorID, testID string)
-templ EmptyState(title, body string)                 // children = CTA
-templ StatCard(title, value, sub string)
-templ PlanCard(plan billing.Plan, current bool)      // children = CTA
-templ FormField(name, label, inputType, value, err, placeholder string, required bool)
-templ FieldError(err string)
-templ Meter(pct int, testID string)
-templ CopyRow(value, copyLabel, copiedLabel string)
-templ DefinitionList(rows []DefRow)
-templ Tabs(items []NavItem, activePath string)
-templ ErrorPage(code, message, detail string, showHome bool)
-templ Icon(name IconName, class string, attrs ...templ.Attributes)
-templ Spinner()
+templ Name(o NameOpts)   // NameOpts embeds ui.Attrs as the field Attrs
 ```
 
-`role` on `Alert`/`Banner` is `"alert"` for something the user must act on and
-`"status"` for a confirmation: `role="alert"` is assertive and interrupts a
-screen reader mid-sentence, which a success message has not earned.
+`Attrs` is the one attribute bundle a caller may set: `ID`, `Class`,
+`TestID`, `Title`, `Decorative`, `Data`, and the CSP-safe named `Alpine` and
+`HX` structs. There is deliberately **no arbitrary-attribute map**, so a
+caller cannot override the `role`, `aria-*`, `tabindex`, `type` or base class
+the component owns. A component builds one `templ.Attributes` map and spreads
+it once on its root; `Class` is additive and `Data` reserves `data-ui` and
+`data-ui-*`. Primary content is templ children; named secondary slots are
+`templ.Component` fields that omit their wrapper when nil.
 
-`testID` parameters emit `data-testid` only when non-empty, so a component can
-be adopted without inventing test ids for sites that never had them.
+Four tests in `internal/web/templates/ui/contract_test.go` hold that line:
+`TestEveryExportedRendererTakesOneOptionsStruct`,
+`TestEveryOptionsStructEmbedsAttrs`,
+`TestAttrsHasNoArbitraryAttributeEscapeHatch` and
+`TestEveryRendererPropagatesItsAttrs`.
+
+Values come from closed enums: `Kind` in `ui/ui.go`, and `Size`, `Emphasis`,
+`Action`, `ButtonType`, `InputType`, `Live`, `Density`, `Orientation`,
+`SortDirection`, `Align`, `Side`, `Placement`, `Gap`, `Padding`, `Width`,
+`Height`, `Ratio` and `Breakpoint` in `ui/enums.go`. Each exposes its
+complete ordered plural slice (`ui.Kinds`, `ui.Sizes`, …) and a normalizer:
+an empty or unrecognised value collapses to the documented base
+(`NormalizeKind` returns `KindNeutral`), so a component can never render with
+a half-applied variant class like `badge-`.
+
+`Kind` is the semantic colour axis shared by `Badge`, `Notice`, `Banner` and
+the toast. Domain values map onto it next to their data (`jobKind`,
+`subKind`, `announcementKind`, `contentStatusKind`, `onOffKind`) — that
+mapping is the only domain-specific part; the shades are not. `Live` replaces
+the old free-form `role` parameter: `LivePolite` renders `role="status"`,
+`LiveAssertive` renders `role="alert"`, and `LiveOff` renders neither.
+`role="alert"` interrupts a screen reader mid-sentence, which a success
+message has not earned, so the choice is now a typed one.
+
+There is **no hand-maintained signature list here**, on purpose: 172
+renderers ship across 143 element and component modules, and a list that long
+rots. The generated
+inventory is authoritative in three places that cannot disagree, because all
+three come from the same manifests:
+
+- `go run ./cmd/ggg info component/<name>` — signature, files, gallery link,
+  verification commands.
+- `internal/web/templates/ui/reference_gen.go` — `ReferenceRegistry`, one
+  `Reference{Name, Family, Module, Signature, Summary, Guidance, Keyboard,
+  States}` per installed renderer.
+- `/dev/gallery/{family}/{component}` — the same record, rendered, in every
+  state.
 
 ### Chrome configuration
 
@@ -396,7 +461,8 @@ startup restyles the shell without touching a template.
 ### Enforcement
 
 `internal/web/templates/designsystem_test.go` reads every `*.templ` in the
-package and fails the build on any of these, with **zero exemptions**:
+`templates` package and fails the build on any of these, with **zero
+exemptions**:
 
 | Rule | Because |
 |---|---|
@@ -408,26 +474,59 @@ package and fails the build on any of these, with **zero exemptions**:
 | no arbitrary length (`text-[10px]`) | sizes come from the scales |
 | no templ expression inside a quoted attribute | `class="badge { f(x) }"` is emitted literally and renders unstyled — this rule exists because it happened |
 
-A companion test walks every `IconName` and asserts it renders an `<svg>`, so a
-new const cannot be added without its switch arm.
+A companion test walks every `IconName` and asserts it renders an `<svg>`, so
+a new const cannot be added without its switch arm.
+
+That scanner covers the `templates` package only. The `ui` package is held to
+the structural contract above by `ui/contract_test.go`, and its rendered
+output is held by the visual and axe sweeps over
+`/dev/gallery/{family}`. Alongside them, `designsystem_test.go` also asserts
+facts about the built stylesheet rather than the templates:
+`TestEveryKindIsStyledForEveryStateFamily` (six kinds × badge/alert/banner/
+toast), `TestEverySizeIsStyledForEveryControlFamily`,
+`TestBuiltStylesheetCarriesKindVariables`, `TestDarkModeFlipsInteractionTokens`,
+`TestReducedMotionCollapsesMotionTokens`, and
+`TestGalleryCoversEveryInstalledComponent`, which compares the installed
+component registry against the `data-ui` values the gallery actually renders.
 
 ### Which layer does my change belong to?
 
 1. **A new colour** → a token in `@theme` (and `.dark` if it flips).
-2. **A recurring visual** → a component class in `@layer components`.
-3. **A recurring structure** → a templ component in `components.templ`.
+2. **A recurring visual** → a component class in `@layer components`, or the
+   owning module's own CSS fragment.
+3. **A recurring structure** → a new renderer in
+   `internal/web/templates/ui/`, declared by a `component/<name>` module.
 4. **A one-off composition** → utilities, drawn from the token scales.
 
 If you are about to type the same utility string a third time, it is step 2 or 3.
 
 ## Component gallery
 
-`/dev/gallery` renders every token and every component in every variant on one
-page. It is the reference to read before adding UI, and it is a visual baseline
-(`gallery-light` / `gallery-dark`) plus an axe sweep, so a regression anywhere
-in the component layer fails `make e2e`.
+The gallery is generated from the installed UI manifests, not hand-written:
 
-The route is registered only when `DEV_AUTH_BYPASS` is on, which
+```text
+GET /dev/gallery                          every family
+GET /dev/gallery/{family}                 every component in one family
+GET /dev/gallery/{family}/{component}     one component, every state
+GET /dev/scenarios/{scenario}             a realistic composed page
+```
+
+The ten families are `foundations`, `actions`, `forms`, `navigation`,
+`feedback`, `overlays`, `data`, `communication`, `layout` and `advanced`. A
+component detail page renders its exact signature, when-to-use guidance, its
+keyboard contract, every declared state, and its native fallback — all read
+from `ReferenceRegistry`, so it cannot describe a component the tree does not
+have. Scenario pages compose whole surfaces (`dashboard`, `resource-list`,
+`settings`, `billing`, `analytics`, `planning`, `communication`,
+`system-states`, …) from deterministic dev fixtures.
+
+Each family page is a visual baseline (`family-<name>-light` /
+`family-<name>-dark`) and each scenario is one at desktop and mobile; both are
+generated into `e2e/generated/surfaces.ts` and swept by axe. A regression
+anywhere in the component layer therefore fails a named screenshot instead of
+leaking into a page nobody captures.
+
+These routes are registered only when `DEV_AUTH_BYPASS` is on, which
 `internal/config` refuses under `APP_ENV=production`.
 
 ## Rebranding
@@ -445,11 +544,13 @@ In order, then `make generate`:
    cannot read custom properties, so email is the one surface that inlines hex.
    Mirror the light-mode token values.
 6. **`chrome.go`** — `BrandName`, `DocsEditBase`, and the nav/footer lists.
-7. **The catalogs** — `grep GoGoGadget internal/i18n/catalog_*.go`. The product
-   name also appears inside translated prose (`email.footer`,
-   `email.*.subject`), which belongs to the catalogs: word order around a brand
-   differs per language, so it is not a template variable.
-8. `make generate`, then `make visual-update` to regenerate the baselines.
+7. **The catalogs** — the product name appears inside translated prose
+   (`email.footer`, `email.*.subject`). Those strings live in the `locales`
+   block of the module that owns them, not in `internal/i18n/catalog_*.go`,
+   which is generated: word order around a brand differs per language, so it
+   is not a template variable.
+8. `make generate`, then `make visual-update` to regenerate the baselines and
+   `make visual` to prove the new ones compare cleanly.
 
 The logo mark itself is `IconLogo` in `icons.templ` and
 `static/favicon.svg`.
@@ -457,19 +558,26 @@ The logo mark itself is `IconLogo` in `icons.templ` and
 ## Adding a page or component
 
 1. Decide the layer (see [Which layer does my change belong to?](#which-layer-does-my-change-belong-to)).
-   New markup is a templ component in `internal/web/templates/`, composed into a
-   layout (`PublicLayout`, `AppLayout`, `AdminLayout`, `DocsLayout`) — reuse
-   `@PageHeader`, `@TableCard`, `@SearchToolbar`, `@Pagination` rather than
-   retyping their utility strings.
-2. Write the handler in the matching `internal/web/handlers_*.go`, returning
-   fragments per the rule above.
-3. Register the route in `internal/web/routes.go` inside the right chain
-   (public, `appChain`, or `adminChain`).
-4. `make generate` (templ + sqlc + tailwind), then `make check`. The
-   design-system test runs there, so a raw hex or a `dark:` fails the gate.
+   A reusable renderer is a `component/<name>` module under
+   `internal/web/templates/ui/`; a page is a `page/<name>` module whose
+   template lives in `internal/web/templates/` and composes a layout
+   (`PublicLayout`, `AppLayout`, `AdminLayout`, `DocsLayout`) out of `ui.*`
+   renderers rather than retyped utility strings.
+2. Write the handler in the module's own `internal/web/page_<name>.go` or
+   `workflow_<name>.go`, returning fragments per the rule above.
+3. **Declare** the route in the module manifest's `runtime.routes` with the
+   right `scope` (`public`, `app`, `admin`, `api-read`, `api-write`, …) and
+   claim its id. `internal/web/routes.go` no longer holds registrations: the
+   mux is built from `internal/web/routes_registry_gen.go`, so an edit there
+   is undone by the next `sync`.
+4. `go run ./cmd/ggg registry build`, then `make generate` (ggg sync + templ +
+   sqlc + tailwind), then `make check`. The design-system test and the
+   no-drift check both run there.
 
-Put `data-testid` on every element a test will assert on — Playwright never
-selects by visible copy. See [Testing](/docs/testing).
+Put `data-testid` on every element a test asserts container or state identity
+on, and give every control a real accessible name so a spec can find it by
+role — the suite uses both axes and neither selects by visible copy alone.
+See [Testing](/docs/testing).
 
 ## Theme
 

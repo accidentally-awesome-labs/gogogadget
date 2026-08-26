@@ -5,6 +5,12 @@ type ToggleOption struct {
 	Value, Label string
 	Icon         IconName
 	Selected     bool
+	// HX issues the request this option makes. It lives here rather than on the
+	// group because htmx does not inherit the verb from an ancestor, so a
+	// group-level hx-post would never fire, and because a single group-level
+	// request cannot say which option the user chose - the choice is the whole
+	// point of the control.
+	HX HX
 }
 
 // ToggleGroupOpts configures a set of mutually exclusive toggles.
@@ -14,7 +20,6 @@ type ToggleGroupOpts struct {
 	Label   string
 	Options []ToggleOption
 	Size    Size
-	HX      HX
 	Attrs   Attrs
 }
 
@@ -32,6 +37,7 @@ templ ToggleGroup(o ToggleGroupOpts) {
 	>
 		for _, opt := range o.Options {
 			<button
+				{ withRequest(templ.Attributes{}, opt.HX)... }
 				type="button"
 				aria-pressed={ pressedAttr(&opt.Selected) }
 				value={ opt.Value }

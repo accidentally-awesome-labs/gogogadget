@@ -47,6 +47,9 @@ type KanbanColumnData struct {
 // KanbanOpts configures the board.
 type KanbanOpts struct {
 	ID string
+	// Label names the scrollable board region. It defaults rather than being
+	// required, because an unnamed region is announced as just "region".
+	Label string
 	// MoveURL receives every move, whether it came from a drag or the menu.
 	// One endpoint means the two paths cannot diverge.
 	MoveURL string
@@ -57,11 +60,15 @@ type KanbanOpts struct {
 
 // Kanban renders the board.
 //
-// Dragging is never the only way to move a card. Every card carries a
-// keyboard-operable "Move to..." menu that posts to the same endpoint, because a
-// board that can only be operated by dragging excludes keyboard users, screen
-// reader users, and anyone on a touch screen where a drag competes with scroll.
-// The drag is a shortcut layered on top of that menu, not a replacement for it.
+// Dragging is never the only way to move a card, and neither is scripting. Every
+// card renders its destinations as real submit buttons inside the card's own
+// move form, so a move is one click and one POST with nothing but HTML. The
+// keyboard-operable "Move to..." menu offers that same list in a tidier place,
+// and the controller hides the buttons once the menu is operable so one command
+// is not offered twice. The drag is a shortcut on top of both, not a
+// replacement: a board that can only be operated by dragging excludes keyboard
+// users, screen reader users, and anyone on a touch screen where a drag competes
+// with scroll.
 func Kanban(o KanbanOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -92,7 +99,10 @@ func Kanban(o KanbanOpts) templ.Component {
 			"id", o.ID,
 			"data-ui-engine", "sortablejs",
 			"data-kanban-move-url", o.MoveURL,
-			"data-kanban-target", o.Target))
+			"data-kanban-target", o.Target,
+			"role", "region",
+			"aria-label", kanbanBoardLabel(o),
+			"tabindex", "0"))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -173,7 +183,7 @@ func KanbanColumn(o KanbanColumnOpts) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Column.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 98, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 113, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -199,7 +209,7 @@ func KanbanColumn(o KanbanColumnOpts) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(kanbanCountLabel(o.Column))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 110, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 125, Col: 32}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -229,7 +239,7 @@ func KanbanColumn(o KanbanColumnOpts) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("Over the limit of %d.", o.Column.Limit))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 121, Col: 58}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 136, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -294,10 +304,12 @@ type KanbanCardOpts struct {
 
 // KanbanCard renders one card.
 //
-// The card is a list item carrying a real form. The form is what both paths use:
-// the menu submits it by navigation, and a drag fills in the destination and
-// submits the same form. The server's response is authoritative, so a rejected
-// move re-renders the board rather than leaving the card where it was dropped.
+// The card is a list item carrying a real form, and that one form is what every
+// path uses: the no-script buttons inside it submit it by navigation, the menu
+// posts the same fields to the same endpoint, and a drag fills in the
+// destination and submits it. The server's response is authoritative, so a
+// rejected move re-renders the board rather than leaving the card where it was
+// dropped.
 func KanbanCard(o KanbanCardOpts) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -335,7 +347,7 @@ func KanbanCard(o KanbanCardOpts) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(o.Card.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 165, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 182, Col: 48}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -367,7 +379,7 @@ func KanbanCard(o KanbanCardOpts) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(o.Card.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 175, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 192, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -406,20 +418,20 @@ func KanbanCard(o KanbanCardOpts) templ.Component {
 			var templ_7745c5c3_Var10 templ.SafeURL
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(o.MoveURL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 190, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 210, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"hidden\" data-kanban-form hx-post=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" data-kanban-form hx-post=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.MoveURL)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 193, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 212, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
@@ -432,44 +444,111 @@ func KanbanCard(o KanbanCardOpts) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(kanbanTarget(o))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 194, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 213, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" hx-swap=\"outerMorph\"><input type=\"hidden\" name=\"card\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" hx-swap=\"outerMorph\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = CSRFField(CSRFFieldOpts{}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<input type=\"hidden\" name=\"card\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Card.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 197, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 217, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\"> <input type=\"hidden\" name=\"from\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"> <input type=\"hidden\" name=\"from\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.From)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 198, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 218, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "\"> <input type=\"hidden\" name=\"to\" value=\"\" data-kanban-to> <input type=\"hidden\" name=\"position\" value=\"\" data-kanban-position></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\"><input type=\"hidden\" name=\"to\" value=\"\" data-kanban-to disabled> <input type=\"hidden\" name=\"position\" value=\"\" data-kanban-position> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(kanbanMoves(o)) > 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "    <div class=\"flex flex-wrap gap-1\" data-kanban-fallback role=\"group\" aria-label=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var15 string
+				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(kanbanMoveGroupLabel(o.Card))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 234, Col: 47}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				for _, column := range kanbanMoves(o) {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "    <button type=\"submit\" name=\"to\" value=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var16 string
+					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(column.ID)
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 241, Col: 56}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" class=\"btn btn-ghost btn-xs\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var17 string
+					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(kanbanMoveLabel(column))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/kanban.templ`, Line: 242, Col: 33}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</button>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</li>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -477,20 +556,59 @@ func KanbanCard(o KanbanCardOpts) templ.Component {
 	})
 }
 
-// kanbanMenu builds the card's command list: the caller's own items, then the
-// move destinations. The current column is excluded because moving a card to
-// where it already is does nothing.
-func kanbanMenu(o KanbanCardOpts) []MenuItem {
-	items := make([]MenuItem, 0, len(o.Card.Menu)+len(o.Columns)+1)
-	items = append(items, o.Card.Menu...)
+// kanbanBoardLabel names the scroll region. A caller may supply one through
+// Attrs; the fallback names it a board rather than leaving an unnamed region,
+// which a screen reader announces as just "region".
+func kanbanBoardLabel(o KanbanOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return "Board"
+}
 
-	moves := make([]MenuItem, 0, len(o.Columns))
+// kanbanMoves lists the columns a card can be moved to. The current column is
+// excluded because moving a card to where it already is does nothing, and no
+// move URL means there is nowhere to send a move at all.
+//
+// Both the menu and the no-script buttons read this one list, so the two paths
+// cannot come to offer different destinations.
+func kanbanMoves(o KanbanCardOpts) []KanbanColumnData {
+	if o.MoveURL == "" {
+		return nil
+	}
+	moves := make([]KanbanColumnData, 0, len(o.Columns))
 	for _, column := range o.Columns {
-		if column.ID == o.From || o.MoveURL == "" {
+		if column.ID == o.From {
 			continue
 		}
+		moves = append(moves, column)
+	}
+	return moves
+}
+
+// kanbanMoveLabel names one destination. Shared so the menu item and the submit
+// button a screen-reader user meets instead of it read identically.
+func kanbanMoveLabel(column KanbanColumnData) string {
+	return "Move to " + column.Title
+}
+
+// kanbanMoveGroupLabel names the no-script button group after its card, which is
+// what tells two identically labelled destinations apart.
+func kanbanMoveGroupLabel(card KanbanCardData) string {
+	return "Move " + card.Title
+}
+
+// kanbanMenu builds the card's command list: the caller's own items, then the
+// move destinations.
+func kanbanMenu(o KanbanCardOpts) []MenuItem {
+	destinations := kanbanMoves(o)
+	items := make([]MenuItem, 0, len(o.Card.Menu)+len(destinations)+1)
+	items = append(items, o.Card.Menu...)
+
+	moves := make([]MenuItem, 0, len(destinations))
+	for _, column := range destinations {
 		moves = append(moves, MenuItem{
-			Label: "Move to " + column.Title,
+			Label: kanbanMoveLabel(column),
 			HX: HX{
 				Post:   o.MoveURL,
 				Target: kanbanTarget(o),

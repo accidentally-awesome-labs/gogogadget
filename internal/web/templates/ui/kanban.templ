@@ -39,6 +39,9 @@ type KanbanColumnData struct {
 // KanbanOpts configures the board.
 type KanbanOpts struct {
 	ID string
+	// Label names the scrollable board region. It defaults rather than being
+	// required, because an unnamed region is announced as just "region".
+	Label string
 	// MoveURL receives every move, whether it came from a drag or the menu.
 	// One endpoint means the two paths cannot diverge.
 	MoveURL string
@@ -49,19 +52,31 @@ type KanbanOpts struct {
 
 // Kanban renders the board.
 //
-// Dragging is never the only way to move a card. Every card carries a
-// keyboard-operable "Move to..." menu that posts to the same endpoint, because a
-// board that can only be operated by dragging excludes keyboard users, screen
-// reader users, and anyone on a touch screen where a drag competes with scroll.
-// The drag is a shortcut layered on top of that menu, not a replacement for it.
+// Dragging is never the only way to move a card, and neither is scripting. Every
+// card renders its destinations as real submit buttons inside the card's own
+// move form, so a move is one click and one POST with nothing but HTML. The
+// keyboard-operable "Move to..." menu offers that same list in a tidier place,
+// and the controller hides the buttons once the menu is operable so one command
+// is not offered twice. The drag is a shortcut on top of both, not a
+// replacement: a board that can only be operated by dragging excludes keyboard
+// users, screen reader users, and anyone on a touch screen where a drag competes
+// with scroll.
 templ Kanban(o KanbanOpts) {
+	// The board scrolls sideways, so it carries a tab stop and a name. An empty
+	// board has no focusable card inside it, and a scroll container with nothing
+	// focusable is reachable by pointer only - the columns off the right edge
+	// become unreachable without a mouse exactly when there is least on screen
+	// to hint they exist.
 	<div
 		{ rootWith("kanban", "flex gap-4 overflow-x-auto pb-2", o.Attrs,
 			"x-data", "uiKanban",
 			"id", o.ID,
 			"data-ui-engine", "sortablejs",
 			"data-kanban-move-url", o.MoveURL,
-			"data-kanban-target", o.Target)... }
+			"data-kanban-target", o.Target,
+			"role", "region",
+			"aria-label", kanbanBoardLabel(o),
+			"tabindex", "0")... }
 	>
 		for _, column := range o.Columns {
 			@KanbanColumn(KanbanColumnOpts{
@@ -152,10 +167,12 @@ type KanbanCardOpts struct {
 
 // KanbanCard renders one card.
 //
-// The card is a list item carrying a real form. The form is what both paths use:
-// the menu submits it by navigation, and a drag fills in the destination and
-// submits the same form. The server's response is authoritative, so a rejected
-// move re-renders the board rather than leaving the card where it was dropped.
+// The card is a list item carrying a real form, and that one form is what every
+// path uses: the no-script buttons inside it submit it by navigation, the menu
+// posts the same fields to the same endpoint, and a drag fills in the
+// destination and submits it. The server's response is authoritative, so a
+// rejected move re-renders the board rather than leaving the card where it was
+// dropped.
 templ KanbanCard(o KanbanCardOpts) {
 	<li
 		{ rootWith("kanban-card", "card p-3 space-y-2 bg-surface-raised", o.Attrs,
@@ -182,41 +199,109 @@ templ KanbanCard(o KanbanCardOpts) {
 				@AvatarGroup(AvatarGroupOpts{People: o.Card.Assignees, Size: SizeSM})
 			}
 		</div>
-		// The move form. It is a real form with a real action, so a move works
-		// with no script at all - which is what makes the drag safe to add.
+		// The move form. It is a real form with a real action carrying real
+		// submit controls, so a move works with no script at all - which is what
+		// makes the drag safe to add. The controller hides the whole form once it
+		// is running, because from that point the card's menu offers the same
+		// destinations and the drag needs only the fields.
 		if o.MoveURL != "" {
 			<form
 				method="post"
 				action={ templ.SafeURL(o.MoveURL) }
-				class="hidden"
 				data-kanban-form
 				hx-post={ o.MoveURL }
 				hx-target={ kanbanTarget(o) }
 				hx-swap="outerMorph"
 			>
+				@CSRFField(CSRFFieldOpts{})
 				<input type="hidden" name="card" value={ o.Card.ID }/>
 				<input type="hidden" name="from" value={ o.From }/>
-				<input type="hidden" name="to" value="" data-kanban-to/>
+				// Disabled until the controller claims it: the buttons below
+				// submit the destination under this same name, and an enabled
+				// empty field would send a second, blank "to" that the server
+				// could read instead of the one the user chose.
+				<input type="hidden" name="to" value="" data-kanban-to disabled/>
 				<input type="hidden" name="position" value="" data-kanban-position/>
+				if len(kanbanMoves(o)) > 0 {
+					// Named as a group after the card, not per button: forty
+					// buttons all called "Move to In progress" are
+					// indistinguishable in a screen reader's element list, and
+					// naming each one after its card would bury the destination.
+					<div
+						class="flex flex-wrap gap-1"
+						data-kanban-fallback
+						role="group"
+						aria-label={ kanbanMoveGroupLabel(o.Card) }
+					>
+						for _, column := range kanbanMoves(o) {
+							// A submit button carrying the destination as its own
+							// name and value: the browser sends "to" because this
+							// is the control that was pressed, so no script is
+							// needed to record the choice.
+							<button type="submit" name="to" value={ column.ID } class="btn btn-ghost btn-xs">
+								{ kanbanMoveLabel(column) }
+							</button>
+						}
+					</div>
+				}
 			</form>
 		}
 	</li>
 }
 
-// kanbanMenu builds the card's command list: the caller's own items, then the
-// move destinations. The current column is excluded because moving a card to
-// where it already is does nothing.
-func kanbanMenu(o KanbanCardOpts) []MenuItem {
-	items := make([]MenuItem, 0, len(o.Card.Menu)+len(o.Columns)+1)
-	items = append(items, o.Card.Menu...)
+// kanbanBoardLabel names the scroll region. A caller may supply one through
+// Attrs; the fallback names it a board rather than leaving an unnamed region,
+// which a screen reader announces as just "region".
+func kanbanBoardLabel(o KanbanOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return "Board"
+}
 
-	moves := make([]MenuItem, 0, len(o.Columns))
+// kanbanMoves lists the columns a card can be moved to. The current column is
+// excluded because moving a card to where it already is does nothing, and no
+// move URL means there is nowhere to send a move at all.
+//
+// Both the menu and the no-script buttons read this one list, so the two paths
+// cannot come to offer different destinations.
+func kanbanMoves(o KanbanCardOpts) []KanbanColumnData {
+	if o.MoveURL == "" {
+		return nil
+	}
+	moves := make([]KanbanColumnData, 0, len(o.Columns))
 	for _, column := range o.Columns {
-		if column.ID == o.From || o.MoveURL == "" {
+		if column.ID == o.From {
 			continue
 		}
+		moves = append(moves, column)
+	}
+	return moves
+}
+
+// kanbanMoveLabel names one destination. Shared so the menu item and the submit
+// button a screen-reader user meets instead of it read identically.
+func kanbanMoveLabel(column KanbanColumnData) string {
+	return "Move to " + column.Title
+}
+
+// kanbanMoveGroupLabel names the no-script button group after its card, which is
+// what tells two identically labelled destinations apart.
+func kanbanMoveGroupLabel(card KanbanCardData) string {
+	return "Move " + card.Title
+}
+
+// kanbanMenu builds the card's command list: the caller's own items, then the
+// move destinations.
+func kanbanMenu(o KanbanCardOpts) []MenuItem {
+	destinations := kanbanMoves(o)
+	items := make([]MenuItem, 0, len(o.Card.Menu)+len(destinations)+1)
+	items = append(items, o.Card.Menu...)
+
+	moves := make([]MenuItem, 0, len(destinations))
+	for _, column := range destinations {
 		moves = append(moves, MenuItem{
-			Label: "Move to " + column.Title,
+			Label: kanbanMoveLabel(column),
 			HX: HX{
 				Post:   o.MoveURL,
 				Target: kanbanTarget(o),

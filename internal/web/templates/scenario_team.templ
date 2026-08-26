@@ -100,7 +100,7 @@ templ ScenarioTeam(gc GalleryContext) {
 					Attrs:  ui.Attrs{TestID: "team-avatars"},
 				})
 			}
-			@ui.Text(ui.TextOpts{Muted: true}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
 				{ teamSummaryLine(gc) }
 			}
 		}

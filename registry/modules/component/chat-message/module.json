@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/chat-message.templ",
         "target": "internal/web/templates/ui/chat-message.templ",
         "class": "templ",
-        "sha256": "8fbe1bc28613f8f6dce4e89072086239ecf377e67582e9535a39e95cad5de423",
+        "sha256": "a741379471d649d609eeb57a228c506ff2e0a244067f8e5b52a80412ec2332f2",
         "rewrite_module": true,
         "contract": true
       }

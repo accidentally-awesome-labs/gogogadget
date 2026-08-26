@@ -67,7 +67,7 @@ func ComponentReference(o referenceView) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = ui.Text(ui.TextOpts{Attrs: ui.Attrs{TestID: "component-summary"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ui.Text(ui.TextOpts{Size: ui.SizeSM, Attrs: ui.Attrs{TestID: "component-summary"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -190,7 +190,7 @@ func ComponentReference(o referenceView) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Text(ui.TextOpts{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Text(ui.TextOpts{Size: ui.SizeSM}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -238,7 +238,7 @@ func ComponentReference(o referenceView) templ.Component {
 					}
 					return nil
 				})
-				templ_7745c5c3_Err = ui.Text(ui.TextOpts{}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.Text(ui.TextOpts{Size: ui.SizeSM}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -266,7 +266,7 @@ func ComponentReference(o referenceView) templ.Component {
 					}
 					return nil
 				})
-				templ_7745c5c3_Err = ui.Text(ui.TextOpts{Muted: true}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var14), templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var14), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -315,7 +315,7 @@ func ComponentReference(o referenceView) templ.Component {
 					}
 					return nil
 				})
-				templ_7745c5c3_Err = ui.Text(ui.TextOpts{Muted: true}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var17), templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var17), templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -372,7 +372,7 @@ func ComponentReference(o referenceView) templ.Component {
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = ui.Text(ui.TextOpts{Muted: true, Attrs: ui.Attrs{TestID: "component-states-note"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{TestID: "component-states-note"}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

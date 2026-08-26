@@ -73,7 +73,7 @@ templ ScenarioDeveloper(gc GalleryContext) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Production key created", Level: 2}) {
 					@ui.Badge(ui.BadgeOpts{Text: "shown once", Kind: ui.KindWarn})
 				}
-				@ui.Text(ui.TextOpts{Muted: true}) {
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
 					{ "Copy it now. We store a hash, so this is the only time the full key can be displayed." }
 				}
 				@ui.SecretReveal(ui.SecretRevealOpts{
@@ -145,7 +145,16 @@ templ ScenarioDeveloper(gc GalleryContext) {
 					@ui.Code(ui.CodeOpts{Text: "Idempotency-Key"})
 					{ "header: retrying with the same key returns the first response instead of creating a second record." }
 				}
-				<pre class="bg-surface-raised border border-border rounded-lg p-4 text-xs overflow-x-auto"><code>{ developerQuickstart }</code></pre>
+				// tabindex and a name because the block scrolls sideways on a narrow
+				// screen: a scroll container with nothing focusable inside is
+				// pointer-only, so the end of every line would be unreachable by
+				// keyboard exactly where the overflow is worst.
+				<pre
+					class="bg-surface-raised border border-border rounded-lg p-4 text-xs overflow-x-auto"
+					tabindex="0"
+					role="region"
+					aria-label="Quickstart request"
+				><code>{ developerQuickstart }</code></pre>
 			}
 		}
 		@ui.Section(ui.SectionOpts{Title: "Recent deliveries", Level: 2, Attrs: ui.Attrs{ID: "developer-deliveries"}}) {

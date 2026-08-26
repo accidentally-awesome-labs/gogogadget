@@ -28,8 +28,17 @@ test('upload, download, delete a file', async ({ browser }) => {
   for await (const chunk of stream) chunks.push(chunk as Buffer);
   expect(Buffer.concat(chunks).toString()).toBe('e2e upload payload');
 
-  page.once('dialog', (d) => d.accept());
+  // Delete is gated by an in-page AlertDialog, not window.confirm. No
+  // page.on('dialog') handler on purpose: a regression that brings the native
+  // prompt back must hang this test, not pass it. [open] scopes the locator to
+  // the dialog actually on screen — there is one per row.
+  const openDialog = page.locator('dialog[data-ui="alert-dialog"][open]');
   await row.getByRole('button', { name: 'Delete' }).click();
+  await expect(openDialog).toBeVisible();
+  // Not deleted yet: that is what makes it a confirmation.
+  await expect(row).toBeVisible();
+
+  await openDialog.getByRole('button', { name: 'Delete permanently' }).click();
   await expect(row).toBeHidden();
 
   await context.close();

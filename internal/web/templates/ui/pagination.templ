@@ -102,7 +102,7 @@ templ Pagination(o PaginationOpts) {
 	if o.TotalPages > 1 {
 		<nav { rootWith("pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", paginationLabel(o))... }>
 			if o.Page > 1 {
-				@pageLink(o, o.Page-1, o.Labels.prev(o.Page, o.TotalPages), "btn btn-ghost")
+				@pageLink(o, o.Page-1, o.Labels.prev(o.Page, o.TotalPages), "", "btn btn-ghost")
 			} else {
 				<span></span>
 			}
@@ -117,7 +117,7 @@ templ Pagination(o PaginationOpts) {
 						} else if entry == o.Page {
 							<span class="px-3 py-1 rounded-lg bg-selected text-selected-fg font-semibold" aria-current="page">{ fmt.Sprint(entry) }</span>
 						} else {
-							@pageLink(o, entry, fmt.Sprint(entry), "px-3 py-1 rounded-lg hover:bg-surface-raised")
+							@pageLink(o, entry, fmt.Sprint(entry), o.Labels.pageLabel(entry), "px-3 py-1 rounded-lg hover:bg-surface-raised")
 						}
 					}
 				</span>
@@ -125,7 +125,7 @@ templ Pagination(o PaginationOpts) {
 				<span class="text-fg-muted">{ o.Labels.pageOf(o.Page, o.TotalPages) }</span>
 			}
 			if o.Page < o.TotalPages {
-				@pageLink(o, o.Page+1, o.Labels.next(o.Page, o.TotalPages), "btn btn-ghost")
+				@pageLink(o, o.Page+1, o.Labels.next(o.Page, o.TotalPages), "", "btn btn-ghost")
 			} else {
 				<span></span>
 			}
@@ -141,7 +141,15 @@ templ Pagination(o PaginationOpts) {
 // hx-target="" makes htmx intercept the click and swap into an empty selector,
 // so a pager meant to be plain link navigation fires a request that lands
 // nowhere and the href that would have worked is never used.
-templ pageLink(o PaginationOpts, page int, label, class string) {
+//
+// The accessible name is passed in rather than derived, and the attribute is
+// omitted when it is empty. Deriving it applied aria-label="Page N" to every
+// link including prev and next, and aria-label overrides text content: "Next →"
+// announced as "Page 2", indistinguishable from the numbered link beside it,
+// with the direction — the only thing those two controls carry — destroyed. A
+// bare digit genuinely needs the label; a control whose text already says
+// "Next" is made worse by one.
+templ pageLink(o PaginationOpts, page int, label, ariaLabel, class string) {
 	<a
 		href={ templ.SafeURL(PageURL(o.BaseURL, o.Param, page)) }
 		if o.Target != "" {
@@ -150,7 +158,9 @@ templ pageLink(o PaginationOpts, page int, label, class string) {
 			hx-swap="innerMorph"
 			hx-push-url="true"
 		}
-		aria-label={ o.Labels.pageLabel(page) }
+		if ariaLabel != "" {
+			aria-label={ ariaLabel }
+		}
 		class={ class }
 	>{ label }</a>
 }

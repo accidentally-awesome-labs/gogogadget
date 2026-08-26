@@ -25,7 +25,7 @@
         "source": "internal/web/templates/terms.templ",
         "target": "internal/web/templates/terms.templ",
         "class": "templ",
-        "sha256": "516e5381e3bd4ee074f0797c77184e774af9382f63a845f24a09074821d4415c",
+        "sha256": "92f6f73b43e8ca60042c7596e0b7ece59c8f7afb3a21b9304308e5598d077ba4",
         "rewrite_module": true,
         "contract": false
       }
@@ -59,9 +59,9 @@
         {
           "id": "footer.legal.terms",
           "area": "footer",
-          "group": "footer.legal",
           "route_id": "terms.show",
           "label_key": "footer.terms",
+          "group": "footer.legal",
           "after": [
             "footer.resources.rss"
           ]
@@ -70,14 +70,6 @@
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "legal.terms.body": "GoGoGadget is provided \"as is\", without warranty of any kind. By using the service you agree to use it lawfully and not abuse the platform.",
@@ -89,6 +81,14 @@
         "legal.terms.placeholder": "Términos provisionales. Sustitúyelos por un texto revisado por un abogado antes del lanzamiento.",
         "legal.terms.title": "Términos del servicio"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

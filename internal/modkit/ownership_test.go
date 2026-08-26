@@ -64,7 +64,7 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 		orphans = append(orphans, path)
 	}
 	require.Empty(t, orphans,
-		"these tracked source files belong to no module, so they are invisible to install, update, and removal: %v", orphans)
+		"these source files belong to no module, so they are invisible to install, update, and removal: %v", orphans)
 }
 
 func repoRoot(t *testing.T) string {
@@ -74,13 +74,34 @@ func repoRoot(t *testing.T) string {
 	return filepath.Join(wd, "..", "..")
 }
 
+// trackedFiles lists every file git would carry, INCLUDING files that are new
+// and not yet added. `git ls-files` alone sees only what is already tracked, so a
+// freshly written source file is invisible to the ownership check until someone
+// commits it - which moves the failure from the moment the file was created to
+// whenever the next commit happens, usually in someone else's run. Four unowned
+// test files hid behind exactly that gap today.
+//
+// --others adds untracked paths and --exclude-standard applies .gitignore, so
+// build output and local scratch stay out.
 func trackedFiles(t *testing.T, root string) []string {
 	t.Helper()
-	cmd := exec.Command("git", "ls-files")
+	cmd := exec.Command("git", "ls-files", "--cached", "--others", "--exclude-standard")
 	cmd.Dir = root
 	out, err := cmd.Output()
 	require.NoError(t, err)
-	return strings.Fields(string(out))
+
+	// The two lists overlap for nothing today, but --cached and --others are
+	// separate enumerations and a rename in flight can appear in both.
+	seen := map[string]bool{}
+	var paths []string
+	for _, path := range strings.Fields(string(out)) {
+		if seen[path] {
+			continue
+		}
+		seen[path] = true
+		paths = append(paths, path)
+	}
+	return paths
 }
 
 func loadLock(t *testing.T, root string) modkit.Lock {

@@ -68,6 +68,14 @@ document.addEventListener("alpine:initialized", () => scan(document));
 // pending holds one promise per engine, so ten charts on a page trigger one
 // fetch. Keyed by name rather than by element: the second widget must wait on
 // the first request, not start a second.
+//
+// A REJECTED entry is evicted. Caching a rejection means one dropped request -
+// a flaky connection, a proxy hiccup, a cold cache under load - permanently
+// disables the widget for the rest of the page's life, and every widget that
+// mounts afterwards receives the cached failure instantly without a single byte
+// being retried. That reads exactly like a broken build and is nothing of the
+// kind. Resolved entries are kept forever: the runtime is loaded, and loading it
+// twice would re-run a bundle that defines custom elements.
 const pending = new Map();
 
 function loadEngine(name) {
@@ -86,6 +94,19 @@ function loadEngine(name) {
   const promise = new Promise((resolve, reject) => {
     const existing = document.querySelector('script[data-ui-engine-src="' + name + '"]');
     if (existing) {
+      // Listeners on an already-settled script never fire, so an existing tag
+      // has to report the state it reached rather than be waited on blindly -
+      // otherwise this promise hangs for the life of the page and the widget
+      // waits for an event that happened before anyone was listening.
+      const state = existing.dataset.uiEngineState;
+      if (state === "loaded") {
+        resolve();
+        return;
+      }
+      if (state === "failed") {
+        reject(new Error("engine " + name + " previously failed to load"));
+        return;
+      }
       existing.addEventListener("load", () => resolve(), { once: true });
       existing.addEventListener("error", () => reject(new Error(name)), { once: true });
       return;
@@ -102,14 +123,44 @@ function loadEngine(name) {
       script.defer = true;
     }
     script.dataset.uiEngineSrc = name;
-    script.addEventListener("load", () => resolve(), { once: true });
-    script.addEventListener("error", () => reject(new Error("failed to load engine " + name)), {
-      once: true,
-    });
+    script.addEventListener(
+      "load",
+      () => {
+        script.dataset.uiEngineState = "loaded";
+        resolve();
+      },
+      { once: true },
+    );
+    script.addEventListener(
+      "error",
+      () => {
+        script.dataset.uiEngineState = "failed";
+        reject(new Error("failed to load engine " + name));
+      },
+      { once: true },
+    );
     // <head>, never #content: the shell survives navigation and the content box
     // does not.
     document.head.appendChild(script);
   });
   pending.set(name, promise);
+  // Evict on failure so the next widget to mount retries. The tag is removed
+  // with it: a <script> that errored will never fire another event, so leaving
+  // it would make the retry take the `existing` branch and reject immediately.
+  //
+  // This catch handles only the eviction branch. The promise returned below
+  // still rejects for the caller, which announces `ui:engine-failed` on the
+  // root - so nothing is swallowed and there is no unhandled rejection either.
+  promise.catch(() => {
+    if (pending.get(name) === promise) {
+      pending.delete(name);
+    }
+    const failed = document.querySelector(
+      'script[data-ui-engine-src="' + name + '"][data-ui-engine-state="failed"]',
+    );
+    if (failed) {
+      failed.remove();
+    }
+  });
   return promise;
 }

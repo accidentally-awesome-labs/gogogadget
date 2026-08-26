@@ -1,53 +1,102 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"context"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 templ Dashboard(d DashboardData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "dashboard.title")})
-
 	// One dismissible pattern for the whole product: data-key names the
-	// localStorage entry, so the checklist needs no component of its own.
-	<div x-data="dismissible" data-key="gg_checklist_dismissed" x-show="!hidden" x-cloak class="card mb-6">
-		<div class="flex items-start justify-between">
-			<div>
-				<h2 class="font-semibold">{ i18n.T(ctx, "dashboard.getting_started") }</h2>
-				<ul class="mt-3 space-y-2 text-sm text-fg-muted">
-					<li>1. <a href="/app/projects/new" class="link">{ i18n.T(ctx, "dashboard.checklist.create_project") }</a></li>
-					<li>2. <a href="/app/settings/org" class="link">{ i18n.T(ctx, "dashboard.checklist.invite_team") }</a> { i18n.T(ctx, "dashboard.checklist.invite_team_note") }</li>
-					<li>3. <a href="/app/settings/billing" class="link">{ i18n.T(ctx, "dashboard.checklist.review_plans") }</a> { i18n.T(ctx, "dashboard.checklist.review_plans_note") }</li>
-				</ul>
-			</div>
-			<button type="button" @click="dismiss()" class="btn btn-ghost btn-xs" aria-label={ i18n.T(ctx, "dashboard.checklist.dismiss") }>✕</button>
-		</div>
+	// localStorage entry. Only the wrapper is local — dismissal is a shell
+	// behaviour (Alpine plus localStorage) that no presentation component owns,
+	// while the list itself is the catalog's OnboardingChecklist.
+	<div x-data="dismissible" data-key="gg_checklist_dismissed" x-show="!hidden" x-cloak class="relative mb-6">
+		@ui.OnboardingChecklist(ui.OnboardingChecklistOpts{
+			// h2: this sits directly under the page's h1, so h3 would skip a
+			// level and send heading navigation past it.
+			Level:         2,
+			Title:         i18n.T(ctx, "dashboard.getting_started"),
+			ProgressLabel: i18n.T(ctx, "dashboard.checklist.progress"),
+			Steps:         dashboardSteps(ctx, d),
+		})
+		@ui.IconButton(ui.IconButtonOpts{
+			Icon: ui.IconClose, Label: i18n.T(ctx, "dashboard.checklist.dismiss"), Size: ui.SizeXS,
+			Attrs: ui.Attrs{
+				Class:  "absolute top-2 right-2",
+				Alpine: ui.Alpine{On: map[string]string{"click": "dismiss()"}},
+			},
+		})
 	</div>
-
-	<div class="grid sm:grid-cols-3 gap-4">
-		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.active_projects"), Value: fmt.Sprint(d.ActiveProjects), Sub: ""})
-		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.team_members"), Value: fmt.Sprint(d.MemberCount), Sub: ""})
+	@ui.StatGroup(ui.StatGroupOpts{Label: i18n.T(ctx, "dashboard.stats_label"), Columns: 3}) {
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.active_projects"), Value: fmt.Sprint(d.ActiveProjects)})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.team_members"), Value: fmt.Sprint(d.MemberCount)})
 		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "dashboard.stats.current_plan"), Value: d.Plan.Name, Sub: d.Plan.PriceDisplay})
-	</div>
-
+	}
 	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "dashboard.recent_activity"), Attrs: ui.Attrs{Class: "mt-10 mb-3"}})
-	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-		if len(d.Recent) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "dashboard.recent_empty"), Variant: ui.EmptyInline})
-		} else {
-			<table class="table">
-				<tbody>
-					for _, row := range d.Recent {
-						<tr>
-							<td>{ row.ActorEmail }</td>
-							<td>@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})</td>
-							<td class="text-right text-fg-muted"><span data-testid="relative-time">{ RelTime(d.Now, row.CreatedAt.Time) }</span></td>
-						</tr>
-					}
-				</tbody>
-			</table>
+	@ui.DataTable(dashboardRecent(ctx, d)) {
+		for _, row := range d.Recent {
+			<tr id={ fmt.Sprintf("dashboard-audit-%d", row.ID) }>
+				<td class="px-4 py-3">{ row.ActorEmail }</td>
+				<td class="px-4 py-3">
+					@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})
+				</td>
+				<td class="px-4 py-3 text-right text-fg-muted">
+					<span data-testid="relative-time">{ RelTime(d.Now, row.CreatedAt.Time) }</span>
+				</td>
+			</tr>
 		}
 	}
+}
+
+// dashboardSteps derives completion from data the dashboard already loaded.
+// Nothing here is invented: an org with a project has created one, an org with
+// more than the founder has invited someone, and an org on a paid plan has been
+// through the plan comparison. A checklist that reports every step incomplete
+// to an org that finished them is worse than no checklist.
+func dashboardSteps(ctx context.Context, d DashboardData) []ui.ChecklistStep {
+	done := i18n.T(ctx, "dashboard.checklist.done")
+	return []ui.ChecklistStep{
+		{
+			Label: i18n.T(ctx, "dashboard.checklist.create_project"),
+			Href:  "/app/projects/new",
+			Done:  d.ActiveProjects > 0, DoneLabel: done,
+		},
+		{
+			Label: i18n.T(ctx, "dashboard.checklist.invite_team"),
+			Body:  i18n.T(ctx, "dashboard.checklist.invite_team_note"),
+			Href:  "/app/settings/org",
+			Done:  d.MemberCount > 1, DoneLabel: done,
+		},
+		{
+			Label: i18n.T(ctx, "dashboard.checklist.review_plans"),
+			Body:  i18n.T(ctx, "dashboard.checklist.review_plans_note"),
+			Href:  "/app/settings/billing",
+			Done:  d.Plan.Key != "free", DoneLabel: done,
+		},
+	}
+}
+
+// dashboardRecent is the recent-activity table. The caption is what names it:
+// two tables on one page announced only as "table" are indistinguishable, and
+// this one has no page heading of its own beyond the section header.
+func dashboardRecent(ctx context.Context, d DashboardData) ui.DataTableOpts {
+	return ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "dashboard.recent_caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "actor", Label: i18n.T(ctx, "dashboard.col_actor")},
+			{Key: "action", Label: i18n.T(ctx, "dashboard.col_action")},
+			{Key: "when", Label: i18n.T(ctx, "dashboard.col_when"), Align: ui.AlignEnd},
+		},
+		RowCount: len(d.Recent),
+		Empty:    dashboardRecentEmpty(),
+	}
+}
+
+templ dashboardRecentEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "dashboard.recent_empty"), Variant: ui.EmptyInline})
 }

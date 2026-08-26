@@ -384,15 +384,17 @@ func TestScenariosAreDeterministic(t *testing.T) {
 	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
 	session := sessionCookie("user_demo", "org_demo", "org:admin")
 
-	// The surface region only. The shell carries a fresh CSRF token on every
-	// response, which is correct and has nothing to do with whether the
-	// scenario's own fixture data is stable.
+	// The surface region only, with its tokens normalised. Two things are
+	// nondeterministic by design and neither is fixture data: the shell carries a
+	// fresh CSRF token on every response, and every form inside the surface
+	// carries the same token masked with a fresh one-time pad. Comparing the
+	// bytes around them is the point of this test; comparing the pad is not.
 	surfaceOf := func(body string) string {
 		i := strings.Index(body, `data-testid="scenario-surface"`)
 		if i < 0 {
-			return body
+			return normalizeCSRF(body)
 		}
-		return body[i:]
+		return normalizeCSRF(body[i:])
 	}
 	for _, scenario := range templates.ScenarioRegistry {
 		url := "/dev/scenarios/" + scenario.Slug

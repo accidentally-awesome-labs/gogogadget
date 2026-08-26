@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/field.templ",
         "target": "internal/web/templates/ui/field.templ",
         "class": "templ",
-        "sha256": "78a8ab5a1857338eaa80a38456261889f754404cc4c5b27a361398b17efeb4ba",
+        "sha256": "6b849d6c88990bff4987a093ee0c55de4b73a47a3461ee24cc1663de33137ebc",
         "rewrite_module": true,
         "contract": true
       },

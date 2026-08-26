@@ -1,115 +1,167 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"context"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 templ AdminHome(d AdminHomeData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.title")})
-	<div class="grid sm:grid-cols-4 gap-4">
-		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_users"), Value: fmt.Sprint(d.TotalUsers), Sub: ""})
-		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_orgs"), Value: fmt.Sprint(d.TotalOrgs), Sub: ""})
-		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.active_subs"), Value: fmt.Sprint(d.ActiveSubs), Sub: ""})
+	@ui.StatGroup(ui.StatGroupOpts{Label: i18n.T(ctx, "admin.stats_aria"), Columns: 4}) {
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_users"), Value: fmt.Sprint(d.TotalUsers)})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.total_orgs"), Value: fmt.Sprint(d.TotalOrgs)})
+		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.active_subs"), Value: fmt.Sprint(d.ActiveSubs)})
 		@ui.Metric(ui.MetricOpts{Title: i18n.T(ctx, "admin.stats.mrr"), Value: fmt.Sprintf("$%d", d.MRR), Sub: i18n.T(ctx, "admin.stats.mrr_hint")})
-	</div>
-
+	}
 	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.signups_heading"), Attrs: ui.Attrs{Class: "mt-10 mb-3"}})
-	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-		if len(d.RecentSignups) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.signups_empty"), Variant: ui.EmptyInline})
-		} else {
-			<table class="table">
-				<tbody>
-					for _, u := range d.RecentSignups {
-						<tr>
-							<td class="font-medium">{ string(u.Email) }</td>
-							<td>{ u.Name }</td>
-							<td class="text-right text-fg-muted"><span data-testid="relative-time">{ RelTime(d.Now, u.CreatedAt.Time) }</span></td>
-						</tr>
-					}
-				</tbody>
-			</table>
+	// The caption is hidden because the section heading above already names
+	// this table on screen; a screen reader still needs the table itself
+	// named, and two identical visible strings would be noise.
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "admin.signups_caption"),
+		HiddenCaption: true,
+		Columns:       signupColumns(ctx),
+		RowCount:      len(d.RecentSignups),
+		Empty:         adminSignupsEmpty(),
+	}) {
+		for _, u := range d.RecentSignups {
+			<tr>
+				<td class="font-medium">{ string(u.Email) }</td>
+				<td>{ u.Name }</td>
+				<td class="text-right text-fg-muted"><span data-testid="relative-time">{ RelTime(d.Now, u.CreatedAt.Time) }</span></td>
+			</tr>
 		}
 	}
 }
 
+func signupColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "email", Label: i18n.T(ctx, "admin.signups.col_email")},
+		{Key: "name", Label: i18n.T(ctx, "admin.signups.col_name")},
+		{Key: "joined", Label: i18n.T(ctx, "admin.signups.col_joined"), Align: ui.AlignEnd},
+	}
+}
+
+templ adminSignupsEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.signups_empty"), Variant: ui.EmptyInline})
+}
+
 templ AdminUsersPage(d AdminUsersData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.users.title")})
-	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.users.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.users.search_aria"), GetURL: "/admin/users", Target: "#table-container", IndicatorID: "admin-search-indicator", Attrs: ui.Attrs{TestID: ""}})
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: d.Query, Placeholder: i18n.T(ctx, "admin.users.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.users.search_aria"), GetURL: "/admin/users", Target: "#table-container", IndicatorID: "admin-search-indicator"})
 	@AdminUsersTable(d)
+}
+
+func adminUserColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "email", Label: i18n.T(ctx, "admin.users.col_email")},
+		{Key: "name", Label: i18n.T(ctx, "admin.users.col_name")},
+		{Key: "joined", Label: i18n.T(ctx, "admin.users.col_joined")},
+		{Key: "role", Label: i18n.T(ctx, "admin.users.col_role")},
+		{Key: "status", Label: i18n.T(ctx, "admin.users.col_status")},
+		{Key: "actions", Label: i18n.T(ctx, "admin.users.col_actions"), Align: ui.AlignEnd},
+	}
 }
 
 templ AdminUsersTable(d AdminUsersData) {
 	<div id="table-container">
-		@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-			<table class="table">
-				<thead>
-					<tr><th>{ i18n.T(ctx, "admin.users.col_email") }</th><th>{ i18n.T(ctx, "admin.users.col_name") }</th><th>{ i18n.T(ctx, "admin.users.col_joined") }</th><th>{ i18n.T(ctx, "admin.users.col_role") }</th><th>{ i18n.T(ctx, "admin.users.col_status") }</th><th class="text-right">{ i18n.T(ctx, "admin.users.col_actions") }</th></tr>
-				</thead>
-				<tbody>
-					for _, u := range d.Users {
-						<tr id={ "user-" + u.ClerkUserID }>
-							<td class="font-medium">{ string(u.Email) }</td>
-							<td>{ u.Name }</td>
-							<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>
-							<td>
-								if AdminWrite(ctx) {
-									@roleForm(u)
-								} else {
-									@roleBadge(u.AdminRole)
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:       i18n.T(ctx, "admin.users.title"),
+			HiddenCaption: true,
+			Columns:       adminUserColumns(ctx),
+			RowCount:      len(d.Users),
+			Empty:         adminUsersEmpty(d),
+			Target:        "#table-container",
+			Pagination: ui.Pagination(ui.PaginationOpts{
+				Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/users?q=" + d.Query,
+				Target: "#table-container", Labels: pagerLabels(ctx),
+			}),
+		}) {
+			for _, u := range d.Users {
+				<tr id={ "user-" + u.ClerkUserID }>
+					<td class="font-medium">{ string(u.Email) }</td>
+					<td>{ u.Name }</td>
+					<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+					<td>
+						if AdminWrite(ctx) {
+							@roleForm(u)
+						} else {
+							@roleBadge(u.AdminRole)
+						}
+					</td>
+					<td>
+						if u.DisabledAt.Valid {
+							@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_disabled"), Kind: ui.KindDanger})
+						} else {
+							@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_active"), Kind: ui.KindSuccess})
+						}
+					</td>
+					<td class="text-right">
+						if AdminWrite(ctx) {
+							@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.users.row_actions_aria", string(u.Email)), Attrs: ui.Attrs{Class: "justify-end"}}) {
+								if !u.DisabledAt.Valid {
+									@ui.ButtonLink(ui.ButtonLinkOpts{
+										Label: i18n.T(ctx, "admin.users.impersonate"),
+										Href:  "/admin/users/" + u.ClerkUserID + "/impersonate",
+										Size:  ui.SizeXS,
+										Attrs: ui.Attrs{
+											TestID: "admin-impersonate",
+											HX:     ui.HX{Boost: true, Target: ui.NavTarget, Select: ui.NavTarget, Swap: ui.NavSwap},
+										},
+									})
 								}
-							</td>
-							<td>
-								if u.DisabledAt.Valid {
-									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_disabled"), Kind: ui.KindDanger})
-								} else {
-									@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.users.status_active"), Kind: ui.KindSuccess})
-								}
-							</td>
-							<td class="text-right">
-								if AdminWrite(ctx) {
-									<div class="card-actions">
-										if !u.DisabledAt.Valid {
-											<a
-												href={ templ.SafeURL("/admin/users/" + u.ClerkUserID + "/impersonate") }
-												hx-boost="true"
-												hx-target={ NavTarget }
-												hx-select={ NavTarget }
-												hx-swap={ NavSwap }
-												class="btn btn-ghost btn-xs"
-												data-testid="admin-impersonate"
-											>{ i18n.T(ctx, "admin.users.impersonate") }</a>
-										}
-										<button
-											type="button"
-											hx-post={ "/admin/users/" + u.ClerkUserID + "/disable" }
-											hx-confirm={ disableConfirm(ctx, u) }
-											class="btn btn-ghost btn-xs"
-											data-testid="admin-disable-toggle"
-										>
-											if u.DisabledAt.Valid {
-												{ i18n.T(ctx, "admin.users.enable") }
-											} else {
-												{ i18n.T(ctx, "admin.users.disable") }
-											}
-										</button>
-									</div>
-								} else {
-									<span class="text-xs text-fg-muted" data-testid="admin-readonly">{ i18n.T(ctx, "admin.read_only") }</span>
-								}
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+								@ui.ConfirmAction(ui.ConfirmActionOpts{
+									ID:           "disable-" + u.ClerkUserID,
+									TriggerLabel: disableLabel(ctx, u),
+									Title:        disableTitle(ctx, u),
+									Message:      disableConfirm(ctx, u),
+									ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+									CancelLabel:  i18n.T(ctx, "admin.cancel"),
+									Kind:         disableKind(u),
+									HX:           ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/disable"},
+									Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
+								})
+							}
+						} else {
+							<span class="text-xs text-fg-muted" data-testid="admin-readonly">{ i18n.T(ctx, "admin.read_only") }</span>
+						}
+					</td>
+				</tr>
+			}
 		}
-		@ui.Pagination(ui.PaginationOpts{Page: d.Page, TotalPages: d.TotalPages, BaseURL: "/admin/users?q="+d.Query, Target: "#table-container", Labels: pagerLabels(ctx)})
 	</div>
+}
+
+templ adminUsersEmpty(d AdminUsersData) {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Body:       i18n.T(ctx, "admin.users.empty"),
+		Variant:    ui.EmptyInline,
+		Filtered:   d.Query != "",
+		ClearURL:   "/admin/users",
+		ClearLabel: i18n.T(ctx, "admin.clear_search"),
+		Target:     "#table-container",
+	})
+}
+
+// disableLabel names the row in the control, not just the verb: forty buttons
+// all reading "Disable" are indistinguishable in a screen reader's list of
+// controls, and getByRole cannot tell them apart either.
+func disableLabel(ctx context.Context, u sqlc.User) string {
+	if u.DisabledAt.Valid {
+		return i18n.T(ctx, "admin.users.enable_row", string(u.Email))
+	}
+	return i18n.T(ctx, "admin.users.disable_row", string(u.Email))
+}
+
+func disableTitle(ctx context.Context, u sqlc.User) string {
+	if u.DisabledAt.Valid {
+		return i18n.T(ctx, "admin.users.enable_title")
+	}
+	return i18n.T(ctx, "admin.users.disable_title")
 }
 
 func disableConfirm(ctx context.Context, u sqlc.User) string {
@@ -119,26 +171,50 @@ func disableConfirm(ctx context.Context, u sqlc.User) string {
 	return i18n.T(ctx, "admin.users.confirm_disable", string(u.Email))
 }
 
+// disableKind keeps the destructive direction destructive. Re-enabling somebody
+// restores access, which is not a loss, so it does not wear the danger colour.
+func disableKind(u sqlc.User) ui.Kind {
+	if u.DisabledAt.Valid {
+		return ui.KindBrand
+	}
+	return ui.KindDanger
+}
+
+func adminOrgColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "name", Label: i18n.T(ctx, "admin.orgs.col_name")},
+		{Key: "slug", Label: i18n.T(ctx, "admin.orgs.col_slug")},
+		{Key: "members", Label: i18n.T(ctx, "admin.orgs.col_members"), Numeric: true},
+		{Key: "plan", Label: i18n.T(ctx, "admin.orgs.col_plan")},
+		{Key: "created", Label: i18n.T(ctx, "admin.orgs.col_created")},
+	}
+}
+
 templ AdminOrgsPage(d AdminOrgsData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.orgs.title")})
-	@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: ""}}) {
-		<table class="table">
-			<thead>
-				<tr><th>{ i18n.T(ctx, "admin.orgs.col_name") }</th><th>{ i18n.T(ctx, "admin.orgs.col_slug") }</th><th>{ i18n.T(ctx, "admin.orgs.col_members") }</th><th>{ i18n.T(ctx, "admin.orgs.col_plan") }</th><th>{ i18n.T(ctx, "admin.orgs.col_created") }</th></tr>
-			</thead>
-			<tbody>
-				for _, o := range d.Orgs {
-					<tr>
-						<td class="font-medium">{ o.Name }</td>
-						<td class="text-fg-muted">{ o.Slug }</td>
-						<td>{ fmt.Sprint(o.MemberCount) }</td>
-						<td>@ui.Badge(ui.BadgeOpts{Text: o.ProductKey, Kind: ui.KindBrand, Attrs: ui.Attrs{TestID: "plan-badge"}})</td>
-						<td class="text-fg-muted">{ o.CreatedAt.Time.Format("Jan 2, 2006") }</td>
-					</tr>
-				}
-			</tbody>
-		</table>
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "admin.orgs.title"),
+		HiddenCaption: true,
+		Columns:       adminOrgColumns(ctx),
+		RowCount:      len(d.Orgs),
+		Empty:         adminOrgsEmpty(),
+	}) {
+		for _, o := range d.Orgs {
+			<tr id={ "org-" + o.ClerkOrgID }>
+				<td class="font-medium">{ o.Name }</td>
+				<td class="text-fg-muted">{ o.Slug }</td>
+				<td class="text-right tabular-nums">{ fmt.Sprint(o.MemberCount) }</td>
+				<td>
+					@ui.Badge(ui.BadgeOpts{Text: o.ProductKey, Kind: ui.KindBrand, Attrs: ui.Attrs{TestID: "plan-badge"}})
+				</td>
+				<td class="text-fg-muted">{ o.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+			</tr>
+		}
 	}
+}
+
+templ adminOrgsEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.orgs.empty"), Variant: ui.EmptyInline})
 }
 
 // roleBadge shows a staff role without offering to change it (support view).
@@ -156,19 +232,34 @@ templ roleBadge(role string) {
 // roleForm grants or revokes staff access. Options are spelled out rather
 // than looped: a computed i18n key is invisible to the catalog guard, and the
 // three roles are a closed set by construction (the column has a CHECK).
+//
+// Name stays "role" for every row because that is what the handler reads, so
+// the element id comes from ID instead — one id per row rather than the same
+// one repeated down the table. The label is real and hidden rather than an
+// aria-label: it names the control AND gives it a click target, and it goes
+// through the same catalog every other label does.
 templ roleForm(u sqlc.User) {
 	<form hx-post={ "/admin/users/" + u.ClerkUserID + "/role" } hx-swap="none" class="inline-block">
-		<select
-			name="role"
-			class="input input-xs w-28"
-			data-testid={ "role-select-" + u.ClerkUserID }
-			hx-post={ "/admin/users/" + u.ClerkUserID + "/role" }
-			hx-trigger="change"
-			hx-swap="none"
-		>
-			<option value="" selected?={ u.AdminRole == "" }>{ i18n.T(ctx, "admin.users.role_none") }</option>
-			<option value="support" selected?={ u.AdminRole == "support" }>{ i18n.T(ctx, "admin.users.role_support") }</option>
-			<option value="admin" selected?={ u.AdminRole == "admin" }>{ i18n.T(ctx, "admin.users.role_admin") }</option>
-		</select>
+		@ui.Field(ui.FieldOpts{
+			ID:          "role-" + u.ClerkUserID,
+			Name:        "role",
+			Label:       i18n.T(ctx, "admin.users.role_aria", string(u.Email)),
+			HiddenLabel: true,
+		}) {
+			@ui.Select(ui.SelectOpts{
+				ID:   "role-" + u.ClerkUserID,
+				Name: "role",
+				Options: []ui.Option{
+					{Value: "", Label: i18n.T(ctx, "admin.users.role_none"), Selected: u.AdminRole == ""},
+					{Value: "support", Label: i18n.T(ctx, "admin.users.role_support"), Selected: u.AdminRole == "support"},
+					{Value: "admin", Label: i18n.T(ctx, "admin.users.role_admin"), Selected: u.AdminRole == "admin"},
+				},
+				Attrs: ui.Attrs{
+					Class:  "input-xs w-28",
+					TestID: "role-select-" + u.ClerkUserID,
+					HX:     ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role", Trigger: "change", Swap: "none"},
+				},
+			})
+		}
 	</form>
 }

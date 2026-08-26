@@ -7,7 +7,7 @@
     "revision": 1,
     "contract": 1,
     "title": "Form",
-    "description": "The Form renderer and its options.",
+    "description": "The Form renderer and its options. Renders the hidden CSRF field for every unsafe method, so a form submitted without JavaScript is accepted rather than refused with 403.",
     "requires": [
       "element/ui-core"
     ],
@@ -16,9 +16,17 @@
         "source": "internal/web/templates/ui/form.templ",
         "target": "internal/web/templates/ui/form.templ",
         "class": "templ",
-        "sha256": "d92c4f139aae4e6935724b2b30d3e84e1fdc60feb6957559496e93f546d70d21",
+        "sha256": "691959f4bd429012883f6d052bb17753fe7ebe9641112086008a3f7384b8e3ec",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/form_test.go",
+        "target": "internal/web/templates/ui/form_test.go",
+        "class": "test",
+        "sha256": "135efb4c4b6626361e9b040a6410f2388f4f227484284c77fcdb814d97ff8673",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {},
@@ -29,7 +37,7 @@
           "family": "forms",
           "signature": "templ Form(o FormOpts)",
           "summary": "Renders a form wrapper; children are the fields.",
-          "guidance": "novalidate is always set: server validation is authoritative, and letting the browser block submission first means the server's rules never run.",
+          "guidance": "novalidate is always set: server validation is authoritative, and letting the browser block submission first means the server's rules never run. The hidden CSRF field is rendered here, not by callers, for every method the check applies to: the token htmx sends as an inherited request header is unreachable when htmx never loaded, and a form the server then refuses is a worse fallback than no form at all. GET and HEAD forms carry no field - a token in a GET is a token in the URL bar, the history and every access log.",
           "states": [
             "default"
           ]

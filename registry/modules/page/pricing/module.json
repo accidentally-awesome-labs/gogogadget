@@ -25,7 +25,7 @@
         "source": "internal/web/templates/pricing.templ",
         "target": "internal/web/templates/pricing.templ",
         "class": "templ",
-        "sha256": "fc1c687fc23444397dd93ea42bb9523cbf407c7f29078b9ea52d9e45a983057d",
+        "sha256": "4277b97bf8bc765fc33c401754412076282821b3d75fc9aed6899f04150935ed",
         "rewrite_module": true,
         "contract": false
       }

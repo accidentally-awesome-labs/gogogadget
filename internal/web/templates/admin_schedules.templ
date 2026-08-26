@@ -1,12 +1,13 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 func fmtI64(v int64) string { return fmt.Sprintf("%d", v) }
@@ -35,132 +36,155 @@ func scheduleScope(s sqlc.Schedule) string {
 	return "system"
 }
 
+// kindOptions turns the schedulable-kind list into select options. The kinds
+// are wire identities, not copy, so they are not translated.
+func kindOptions(kinds []string, selected string) []ui.Option {
+	out := make([]ui.Option, 0, len(kinds))
+	for _, k := range kinds {
+		out = append(out, ui.Option{Value: k, Label: k, Selected: k == selected})
+	}
+	return out
+}
+
+// scopeOptions puts the system-wide choice first, then every org.
+func scopeOptions(ctx context.Context, orgs []sqlc.Org, selected string) []ui.Option {
+	out := make([]ui.Option, 0, len(orgs)+1)
+	out = append(out, ui.Option{Value: "", Label: i18n.T(ctx, "admin.schedules.scope_system"), Selected: selected == ""})
+	for _, o := range orgs {
+		out = append(out, ui.Option{Value: o.ClerkOrgID, Label: o.Name, Selected: o.ClerkOrgID == selected})
+	}
+	return out
+}
+
+func adminScheduleColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "name", Label: i18n.T(ctx, "admin.schedules.col_name")},
+		{Key: "kind", Label: i18n.T(ctx, "admin.schedules.col_kind")},
+		{Key: "scope", Label: i18n.T(ctx, "admin.schedules.col_scope"), HideBelow: ui.BreakpointSM},
+		{Key: "every", Label: i18n.T(ctx, "admin.schedules.col_every"), Numeric: true},
+		{Key: "enabled", Label: i18n.T(ctx, "admin.schedules.col_enabled")},
+		{Key: "next", Label: i18n.T(ctx, "admin.schedules.col_next")},
+		{Key: "actions", Label: i18n.T(ctx, "admin.schedules.col_actions"), Align: ui.AlignEnd},
+	}
+}
+
 templ AdminSchedulesPage(d SchedulesData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.schedules.title")})
 	if AdminWrite(ctx) {
-		<div id="schedule-create-form" class="card mb-8 max-w-2xl">
-			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.schedules.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
-			<form hx-post="/admin/schedules" hx-target="#schedule-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="schedule-create-form" class="space-y-4">
-				if d.Invalid {
-					@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
-						{ i18n.T(ctx, "admin.schedules.invalid") }
-					}
-				}
-				<div class="grid sm:grid-cols-2 gap-4">
-					<div>
-						<label class="label" for="schedule-name">{ i18n.T(ctx, "admin.schedules.name_label") }</label>
-						<input id="schedule-name" type="text" name="name" value={ d.CreateName } class="input" placeholder={ i18n.T(ctx, "admin.schedules.name_placeholder") }/>
-					</div>
-					<div>
-						<label class="label" for="schedule-kind">{ i18n.T(ctx, "admin.schedules.kind_label") }</label>
-						<select id="schedule-kind" name="kind" class="input">
-							for _, k := range d.Kinds {
-								<option value={ k } selected?={ k == d.CreateKind }>{ k }</option>
-							}
-						</select>
-					</div>
-				</div>
-				<div class="grid sm:grid-cols-2 gap-4">
-					<div>
-						<label class="label" for="schedule-every">{ i18n.T(ctx, "admin.schedules.every_label") }</label>
-						<input id="schedule-every" type="number" name="every_seconds" value={ d.CreateEvery } min="60" class="input"/>
-					</div>
-					<div>
-						<label class="label" for="schedule-org">{ i18n.T(ctx, "admin.schedules.scope_label") }</label>
-						<select id="schedule-org" name="org" class="input">
-							<option value="">{ i18n.T(ctx, "admin.schedules.scope_system") }</option>
-							for _, o := range d.Orgs {
-								<option value={ o.ClerkOrgID } selected?={ o.ClerkOrgID == d.CreateOrg }>{ o.Name }</option>
-							}
-						</select>
-					</div>
-				</div>
-				<div>
-					<label class="label" for="schedule-payload">{ i18n.T(ctx, "admin.schedules.payload_label") }</label>
-					<input id="schedule-payload" type="text" name="payload" value={ d.CreatePayload } class="input" placeholder='{"filter":"unread"}'/>
-				</div>
-				<div class="form-actions">
-					<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.schedules.create") }</button>
-					@ui.Spinner(ui.SpinnerOpts{})
-				</div>
-			</form>
-		</div>
+		@scheduleCreateCard(d)
 	}
-	<div class="table-card max-w-4xl" data-testid="schedules-table">
-		if len(d.Items) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.schedules.empty"), Variant: ui.EmptyInline})
-		} else {
-			<table class="table">
-				<thead>
-					<tr>
-						<th>{ i18n.T(ctx, "admin.schedules.col_name") }</th>
-						<th>{ i18n.T(ctx, "admin.schedules.col_kind") }</th>
-						<th>{ i18n.T(ctx, "admin.schedules.col_scope") }</th>
-						<th>{ i18n.T(ctx, "admin.schedules.col_every") }</th>
-						<th>{ i18n.T(ctx, "admin.schedules.col_enabled") }</th>
-						<th>{ i18n.T(ctx, "admin.schedules.col_next") }</th>
-						<th class="text-right">{ i18n.T(ctx, "admin.schedules.col_actions") }</th>
-					</tr>
-				</thead>
-				<tbody>
-					for _, row := range d.Items {
-						<tr data-testid={ "schedule-row-" + fmtI64(row.ID) }>
-							<td class="font-medium">{ row.Name }</td>
-							<td><code class="code-chip">{ row.Kind }</code></td>
-							<td class="text-fg-muted text-xs">{ scheduleScope(row) }</td>
-							<td>{ fmtI32(row.EverySeconds) }s</td>
-							<td>
-								if AdminWrite(ctx) {
-									<form hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/toggle" } hx-disable="this" class="inline">
-										<button type="submit" class={ "badge", "badge-" + string(onOffKind(row.Enabled)), "cursor-pointer" } data-testid={ "schedule-toggle-" + fmtI64(row.ID) }>
-											if row.Enabled {
-												{ i18n.T(ctx, "admin.schedules.on") }
-											} else {
-												{ i18n.T(ctx, "admin.schedules.off") }
-											}
-										</button>
-									</form>
-								} else {
-									if row.Enabled {
-										@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.schedules.on"), Kind: ui.KindSuccess})
-									} else {
-										@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "admin.schedules.off"), Kind: ui.KindNeutral})
-									}
-								}
-							</td>
-							<td>
-								<span data-testid="relative-time" title={ row.NextRunAt.Time.Format("2006-01-02 15:04") }>{ RelTime(d.Now(), row.NextRunAt.Time) }</span>
-							</td>
-							<td class="text-right">
-								if AdminWrite(ctx) {
-									<div class="card-actions">
-										if row.Enabled {
-											<button
-												type="button"
-												hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/run" }
-												class="btn btn-ghost btn-xs"
-												data-testid={ "schedule-run-" + fmtI64(row.ID) }
-											>
-												{ i18n.T(ctx, "admin.schedules.run_now") }
-											</button>
-										}
-										<button
-											type="button"
-											hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/delete" }
-											hx-confirm={ i18n.T(ctx, "admin.schedules.delete_confirm") }
-											class="btn btn-ghost btn-xs text-danger-text"
-											data-testid={ "schedule-delete-" + fmtI64(row.ID) }
-										>
-											{ i18n.T(ctx, "admin.schedules.delete") }
-										</button>
-									</div>
-								}
-							</td>
-						</tr>
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "admin.schedules.title"),
+		HiddenCaption: true,
+		Columns:       adminScheduleColumns(ctx),
+		RowCount:      len(d.Items),
+		Empty:         adminSchedulesEmpty(),
+		Attrs:         ui.Attrs{TestID: "schedules-table", Class: "max-w-4xl"},
+	}) {
+		for _, row := range d.Items {
+			<tr id={ "schedule-row-" + fmtI64(row.ID) } data-testid={ "schedule-row-" + fmtI64(row.ID) }>
+				<td class="font-medium">{ row.Name }</td>
+				<td><code class="code-chip">{ row.Kind }</code></td>
+				<td class="text-fg-muted text-xs hidden sm:table-cell">{ scheduleScope(row) }</td>
+				<td class="text-right tabular-nums">{ fmtI32(row.EverySeconds) }s</td>
+				<td>
+					if AdminWrite(ctx) {
+						<form hx-post={ "/admin/schedules/" + fmtI64(row.ID) + "/toggle" } hx-disable="this" class="inline">
+							@ui.ToggleButton(ui.ToggleButtonOpts{
+								Label: scheduleOnOffLabel(ctx, row.Enabled),
+								On:    row.Enabled,
+								Size:  ui.SizeXS,
+								Attrs: ui.Attrs{TestID: "schedule-toggle-" + fmtI64(row.ID)},
+							})
+						</form>
+					} else {
+						@ui.Badge(ui.BadgeOpts{Text: scheduleOnOffLabel(ctx, row.Enabled), Kind: onOffKind(row.Enabled)})
 					}
-				</tbody>
-			</table>
+				</td>
+				<td>
+					<span data-testid="relative-time" title={ row.NextRunAt.Time.Format("2006-01-02 15:04") }>{ RelTime(d.Now(), row.NextRunAt.Time) }</span>
+				</td>
+				<td class="text-right">
+					if AdminWrite(ctx) {
+						@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.schedules.row_actions_aria", row.Name), Attrs: ui.Attrs{Class: "justify-end"}}) {
+							if row.Enabled {
+								@ui.Button(ui.ButtonOpts{
+									Label: i18n.T(ctx, "admin.schedules.run_now"),
+									Size:  ui.SizeXS,
+									Icon:  ui.IconPlay,
+									Attrs: ui.Attrs{
+										TestID: "schedule-run-" + fmtI64(row.ID),
+										HX:     ui.HX{Post: "/admin/schedules/" + fmtI64(row.ID) + "/run"},
+									},
+								})
+							}
+							@ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID:           "schedule-delete-dialog-" + fmtI64(row.ID),
+								TriggerLabel: i18n.T(ctx, "admin.schedules.delete_row", row.Name),
+								Title:        i18n.T(ctx, "admin.schedules.delete_title"),
+								Message:      i18n.T(ctx, "admin.schedules.delete_confirm"),
+								ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+								CancelLabel:  i18n.T(ctx, "admin.cancel"),
+								Kind:         ui.KindDanger,
+								HX:           ui.HX{Post: "/admin/schedules/" + fmtI64(row.ID) + "/delete"},
+								Attrs:        ui.Attrs{TestID: "schedule-delete-" + fmtI64(row.ID)},
+							})
+						}
+					}
+				</td>
+			</tr>
 		}
+	}
+	@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true, Attrs: ui.Attrs{Class: "mt-3"}}) {
+		{ i18n.T(ctx, "admin.schedules.hint") }
+	}
+}
+
+func scheduleOnOffLabel(ctx context.Context, on bool) string {
+	if on {
+		return i18n.T(ctx, "admin.schedules.on")
+	}
+	return i18n.T(ctx, "admin.schedules.off")
+}
+
+templ adminSchedulesEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.schedules.empty"), Variant: ui.EmptyInline})
+}
+
+// scheduleCreateCard is its own swap target so a 422 re-render replaces exactly
+// this card and keeps the submitted values.
+templ scheduleCreateCard(d SchedulesData) {
+	<div id="schedule-create-form" class="card mb-8 max-w-2xl">
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.schedules.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
+		<form hx-post="/admin/schedules" hx-target="#schedule-create-form" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="schedule-create-form" class="space-y-4">
+			if d.Invalid {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
+					{ i18n.T(ctx, "admin.schedules.invalid") }
+				}
+			}
+			@ui.Grid(ui.GridOpts{Cols: 2}) {
+				@ui.Field(ui.FieldOpts{Name: "name", Label: i18n.T(ctx, "admin.schedules.name_label")}) {
+					@ui.TextInput(ui.TextInputOpts{Name: "name", Value: d.CreateName, Placeholder: i18n.T(ctx, "admin.schedules.name_placeholder")})
+				}
+				@ui.Field(ui.FieldOpts{Name: "kind", Label: i18n.T(ctx, "admin.schedules.kind_label")}) {
+					@ui.Select(ui.SelectOpts{Name: "kind", Options: kindOptions(d.Kinds, d.CreateKind)})
+				}
+			}
+			@ui.Grid(ui.GridOpts{Cols: 2}) {
+				@ui.Field(ui.FieldOpts{Name: "every_seconds", Label: i18n.T(ctx, "admin.schedules.every_label")}) {
+					@ui.NumberInput(ui.NumberInputOpts{Name: "every_seconds", Value: d.CreateEvery, Min: "60"})
+				}
+				@ui.Field(ui.FieldOpts{Name: "org", Label: i18n.T(ctx, "admin.schedules.scope_label")}) {
+					@ui.Select(ui.SelectOpts{Name: "org", Options: scopeOptions(ctx, d.Orgs, d.CreateOrg)})
+				}
+			}
+			@ui.Field(ui.FieldOpts{Name: "payload", Label: i18n.T(ctx, "admin.schedules.payload_label")}) {
+				@ui.TextInput(ui.TextInputOpts{Name: "payload", Value: d.CreatePayload, Placeholder: i18n.T(ctx, "admin.schedules.payload_placeholder")})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "admin.schedules.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
+				@ui.Spinner(ui.SpinnerOpts{})
+			}
+		</form>
 	</div>
-	<p class="text-xs text-fg-muted mt-3">{ i18n.T(ctx, "admin.schedules.hint") }</p>
 }

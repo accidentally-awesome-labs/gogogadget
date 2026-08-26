@@ -20,7 +20,7 @@
         "source": "internal/web/files_test.go",
         "target": "internal/web/files_test.go",
         "class": "test",
-        "sha256": "97a421555bfe8f5f4d662a318f32743ea66da7020a38c7df045cafb5a31eb0b3",
+        "sha256": "e92f20c07b702a48270065941a42d78e6c8b77cc9718f043db318c06c152aa94",
         "rewrite_module": true,
         "contract": false
       },
@@ -28,7 +28,7 @@
         "source": "internal/web/page_files.go",
         "target": "internal/web/page_files.go",
         "class": "go",
-        "sha256": "a03460630061ed3dfade4f3a8ba6cf54318309ac4ddc82d13ca0ff30d291efd5",
+        "sha256": "de43eb52574c3f51b145f00fa58f0579288a4c3da96c01cf3c32cb10a4b0b726",
         "rewrite_module": true,
         "contract": false
       },
@@ -36,7 +36,7 @@
         "source": "internal/web/templates/files.templ",
         "target": "internal/web/templates/files.templ",
         "class": "templ",
-        "sha256": "e0e043ced881345aeb73c451e56e5dcf48fa154dfc1509a012edf59605c773c1",
+        "sha256": "49c92f71f7522bf6d36761a554b42011c4f66f46690b8bb16ec9b771e5cdd76f",
         "rewrite_module": true,
         "contract": false
       }
@@ -82,30 +82,42 @@
     "environment": [],
     "locales": {
       "en": {
-        "files.choose": "Choose file",
+        "files.caption": "Files in your organization",
         "files.col_name": "Name",
         "files.col_size": "Size",
         "files.col_uploaded": "Uploaded",
+        "files.delete_action": "Delete permanently",
         "files.delete_confirm": "Delete this file? This cannot be undone.",
+        "files.delete_row": "Delete %s",
+        "files.delete_title": "Delete file",
         "files.download": "Download",
+        "files.dropzone": "Drop a file here, or click to choose one",
         "files.empty_body": "Uploads land here, scoped to your organization.",
         "files.empty_title": "No files yet",
         "files.limit_hit": "Storage limit reached — the %s MB plan is full.",
-        "files.quota": "%s MB of %s MB used on %s",
+        "files.megabytes": "%s MB",
+        "files.quota_meter_label": "Storage quota",
+        "files.quota_title": "Storage used on %s",
         "files.title": "Files",
         "files.upload": "Upload"
       },
       "es": {
-        "files.choose": "Elegir archivo",
+        "files.caption": "Archivos de tu organización",
         "files.col_name": "Nombre",
         "files.col_size": "Tamaño",
         "files.col_uploaded": "Subido",
+        "files.delete_action": "Eliminar definitivamente",
         "files.delete_confirm": "¿Eliminar este archivo? Esta acción no se puede deshacer.",
+        "files.delete_row": "Eliminar %s",
+        "files.delete_title": "Eliminar archivo",
         "files.download": "Descargar",
+        "files.dropzone": "Suelta un archivo aquí o haz clic para elegir uno",
         "files.empty_body": "Las subidas aparecen aquí, con alcance de tu organización.",
         "files.empty_title": "Aún no hay archivos",
         "files.limit_hit": "Límite de almacenamiento alcanzado — el plan de %s MB está lleno.",
-        "files.quota": "%s MB de %s MB usados en el plan %s",
+        "files.megabytes": "%s MB",
+        "files.quota_meter_label": "Cuota de almacenamiento",
+        "files.quota_title": "Almacenamiento usado en el plan %s",
         "files.title": "Archivos",
         "files.upload": "Subir"
       }

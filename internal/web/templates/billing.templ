@@ -51,133 +51,181 @@ func meterPct(used, limit int64) int {
 	return int(v)
 }
 
+// billingCardAttrs carries the post-checkout poll.
+//
+// The four attributes below are the whole contract and are deliberately
+// unchanged: #billing-card polls its own fragment every 2s and morphs itself
+// out, so a webhook that lands a second after the redirect updates the card
+// without a reload and without losing focus. The poll exists only while the
+// subscription is still incomplete; a card that kept polling after the answer
+// arrived would hammer the endpoint forever.
+func billingCardAttrs(processing bool) ui.Attrs {
+	attrs := ui.Attrs{ID: "billing-card", Class: "mb-6 max-w-lg"}
+	if processing {
+		attrs.HX = ui.HX{
+			Get: "/app/settings/billing/fragment", Trigger: "every 2s", Swap: "outerMorph",
+		}
+	}
+	return attrs
+}
+
 // BillingCard is the current-plan card (polled fragment after checkout).
 templ BillingCard(plan billing.Plan, sub *sqlc.Subscription, processing bool) {
-	<div id="billing-card" class="card mb-6 max-w-lg"
+	@ui.Card(ui.CardOpts{Attrs: billingCardAttrs(processing)}) {
 		if processing {
-			hx-get="/app/settings/billing/fragment" hx-trigger="every 2s" hx-swap="outerMorph"
-		}
-	>
-		if processing {
-			<p class="font-semibold">{ i18n.T(ctx, "billing.processing_title") }</p>
-			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "billing.processing_sub") }</p>
+			@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "billing.processing_title"), Level: 2})
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-1"}}) {
+				{ i18n.T(ctx, "billing.processing_sub") }
+			}
+			// Indeterminate on purpose: the payment provider's webhook decides
+			// when this finishes, so there is no fraction to report and a bar
+			// claiming one would be inventing progress.
+			@ui.ProgressBar(ui.ProgressBarOpts{
+				Value:     -1,
+				Label:     i18n.T(ctx, "billing.processing_title"),
+				ValueText: i18n.T(ctx, "billing.processing_sub"),
+				Attrs:     ui.Attrs{Class: "mt-4", TestID: "billing-processing"},
+			})
 		} else {
-			<div class="flex items-center justify-between">
-				@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "billing.plan_heading", plan.Name), Attrs: ui.Attrs{Class: ""}})
+			@ui.CardHeader(ui.CardHeaderOpts{Title: i18n.T(ctx, "billing.plan_heading", plan.Name), Level: 2}) {
 				if sub != nil {
 					@ui.Badge(ui.BadgeOpts{Text: sub.Status, Kind: subKind(sub.Status), Attrs: ui.Attrs{TestID: "plan-badge"}})
 				} else {
 					@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "billing.plan_free"), Kind: ui.KindNeutral, Attrs: ui.Attrs{TestID: "plan-badge"}})
 				}
-			</div>
+			}
 			if sub != nil && sub.CurrentPeriodEnd.Valid {
-				<p class="text-sm text-fg-muted mt-2">
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
 					if sub.CancelAtPeriodEnd {
 						{ i18n.T(ctx, "billing.ends_on", sub.CurrentPeriodEnd.Time.Format("January 2, 2006")) }
 					} else {
 						{ i18n.T(ctx, "billing.period_ends", sub.CurrentPeriodEnd.Time.Format("January 2, 2006")) }
 					}
-				</p>
+				}
 			}
 		}
-	</div>
+	}
 }
 
 templ BillingError(msg string) {
-	@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "max-w-lg", TestID: ""}}) {
+	@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "max-w-lg"}}) {
 		{ msg }
 	}
 }
 
 // NotConfigured is the 503 fragment for an unconfigured service; it always
 // links the matching docs page.
+//
+// It is not ui.TerminalPage: that component's only link is hardcoded to "/",
+// and the whole point of this page is to send the reader to the setup guide for
+// the service that is missing.
 templ NotConfigured(feature, docsSlug string) {
 	<section class="page-narrow text-center">
-		<h1 class="display-title text-brand-text">{ i18n.T(ctx, "billing.not_configured", feature) }</h1>
-		<p class="mt-4 text-fg-muted">{ i18n.T(ctx, "billing.not_configured_body") }</p>
-		<a href={ "/docs/" + docsSlug } class="btn btn-primary mt-8">{ i18n.T(ctx, "billing.setup_guide") }</a>
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "billing.not_configured", feature), Level: 1,
+			Unstyled: true, Attrs: ui.Attrs{Class: "display-title text-brand-text"},
+		})
+		@ui.Text(ui.TextOpts{Size: ui.SizeMD, Muted: true, Attrs: ui.Attrs{Class: "mt-4"}}) {
+			{ i18n.T(ctx, "billing.not_configured_body") }
+		}
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: i18n.T(ctx, "billing.setup_guide"), Href: "/docs/" + docsSlug,
+			Action: ui.ActionPrimary, Attrs: ui.Attrs{Class: "mt-8"},
+		})
 	</section>
-}
-
-// usageCard is the shared shape of every quota meter: label, "x of y", bar.
-//
-// The meter carries the card's heading as its own label. A meter is announced by
-// its accessible name, and without one a screen reader reads a bare percentage
-// with no indication of which quota it measures - three unnamed meters on this
-// page were indistinguishable.
-templ usageCard(heading, detail string, pct int, testID string) {
-	<div class="card mb-6 max-w-lg" data-testid={ testID }>
-		<h2 class="text-sm font-semibold mb-2">{ heading }</h2>
-		<p class="text-sm text-fg-muted">{ detail }</p>
-		@ui.Meter(ui.MeterOpts{Percent: pct, Label: heading, ValueText: detail})
-	</div>
 }
 
 templ SettingsBilling(d BillingData) {
 	@SettingsTabs("/app/settings/billing")
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "billing.title")})
-
 	if d.Success && !d.Processing {
-		@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "mb-4 max-w-lg", TestID: ""}}) {
+		@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "mb-4 max-w-lg"}}) {
 			{ i18n.T(ctx, "billing.welcome") }
 		}
 	}
-
 	@BillingCard(d.Plan, d.Sub, d.Processing)
-
 	if d.Plan.MaxProjects > 0 {
-		@usageCard(
-			i18n.T(ctx, "billing.usage"),
-			i18n.T(ctx, "billing.projects_used", fmt.Sprint(d.ProjectCount), fmt.Sprint(d.Plan.MaxProjects)),
-			meterPct(d.ProjectCount, int64(d.Plan.MaxProjects)),
-			"usage-meter",
-		)
+		@ui.UsageCard(ui.UsageCardOpts{
+			Title:      i18n.T(ctx, "billing.projects"),
+			Used:       fmt.Sprint(d.ProjectCount),
+			Limit:      fmt.Sprint(d.Plan.MaxProjects),
+			Percent:    meterPct(d.ProjectCount, int64(d.Plan.MaxProjects)),
+			MeterLabel: i18n.T(ctx, "billing.projects"),
+			Attrs:      ui.Attrs{Class: "mb-6 max-w-lg", TestID: "usage-meter"},
+		})
 	}
-
 	if d.Plan.MaxStorageMB > 0 {
-		@usageCard(
-			i18n.T(ctx, "billing.storage"),
-			i18n.T(ctx, "billing.storage_used", usedMB(d.UsedStorageBytes), fmt.Sprint(d.Plan.MaxStorageMB)),
-			meterPct(d.UsedStorageBytes, int64(d.Plan.MaxStorageMB)*1024*1024),
-			"storage-meter",
-		)
+		@ui.UsageCard(ui.UsageCardOpts{
+			Title:      i18n.T(ctx, "billing.storage"),
+			Used:       usedMB(d.UsedStorageBytes) + " MB",
+			Limit:      fmt.Sprint(d.Plan.MaxStorageMB) + " MB",
+			Percent:    meterPct(d.UsedStorageBytes, int64(d.Plan.MaxStorageMB)*1024*1024),
+			MeterLabel: i18n.T(ctx, "billing.storage"),
+			Attrs:      ui.Attrs{Class: "mb-6 max-w-lg", TestID: "storage-meter"},
+		})
 	}
-
 	for _, m := range d.Plan.Meters {
 		if m.LimitPerMonth > 0 {
-			@usageCard(
-				m.Label,
-				i18n.T(ctx, "billing.meter_used", fmt.Sprint(d.MeterUsage[m.Key]), fmt.Sprint(m.LimitPerMonth)),
-				meterPct(d.MeterUsage[m.Key], m.LimitPerMonth),
-				"meter-"+m.Key,
-			)
+			@ui.UsageCard(ui.UsageCardOpts{
+				Title:      i18n.T(ctx, "billing.meter_title", m.Label),
+				Used:       fmt.Sprint(d.MeterUsage[m.Key]),
+				Limit:      fmt.Sprint(m.LimitPerMonth),
+				Percent:    meterPct(d.MeterUsage[m.Key], m.LimitPerMonth),
+				MeterLabel: i18n.T(ctx, "billing.meter_title", m.Label),
+				Attrs:      ui.Attrs{Class: "mb-6 max-w-lg", TestID: "meter-" + m.Key},
+			})
 		}
 	}
-
-	<div class="grid sm:grid-cols-3 gap-4 max-w-4xl">
+	@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD, Attrs: ui.Attrs{Class: "max-w-4xl"}}) {
 		for _, p := range d.Plans {
 			@ui.PlanCard(uiPlanCard(ctx, p, p.Key == d.Plan.Key)) {
-				if planRank(p.Key) > planRank(d.Plan.Key) {
-					<form hx-post="/app/billing/checkout" hx-disable="this">
-						<input type="hidden" name="plan" value={ p.Key }/>
-						<button type="submit" class="btn btn-primary w-full">
-							@ui.Spinner(ui.SpinnerOpts{})
-							{ i18n.T(ctx, "billing.upgrade_to", p.Name) }
-						</button>
-					</form>
-				} else if p.Key == d.Plan.Key {
-					<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">{ i18n.T(ctx, "billing.current_plan") }</span>
-				}
+				@settingsPlanAction(p, d.Plan)
 			}
 		}
-	</div>
-
+	}
 	if d.Sub != nil {
-		<form hx-post="/app/billing/portal" hx-disable="this" class="mt-6">
-			<button type="submit" class="btn btn-ghost" data-testid="manage-subscription">
-				@ui.Spinner(ui.SpinnerOpts{})
-				{ i18n.T(ctx, "billing.manage") }
-			</button>
-		</form>
+		// Hosted boundary: the portal is the payment provider's, so this posts
+		// for a redirect and never renders a card field of its own.
+		@ui.Form(ui.FormOpts{
+			Target: "this", Swap: "innerHTML",
+			Attrs: ui.Attrs{Class: "mt-6", HX: ui.HX{Post: "/app/billing/portal", Disable: true}},
+		}) {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "billing.manage"), Type: ui.TypeSubmit,
+				Attrs: ui.Attrs{TestID: "manage-subscription"},
+			})
+		}
+	}
+}
+
+// settingsPlanAction is the one control at the foot of a plan card.
+//
+// The current plan renders a disabled Button rather than a span wearing button
+// classes: a span is announced as text, so a keyboard user tabbing the grid
+// finds a gap with no explanation, and the pointer-events-none it needed was
+// the tell that it was pretending.
+//
+// Target and Swap restate htmx's own defaults - the form itself, innerHTML -
+// because the 422/503 the server renders back is meant to land inside this
+// form; on success the handler answers with a redirect to the hosted checkout.
+templ settingsPlanAction(plan billing.Plan, current billing.Plan) {
+	if planRank(plan.Key) > planRank(current.Key) {
+		@ui.Form(ui.FormOpts{
+			Target: "this", Swap: "innerHTML",
+			Attrs: ui.Attrs{HX: ui.HX{Post: "/app/billing/checkout", Disable: true}},
+		}) {
+			<input type="hidden" name="plan" value={ plan.Key }/>
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "billing.upgrade_to", plan.Name),
+				Type:  ui.TypeSubmit, Action: ui.ActionPrimary,
+				Attrs: ui.Attrs{Class: "w-full"},
+			})
+		}
+	} else if plan.Key == current.Key {
+		@ui.Button(ui.ButtonOpts{
+			Label:    i18n.T(ctx, "billing.current_plan"),
+			Disabled: true,
+			Attrs:    ui.Attrs{Class: "w-full"},
+		})
 	}
 }

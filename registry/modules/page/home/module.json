@@ -25,7 +25,7 @@
         "source": "internal/web/templates/home.templ",
         "target": "internal/web/templates/home.templ",
         "class": "templ",
-        "sha256": "f1d52e0aea0d4f4366931b4f9a02f8d0115cbb2ee86ed0102ceb40207202ba70",
+        "sha256": "f7d3172bbe4fca8a1a5feff1fce40a4161781e9c21cf950b6712f6829496f80f",
         "rewrite_module": true,
         "contract": false
       }
@@ -125,7 +125,7 @@
         "home.faq.title": "Frequently asked questions",
         "home.features.title": "Everything a SaaS needs, nothing it doesn't",
         "home.hero.subtitle": "The production-grade Go + HTMX boilerplate. Auth, teams, billing, email, admin, blog, and docs — wired to best-in-class managed services so you own the product, not the plumbing.",
-        "home.hero.title1": "Ship your SaaS this weekend,",
+        "home.hero.title1": "Ship your SaaS this weekend, ",
         "home.hero.title2": "not next quarter",
         "home.how.title": "How it works",
         "home.pricing.choose": "Choose %s",
@@ -176,7 +176,7 @@
         "home.faq.title": "Preguntas frecuentes",
         "home.features.title": "Todo lo que un SaaS necesita, nada de lo que no",
         "home.hero.subtitle": "El boilerplate de Go + HTMX listo para producción. Autenticación, equipos, facturación, correo, administración, blog y documentación — conectados a servicios gestionados de primera clase para que seas dueño del producto, no de la infraestructura.",
-        "home.hero.title1": "Lanza tu SaaS este fin de semana,",
+        "home.hero.title1": "Lanza tu SaaS este fin de semana, ",
         "home.hero.title2": "no el próximo trimestre",
         "home.how.title": "Cómo funciona",
         "home.pricing.choose": "Elegir %s",

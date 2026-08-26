@@ -7,7 +7,7 @@
     "revision": 1,
     "contract": 1,
     "title": "Middleware and request security",
-    "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards.",
+    "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards. The CSRF step publishes the token twice: as the inherited request header htmx reads, and into the request context that ui.Form draws its hidden field from, so a form submitted with no JavaScript is accepted.",
     "requires": [
       "system/identity",
       "system/organizations",
@@ -24,6 +24,14 @@
         "contract": true
       },
       {
+        "source": "internal/web/csrf_form_test.go",
+        "target": "internal/web/csrf_form_test.go",
+        "class": "test",
+        "sha256": "0ab35b2d32f0337041923538a320c3577e5740377848d046f38d0d296f835c36",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/maintenance_test.go",
         "target": "internal/web/maintenance_test.go",
         "class": "test",
@@ -35,7 +43,7 @@
         "source": "internal/web/middleware.go",
         "target": "internal/web/middleware.go",
         "class": "go",
-        "sha256": "a8e52bdb9c858ab98a8c27dfba936da43d0172e1cf31436116ac5c04f4adf5f8",
+        "sha256": "e2940068a654a8849416f4b4f2477ad5ffe37a988dc01ccf4dc29bfe345bc03f",
         "rewrite_module": true,
         "contract": true
       }

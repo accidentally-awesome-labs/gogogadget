@@ -1,10 +1,11 @@
 // Kanban drag adapter, owned by component/kanban.
 //
-// Dragging is a shortcut, not the interface. Every card already carries a
-// keyboard-operable "Move to..." menu that posts to the same endpoint, and this
-// file adds a pointer gesture on top of it. That ordering is the whole design:
-// a board operable only by dragging excludes keyboard users, screen reader
-// users, and anyone on a touch screen where a drag competes with scrolling.
+// Dragging is a shortcut, not the interface. Every card ships two paths that
+// need no drag: submit buttons inside its own move form, which work with no
+// script at all, and a keyboard-operable "Move to..." menu. That ordering is the
+// whole design: a board operable only by dragging excludes keyboard users,
+// screen reader users, and anyone on a touch screen where a drag competes with
+// scrolling.
 //
 // The drop therefore does not invent a request. It fills in the card's own move
 // form and submits it, so both paths hit one endpoint with one payload shape and
@@ -16,6 +17,20 @@ document.addEventListener("alpine:init", () => {
       const root = this.$root;
       this.root = root;
       this.instances = [];
+
+      // Take over the no-script move controls. Their job is done: this
+      // controller is running, so the card menu offers the same destinations,
+      // and offering one command twice is clutter on screen and a duplicate in
+      // a screen reader's element list. Hiding the form rather than the button
+      // row keeps the drag's fields exactly where they were.
+      root.querySelectorAll("[data-kanban-form]").forEach((form) => {
+        form.hidden = true;
+        // The destination field ships disabled, because the buttons just hidden
+        // submit under the same name and a no-script move must send exactly one
+        // "to". Nothing else can set it now, so it becomes ours.
+        const to = form.querySelector("[data-kanban-to]");
+        if (to) to.disabled = false;
+      });
 
       // Sortable arrives lazily. The board is already fully operable through
       // the card menus, so this waits for the engine instead of failing - and if

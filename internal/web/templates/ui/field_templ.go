@@ -8,11 +8,24 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// FieldIDs returns the stable input/hint/error IDs for a field name. A custom
-// control wires the same IDs through FieldARIA, so a hand-built input describes
-// itself exactly the way Field does.
-func FieldIDs(name string) (input, hint, error string) {
-	return name, name + "-hint", name + "-error"
+// FieldIDs returns the stable input/hint/error IDs for a field.
+// The argument is the control's resolved id, which defaults to the field name
+// and is only different when a caller had to override it - the same control
+// repeated per table row. Deriving all three from one base is what keeps the
+// control's aria-describedby and the elements Field renders in agreement.
+// FieldControlID resolves that base from a FieldOpts.
+func FieldIDs(base string) (input, hint, error string) {
+	return base, base + "-hint", base + "-error"
+}
+
+// FieldControlID is the id the field's control carries. A custom control must
+// resolve it through here rather than reading Name, or its id and the label's
+// for= will disagree the moment a caller sets ID.
+//
+// FieldOpts.Attrs land on the field's wrapper, not on the control, so Attrs.ID
+// is deliberately not consulted: it names the wrapper.
+func FieldControlID(o FieldOpts) string {
+	return controlID(o.ID, Attrs{}, o.Name)
 }
 
 // FieldARIA returns the aria attributes for a field.
@@ -40,11 +53,12 @@ func FieldARIA(o FieldOpts) templ.Attributes {
 // nothing describes it. The error replaces the hint once it exists: two
 // descriptions read in sequence bury the actionable one.
 func FieldAriaDescribedBy(o FieldOpts) string {
+	_, hint, errID := FieldIDs(FieldControlID(o))
 	switch {
 	case o.Error != "":
-		return o.Name + "-error"
+		return errID
 	case o.Hint != "":
-		return o.Name + "-hint"
+		return hint
 	default:
 		return ""
 	}
@@ -54,7 +68,12 @@ func FieldAriaDescribedBy(o FieldOpts) string {
 // children so any input type composes, and the hint/error ids come from
 // FieldIDs so a custom control can wire the same aria-describedby.
 type FieldOpts struct {
-	Name  string
+	Name string
+	// ID overrides the control's element id, which defaults to Name. It exists
+	// because a control repeated once per table row would otherwise emit one
+	// identical id on every row, and `for=` and `aria-describedby` resolve to
+	// the first match - so every row's label and error would describe row one.
+	ID    string
 	Label string
 	Hint  string
 	Error string
@@ -108,9 +127,9 @@ func Field(o FieldOpts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(FieldControlID(o))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 67, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 86, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 			if templ_7745c5c3_Err != nil {
@@ -123,7 +142,7 @@ func Field(o FieldOpts) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 67, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 86, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -139,9 +158,9 @@ func Field(o FieldOpts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(FieldControlID(o))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 69, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 88, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -154,7 +173,7 @@ func Field(o FieldOpts) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 70, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 89, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -178,7 +197,7 @@ func Field(o FieldOpts) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("optional")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 78, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 97, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -204,9 +223,9 @@ func Field(o FieldOpts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name + "-hint")
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(fieldHintID(o))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 84, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 103, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -219,7 +238,7 @@ func Field(o FieldOpts) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(o.Hint)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 84, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/field.templ`, Line: 103, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -231,7 +250,7 @@ func Field(o FieldOpts) templ.Component {
 			}
 		}
 		if o.Error != "" {
-			templ_7745c5c3_Err = FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: o.Name + "-error"}}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: fieldErrorID(o)}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -242,6 +261,18 @@ func Field(o FieldOpts) templ.Component {
 		}
 		return nil
 	})
+}
+
+// fieldHintID and fieldErrorID name the elements Field renders. They resolve
+// through FieldIDs so the markup and FieldARIA's aria-describedby cannot drift.
+func fieldHintID(o FieldOpts) string {
+	_, hint, _ := FieldIDs(FieldControlID(o))
+	return hint
+}
+
+func fieldErrorID(o FieldOpts) string {
+	_, _, errID := FieldIDs(FieldControlID(o))
+	return errID
 }
 
 var _ = templruntime.GeneratedTemplate

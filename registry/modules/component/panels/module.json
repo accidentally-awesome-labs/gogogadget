@@ -24,7 +24,7 @@
         "source": "internal/web/templates/ui/panels_test.go",
         "target": "internal/web/templates/ui/panels_test.go",
         "class": "test",
-        "sha256": "65fb4cf0abaa90f60aa6766496f77a678c5ed8015a5cedc94da806e7a5cce5f7",
+        "sha256": "3eb126cdeab0a892efe0816a638047e0e69d05e4b95b0dacd3451fab0a385bad",
         "rewrite_module": true,
         "contract": false
       },

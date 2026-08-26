@@ -23,7 +23,9 @@ type ButtonOpts struct {
 	// different statement from "working".
 	Disabled bool
 	// Icon is decorative - Label already names the command.
-	Icon  IconName
+	Icon IconName
+	// HX issues the request the button makes. It is applied after Attrs.HX, so
+	// a value set here wins per attribute when both carry the same one.
 	HX    HX
 	Attrs Attrs
 }
@@ -31,9 +33,9 @@ type ButtonOpts struct {
 // Button renders a control that acts.
 templ Button(o ButtonOpts) {
 	<button
-		{ rootWith("button", buttonClass(o.Action, o.Size), o.Attrs,
+		{ withRequest(rootWith("button", buttonClass(o.Action, o.Size), o.Attrs,
 			"type", string(o.Type.Value()),
-			"aria-busy", boolAttr(o.Busy))... }
+			"aria-busy", boolAttr(o.Busy)), o.HX)... }
 		disabled?={ o.Disabled }
 	>
 		if o.Busy {

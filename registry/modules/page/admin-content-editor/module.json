@@ -17,6 +17,14 @@
     ],
     "files": [
       {
+        "source": "internal/web/admin_content_editor_test.go",
+        "target": "internal/web/admin_content_editor_test.go",
+        "class": "test",
+        "sha256": "8bfb2ff940a7586bf1e9ea4bcddf63ad38aef0191735ce58faf6e8fd486bcdda",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_admin_content_editor.go",
         "target": "internal/web/page_admin_content_editor.go",
         "class": "go",

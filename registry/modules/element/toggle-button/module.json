@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/toggle-button.templ",
         "target": "internal/web/templates/ui/toggle-button.templ",
         "class": "templ",
-        "sha256": "3227f1a9f5ada198b809a43757db9e9a11e62ca9e1846146361eaedae161fd56",
+        "sha256": "277d0bce7a450e5b22f1533a0d3e80cca1464128cf1e80c98f707517dc2fd9dc",
         "rewrite_module": true,
         "contract": true
       }

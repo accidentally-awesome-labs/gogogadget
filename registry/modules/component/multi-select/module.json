@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/multi-select.templ",
         "target": "internal/web/templates/ui/multi-select.templ",
         "class": "templ",
-        "sha256": "577c67134fa6d701949fb3284312f2643417781c9e5022d463422dc7a665d8fe",
+        "sha256": "701c55ccfd23d09bb67c6752b045f39d43cf268ff4738fd7fc8b3c9aad4fea81",
         "rewrite_module": true,
         "contract": true
       }

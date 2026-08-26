@@ -26,6 +26,15 @@ type AlertDialogOpts struct {
 // inside a modal with no way out; a destructive confirmation is the last place
 // to depend on JavaScript having loaded.
 //
+// That native path carries cancel in every case, and confirm only when the
+// dialog has no request on it. htmx preventDefaults a click on any type="submit"
+// control, so a confirm button carrying ConfirmHX never submits the form: the
+// dialog stays open over the page and returnValue stays empty. Where a request
+// is present the confirm control therefore also closes explicitly. It is not a
+// fallback for the native path but a repair of it, so it is attached only when
+// ConfirmHX is set - adding it unconditionally would double-close a dialog the
+// platform already handled.
+//
 // role="alertdialog" with a described message is what makes a screen reader
 // announce the consequence rather than just the title.
 //
@@ -48,13 +57,24 @@ templ AlertDialog(o AlertDialogOpts) {
 			<p id={ o.ID + "-message" } class="text-sm text-fg-muted">{ o.Message }</p>
 			<div class="flex justify-end gap-2">
 				<button type="submit" value="cancel" class="btn btn-ghost" data-ui-dialog-cancel>{ o.CancelLabel }</button>
-				<button
-					type="submit"
-					value="confirm"
-					class={ "btn btn-" + dialogButtonClass(o.Kind) }
-					data-ui-dialog-confirm
-					{ applyHXAttrs(o.ConfirmHX)... }
-				>{ o.ConfirmLabel }</button>
+				if hxIsSet(o.ConfirmHX) {
+					<button
+						type="submit"
+						value="confirm"
+						class={ "btn btn-" + dialogButtonClass(o.Kind) }
+						data-ui-dialog-confirm
+						x-data="uiDialog"
+						x-on:click={ "close('" + o.ID + "', 'confirm')" }
+						{ applyHXAttrs(o.ConfirmHX)... }
+					>{ o.ConfirmLabel }</button>
+				} else {
+					<button
+						type="submit"
+						value="confirm"
+						class={ "btn btn-" + dialogButtonClass(o.Kind) }
+						data-ui-dialog-confirm
+					>{ o.ConfirmLabel }</button>
+				}
 			</div>
 		</form>
 	</dialog>

@@ -17,7 +17,12 @@ type NotificationItemOpts struct {
 	// alone is invisible to a screen reader.
 	Unread      bool
 	UnreadLabel string
-	Attrs       Attrs
+	// Actions is the row's controls - mark read, open, dismiss. It is a slot
+	// rather than a list of typed buttons because the requests are the caller's
+	// domain, and the wrapper is omitted when nil so a read-only list does not
+	// carry an empty cell that steals the row's remaining width.
+	Actions templ.Component
+	Attrs   Attrs
 }
 
 // NotificationItem renders one notification.
@@ -38,6 +43,11 @@ templ NotificationItem(o NotificationItemOpts) {
 					<time class="block text-xs text-fg-muted mt-1" datetime={ o.MachineTime }>{ o.Timestamp }</time>
 				}
 			</span>
+			if o.Actions != nil {
+				<span class="shrink-0 ml-auto">
+					@o.Actions
+				</span>
+			}
 		</span>
 	</li>
 }

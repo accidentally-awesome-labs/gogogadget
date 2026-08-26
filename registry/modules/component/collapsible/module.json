@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/collapsible.templ",
         "target": "internal/web/templates/ui/collapsible.templ",
         "class": "templ",
-        "sha256": "cc06dfb8dbf7249600314f35447f469a866c881e5da2ec48b701ebdf2e47cdd4",
+        "sha256": "a9c0f81d0fd19a5f9aff4b9ed1d31f2c9652f38170ddc1e5c85c0939908d6d82",
         "rewrite_module": true,
         "contract": true
       }
@@ -27,12 +27,9 @@
         {
           "name": "collapsible",
           "family": "navigation",
-          "engine": "alpine",
-          "alpine": "uiCollapsible",
-          "native_fallback": "details element",
           "signature": "templ Collapsible(o CollapsibleOpts)",
-          "summary": "Renders a button plus the region it controls.",
-          "guidance": "Unlike Disclosure this is for a region whose trigger sits elsewhere in the layout - a filter panel toggled from a toolbar, for instance. The trigger carries aria-expanded and aria-controls, and the region uses the `hidden` attribute rather than a class so it is removed from the accessibility tree and from tab order when closed.",
+          "summary": "Renders a native details/summary around a region.",
+          "guidance": "It is the same platform primitive as Disclosure, differing only in that the summary is dressed as a button and the region carries a caller-supplied id. No JavaScript at all: the platform supplies the toggle, the button semantics, keyboard activation and the expanded-state announcement, which is why this component declares no engine and needs no native fallback.",
           "states": [
             "default"
           ]

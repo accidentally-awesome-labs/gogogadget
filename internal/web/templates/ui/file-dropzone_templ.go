@@ -10,7 +10,21 @@ import templruntime "github.com/a-h/templ/runtime"
 
 // FileDropzoneOpts is a drag-and-drop upload area.
 type FileDropzoneOpts struct {
-	Name        string
+	Name string
+	// ID overrides the input's element id, which defaults to Name. The same
+	// control repeated once per row would otherwise emit one identical id, and
+	// the wrapping label's for= resolves to the first match - so every zone on
+	// the page would open the first zone's picker.
+	//
+	// Attrs are deliberately not consulted here: they land on the wrapping
+	// label, so Attrs.ID names the wrapper, not the input.
+	ID string
+	// Form is the id of the form that submits this control, for a dropzone that
+	// cannot be a descendant of the form it belongs to - an upload zone inside a
+	// page whose enclosing form saves something else entirely. Nested <form> is
+	// dropped by the HTML parser, so HTML's form attribute is the only answer
+	// that still works with no JavaScript.
+	Form        string
 	Accept      string
 	Multiple    bool
 	Label       string
@@ -51,7 +65,7 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 		}
 		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("file-dropzone", "block rounded-xl border-2 border-dashed border-border p-6 text-center cursor-pointer hover:bg-surface-raised", o.Attrs,
 			"x-data", "uiDropzone",
-			"for", o.Name))
+			"for", dropzoneControlID(o)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +84,7 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(o.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 26, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 40, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -80,7 +94,7 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error}))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, FieldARIA(FieldOpts{Name: o.Name, ID: dropzoneControlID(o), Hint: o.Hint, Error: o.Error}))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -89,9 +103,9 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(dropzoneControlID(o))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 29, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 44, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -104,7 +118,7 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 29, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 45, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -114,15 +128,15 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if o.Accept != "" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " accept=\"")
+		if o.Form != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " form=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Accept)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Form)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 31, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 48, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -133,18 +147,65 @@ func FileDropzone(o FileDropzoneOpts) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if o.Multiple {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " multiple")
+		if o.Accept != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " accept=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Accept)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/file-dropzone.templ`, Line: 51, Col: 21}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "></label>")
+		if o.Multiple {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " multiple")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, ">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if o.Hint != "" && o.Error == "" {
+			templ_7745c5c3_Err = Hint(HintOpts{For: dropzoneControlID(o), Text: o.Hint}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if o.Error != "" {
+			templ_7745c5c3_Err = FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: dropzoneErrorID(o)}}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</label>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		return nil
 	})
+}
+
+// dropzoneControlID is the id shared by the wrapping label's for= and the input
+// it points at. One resolution, two consumers: a label pointing at a different
+// id than the input carries is a label that does nothing.
+func dropzoneControlID(o FileDropzoneOpts) string {
+	return controlID(o.ID, Attrs{}, o.Name)
+}
+
+func dropzoneErrorID(o FileDropzoneOpts) string {
+	_, _, errID := FieldIDs(dropzoneControlID(o))
+	return errID
 }
 
 var _ = templruntime.GeneratedTemplate

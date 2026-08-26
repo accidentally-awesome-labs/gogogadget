@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/popover.templ",
         "target": "internal/web/templates/ui/popover.templ",
         "class": "templ",
-        "sha256": "e4fce01d994128791fac6a1f095f659fcb572755522e583c229971bc4f35962c",
+        "sha256": "bf7f12ffde57c672e7bb204d82550be62d67a202ca393beef74d1b6f955fe89e",
         "rewrite_module": true,
         "contract": true
       }
@@ -29,10 +29,11 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiMenu",
-          "native_fallback": "details element",
+          "native_fallback": "popover attribute",
           "signature": "templ Popover(o PopoverOpts)",
           "summary": "Renders a trigger with a positioned panel.",
-          "keyboard": "Focus moves into the panel on open and back to the trigger on close, Escape closes it, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next command starting with it.",
+          "guidance": "The panel is a native popover opened declaratively with popovertarget, so its content discloses with no script at all - a script-toggled panel would leave arbitrary caller content permanently display:none without one. The platform supplies light dismiss, Escape and the top layer; the Alpine component adds only the focus handling and keeps aria-expanded in step, because a declarative popovertarget button does not write that attribute and an expandable button that never reports its state is a bug.",
+          "keyboard": "Escape closes the panel and returns focus to the trigger. A popover holds arbitrary content, so it makes no promise about arrow or typeahead navigation inside it: those keys belong to whatever the panel contains, and a menu that needs them is DropdownMenu.",
           "states": [
             "default"
           ]

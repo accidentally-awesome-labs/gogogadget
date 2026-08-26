@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/combobox.templ",
         "target": "internal/web/templates/ui/combobox.templ",
         "class": "templ",
-        "sha256": "7cac7ea58062ff7c4725e63d471ba7f0d7b9d5d46ca015ce7e192fcb6e668790",
+        "sha256": "553415ab0928244a817470f36ec24b0b7a844ee98fdb6b3395c0ca26d9665b9e",
         "rewrite_module": true,
         "contract": true
       },

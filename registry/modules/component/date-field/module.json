@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/date-field.templ",
         "target": "internal/web/templates/ui/date-field.templ",
         "class": "templ",
-        "sha256": "24fc5668ac910bfdb6847c0e9525a06715a15c9a84d97fe4224848fb09af4c7f",
+        "sha256": "4637de6c03c12786c2206ab0ae746fc068f65801832157901abb8b360fa98b41",
         "rewrite_module": true,
         "contract": true
       }

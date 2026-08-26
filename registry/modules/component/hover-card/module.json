@@ -17,7 +17,7 @@
         "source": "internal/web/templates/ui/hover-card.templ",
         "target": "internal/web/templates/ui/hover-card.templ",
         "class": "templ",
-        "sha256": "21a64ee371cfb8a38ef94b5b06c127b81cc5a24f25ff64f053852a148848ef02",
+        "sha256": "471cd16f5baf94b8a60d9de92ebfc7bdcbfcf8afd241e641b8871597fcd4bc4c",
         "rewrite_module": true,
         "contract": true
       },
@@ -25,7 +25,7 @@
         "source": "internal/web/templates/ui/hover-card_test.go",
         "target": "internal/web/templates/ui/hover-card_test.go",
         "class": "test",
-        "sha256": "6b87d10b74169bbffdb432d206d0bf33f5aacffce0d933719f721b9e0ed78ccc",
+        "sha256": "2a0129882259045841922c5b2d87b3fd4362da40702fd900e56631428fc38913",
         "rewrite_module": true,
         "contract": false
       }

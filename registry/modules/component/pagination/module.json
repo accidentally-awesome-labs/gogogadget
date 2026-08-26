@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/pagination.templ",
         "target": "internal/web/templates/ui/pagination.templ",
         "class": "templ",
-        "sha256": "4ca3a335766b5eb92442ced00611dc7e14e8a1e454f65113b4bd17dd8b8dfdd0",
+        "sha256": "082cb8c833b042169cdd2ca10af6baa78ab7d49be56768514cea185ea90103d6",
         "rewrite_module": true,
         "contract": true
       },
@@ -24,7 +24,7 @@
         "source": "internal/web/templates/ui/pagination_test.go",
         "target": "internal/web/templates/ui/pagination_test.go",
         "class": "test",
-        "sha256": "9eedd2f6fd094fae512bf04ebdc4613ee9117d6633b946e05a54c52b10c1034f",
+        "sha256": "d3c09c171b1210e9134c9afcbf931d150e22cfb1a8319d1352e16eb30f593b15",
         "rewrite_module": true,
         "contract": false
       }
