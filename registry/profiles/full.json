@@ -66,6 +66,7 @@
       "component/key-value",
       "component/label",
       "component/list",
+      "component/markdown-editor",
       "component/member-item",
       "component/mention-chip",
       "component/menubar",

@@ -59,6 +59,7 @@
     "registry/modules/component/key-value/module.json",
     "registry/modules/component/label/module.json",
     "registry/modules/component/list/module.json",
+    "registry/modules/component/markdown-editor/module.json",
     "registry/modules/component/member-item/module.json",
     "registry/modules/component/mention-chip/module.json",
     "registry/modules/component/menubar/module.json",

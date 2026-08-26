@@ -968,6 +968,44 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Advanced — Markdown editor") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					The textarea is the form value. Formatting buttons and Ctrl+B/I/K edit that
+					text through the browser's own undo history, so Ctrl+Z undoes a toolbar click
+					without losing what you typed. There is no client-side Markdown renderer:
+					the preview would come from the server's goldmark pipeline.
+				</p>
+				@ui.MarkdownEditor(ui.MarkdownEditorOpts{
+					Name: "release_notes", Label: "Release notes",
+					Value: "## What changed\n\n- The catalog is modular now.\n",
+					Placeholder: "Write Markdown…",
+					Rows: 8, MaxLength: 2000,
+					Hint: "Markdown is rendered by the server, never in the browser.",
+				}) {
+					@ui.MediaPicker(ui.MediaPickerOpts{
+						ID:          "release_notes-picker",
+						UploadLabel: "Drop an image, or click to choose",
+						EmptyLabel:  "No uploads yet.",
+						Items: []ui.MediaItem{
+							{URL: "/static/og.png", Alt: "GoGoGadget social preview", Name: "og.png"},
+						},
+					})
+				}
+				<p class="text-sm text-fg-muted">
+					The preview region below is what the server swaps rendered HTML into. It is a
+					polite live region, so an author is not interrupted mid-sentence as it updates.
+				</p>
+				@ui.EditorPreview(ui.EditorPreviewOpts{ID: "release_notes-preview"}) {
+					<h2>What changed</h2>
+					<ul>
+						<li>The catalog is modular now.</li>
+					</ul>
+				}
+
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

@@ -1,0 +1,279 @@
+package ui
+
+import "fmt"
+
+// MarkdownEditorOpts configures the Markdown editing surface.
+//
+// There is deliberately no WYSIWYG engine here. A rich-text editor produces
+// HTML, and HTML from a user is exactly what this repository refuses to trust:
+// goldmark runs without unsafe HTML and user content never reaches templ.Raw.
+// Editing Markdown text keeps the stored value something the server can render
+// safely, which a saved HTML blob is not.
+type MarkdownEditorOpts struct {
+	Name        string
+	Label       string
+	Value       string
+	Placeholder string
+	// PreviewURL renders the preview server-side. The preview is the same
+	// goldmark pipeline the published page uses, so what the author sees is
+	// what readers get - a client-side Markdown renderer would be a second
+	// implementation that disagrees with the first.
+	PreviewURL string
+	// Target is the element the preview swaps into.
+	Target string
+	// MediaURL lists existing uploads; UploadURL accepts new ones. Both are
+	// optional: an editor without media is still an editor.
+	MediaURL  string
+	UploadURL string
+	Rows      int
+	MaxLength int
+	// Hint and Error mirror the enclosing Field so the control describes only
+	// elements that exist.
+	Hint, Error string
+	Required    bool
+	Disabled    bool
+	ReadOnly    bool
+	Attrs       Attrs
+}
+
+// MarkdownEditor renders a textarea with Markdown affordances.
+//
+// The textarea is the form value, always. Every toolbar button and shortcut
+// edits that text in place, so with no JavaScript the author types Markdown into
+// a plain textarea and the form submits unchanged - the toolbar is the part that
+// is optional, not the editing.
+templ MarkdownEditor(o MarkdownEditorOpts) {
+	<div
+		{ rootWith("markdown-editor", "space-y-2", o.Attrs,
+			"x-data", "uiMarkdownEditor",
+			"data-editor-name", o.Name)... }
+	>
+		// The toolbar starts hidden: its buttons do nothing without the
+		// controller, and a row of inert buttons is worse than none.
+		@EditorToolbar(EditorToolbarOpts{
+			For:      o.Name,
+			Disabled: o.Disabled || o.ReadOnly,
+			MediaURL: o.MediaURL,
+		})
+		<div data-editor-panes class="grid grid-cols-1 gap-3">
+			<textarea
+				{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+				id={ o.Name }
+				name={ o.Name }
+				rows={ fmt.Sprint(markdownRows(o.Rows)) }
+				class="input font-mono text-sm"
+				placeholder={ o.Placeholder }
+				data-editor-input
+				required?={ o.Required }
+				disabled?={ o.Disabled }
+				readonly?={ o.ReadOnly }
+				if o.MaxLength > 0 {
+					maxlength={ fmt.Sprint(o.MaxLength) }
+				}
+				if o.PreviewURL != "" {
+					hx-post={ o.PreviewURL }
+					hx-trigger="input changed delay:400ms"
+					hx-target={ markdownPreviewTarget(o) }
+					hx-swap="innerHTML"
+					hx-include="closest form"
+				}
+			>{ o.Value }</textarea>
+			if o.PreviewURL != "" {
+				@EditorPreview(EditorPreviewOpts{ID: o.Name + "-preview"})
+			}
+		</div>
+		// The media panel is swapped in here rather than beside the editor: the
+		// insert buttons act on this textarea, so they have to live inside the
+		// controller's root or their clicks reach nothing.
+		<div id={ o.Name + "-media" } data-editor-media>
+			{ children... }
+		</div>
+		if o.MaxLength > 0 {
+			@CharCounter(CharCounterOpts{For: o.Name, Max: o.MaxLength, Label: "characters"})
+		}
+		if o.Error != "" {
+			@FieldError(FieldErrorOpts{Error: o.Error, Attrs: Attrs{ID: o.Name + "-error"}})
+		}
+	</div>
+}
+
+// EditorToolbarOpts configures the formatting controls.
+type EditorToolbarOpts struct {
+	// For is the textarea's name; every button acts on that field.
+	For      string
+	Disabled bool
+	MediaURL string
+	Attrs    Attrs
+}
+
+// EditorToolbar renders the formatting controls.
+//
+// Each button carries the Markdown syntax it applies as data, so the controller
+// needs no per-button logic and adding a control is a markup change. The buttons
+// are real buttons with accessible names, not icon-only glyphs: "B" is
+// meaningless read aloud.
+templ EditorToolbar(o EditorToolbarOpts) {
+	<div
+		{ rootWith("editor-toolbar", "flex flex-wrap items-center gap-1", o.Attrs,
+			"role", "group",
+			"aria-label", "Formatting",
+			"hidden", "hidden")... }
+		data-editor-toolbar
+	>
+		for _, control := range markdownControls() {
+			<button
+				type="button"
+				class="btn btn-ghost btn-xs"
+				data-editor-action={ control.Action }
+				data-editor-prefix={ control.Prefix }
+				data-editor-suffix={ control.Suffix }
+				aria-label={ control.Label }
+				title={ control.Title }
+				disabled?={ o.Disabled }
+			>{ control.Text }</button>
+		}
+		if o.MediaURL != "" {
+			<button
+				type="button"
+				class="btn btn-ghost btn-xs"
+				data-editor-action="media"
+				aria-label="Insert media"
+				hx-get={ o.MediaURL }
+				hx-target={ "#" + o.For + "-media" }
+				hx-swap="innerHTML"
+				disabled?={ o.Disabled }
+			>Media</button>
+		}
+		<button
+			type="button"
+			class="btn btn-ghost btn-xs ml-auto"
+			data-editor-action="split"
+			aria-pressed="false"
+			aria-label="Side by side"
+		>Split</button>
+	</div>
+}
+
+// EditorPreviewOpts configures the rendered preview region.
+type EditorPreviewOpts struct {
+	ID    string
+	Attrs Attrs
+}
+
+// EditorPreview renders the server-rendered preview region.
+//
+// It is a polite live region: the preview updates as the author types, and an
+// assertive one would interrupt them mid-sentence. The content arrives from the
+// server's own Markdown pipeline - this component never renders Markdown itself,
+// because a second renderer is a second set of escaping rules.
+templ EditorPreview(o EditorPreviewOpts) {
+	<div
+		{ rootWith("editor-preview", "prose card min-h-32", o.Attrs,
+			"id", o.ID,
+			"role", "status",
+			"aria-live", "polite",
+			"aria-label", "Preview")... }
+	>
+		{ children... }
+	</div>
+}
+
+// MediaPickerOpts lists uploadable and existing media.
+type MediaPickerOpts struct {
+	ID    string
+	Items []MediaItem
+	// UploadURL accepts a new file; the input is a real file input so upload
+	// works without drag and drop.
+	UploadURL   string
+	UploadLabel string
+	EmptyLabel  string
+	Attrs       Attrs
+}
+
+// MediaItem is one existing upload.
+type MediaItem struct {
+	// URL is inserted into the document; Alt is the required alternative text.
+	URL, Alt, Name string
+	// Thumb is an optional preview image.
+	Thumb string
+}
+
+// MediaPicker renders existing media plus an upload control.
+//
+// Every item inserts a Markdown image with its alt text already filled in. Alt
+// text is part of the item rather than something the author is prompted for
+// later, because a prompt that can be dismissed produces images with no
+// description.
+templ MediaPicker(o MediaPickerOpts) {
+	<div { rootWith("media-picker", "space-y-3", o.Attrs, "id", o.ID)... }>
+		if o.UploadURL != "" {
+			@FileDropzone(FileDropzoneOpts{
+				Name:  o.ID + "-upload",
+				Label: o.UploadLabel,
+				Accept: "image/*",
+			})
+		}
+		if len(o.Items) == 0 {
+			<p class="text-sm text-fg-muted">{ o.EmptyLabel }</p>
+		} else {
+			<ul class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+				for _, item := range o.Items {
+					<li>
+						<button
+							type="button"
+							class="w-full rounded-lg border border-border p-2 text-left text-xs hover:bg-surface-raised"
+							data-editor-action="insert"
+							data-editor-insert={ mediaMarkdown(item) }
+						>
+							if item.Thumb != "" {
+								<img src={ item.Thumb } alt={ item.Alt } loading="lazy" class="w-full h-16 object-cover rounded mb-1"/>
+							}
+							<span class="block truncate">{ item.Name }</span>
+						</button>
+					</li>
+				}
+			</ul>
+		}
+	</div>
+}
+
+// markdownControl is one toolbar button's declaration.
+type markdownControl struct {
+	Action, Prefix, Suffix, Label, Title, Text string
+}
+
+// markdownControls declares the toolbar. Wrapping controls carry a prefix and
+// suffix; line controls carry a prefix only, which is what tells the controller
+// whether to wrap a selection or prepend to its lines.
+func markdownControls() []markdownControl {
+	return []markdownControl{
+		{Action: "wrap", Prefix: "**", Suffix: "**", Label: "Bold", Title: "Bold (Ctrl+B)", Text: "B"},
+		{Action: "wrap", Prefix: "_", Suffix: "_", Label: "Italic", Title: "Italic (Ctrl+I)", Text: "I"},
+		{Action: "wrap", Prefix: "`", Suffix: "`", Label: "Inline code", Title: "Inline code", Text: "Code"},
+		{Action: "wrap", Prefix: "[", Suffix: "](url)", Label: "Link", Title: "Link (Ctrl+K)", Text: "Link"},
+		{Action: "line", Prefix: "## ", Label: "Heading", Title: "Heading", Text: "H2"},
+		{Action: "line", Prefix: "- ", Label: "Bulleted list", Title: "Bulleted list", Text: "List"},
+		{Action: "line", Prefix: "> ", Label: "Quote", Title: "Quote", Text: "Quote"},
+	}
+}
+
+func markdownRows(rows int) int {
+	if rows <= 0 {
+		return 12
+	}
+	return rows
+}
+
+func markdownPreviewTarget(o MarkdownEditorOpts) string {
+	if o.Target != "" {
+		return o.Target
+	}
+	return "#" + o.Name + "-preview"
+}
+
+// mediaMarkdown builds the insertion text. The alt text is not optional: an
+// image with no description is invisible to a screen reader, and filling it here
+// is the only point where the information is actually available.
+func mediaMarkdown(item MediaItem) string {
+	return "![" + item.Alt + "](" + item.URL + ")"
+}
