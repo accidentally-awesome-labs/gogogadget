@@ -1,0 +1,187 @@
+package templates
+
+import (
+	"fmt"
+	"sort"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// devTableRow is one fixture row in the sort and row-delete example.
+type devTableRow struct {
+	ID, Name, Owner string
+	Runs            int
+	// Updated is the ISO date the sort orders by; Display is what the cell
+	// shows. One field would force the sort to order a display string, and
+	// "1 Feb" sorts before "2 Jan".
+	Updated, Display string
+}
+
+// devTableRows is the fixture, deliberately NOT in any of the sortable orders.
+// Rows that arrive pre-sorted by name make a working sort and a broken one
+// render identically on the first click.
+func devTableRows() []devTableRow {
+	return []devTableRow{
+		{ID: "dorado", Name: "Dorado", Owner: "Radia Perlman", Runs: 43, Updated: "2026-01-16", Display: "16 Jan 2026"},
+		{ID: "apollo", Name: "Apollo", Owner: "Ada Lovelace", Runs: 1204, Updated: "2026-01-15", Display: "15 Jan 2026"},
+		{ID: "cirrus", Name: "Cirrus", Owner: "Alan Turing", Runs: 512, Updated: "2026-01-11", Display: "11 Jan 2026"},
+		{ID: "borealis", Name: "Borealis", Owner: "Grace Hopper", Runs: 87, Updated: "2026-01-14", Display: "14 Jan 2026"},
+	}
+}
+
+// DevTableHasRow reports whether an id is one of the fixture rows.
+//
+// The delete action 404s on anything else. A demo that answered an empty 200 for
+// a row that never existed would make the row-removal contract look like it
+// works when what it actually proved is that htmx deletes whatever it targeted.
+func DevTableHasRow(id string) bool {
+	for _, row := range devTableRows() {
+		if row.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+// devTableColumns declares the table. Three columns are sortable and three are
+// not, so the aria-sort contract is visible: only the sorted one carries it.
+func devTableColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "name", Label: "Project", Sortable: true},
+		{Key: "owner", Label: "Owner", HideBelow: ui.BreakpointSM},
+		{Key: "runs", Label: "Runs", Numeric: true, Sortable: true},
+		{Key: "updated", Label: "Last run", Sortable: true, HideBelow: ui.BreakpointMD},
+		{Key: "actions", Label: "Actions", Align: ui.AlignEnd},
+	}
+}
+
+// devTableSortKey keeps only a key the fixture can actually order by.
+//
+// An unrecognised key falls back to the fixture order instead of 404ing: a sort
+// is a view of the same rows, like a page number, not a claim about which
+// surface is being rendered. Falling back also means no header claims aria-sort,
+// which is the honest description of an unsorted table.
+func devTableSortKey(key string) string {
+	switch key {
+	case "name", "runs", "updated":
+		return key
+	default:
+		return ""
+	}
+}
+
+// devTableSortDir reads the direction only when the key is one we sort by, so
+// ?dir=desc alone cannot mark a column sorted that nothing was sorted on.
+func devTableSortDir(key string, dir ui.SortDirection) ui.SortDirection {
+	if devTableSortKey(key) == "" {
+		return ui.SortNone
+	}
+	if dir.Value() == ui.SortDesc {
+		return ui.SortDesc
+	}
+	return ui.SortAsc
+}
+
+// devTableSorted returns the rows in the requested order.
+//
+// SliceStable, so rows comparing equal keep the fixture order: an unstable sort
+// makes two identical requests render two different tables, which is the one
+// thing a reference surface must never do.
+func devTableSorted(key string, dir ui.SortDirection) []devTableRow {
+	rows := devTableRows()
+	sorted := devTableSortKey(key)
+	if sorted == "" {
+		return rows
+	}
+	desc := devTableSortDir(key, dir) == ui.SortDesc
+	sort.SliceStable(rows, func(i, j int) bool {
+		left, right := rows[i], rows[j]
+		if desc {
+			left, right = right, left
+		}
+		switch sorted {
+		case "runs":
+			return left.Runs < right.Runs
+		case "updated":
+			return left.Updated < right.Updated
+		default:
+			return left.Name < right.Name
+		}
+	})
+	return rows
+}
+
+// devTableCaption states the order in words. The arrow glyph in the sorted
+// header is invisible to a screen reader, and aria-sort names the direction but
+// not which column matters most to the reader arriving cold.
+func devTableCaption(key string, dir ui.SortDirection) string {
+	sorted := devTableSortKey(key)
+	if sorted == "" {
+		return "Four fixture projects, in the order the server returned them."
+	}
+	direction := "ascending"
+	if devTableSortDir(key, dir) == ui.SortDesc {
+		direction = "descending"
+	}
+	return fmt.Sprintf("Four fixture projects, sorted by %s, %s.", sorted, direction)
+}
+
+// DevTableExample renders the table's resting state inside the box it morphs.
+templ DevTableExample(key string, dir ui.SortDirection) {
+	<div id="dev-table-region" data-testid="dev-table-region">
+		@DevTableFragment(key, dir)
+	</div>
+}
+
+// DevTableFragment is what the sort action returns: the whole table, headers
+// included, because aria-sort lives on a header and a fragment of rows alone
+// would leave the previous column still claiming to be the sorted one.
+//
+// ColumnHeader pushes the sort URL into history, and here that URL is the
+// fragment endpoint. A production table points BaseURL at its own page URL, so
+// what gets pushed there is an address a reload can serve; this demo has no page
+// of its own to point at.
+templ DevTableFragment(key string, dir ui.SortDirection) {
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:  devTableCaption(key, dir),
+		Columns:  devTableColumns(),
+		SortKey:  devTableSortKey(key),
+		SortDir:  devTableSortDir(key, dir),
+		BaseURL:  "/dev/ui/table/sort",
+		Target:   "#dev-table-region",
+		RowCount: len(devTableRows()),
+		Attrs:    ui.Attrs{ID: "dev-table", TestID: "dev-table"},
+	}) {
+		for _, row := range devTableSorted(key, dir) {
+			// A stable id per row: the sort morphs the table, so without one
+			// morph matches rows by position and moves the cell text between
+			// them instead of moving the rows.
+			<tr id={ "dev-row-" + row.ID }>
+				<td class="px-4 py-3">{ row.Name }</td>
+				<td class="px-4 py-3 hidden sm:table-cell">{ row.Owner }</td>
+				<td class="px-4 py-3 text-right tabular-nums">{ fmt.Sprint(row.Runs) }</td>
+				<td class="px-4 py-3 hidden md:table-cell">
+					<time datetime={ row.Updated }>{ row.Display }</time>
+				</td>
+				<td class="px-4 py-3 text-right">
+					@ui.Button(ui.ButtonOpts{
+						Label: "Delete", Action: ui.ActionDanger, Size: ui.SizeXS, Icon: ui.IconDelete,
+						Attrs: ui.Attrs{
+							TestID: "dev-row-delete-" + row.ID,
+							// The exact production row-delete contract: DELETE,
+							// a confirmation, the closest tr as the target, and
+							// outerHTML - which removes the row only because
+							// the response body is empty.
+							HX: ui.HX{
+								Delete:  "/dev/ui/row/delete?row=" + row.ID,
+								Confirm: "Delete " + row.Name + "? This cannot be undone.",
+								Target:  "closest tr",
+								Swap:    "outerHTML",
+							},
+						},
+					})
+				</td>
+			</tr>
+		}
+	}
+}

@@ -64,6 +64,19 @@ func (s *Server) handleDevScenario(w http.ResponseWriter, r *http.Request) {
 		s.handleNotFound(w, r)
 		return
 	}
+	// The other axes are validated the same way and for the same reason. A URL
+	// that looks like it selected rtl and rendered ltr is a reviewer arguing
+	// about a screenshot that was never taken.
+	context, ok := templates.ScenarioContextFrom(
+		state, scenarioPage(r),
+		r.URL.Query().Get("dir"),
+		r.URL.Query().Get("content"),
+		r.URL.Query().Get("density"),
+	)
+	if !ok {
+		s.handleNotFound(w, r)
+		return
+	}
 	// An app or admin scenario renders the real signed-in shell, which mounts
 	// clerk-js and bounces a visitor with no session straight to sign-in - so
 	// the scenario would be unreachable in a browser. Rather than fabricate
@@ -90,7 +103,7 @@ func (s *Server) handleDevScenario(w http.ResponseWriter, r *http.Request) {
 	s.Render(w, r, Page{
 		Title:  scenario.Title,
 		Layout: layout,
-	}, templates.ScenarioPage(scenario, state, scenarioPage(r)))
+	}, templates.ScenarioPage(scenario, context))
 }
 
 // scenarioPage reads the 1-based page a paged scenario is showing. An
@@ -128,24 +141,47 @@ func scenarioNeedsSession(scenario templates.Scenario) bool {
 // gallery, not a new registry entry. Unknown pairs are 404 so a demo wired to a
 // typo fails visibly instead of looking like it worked.
 func (s *Server) handleDevUIAction(w http.ResponseWriter, r *http.Request) {
-	component := r.PathValue("component")
-	action := r.PathValue("action")
-
-	switch component + "/" + action {
-	case "kanban/move":
-		if r.Method != http.MethodPost {
-			s.handleNotFound(w, r)
-			return
-		}
-		s.handleDevKanbanMove(w, r)
-	case "pagination/page", "search/query":
-		if r.Method != http.MethodGet {
-			s.handleNotFound(w, r)
-			return
-		}
-		s.renderDevPagerFragment(w, r)
-	default:
+	handler, method := s.devUIFragment(r.PathValue("component") + "/" + r.PathValue("action"))
+	if handler == nil || method != r.Method {
 		s.handleNotFound(w, r)
+		return
+	}
+	handler(w, r)
+}
+
+// devUIFragment resolves one example to its handler and the single method it
+// answers on.
+//
+// A table returning the method rather than an arm per example that checks
+// r.Method itself: with a dozen examples that check is written a dozen times,
+// and the one that gets it wrong accepts GET for a mutation - which the CSRF
+// middleware does not cover, because it only guards mutating methods.
+func (s *Server) devUIFragment(name string) (http.HandlerFunc, string) {
+	switch name {
+	case "pagination/page", "search/query":
+		return s.renderDevPagerFragment, http.MethodGet
+	case "table/sort":
+		return s.handleDevTableSort, http.MethodGet
+	case "overlay/open":
+		return s.handleDevOverlayOpen, http.MethodGet
+	case "kanban/move":
+		return s.handleDevKanbanMove, http.MethodPost
+	case "toast/show":
+		return s.handleDevToastShow, http.MethodPost
+	case "copy/confirm":
+		return s.handleDevCopyConfirm, http.MethodPost
+	case "upload/receive":
+		return s.handleDevUploadReceive, http.MethodPost
+	case "form/save":
+		return s.handleDevFormSave, http.MethodPost
+	case "calendar/select":
+		return s.handleDevCalendarSelect, http.MethodPost
+	case "editor/preview":
+		return s.handleDevEditorPreview, http.MethodPost
+	case "row/delete":
+		return s.handleDevRowDelete, http.MethodDelete
+	default:
+		return nil, ""
 	}
 }
 

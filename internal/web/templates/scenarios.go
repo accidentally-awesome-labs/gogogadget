@@ -131,6 +131,26 @@ var ScenarioRegistry = []Scenario{
 // ScenarioBySlug returns the declared scenario for a URL segment. An unknown
 // slug is not found rather than falling back to the first scenario: a typo that
 // silently renders a different page teaches the reader the wrong thing.
+// scenarioAxisTestID names an axis option. The state options keep their
+// original "state-<value>" ids because tests and the visual matrix already
+// reference them.
+func scenarioAxisTestID(key, option string) string {
+	if key == "state" {
+		return "state-" + option
+	}
+	return key + "-" + option
+}
+
+// scenarioContextSummary states what is on screen, so a screenshot carries its
+// own axes rather than needing the URL beside it.
+func scenarioContextSummary(gc GalleryContext) string {
+	content := ContentNormal
+	if gc.LongContent {
+		content = ContentLong
+	}
+	return gc.Direction + " · " + content + " content · " + string(gc.Density.Value())
+}
+
 func ScenarioBySlug(slug string) (Scenario, bool) {
 	for _, scenario := range ScenarioRegistry {
 		if scenario.Slug == slug {

@@ -17,10 +17,18 @@
     ],
     "files": [
       {
+        "source": "internal/web/dev_fragments_test.go",
+        "target": "internal/web/dev_fragments_test.go",
+        "class": "test",
+        "sha256": "e9e54579129f18dd945edf24647c61f6de2d56b05ea5465737acc129d94785e9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/dev_routes_test.go",
         "target": "internal/web/dev_routes_test.go",
         "class": "test",
-        "sha256": "0bdc0a2994a335c857e74b30ee9c77858987d8649986c3a93922393f83765c6a",
+        "sha256": "9d79660647e85dd76552d48676866c1c37a394db9d2f8940cc86548565622cfe",
         "rewrite_module": true,
         "contract": false
       },
@@ -36,7 +44,15 @@
         "source": "internal/web/page_dev_catalog.go",
         "target": "internal/web/page_dev_catalog.go",
         "class": "go",
-        "sha256": "2ac683f8558fc88418208084b0031bd6e2e22b14ae4fd5b8344dfa225275884b",
+        "sha256": "d760b4fd9194732f0bb1e9614b3d4d883980c741b4d67eb96deafee4e7759061",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_dev_fragments.go",
+        "target": "internal/web/page_dev_fragments.go",
+        "class": "go",
+        "sha256": "3bc73a4da0ea4a2c4eaef3d1e7a8c68b7bddeb1eee82afb26504c64d57b39dba",
         "rewrite_module": true,
         "contract": false
       },
@@ -57,10 +73,74 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/dev_fragment_calendar.templ",
+        "target": "internal/web/templates/dev_fragment_calendar.templ",
+        "class": "templ",
+        "sha256": "ef2bb616a98c3f472cad9b04b154db86a267b7fe2d0449390a2f594a58cd263b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_copy.templ",
+        "target": "internal/web/templates/dev_fragment_copy.templ",
+        "class": "templ",
+        "sha256": "da56bd57e9281d06904fd0c01f9ebadcfa7e220ca7c70a5a30dade4a0203105e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_editor.templ",
+        "target": "internal/web/templates/dev_fragment_editor.templ",
+        "class": "templ",
+        "sha256": "01c84340fd370d1d15d970802efe0fb42945c8892cfea696fad0010e1e0eb816",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_form.templ",
+        "target": "internal/web/templates/dev_fragment_form.templ",
+        "class": "templ",
+        "sha256": "39eac97252ec602b3ce1ca4d79b03b8b050aab7ff9571e0cab1b0baa075c8231",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_overlay.templ",
+        "target": "internal/web/templates/dev_fragment_overlay.templ",
+        "class": "templ",
+        "sha256": "0c6d0a26b5f3785629c566531c2381b33496df327ad55b8920697d16d8450ee7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_table.templ",
+        "target": "internal/web/templates/dev_fragment_table.templ",
+        "class": "templ",
+        "sha256": "90f83e9beee120cabe9e63e3894f24d613b5d554464d4fc690e8e7b330c53cd6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_toast.templ",
+        "target": "internal/web/templates/dev_fragment_toast.templ",
+        "class": "templ",
+        "sha256": "90fa21bb1d0afd59059e81f433e6fcf590ba80cbc1079ab0a023a418512afc16",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/dev_fragment_upload.templ",
+        "target": "internal/web/templates/dev_fragment_upload.templ",
+        "class": "templ",
+        "sha256": "ef0cf65e9a045c179dccae4dddd6edcc2357f21a3af6be8abdfdec3fc9f4d667",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "1b1882e2fda38ad089b3fb3f841789b2c00f5e60f5dab2cdc637dcd85d34f222",
+        "sha256": "9746a3ae3f6963c855ce298d793a06972fec6c55e8b970b48fffc29d25fbad78",
         "rewrite_module": true,
         "contract": false
       },
@@ -145,6 +225,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/templates/scenario_context.go",
+        "target": "internal/web/templates/scenario_context.go",
+        "class": "go",
+        "sha256": "15073868058b0f24f6452e7ca41158750cc235f22a4bac2714dfda2efbdc10c4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/scenario_dashboard.templ",
         "target": "internal/web/templates/scenario_dashboard.templ",
         "class": "templ",
@@ -164,7 +252,7 @@
         "source": "internal/web/templates/scenario_operations.templ",
         "target": "internal/web/templates/scenario_operations.templ",
         "class": "templ",
-        "sha256": "70e38d11469710e37317d1415b2ea737de7c79304418fae4bef5f8c8ee073404",
+        "sha256": "ba1f9fa9344cbd1729a92de1cdd6f057b61ff884128d3707388167210669e473",
         "rewrite_module": true,
         "contract": false
       },
@@ -172,7 +260,7 @@
         "source": "internal/web/templates/scenario_page.templ",
         "target": "internal/web/templates/scenario_page.templ",
         "class": "templ",
-        "sha256": "4334528c0cacc20706ffe697b0459772656973c6322edde9b8ee6362968ffe19",
+        "sha256": "6c8bc91522e2596b4a5b1ac9f224cef4331a77a4410924446fd5dfa40c1135b8",
         "rewrite_module": true,
         "contract": false
       },
@@ -220,7 +308,7 @@
         "source": "internal/web/templates/scenarios.go",
         "target": "internal/web/templates/scenarios.go",
         "class": "go",
-        "sha256": "e20e59c8527ae5d4525f019d19b4fc21cf0bed3df9d0c472463faa81393dfa65",
+        "sha256": "83631d7b219893a8b987aa6ed2fbd66422238474d651eb993239b05f7c679ec7",
         "rewrite_module": true,
         "contract": false
       }

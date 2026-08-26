@@ -55,7 +55,7 @@ templ ScenarioOperations(gc GalleryContext) {
 		@ui.DataTable(ui.DataTableOpts{
 			Caption:    "Background jobs, newest first",
 			Columns:    opsJobColumns(),
-			Density:    ui.DensityCompact,
+			Density:    gc.Density.Value(),
 			SortKey:    "updated",
 			SortDir:    ui.SortDesc,
 			RowCount:   len(opsJobPage(gc)),
@@ -85,6 +85,7 @@ templ ScenarioOperations(gc GalleryContext) {
 	}
 	@ui.Section(ui.SectionOpts{Title: "Schedules", Level: 2, Attrs: ui.Attrs{ID: "ops-schedules"}}) {
 		@ui.DataTable(ui.DataTableOpts{
+			Density:    gc.Density.Value(),
 			Caption:  "Recurring work and its next run",
 			Columns:  opsScheduleColumns(),
 			RowCount: len(opsSchedules(gc)),

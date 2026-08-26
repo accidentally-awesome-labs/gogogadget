@@ -402,3 +402,172 @@ func TestScenariosAreDeterministic(t *testing.T) {
 			"%s is not deterministic", scenario.Slug)
 	}
 }
+
+// Every context axis is validated against a closed set. An unrecognised value is
+// refused rather than falling back: a URL that looks like it selected rtl and
+// rendered ltr is a reviewer arguing about a screenshot that was never taken.
+func TestScenarioContextAxesAreValidated(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	valid := []string{
+		"?dir=ltr", "?dir=rtl", "?content=normal", "?content=long",
+		"?density=comfortable", "?density=compact",
+		"?dir=rtl&content=long&state=empty",
+	}
+	for _, query := range valid {
+		code, _, _ := serve(t, s, "GET", "/dev/scenarios/resource-list"+query, nil, nil, session)
+		assert.Equal(t, http.StatusOK, code, "%s must be accepted", query)
+	}
+
+	invalid := []string{"?dir=sideways", "?content=medium", "?density=cosy", "?state=nonsense"}
+	for _, query := range invalid {
+		code, _, _ := serve(t, s, "GET", "/dev/scenarios/resource-list"+query, nil, nil, session)
+		assert.Equal(t, http.StatusNotFound, code, "%s must be refused", query)
+	}
+}
+
+// The direction has to reach the markup, or the control is decoration.
+func TestDirectionReachesTheSurface(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	_, _, ltr := serve(t, s, "GET", "/dev/scenarios/settings", nil, nil, session)
+	_, _, rtl := serve(t, s, "GET", "/dev/scenarios/settings?dir=rtl", nil, nil, session)
+
+	assert.Contains(t, rtl, `dir="rtl"`)
+	assert.NotContains(t, ltr, `dir="rtl"`)
+}
+
+// Long content must actually change what is rendered. A toggle that does nothing
+// hides exactly the layout break it exists to expose.
+func TestLongContentChangesTheSurface(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	surfaceOf := func(body string) string {
+		i := strings.Index(body, `data-testid="scenario-surface"`)
+		require.GreaterOrEqual(t, i, 0)
+		return body[i:]
+	}
+	_, _, normal := serve(t, s, "GET", "/dev/scenarios/dashboard", nil, nil, session)
+	_, _, long := serve(t, s, "GET", "/dev/scenarios/dashboard?content=long", nil, nil, session)
+
+	assert.NotEqual(t, surfaceOf(normal), surfaceOf(long))
+}
+
+// Every axis control is a real link carrying the other axes, so a reviewer can
+// combine them and share the result.
+func TestAxisControlsPreserveTheOtherAxes(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	_, _, body := serve(t, s, "GET",
+		"/dev/scenarios/resource-list?state=empty&dir=rtl", nil, nil, session)
+
+	// The content toggle must keep the state and direction already chosen.
+	assert.Contains(t, body, "content=long")
+	assert.Contains(t, body, "state=empty")
+	assert.Contains(t, body, "dir=rtl")
+}
+
+// A control that changes nothing is the same lie as a disabled button with no
+// explanation: the reader clicks, sees no difference, and concludes the axis
+// does not matter. So every axis a scenario offers must move its surface.
+func TestEveryOfferedAxisMovesTheSurface(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	surfaceOf := func(body string) string {
+		i := strings.Index(body, `data-testid="scenario-surface"`)
+		require.GreaterOrEqual(t, i, 0)
+		return body[i:]
+	}
+	for _, scenario := range templates.ScenarioRegistry {
+		base := "/dev/scenarios/" + scenario.Slug
+		_, _, plain := serve(t, s, "GET", base, nil, nil, session)
+		offered := map[string]bool{}
+		for _, line := range strings.Split(plain, "\n") {
+			for _, key := range []string{"density", "content", "dir"} {
+				if strings.Contains(line, `data-testid="axis-`+key+`"`) {
+					offered[key] = true
+				}
+			}
+		}
+		for key, probe := range map[string]string{
+			"density": "?density=compact",
+			"content": "?content=long",
+			"dir":     "?dir=rtl",
+		} {
+			if !offered[key] {
+				continue
+			}
+			_, _, moved := serve(t, s, "GET", base+probe, nil, nil, session)
+			assert.NotEqual(t, surfaceOf(plain), surfaceOf(moved),
+				"%s offers %s but renders identically", scenario.Slug, key)
+		}
+	}
+}
+
+// An axis a scenario cannot respond to must not be offered at all, rather than
+// offered and inert.
+func TestUnusableAxisIsNotOffered(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_demo", "org_demo", "org:admin")
+	session := sessionCookie("user_demo", "org_demo", "org:admin")
+
+	// Communication holds no table or list that takes a Density.
+	_, _, body := serve(t, s, "GET", "/dev/scenarios/communication", nil, nil, session)
+	assert.NotContains(t, body, `data-testid="axis-density"`)
+
+	// Resource list is built on a DataTable, so it does.
+	_, _, table := serve(t, s, "GET", "/dev/scenarios/resource-list", nil, nil, session)
+	assert.Contains(t, table, `data-testid="axis-density"`)
+}
+
+// Every fragment action must have a caller. A handler nothing invokes is code
+// with no reader: the endpoint answers, the demo it exists for never appears,
+// and the gap is invisible because both halves look complete on their own.
+func TestEveryFragmentActionIsReachableFromTheGallery(t *testing.T) {
+	s := integrationServer(t, nil)
+
+	_, _, body := serve(t, s, "GET", "/dev/gallery", nil, nil)
+
+	// The gallery is where the interactive examples live, so each declared
+	// action has to appear in its markup as a request the page can make.
+	for _, action := range []string{
+		"toast/show", "copy/confirm", "upload/receive", "row/delete",
+		"table/sort", "form/save", "calendar/select", "editor/preview",
+		"overlay/open",
+	} {
+		assert.Contains(t, body, "/dev/ui/"+action,
+			"no example invokes /dev/ui/%s", action)
+	}
+}
+
+// The interactive examples must exercise production's status codes, not a
+// friendlier set. A demo that answers 200 where the product answers 422 teaches
+// the reader a contract that does not exist.
+func TestInteractiveExamplesUseProductionStatuses(t *testing.T) {
+	s := integrationServer(t, nil)
+	token, cookies := csrfFor(t, s)
+	headers := http.Header{}
+	headers.Set("X-CSRF-Token", token)
+	headers.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// A rejected value is a re-rendered fragment, never a redirect or a 200.
+	code, _, body := serve(t, s, "POST", "/dev/ui/form/save",
+		[]byte("dev_email=not-an-email"), headers, cookies...)
+	assert.Equal(t, http.StatusUnprocessableEntity, code)
+	assert.NotContains(t, body, "<html")
+
+	// A row delete is 200 with nothing in it, so outerHTML removes the row.
+	code, _, body = serve(t, s, "DELETE", "/dev/ui/row/delete?row=apollo", nil, headers, cookies...)
+	assert.Equal(t, http.StatusOK, code)
+	assert.Empty(t, strings.TrimSpace(body), "a delete that returns markup leaves the row behind")
+}

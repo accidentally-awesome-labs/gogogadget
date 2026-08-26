@@ -1173,6 +1173,23 @@ templ Gallery() {
 			</div>
 		}
 
+		// The interactive examples. Each one calls its declared
+		// /dev/ui/{component}/{action} fragment route and exercises the same
+		// statuses and swaps production uses - a demo that returns 200 where the
+		// product returns 422 teaches the reader the wrong contract.
+		@gallerySection("Interactive — real requests") {
+			<div class="space-y-8">
+				@DevToastExample()
+				@DevCopyExample()
+				@DevTableExample("name", ui.SortAsc)
+				@DevSaveExample()
+				@DevUploadExample()
+				@DevCalendarExample()
+				@DevEditorExample()
+				@DevOverlayExample()
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

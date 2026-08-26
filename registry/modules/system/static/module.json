@@ -104,7 +104,7 @@
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "004c5dffbb3db91a3e566fcfe2dd45ab7826b230da41507c3054196f51665267",
+        "sha256": "f92bd2b065c744bbaa41bd041808ecce57e60ceaeb4e8d94bd71e201b2ce8ebb",
         "rewrite_module": false,
         "contract": false
       },
@@ -112,7 +112,7 @@
         "source": "static/ui-engines.js",
         "target": "static/ui-engines.js",
         "class": "generated",
-        "sha256": "1f05a31ba7df9f7833f00df6d10549709969d77d4eeb6afdac9728d661200ca7",
+        "sha256": "52d5b50b1c5c8a91c2bc247694f968e3baa3eee36e00b827905914fc71783810",
         "rewrite_module": false,
         "contract": false
       },

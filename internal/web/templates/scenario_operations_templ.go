@@ -218,7 +218,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 			templ_7745c5c3_Err = ui.DataTable(ui.DataTableOpts{
 				Caption:    "Background jobs, newest first",
 				Columns:    opsJobColumns(),
-				Density:    ui.DensityCompact,
+				Density:    gc.Density.Value(),
 				SortKey:    "updated",
 				SortDir:    ui.SortDesc,
 				RowCount:   len(opsJobPage(gc)),
@@ -268,7 +268,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue("ops-schedule-" + schedule.ID)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 96, Col: 82}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 97, Col: 82}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 					if templ_7745c5c3_Err != nil {
@@ -281,7 +281,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 					var templ_7745c5c3_Var13 string
 					templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(schedule.Name)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 97, Col: 54}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 98, Col: 54}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 					if templ_7745c5c3_Err != nil {
@@ -294,7 +294,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(schedule.Cadence)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 98, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 99, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -315,7 +315,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(schedule.NextRun)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 102, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_operations.templ`, Line: 103, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -340,6 +340,7 @@ func ScenarioOperations(gc GalleryContext) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = ui.DataTable(ui.DataTableOpts{
+				Density:  gc.Density.Value(),
 				Caption:  "Recurring work and its next run",
 				Columns:  opsScheduleColumns(),
 				RowCount: len(opsSchedules(gc)),

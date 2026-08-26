@@ -34,22 +34,29 @@ templ ScenarioIndex() {
 // how to reach it. Only the states the descriptor declares are offered, because
 // a control that selects a state the scenario does not have is a control that
 // must fail.
-templ ScenarioPage(scenario Scenario, state string, page int) {
+templ ScenarioPage(scenario Scenario, gc GalleryContext) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: scenario.Title}) {
 		<p class="text-sm text-fg-muted">{ scenario.Summary }</p>
 	}
-	<nav class="flex flex-wrap items-center gap-2" aria-label="Scenario state" data-testid="scenario-states">
-		for _, candidate := range scenarioStateOptions(scenario) {
-			<a
-				href={ templ.SafeURL(scenarioStateURL(scenario, candidate)) }
-				class={ scenarioStateClass(candidate == scenarioActiveState(state)) }
-				aria-current={ scenarioCurrent(candidate == scenarioActiveState(state)) }
-				data-testid={ "state-" + candidate }
-			>{ candidate }</a>
+	// Every axis is a group of real links carrying the other axes, so a reviewer
+	// can combine them and share the exact view they are questioning.
+	<div class="space-y-2" data-testid="scenario-axes">
+		for _, axis := range scenarioAxes(scenario) {
+			<nav class="flex flex-wrap items-center gap-2" aria-label={ axis.Label } data-testid={ "axis-" + axis.Key }>
+				<span class="text-xs text-fg-muted w-20">{ axis.Label }</span>
+				for _, option := range axis.Options {
+					<a
+						href={ templ.SafeURL(scenarioAxisURL(scenario, gc, axis.Key, option)) }
+						class={ scenarioStateClass(option == scenarioAxisValue(gc, axis.Key)) }
+						aria-current={ scenarioCurrent(option == scenarioAxisValue(gc, axis.Key)) }
+						data-testid={ scenarioAxisTestID(axis.Key, option) }
+					>{ option }</a>
+				}
+			</nav>
 		}
-	</nav>
+	</div>
 	<p class="text-sm text-fg-muted" data-testid="scenario-slug">
-		{ fmt.Sprintf("%s · %s state", scenario.Slug, scenarioActiveState(state)) }
+		{ fmt.Sprintf("%s · %s state", scenario.Slug, scenarioActiveState(gc.State)) }
 	</p>
 	// The components this scenario exists to exercise, named from the
 	// descriptor. The visual matrix and the accessibility sweep read the same
@@ -60,14 +67,18 @@ templ ScenarioPage(scenario Scenario, state string, page int) {
 			{Term: "Layout", Value: scenario.Layout},
 			{Term: "Components", Value: joinWith(scenario.Surfaces, ", ")},
 			{Term: "States", Value: joinWith(scenarioStateOptions(scenario), ", ")},
+			{Term: "Rendered at", Value: scenarioContextSummary(gc)},
 		},
 	})
 	// The surface itself. It renders inside #content only: the shell around it
 	// is the real layout, so a scenario cannot drift from the chrome the
 	// product ships.
-	<div class="space-y-8" data-testid="scenario-surface">
+	// The direction lives on the surface wrapper, not the document: the shell
+	// around it is the product's own and stays in the reader's direction, so
+	// only the composition flips.
+	<div class="space-y-8" data-testid="scenario-surface" dir={ gc.Direction }>
 		if scenario.Render != nil {
-			@scenario.Render(GalleryContext{State: scenarioActiveState(state), Page: page})
+			@scenario.Render(gc)
 		} else {
 			// Stated, not blank: an empty column is indistinguishable from a
 			// composition that failed to render.
