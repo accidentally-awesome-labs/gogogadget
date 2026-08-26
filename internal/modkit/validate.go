@@ -126,6 +126,9 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateRuntime(m.Runtime, canonical); err != nil {
 		return err
 	}
+	if err := validateVendors(m.Vendors, canonical); err != nil {
+		return err
+	}
 	if err := validateTests(m.Tests, canonical); err != nil {
 		return err
 	}

@@ -2,10 +2,8 @@ package modkit
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -23,10 +21,6 @@ type staticSource struct {
 
 func (s staticSource) Resolve(context.Context, string, string) (Snapshot, error) {
 	return s.snapshot, s.err
-}
-
-func sha256Hex(data []byte) string {
-	return fmt.Sprintf("%x", sha256.Sum256(data))
 }
 
 func plannerRegistry(t *testing.T) fstest.MapFS {

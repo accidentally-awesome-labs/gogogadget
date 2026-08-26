@@ -429,6 +429,12 @@
         "title": {
           "type": "string",
           "minLength": 1
+        },
+        "vendors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VendorArtifact"
+          }
         }
       },
       "required": [
@@ -1374,6 +1380,54 @@
         "name",
         "family"
       ]
+    },
+    "VendorArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "source",
+        "version",
+        "bytes",
+        "sha256",
+        "license"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license_at": {
+          "type": "string"
+        },
+        "origins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
   }
 }

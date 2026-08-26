@@ -194,6 +194,10 @@ type Manifest struct {
 	Files       []ManifestFile        `json:"files"`
 	Claims      NamespaceClaims       `json:"claims"`
 	Runtime     RuntimeContributions  `json:"runtime"`
+	// Vendors records the provenance of every third-party file this module
+	// commits into the tree. Declared per module rather than centrally so that
+	// removing a module removes its vendored bytes with it.
+	Vendors []VendorArtifact `json:"vendors,omitempty"`
 	Migrations  []ManifestMigration   `json:"migrations"`
 	Environment []EnvironmentVariable `json:"environment"`
 	// Locales maps a locale code to the keys this module owns in that locale.

@@ -13,6 +13,14 @@
     ],
     "files": [
       {
+        "source": "VENDOR-LICENSES.md",
+        "target": "VENDOR-LICENSES.md",
+        "class": "asset",
+        "sha256": "f5cb8ddcb00e3349a95e772bd200f510bba3791c0286e8ae0aa85ce60d42b15b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "input.css",
         "target": "input.css",
         "class": "style",
@@ -96,7 +104,7 @@
         "source": "static/ui-components.js",
         "target": "static/ui-components.js",
         "class": "generated",
-        "sha256": "a02bab64342bc0625ca2c8f76f7b28ef0a4357462cb7826491af3a06f95ad464",
+        "sha256": "00308792ffa55f803f57afacb278cc17cab460f5b48637553d41938c5bba0f41",
         "rewrite_module": false,
         "contract": false
       },
@@ -104,7 +112,7 @@
         "source": "static/ui-engines.js",
         "target": "static/ui-engines.js",
         "class": "generated",
-        "sha256": "a2b1a85b5ddda698ef8381db1a1fa626270823d7ea98dc65251668c6fa5b19a9",
+        "sha256": "4ee099008feaa2584d20b80d2ec990427ec1da6693c17a2ce71720ed66545fac",
         "rewrite_module": false,
         "contract": false
       },
@@ -177,6 +185,41 @@
         }
       ]
     },
+    "vendors": [
+      {
+        "path": "static/vendor/alpine-csp.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.15.12/dist/cdn.min.js",
+        "version": "3.15.12",
+        "bytes": 61522,
+        "sha256": "566167134bb2347110904e2ced6e816d2e8d837200c158f98b72372b3bb0b9a6",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "origins": [
+          "alpinejs.dev"
+        ]
+      },
+      {
+        "path": "static/vendor/alpine-focus.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.15.12/dist/cdn.min.js",
+        "version": "3.15.12",
+        "bytes": 26051,
+        "sha256": "ea7e215444f5110619549621cd0760cedfe273f708b144d4e658a87b702555f9",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "origins": [
+          "github.com"
+        ]
+      },
+      {
+        "path": "static/vendor/htmx.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0-beta6/dist/htmx.min.js",
+        "version": "4.0.0-beta6",
+        "bytes": 36282,
+        "sha256": "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25",
+        "license": "BSD-2-Clause",
+        "license_at": "VENDOR-LICENSES.md"
+      }
+    ],
     "migrations": [],
     "environment": [],
     "docs": [],

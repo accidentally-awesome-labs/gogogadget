@@ -75,8 +75,7 @@
           "path": "static/vendor/sortablejs-1.15.7.min.js",
           "kind": "script",
           "engine": "sortablejs",
-          "integrity": "sha256-v0JBvHP+9/EcWaKDpp/oBRzdMcbY/1orm6IZ54Mfz3Y=",
-          "esm": false
+          "integrity": "sha256-v0JBvHP+9/EcWaKDpp/oBRzdMcbY/1orm6IZ54Mfz3Y="
         },
         {
           "id": "ui-kanban",
@@ -85,6 +84,17 @@
         }
       ]
     },
+    "vendors": [
+      {
+        "path": "static/vendor/sortablejs-1.15.7.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js",
+        "version": "1.15.7",
+        "bytes": 45478,
+        "sha256": "bf4241bc73fef7f11c59a283a69fe8051cdd31c6d8ff5a2b9ba219e7831fcf76",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md"
+      }
+    ],
     "migrations": [],
     "environment": [],
     "docs": [],

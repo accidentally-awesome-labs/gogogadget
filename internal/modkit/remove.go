@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -110,6 +111,41 @@ func (e *Engine) planRemove(
 				Path: file.Path, Module: id, Source: file.Source,
 				Kind: ChangeDelete, Class: DestinationAuthored, SHA256: file.BaseSHA256,
 			})
+		}
+	}
+
+	// A module's sources are declared; the build output derived from them is not,
+	// because the emitter owns it. Removal has to take that output with the
+	// source: a deleted `X.templ` whose generated `X_templ.go` survives still
+	// defines the renderer, so the component keeps rendering and removal is a
+	// report of work that did not happen.
+	declared := make([]string, 0, len(changes))
+	for _, change := range changes {
+		declared = append(declared, change.Path)
+	}
+	for _, id := range requested {
+		owned := make([]string, 0)
+		for _, file := range installed[id].Files {
+			owned = append(owned, file.Path)
+		}
+		for _, path := range generatedSiblings(owned) {
+			if slices.Contains(declared, path) {
+				continue
+			}
+			_, digest, missing, err := currentTargetState(canonicalRoot, path)
+			if err != nil {
+				return Plan{}, err
+			}
+			// Absent output is nothing to undo - a project that has never run
+			// the generator is a legal state, not a failure.
+			if missing {
+				continue
+			}
+			changes = append(changes, Change{
+				Path: path, Module: id, Kind: ChangeDelete,
+				Class: DestinationGenerated, SHA256: digest,
+			})
+			declared = append(declared, path)
 		}
 	}
 
@@ -405,4 +441,30 @@ func equalProjects(left, right Project) bool {
 		strings.Join(left.Exclude, "\x00") == strings.Join(right.Exclude, "\x00") &&
 		left.Schema == right.Schema &&
 		left.Registry == right.Registry
+}
+
+// generatedSiblings names the build output derived from each deleted source.
+//
+// Only templ sources have one. A plain Go file or a static asset has no
+// generated twin, and inventing a path for it would delete a file nobody
+// generated. Paths already in the input are skipped so a plan never deletes the
+// same file twice.
+func generatedSiblings(paths []string) []string {
+	present := make(map[string]struct{}, len(paths))
+	for _, path := range paths {
+		present[path] = struct{}{}
+	}
+	out := make([]string, 0)
+	for _, path := range paths {
+		if !strings.HasSuffix(path, ".templ") {
+			continue
+		}
+		generated := strings.TrimSuffix(path, ".templ") + "_templ.go"
+		if _, ok := present[generated]; ok {
+			continue
+		}
+		out = append(out, generated)
+		present[generated] = struct{}{}
+	}
+	return out
 }

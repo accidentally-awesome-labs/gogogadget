@@ -117,6 +117,21 @@
       ]
     },
     "data": [],
-    "removal_policy": "free"
+    "removal_policy": "free",
+    "vendors": [
+      {
+        "path": "static/vendor/chartjs-4.5.1.umd.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
+        "version": "4.5.1",
+        "bytes": 208522,
+        "sha256": "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "origins": [
+          "github.com",
+          "www.chartjs.org"
+        ]
+      }
+    ]
   }
 }

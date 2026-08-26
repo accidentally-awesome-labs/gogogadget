@@ -1059,6 +1059,12 @@ func (c CLI) runRegistry(ctx context.Context, args []string) error {
 		if err != nil {
 			return c.failure("registry build", *asJSON, runtimeError(err))
 		}
+		// Vendored bytes are verified here rather than in a separate audit, so
+		// a swapped third-party file fails the build instead of shipping. A
+		// check that has to be remembered is a check that eventually is not run.
+		if err := verifyCatalogVendors(c.root()); err != nil {
+			return c.failure("registry build", *asJSON, runtimeError(err))
+		}
 		return c.emit("registry build", *asJSON, Envelope{
 			OK: true, Resolved: discovered, Generated: append(built, refreshed...), Exit: exitOK,
 		})
