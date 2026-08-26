@@ -29,7 +29,13 @@
           "family": "navigation",
           "engine": "alpine",
           "alpine": "uiCollapsible",
-          "native_fallback": "details element"
+          "native_fallback": "details element",
+          "signature": "templ Collapsible(o CollapsibleOpts)",
+          "summary": "Renders a button plus the region it controls.",
+          "guidance": "Unlike Disclosure this is for a region whose trigger sits elsewhere in the layout - a filter panel toggled from a toolbar, for instance. The trigger carries aria-expanded and aria-controls, and the region uses the `hidden` attribute rather than a class so it is removed from the accessibility tree and from tab order when closed.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

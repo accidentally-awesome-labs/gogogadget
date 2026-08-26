@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "field",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Field(o FieldOpts)",
+          "summary": "Renders label + control + field-level error.",
+          "guidance": "The control arrives as children so any input type composes, and the hint/error ids come from FieldIDs so a custom control can wire the same aria-describedby.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

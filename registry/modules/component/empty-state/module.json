@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "empty-state",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ EmptyState(o EmptyStateOpts)",
+          "summary": "Renders the resting state of a region with no data.",
+          "guidance": "It carries no role and no live region: an empty list is not news. ErrorState is the announced counterpart for a region that failed.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

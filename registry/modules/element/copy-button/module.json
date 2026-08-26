@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "copy-button",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ CopyButton(o CopyButtonOpts)",
+          "summary": "Renders a clipboard control with a confirmation state.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

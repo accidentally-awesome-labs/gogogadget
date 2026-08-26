@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "status-dot",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ StatusDot(o StatusDotOpts)",
+          "summary": "Renders a state dot with its label.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

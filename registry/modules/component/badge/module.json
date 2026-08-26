@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "badge",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ Badge(o BadgeOpts)",
+          "summary": "A small state pill: Kind picks the semantic colour.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

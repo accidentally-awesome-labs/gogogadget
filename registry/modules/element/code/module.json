@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "code",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Code(o CodeOpts)",
+          "summary": "Renders an inline code span.",
+          "guidance": "The value is text content, never raw markup: user-controlled content in a code span is still user-controlled content, and templ escaping is the only reason this is safe.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "stat-group",
-          "family": "data"
+          "family": "data",
+          "signature": "templ StatGroup(o StatGroupOpts)",
+          "summary": "Renders metrics as a labelled group.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "secret-reveal",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ SecretReveal(o SecretRevealOpts)",
+          "summary": "The reveal-once secret pattern: the value in a code box and a copy button carrying it on data-copy.",
+          "guidance": "The value never reaches an Alpine expression, so a secret containing quotes cannot break out of one.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

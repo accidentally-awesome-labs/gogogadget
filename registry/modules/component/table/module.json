@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "table",
-          "family": "data"
+          "family": "data",
+          "signature": "templ Table(o TableOpts)",
+          "summary": "Renders a semantic table with a caption and responsive overflow.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

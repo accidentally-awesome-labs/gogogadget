@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "time-field",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ TimeField(o TimeFieldOpts)",
+          "summary": "Renders a native time input.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "icon-button",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ IconButton(o IconButtonOpts)",
+          "summary": "Renders an icon-only control with an accessible name.",
+          "states": [
+            "busy",
+            "default",
+            "disabled"
+          ]
         }
       ]
     },

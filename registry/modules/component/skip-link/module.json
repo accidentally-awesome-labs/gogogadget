@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "skip-link",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ SkipLink(o SkipLinkOpts)",
+          "summary": "Renders the first focusable control on the page.",
+          "guidance": "It is visually hidden until focused, not display:none - a hidden element is not focusable, so a display:none skip link is exactly as useless as none at all. It must be the first control in the document, otherwise a keyboard user tabs through the whole navigation before reaching the way to bypass it.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "toolbar",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Toolbar(o ToolbarOpts)",
+          "summary": "Renders a group of related controls.",
+          "guidance": "role=\"group\", not role=\"toolbar\": a toolbar promises arrow-key navigation between its controls with a single tab stop. These controls are each tabbable, so claiming toolbar would advertise a keyboard contract that is not implemented.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -47,18 +47,38 @@
           "name": "column-picker",
           "family": "advanced",
           "engine": "alpine",
-          "alpine": "uiGrid"
+          "alpine": "uiGrid",
+          "signature": "templ ColumnPicker(o ColumnPickerOpts)",
+          "summary": "Renders per-column visibility checkboxes inside a native disclosure.",
+          "guidance": "Checkboxes in a details element, not a custom menu: the state is a set of independent toggles, which is exactly what a checkbox group is, and the platform already supplies the keyboard model. The picker starts hidden because hiding a column has no effect without the controller.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "data-grid",
           "family": "advanced",
           "engine": "alpine",
           "alpine": "uiGrid",
-          "native_fallback": "semantic table with pagination"
+          "native_fallback": "semantic table with pagination",
+          "signature": "templ DataGrid(o DataGridOpts)",
+          "summary": "Renders the grid surface.",
+          "guidance": "The table is a real table with real headers, and the enhancement adds cell focus and column controls on top of it. It is deliberately not role=\"grid\": that role promises a full two-dimensional keyboard model, and claiming it while the page still behaves like a table is worse for a screen-reader user than the honest table semantics they already understand.",
+          "keyboard": "Arrow keys move cell focus, Home/End jump to the row's ends (with Ctrl/Cmd, to the grid's first or last cell) and PageUp/PageDown move ten rows; a cell containing a text control keeps its own keys.",
+          "states": [
+            "default",
+            "empty",
+            "overflow"
+          ]
         },
         {
           "name": "grid-toolbar",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ GridToolbar(o GridToolbarOpts)",
+          "summary": "Renders search plus the column picker trigger.",
+          "states": [
+            "default"
+          ]
         }
       ],
       "assets": [

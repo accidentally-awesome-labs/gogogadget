@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "section-header",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ SectionHeader(o SectionHeaderOpts)",
+          "summary": "A sub-heading inside a page.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

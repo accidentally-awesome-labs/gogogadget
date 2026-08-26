@@ -35,7 +35,13 @@
       "ui": [
         {
           "name": "column-header",
-          "family": "data"
+          "family": "data",
+          "signature": "templ ColumnHeader(o ColumnHeaderOpts)",
+          "summary": "Renders a th with sort semantics.",
+          "guidance": "aria-sort is what tells a screen-reader user which column orders the table and in which direction. Without it a sorted table is indistinguishable from an unsorted one, and the little arrow glyph is invisible to them.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

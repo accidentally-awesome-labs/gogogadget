@@ -37,7 +37,14 @@
           "family": "navigation",
           "engine": "alpine",
           "alpine": "uiTabs",
-          "native_fallback": "sequential panels"
+          "native_fallback": "sequential panels",
+          "signature": "templ TabPanels(o TabPanelsOpts)",
+          "summary": "Renders the ARIA tab widget.",
+          "guidance": "This is the one navigation component that genuinely needs script, and it claims role=\"tablist\" only because it implements the whole contract: a single tab stop for the set (roving tabindex), Left/Right to move between tabs, Home/End to jump to the ends, and aria-selected plus aria-controls wiring the tab to its panel. NavTabs is the alternative for navigation between URLs - tabs that are really links should stay links.",
+          "keyboard": "A roving tabindex gives the set one tab stop; Left/Right move and activate the adjacent tab, and Home/End jump to the first or last.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

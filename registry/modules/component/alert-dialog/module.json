@@ -29,7 +29,16 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiDialog",
-          "native_fallback": "dialog element"
+          "native_fallback": "dialog element",
+          "signature": "templ AlertDialog(o AlertDialogOpts)",
+          "summary": "Renders a modal requiring an explicit confirm or cancel.",
+          "guidance": "Both buttons submit the enclosing `form method=\"dialog\"` with a value, so the platform closes the dialog and records the choice in `returnValue`. They were once type=\"button\" with no handler, which left a keyboard or pointer user inside a modal with no way out; a destructive confirmation is the last place to depend on JavaScript having loaded. role=\"alertdialog\" with a described message is what makes a screen reader announce the consequence rather than just the title. Cancel is first in the DOM, so the platform's own initial focus lands on the safe choice. A destructive dialog that opens with Delete focused turns a stray Enter - the key the user just pressed to open it - into the deletion.",
+          "keyboard": "Escape closes the native dialog, and Cancel is first in the DOM so the platform's initial focus - and a stray Enter - lands on the safe choice.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

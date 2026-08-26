@@ -58,15 +58,35 @@
           "engine": "sortablejs",
           "alpine": "uiKanban",
           "vendor": "sortablejs@1.15.7",
-          "native_fallback": "move menu on every card"
+          "native_fallback": "move menu on every card",
+          "signature": "templ Kanban(o KanbanOpts)",
+          "summary": "Renders the board.",
+          "guidance": "Dragging is never the only way to move a card. Every card carries a keyboard-operable \"Move to...\" menu that posts to the same endpoint, because a board that can only be operated by dragging excludes keyboard users, screen reader users, and anyone on a touch screen where a drag competes with scroll. The drag is a shortcut layered on top of that menu, not a replacement for it.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         },
         {
           "name": "kanban-card",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ KanbanCard(o KanbanCardOpts)",
+          "summary": "Renders one card.",
+          "guidance": "The card is a list item carrying a real form. The form is what both paths use: the menu submits it by navigation, and a drag fills in the destination and submits the same form. The server's response is authoritative, so a rejected move re-renders the board rather than leaving the card where it was dropped.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "kanban-column",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ KanbanColumn(o KanbanColumnOpts)",
+          "summary": "Renders one column and its cards.",
+          "guidance": "It is a list with a heading, not a generic div: a screen-reader user needs to know how many cards a column holds and where its boundary is, and a list already reports both.",
+          "states": [
+            "default",
+            "empty"
+          ]
         }
       ],
       "assets": [

@@ -37,7 +37,13 @@
           "family": "forms",
           "engine": "alpine",
           "alpine": "uiCharCounter",
-          "native_fallback": "native input"
+          "native_fallback": "native input",
+          "signature": "templ CharCounter(o CharCounterOpts)",
+          "summary": "Renders a live character count for a length-limited control.",
+          "guidance": "The native maxlength on the control is what actually enforces the limit, and the server enforces it again. This is only the readout, so a user who has JavaScript disabled still cannot exceed the limit - they simply do not see the running total. aria-live is polite and the region announces only the count, so a screen reader is not interrupted on every keystroke.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

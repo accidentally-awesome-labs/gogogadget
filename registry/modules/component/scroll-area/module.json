@@ -34,7 +34,15 @@
       "ui": [
         {
           "name": "scroll-area",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ ScrollArea(o ScrollAreaOpts)",
+          "summary": "Renders a bounded, keyboard-scrollable region.",
+          "guidance": "tabindex=\"0\" plus role=\"region\" is the pairing that matters. A scrollable div with neither is reachable only by pointer, so its content is unreadable to a keyboard user once it overflows.",
+          "keyboard": "The region is focusable, so arrow keys and Page Up/Down scroll its content for a keyboard user.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

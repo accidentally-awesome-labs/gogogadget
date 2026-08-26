@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "tooltip",
-          "family": "overlays"
+          "family": "overlays",
+          "signature": "templ Tooltip(o TooltipOpts)",
+          "summary": "Renders an inline tooltip on hover/focus.",
+          "guidance": "The trigger is the caller's own element (children), so this renderer cannot put aria-describedby on it; the text is exposed with role=\"tooltip\" and the association belongs to the trigger-owning API in the component catalog.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "checkbox",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Checkbox(o CheckboxOpts)",
+          "summary": "A labelled checkbox.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

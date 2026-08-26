@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "kbd",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Kbd(o KbdOpts)",
+          "summary": "Renders one or more keyboard keys.",
+          "guidance": "<kbd> is the element that says \"press this\", which matters when documentation is read aloud.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

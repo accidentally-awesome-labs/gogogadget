@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "chat-log",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ ChatLog(o ChatLogOpts)",
+          "summary": "Renders the transcript as a polite live region.",
+          "guidance": "Polite, never assertive: an assertive log interrupts the screen reader on every token of a streaming response, which makes the page unusable. role=log is the specific one for an append-only transcript - it tells assistive technology that only additions matter, so earlier messages are not re-read.",
+          "states": [
+            "busy",
+            "default"
+          ]
         }
       ]
     },

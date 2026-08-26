@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "steps",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ Steps(o StepsOpts)",
+          "summary": "Renders an ordered progress trail.",
+          "guidance": "The position is stated in text (\"Step 2 of 4\") rather than left to the styling: colour and a filled circle are invisible to a screen reader and ambiguous to anyone who cannot distinguish the two shades.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

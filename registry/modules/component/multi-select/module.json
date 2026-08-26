@@ -26,7 +26,15 @@
       "ui": [
         {
           "name": "multi-select",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ MultiSelect(o MultiSelectOpts)",
+          "summary": "Renders a native multiple select.",
+          "guidance": "Native multiple selection is unloved but it works everywhere, submits without JavaScript, and is understood by every screen reader. The size attribute is set so the list is visible rather than a one-line box the user must discover they can expand.",
+          "states": [
+            "default",
+            "disabled",
+            "error"
+          ]
         }
       ]
     },

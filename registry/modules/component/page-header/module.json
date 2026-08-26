@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "page-header",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ PageHeader(o PageHeaderOpts)",
+          "summary": "The title row every page opens with; children are the right-hand actions.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

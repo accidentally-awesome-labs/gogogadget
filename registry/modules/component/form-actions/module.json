@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "form-actions",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ FormActions(o FormActionsOpts)",
+          "summary": "Renders a form's action row.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -93,6 +93,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"static", one(emitStaticRegistry)},
 		{"ui_components", one(emitUIComponentsRegistry)},
 		{"ui_metadata", one(emitUIComponentRegistry)},
+		{"ui_reference", one(emitUIReferenceRegistry)},
 		{"alpine_fragments", one(emitAlpineFragments)},
 		{"engines", one(emitEngineRegistry)},
 		{"styles", one(emitStylesRegistry)},
@@ -1966,6 +1967,80 @@ func emitUIComponentRegistry(ctx context.Context, modulePath string, lock Lock, 
 		return nil, fmt.Errorf("format ui component registry: %w", err)
 	}
 	return &GeneratedFile{Path: "internal/web/templates/ui/components_registry_gen.go", Content: string(src)}, nil
+}
+
+// emitUIReferenceRegistry renders the prose half of a component's public
+// interface: its exact renderer signature, what it is for, what it refuses to
+// do, its keyboard contract and the states it actually has. The gallery detail
+// pages read this instead of carrying hand-written copy, so documentation for a
+// component cannot outlive the module that ships it. It is a separate file from
+// the component metadata because the two have different readers — coverage
+// tests want the terse installed set, the reference wants the narrative — and
+// splitting them keeps a copy edit out of the file gallery coverage compares.
+func emitUIReferenceRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package ui\n\n")
+	b.WriteString("// Reference is the documented interface of one installed UI component.\n")
+	b.WriteString("// Signature, Summary, Guidance and Keyboard are declared by the owning\n")
+	b.WriteString("// module; an absent Keyboard means the component adds no key handling of its\n")
+	b.WriteString("// own, which is a different statement from unknown.\n")
+	b.WriteString("type Reference struct {\n")
+	b.WriteString("\tName      string\n\tFamily    GalleryFamily\n\tModule    string\n")
+	b.WriteString("\tSignature string\n\tSummary   string\n\tGuidance  string\n")
+	b.WriteString("\tKeyboard  string\n\tStates    []string\n")
+	b.WriteString("}\n\n")
+	b.WriteString("// ReferenceRegistry documents every installed component in module order,\n")
+	b.WriteString("// matching ComponentRegistry entry for entry.\n")
+	b.WriteString("var ReferenceRegistry = []Reference{\n")
+	owner := make(map[string]string)
+	for _, m := range orderedModules(lock, graph) {
+		for _, c := range m.Runtime.UI {
+			if prior, ok := owner[c.Name]; ok {
+				return nil, fmt.Errorf("ui component %q declared by both %s and %s", c.Name, prior, m.ID)
+			}
+			owner[c.Name] = m.ID
+			fmt.Fprintf(&b, "\t{Name: %s, Family: %s, Module: %s",
+				goString(c.Name), goString(string(c.Family)), goString(m.ID))
+			if c.Signature != "" {
+				fmt.Fprintf(&b, ", Signature: %s", goString(c.Signature))
+			}
+			if c.Summary != "" {
+				fmt.Fprintf(&b, ", Summary: %s", goString(c.Summary))
+			}
+			if c.Guidance != "" {
+				fmt.Fprintf(&b, ", Guidance: %s", goString(c.Guidance))
+			}
+			if c.Keyboard != "" {
+				fmt.Fprintf(&b, ", Keyboard: %s", goString(c.Keyboard))
+			}
+			if len(c.States) > 0 {
+				fmt.Fprintf(&b, ", States: %s", goStringSlice(c.States))
+			}
+			b.WriteString("},\n")
+		}
+	}
+	b.WriteString("}\n\n")
+	// Built once rather than scanned per call: every gallery detail request
+	// resolves a component name, and the registry grows with the catalog.
+	b.WriteString("var referenceIndex = func() map[string]int {\n")
+	b.WriteString("\tindex := make(map[string]int, len(ReferenceRegistry))\n")
+	b.WriteString("\tfor i := range ReferenceRegistry {\n")
+	b.WriteString("\t\tindex[ReferenceRegistry[i].Name] = i\n")
+	b.WriteString("\t}\n\treturn index\n}()\n\n")
+	b.WriteString("// ReferenceFor returns the documented interface of an installed component.\n")
+	b.WriteString("// A missing name is not an error: it is how a caller learns the module that\n")
+	b.WriteString("// owns that component is not installed.\n")
+	b.WriteString("func ReferenceFor(name string) (Reference, bool) {\n")
+	b.WriteString("\tat, ok := referenceIndex[name]\n")
+	b.WriteString("\tif !ok {\n\t\treturn Reference{}, false\n\t}\n")
+	b.WriteString("\treturn ReferenceRegistry[at], true\n}\n")
+	_ = ctx
+	src, err := format.Source([]byte(b.String()))
+	if err != nil {
+		return nil, fmt.Errorf("format ui reference registry: %w", err)
+	}
+	return &GeneratedFile{Path: "internal/web/templates/ui/reference_gen.go", Content: string(src)}, nil
 }
 
 func emitContentRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {

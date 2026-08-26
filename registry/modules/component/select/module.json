@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "select",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Select(o SelectOpts)",
+          "summary": "A native select.",
+          "states": [
+            "default",
+            "disabled"
+          ]
         }
       ]
     },

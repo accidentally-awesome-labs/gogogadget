@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "disclosure",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ Disclosure(o DisclosureOpts)",
+          "summary": "Renders a native details/summary.",
+          "guidance": "No JavaScript at all: the platform supplies the toggle, the button semantics, keyboard activation, and the correct announcement of expanded state. It also means the content is present for in-page search and prints expanded when the browser asks it to.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "table-card",
-          "family": "data"
+          "family": "data",
+          "signature": "templ TableCard(o TableCardOpts)",
+          "summary": "The bordered, clipped box every table sits in.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "inline",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Inline(o InlineOpts)",
+          "summary": "Renders children in a horizontal row.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

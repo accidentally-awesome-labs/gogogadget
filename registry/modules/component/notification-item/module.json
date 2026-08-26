@@ -27,7 +27,14 @@
       "ui": [
         {
           "name": "notification-item",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ NotificationItem(o NotificationItemOpts)",
+          "summary": "Renders one notification.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

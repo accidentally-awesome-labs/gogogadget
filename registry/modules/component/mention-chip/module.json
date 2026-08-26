@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "mention-chip",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ MentionChip(o MentionChipOpts)",
+          "summary": "Renders an inline mention.",
+          "guidance": "The @ is decorative and hidden: a screen reader reading \"at Ada Lovelace\" inside a sentence is confusing, and the visual marker is what distinguishes a mention from ordinary text for sighted readers.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

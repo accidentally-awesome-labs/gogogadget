@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "stack",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Stack(o StackOpts)",
+          "summary": "Renders children in a vertical stack.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

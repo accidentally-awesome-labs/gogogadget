@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "navigation-menu",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ NavigationMenu(o NavigationMenuOpts)",
+          "summary": "Renders a labelled group of boosted navigation links.",
+          "guidance": "These are anchors, not role=\"menuitem\": a menu promises arrow-key navigation and a menu button, while this is a list of links a user tabs through. The honest role is what a screen reader can act on.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

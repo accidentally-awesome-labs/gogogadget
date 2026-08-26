@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "accordion",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ Accordion(o AccordionOpts)",
+          "summary": "Renders sections as native details elements.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

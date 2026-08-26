@@ -39,15 +39,36 @@
       "ui": [
         {
           "name": "question",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ Question(o QuestionOpts)",
+          "summary": "Renders one question's native control.",
+          "guidance": "Radio and checkbox sets are a fieldset with a legend, because the question is the group's label: without it a screen reader reads the options with no idea what is being asked.",
+          "states": [
+            "default",
+            "error"
+          ]
         },
         {
           "name": "questionnaire",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ Questionnaire(o QuestionnaireOpts)",
+          "summary": "Renders one step of a questionnaire.",
+          "guidance": "State lives on the server. A wizard that keeps answers in the browser loses them on reload, cannot be resumed on another device, and cannot be validated - so each step posts its answer and the server decides what comes next.",
+          "states": [
+            "default",
+            "error"
+          ]
         },
         {
           "name": "wizard-actions",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ WizardActions(o WizardActionsOpts)",
+          "summary": "Renders Back, Skip and Next/Submit.",
+          "guidance": "The naming stays consistent across every step: the forward control is \"Next\" until the final step, where it is the submit verb. Changing the wording mid-flow makes the user re-read the button on every step to check what it now does.",
+          "states": [
+            "default",
+            "loading"
+          ]
         }
       ],
       "assets": []

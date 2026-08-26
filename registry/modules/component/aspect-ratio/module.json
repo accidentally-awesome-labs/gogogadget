@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "aspect-ratio",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ AspectRatio(o AspectRatioOpts)",
+          "summary": "Reserves the box a medium will occupy.",
+          "guidance": "This exists to stop layout shift: without a reserved box the page reflows the moment an image or embed arrives, moving whatever the user was about to click. RatioAuto is the honest name for declining to reserve, rather than a default that hides the cost.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

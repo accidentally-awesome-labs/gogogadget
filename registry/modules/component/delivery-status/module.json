@@ -27,7 +27,12 @@
       "ui": [
         {
           "name": "delivery-status",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ DeliveryStatus(o DeliveryStatusOpts)",
+          "summary": "Renders a delivery outcome.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

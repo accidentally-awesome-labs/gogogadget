@@ -34,7 +34,15 @@
       "ui": [
         {
           "name": "combobox",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Combobox(o ComboboxOpts)",
+          "summary": "Renders a text input backed by a native datalist.",
+          "guidance": "datalist is the engine-free choice: the browser supplies the filtering, the popup, keyboard navigation and mobile behaviour, and the field still submits a value with JavaScript disabled. A hand-built listbox has to reimplement all of that and usually ships without the keyboard half.",
+          "states": [
+            "default",
+            "disabled",
+            "error"
+          ]
         }
       ]
     },

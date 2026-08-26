@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "form",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Form(o FormOpts)",
+          "summary": "Renders a form wrapper; children are the fields.",
+          "guidance": "novalidate is always set: server validation is authoritative, and letting the browser block submission first means the server's rules never run.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

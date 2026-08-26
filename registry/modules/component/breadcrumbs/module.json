@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "breadcrumbs",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ Breadcrumbs(o BreadcrumbsOpts)",
+          "summary": "Renders an ordered trail to the current page.",
+          "guidance": "It is an <ol> because the order is the meaning, and the separators are aria-hidden: a screen reader announces list position already, so reading a slash between every item is noise.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

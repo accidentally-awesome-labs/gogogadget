@@ -30,7 +30,14 @@
       "ui": [
         {
           "name": "composer",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ Composer(o ComposerOpts)",
+          "summary": "Renders a message form.",
+          "guidance": "It is a real form with a submit button, so a message can be sent with no JavaScript and with the keyboard alone. There is no Enter-to-send here: a textarea where Enter submits makes multi-line messages impossible to write, and a caller who wants it can add it deliberately.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "input-addon",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ InputAddon(o InputAddonOpts)",
+          "summary": "Renders a non-editable affix such as a currency symbol or domain suffix.",
+          "guidance": "It is aria-hidden: the text is a visual hint about the field's format and the field's own label already states what it is, so announcing \"dollars\" between the label and the value would interrupt the reading.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

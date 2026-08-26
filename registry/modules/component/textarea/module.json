@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "textarea",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Textarea(o TextareaOpts)",
+          "summary": "A multi-line text input.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

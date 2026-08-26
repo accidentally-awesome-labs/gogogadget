@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "label",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Label(o LabelOpts)",
+          "summary": "Renders a control label.",
+          "guidance": "Field renders its own; this exists for a custom control that needs the same label semantics.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

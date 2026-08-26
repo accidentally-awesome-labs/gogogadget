@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "text",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Text(o TextOpts)",
+          "summary": "Renders body copy.",
+          "guidance": "It is a <p>, not a <div>: paragraph structure is what lets a screen reader user move through prose a paragraph at a time.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "search-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ SearchInput(o SearchInputOpts)",
+          "summary": "The debounced table search.",
+          "guidance": "It morphs Target and pushes the URL, so a search is shareable and the Back button works.",
+          "states": [
+            "default",
+            "loading"
+          ]
         }
       ]
     },

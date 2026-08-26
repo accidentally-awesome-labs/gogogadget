@@ -36,7 +36,14 @@
       "ui": [
         {
           "name": "toast",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ Toast(o ToastOpts)",
+          "summary": "Renders a transient message.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

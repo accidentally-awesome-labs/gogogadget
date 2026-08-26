@@ -34,7 +34,15 @@
       "ui": [
         {
           "name": "checkbox-group",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ CheckboxGroup(o CheckboxGroupOpts)",
+          "summary": "Renders related checkboxes inside a fieldset.",
+          "guidance": "A fieldset with a legend is what associates the group's question with each answer. Wrapping them in a div with a heading looks identical and tells a screen-reader user nothing about what the checkboxes belong to.",
+          "states": [
+            "default",
+            "disabled",
+            "error"
+          ]
         }
       ]
     },

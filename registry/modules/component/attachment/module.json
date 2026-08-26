@@ -27,7 +27,14 @@
       "ui": [
         {
           "name": "attachment",
-          "family": "data"
+          "family": "data",
+          "signature": "templ Attachment(o AttachmentOpts)",
+          "summary": "Renders one file row.",
+          "guidance": "The name is the link text, not \"download\": a screen reader's link list shows link text out of context, and forty links all reading \"download\" are indistinguishable.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

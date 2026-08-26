@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "button-link",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ ButtonLink(o ButtonLinkOpts)",
+          "summary": "Renders a link that looks like a button.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

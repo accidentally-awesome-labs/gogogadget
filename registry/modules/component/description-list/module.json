@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "description-list",
-          "family": "data"
+          "family": "data",
+          "signature": "templ DescriptionList(o DescriptionListOpts)",
+          "summary": "The read-only detail pattern (account, org).",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

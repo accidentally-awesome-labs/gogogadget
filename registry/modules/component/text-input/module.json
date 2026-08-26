@@ -26,7 +26,15 @@
       "ui": [
         {
           "name": "text-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ TextInput(o TextInputOpts)",
+          "summary": "A single-line text input.",
+          "states": [
+            "default",
+            "disabled",
+            "error",
+            "readonly"
+          ]
         }
       ]
     },

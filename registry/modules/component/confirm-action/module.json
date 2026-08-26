@@ -39,7 +39,16 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiDialog",
-          "native_fallback": "dialog element"
+          "native_fallback": "dialog element",
+          "signature": "templ ConfirmAction(o ConfirmActionOpts)",
+          "summary": "Renders a trigger plus the dialog that gates its request.",
+          "guidance": "This replaces hx-confirm, which calls window.confirm: an OS dialog that cannot be translated, cannot be styled, cannot be tested through the DOM, and on some platforms offers a \"prevent further dialogs\" checkbox that silently disables every subsequent confirmation on the page.",
+          "keyboard": "Escape closes the confirmation dialog, and initial focus lands on Cancel so a stray Enter cannot confirm.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

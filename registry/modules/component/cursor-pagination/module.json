@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "cursor-pagination",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ CursorPagination(o CursorPaginationOpts)",
+          "summary": "Renders previous/next controls for a keyset-paged list.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

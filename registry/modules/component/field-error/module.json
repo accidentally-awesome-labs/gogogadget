@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "field-error",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ FieldError(o FieldErrorOpts)",
+          "summary": "The per-field validation message under an input.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

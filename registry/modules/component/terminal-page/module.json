@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "terminal-page",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ TerminalPage(o TerminalPageOpts)",
+          "summary": "The one shape every terminal page takes: a big code or title, a sentence, optional detail, optional way home.",
+          "guidance": "An empty BackHomeLabel suppresses the link.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

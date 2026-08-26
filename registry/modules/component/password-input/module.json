@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "password-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ PasswordInput(o PasswordInputOpts)",
+          "summary": "Renders a native password field.",
+          "guidance": "There is no reveal toggle here on purpose: it belongs to a module that owns the Alpine behaviour, and a half-built toggle that leaves the value in the DOM as plain text is worse than none.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

@@ -29,7 +29,14 @@
           "family": "forms",
           "engine": "alpine",
           "alpine": "uiDateRange",
-          "native_fallback": "native input"
+          "native_fallback": "native input",
+          "signature": "templ DateRangeField(o DateRangeFieldOpts)",
+          "summary": "Renders a start and end date as two native date inputs.",
+          "guidance": "The end input's min is bound to the start value by the Alpine behaviour, but the server still validates the ordering: a range that only makes sense because the browser prevented the mistake is not validated at all.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

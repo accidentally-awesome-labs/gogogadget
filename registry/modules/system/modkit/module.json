@@ -86,7 +86,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "b3102bb18789c06702973ad2e81654025efbc8cf9d5c949257eba5d67b2e12fa",
+        "sha256": "d2307cf85690ea871e2b76ac75c6b261a1cd94a990f2b4c3134ae5ed5e4a3148",
         "rewrite_module": true,
         "contract": false
       },
@@ -142,7 +142,7 @@
         "source": "internal/modkit/migration_plan.go",
         "target": "internal/modkit/migration_plan.go",
         "class": "go",
-        "sha256": "01e62cf961f9ef41485f33f1728fe4a0e1eabf5bfe2740f0e6da7f2df8e3929d",
+        "sha256": "8e2c5af1e97b7905f4ed806b871ceb13dc73c8c583d754bb8e76f8a3ac5f1da6",
         "rewrite_module": true,
         "contract": false
       },
@@ -150,7 +150,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "8270d29ac240eaedb702e4d0d4c3a9d07a24a049c4855c160737d27d9144a062",
+        "sha256": "02ba5eeace5646cddc36f9d4d930be4cc07eacce7be03c1d195b07396ac7ca3c",
         "rewrite_module": true,
         "contract": true
       },
@@ -223,6 +223,14 @@
         "target": "internal/modkit/reconcile_test.go",
         "class": "test",
         "sha256": "6815ce61787fbd0293a5f64eacb6feb1ab5f61155bedc789de99af79c0bc5d1a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/modkit/reference_test.go",
+        "target": "internal/modkit/reference_test.go",
+        "class": "test",
+        "sha256": "a1d3b44ff6983fe65146506b91e8215000a39a4b9465b87b25b58b9d799f429b",
         "rewrite_module": true,
         "contract": false
       },
@@ -326,7 +334,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "579521598459728d270b9b738e8a8835d284492e40edd9c42c8bf034874aa9aa",
+        "sha256": "7c63404519cfeebb11cb543c775899fac908732e7b7318f5f3065503197c61d3",
         "rewrite_module": true,
         "contract": false
       },

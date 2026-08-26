@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "date-time-field",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ DateTimeField(o DateTimeFieldOpts)",
+          "summary": "Renders a native datetime-local input.",
+          "guidance": "datetime-local, not datetime: the value carries no timezone, so the server converts using the user's known zone rather than trusting a browser offset that changes when the user travels.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

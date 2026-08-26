@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "meter",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ Meter(o MeterOpts)",
+          "summary": "Renders a quota bar with meter semantics.",
+          "guidance": "role=\"meter\" rather than the native <meter> element: the native element's rendering is controlled by vendor pseudo-elements that differ per browser, so styling it from the token layer is not possible without per-engine hacks. The role gives the same semantics with full control over presentation. It is deliberately not a progressbar. A meter is a measurement inside a range - disk used, seats filled - while a progress bar is a task advancing towards completion. Screen readers announce them differently, and calling a quota a progress bar implies it will finish.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

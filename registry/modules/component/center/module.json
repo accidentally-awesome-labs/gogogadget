@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "center",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Center(o CenterOpts)",
+          "summary": "Centres its content horizontally within a constrained measure.",
+          "guidance": "It does not centre text. Centred body copy forces the eye to find a new left edge on every line, which is why this only centres the block.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

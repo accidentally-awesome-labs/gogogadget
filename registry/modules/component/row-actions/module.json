@@ -27,7 +27,13 @@
       "ui": [
         {
           "name": "row-actions",
-          "family": "data"
+          "family": "data",
+          "signature": "templ RowActions(o RowActionsOpts)",
+          "summary": "Renders a row's commands as a menu.",
+          "states": [
+            "default",
+            "disabled"
+          ]
         }
       ]
     },

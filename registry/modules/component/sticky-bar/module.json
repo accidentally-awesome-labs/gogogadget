@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "sticky-bar",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ StickyBar(o StickyBarOpts)",
+          "summary": "Renders a pinned action bar.",
+          "guidance": "It is sticky rather than fixed, so it stays inside its scroll container and cannot cover content the container has scrolled past. A fixed bar overlays the viewport, which on a short screen can hide the very field its Save button submits.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

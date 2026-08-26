@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "plan-card",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ PlanCard(o PlanCardOpts)",
+          "summary": "Renders one plan on the pricing page or in an upgrade CTA.",
+          "guidance": "Price is pre-formatted by the caller: currency and period formatting is a billing concern, and ui does not import billing.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

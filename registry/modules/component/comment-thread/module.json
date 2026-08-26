@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "comment-thread",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ CommentThread(o CommentThreadOpts)",
+          "summary": "Groups comments into a named region.",
+          "guidance": "It is not a live region: a thread rendered with the page has nothing new to announce. ChatLog is the live counterpart, for messages arriving after load.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

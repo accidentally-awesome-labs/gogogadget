@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "table-toolbar",
-          "family": "data"
+          "family": "data",
+          "signature": "templ TableToolbar(o TableToolbarOpts)",
+          "summary": "Renders the control row above a table.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -27,7 +27,12 @@
       "ui": [
         {
           "name": "back-link",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ BackLink(o BackLinkOpts)",
+          "summary": "Renders a link up to the parent view.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

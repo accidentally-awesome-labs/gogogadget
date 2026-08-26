@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "progress-circle",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ ProgressCircle(o ProgressCircleOpts)",
+          "summary": "Renders progress as a ring.",
+          "guidance": "The ring is drawn with an SVG stroke offset and is aria-hidden; the semantics live on the wrapper, so assistive technology gets a progressbar with a value rather than a description of two circles.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

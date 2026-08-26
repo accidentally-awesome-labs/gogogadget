@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "switch",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Switch(o SwitchOpts)",
+          "summary": "A labelled toggle.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

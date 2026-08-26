@@ -26,11 +26,21 @@
       "ui": [
         {
           "name": "item",
-          "family": "data"
+          "family": "data",
+          "signature": "templ Item(o ItemOpts)",
+          "summary": "Renders one list entry.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "list",
-          "family": "data"
+          "family": "data",
+          "signature": "templ List(o ListOpts)",
+          "summary": "Renders an unordered list.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

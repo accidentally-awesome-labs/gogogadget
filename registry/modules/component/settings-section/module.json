@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "settings-section",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ SettingsSection(o SettingsSectionOpts)",
+          "summary": "Renders a titled settings block.",
+          "guidance": "The heading and the control live in one <section> with an accessible name, so a screen-reader user can jump between settings blocks instead of tabbing through every control to find the next one.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

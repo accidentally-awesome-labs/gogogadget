@@ -27,7 +27,13 @@
       "ui": [
         {
           "name": "section",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Section(o SectionOpts)",
+          "summary": "Renders a landmark region with its own heading.",
+          "guidance": "It is a <section> with an accessible name, which is what makes it a landmark a screen reader can jump to. A <section> without a name is not a landmark at all - it is an anonymous div with extra letters.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

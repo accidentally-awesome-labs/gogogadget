@@ -35,10 +35,15 @@ templ FamilyIndex() {
 
 // FamilyPage lists one family's components.
 //
-// Every entry is a link to the component's own page, and each states its engine
-// and native fallback: those two facts decide whether a component can be used on
-// a surface that has to work without JavaScript, and they are the first thing an
-// adopter needs.
+// Every entry links to the component's own page and states its summary plus its
+// engine and native fallback: those two runtime facts decide whether a component
+// can be used on a surface that has to work without JavaScript.
+//
+// The list is rendered twice, at the page measure and inside a deliberately
+// narrow column. A component that only holds together at full width is the
+// commonest defect in a catalog like this one, and it is invisible on a desktop
+// review - so the constrained column is on the page rather than in a runner's
+// viewport option, where nobody looks at it.
 templ FamilyPage(family ui.GalleryFamily) {
 	@ui.Breadcrumbs(ui.BreadcrumbsOpts{Crumbs: []ui.Crumb{
 		{Label: "Gallery", Href: "/dev/gallery"},
@@ -53,29 +58,32 @@ templ FamilyPage(family ui.GalleryFamily) {
 			Body:  "Install one with ggg add, or remove the family from the profile.",
 		})
 	} else {
-		<ul class="space-y-2" data-testid="family-components">
-			for _, component := range ui.ComponentsInFamily(family) {
-				<li>
-					<a
-						href={ templ.SafeURL(fmt.Sprintf("/dev/gallery/%s/%s", family, component.Name)) }
-						class="card p-3 flex items-baseline justify-between gap-3 hover:bg-surface-raised"
-						data-testid={ "component-" + component.Name }
-					>
-						<span class="font-mono text-sm">{ component.Name }</span>
-						<span class="text-xs text-fg-muted">{ componentRuntimeNote(component) }</span>
-					</a>
-				</li>
+		<div class="space-y-8">
+			@ui.Section(ui.SectionOpts{Title: "At the page measure", Level: 2, Attrs: ui.Attrs{
+				ID: "family-normal", TestID: "family-normal",
+			}}) {
+				@familyComponentList(familyEntries(family), "family-components", "component-")
 			}
-		</ul>
+			@ui.Section(ui.SectionOpts{Title: "In a narrow column", Level: 2, Attrs: ui.Attrs{
+				ID: "family-constrained", TestID: "family-constrained",
+			}}) {
+				@ui.Text(ui.TextOpts{Muted: true}) {
+					The same entries in a sidebar-width column. Anything that clips,
+					overflows or stops being readable here does the same on a phone.
+				}
+				<div class="max-w-xs">
+					@familyComponentList(familyEntries(family), "constrained-components", "constrained-component-")
+				</div>
+			}
+		</div>
 	}
 }
 
 // ComponentPage renders one component's reference.
 //
-// The module is stated because that is what an adopter installs; the engine and
-// fallback are stated because they decide where the component may be used. Both
-// come from the installed manifest, so this page cannot describe a component the
-// project does not have.
+// Everything on it comes from the manifest that installed the component, so this
+// page cannot describe a component the project does not have, and it cannot
+// describe one differently from the code that ships.
 templ ComponentPage(component ui.Component) {
 	@ui.Breadcrumbs(ui.BreadcrumbsOpts{Crumbs: []ui.Crumb{
 		{Label: "Gallery", Href: "/dev/gallery"},
@@ -83,10 +91,7 @@ templ ComponentPage(component ui.Component) {
 		{Label: component.Name},
 	}})
 	@ui.PageHeader(ui.PageHeaderOpts{Title: component.Name})
-	@ui.DescriptionList(ui.DescriptionListOpts{
-		Attrs: ui.Attrs{TestID: "component-facts"},
-		Items: componentFacts(component),
-	})
+	@ComponentReference(referenceViewOf(component))
 }
 
 // familyTitle capitalises the family for a heading without inventing a second

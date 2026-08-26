@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "color-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ ColorInput(o ColorInputOpts)",
+          "summary": "Renders a native colour input paired with its hex value.",
+          "guidance": "The hex text is shown because a swatch alone cannot be read, compared, copied, or communicated - and it is the value the user will paste elsewhere.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

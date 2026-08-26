@@ -29,7 +29,15 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiMenu",
-          "native_fallback": "details element"
+          "native_fallback": "details element",
+          "signature": "templ DropdownMenu(o DropdownMenuOpts)",
+          "summary": "Renders a button that toggles a panel of links.",
+          "guidance": "This is a disclosure, not an ARIA menu: it deliberately does not claim role=\"menu\", because that role promises arrow-key navigation between menuitems, and claiming a keyboard contract the widget does not implement is worse for a screen-reader user than presenting an honest expandable button. The trigger and panel carry data hooks so the Alpine component can move focus in on open and return it to the trigger on close.",
+          "keyboard": "Focus moves into the panel on open and back to the trigger on close, Escape closes it, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next command starting with it.",
+          "states": [
+            "default",
+            "disabled"
+          ]
         }
       ]
     },

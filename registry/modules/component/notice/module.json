@@ -26,7 +26,15 @@
       "ui": [
         {
           "name": "notice",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ Notice(o NoticeOpts)",
+          "summary": "An in-page notice inside a form or card.",
+          "guidance": "Live decides how the message is announced, and the component owns the mapping so a caller cannot silently downgrade an actionable failure to a status. The default is LiveOff: a notice rendered as part of the page on first paint has nothing to announce, and marking it live makes a screen reader read it again on every unrelated update.",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
         }
       ]
     },

@@ -25,6 +25,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/gallery_reference_test.go",
+        "target": "internal/web/gallery_reference_test.go",
+        "class": "test",
+        "sha256": "97154588b44be8a7aac747c3e70e40df7e051b3fd4e33e79596600a8cc4d6d8f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/page_dev_catalog.go",
         "target": "internal/web/page_dev_catalog.go",
         "class": "go",
@@ -76,7 +84,7 @@
         "source": "internal/web/templates/gallery_family.templ",
         "target": "internal/web/templates/gallery_family.templ",
         "class": "templ",
-        "sha256": "c48ac9be3c873332e0ef4109bb4cdf0fd7b2d1c05f7a87a79c77e320fd6b6637",
+        "sha256": "0470c25e7c7eba4ad04d21d082c831803a11a2fd25cd1e79490f4ddde8f6407d",
         "rewrite_module": true,
         "contract": false
       },
@@ -85,6 +93,22 @@
         "target": "internal/web/templates/gallery_pager.templ",
         "class": "templ",
         "sha256": "3fd4b3f371e68a6a772dbb85993899b0f6faa36c88a0c65c75151ea4ccc7ceae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_reference.go",
+        "target": "internal/web/templates/gallery_reference.go",
+        "class": "go",
+        "sha256": "ef38b6e7738b039321dbfd7cfcc51e93298a043c1587d0bc0e76d49abeba1e3b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_reference.templ",
+        "target": "internal/web/templates/gallery_reference.templ",
+        "class": "templ",
+        "sha256": "bf39a04ec54f18afba80179e95be879b41f3bcaa9faec4193647b459722ef073",
         "rewrite_module": true,
         "contract": false
       },

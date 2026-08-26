@@ -183,21 +183,21 @@ const (
 
 // Manifest is the canonical, embedded snapshot of one resolved module.
 type Manifest struct {
-	ID          string                `json:"id"`
-	Kind        ModuleKind            `json:"kind"`
-	Name        string                `json:"name"`
-	Revision    int                   `json:"revision"`
-	Contract    int                   `json:"contract"`
-	Title       string                `json:"title"`
-	Description string                `json:"description"`
-	Requires    []string              `json:"requires"`
-	Files       []ManifestFile        `json:"files"`
-	Claims      NamespaceClaims       `json:"claims"`
-	Runtime     RuntimeContributions  `json:"runtime"`
+	ID          string               `json:"id"`
+	Kind        ModuleKind           `json:"kind"`
+	Name        string               `json:"name"`
+	Revision    int                  `json:"revision"`
+	Contract    int                  `json:"contract"`
+	Title       string               `json:"title"`
+	Description string               `json:"description"`
+	Requires    []string             `json:"requires"`
+	Files       []ManifestFile       `json:"files"`
+	Claims      NamespaceClaims      `json:"claims"`
+	Runtime     RuntimeContributions `json:"runtime"`
 	// Vendors records the provenance of every third-party file this module
 	// commits into the tree. Declared per module rather than centrally so that
 	// removing a module removes its vendored bytes with it.
-	Vendors []VendorArtifact `json:"vendors,omitempty"`
+	Vendors     []VendorArtifact      `json:"vendors,omitempty"`
 	Migrations  []ManifestMigration   `json:"migrations"`
 	Environment []EnvironmentVariable `json:"environment"`
 	// Locales maps a locale code to the keys this module owns in that locale.
@@ -447,6 +447,27 @@ type UIContribution struct {
 	Alpine         string        `json:"alpine,omitempty"`
 	Vendor         string        `json:"vendor,omitempty"`
 	NativeFallback string        `json:"native_fallback,omitempty"`
+	// Signature is the renderer's exact declaration, e.g.
+	// "templ Button(o ButtonOpts)". It is declared rather than read from source
+	// because GenerateAll is a pure function of the manifest graph; a drift test
+	// asserts it still matches the code, so a declared signature cannot quietly
+	// describe a renderer that changed shape.
+	Signature string `json:"signature,omitempty"`
+	// Summary is one sentence on what the component is for, taken from the
+	// renderer's own doc comment so the reference and the code cannot disagree.
+	Summary string `json:"summary,omitempty"`
+	// Guidance is the reasoning a reader needs before choosing this component:
+	// when it applies, what it refuses to do, and the accessibility decision
+	// behind that refusal.
+	Guidance string `json:"guidance,omitempty"`
+	// Keyboard is the interaction contract for components that implement one.
+	// Absent means the component adds no key handling of its own, which is a
+	// different statement from "unknown".
+	Keyboard string `json:"keyboard,omitempty"`
+	// States are the rendering states this component actually has. Declaring
+	// them lets the reference show every one and lets the visual matrix cover
+	// them, instead of both guessing from a fixed list that fits nothing.
+	States []string `json:"states,omitempty"`
 }
 
 // AssetContribution declares an ordered same-origin static asset.

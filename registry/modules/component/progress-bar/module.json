@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "progress-bar",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ ProgressBar(o ProgressBarOpts)",
+          "summary": "Renders task progress with progressbar semantics.",
+          "guidance": "progressbar, not meter: a progress bar describes a task advancing towards completion, while a meter describes a measurement within a range. Screen readers announce them differently, and using meter for a running task tells the user a quota is filling up.",
+          "states": [
+            "default",
+            "loading"
+          ]
         }
       ]
     },

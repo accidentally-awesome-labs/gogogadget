@@ -26,15 +26,30 @@
       "ui": [
         {
           "name": "card",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Card(o CardOpts)",
+          "summary": "The bordered container every panel sits in.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "card-footer",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ CardFooter(o CardFooterOpts)",
+          "summary": "Renders a trailing action row.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "card-header",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ CardHeader(o CardHeaderOpts)",
+          "summary": "Renders a title row with optional trailing actions.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

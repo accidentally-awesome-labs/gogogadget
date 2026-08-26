@@ -54,7 +54,13 @@
           "engine": "chartjs",
           "alpine": "uiChart",
           "vendor": "chart.js@4.5.1",
-          "native_fallback": "data table"
+          "native_fallback": "data table",
+          "signature": "templ AreaChart(o AreaChartOpts)",
+          "summary": "Renders area data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "bar-chart",
@@ -62,11 +68,23 @@
           "engine": "chartjs",
           "alpine": "uiChart",
           "vendor": "chart.js@4.5.1",
-          "native_fallback": "data table"
+          "native_fallback": "data table",
+          "signature": "templ BarChart(o BarChartOpts)",
+          "summary": "Renders bar data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "chart-legend",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ ChartLegend(o ChartLegendOpts)",
+          "summary": "Names each series in text with its colour swatch.",
+          "guidance": "The swatch is decoration: colour alone cannot distinguish series for a colour-blind reader, so the label is what carries the identity.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "donut-chart",
@@ -74,7 +92,13 @@
           "engine": "chartjs",
           "alpine": "uiChart",
           "vendor": "chart.js@4.5.1",
-          "native_fallback": "data table"
+          "native_fallback": "data table",
+          "signature": "templ DonutChart(o DonutChartOpts)",
+          "summary": "Renders donut data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "line-chart",
@@ -82,7 +106,13 @@
           "engine": "chartjs",
           "alpine": "uiChart",
           "vendor": "chart.js@4.5.1",
-          "native_fallback": "data table"
+          "native_fallback": "data table",
+          "signature": "templ LineChart(o LineChartOpts)",
+          "summary": "Renders line data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "sparkline",
@@ -90,7 +120,13 @@
           "engine": "chartjs",
           "alpine": "uiChart",
           "vendor": "chart.js@4.5.1",
-          "native_fallback": "data table"
+          "native_fallback": "data table",
+          "signature": "templ Sparkline(o SparklineOpts)",
+          "summary": "Renders a sparkline as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
         }
       ],
       "assets": [

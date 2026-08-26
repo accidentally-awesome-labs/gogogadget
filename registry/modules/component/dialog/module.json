@@ -29,7 +29,14 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiDialog",
-          "native_fallback": "dialog element"
+          "native_fallback": "dialog element",
+          "signature": "templ Dialog(o DialogOpts)",
+          "summary": "Renders a native <dialog>.",
+          "guidance": "The platform supplies the top layer, the backdrop, the focus trap and Escape-to-close, and the close control is a `form method=\"dialog\"` submit button - so the dialog dismisses with no JavaScript at all. The Alpine `uiDialog` component only calls showModal().",
+          "keyboard": "Escape closes it: this is a native <dialog>, so the platform supplies dismissal and the focus trap.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

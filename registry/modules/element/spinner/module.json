@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "spinner",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Spinner(o SpinnerOpts)",
+          "summary": "Renders the spinner glyph as an HTMX request indicator.",
+          "states": [
+            "default",
+            "loading"
+          ]
         }
       ]
     },

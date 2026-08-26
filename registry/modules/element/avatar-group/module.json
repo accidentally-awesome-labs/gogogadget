@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "avatar-group",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ AvatarGroup(o AvatarGroupOpts)",
+          "summary": "Renders overlapping avatars with an overflow count.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

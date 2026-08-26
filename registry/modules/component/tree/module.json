@@ -45,17 +45,37 @@
           "name": "tree",
           "family": "advanced",
           "engine": "alpine",
-          "alpine": "uiTree"
+          "alpine": "uiTree",
+          "signature": "templ Tree(o TreeOpts)",
+          "summary": "Renders a disclosure tree.",
+          "guidance": "It is built from nested `details` elements, so with no JavaScript every branch still opens and every leaf is still reachable. The controller adds the APG keyboard model on top - roving focus, arrows, Home/End and typeahead - by upgrading this markup rather than replacing it. A div-based tree would have to implement disclosure, keyboard and semantics all at once, and would offer nothing when any of the three failed.",
+          "keyboard": "A roving tabindex gives the tree one tab stop; ArrowUp/ArrowDown move between visible nodes, ArrowRight opens a branch or steps into it, ArrowLeft closes it or steps out, Home/End jump to the ends, and printable characters start typeahead.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "tree-grid",
           "family": "advanced",
           "engine": "alpine",
-          "alpine": "uiTree"
+          "alpine": "uiTree",
+          "signature": "templ TreeGrid(o TreeGridOpts)",
+          "summary": "Renders a hierarchy with columns.",
+          "guidance": "This is a table, because the data is rows and columns and a table already reports both. Depth is carried by aria-level on each row rather than by indentation alone: indentation is a visual convention that conveys nothing to a screen reader, and \"level 3\" is the fact the user needs.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         },
         {
           "name": "tree-node",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ TreeNode(o TreeNodeOpts)",
+          "summary": "Renders one node and its children.",
+          "states": [
+            "default",
+            "loading"
+          ]
         }
       ],
       "assets": [

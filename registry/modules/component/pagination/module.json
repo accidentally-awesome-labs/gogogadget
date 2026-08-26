@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "pagination",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ Pagination(o PaginationOpts)",
+          "summary": "Renders hx-get pager links.",
+          "guidance": "Target is the box the pager morphs; Labels carries the localized strings so ui never imports i18n. A single page renders nothing at all: a pager with both arrows dead is noise that still occupies layout.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

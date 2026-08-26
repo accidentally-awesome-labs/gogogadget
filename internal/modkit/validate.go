@@ -502,6 +502,24 @@ func validateUI(items []UIContribution, canonical bool) error {
 		if !validGalleryFamily(item.Family) {
 			return fmt.Errorf("manifest runtime ui[%d] family is invalid", i)
 		}
+		// A declared signature is the renderer's exact templ declaration. Any
+		// other shape means the manifest is describing something that is not the
+		// renderer, and the reference would publish it verbatim.
+		if item.Signature != "" && !strings.HasPrefix(item.Signature, "templ ") {
+			return fmt.Errorf("manifest runtime ui[%d] signature must start with %q", i, "templ ")
+		}
+		if err := validateStringSet(
+			fmt.Sprintf("manifest runtime ui[%d] states", i),
+			item.States, canonical,
+			func(value string) error {
+				if !validUIState(value) {
+					return fmt.Errorf("state %q is not a known rendering state", value)
+				}
+				return nil
+			},
+		); err != nil {
+			return err
+		}
 		if _, ok := seen[item.Name]; ok {
 			return fmt.Errorf("manifest runtime ui contains duplicate name %q", item.Name)
 		}
@@ -1290,6 +1308,27 @@ func validGalleryFamily(value GalleryFamily) bool {
 	switch value {
 	case GalleryFoundations, GalleryActions, GalleryForms, GalleryNavigation, GalleryFeedback,
 		GalleryOverlays, GalleryData, GalleryCommunication, GalleryLayout, GalleryAdvanced:
+		return true
+	default:
+		return false
+	}
+}
+
+// validUIState is the closed set of rendering states a component may declare.
+// The reference pages and the visual matrix render exactly the states listed on
+// a component, so a value outside this set would name a state nothing knows how
+// to produce — a silent documentation hole rather than a build failure.
+//
+// "hover" and "focus" are deliberately absent: the browser applies them, so no
+// renderer can produce one and a declaration would be a state the reference
+// cannot show. Locale, direction, density and long content are absent for a
+// different reason — they are context dimensions that apply to every component
+// at once, so they live in GalleryContext rather than being repeated on 172
+// entries.
+func validUIState(value string) bool {
+	switch value {
+	case "default", "disabled", "readonly", "busy", "loading",
+		"empty", "error", "success", "overflow":
 		return true
 	default:
 		return false

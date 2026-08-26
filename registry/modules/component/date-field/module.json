@@ -26,7 +26,14 @@
       "ui": [
         {
           "name": "date-field",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ DateField(o DateFieldOpts)",
+          "summary": "Renders a native date input.",
+          "guidance": "The platform picker already handles locale format, keyboard entry, and the mobile date wheel; a custom calendar has to re-earn all three and usually loses the keyboard.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

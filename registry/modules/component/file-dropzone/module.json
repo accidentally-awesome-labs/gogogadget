@@ -37,7 +37,14 @@
           "family": "forms",
           "engine": "alpine",
           "alpine": "uiDropzone",
-          "native_fallback": "native input"
+          "native_fallback": "native input",
+          "signature": "templ FileDropzone(o FileDropzoneOpts)",
+          "summary": "Renders a labelled drop target around a real file input.",
+          "guidance": "The input is a genuine <input type=\"file\"> inside a <label>, so clicking the zone opens the picker and the keyboard reaches the control with no script at all. Drag-and-drop is added on top by the Alpine behaviour: a drop target that is *only* droppable excludes every keyboard user.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

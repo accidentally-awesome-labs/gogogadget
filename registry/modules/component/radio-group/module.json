@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "radio-group",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ RadioGroup(o RadioGroupOpts)",
+          "summary": "Renders a group of radios sharing a name.",
+          "states": [
+            "default",
+            "disabled"
+          ]
         }
       ]
     },

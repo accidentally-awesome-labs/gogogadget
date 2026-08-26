@@ -262,7 +262,8 @@ func isGeneratedOutput(path string) bool {
 	// explicitly rather than matched by pattern: this predicate is what stops an
 	// emitter from overwriting authored source, so widening it stays deliberate.
 	switch path {
-	case ".env.example", "content/docs/configuration-reference.md", "e2e/generated/personas.ts":
+	case ".env.example", "content/docs/configuration-reference.md", "e2e/generated/personas.ts",
+		"internal/web/templates/ui/reference_gen.go":
 		return true
 	}
 	return false

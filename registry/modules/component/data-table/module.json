@@ -27,7 +27,13 @@
       "ui": [
         {
           "name": "data-table",
-          "family": "data"
+          "family": "data",
+          "signature": "templ DataTable(o DataTableOpts)",
+          "summary": "Renders the full table surface.",
+          "states": [
+            "default",
+            "empty"
+          ]
         }
       ]
     },

@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "file-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ FileInput(o FileInputOpts)",
+          "summary": "Renders a native file input.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

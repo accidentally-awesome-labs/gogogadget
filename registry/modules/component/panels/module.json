@@ -42,17 +42,37 @@
       "ui": [
         {
           "name": "panel",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ Panel(o PanelOpts)",
+          "summary": "Renders one panel.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         },
         {
           "name": "panel-group",
           "family": "advanced",
           "engine": "alpine",
-          "alpine": "uiPanels"
+          "alpine": "uiPanels",
+          "signature": "templ PanelGroup(o PanelGroupOpts)",
+          "summary": "Renders resizable panels.",
+          "guidance": "The fallback is stacked, full-width panels: with no JavaScript the content is simply laid out one after another, which is also what a narrow screen gets. Resizing is an enhancement on a layout that already works, never the thing that makes the content reachable.",
+          "keyboard": "The handle is a focusable role=\"separator\": arrow keys move the split by one percent, PageUp/PageDown by ten, and Home/End jump to its bounds.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "panel-handle",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ PanelHandle(o PanelHandleOpts)",
+          "summary": "Renders the divider between two panels.",
+          "guidance": "It is a focusable role=\"separator\" with bounded aria-valuenow, which is what makes the split adjustable by keyboard. A bare styled div would be a pointer-only control, and a separator without the values reports a position of nothing.",
+          "keyboard": "The handle is a focusable role=\"separator\": arrow keys move the split by one percent, PageUp/PageDown by ten, and Home/End jump to its bounds.",
+          "states": [
+            "default"
+          ]
         }
       ],
       "assets": [

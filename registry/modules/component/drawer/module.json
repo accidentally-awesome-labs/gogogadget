@@ -27,7 +27,15 @@
       "ui": [
         {
           "name": "drawer",
-          "family": "overlays"
+          "family": "overlays",
+          "signature": "templ Drawer(o DrawerOpts)",
+          "summary": "Renders an edge-anchored modal panel.",
+          "guidance": "It is a native <dialog>, exactly like Dialog, because the platform supplies the top layer, the backdrop, the focus trap and Escape-to-close. Only the geometry differs, so a drawer that reimplemented any of that would be a second, worse dialog.",
+          "keyboard": "Escape closes it: this is a native <dialog>, so the platform supplies dismissal and the focus trap.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

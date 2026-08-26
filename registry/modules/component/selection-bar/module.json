@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "selection-bar",
-          "family": "data"
+          "family": "data",
+          "signature": "templ SelectionBar(o SelectionBarOpts)",
+          "summary": "Renders bulk actions for a selection.",
+          "guidance": "role=\"status\" with a polite live region: the count changes as the user selects, and an unannounced count means a screen-reader user cannot tell how many rows a bulk delete is about to affect.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

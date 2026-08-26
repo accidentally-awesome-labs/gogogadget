@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "container",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Container(o ContainerOpts)",
+          "summary": "Renders a width-constrained wrapper.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

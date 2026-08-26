@@ -28,7 +28,13 @@
       "ui": [
         {
           "name": "member-item",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ MemberItem(o MemberItemOpts)",
+          "summary": "Renders one member row.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

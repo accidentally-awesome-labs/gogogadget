@@ -34,7 +34,15 @@
       "ui": [
         {
           "name": "number-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ NumberInput(o NumberInputOpts)",
+          "summary": "Renders a native number input.",
+          "guidance": "type=number gives the numeric keypad on mobile and the browser's own step controls; reimplementing either in JavaScript would be strictly worse.",
+          "states": [
+            "default",
+            "disabled",
+            "error"
+          ]
         }
       ]
     },

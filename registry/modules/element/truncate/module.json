@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "truncate",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Truncate(o TruncateOpts)",
+          "summary": "Clips overflowing text.",
+          "guidance": "The full string is always in the DOM and carried in title, so it stays selectable, searchable by the browser's find, and available on hover. Cutting the string server-side would make the rest unreachable, and a screen reader would read the truncated version as if it were the whole value.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         }
       ]
     },

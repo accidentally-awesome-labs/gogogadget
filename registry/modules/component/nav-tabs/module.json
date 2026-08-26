@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "nav-tabs",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ NavTabs(o NavTabsOpts)",
+          "summary": "The boosted sub-navigation inside a page (settings).",
+          "guidance": "ActivePath is the current request path.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

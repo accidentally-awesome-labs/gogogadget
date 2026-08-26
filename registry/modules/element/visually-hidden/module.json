@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "visually-hidden",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ VisuallyHidden(o VisuallyHiddenOpts)",
+          "summary": "Hides content visually while keeping it in the accessibility tree.",
+          "guidance": "This is not display:none and not hidden - both remove the content from the tree entirely, which is the opposite of the intent. It exists so a control can carry a name that the visual design does not have room for.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

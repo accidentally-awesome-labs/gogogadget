@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "avatar",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Avatar(o AvatarOpts)",
+          "summary": "Renders an image with an initials fallback.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

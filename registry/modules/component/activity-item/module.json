@@ -27,7 +27,12 @@
       "ui": [
         {
           "name": "activity-item",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ ActivityItem(o ActivityItemOpts)",
+          "summary": "Renders one activity entry.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

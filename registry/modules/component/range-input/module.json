@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "range-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ RangeInput(o RangeInputOpts)",
+          "summary": "Renders a native slider with a text readout.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

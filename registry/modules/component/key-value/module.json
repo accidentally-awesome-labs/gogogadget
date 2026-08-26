@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "key-value",
-          "family": "data"
+          "family": "data",
+          "signature": "templ KeyValue(o KeyValueOpts)",
+          "summary": "Renders one definition row.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

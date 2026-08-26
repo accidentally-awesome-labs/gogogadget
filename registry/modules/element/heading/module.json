@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "heading",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Heading(o HeadingOpts)",
+          "summary": "Renders a structural heading at an independent visual size.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

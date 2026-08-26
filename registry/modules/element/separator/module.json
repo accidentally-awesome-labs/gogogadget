@@ -34,7 +34,12 @@
       "ui": [
         {
           "name": "separator",
-          "family": "foundations"
+          "family": "foundations",
+          "signature": "templ Separator(o SeparatorOpts)",
+          "summary": "Renders a horizontal or vertical rule.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

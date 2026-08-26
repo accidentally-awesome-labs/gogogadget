@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "button-group",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ ButtonGroup(o ButtonGroupOpts)",
+          "summary": "Joins related controls visually and as one labelled group.",
+          "guidance": "Unlike ToggleGroup the members are independent commands, not exclusive states, so nothing here carries aria-pressed.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

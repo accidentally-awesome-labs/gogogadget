@@ -27,7 +27,12 @@
       "ui": [
         {
           "name": "tile",
-          "family": "data"
+          "family": "data",
+          "signature": "templ Tile(o TileOpts)",
+          "summary": "Renders a compact summary, optionally as a link.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

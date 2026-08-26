@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "timeline",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ Timeline(o TimelineOpts)",
+          "summary": "Renders events in order.",
+          "guidance": "An <ol> because the order carries the meaning: a screen reader announces position in the list, which is exactly the information a timeline conveys visually with its connecting line.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

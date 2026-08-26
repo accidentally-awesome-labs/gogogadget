@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "hint",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ Hint(o HintOpts)",
+          "summary": "Renders help text below a control.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

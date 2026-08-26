@@ -1374,6 +1374,40 @@
         "native_fallback": {
           "type": "string",
           "minLength": 1
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^templ "
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guidance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "keyboard": {
+          "type": "string",
+          "minLength": 1
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "default",
+              "disabled",
+              "readonly",
+              "busy",
+              "loading",
+              "empty",
+              "error",
+              "success",
+              "overflow"
+            ]
+          },
+          "uniqueItems": true
         }
       },
       "required": [

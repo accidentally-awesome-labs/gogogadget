@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "chat-message",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ ChatMessage(o ChatMessageOpts)",
+          "summary": "Renders one message.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

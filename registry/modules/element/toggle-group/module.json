@@ -34,7 +34,13 @@
       "ui": [
         {
           "name": "toggle-group",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ ToggleGroup(o ToggleGroupOpts)",
+          "summary": "Renders exclusive toggles as a labelled group.",
+          "guidance": "These are buttons with aria-pressed rather than role=\"radiogroup\": a radio group promises arrow-key navigation between options, and the buttons here are each independently tabbable. Announcing the honest role is better than claiming a keyboard contract that is not implemented.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

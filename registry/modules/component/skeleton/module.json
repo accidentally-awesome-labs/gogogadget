@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "skeleton",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ Skeleton(o SkeletonOpts)",
+          "summary": "Renders a loading placeholder.",
+          "guidance": "Always aria-hidden, with no exception: a screen reader announcing \"loading, loading, loading\" for a stack of grey boxes is worse than silence, and the region's own live announcement is what should report arrival. It is only for an *initially empty* region - drawing skeletons over content that is already on screen replaces real information with fake information.",
+          "states": [
+            "default",
+            "loading"
+          ]
         }
       ]
     },

@@ -26,7 +26,12 @@
       "ui": [
         {
           "name": "toggle-button",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ ToggleButton(o ToggleButtonOpts)",
+          "summary": "Renders a button that reports its own pressed state.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

@@ -26,7 +26,13 @@
       "ui": [
         {
           "name": "split",
-          "family": "layout"
+          "family": "layout",
+          "signature": "templ Split(o SplitOpts)",
+          "summary": "Renders two panes side by side, stacking on small screens.",
+          "guidance": "Stacking is not optional: two panes side by side on a phone gives each about twenty characters per line, which is unreadable.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

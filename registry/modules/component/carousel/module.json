@@ -44,15 +44,34 @@
           "name": "carousel",
           "family": "advanced",
           "engine": "alpine",
-          "alpine": "uiCarousel"
+          "alpine": "uiCarousel",
+          "signature": "templ Carousel(o CarouselOpts)",
+          "summary": "Renders a horizontally scrollable region.",
+          "guidance": "It is CSS scroll snap over a plain list, so every slide is reachable by scrolling, by keyboard, and with no JavaScript at all. It is deliberately not an ARIA carousel widget: the browser's own scroll container already gives keyboard scrolling and a scrollbar, and re-implementing that as a slideshow would hide the slides that are currently off screen.",
+          "keyboard": "The scroller is focusable, so arrow keys scroll between slides; no slideshow key model is layered over the browser's own scrolling.",
+          "states": [
+            "default",
+            "overflow"
+          ]
         },
         {
           "name": "carousel-dots",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ CarouselDots(o CarouselDotsOpts)",
+          "summary": "Renders links to each slide.",
+          "guidance": "They are real anchors to each slide's id, so they work with no JavaScript and the browser scrolls the slide into view itself. Each carries the position as text: a row of unlabelled dots is a set of controls a screen reader cannot tell apart.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "carousel-slide",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ Slide(o SlideOpts)",
+          "summary": "Renders one slide.",
+          "states": [
+            "default"
+          ]
         }
       ],
       "assets": [

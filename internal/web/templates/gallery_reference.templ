@@ -1,0 +1,111 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// ComponentReference renders one component's generated reference.
+//
+// The order is the order a reader needs it in: what it is, how it is called,
+// how to call it, when to reach for it, what the keyboard does, which states it
+// really has, and only then the installation facts. Each region is a named
+// landmark rather than a bare div, so a screen reader user can jump straight to
+// the keyboard contract instead of reading the page to find it, and each carries
+// a data-testid so the visual and accessibility runners can address one part of
+// the reference rather than diffing the whole page.
+templ ComponentReference(o referenceView) {
+	<div class="space-y-8" data-testid="component-reference">
+		@ui.Text(ui.TextOpts{Attrs: ui.Attrs{TestID: "component-summary"}}) {
+			{ o.Summary }
+		}
+		@ui.Section(ui.SectionOpts{Title: "Signature", Level: 2, Attrs: ui.Attrs{
+			ID: "reference-signature", TestID: "component-signature",
+		}}) {
+			<pre class="card text-xs overflow-auto"><code>{ o.Signature }</code></pre>
+		}
+		if o.Usage != "" {
+			@ui.Section(ui.SectionOpts{Title: "Usage", Level: 2, Attrs: ui.Attrs{
+				ID: "reference-usage", TestID: "component-usage",
+			}}) {
+				<pre class="card text-xs overflow-auto"><code>{ o.Usage }</code></pre>
+				@ui.CopyButton(ui.CopyButtonOpts{
+					Value: o.Usage, Size: ui.SizeXS,
+					Label: "Copy call", CopiedLabel: "Copied",
+					Attrs: ui.Attrs{TestID: "component-usage-copy"},
+				})
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "When to use it", Level: 2, Attrs: ui.Attrs{
+			ID: "reference-guidance", TestID: "component-guidance",
+		}}) {
+			@ui.Text(ui.TextOpts{}) {
+				{ o.Guidance }
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Keyboard", Level: 2, Attrs: ui.Attrs{
+			ID: "reference-keyboard", TestID: "component-keyboard",
+		}}) {
+			if o.Keyboard != "" {
+				@ui.Text(ui.TextOpts{}) {
+					{ o.Keyboard }
+				}
+			} else {
+				@ui.Text(ui.TextOpts{Muted: true}) {
+					{ referenceNoKeyboard }
+				}
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "States", Level: 2, Attrs: ui.Attrs{
+			ID: "reference-states", TestID: "component-states",
+		}}) {
+			if len(o.States) == 0 {
+				@ui.Text(ui.TextOpts{Muted: true}) {
+					{ referenceNoStates }
+				}
+			} else {
+				@ui.Inline(ui.InlineOpts{Gap: ui.GapSM, Attrs: ui.Attrs{Class: "flex-wrap"}}) {
+					for _, state := range o.States {
+						@ui.Code(ui.CodeOpts{Text: state})
+					}
+				}
+			}
+			// Said out loud, because a list of states that silently excludes two
+			// of the most-asked-about ones reads as a complete list.
+			@ui.Text(ui.TextOpts{Muted: true, Attrs: ui.Attrs{TestID: "component-states-note"}}) {
+				{ referenceStatesNote }
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Installation", Level: 2, Attrs: ui.Attrs{
+			ID: "reference-installation", TestID: "component-installation",
+		}}) {
+			@ui.DescriptionList(ui.DescriptionListOpts{
+				Attrs: ui.Attrs{TestID: "component-facts"},
+				Items: o.Facts,
+			})
+		}
+	</div>
+}
+
+// familyComponentList links every component in a family and states its summary
+// beside its name.
+//
+// The test ids are parameters because the family page renders this list twice -
+// once at the page measure and once deliberately squeezed - and two elements
+// answering to one test id is an ambiguity every runner resolves differently.
+templ familyComponentList(entries []familyEntry, listID, itemPrefix string) {
+	<ul class="space-y-2" data-testid={ listID }>
+		for _, entry := range entries {
+			<li>
+				<a
+					href={ templ.SafeURL("/dev/gallery/" + string(entry.Component.Family) + "/" + entry.Component.Name) }
+					class="card p-3 block hover:bg-surface-raised"
+					data-testid={ itemPrefix + entry.Component.Name }
+				>
+					<span class="flex items-baseline justify-between gap-3">
+						<span class="font-mono text-sm">{ entry.Component.Name }</span>
+						<span class="text-xs text-fg-muted shrink-0">{ entry.Note }</span>
+					</span>
+					<span class="block text-sm text-fg-muted mt-1">{ entry.Summary }</span>
+				</a>
+			</li>
+		}
+	</ul>
+}

@@ -38,7 +38,14 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiHoverCard",
-          "native_fallback": "visible trigger"
+          "native_fallback": "visible trigger",
+          "signature": "templ HoverCard(o HoverCardOpts)",
+          "summary": "Renders a preview that opens on hover *and* focus.",
+          "guidance": "Focus is not optional: a panel that only opens on hover is unreachable by keyboard and on touch, where there is no hover state at all. The content is a description rather than a label, because the trigger already has a name and replacing it with a paragraph of preview text would make the link unreadable in a screen reader's link list.",
+          "keyboard": "The trigger is focusable and opens the card on focus as well as hover, and Escape closes it.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

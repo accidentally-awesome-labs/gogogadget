@@ -28,7 +28,13 @@
       "ui": [
         {
           "name": "onboarding-checklist",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ OnboardingChecklist(o OnboardingChecklistOpts)",
+          "summary": "Renders setup steps with progress.",
+          "guidance": "Every step stays visible and actionable once done, rather than disappearing: a list that shrinks as you complete it hides what the product can do, and a user who wants to revisit a step has nowhere to go.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

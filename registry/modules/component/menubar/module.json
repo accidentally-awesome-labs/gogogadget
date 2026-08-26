@@ -27,7 +27,14 @@
       "ui": [
         {
           "name": "menubar",
-          "family": "navigation"
+          "family": "navigation",
+          "signature": "templ Menubar(o MenubarOpts)",
+          "summary": "Renders application menus as a row of disclosure buttons.",
+          "guidance": "Each menu is a DropdownMenu, so the whole bar inherits one behaviour: click or Enter to open, Escape to close, focus into the panel and back to the trigger. A real ARIA menubar adds cross-menu arrow navigation and typeahead; building half of that and claiming role=\"menubar\" would promise a keyboard contract the widget does not honour.",
+          "keyboard": "Click or Enter opens a menu and Escape closes it, with focus moving into the panel and back to the trigger; there is deliberately no cross-menu arrow navigation.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

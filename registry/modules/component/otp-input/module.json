@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "otp-input",
-          "family": "forms"
+          "family": "forms",
+          "signature": "templ OTPInput(o OTPInputOpts)",
+          "summary": "Renders a single one-time-code input.",
+          "guidance": "One input, not one box per digit. A box-per-digit widget breaks paste, breaks password-manager and SMS autofill, and gives a screen reader six unlabelled fields instead of one. autocomplete=\"one-time-code\" is what lets the platform offer the code from a message, and inputmode numeric brings up the keypad.",
+          "states": [
+            "default",
+            "error"
+          ]
         }
       ]
     },

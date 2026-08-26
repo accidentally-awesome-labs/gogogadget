@@ -27,7 +27,13 @@
       "ui": [
         {
           "name": "error-state",
-          "family": "feedback"
+          "family": "feedback",
+          "signature": "templ ErrorState(o ErrorStateOpts)",
+          "summary": "Renders a failed region with a retry.",
+          "guidance": "role=\"alert\" because a region that failed after the user acted must be announced - unlike EmptyState, which is a resting state and not news. The retry is a real link with an hx-get, so it works with scripts disabled.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

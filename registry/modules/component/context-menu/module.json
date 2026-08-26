@@ -31,7 +31,15 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiContextMenu",
-          "native_fallback": "visible trigger"
+          "native_fallback": "visible trigger",
+          "signature": "templ ContextMenu(o ContextMenuOpts)",
+          "summary": "Renders a region whose commands are reachable by right-click and by an explicit trigger.",
+          "guidance": "The trigger is a real DropdownMenu, so the keyboard path is the same well-tested one every other menu uses; right-click is the addition, not the mechanism.",
+          "keyboard": "Right-click opens the menu, and its trigger carries the standard menu keys: Escape closes, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next matching one.",
+          "states": [
+            "default",
+            "disabled"
+          ]
         }
       ]
     },

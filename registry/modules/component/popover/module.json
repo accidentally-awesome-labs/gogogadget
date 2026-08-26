@@ -29,7 +29,13 @@
           "family": "overlays",
           "engine": "alpine",
           "alpine": "uiMenu",
-          "native_fallback": "details element"
+          "native_fallback": "details element",
+          "signature": "templ Popover(o PopoverOpts)",
+          "summary": "Renders a trigger with a positioned panel.",
+          "keyboard": "Focus moves into the panel on open and back to the trigger on close, Escape closes it, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next command starting with it.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

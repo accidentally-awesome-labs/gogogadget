@@ -27,7 +27,12 @@
       "ui": [
         {
           "name": "usage-card",
-          "family": "communication"
+          "family": "communication",
+          "signature": "templ UsageCard(o UsageCardOpts)",
+          "summary": "Renders a quota with its meter.",
+          "states": [
+            "default"
+          ]
         }
       ]
     },

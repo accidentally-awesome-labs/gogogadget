@@ -45,22 +45,53 @@
       "ui": [
         {
           "name": "editor-preview",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ EditorPreview(o EditorPreviewOpts)",
+          "summary": "Renders the server-rendered preview region.",
+          "guidance": "It is a polite live region: the preview updates as the author types, and an assertive one would interrupt them mid-sentence. The content arrives from the server's own Markdown pipeline - this component never renders Markdown itself, because a second renderer is a second set of escaping rules.",
+          "states": [
+            "default"
+          ]
         },
         {
           "name": "editor-toolbar",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ EditorToolbar(o EditorToolbarOpts)",
+          "summary": "Renders the formatting controls.",
+          "guidance": "Each button carries the Markdown syntax it applies as data, so the controller needs no per-button logic and adding a control is a markup change. The buttons are real buttons with accessible names, not icon-only glyphs: \"B\" is meaningless read aloud.",
+          "states": [
+            "default",
+            "disabled"
+          ]
         },
         {
           "name": "markdown-editor",
           "family": "advanced",
           "engine": "alpine",
           "alpine": "uiMarkdownEditor",
-          "native_fallback": "plain textarea"
+          "native_fallback": "plain textarea",
+          "signature": "templ MarkdownEditor(o MarkdownEditorOpts)",
+          "summary": "Renders a textarea with Markdown affordances.",
+          "guidance": "The textarea is the form value, always. Every toolbar button and shortcut edits that text in place, so with no JavaScript the author types Markdown into a plain textarea and the form submits unchanged - the toolbar is the part that is optional, not the editing.",
+          "keyboard": "Cmd/Ctrl+B, Cmd/Ctrl+I and Cmd/Ctrl+K wrap the selection in bold, italic and link syntax; every other key stays the textarea's own.",
+          "states": [
+            "default",
+            "disabled",
+            "error",
+            "readonly"
+          ]
         },
         {
           "name": "media-picker",
-          "family": "advanced"
+          "family": "advanced",
+          "signature": "templ MediaPicker(o MediaPickerOpts)",
+          "summary": "Renders existing media plus an upload control.",
+          "guidance": "Every item inserts a Markdown image with its alt text already filled in. Alt text is part of the item rather than something the author is prompted for later, because a prompt that can be dismissed produces images with no description.",
+          "states": [
+            "default",
+            "empty",
+            "overflow"
+          ]
         }
       ],
       "assets": [

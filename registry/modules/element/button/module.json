@@ -34,7 +34,14 @@
       "ui": [
         {
           "name": "button",
-          "family": "actions"
+          "family": "actions",
+          "signature": "templ Button(o ButtonOpts)",
+          "summary": "Renders a control that acts.",
+          "states": [
+            "busy",
+            "default",
+            "disabled"
+          ]
         }
       ]
     },
