@@ -6,11 +6,29 @@ set -euo pipefail
 
 fetch() { # name url dest sha256
   local name="$1" url="$2" dest="$3" sha="$4"
+
+  # The digest is checked for SHAPE before it is used, because `shasum -c`
+  # rejects a malformed line exactly as it rejects a changed file. That made a
+  # digest recorded in the wrong encoding indistinguishable from a CDN
+  # substitution: this script once carried a base64 SRI value here, and CI
+  # reported "sha256 mismatch" while the committed bytes were in fact correct.
+  # A wrong digest is an authoring mistake and a changed asset is a supply-chain
+  # event; they must never read the same.
+  if [[ ! "${sha}" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "digest for ${name} is not a 64-character lowercase hex sha256: ${sha}" >&2
+    echo "  (an SRI 'integrity' value is base64 and belongs in the manifest, not here)" >&2
+    exit 1
+  fi
+
   echo "fetching ${name} → ${dest}"
   curl -sfL -o "${dest}.tmp" "${url}"
-  if ! echo "${sha}  ${dest}.tmp" | shasum -a 256 -c - >/dev/null 2>&1; then
+  local got
+  got="$(shasum -a 256 "${dest}.tmp" | cut -d' ' -f1)"
+  if [[ "${got}" != "${sha}" ]]; then
     rm -f "${dest}.tmp"
     echo "sha256 mismatch for ${name} (${url}) — refusing to install" >&2
+    echo "  expected ${sha}" >&2
+    echo "  actual   ${got}" >&2
     exit 1
   fi
   mv "${dest}.tmp" "${dest}"
@@ -57,7 +75,7 @@ fetch "chart.js@4.5.1" \
 fetch "sortablejs@1.15.7" \
   "https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js" \
   "static/vendor/sortablejs-1.15.7.min.js" \
-  "v0JBvHP+9/EcWaKDpp/oBRzdMcbY/1orm6IZ54Mfz3Y="
+  "bf4241bc73fef7f11c59a283a69fe8051cdd31c6d8ff5a2b9ba219e7831fcf76"
 
 fetch "cally@0.9.2" \
   "https://cdn.jsdelivr.net/npm/cally@0.9.2/dist/cally.js" \
