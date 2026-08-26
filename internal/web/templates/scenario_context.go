@@ -6,6 +6,13 @@ import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
 // component enums are: a value nothing renders is a control that lies, and the
 // reviewer only finds out by comparing two screenshots that look the same.
 const (
+	// TextDirectionKey is deliberately not "dir". Every sorted table in the
+	// product writes dir=asc|desc - SortURL hardcodes it - and a scenario's own
+	// tables link back to the scenario, so a text-direction axis on "dir" turns
+	// every sort link into a 404. The product convention wins; this dev-only
+	// axis takes an unambiguous key.
+	TextDirectionKey = "text"
+
 	DirectionLTR = "ltr"
 	DirectionRTL = "rtl"
 
@@ -84,7 +91,7 @@ var densityAware = map[string]struct{}{
 func scenarioAxes(scenario Scenario) []ScenarioAxis {
 	axes := []ScenarioAxis{
 		{Label: "State", Key: "state", Options: scenarioStateOptions(scenario)},
-		{Label: "Direction", Key: "dir", Options: []string{DirectionLTR, DirectionRTL}},
+		{Label: "Direction", Key: TextDirectionKey, Options: []string{DirectionLTR, DirectionRTL}},
 		{Label: "Content", Key: "content", Options: []string{ContentNormal, ContentLong}},
 	}
 	if scenarioRespondsToDensity(scenario) {
@@ -116,7 +123,7 @@ func scenarioAxisValue(gc GalleryContext, key string) string {
 	switch key {
 	case "state":
 		return scenarioActiveState(gc.State)
-	case "dir":
+	case TextDirectionKey:
 		if gc.Direction == "" {
 			return DirectionLTR
 		}
@@ -141,22 +148,22 @@ func scenarioAxisValue(gc GalleryContext, key string) string {
 // a shared link and a clicked link must match, or the two disagree in history.
 func scenarioAxisURL(scenario Scenario, gc GalleryContext, key, value string) string {
 	values := map[string]string{
-		"state":   scenarioAxisValue(gc, "state"),
-		"dir":     scenarioAxisValue(gc, "dir"),
-		"content": scenarioAxisValue(gc, "content"),
-		"density": scenarioAxisValue(gc, "density"),
+		"state":          scenarioAxisValue(gc, "state"),
+		TextDirectionKey: scenarioAxisValue(gc, TextDirectionKey),
+		"content":        scenarioAxisValue(gc, "content"),
+		"density":        scenarioAxisValue(gc, "density"),
 	}
 	values[key] = value
 
 	defaults := map[string]string{
-		"state":   "default",
-		"dir":     DirectionLTR,
-		"content": ContentNormal,
-		"density": string(ui.DensityComfortable),
+		"state":          "default",
+		TextDirectionKey: DirectionLTR,
+		"content":        ContentNormal,
+		"density":        string(ui.DensityComfortable),
 	}
 	query := ""
 	// Fixed order so the same selection always produces the same URL.
-	for _, axis := range []string{"state", "dir", "content", "density"} {
+	for _, axis := range []string{"state", TextDirectionKey, "content", "density"} {
 		if values[axis] == defaults[axis] {
 			continue
 		}

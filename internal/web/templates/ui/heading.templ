@@ -21,21 +21,61 @@ type HeadingOpts struct {
 	Attrs    Attrs
 }
 
+// headingBody is Text when the caller supplied it, and the caller's own markup
+// otherwise. A heading is frequently one sentence with one emphasized clause -
+// a brand-coloured second half, an italicised term - and a text-only primitive
+// forces that to flatten to a single tone. Flattening is a real loss: the
+// emphasis carried meaning, and the alternative is a hand-rolled <h1>, which
+// takes the whole structural decision out of the component that exists to own
+// it. Text wins when both are present so a caller cannot silently render two
+// competing bodies.
+templ headingBody(o HeadingOpts) {
+	if o.Text != "" {
+		{ o.Text }
+	} else {
+		{ children... }
+	}
+}
+
 // Heading renders a structural heading at an independent visual size.
 templ Heading(o HeadingOpts) {
 	switch headingLevel(o.Level) {
 		case 1:
-			<h1 { root("heading", headingSizeClass(o), o.Attrs)... }>{ o.Text }</h1>
+			<h1 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h1>
 		case 3:
-			<h3 { root("heading", headingSizeClass(o), o.Attrs)... }>{ o.Text }</h3>
+			<h3 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h3>
 		case 4:
-			<h4 { root("heading", headingSizeClass(o), o.Attrs)... }>{ o.Text }</h4>
+			<h4 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h4>
 		case 5:
-			<h5 { root("heading", headingSizeClass(o), o.Attrs)... }>{ o.Text }</h5>
+			<h5 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h5>
 		case 6:
-			<h6 { root("heading", headingSizeClass(o), o.Attrs)... }>{ o.Text }</h6>
+			<h6 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h6>
 		default:
-			<h2 { root("heading", headingSizeClass(o), o.Attrs)... }>{ o.Text }</h2>
+			<h2 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h2>
 	}
 }
 

@@ -2,6 +2,7 @@ package ui
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/a-h/templ"
 )
@@ -119,6 +120,21 @@ func applyHX(out templ.Attributes, hx HX) {
 	if hx.Encoding != "" {
 		out["hx-encoding"] = hx.Encoding
 	}
+	if hx.Include != "" {
+		out["hx-include"] = hx.Include
+	}
+	if hx.Sync != "" {
+		out["hx-sync"] = hx.Sync
+	}
+	// The indicator is a selector, and htmx expects one. Callers hold an id, so
+	// a bare id would silently match nothing - prefix it here rather than making
+	// every call site remember the "#".
+	if hx.Indicator != "" {
+		out["hx-indicator"] = indicatorSelector(hx.Indicator)
+	}
+	if hx.PushURL != "" {
+		out["hx-push-url"] = hx.PushURL
+	}
 	if hx.Boost {
 		out["hx-boost"] = "true"
 	}
@@ -128,4 +144,17 @@ func applyHX(out templ.Attributes, hx HX) {
 	if hx.HistoryElt {
 		out["hx-history-elt"] = true
 	}
+}
+
+// indicatorSelector accepts either a bare id or a selector. Every call site in
+// the catalog holds an element id, and htmx needs a selector, so the common case
+// is prefixed here. A value that is already a selector is passed through
+// untouched: prefixing "#foo .spinner" or ".loading" would produce a selector
+// that matches nothing, and a request indicator that never appears is invisible
+// to test and reader alike.
+func indicatorSelector(value string) string {
+	if strings.ContainsAny(value, "#.[ >:") {
+		return value
+	}
+	return "#" + value
 }

@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 // Port 18080 is e2e-only — never the dev port 8080, so Playwright cannot
 // attach to a stray dev server. The e2e database is disposable and reseeded
@@ -20,7 +20,21 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
+  projects: [
+    { name: 'chromium', use: { browserName: 'chromium' } },
+    // Mobile is scoped by testMatch on purpose. An unscoped project re-runs
+    // every spec at a phone viewport, and snapshot names are per project — so
+    // the visual suite would look for baselines that were never recorded, and
+    // the flow specs would assert desktop-only chrome. iPhone 12 is the same
+    // device descriptor mobile.spec.ts already uses; browserName follows it
+    // because the descriptor's own default is WebKit and isMobile emulation
+    // only works in Chromium.
+    {
+      name: 'mobile',
+      testMatch: /a11y-states\.spec\.ts$/,
+      use: { ...devices['iPhone 12'], browserName: 'chromium' },
+    },
+  ],
   // E2E_NO_WEBSERVER: the visual harness runs the server on the host and
   // Playwright inside the pinned container, which has no Go toolchain.
   webServer: process.env.E2E_NO_WEBSERVER

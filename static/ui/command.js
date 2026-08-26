@@ -61,14 +61,26 @@ document.addEventListener("alpine:init", () => {
     open() {
       if (typeof this.dialog.showModal === "function") this.dialog.showModal();
       else this.dialog.setAttribute("open", "");
+      // Re-marked on open: results may have been swapped in since init, and a
+      // listbox whose children lost their option role is structurally invalid.
+      this.markOptions();
       this.input.focus();
       this.input.select();
     },
 
+    // options are every command, visible or not. What an element *is* does not
+    // depend on whether it is on screen: filtering by visibility here meant
+    // markOptions() assigned no roles at all when it first ran, because the
+    // palette's dialog is closed and display:none makes every offsetParent
+    // null - leaving a listbox whose children were plain anchors.
     options() {
-      return Array.from(this.results.querySelectorAll("[data-command-item]")).filter(
-        (item) => item.offsetParent !== null,
-      );
+      return Array.from(this.results.querySelectorAll("[data-command-item]"));
+    },
+
+    // visibleOptions is what the arrow keys walk. Visibility belongs here, in
+    // the navigation path, not in the role assignment.
+    visibleOptions() {
+      return this.options().filter((item) => item.offsetParent !== null);
     },
 
     // markOptions gives each command the option role and a stable id, which is
@@ -82,10 +94,27 @@ document.addEventListener("alpine:init", () => {
         // separate tab stops.
         item.tabIndex = -1;
       });
-      this.results.querySelectorAll("ul, li").forEach((el) => {
-        // The wrapping list markup would otherwise sit between listbox and
-        // option, which breaks the relationship.
-        el.setAttribute("role", "presentation");
+      // The wrapping markup sits between the listbox and its options, and a
+      // listbox child may only be an option or a group.
+      //
+      // The group's ul becomes role="group" rather than presentation: it carries
+      // aria-labelledby, and presentation is ignored on any element with a
+      // global ARIA attribute - so it fell back to its implicit "list" role and
+      // made the listbox structurally invalid. A group is a legal child and
+      // keeps the section name.
+      this.results.querySelectorAll("ul").forEach((list) => {
+        list.setAttribute("role", "group");
+      });
+      // The group's own wrapper is a direct child of the listbox, and a listbox
+      // child may only be an option or a group. It carries no ARIA of its own,
+      // so presentation applies and it dissolves, promoting the ul.
+      this.results.querySelectorAll('[data-ui="command-group"]').forEach((group) => {
+        group.setAttribute("role", "presentation");
+      });
+      // The list items carry no ARIA of their own, so presentation applies and
+      // they drop out of the tree as intended.
+      this.results.querySelectorAll("li").forEach((item) => {
+        item.setAttribute("role", "presentation");
       });
     },
 
@@ -104,7 +133,7 @@ document.addEventListener("alpine:init", () => {
     },
 
     onKey(event) {
-      const options = this.options();
+      const options = this.visibleOptions();
       if (!options.length) return;
       const index = this.active ? options.indexOf(this.active) : -1;
 

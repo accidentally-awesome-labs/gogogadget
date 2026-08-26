@@ -296,6 +296,15 @@
   .drawer-top    { margin-top: 0; margin-bottom: auto; }
   .drawer-bottom { margin-top: auto; margin-bottom: 0; }
 
+  /* A dialog must state its own foreground. The UA stylesheet gives <dialog>
+     `color: canvastext`, which follows the browser's colour scheme and not this
+     sheet's `.dark` class - so in dark mode every dialog rendered black text on
+     a dark card at 1.11 contrast, unreadable. No page-load scan sees it because
+     the dialog is closed until something opens it. */
+  .dialog {
+    color: var(--color-fg);
+  }
+
   /* The scrim is a token so light and dark separate the dialog equally. */
   .dialog::backdrop {
     background-color: var(--color-overlay-scrim);

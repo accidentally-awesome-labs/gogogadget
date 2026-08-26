@@ -1044,9 +1044,22 @@ templ Gallery() {
 					Page:       1,
 					TotalPages: 3,
 					WindowSize: 2,
+					// Selectable so a cell actually contains a control. The grid
+					// guarantees that arrow keys inside an input move the caret
+					// rather than the cell focus, and with every cell holding
+					// plain text that guarantee was unreachable from any surface -
+					// asserted in code and never exercised.
+					Selectable: true,
 				}) {
 					for _, row := range galleryGridRows() {
 						<tr data-grid-row class="border-t border-border">
+							<td class="px-3 py-2">
+								@ui.Checkbox(ui.CheckboxOpts{
+									Name:  "grid-select",
+									Value: row[0],
+									Label: "Select " + row[0],
+								})
+							</td>
 							<td class="px-3 py-2">{ row[0] }</td>
 							<td class="px-3 py-2">{ row[1] }</td>
 							<td class="px-3 py-2 text-right tabular-nums">{ row[2] }</td>

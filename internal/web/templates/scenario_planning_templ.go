@@ -325,6 +325,11 @@ func planningBoardPanelBody(gc GalleryContext) templ.Component {
 		}
 		templ_7745c5c3_Err = ui.Kanban(ui.KanbanOpts{
 			ID: "planning-board",
+			// Named explicitly. This board sits inside a panel already titled
+			// "Board", and two nested landmarks with the same accessible name are
+			// indistinguishable - the outer panel and the inner scroll region would
+			// both announce as "Board, region".
+			Label: "Task board",
 			// MoveURL is unset on purpose. The only live board endpoint in the dev
 			// catalog is the gallery's own move handler, which validates against the
 			// gallery's columns and answers with the gallery's board - so wiring

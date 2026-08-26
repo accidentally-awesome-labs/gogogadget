@@ -1,6 +1,8 @@
 package modkit_test
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -162,5 +164,75 @@ func TestSharedUIContractsBelongToCore(t *testing.T) {
 		}
 		assert.Contains(t, m.Manifest.Requires, "element/ui-core",
 			"%s uses shared types but does not require element/ui-core", m.ID)
+	}
+}
+
+// An applied migration is the one artifact in this system that can never be
+// corrected. The database already ran it, so editing the file in place makes the
+// recorded schema history disagree with every deployment that applied the old
+// text - and nothing in the tree reports the divergence. Later migrations are
+// written against a schema that no longer matches what the file claims to build.
+//
+// The engine's immutability rules are covered against synthetic fixtures
+// elsewhere. This asserts the property that actually protects users: the real
+// ledger in this repository. Every migration on disk is claimed by exactly one
+// module, declared immutable, and byte-identical to the digest recorded when it
+// was allocated. A forward-only fix is a new migration, never an edit.
+func TestRepositoryMigrationLedgerIsImmutableAndOwned(t *testing.T) {
+	root := repoRoot(t)
+	lock := loadLock(t, root)
+
+	type claim struct {
+		module string
+		kind   string
+		digest string
+	}
+	claims := map[string]claim{}
+	for _, module := range lock.Modules {
+		// The lock records the immutable allocation - id, global number, path
+		// and digest. The forward-only kind is the module's own declaration, so
+		// it comes from the manifest the lock carries alongside it.
+		kinds := map[string]string{}
+		for _, declared := range module.Manifest.Migrations {
+			kinds[declared.ID] = string(declared.Kind)
+		}
+		for _, migration := range module.Migrations {
+			id := strings.TrimSuffix(filepath.Base(migration.Path), ".sql")
+			if prior, ok := claims[id]; ok {
+				t.Fatalf("migration %q is claimed by both %s and %s: two owners means neither can remove it safely",
+					id, prior.module, module.ID)
+			}
+			claims[id] = claim{module: module.ID, kind: kinds[migration.ID], digest: migration.SHA256}
+		}
+	}
+	require.NotEmpty(t, claims, "the lock records no migrations at all, so this test proves nothing")
+
+	onDisk, err := filepath.Glob(filepath.Join(root, "internal", "db", "migrations", "*.sql"))
+	require.NoError(t, err)
+	require.NotEmpty(t, onDisk)
+
+	seen := map[string]bool{}
+	for _, path := range onDisk {
+		id := strings.TrimSuffix(filepath.Base(path), ".sql")
+		seen[id] = true
+
+		owner, ok := claims[id]
+		require.Truef(t, ok,
+			"migration %q exists on disk but no module claims it, so installing that module into a derivative would silently omit a schema change", id)
+
+		assert.Equalf(t, "immutable", owner.kind,
+			"migration %q is claimed by %s as %q; an applied migration is immutable by definition", id, owner.module, owner.kind)
+
+		body, err := os.ReadFile(path)
+		require.NoError(t, err)
+		sum := sha256.Sum256(body)
+		assert.Equalf(t, owner.digest, hex.EncodeToString(sum[:]),
+			"migration %q was edited after it was allocated by %s. The database already ran the previous text, so this file no longer describes the schema any deployment has. Revert it and add a new forward migration instead.",
+			id, owner.module)
+	}
+
+	for id, owner := range claims {
+		assert.Truef(t, seen[id],
+			"%s claims migration %q but no such file exists, so a derivative installing it would fail to migrate", owner.module, id)
 	}
 }

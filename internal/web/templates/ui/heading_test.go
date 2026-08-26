@@ -1,6 +1,10 @@
 package ui
 
 import (
+	"bytes"
+	"context"
+	"github.com/a-h/templ"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,3 +50,44 @@ func TestUnstyledHeadingCarriesOnlyTheCallersClass(t *testing.T) {
 }
 
 // A rule with no name is decoration and must stay out of the accessibility
+
+// A heading is often one sentence with one emphasized clause - a brand-coloured
+// second half, an italicised term. A text-only primitive forces that to flatten
+// to one tone, and the usual escape is a hand-rolled <h1>, which takes the
+// structural decision away from the component that exists to own it.
+func TestHeadingRendersCallerMarkupWhenTextIsAbsent(t *testing.T) {
+	accent := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		_, err := io.WriteString(w, `Ship <span class="text-brand-text">faster</span>`)
+		return err
+	})
+
+	html := renderWithChildren(t, Heading(HeadingOpts{Level: 1, Size: SizeLG}), accent)
+	assert.Contains(t, html, "<h1", "the level must still come from the component")
+	assert.Contains(t, html, `<span class="text-brand-text">faster</span>`,
+		"caller markup was dropped, so an emphasized clause is inexpressible")
+}
+
+// Text wins when both are supplied. Rendering both would emit two competing
+// bodies in one heading, and the caller would have no way to see which won.
+func TestHeadingTextWinsOverChildren(t *testing.T) {
+	ignored := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		_, err := io.WriteString(w, "SHOULD-NOT-APPEAR")
+		return err
+	})
+
+	html := renderWithChildren(t, Heading(HeadingOpts{Text: "Declared", Level: 2}), ignored)
+	assert.Contains(t, html, "Declared")
+	assert.NotContains(t, html, "SHOULD-NOT-APPEAR")
+}
+
+// renderWithChildren renders a component with a caller-supplied body. templ
+// passes children through the context rather than as an argument, so a slot can
+// only be exercised this way.
+func renderWithChildren(t *testing.T, c templ.Component, children templ.Component) string {
+	t.Helper()
+	var buf bytes.Buffer
+	if err := c.Render(templ.WithChildren(context.Background(), children), &buf); err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	return buf.String()
+}

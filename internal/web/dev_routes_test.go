@@ -412,16 +412,16 @@ func TestScenarioContextAxesAreValidated(t *testing.T) {
 	session := sessionCookie("user_demo", "org_demo", "org:admin")
 
 	valid := []string{
-		"?dir=ltr", "?dir=rtl", "?content=normal", "?content=long",
+		"?text=ltr", "?text=rtl", "?content=normal", "?content=long",
 		"?density=comfortable", "?density=compact",
-		"?dir=rtl&content=long&state=empty",
+		"?text=rtl&content=long&state=empty",
 	}
 	for _, query := range valid {
 		code, _, _ := serve(t, s, "GET", "/dev/scenarios/resource-list"+query, nil, nil, session)
 		assert.Equal(t, http.StatusOK, code, "%s must be accepted", query)
 	}
 
-	invalid := []string{"?dir=sideways", "?content=medium", "?density=cosy", "?state=nonsense"}
+	invalid := []string{"?text=sideways", "?content=medium", "?density=cosy", "?state=nonsense"}
 	for _, query := range invalid {
 		code, _, _ := serve(t, s, "GET", "/dev/scenarios/resource-list"+query, nil, nil, session)
 		assert.Equal(t, http.StatusNotFound, code, "%s must be refused", query)
@@ -435,7 +435,7 @@ func TestDirectionReachesTheSurface(t *testing.T) {
 	session := sessionCookie("user_demo", "org_demo", "org:admin")
 
 	_, _, ltr := serve(t, s, "GET", "/dev/scenarios/settings", nil, nil, session)
-	_, _, rtl := serve(t, s, "GET", "/dev/scenarios/settings?dir=rtl", nil, nil, session)
+	_, _, rtl := serve(t, s, "GET", "/dev/scenarios/settings?text=rtl", nil, nil, session)
 
 	assert.Contains(t, rtl, `dir="rtl"`)
 	assert.NotContains(t, ltr, `dir="rtl"`)
@@ -467,12 +467,12 @@ func TestAxisControlsPreserveTheOtherAxes(t *testing.T) {
 	session := sessionCookie("user_demo", "org_demo", "org:admin")
 
 	_, _, body := serve(t, s, "GET",
-		"/dev/scenarios/resource-list?state=empty&dir=rtl", nil, nil, session)
+		"/dev/scenarios/resource-list?state=empty&text=rtl", nil, nil, session)
 
 	// The content toggle must keep the state and direction already chosen.
 	assert.Contains(t, body, "content=long")
 	assert.Contains(t, body, "state=empty")
-	assert.Contains(t, body, "dir=rtl")
+	assert.Contains(t, body, "text=rtl")
 }
 
 // A control that changes nothing is the same lie as a disabled button with no
@@ -493,7 +493,7 @@ func TestEveryOfferedAxisMovesTheSurface(t *testing.T) {
 		_, _, plain := serve(t, s, "GET", base, nil, nil, session)
 		offered := map[string]bool{}
 		for _, line := range strings.Split(plain, "\n") {
-			for _, key := range []string{"density", "content", "dir"} {
+			for _, key := range []string{"density", "content", "text"} {
 				if strings.Contains(line, `data-testid="axis-`+key+`"`) {
 					offered[key] = true
 				}
@@ -502,7 +502,7 @@ func TestEveryOfferedAxisMovesTheSurface(t *testing.T) {
 		for key, probe := range map[string]string{
 			"density": "?density=compact",
 			"content": "?content=long",
-			"dir":     "?dir=rtl",
+			"text":    "?text=rtl",
 		} {
 			if !offered[key] {
 				continue

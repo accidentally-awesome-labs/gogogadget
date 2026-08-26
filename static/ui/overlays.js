@@ -131,14 +131,17 @@ document.addEventListener("alpine:init", () => {
     init() {
       const trigger = this.$root.querySelector("[data-ui-hovercard-trigger]");
       if (!trigger) return;
-      this._show = () => {
-        this.open = true;
+      // aria-expanded is kept in step here rather than bound in markup: the
+      // controller already owns open/close on hover, focus and Escape, and a
+      // second owner would let the attribute drift from the panel.
+      const sync = (open) => {
+        this.open = open;
+        trigger.setAttribute("aria-expanded", open ? "true" : "false");
       };
-      this._hide = () => {
-        this.open = false;
-      };
+      this._show = () => sync(true);
+      this._hide = () => sync(false);
       this._onKey = (event) => {
-        if (event.key === "Escape") this.open = false;
+        if (event.key === "Escape") sync(false);
       };
       trigger.addEventListener("mouseenter", this._show);
       trigger.addEventListener("focus", this._show);

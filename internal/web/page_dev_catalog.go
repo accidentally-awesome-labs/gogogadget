@@ -69,7 +69,7 @@ func (s *Server) handleDevScenario(w http.ResponseWriter, r *http.Request) {
 	// about a screenshot that was never taken.
 	context, ok := templates.ScenarioContextFrom(
 		state, scenarioPage(r),
-		r.URL.Query().Get("dir"),
+		r.URL.Query().Get(templates.TextDirectionKey),
 		r.URL.Query().Get("content"),
 		r.URL.Query().Get("density"),
 	)

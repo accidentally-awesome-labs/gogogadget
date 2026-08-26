@@ -36,8 +36,11 @@ document.addEventListener("alpine:init", () => {
 
       this.applyStoredPreferences();
 
-      // One roving tab stop for the whole table, so tabbing past a thousand-row
-      // grid takes one press instead of a thousand.
+      // One roving tab stop across the cells, so tabbing past a thousand-row
+      // grid takes one press instead of a thousand. Controls inside cells keep
+      // their own stops - a sort link has to be a link - so the table is not
+      // literally a single stop, and it should not be: those controls are
+      // reachable precisely because they are real.
       this.cells().forEach((cell, index) => {
         cell.tabIndex = index === 0 ? 0 : -1;
       });
@@ -137,7 +140,7 @@ document.addEventListener("alpine:init", () => {
             : rows[r][rows[r].length - 1];
           break;
         case "PageDown":
-          target = (rows[Math.min(r + 10, rows.length - 1)] || [])[Math.min(c, 0) === 0 ? c : 0];
+          target = (rows[Math.min(r + 10, rows.length - 1)] || [])[c];
           break;
         case "PageUp":
           target = (rows[Math.max(r - 10, 0)] || [])[c];
