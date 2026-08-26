@@ -155,6 +155,14 @@ func TestDeclaredEnumValuesRoundTrip(t *testing.T) {
 		assert.Equal(t, v, v.Value())
 		assert.True(t, v.Valid())
 	}
+	// A question type that normalizes to a text input is the safe default: an
+	// unrecognised type must still render a control the user can answer, not
+	// nothing.
+	assert.Equal(t, QuestionShortText, QuestionType("interpretive-dance").Value())
+	for _, v := range QuestionTypes {
+		assert.Equal(t, v, v.Value())
+		assert.True(t, v.Valid())
+	}
 	for _, v := range EmptyVariants {
 		assert.Equal(t, v, v.Value())
 		assert.True(t, v.Valid())

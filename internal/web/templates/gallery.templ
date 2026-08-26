@@ -1069,6 +1069,99 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Advanced — tree and hierarchy") {
+			<div class="space-y-4">
+				<p class="text-sm text-fg-muted">
+					Nested <code>details</code> elements: every branch opens with no script at all.
+					The controller adds the APG keyboard model on top — one tab stop, arrows,
+					Home/End, and typeahead.
+				</p>
+				@ui.Tree(ui.TreeOpts{
+					ID: "gallery-tree", Label: "Project files",
+					Nodes: galleryTreeNodes(),
+				})
+				@ui.TreeGrid(ui.TreeGridOpts{
+					ID: "gallery-treegrid", Label: "Modules by size",
+					Columns: []ui.Column{{Key: "name", Label: "Module"}, {Key: "size", Label: "Files", Numeric: true}},
+					Nodes:   galleryTreeGridNodes(),
+				})
+			</div>
+		}
+		@gallerySection("Advanced — carousel") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					CSS scroll snap over a plain list. Autoplay is off, and the dots below are
+					real anchors to each slide — so they work with scripting disabled.
+				</p>
+				@ui.Carousel(ui.CarouselOpts{
+					ID: "gallery-carousel", Label: "What shipped",
+					Slides: []ui.SlideData{
+						{ID: "slide-registry", Title: "Source registry", Body: "Install, inspect, modify."},
+						{ID: "slide-catalog", Title: "Typed catalog", Body: "One renderer per module."},
+						{ID: "slide-widgets", Title: "Advanced widgets", Body: "Progressive, never required."},
+					},
+				})
+			</div>
+		}
+		@gallerySection("Advanced — command palette") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					A search form in a native dialog. Every command is a link, and the input only
+					claims <code>role="combobox"</code> once the controller that implements it is
+					running. Ctrl+K opens it.
+				</p>
+				@ui.CommandPalette(ui.CommandPaletteOpts{
+					ID: "gallery-command", Label: "Search commands",
+					FallbackURL: "/dev/gallery",
+					Groups: []ui.CommandGroupData{
+						{Title: "Navigate", Items: []ui.CommandItemData{
+							{ID: "cmd-projects", Label: "Go to projects", Href: "/app/projects", Icon: ui.IconFolder, Shortcut: "G P"},
+							{ID: "cmd-settings", Label: "Go to settings", Href: "/app/settings", Icon: ui.IconSettings},
+						}},
+						{Title: "Create", Items: []ui.CommandItemData{
+							{ID: "cmd-new", Label: "New project", Href: "/app/projects", Hint: "Projects", Icon: ui.IconAdd},
+						}},
+					},
+				})
+			</div>
+		}
+		@gallerySection("Advanced — resizable panels") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					Stacked on a narrow screen, split on a wide one. The divider is a focusable
+					<code>role="separator"</code>: arrows move it one percent, Page keys ten,
+					Home and End go to its bounds.
+				</p>
+				@ui.PanelGroup(ui.PanelGroupOpts{
+					ID: "gallery-panels", PersistKey: "gallery",
+					Orientation: ui.OrientationHorizontal,
+					Panels: []ui.PanelData{
+						{ID: "panel-list", Title: "Modules", Size: 35, MinSize: 20},
+						{ID: "panel-detail", Title: "Detail", MinSize: 25},
+					},
+				})
+			</div>
+		}
+		@gallerySection("Advanced — questionnaire") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					Native fields, and the step lives on the server: each answer posts and the
+					server decides what comes next, so a reload resumes instead of restarting.
+				</p>
+				@ui.Questionnaire(ui.QuestionnaireOpts{
+					ID: "gallery-wizard", SubmitURL: "/dev/gallery", Current: 2,
+					Questions: []ui.QuestionData{
+						{ID: "team_size", Label: "How large is your team?", Type: ui.QuestionSelect, Required: true,
+							Options: []ui.Option{{Value: "1", Label: "Just me"}, {Value: "10", Label: "2–10"}}},
+						{ID: "goals", Label: "What are you hoping to ship?", Type: ui.QuestionCheckbox,
+							Hint: "Pick as many as apply.",
+							Options: []ui.Option{{Value: "api", Label: "An API"}, {Value: "dash", Label: "A dashboard"}}},
+						{ID: "notes", Label: "Anything else?", Type: ui.QuestionLongText},
+					},
+				})
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

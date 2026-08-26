@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/command",
+    "kind": "component",
+    "name": "command",
+    "revision": 1,
+    "contract": 1,
+    "title": "Command palette",
+    "description": "A search form in a native dialog where every command is a link. The combobox roles are applied by the controller that implements them, never rendered as an unfulfilled promise.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/command.templ",
+        "target": "internal/web/templates/ui/command.templ",
+        "class": "templ",
+        "sha256": "87a0ba957bcd40d6fd58b7dcdf0c4b0314ee2e68a36ccb11491e98e454abbf3a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/command_test.go",
+        "target": "internal/web/templates/ui/command_test.go",
+        "class": "test",
+        "sha256": "4057ad129d1ff85ebd61ec7abf045701ef63a590479c9476f1df2a45e1da3509",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/command.js",
+        "target": "static/ui/command.js",
+        "class": "asset",
+        "sha256": "51e8c32db57468f7dc1197f3c9360e9c1f8ebe648a56b9a71d971e427adf5f64",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "command-group",
+          "family": "advanced"
+        },
+        {
+          "name": "command-item",
+          "family": "advanced"
+        },
+        {
+          "name": "command-palette",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiCommand"
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-command",
+          "path": "static/ui/command.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

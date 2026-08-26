@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/carousel",
+    "kind": "component",
+    "name": "carousel",
+    "revision": 1,
+    "contract": 1,
+    "title": "Carousel",
+    "description": "CSS scroll snap over a plain list. Autoplay is off by default, pauses on hover and focus, and never runs under reduced motion. The dots are real anchors to each slide.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/carousel.templ",
+        "target": "internal/web/templates/ui/carousel.templ",
+        "class": "templ",
+        "sha256": "3fc546e5008d629cd5f79fb83e5d4bb0b39b37b970a8dbb8973f856745ecf50b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/carousel_test.go",
+        "target": "internal/web/templates/ui/carousel_test.go",
+        "class": "test",
+        "sha256": "6b4c0d762f2cc496f93afa2788b4a3a073a1b46ca6f875aa39bf0e7cf16cd8d7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/carousel.js",
+        "target": "static/ui/carousel.js",
+        "class": "asset",
+        "sha256": "d5caa9d7469f92727d29f9f95d2884bcd3194395ab0820c20d1f3bff4980209a",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "carousel",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiCarousel"
+        },
+        {
+          "name": "carousel-dots",
+          "family": "advanced"
+        },
+        {
+          "name": "carousel-slide",
+          "family": "advanced"
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-carousel",
+          "path": "static/ui/carousel.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

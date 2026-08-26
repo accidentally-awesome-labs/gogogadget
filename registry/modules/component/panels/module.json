@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/panels",
+    "kind": "component",
+    "name": "panels",
+    "revision": 1,
+    "contract": 1,
+    "title": "Resizable panels",
+    "description": "Stacked panels by default; on a wide screen a split with keyboard-operable role=separator handles carrying bounded aria-valuenow.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/panels.templ",
+        "target": "internal/web/templates/ui/panels.templ",
+        "class": "templ",
+        "sha256": "de089dcd1abcac8f6131316b398260be9d503c67b4e696b7059d5286e3f8296a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/panels_test.go",
+        "target": "internal/web/templates/ui/panels_test.go",
+        "class": "test",
+        "sha256": "580e46dc6ea7fea6d9b18a446bfd33ab9947ba626e3e22bb3bd47ea4fd3d78de",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/panels.js",
+        "target": "static/ui/panels.js",
+        "class": "asset",
+        "sha256": "1d6d0c43fe4d89be1c07c2008d89d2c02b0d532f4bd7d1833ad9d3ed30385455",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "panel",
+          "family": "advanced"
+        },
+        {
+          "name": "panel-group",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiPanels"
+        },
+        {
+          "name": "panel-handle",
+          "family": "advanced"
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-panels",
+          "path": "static/ui/panels.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

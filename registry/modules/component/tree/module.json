@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/tree",
+    "kind": "component",
+    "name": "tree",
+    "revision": 1,
+    "contract": 1,
+    "title": "Tree",
+    "description": "Nested details upgraded with the APG keyboard model: one tab stop, arrows, Home/End and typeahead. Every branch opens with no script.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tree.templ",
+        "target": "internal/web/templates/ui/tree.templ",
+        "class": "templ",
+        "sha256": "adb42049442713a2d0d3948e148a003c6b5950ba682adb2a853f580754f86ad6",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/tree_test.go",
+        "target": "internal/web/templates/ui/tree_test.go",
+        "class": "test",
+        "sha256": "53e0e7127976a6c489ef1559d9cfd62c8539efe64f12189979041f563f30fa8b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/tree.js",
+        "target": "static/ui/tree.js",
+        "class": "asset",
+        "sha256": "1bdf917b0c62d73d7af5f4b21c47d507f9978037a9ab307ac2022132d7cf33a6",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "tree",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiTree"
+        },
+        {
+          "name": "tree-grid",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiTree"
+        },
+        {
+          "name": "tree-node",
+          "family": "advanced"
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-tree",
+          "path": "static/ui/tree.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

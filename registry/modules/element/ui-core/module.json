@@ -38,7 +38,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "18209a08189f554fcb45d66f940a3892a78c34c4f1c1755ede1a3b12a9871497",
+        "sha256": "0819f84780fccf9784d243486bf26690d2a6722216aeae0d717e32acd680ec9b",
         "rewrite_module": true,
         "contract": false
       },
@@ -54,7 +54,7 @@
         "source": "internal/web/templates/ui/enums_test.go",
         "target": "internal/web/templates/ui/enums_test.go",
         "class": "test",
-        "sha256": "cfda4db8029431f2c9b565850dfaa65e76d015f6d79ed6c420ac494a0f55c999",
+        "sha256": "96375eced2cb91517f01d409cf4a9135f909dd2b50d3bd20c16a215dd547a21f",
         "rewrite_module": true,
         "contract": false
       },

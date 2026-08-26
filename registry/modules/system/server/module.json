@@ -244,7 +244,7 @@
         "source": "internal/web/templates/ui_adapters.go",
         "target": "internal/web/templates/ui_adapters.go",
         "class": "go",
-        "sha256": "71372089d316ba9a618e7d80f72adf3bb295ed03b9723f0f6391b0c385bbe73f",
+        "sha256": "b0d558841a3045cba3bf089971095c587c545c73abdc7fc580d013df9dec6add",
         "rewrite_module": true,
         "contract": false
       },

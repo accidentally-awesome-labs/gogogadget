@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/questionnaire",
+    "kind": "component",
+    "name": "questionnaire",
+    "revision": 1,
+    "contract": 1,
+    "title": "Questionnaire",
+    "description": "Native fields and a server-owned step. Each step posts its answer and the server decides what comes next, so a reload resumes rather than restarts.",
+    "requires": [
+      "component/field",
+      "component/select",
+      "component/steps",
+      "component/text-input",
+      "component/textarea",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/questionnaire.templ",
+        "target": "internal/web/templates/ui/questionnaire.templ",
+        "class": "templ",
+        "sha256": "951e156c3a93fda509ca7d4382369eda5f518750deb5aefb1daaa10578d8859c",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/questionnaire_test.go",
+        "target": "internal/web/templates/ui/questionnaire_test.go",
+        "class": "test",
+        "sha256": "d77d5ae304083fd310f05d80e8e80f0d39cc7d5c55a31accdf170f2e190c260e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "question",
+          "family": "advanced"
+        },
+        {
+          "name": "questionnaire",
+          "family": "advanced"
+        },
+        {
+          "name": "wizard-actions",
+          "family": "advanced"
+        }
+      ],
+      "assets": []
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

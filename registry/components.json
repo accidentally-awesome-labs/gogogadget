@@ -13,6 +13,7 @@
     "registry/modules/component/breadcrumbs/module.json",
     "registry/modules/component/calendar/module.json",
     "registry/modules/component/card/module.json",
+    "registry/modules/component/carousel/module.json",
     "registry/modules/component/center/module.json",
     "registry/modules/component/char-counter/module.json",
     "registry/modules/component/chart/module.json",
@@ -24,6 +25,7 @@
     "registry/modules/component/color-input/module.json",
     "registry/modules/component/column-header/module.json",
     "registry/modules/component/combobox/module.json",
+    "registry/modules/component/command/module.json",
     "registry/modules/component/comment-thread/module.json",
     "registry/modules/component/comment/module.json",
     "registry/modules/component/composer/module.json",
@@ -77,11 +79,13 @@
     "registry/modules/component/otp-input/module.json",
     "registry/modules/component/page-header/module.json",
     "registry/modules/component/pagination/module.json",
+    "registry/modules/component/panels/module.json",
     "registry/modules/component/password-input/module.json",
     "registry/modules/component/plan-card/module.json",
     "registry/modules/component/popover/module.json",
     "registry/modules/component/progress-bar/module.json",
     "registry/modules/component/progress-circle/module.json",
+    "registry/modules/component/questionnaire/module.json",
     "registry/modules/component/radio-group/module.json",
     "registry/modules/component/range-input/module.json",
     "registry/modules/component/row-actions/module.json",
@@ -119,6 +123,7 @@
     "registry/modules/component/toast/module.json",
     "registry/modules/component/toolbar/module.json",
     "registry/modules/component/tooltip/module.json",
+    "registry/modules/component/tree/module.json",
     "registry/modules/component/usage-card/module.json"
   ]
 }

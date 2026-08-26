@@ -262,6 +262,7 @@ func renderers() map[string]any {
 		"MarkdownEditor": MarkdownEditor, "EditorToolbar": EditorToolbar, "EditorPreview": EditorPreview, "MediaPicker": MediaPicker,
 		"DataGrid": DataGrid, "GridToolbar": GridToolbar, "ColumnPicker": ColumnPicker,
 		"Kanban": Kanban, "KanbanColumn": KanbanColumn, "KanbanCard": KanbanCard,
+		"Tree": Tree, "TreeNode": TreeNode, "TreeGrid": TreeGrid, "Carousel": Carousel, "Slide": Slide, "CarouselDots": CarouselDots, "CommandPalette": CommandPalette, "CommandGroup": CommandGroup, "CommandItem": CommandItem, "PanelGroup": PanelGroup, "Panel": Panel, "PanelHandle": PanelHandle, "Questionnaire": Questionnaire, "Question": Question, "WizardActions": WizardActions,
 	}
 }
 

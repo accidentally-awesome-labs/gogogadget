@@ -1,0 +1,184 @@
+package ui
+
+// CommandItemData is one command.
+type CommandItemData struct {
+	// ID is required: aria-activedescendant names it.
+	ID    string
+	Label string
+	// Href is required. Every command is a destination or a form action, never
+	// a handler that exists only in JavaScript - a palette whose commands only
+	// work when scripted is a palette that vanishes when it fails.
+	Href string
+	// Hint is secondary text, e.g. the section a command belongs to.
+	Hint string
+	Icon IconName
+	// Shortcut is displayed, not bound here: the binding belongs to the surface
+	// that owns the key, and showing a shortcut nothing listens for is a lie.
+	Shortcut string
+}
+
+// CommandGroupData is a titled set of commands.
+type CommandGroupData struct {
+	// Title is required: an untitled group is a visual break with no meaning.
+	Title string
+	Items []CommandItemData
+}
+
+// CommandPaletteOpts configures the palette.
+type CommandPaletteOpts struct {
+	ID    string
+	Label string
+	// SearchURL returns filtered results; the server owns the filtering, so the
+	// palette can search things that were never sent to the browser.
+	SearchURL string
+	// FallbackURL is the plain search page the form submits to when scripting
+	// is unavailable. Without it the palette is a dead input.
+	FallbackURL string
+	Target      string
+	Groups      []CommandGroupData
+	Attrs       Attrs
+}
+
+// CommandPalette renders a searchable command dialog.
+//
+// The markup is a real form pointing at a real search page, inside a native
+// dialog. With no JavaScript the palette is a search form that works; with it,
+// the input becomes a combobox over a listbox and Cmd/Ctrl-K opens the dialog.
+// The combobox roles are added by the controller, not baked into the markup,
+// because an input claiming role="combobox" with no active descendant and no key
+// handling is worse than a plain text field.
+templ CommandPalette(o CommandPaletteOpts) {
+	<div { rootWith("command-palette", "", o.Attrs, "x-data", "uiCommand", "data-command-target", o.Target)... }>
+		// The trigger is a real button, so the palette is reachable without
+		// knowing the shortcut. A keyboard-only affordance is undiscoverable.
+		<button type="button" class="btn btn-ghost btn-sm" data-command-open aria-haspopup="dialog">
+			@Icon(IconOpts{Name: IconSearch})
+			<span>{ o.Label }</span>
+			<kbd class="ml-2 text-xs text-fg-muted">Ctrl K</kbd>
+		</button>
+		<dialog id={ o.ID } class="dialog card max-w-xl w-full" data-command-dialog aria-label={ o.Label }>
+			<form method="get" action={ templ.SafeURL(o.FallbackURL) } data-command-form>
+				<div class="flex items-center gap-2 border-b border-border p-3">
+					<label for={ o.ID + "-q" } class="sr-only">{ o.Label }</label>
+					<input
+						id={ o.ID + "-q" }
+						name="q"
+						type="search"
+						class="input border-0 flex-1"
+						placeholder="Search commands…"
+						autocomplete="off"
+						data-command-input
+						if o.SearchURL != "" {
+							hx-get={ o.SearchURL }
+							hx-trigger="input changed delay:200ms"
+							hx-target={ "#" + o.ID + "-results" }
+							hx-swap="innerHTML"
+						}
+					/>
+					<button type="submit" class="btn btn-ghost btn-xs">Search</button>
+				</div>
+			</form>
+			<div id={ o.ID + "-results" } class="max-h-80 overflow-y-auto p-2" data-command-results>
+				for _, group := range o.Groups {
+					@CommandGroup(CommandGroupOpts{Group: group})
+				}
+				if len(o.Groups) == 0 {
+					<p class="p-3 text-sm text-fg-muted">No commands yet.</p>
+				}
+			</div>
+			// Native dialog dismissal: a form method="dialog" submit closes with
+			// no JavaScript, which is what makes the dialog safe to open.
+			<form method="dialog" class="border-t border-border p-2 text-right">
+				<button type="submit" class="btn btn-ghost btn-xs">Close</button>
+			</form>
+		</dialog>
+	</div>
+}
+
+// CommandGroupOpts configures one group.
+type CommandGroupOpts struct {
+	Group CommandGroupData
+	Attrs Attrs
+}
+
+// CommandGroup renders a titled group of commands.
+templ CommandGroup(o CommandGroupOpts) {
+	<div { root("command-group", "py-1", o.Attrs)... }>
+		<p class="px-2 py-1 text-xs font-medium text-fg-muted" id={ commandGroupID(o.Group) }>
+			{ o.Group.Title }
+		</p>
+		// The group's title labels its list, so the commands are announced as
+		// belonging to it rather than as one flat run.
+		<ul role="list" aria-labelledby={ commandGroupID(o.Group) } class="space-y-0.5">
+			for _, item := range o.Group.Items {
+				@CommandItem(CommandItemOpts{Item: item})
+			}
+		</ul>
+	</div>
+}
+
+// CommandItemOpts configures one command.
+type CommandItemOpts struct {
+	Item  CommandItemData
+	Attrs Attrs
+}
+
+// CommandItem renders one command as a link.
+//
+// A link, because every command has a destination. Rendering it as a div with a
+// click handler would make it unreachable by keyboard, un-middle-clickable, and
+// invisible to a screen reader's list of links.
+templ CommandItem(o CommandItemOpts) {
+	<li>
+		<a
+			{ rootWith("command-item",
+				"flex items-center gap-2 px-2 py-1.5 rounded text-sm hover:bg-surface-raised",
+				o.Attrs, "id", o.Item.ID)... }
+			href={ templ.SafeURL(o.Item.Href) }
+			data-command-item
+		>
+			if o.Item.Icon != "" {
+				@Icon(IconOpts{Name: o.Item.Icon})
+			}
+			<span class="flex-1">{ o.Item.Label }</span>
+			if o.Item.Hint != "" {
+				<span class="text-xs text-fg-muted">{ o.Item.Hint }</span>
+			}
+			if o.Item.Shortcut != "" {
+				<kbd class="text-xs text-fg-muted">{ o.Item.Shortcut }</kbd>
+			}
+		</a>
+	</li>
+}
+
+// commandGroupID derives a stable id for the group's label from its title, which
+// is required - so the list always has something to be labelled by.
+func commandGroupID(group CommandGroupData) string {
+	return "cmd-group-" + commandSlug(group.Title)
+}
+
+// commandSlug reduces a title to characters valid in an id reference. A raw
+// title with spaces or punctuation produces an aria-labelledby that resolves to
+// nothing, which is worse than no label because it looks correct in the markup.
+func commandSlug(title string) string {
+	out := make([]rune, 0, len(title))
+	for _, r := range title {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
+			out = append(out, r)
+		case r >= 'A' && r <= 'Z':
+			out = append(out, r+('a'-'A'))
+		case len(out) > 0 && out[len(out)-1] != '-':
+			out = append(out, '-')
+		}
+	}
+	// Trailing separators would make two titles differing only in punctuation
+	// collide with each other.
+	for len(out) > 0 && out[len(out)-1] == '-' {
+		out = out[:len(out)-1]
+	}
+	if len(out) == 0 {
+		return "group"
+	}
+	return string(out)
+}

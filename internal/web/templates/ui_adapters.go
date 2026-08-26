@@ -174,3 +174,35 @@ func galleryGridRows() [][4]string {
 		{"Deimos", "Katherine", "9", "eu-central-1"},
 	}
 }
+
+// galleryTreeNodes is fixed demo data: the tree owns no content.
+func galleryTreeNodes() []ui.TreeNodeData {
+	return []ui.TreeNodeData{
+		{
+			ID: "n-internal", Label: "internal", Expanded: true,
+			Children: []ui.TreeNodeData{
+				{ID: "n-web", Label: "web", Expanded: true, Children: []ui.TreeNodeData{
+					{ID: "n-templates", Label: "templates", Href: "/dev/gallery"},
+					{ID: "n-routes", Label: "routes.go", Href: "/dev/gallery"},
+				}},
+				{ID: "n-modkit", Label: "modkit", HasChildren: true},
+			},
+		},
+		{ID: "n-registry", Label: "registry", HasChildren: true},
+		{ID: "n-readme", Label: "README.md", Href: "/dev/gallery"},
+	}
+}
+
+// galleryTreeGridNodes carries cell values as well as hierarchy.
+func galleryTreeGridNodes() []ui.TreeNodeData {
+	return []ui.TreeNodeData{
+		{
+			ID: "g-catalog", Label: "Core catalog", Cells: []string{"135"}, Expanded: true,
+			Children: []ui.TreeNodeData{
+				{ID: "g-actions", Label: "Actions", Cells: []string{"18"}},
+				{ID: "g-forms", Label: "Forms", Cells: []string{"22"}},
+			},
+		},
+		{ID: "g-advanced", Label: "Advanced widgets", Cells: []string{"24"}},
+	}
+}
