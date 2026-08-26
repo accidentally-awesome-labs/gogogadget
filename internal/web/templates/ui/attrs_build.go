@@ -119,18 +119,6 @@ func applyHX(out templ.Attributes, hx HX) {
 	if hx.Encoding != "" {
 		out["hx-encoding"] = hx.Encoding
 	}
-	for k, v := range hx.Vals {
-		out["hx-vals"] = hx.Vals
-		_ = k
-		_ = v
-		break
-	}
-	for k, v := range hx.Headers {
-		out["hx-headers"] = hx.Headers
-		_ = k
-		_ = v
-		break
-	}
 	if hx.Boost {
 		out["hx-boost"] = "true"
 	}

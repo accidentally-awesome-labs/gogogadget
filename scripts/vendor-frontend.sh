@@ -51,6 +51,14 @@ fetch "chart.js@4.5.1" \
 # loader must inject it with type="module". Lazily loaded like Chart.js: a page
 # with no date picker never fetches it. MIT, with the bundled Atomico 1.79.2
 # notice travelling inside the committed file.
+# SortableJS is a lazily loaded engine for the kanban board's drag shortcut. The
+# board is fully operable through each card's move menu without it, so a page
+# with no board never fetches this. MIT.
+fetch "sortablejs@1.15.7" \
+  "https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js" \
+  "static/vendor/sortablejs-1.15.7.min.js" \
+  "v0JBvHP+9/EcWaKDpp/oBRzdMcbY/1orm6IZ54Mfz3Y="
+
 fetch "cally@0.9.2" \
   "https://cdn.jsdelivr.net/npm/cally@0.9.2/dist/cally.js" \
   "static/vendor/cally-0.9.2.js" \

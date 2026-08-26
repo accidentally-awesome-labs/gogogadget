@@ -25,17 +25,42 @@
         "contract": false
       },
       {
+        "source": "internal/web/page_dev_gallery_move.go",
+        "target": "internal/web/page_dev_gallery_move.go",
+        "class": "go",
+        "sha256": "34b66562a91882e510a71c9e9662a27eed724fc02003d81bbf5e3e1f9659ea48",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "5078c38fd84a6d9a061d214055a55624191ed7114d564db1aede80c982762e4e",
+        "sha256": "460a3c1b30ab445829907d6ae670d5ca72617d868a4950ede7ec933c99c8aba0",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_board.templ",
+        "target": "internal/web/templates/gallery_board.templ",
+        "class": "templ",
+        "sha256": "c2a55df36cbf99dc037a5001967ca9cfd59dde1290dbd51e68db9b33512e5354",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/gallery_board_test.go",
+        "target": "internal/web/templates/gallery_board_test.go",
+        "class": "test",
+        "sha256": "c84ec12ef8fd5ea33c1564a51d334d55ecfb0e78ed35efec0bd9f35dab54f92a",
         "rewrite_module": true,
         "contract": false
       }
     ],
     "claims": {
       "routes": [
-        "dev-gallery.index"
+        "dev-gallery.index",
+        "dev-gallery.kanban_move"
       ]
     },
     "runtime": {
@@ -56,6 +81,24 @@
           },
           "package": "internal/web",
           "handler": "handleDevGallery",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev-gallery.kanban_move",
+          "method": "POST",
+          "pattern": "/dev/ui/kanban/move",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevKanbanMove",
           "enabled": "devAuthBypass"
         }
       ]

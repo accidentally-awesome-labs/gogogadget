@@ -1057,6 +1057,18 @@ templ Gallery() {
 			</div>
 		}
 
+		@gallerySection("Advanced — kanban board") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					Every card carries a "Move to…" menu, and that menu is the interface.
+					Dragging is a shortcut layered on top: a drop fills in the card's own move
+					form and submits it, so both paths post the same payload to one endpoint and
+					the server decides. With no script the menus still work.
+				</p>
+				@GalleryBoard("", "")
+			</div>
+		}
+
 		@gallerySection("Layout — card") {
 			@ui.Card(ui.CardOpts{}) {
 				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {

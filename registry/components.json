@@ -57,6 +57,7 @@
     "registry/modules/component/inline/module.json",
     "registry/modules/component/input-addon/module.json",
     "registry/modules/component/input-group/module.json",
+    "registry/modules/component/kanban/module.json",
     "registry/modules/component/key-value/module.json",
     "registry/modules/component/label/module.json",
     "registry/modules/component/list/module.json",

@@ -22,7 +22,15 @@
         "source": "internal/web/templates/ui/attrs_build.go",
         "target": "internal/web/templates/ui/attrs_build.go",
         "class": "go",
-        "sha256": "0eb8fc098aafffabc38203e54125f2774e9374d52513f7da1d640088fa0e6b8d",
+        "sha256": "0c6af45cdbd326491aa572ae7a9db08e6570973053070074a813779508bd8e5e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/attrs_build_test.go",
+        "target": "internal/web/templates/ui/attrs_build_test.go",
+        "class": "test",
+        "sha256": "254eb335996f3093c8dfada6c905480e16c1f257e505fd4965f070454ab82667",
         "rewrite_module": true,
         "contract": false
       },
@@ -30,7 +38,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "b63ec4ff1b92502ee96143abe9d5ed46c132cb29d8c8c3948c39db96fece3206",
+        "sha256": "18209a08189f554fcb45d66f940a3892a78c34c4f1c1755ede1a3b12a9871497",
         "rewrite_module": true,
         "contract": false
       },

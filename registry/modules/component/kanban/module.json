@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/kanban",
+    "kind": "component",
+    "name": "kanban",
+    "revision": 1,
+    "contract": 1,
+    "title": "Kanban board",
+    "description": "A board where every card carries a keyboard-operable move menu. Dragging is a shortcut layered on top: it fills and submits the same move form, and the server's response is authoritative.",
+    "requires": [
+      "component/badge",
+      "component/dropdown-menu",
+      "component/notice",
+      "element/avatar-group",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/kanban.templ",
+        "target": "internal/web/templates/ui/kanban.templ",
+        "class": "templ",
+        "sha256": "d9525c85be21fc4c8c88da398d10c86015c18c8372f68948f309ba45094d9eab",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/kanban_test.go",
+        "target": "internal/web/templates/ui/kanban_test.go",
+        "class": "test",
+        "sha256": "83a917c1cc367cdece5dd5ec39805d63218401b6544b57ffa3d86f1ade6d6c18",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/kanban.js",
+        "target": "static/ui/kanban.js",
+        "class": "asset",
+        "sha256": "e64683e13372fb03d4524288a957e05f601cd628838ebafd7e59f2003019469b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/sortablejs-1.15.7.min.js",
+        "target": "static/vendor/sortablejs-1.15.7.min.js",
+        "class": "asset",
+        "sha256": "bf4241bc73fef7f11c59a283a69fe8051cdd31c6d8ff5a2b9ba219e7831fcf76",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "kanban",
+          "family": "advanced",
+          "engine": "sortablejs",
+          "alpine": "uiKanban",
+          "vendor": "sortablejs@1.15.7",
+          "native_fallback": "move menu on every card"
+        },
+        {
+          "name": "kanban-card",
+          "family": "advanced"
+        },
+        {
+          "name": "kanban-column",
+          "family": "advanced"
+        }
+      ],
+      "assets": [
+        {
+          "id": "sortablejs",
+          "path": "static/vendor/sortablejs-1.15.7.min.js",
+          "kind": "script",
+          "engine": "sortablejs",
+          "integrity": "sha256-v0JBvHP+9/EcWaKDpp/oBRzdMcbY/1orm6IZ54Mfz3Y=",
+          "esm": false
+        },
+        {
+          "id": "ui-kanban",
+          "path": "static/ui/kanban.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

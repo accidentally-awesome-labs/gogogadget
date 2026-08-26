@@ -261,6 +261,7 @@ func renderers() map[string]any {
 		"MonthGrid": MonthGrid, "DatePicker": DatePicker, "DateTimePicker": DateTimePicker, "DateRangePicker": DateRangePicker, "Scheduler": Scheduler, "AvailabilityGrid": AvailabilityGrid,
 		"MarkdownEditor": MarkdownEditor, "EditorToolbar": EditorToolbar, "EditorPreview": EditorPreview, "MediaPicker": MediaPicker,
 		"DataGrid": DataGrid, "GridToolbar": GridToolbar, "ColumnPicker": ColumnPicker,
+		"Kanban": Kanban, "KanbanColumn": KanbanColumn, "KanbanCard": KanbanCard,
 	}
 }
 

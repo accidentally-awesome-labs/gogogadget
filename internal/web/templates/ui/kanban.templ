@@ -1,0 +1,257 @@
+package ui
+
+import "fmt"
+
+// KanbanCardData is one card's content.
+type KanbanCardData struct {
+	// ID is required: it is what the move request names.
+	ID          string
+	Title       string
+	Description string
+	// Badge is optional status. A pointer because "no badge" and "an empty
+	// badge" are different things, and an empty one renders a blank pill.
+	Badge     *BadgeOpts
+	Assignees []AvatarOpts
+	// Menu is the card's commands. The move options are added to it, so a
+	// caller's own commands and moving sit in the same place.
+	Menu []MenuItem
+}
+
+// KanbanColumnData is one column's content.
+type KanbanColumnData struct {
+	// ID is required: it is the move destination.
+	ID    string
+	Title string
+	// Count is the column's total, which may exceed the cards rendered.
+	Count int
+	// Limit is a work-in-progress cap. Zero means no cap; the cap is advisory
+	// and the server decides whether a move is allowed.
+	Limit int
+	Cards []KanbanCardData
+}
+
+// KanbanOpts configures the board.
+type KanbanOpts struct {
+	ID string
+	// MoveURL receives every move, whether it came from a drag or the menu.
+	// One endpoint means the two paths cannot diverge.
+	MoveURL string
+	Target  string
+	Columns []KanbanColumnData
+	Attrs   Attrs
+}
+
+// Kanban renders the board.
+//
+// Dragging is never the only way to move a card. Every card carries a
+// keyboard-operable "Move to..." menu that posts to the same endpoint, because a
+// board that can only be operated by dragging excludes keyboard users, screen
+// reader users, and anyone on a touch screen where a drag competes with scroll.
+// The drag is a shortcut layered on top of that menu, not a replacement for it.
+templ Kanban(o KanbanOpts) {
+	<div
+		{ rootWith("kanban", "flex gap-4 overflow-x-auto pb-2", o.Attrs,
+			"x-data", "uiKanban",
+			"id", o.ID,
+			"data-ui-engine", "sortablejs",
+			"data-kanban-move-url", o.MoveURL,
+			"data-kanban-target", o.Target)... }
+	>
+		for _, column := range o.Columns {
+			@KanbanColumn(KanbanColumnOpts{
+				Column:  column,
+				Columns: o.Columns,
+				MoveURL: o.MoveURL,
+				Target:  o.Target,
+			})
+		}
+	</div>
+}
+
+// KanbanColumnOpts configures one column.
+type KanbanColumnOpts struct {
+	Column KanbanColumnData
+	// Columns is every column on the board, so each card's move menu can list
+	// the destinations. Without it a card could only be moved to a column the
+	// renderer happens to know about.
+	Columns []KanbanColumnData
+	MoveURL string
+	Target  string
+	Attrs   Attrs
+}
+
+// KanbanColumn renders one column and its cards.
+//
+// It is a list with a heading, not a generic div: a screen-reader user needs to
+// know how many cards a column holds and where its boundary is, and a list
+// already reports both.
+templ KanbanColumn(o KanbanColumnOpts) {
+	<section
+		{ rootWith("kanban-column", "shrink-0 w-72 card p-3 space-y-3", o.Attrs,
+			"aria-labelledby", o.Column.ID+"-title")... }
+		data-kanban-column={ o.Column.ID }
+	>
+		<header class="flex items-baseline justify-between gap-2">
+			<h3 id={ o.Column.ID + "-title" } class="section-title text-sm">
+				{ o.Column.Title }
+			</h3>
+			// The count is text, not a coloured dot: a limit reached is
+			// information the user has to be able to read.
+			<span class="text-xs text-fg-muted" data-kanban-count>
+				{ kanbanCountLabel(o.Column) }
+			</span>
+		</header>
+		if kanbanOverLimit(o.Column) {
+			// Stated, not styled. A column tinted red says nothing to a screen
+			// reader and nothing at all to someone who cannot see the tint.
+			@Notice(NoticeOpts{
+				Kind: KindWarn,
+				Live: LiveOff,
+				Attrs: Attrs{Class: "text-xs"},
+			}) {
+				{ fmt.Sprintf("Over the limit of %d.", o.Column.Limit) }
+			}
+		}
+		<ul class="space-y-2 min-h-8" data-kanban-list role="list">
+			for _, card := range o.Column.Cards {
+				@KanbanCard(KanbanCardOpts{
+					Card:     card,
+					From:     o.Column.ID,
+					Columns:  o.Columns,
+					MoveURL:  o.MoveURL,
+					Target:   o.Target,
+				})
+			}
+		</ul>
+		if len(o.Column.Cards) == 0 {
+			<p class="text-sm text-fg-muted" data-kanban-empty>Nothing here yet.</p>
+		}
+	</section>
+}
+
+// KanbanCardOpts configures one card.
+type KanbanCardOpts struct {
+	Card KanbanCardData
+	// From is the column the card currently sits in, so the move menu can omit
+	// it: offering "move to where it already is" is a command that does nothing.
+	From    string
+	Columns []KanbanColumnData
+	MoveURL string
+	Target  string
+	Attrs   Attrs
+}
+
+// KanbanCard renders one card.
+//
+// The card is a list item carrying a real form. The form is what both paths use:
+// the menu submits it by navigation, and a drag fills in the destination and
+// submits the same form. The server's response is authoritative, so a rejected
+// move re-renders the board rather than leaving the card where it was dropped.
+templ KanbanCard(o KanbanCardOpts) {
+	<li
+		{ rootWith("kanban-card", "card p-3 space-y-2 bg-surface-raised", o.Attrs,
+			"data-kanban-card", o.Card.ID)... }
+	>
+		<div class="flex items-start justify-between gap-2">
+			<p class="text-sm font-medium">{ o.Card.Title }</p>
+			if len(kanbanMenu(o)) > 0 {
+				@DropdownMenu(DropdownMenuOpts{
+					ID:    o.Card.ID + "-menu",
+					Label: kanbanMenuLabel(o.Card),
+					Items: kanbanMenu(o),
+				})
+			}
+		</div>
+		if o.Card.Description != "" {
+			<p class="text-sm text-fg-muted">{ o.Card.Description }</p>
+		}
+		<div class="flex items-center justify-between gap-2">
+			if o.Card.Badge != nil {
+				@Badge(*o.Card.Badge)
+			}
+			if len(o.Card.Assignees) > 0 {
+				@AvatarGroup(AvatarGroupOpts{People: o.Card.Assignees, Size: SizeSM})
+			}
+		</div>
+		// The move form. It is a real form with a real action, so a move works
+		// with no script at all - which is what makes the drag safe to add.
+		if o.MoveURL != "" {
+			<form
+				method="post"
+				action={ templ.SafeURL(o.MoveURL) }
+				class="hidden"
+				data-kanban-form
+				hx-post={ o.MoveURL }
+				hx-target={ kanbanTarget(o) }
+				hx-swap="outerMorph"
+			>
+				<input type="hidden" name="card" value={ o.Card.ID }/>
+				<input type="hidden" name="from" value={ o.From }/>
+				<input type="hidden" name="to" value="" data-kanban-to/>
+				<input type="hidden" name="position" value="" data-kanban-position/>
+			</form>
+		}
+	</li>
+}
+
+// kanbanMenu builds the card's command list: the caller's own items, then the
+// move destinations. The current column is excluded because moving a card to
+// where it already is does nothing.
+func kanbanMenu(o KanbanCardOpts) []MenuItem {
+	items := make([]MenuItem, 0, len(o.Card.Menu)+len(o.Columns)+1)
+	items = append(items, o.Card.Menu...)
+
+	moves := make([]MenuItem, 0, len(o.Columns))
+	for _, column := range o.Columns {
+		if column.ID == o.From || o.MoveURL == "" {
+			continue
+		}
+		moves = append(moves, MenuItem{
+			Label: "Move to " + column.Title,
+			HX: HX{
+				Post:   o.MoveURL,
+				Target: kanbanTarget(o),
+				Swap:   "outerMorph",
+				Vals: map[string]string{
+					"card": o.Card.ID,
+					"from": o.From,
+					"to":   column.ID,
+				},
+			},
+		})
+	}
+	if len(moves) == 0 {
+		return items
+	}
+	if len(items) > 0 {
+		items = append(items, MenuItem{Separator: true})
+	}
+	return append(items, moves...)
+}
+
+// kanbanMenuLabel names the menu after its card. Forty menus all called
+// "Actions" are indistinguishable in a screen reader's element list.
+func kanbanMenuLabel(card KanbanCardData) string {
+	return "Actions for " + card.Title
+}
+
+// kanbanTarget defaults to the board, because a rejected move has to be able to
+// re-render more than the card that moved.
+func kanbanTarget(o KanbanCardOpts) string {
+	if o.Target != "" {
+		return o.Target
+	}
+	return "closest [data-ui=kanban]"
+}
+
+// kanbanCountLabel states the count, and the limit when there is one.
+func kanbanCountLabel(column KanbanColumnData) string {
+	if column.Limit > 0 {
+		return fmt.Sprintf("%d of %d", column.Count, column.Limit)
+	}
+	return fmt.Sprint(column.Count)
+}
+
+func kanbanOverLimit(column KanbanColumnData) bool {
+	return column.Limit > 0 && column.Count > column.Limit
+}

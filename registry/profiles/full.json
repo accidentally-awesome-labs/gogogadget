@@ -64,6 +64,7 @@
       "component/inline",
       "component/input-addon",
       "component/input-group",
+      "component/kanban",
       "component/key-value",
       "component/label",
       "component/list",
