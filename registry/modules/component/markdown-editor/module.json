@@ -19,7 +19,7 @@
         "source": "internal/web/templates/ui/markdown-editor.templ",
         "target": "internal/web/templates/ui/markdown-editor.templ",
         "class": "templ",
-        "sha256": "036f17bfeff240548ce395dcfc452f45c597a00ecf93c90327aa6c1436e44967",
+        "sha256": "aa930281d05e54d7164f7966c4186707525a48563a9bf82efa82f59320da5272",
         "rewrite_module": true,
         "contract": true
       },

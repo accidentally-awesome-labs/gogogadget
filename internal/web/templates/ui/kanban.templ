@@ -28,6 +28,12 @@ type KanbanColumnData struct {
 	// and the server decides whether a move is allowed.
 	Limit int
 	Cards []KanbanCardData
+	// Level is the column title's heading level, defaulting to 3. A board's
+	// depth is a fact about the page, not the component: a board rendered
+	// directly under the page title needs h2, and hardcoding h3 skips a level
+	// there - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
 }
 
 // KanbanOpts configures the board.
@@ -92,9 +98,12 @@ templ KanbanColumn(o KanbanColumnOpts) {
 		data-kanban-column={ o.Column.ID }
 	>
 		<header class="flex items-baseline justify-between gap-2">
-			<h3 id={ o.Column.ID + "-title" } class="section-title text-sm">
-				{ o.Column.Title }
-			</h3>
+			@Heading(HeadingOpts{
+				Text:  o.Column.Title,
+				Level: kanbanColumnLevel(o.Column),
+				Size:  SizeSM,
+				Attrs: Attrs{ID: o.Column.ID + "-title", Class: "text-sm"},
+			})
 			// The count is text, not a coloured dot: a limit reached is
 			// information the user has to be able to read.
 			<span class="text-xs text-fg-muted" data-kanban-count>
@@ -105,8 +114,8 @@ templ KanbanColumn(o KanbanColumnOpts) {
 			// Stated, not styled. A column tinted red says nothing to a screen
 			// reader and nothing at all to someone who cannot see the tint.
 			@Notice(NoticeOpts{
-				Kind: KindWarn,
-				Live: LiveOff,
+				Kind:  KindWarn,
+				Live:  LiveOff,
 				Attrs: Attrs{Class: "text-xs"},
 			}) {
 				{ fmt.Sprintf("Over the limit of %d.", o.Column.Limit) }
@@ -115,11 +124,11 @@ templ KanbanColumn(o KanbanColumnOpts) {
 		<ul class="space-y-2 min-h-8" data-kanban-list role="list">
 			for _, card := range o.Column.Cards {
 				@KanbanCard(KanbanCardOpts{
-					Card:     card,
-					From:     o.Column.ID,
-					Columns:  o.Columns,
-					MoveURL:  o.MoveURL,
-					Target:   o.Target,
+					Card:    card,
+					From:    o.Column.ID,
+					Columns: o.Columns,
+					MoveURL: o.MoveURL,
+					Target:  o.Target,
 				})
 			}
 		</ul>
@@ -250,6 +259,15 @@ func kanbanCountLabel(column KanbanColumnData) string {
 		return fmt.Sprintf("%d of %d", column.Count, column.Limit)
 	}
 	return fmt.Sprint(column.Count)
+}
+
+// kanbanColumnLevel defaults to 3: a board usually sits inside a titled region,
+// and h3 under that region's h2 is the ordinary case.
+func kanbanColumnLevel(column KanbanColumnData) int {
+	if column.Level > 0 {
+		return column.Level
+	}
+	return 3
 }
 
 func kanbanOverLimit(column KanbanColumnData) bool {

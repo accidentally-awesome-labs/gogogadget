@@ -10,7 +10,13 @@ import templruntime "github.com/a-h/templ/runtime"
 
 type DialogOpts struct {
 	ID, Title string
-	Attrs     Attrs
+	// Level is the title's heading level, defaulting to 2. A dialog's depth is
+	// a fact about the page it opens over, not the component: one opened from
+	// inside a titled region reads as h3 there, and hardcoding h2 flattens that
+	// nesting - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
+	Attrs Attrs
 }
 
 // Dialog renders a native <dialog>. The platform supplies the top layer, the
@@ -45,7 +51,7 @@ func Dialog(o DialogOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dialog.templ`, Line: 13, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dialog.templ`, Line: 19, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -59,20 +65,15 @@ func Dialog(o DialogOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "><form method=\"dialog\" class=\"flex flex-col gap-4\"><div class=\"flex items-center justify-between\"><h2 class=\"section-title\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "><form method=\"dialog\" class=\"flex flex-col gap-4\"><div class=\"flex items-center justify-between\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(o.Title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/dialog.templ`, Line: 16, Col: 39}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		templ_7745c5c3_Err = Heading(HeadingOpts{Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h2><button type=\"submit\" class=\"btn btn-ghost btn-icon\" aria-label=\"Close\" data-ui-dialog-close>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<button type=\"submit\" class=\"btn btn-ghost btn-icon\" aria-label=\"Close\" data-ui-dialog-close>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

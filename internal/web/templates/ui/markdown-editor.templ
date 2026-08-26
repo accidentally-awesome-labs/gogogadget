@@ -48,6 +48,12 @@ templ MarkdownEditor(o MarkdownEditorOpts) {
 			"x-data", "uiMarkdownEditor",
 			"data-editor-name", o.Name)... }
 	>
+		// The label was declared and never rendered, which left the textarea
+		// named only by its placeholder and title - a label a screen reader may
+		// not use and a sighted user loses the moment they start typing.
+		if o.Label != "" {
+			@Label(LabelOpts{For: o.Name, Text: o.Label, Required: o.Required})
+		}
 		// The toolbar starts hidden: its buttons do nothing without the
 		// controller, and a row of inert buttons is worse than none.
 		@EditorToolbar(EditorToolbarOpts{

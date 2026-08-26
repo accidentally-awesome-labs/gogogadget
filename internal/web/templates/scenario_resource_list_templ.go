@@ -505,9 +505,13 @@ func resourceListEmpty(gc GalleryContext) templ.Component {
 		if gc.State == "error" {
 			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{
 				Variant: ui.EmptyInline,
-				Title:   "No rows to show",
-				Body:    "The list failed to load, so nothing is displayed. This is not an empty workspace.",
-				Attrs:   ui.Attrs{TestID: "resource-list-empty-error"},
+				// The table has a caption, not a heading, and it sits directly under
+				// the page title - so the empty state's title is this surface's
+				// first heading below h1 and must be h2.
+				Level: 2,
+				Title: "No rows to show",
+				Body:  "The list failed to load, so nothing is displayed. This is not an empty workspace.",
+				Attrs: ui.Attrs{TestID: "resource-list-empty-error"},
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -516,6 +520,7 @@ func resourceListEmpty(gc GalleryContext) templ.Component {
 			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{
 				Variant:    ui.EmptyInline,
 				Filtered:   true,
+				Level:      2,
 				Title:      "No projects match that search",
 				Body:       fmt.Sprintf("Nothing in this workspace matches %q. All 12 projects are still there.", resourceListQuery(gc)),
 				ClearURL:   resourceListURL(""),

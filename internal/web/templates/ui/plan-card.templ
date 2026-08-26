@@ -11,13 +11,19 @@ type PlanCardOpts struct {
 	Features     []PlanFeature
 	Current      bool
 	CurrentLabel string
-	Attrs        Attrs
+	// Level is the plan name's heading level, defaulting to 3. A card's depth
+	// is a fact about the page, not the component: a plan grid rendered
+	// directly under the page title needs h2, and hardcoding h3 skips a level
+	// there - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
+	Attrs Attrs
 }
 
 templ PlanCard(o PlanCardOpts) {
 	<div { root("plan-card", planCardClasses(o), o.Attrs)... }>
 		<div class="flex items-center justify-between">
-			<h3 class="section-title">{ o.Name }</h3>
+			@Heading(HeadingOpts{Text: o.Name, Level: planCardLevel(o.Level), Size: SizeSM})
 			if o.Current {
 				@Badge(BadgeOpts{Text: o.CurrentLabel, Kind: KindBrand})
 			}
@@ -33,6 +39,15 @@ templ PlanCard(o PlanCardOpts) {
 		</ul>
 		{ children... }
 	</div>
+}
+
+// planCardLevel defaults to 3: a plan grid usually sits under a "Plans" or
+// "Pricing" heading of its own.
+func planCardLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }
 
 // planCardClasses rings the current plan. The ring is the only difference, so

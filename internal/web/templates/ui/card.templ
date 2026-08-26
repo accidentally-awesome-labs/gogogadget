@@ -14,15 +14,29 @@ templ Card(o CardOpts) {
 // CardHeaderOpts configures a card header row.
 type CardHeaderOpts struct {
 	Title string
+	// Level is the title's heading level, defaulting to 3. A card's depth is a
+	// fact about the page, not the component: a card rendered directly under
+	// the page title needs h2, and hardcoding h3 skips a level there - which
+	// sends heading navigation somewhere the reader did not ask for.
+	Level int
 	Attrs Attrs
 }
 
 // CardHeader renders a title row with optional trailing actions.
 templ CardHeader(o CardHeaderOpts) {
 	<div { root("card-header", "flex items-center justify-between mb-4", o.Attrs)... }>
-		<h3 class="section-title">{ o.Title }</h3>
+		@Heading(HeadingOpts{Text: o.Title, Level: cardHeaderLevel(o.Level), Size: SizeSM})
 		{ children... }
 	</div>
+}
+
+// cardHeaderLevel defaults to 3: most cards sit inside a titled section, and h3
+// under that section's h2 is the ordinary case.
+func cardHeaderLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }
 
 // CardFooterOpts configures a card footer row.

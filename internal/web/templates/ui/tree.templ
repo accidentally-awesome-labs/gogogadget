@@ -73,10 +73,15 @@ templ TreeNode(o TreeNodeOpts) {
 	<li { root("tree-node", "", o.Attrs)... } data-tree-node={ o.Node.ID }>
 		if treeIsBranch(o.Node) {
 			<details open?={ o.Node.Expanded } data-tree-branch>
+				// The depth travels as data, not as aria-level: aria-level is not
+				// allowed on a summary element, and emitting it is an invalid
+				// attribute rather than extra information. The controller applies
+				// the tree roles - and the level with them - once it is running,
+				// which is when the keyboard model those roles promise exists.
 				<summary
 					class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-surface-raised cursor-pointer"
 					data-tree-item
-					aria-level={ fmt.Sprint(treeLevel(o.Level)) }
+					data-tree-level={ fmt.Sprint(treeLevel(o.Level)) }
 				>
 					if o.Node.Icon != "" {
 						@Icon(IconOpts{Name: o.Node.Icon})
@@ -99,7 +104,7 @@ templ TreeNode(o TreeNodeOpts) {
 				href={ templ.SafeURL(o.Node.Href) }
 				class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-surface-raised"
 				data-tree-item
-				aria-level={ fmt.Sprint(treeLevel(o.Level)) }
+				data-tree-level={ fmt.Sprint(treeLevel(o.Level)) }
 			>
 				if o.Node.Icon != "" {
 					@Icon(IconOpts{Name: o.Node.Icon})
@@ -112,7 +117,7 @@ templ TreeNode(o TreeNodeOpts) {
 			<span
 				class="flex items-center gap-1.5 px-2 py-1 text-fg-muted"
 				data-tree-item
-				aria-level={ fmt.Sprint(treeLevel(o.Level)) }
+				data-tree-level={ fmt.Sprint(treeLevel(o.Level)) }
 			>
 				{ o.Node.Label }
 			</span>
@@ -132,11 +137,18 @@ type TreeGridOpts struct {
 // TreeGrid renders a hierarchy with columns.
 //
 // This is a table, because the data is rows and columns and a table already
-// reports both. Depth is carried by aria-level on each row rather than by
-// indentation alone: indentation is a visual convention that conveys nothing to
-// a screen reader, and "level 3" is the fact the user needs.
+// reports both. It does NOT claim role="treegrid": that role promises a full
+// two-dimensional keyboard model, and this component has none - the tree
+// controller binds keys to tree items, not table rows.
+//
+// Depth therefore travels as text in the row header, not as aria-level.
+// aria-level and aria-expanded are only valid on treegrid rows, so on a plain
+// table they are invalid attributes that report nothing - and the indentation
+// beside them is a visual convention a screen reader never sees. "Level 2" in
+// the row's own name is the fact the user needs, and it survives every reading
+// order.
 templ TreeGrid(o TreeGridOpts) {
-	<div { rootWith("tree-grid", "table-card overflow-x-auto", o.Attrs, "x-data", "uiTree", "id", o.ID)... }>
+	<div { rootWith("tree-grid", "table-card overflow-x-auto", o.Attrs, "id", o.ID)... }>
 		<table class="w-full text-sm">
 			<caption class="sr-only">{ o.Label }</caption>
 			<thead>
@@ -156,16 +168,14 @@ templ TreeGrid(o TreeGridOpts) {
 // treeGridRows flattens the hierarchy into rows carrying their depth.
 templ treeGridRows(nodes []TreeNodeData, level int) {
 	for _, node := range nodes {
-		<tr
-			class="border-t border-border"
-			data-tree-row={ node.ID }
-			aria-level={ fmt.Sprint(level) }
-			if treeIsBranch(node) {
-				aria-expanded={ treeExpandedAttr(node) }
-			}
-		>
+		<tr class="border-t border-border" data-tree-row={ node.ID } data-tree-level={ fmt.Sprint(level) }>
 			<th scope="row" class="px-3 py-2 text-left font-normal">
 				<span style={ treeIndent(level) }>{ node.Label }</span>
+				// Stated for every row below the root, and for a branch also
+				// whether it is open - the caret is invisible to a screen reader.
+				if level > 1 || treeIsBranch(node) {
+					<span class="sr-only">{ treeRowContext(node, level) }</span>
+				}
 			</th>
 			for _, cell := range node.Cells {
 				<td class="px-3 py-2">{ cell }</td>
@@ -184,13 +194,25 @@ func treeIsBranch(node TreeNodeData) bool {
 	return len(node.Children) > 0 || node.HasChildren
 }
 
-// treeExpandedAttr states the branch's state. A branch with no aria-expanded is
-// indistinguishable from a leaf.
-func treeExpandedAttr(node TreeNodeData) string {
-	if node.Expanded {
-		return "true"
+// treeRowContext states a row's depth, and for a branch whether it is open.
+// Both facts are visual otherwise - indentation and a caret - and a screen
+// reader sees neither.
+func treeRowContext(node TreeNodeData, level int) string {
+	out := ""
+	if level > 1 {
+		out = fmt.Sprintf("level %d", level)
 	}
-	return "false"
+	if treeIsBranch(node) {
+		state := "collapsed"
+		if node.Expanded {
+			state = "expanded"
+		}
+		if out != "" {
+			out += ", "
+		}
+		out += state
+	}
+	return out
 }
 
 // treeLevel floors the depth at 1. A zero level would claim the node sits

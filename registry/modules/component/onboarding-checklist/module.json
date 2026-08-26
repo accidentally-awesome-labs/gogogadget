@@ -18,7 +18,7 @@
         "source": "internal/web/templates/ui/onboarding-checklist.templ",
         "target": "internal/web/templates/ui/onboarding-checklist.templ",
         "class": "templ",
-        "sha256": "7cc8bf68e4733d7eb2dfb4b6461178a4147e2157627e31358b924c42eafa0d9c",
+        "sha256": "406f553ef21327c766727d9d6943a6137a02218a7462f6bf760238c0963af12e",
         "rewrite_module": true,
         "contract": true
       }

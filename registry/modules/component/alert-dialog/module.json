@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/alert-dialog.templ",
         "target": "internal/web/templates/ui/alert-dialog.templ",
         "class": "templ",
-        "sha256": "f9753cecf73aff2edf4f88dc2d36b6408a3a72176ef35f81bfa1eaebf6b55838",
+        "sha256": "6cb72e2cb08080c71b0071bdd365768339e6bf9489a348655a819b76f2c24295",
         "rewrite_module": true,
         "contract": true
       }

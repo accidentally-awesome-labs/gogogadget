@@ -179,7 +179,11 @@ func ScenarioSettings(gc GalleryContext) templ.Component {
 		templ_7745c5c3_Err = ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Workspace",
 			Description: "Identity and plan facts. These are set at creation or by billing, not on this page.",
-			Attrs:       ui.Attrs{TestID: "settings-workspace"},
+			// Every block on this page sits directly under the page title with
+			// no region heading between, so they are h2 - the tabs above are
+			// navigation, not an outline level.
+			Level: 2,
+			Attrs: ui.Attrs{TestID: "settings-workspace"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -250,7 +254,7 @@ func ScenarioSettings(gc GalleryContext) templ.Component {
 							var templ_7745c5c3_Var11 string
 							templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(settingsPermissionReason)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_settings.templ`, Line: 78, Col: 33}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_settings.templ`, Line: 83, Col: 33}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 							if templ_7745c5c3_Err != nil {
@@ -299,6 +303,7 @@ func ScenarioSettings(gc GalleryContext) templ.Component {
 		templ_7745c5c3_Err = ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Account details",
 			Description: "How you appear to the rest of the workspace, and where invoices are sent.",
+			Level:       2,
 			Attrs:       ui.Attrs{TestID: "settings-account"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -388,6 +393,7 @@ func ScenarioSettings(gc GalleryContext) templ.Component {
 		templ_7745c5c3_Err = ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Security",
 			Description: "Applies to every member of the workspace, including invited guests.",
+			Level:       2,
 			Attrs:       ui.Attrs{TestID: "settings-security"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var12), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -437,7 +443,7 @@ func ScenarioSettings(gc GalleryContext) templ.Component {
 					var templ_7745c5c3_Var17 string
 					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(settingsPermissionReason)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_settings.templ`, Line: 135, Col: 31}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/scenario_settings.templ`, Line: 142, Col: 31}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 					if templ_7745c5c3_Err != nil {
@@ -474,6 +480,7 @@ func ScenarioSettings(gc GalleryContext) templ.Component {
 		templ_7745c5c3_Err = ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Danger zone",
 			Description: "Deleting the workspace removes every project, run and uploaded file in it.",
+			Level:       2,
 			Danger:      true,
 			Attrs:       ui.Attrs{TestID: "settings-danger"},
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)

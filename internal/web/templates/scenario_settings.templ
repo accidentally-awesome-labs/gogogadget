@@ -49,7 +49,11 @@ templ ScenarioSettings(gc GalleryContext) {
 		@ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Workspace",
 			Description: "Identity and plan facts. These are set at creation or by billing, not on this page.",
-			Attrs:       ui.Attrs{TestID: "settings-workspace"},
+			// Every block on this page sits directly under the page title with
+			// no region heading between, so they are h2 - the tabs above are
+			// navigation, not an outline level.
+			Level: 2,
+			Attrs: ui.Attrs{TestID: "settings-workspace"},
 		}) {
 			// A description list, not disabled inputs: a fact nobody can edit
 			// is not a form control, and rendering it as one invites the user
@@ -64,6 +68,7 @@ templ ScenarioSettings(gc GalleryContext) {
 		@ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Account details",
 			Description: "How you appear to the rest of the workspace, and where invoices are sent.",
+			Level:       2,
 			Attrs:       ui.Attrs{TestID: "settings-account"},
 		}) {
 			@ui.Form(ui.FormOpts{Method: "get", Action: settingsURL(""), Attrs: ui.Attrs{TestID: "settings-account-form"}}) {
@@ -93,6 +98,7 @@ templ ScenarioSettings(gc GalleryContext) {
 		@ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Security",
 			Description: "Applies to every member of the workspace, including invited guests.",
+			Level:       2,
 			Attrs:       ui.Attrs{TestID: "settings-security"},
 		}) {
 			@ui.Form(ui.FormOpts{Method: "get", Action: settingsURL(""), Attrs: ui.Attrs{TestID: "settings-security-form"}}) {
@@ -119,6 +125,7 @@ templ ScenarioSettings(gc GalleryContext) {
 		@ui.SettingsSection(ui.SettingsSectionOpts{
 			Title:       "Danger zone",
 			Description: "Deleting the workspace removes every project, run and uploaded file in it.",
+			Level:       2,
 			Danger:      true,
 			Attrs:       ui.Attrs{TestID: "settings-danger"},
 		}) {

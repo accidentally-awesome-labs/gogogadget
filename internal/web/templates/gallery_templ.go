@@ -2359,13 +2359,13 @@ func Gallery() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = ui.Pagination(ui.PaginationOpts{Page: 4, TotalPages: 12, BaseURL: "/dev/gallery", Target: "#content", Numbered: true, Labels: pagerLabels(ctx)}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.Pagination(ui.PaginationOpts{Page: 4, TotalPages: 12, BaseURL: "/dev/gallery", Target: "#content", Numbered: true, Label: "Numbered pagination example", Labels: pagerLabels(ctx)}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = ui.CursorPagination(ui.CursorPaginationOpts{
 				PrevURL: "/dev/gallery?before=abc", NextURL: "/dev/gallery?after=xyz",
-				Target: "#content",
+				Target: "#content", Label: "Keyset pagination example",
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -2891,7 +2891,7 @@ func Gallery() templ.Component {
 				}),
 				Pagination: ui.Pagination(ui.PaginationOpts{
 					Page: 1, TotalPages: 4, BaseURL: "/dev/gallery", Target: "#content",
-					Labels: pagerLabels(ctx),
+					Label: "Table card example pagination", Labels: pagerLabels(ctx),
 				}),
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var101), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

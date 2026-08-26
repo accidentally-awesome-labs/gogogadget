@@ -2,10 +2,35 @@ package ui
 
 // SectionHeaderOpts is a sub-heading inside a page.
 type SectionHeaderOpts struct {
-	Text  string
+	Text string
+	// Level is the heading level, defaulting to 2. A sub-heading's depth is a
+	// fact about the page, not the component: one nested inside another titled
+	// region needs h3, and hardcoding h2 flattens that nesting - which sends
+	// heading navigation somewhere the reader did not ask for.
+	Level int
 	Attrs Attrs
 }
 
+// SectionHeader renders a page sub-heading.
+//
+// The heading element is this component's root, so it carries its own data-ui
+// marker and cannot delegate to Heading: rendering Heading here would replace
+// that marker with heading's, and a component the catalog can no longer see is
+// a component no visual or accessibility gate covers. The level still comes
+// from headingLevel, so the primitive owns what an out-of-range level means.
 templ SectionHeader(o SectionHeaderOpts) {
-	<h2 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h2>
+	switch headingLevel(o.Level) {
+		case 1:
+			<h1 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h1>
+		case 3:
+			<h3 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h3>
+		case 4:
+			<h4 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h4>
+		case 5:
+			<h5 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h5>
+		case 6:
+			<h6 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h6>
+		default:
+			<h2 { root("section-header", "section-title", o.Attrs)... }>{ o.Text }</h2>
+	}
 }

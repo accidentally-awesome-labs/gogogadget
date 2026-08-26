@@ -17,7 +17,7 @@
         "source": "internal/web/templates/ui/error-state.templ",
         "target": "internal/web/templates/ui/error-state.templ",
         "class": "templ",
-        "sha256": "3ef0036e95319f1aa5949ad2fd6c6c87953c6ddcb2fb3cdf62b3203c60501d0b",
+        "sha256": "14a646ea953c51f00cf3df1116f2deaf51650756460035cd29c0dfa489b25020",
         "rewrite_module": true,
         "contract": true
       }

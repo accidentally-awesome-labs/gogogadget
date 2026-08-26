@@ -36,7 +36,7 @@
         "source": "internal/web/templates/projects.templ",
         "target": "internal/web/templates/projects.templ",
         "class": "templ",
-        "sha256": "e5da60ffd19a54786df636154b2a4eac1a621965d2e0ae580ea7af9c7f8d3193",
+        "sha256": "fab9f1a83484df218fa3609d0313ecc3923b869ea6aa234b6c7e3cb5d0bf0956",
         "rewrite_module": true,
         "contract": false
       }
@@ -74,6 +74,20 @@
           "label_key": "sidebar.projects",
           "after": [
             "nav.app.dashboard"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "projects",
+          "path": "/app/projects",
+          "persona": "pro",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
           ]
         }
       ]

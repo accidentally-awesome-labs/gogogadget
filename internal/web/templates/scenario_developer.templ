@@ -67,7 +67,10 @@ templ ScenarioDeveloper(gc GalleryContext) {
 			// it on every visit would imply the product can show a secret
 			// again, which it deliberately cannot.
 			@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "developer-key-reveal"}}) {
-				@ui.CardHeader(ui.CardHeaderOpts{Title: "Production key created"}) {
+				// The reveal panel is the first thing on the surface, directly
+				// under the page title, so its card title is h2. The quickstart
+				// card below sits inside a titled section and keeps h3.
+				@ui.CardHeader(ui.CardHeaderOpts{Title: "Production key created", Level: 2}) {
 					@ui.Badge(ui.BadgeOpts{Text: "shown once", Kind: ui.KindWarn})
 				}
 				@ui.Text(ui.TextOpts{Muted: true}) {

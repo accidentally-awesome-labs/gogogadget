@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/plan-card.templ",
         "target": "internal/web/templates/ui/plan-card.templ",
         "class": "templ",
-        "sha256": "00725274be152a808848af9076629bdfac99d74ae3f2824be0f715c40ad3a68a",
+        "sha256": "773c46d37ff9ad438a75233800f490315597faf0984dc06fbd687078514cb5e8",
         "rewrite_module": true,
         "contract": true
       }

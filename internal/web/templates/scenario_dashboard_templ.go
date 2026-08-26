@@ -175,6 +175,10 @@ func ScenarioDashboard(gc GalleryContext) templ.Component {
 			}
 			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{
 				Title: "No numbers yet",
+				// Directly under the page title with no region heading between,
+				// so h2. The activity empty state below sits inside a titled
+				// section and keeps its default h3.
+				Level: 2,
 				Body:  dashboardText(gc.LongContent, "These totals count projects, runs and storage across the workspace. The first project you create starts them.", "These totals count projects, runs and storage across every member of the workspace, including the ones shared with you by other organisations you belong to. They stay at zero until the first project is created, and the first run of that project is what starts the weekly counters moving."),
 				Attrs: ui.Attrs{TestID: "dashboard-stats-empty"},
 			}).Render(ctx, templ_7745c5c3_Buffer)
@@ -353,8 +357,10 @@ func dashboardChecklist(gc GalleryContext) ui.OnboardingChecklistOpts {
 	return ui.OnboardingChecklistOpts{
 		Title:         "Finish setting up",
 		ProgressLabel: "Workspace setup progress",
-		Steps:         steps,
-		Attrs:         ui.Attrs{TestID: "dashboard-onboarding"},
+		// First heading on the surface, directly under the page title.
+		Level: 2,
+		Steps: steps,
+		Attrs: ui.Attrs{TestID: "dashboard-onboarding"},
 	}
 }
 

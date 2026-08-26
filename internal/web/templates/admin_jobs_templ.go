@@ -89,7 +89,7 @@ func AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page,
 				ctx = templ.InitializeContext(ctx)
 				return nil
 			})
-			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "admin.jobs.title"), Body: i18n.T(ctx, "admin.jobs.empty")}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.EmptyState(ui.EmptyStateOpts{Level: 2, Title: i18n.T(ctx, "admin.jobs.title"), Body: i18n.T(ctx, "admin.jobs.empty")}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

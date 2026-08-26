@@ -90,13 +90,17 @@ type PaginationOpts struct {
 	// hundred-page table the numbers are noise, and prev/next plus a position
 	// readout is the honest interface.
 	Numbered bool
-	Labels   PagerLabels
+	// Label names this navigation landmark, defaulting to "Pagination". Two
+	// pagers on one page otherwise give a screen reader two identical entries
+	// with no way to tell which list each one moves.
+	Label  string
+	Labels PagerLabels
 	Attrs    Attrs
 }
 
 templ Pagination(o PaginationOpts) {
 	if o.TotalPages > 1 {
-		<nav { rootWith("pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", o.Labels.aria(o.Page, o.TotalPages))... }>
+		<nav { rootWith("pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", paginationLabel(o))... }>
 			if o.Page > 1 {
 				@pageLink(o, o.Page-1, o.Labels.prev(o.Page, o.TotalPages), "btn btn-ghost")
 			} else {
@@ -183,4 +187,13 @@ func PageWindow(page, totalPages int) []int {
 		prev = i
 	}
 	return out
+}
+
+// paginationLabel prefers the caller's landmark name, then any Aria label
+// function, then the default.
+func paginationLabel(o PaginationOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return o.Labels.aria(o.Page, o.TotalPages)
 }

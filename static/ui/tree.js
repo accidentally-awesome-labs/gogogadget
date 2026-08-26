@@ -13,6 +13,24 @@ document.addEventListener("alpine:init", () => {
       this.typed = "";
       this.typedAt = 0;
 
+      // The tree roles are applied here, not rendered in the markup. aria-level
+      // is invalid on a summary element, and role="treeitem" promises the
+      // keyboard model below - which only exists once this runs. Declaring
+      // either in markup would be an invalid attribute or an unfulfilled
+      // promise, and both are worse than the native disclosure alone.
+      root.setAttribute("role", "tree");
+      root.querySelectorAll("ul").forEach((list) => list.setAttribute("role", "group"));
+      root.querySelectorAll("li").forEach((item) => item.setAttribute("role", "none"));
+      root.querySelectorAll("[data-tree-item]").forEach((item) => {
+        item.setAttribute("role", "treeitem");
+        const level = item.dataset.treeLevel;
+        if (level) item.setAttribute("aria-level", level);
+        const branch = item.tagName === "SUMMARY" ? item.parentElement : null;
+        if (branch && branch.tagName === "DETAILS") {
+          item.setAttribute("aria-expanded", branch.open ? "true" : "false");
+        }
+      });
+
       // One tab stop for the whole tree: tabbing through a two-hundred-node
       // tree should not take two hundred presses.
       const items = this.items();
@@ -32,6 +50,8 @@ document.addEventListener("alpine:init", () => {
       this._onToggle = (event) => {
         const branch = event.target;
         if (!branch.matches || !branch.matches("[data-tree-branch]")) return;
+        const summary = branch.querySelector(":scope > summary");
+        if (summary) summary.setAttribute("aria-expanded", branch.open ? "true" : "false");
         if (!branch.open) return;
         this.load(branch);
       };

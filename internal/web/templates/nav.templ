@@ -63,7 +63,7 @@ templ navLinks(page Page) {
 
 templ Nav(page Page) {
 	<header class="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-(--z-nav)">
-		<nav class="max-w-page mx-auto flex items-center justify-between px-4 h-navbar" x-data="mobileNav">
+		<nav class="max-w-page mx-auto flex items-center justify-between px-4 h-navbar" x-data="mobileNav" aria-label="Main">
 			@logo()
 			<div class="hidden md:flex items-center gap-6">
 				@navLinks(page)
@@ -98,7 +98,10 @@ templ Footer(page Page) {
 		<div class="max-w-page mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
 			for _, col := range FooterColumns {
 				<div>
-					<h3 class="font-semibold mb-3">{ i18n.T(ctx, col.TitleKey) }</h3>
+					// h2, not h3. The footer follows the page's own h1, so an h3 here skips a
+					// level on any page whose last heading is the h1 - and a skipped level
+					// makes heading navigation land somewhere the reader did not expect.
+					<h2 class="font-semibold mb-3">{ i18n.T(ctx, col.TitleKey) }</h2>
 					<ul class="space-y-2">
 						for _, l := range col.Items {
 							<li><a href={ templ.SafeURL(l.Href) } class="text-fg-muted hover:text-fg">{ NavLabel(ctx, l) }</a></li>

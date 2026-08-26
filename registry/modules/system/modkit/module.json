@@ -86,7 +86,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "d2307cf85690ea871e2b76ac75c6b261a1cd94a990f2b4c3134ae5ed5e4a3148",
+        "sha256": "f21d51f6dc89351d3bddeb6ab7f547655c8530b11349510a15381be9445a607f",
         "rewrite_module": true,
         "contract": false
       },
@@ -142,7 +142,7 @@
         "source": "internal/modkit/migration_plan.go",
         "target": "internal/modkit/migration_plan.go",
         "class": "go",
-        "sha256": "8e2c5af1e97b7905f4ed806b871ceb13dc73c8c583d754bb8e76f8a3ac5f1da6",
+        "sha256": "a4c83f44b97394aeb5bc924d75dca8a915dece96730f4702d23eb6421f23b5ab",
         "rewrite_module": true,
         "contract": false
       },
@@ -150,7 +150,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "02ba5eeace5646cddc36f9d4d930be4cc07eacce7be03c1d195b07396ac7ca3c",
+        "sha256": "e79b5f157970f5842b0bc5e25bcb94988ec3755bd421c38131430c7dab2aef1d",
         "rewrite_module": true,
         "contract": true
       },
@@ -323,6 +323,14 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/surfaces_test.go",
+        "target": "internal/modkit/surfaces_test.go",
+        "class": "test",
+        "sha256": "182a91078d7dc5e60fedafaf2a3b1fd83b3f90453d010ded64ed723e4fffbcae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/modkit/target_plan.go",
         "target": "internal/modkit/target_plan.go",
         "class": "go",
@@ -334,7 +342,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "7c63404519cfeebb11cb543c775899fac908732e7b7318f5f3065503197c61d3",
+        "sha256": "048a2b8a566bc0bb35bdab940515f67a28739441aed110991277cf91f4e140f9",
         "rewrite_module": true,
         "contract": false
       },

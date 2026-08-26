@@ -67,6 +67,20 @@
             "nav.admin.announcements"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "admin-content",
+          "path": "/admin/content",
+          "persona": "admin",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

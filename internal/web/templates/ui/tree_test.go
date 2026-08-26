@@ -32,13 +32,18 @@ func TestTreeOpensWithoutScript(t *testing.T) {
 	assert.NotContains(t, html, "onclick")
 }
 
-// Depth must be stated. Indentation conveys the shape to a sighted reader and
-// nothing at all to a screen reader.
-func TestTreeStatesItsDepth(t *testing.T) {
+// Depth must reach the controller, but not as aria-level: that attribute is not
+// allowed on a summary element, so emitting it is invalid markup rather than
+// extra information. The controller applies the tree roles - and the level with
+// them - once it is running, which is when the keyboard model those roles
+// promise actually exists.
+func TestTreeCarriesItsDepthAsData(t *testing.T) {
 	html := renderComponent(t, Tree(TreeOpts{ID: "t", Label: "Files", Nodes: treeNodes()}))
 
-	assert.Contains(t, html, `aria-level="1"`)
-	assert.Contains(t, html, `aria-level="2"`)
+	assert.Contains(t, html, `data-tree-level="1"`)
+	assert.Contains(t, html, `data-tree-level="2"`)
+	assert.NotContains(t, html, "aria-level")
+	assert.NotContains(t, html, `role="treeitem"`)
 }
 
 // A branch whose children are not loaded still discloses. Waiting for the fetch
@@ -83,15 +88,19 @@ func TestTreeGridIsATableWithLevels(t *testing.T) {
 
 	assert.Contains(t, html, "<table")
 	assert.Contains(t, html, `<caption class="sr-only">Modules</caption>`)
-	assert.Contains(t, html, `aria-level="1"`)
-	assert.Contains(t, html, `aria-level="2"`)
+	// Depth is stated in the row header's own text. aria-level is only valid on
+	// treegrid rows, and this table does not claim that role because it has no
+	// two-dimensional keyboard model to back it.
+	assert.NotContains(t, html, "aria-level")
+	assert.Contains(t, html, "level 2")
 	// The row header names the row, so a cell read in isolation still says which
 	// module it belongs to.
 	assert.Contains(t, html, `scope="row"`)
 }
 
-// A branch must say whether it is open. Without aria-expanded it is
-// indistinguishable from a leaf.
+// A branch must say whether it is open, and the caret that shows it is
+// invisible to a screen reader. It is stated in text rather than with
+// aria-expanded, which a plain table row may not carry.
 func TestTreeGridBranchesStateTheirExpansion(t *testing.T) {
 	html := renderComponent(t, TreeGrid(TreeGridOpts{
 		ID: "g", Label: "Modules",
@@ -102,8 +111,10 @@ func TestTreeGridBranchesStateTheirExpansion(t *testing.T) {
 		},
 	}))
 
-	require.Equal(t, 1, strings.Count(html, "aria-expanded"))
-	assert.Contains(t, html, `aria-expanded="false"`)
+	assert.NotContains(t, html, "aria-expanded")
+	assert.Contains(t, html, "collapsed")
+	// The leaf says nothing about expansion, because it has none.
+	require.Equal(t, 1, strings.Count(html, "collapsed"))
 }
 
 // A collapsed branch's children must not be in the table: rows a sighted user

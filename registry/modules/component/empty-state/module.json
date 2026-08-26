@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/empty-state.templ",
         "target": "internal/web/templates/ui/empty-state.templ",
         "class": "templ",
-        "sha256": "cde2516f73be8d5f08f6d8d296ee47f3abca968d8d3e4fe69c8ed8ffc426a614",
+        "sha256": "c8e3ad379eb910526be1e60f3bdcae8e4d00f6fd88de75b5d303dd347035f7eb",
         "rewrite_module": true,
         "contract": true
       },

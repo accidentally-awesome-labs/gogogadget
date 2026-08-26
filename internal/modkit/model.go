@@ -170,6 +170,16 @@ const (
 	GalleryAdvanced      GalleryFamily = "advanced"
 )
 
+// GalleryFamilies is every reference family in the order the gallery presents
+// them, mirroring ui.GalleryFamilies. The visual surface matrix walks this
+// slice, so the order a reader browses families in and the order their
+// baselines are compared in cannot diverge.
+var GalleryFamilies = []GalleryFamily{
+	GalleryFoundations, GalleryActions, GalleryForms, GalleryNavigation,
+	GalleryFeedback, GalleryOverlays, GalleryData, GalleryCommunication,
+	GalleryLayout, GalleryAdvanced,
+}
+
 // AssetKind is the closed static asset role set.
 type AssetKind string
 
@@ -257,6 +267,8 @@ type RuntimeContributions struct {
 	Slots        []SlotContribution        `json:"slots,omitempty"`
 	UI           []UIContribution          `json:"ui,omitempty"`
 	Assets       []AssetContribution       `json:"assets,omitempty"`
+	Scenarios    []ScenarioContribution    `json:"scenarios,omitempty"`
+	Visual       []VisualContribution      `json:"visual,omitempty"`
 }
 
 // SystemContribution declares a directly compiled runtime constructor.
@@ -468,6 +480,64 @@ type UIContribution struct {
 	// them lets the reference show every one and lets the visual matrix cover
 	// them, instead of both guessing from a fixed list that fits nothing.
 	States []string `json:"states,omitempty"`
+}
+
+// ScenarioContribution declares one realistic product surface the dev catalog
+// composes. A scenario is a deliberate choice of which components appear
+// together, so it is declared rather than discovered — discovering it from
+// installed modules would produce a component index, which the gallery already
+// is. It lives in the manifest so the Go descriptor table and the visual
+// surface matrix are rendered from one statement instead of two lists that can
+// disagree about which surfaces exist.
+type ScenarioContribution struct {
+	// Slug is the URL segment and the visual baseline identity, so renaming one
+	// is a visible change rather than a silent baseline reset.
+	Slug string `json:"slug"`
+	// Title and Summary describe the surface a reader is looking at.
+	Title   string `json:"title"`
+	Summary string `json:"summary"`
+	// Layout is the real shell this scenario renders inside. It is the same
+	// string Page.Layout takes, so a scenario cannot name a shell the renderer
+	// does not have.
+	Layout string `json:"layout"`
+	// Surfaces names the components this scenario exists to exercise. It is what
+	// the visual matrix and the accessibility sweep read to know their coverage.
+	Surfaces []string `json:"surfaces"`
+	// States are the query values this scenario accepts. A state absent here is
+	// refused rather than silently rendering the default, because a URL that
+	// looks like it selected something and did not is worse than a 404.
+	States []string `json:"states"`
+}
+
+// VisualContribution declares one page surface in the visual comparison
+// matrix. It is a separate list from Routes rather than a field on one because
+// a compared surface is not one-to-one with a route: /admin is compared twice,
+// once as an administrator and once as the 403 a non-admin sees, and the 404
+// baseline has no route at all.
+type VisualContribution struct {
+	// ID is the baseline file stem. Changing it orphans committed screenshots,
+	// so the existing names are carried verbatim rather than regularised.
+	ID string `json:"id"`
+	// Path is the URL to visit, query included when a state is part of the
+	// surface.
+	Path string `json:"path"`
+	// Persona is the actor to authenticate as, empty for anonymous. It must name
+	// a declared persona so a baseline cannot be captured as a user the fixtures
+	// never seed.
+	Persona string `json:"persona,omitempty"`
+	// FullPage compares the whole document rather than the fold. A reference
+	// sheet needs it; a product page does not, and comparing its full height
+	// would make every added row a diff.
+	FullPage bool `json:"full_page,omitempty"`
+	// Viewports are the widths this surface is compared at. Declared rather than
+	// defaulted: a surface silently gaining a viewport would fail on a baseline
+	// nobody captured.
+	Viewports []string `json:"viewports"`
+	// Masks are selectors covering values that legitimately differ between runs.
+	// Each one hides pixels from comparison, so an over-broad mask is a
+	// regression nothing can see — they are declared per surface for that
+	// reason.
+	Masks []string `json:"masks,omitempty"`
 }
 
 // AssetContribution declares an ordered same-origin static asset.

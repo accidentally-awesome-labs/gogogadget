@@ -65,6 +65,20 @@
           "route_id": "dashboard.index",
           "label_key": "sidebar.dashboard"
         }
+      ],
+      "visual": [
+        {
+          "id": "dashboard",
+          "path": "/app",
+          "persona": "pro",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

@@ -21,6 +21,11 @@ type PanelData struct {
 	// root markup and Alpine hooks just to put something inside - two copies of
 	// a root that drifts the moment the group's classes change.
 	Content templ.Component
+	// Level is the panel title's heading level, defaulting to 3. A panel's depth
+	// is a fact about the page, not the component: a group rendered directly
+	// under the page title needs h2, and hardcoding h3 skips a level there -
+	// which sends heading navigation somewhere the reader did not ask for.
+	Level int
 	// Attrs are the panel's own attributes. Without them a panel built by
 	// PanelGroup would be less addressable than the same panel rendered
 	// directly, so composing through the group would cost the caller their test
@@ -76,6 +81,12 @@ type PanelOpts struct {
 }
 
 // Panel renders one panel.
+//
+// It scrolls, so it carries a tab stop. A scrollable box with no tab stop is
+// reachable by pointer only: once its content overflows there is nothing for
+// the arrow keys to act on, and the overflowing content becomes unreadable
+// without a mouse. The heading names the region, so the stop is announced
+// rather than being an anonymous focus target.
 templ Panel(o PanelOpts) {
 	<section
 		{ root("panel", "min-w-0 min-h-0 overflow-auto", o.Attrs)... }
@@ -83,8 +94,14 @@ templ Panel(o PanelOpts) {
 		data-panel={ o.Panel.ID }
 		data-panel-min={ fmt.Sprint(panelMin(o.Panel)) }
 		aria-labelledby={ o.Panel.ID + "-title" }
+		tabindex="0"
 	>
-		<h3 id={ o.Panel.ID + "-title" } class="section-title text-sm mb-2">{ o.Panel.Title }</h3>
+		@Heading(HeadingOpts{
+			Text:  o.Panel.Title,
+			Level: panelLevel(o.Panel),
+			Size:  SizeSM,
+			Attrs: Attrs{ID: o.Panel.ID + "-title", Class: "mb-2"},
+		})
 		// Declared content first, then any children the caller passes directly.
 		// Both paths exist because a group builds its panels from data while a
 		// standalone Panel reads more naturally with children.
@@ -186,6 +203,15 @@ func panelMax(panels []PanelData, index int) int {
 		return panelMin(panels[index])
 	}
 	return max
+}
+
+// panelLevel defaults to 3: most panel groups sit inside a titled section, and
+// h3 under that section's h2 is the ordinary case.
+func panelLevel(panel PanelData) int {
+	if panel.Level > 0 {
+		return panel.Level
+	}
+	return 3
 }
 
 func panelClamp(value, min, max int) int {

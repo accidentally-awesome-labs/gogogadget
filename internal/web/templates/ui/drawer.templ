@@ -8,7 +8,13 @@ type DrawerOpts struct {
 	ID    string
 	Title string
 	// Side is the edge the panel attaches to.
-	Side  Side
+	Side Side
+	// Level is the title's heading level, defaulting to 2. A drawer's depth is
+	// a fact about the page it opens over, not the component: one opened from
+	// inside a titled region reads as h3 there, and hardcoding h2 flattens that
+	// nesting - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
 	Attrs Attrs
 }
 
@@ -26,7 +32,10 @@ templ Drawer(o DrawerOpts) {
 	>
 		<form method="dialog" class="flex h-full flex-col gap-4">
 			<div class="flex items-center justify-between">
-				<h2 id={ o.ID + "-title" } class="section-title">{ o.Title }</h2>
+				@Heading(HeadingOpts{
+					Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
+					Attrs: Attrs{ID: o.ID + "-title"},
+				})
 				<button type="submit" class="btn btn-ghost btn-icon" aria-label="Close" data-ui-dialog-close>
 					@Icon(IconOpts{Name: IconClose, Attrs: Attrs{Class: "w-4 h-4"}})
 				</button>

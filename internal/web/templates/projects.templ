@@ -28,7 +28,7 @@ templ ProjectsPage(d ProjectListData) {
 templ ProjectsTable(d ProjectListData) {
 	<div id="table-container">
 		if len(d.Projects) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "projects.empty_title"), Body: i18n.T(ctx, "projects.empty_body")}) {
+			@ui.EmptyState(ui.EmptyStateOpts{Level: 2, Title: i18n.T(ctx, "projects.empty_title"), Body: i18n.T(ctx, "projects.empty_body")}) {
 				<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
 			}
 		} else {

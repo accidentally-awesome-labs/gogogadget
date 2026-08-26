@@ -1111,6 +1111,12 @@
             "$ref": "#/$defs/RouteContribution"
           }
         },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ScenarioContribution"
+          }
+        },
         "slots": {
           "type": "array",
           "items": {
@@ -1124,6 +1130,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/UIContribution"
+          }
+        },
+        "visual": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VisualContribution"
           }
         }
       },
@@ -1177,6 +1189,67 @@
         "field",
         "capability",
         "type"
+      ]
+    },
+    "ScenarioContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "public",
+            "app",
+            "admin"
+          ]
+        },
+        "surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "default",
+              "disabled",
+              "readonly",
+              "busy",
+              "loading",
+              "empty",
+              "error",
+              "success",
+              "overflow"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "slug",
+        "title",
+        "summary",
+        "layout",
+        "surfaces",
+        "states"
       ]
     },
     "SlotContribution": {
@@ -1462,6 +1535,52 @@
           }
         }
       }
+    },
+    "VisualContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "persona": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "full_page": {
+          "type": "boolean"
+        },
+        "viewports": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "desktop",
+              "mobile"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "masks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "viewports"
+      ]
     }
   }
 }

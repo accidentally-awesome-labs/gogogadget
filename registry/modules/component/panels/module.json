@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/panels.templ",
         "target": "internal/web/templates/ui/panels.templ",
         "class": "templ",
-        "sha256": "217cc76a39da2cdd64b9980f7291c3de00fae3f952771a7f63700d27c3d4ffb8",
+        "sha256": "e3bac90cd912faf99405a81dd8161b7db7eb04e0ff72625599835eac4ac81330",
         "rewrite_module": true,
         "contract": true
       },

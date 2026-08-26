@@ -19,7 +19,12 @@ type OnboardingChecklistOpts struct {
 	Steps []ChecklistStep
 	// ProgressLabel names the overall progress meter.
 	ProgressLabel string
-	Attrs         Attrs
+	// Level is the title's heading level, defaulting to 3. The checklist's
+	// depth is a fact about the page, not the component: one rendered directly
+	// under the page title needs h2, and hardcoding h3 skips a level there -
+	// which sends heading navigation somewhere the reader did not ask for.
+	Level int
+	Attrs Attrs
 }
 
 // OnboardingChecklist renders setup steps with progress.
@@ -29,7 +34,12 @@ type OnboardingChecklistOpts struct {
 // user who wants to revisit a step has nowhere to go.
 templ OnboardingChecklist(o OnboardingChecklistOpts) {
 	<div { root("onboarding-checklist", "card space-y-3", o.Attrs)... }>
-		<h3 class="font-semibold">{ o.Title }</h3>
+		// Unstyled: the title's typography is this component's own, and
+		// borrowing a Size to obtain the tag would resize it.
+		@Heading(HeadingOpts{
+			Text: o.Title, Level: checklistLevel(o.Level),
+			Unstyled: true, Attrs: Attrs{Class: "font-semibold"},
+		})
 		@ProgressBar(ProgressBarOpts{
 			Value: float64(checklistDone(o.Steps)), Max: float64(len(o.Steps)),
 			Label:     o.ProgressLabel,
@@ -56,6 +66,15 @@ templ OnboardingChecklist(o OnboardingChecklistOpts) {
 			}
 		</ol>
 	</div>
+}
+
+// checklistLevel defaults to 3: the checklist usually sits inside a titled
+// region of a dashboard rather than being that page's first heading.
+func checklistLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }
 
 func checklistDone(steps []ChecklistStep) int {

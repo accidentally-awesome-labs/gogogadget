@@ -295,6 +295,12 @@ func validateRuntime(runtime RuntimeContributions, canonical bool) error {
 	if err := validateAssets(runtime.Assets, canonical); err != nil {
 		return err
 	}
+	if err := validateScenarios(runtime.Scenarios, canonical); err != nil {
+		return err
+	}
+	if err := validateVisual(runtime.Visual, canonical); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -528,6 +534,117 @@ func validateUI(items []UIContribution, canonical bool) error {
 			return fmt.Errorf("manifest runtime ui must be sorted by name")
 		}
 		last = item.Name
+	}
+	return nil
+}
+
+// validateScenarios checks the declared dev-catalog compositions. Slug, layout
+// and state vocabularies are closed because every one of them is dereferenced
+// somewhere that cannot fail softly: the slug becomes a URL segment and a
+// baseline file name, the layout selects a real shell renderer, and a state is
+// accepted or refused by the page.
+func validateScenarios(items []ScenarioContribution, canonical bool) error {
+	seen := make(map[string]struct{}, len(items))
+	last := ""
+	for i, item := range items {
+		if !validComponentName(item.Slug) {
+			return fmt.Errorf("manifest runtime scenarios[%d] slug is invalid", i)
+		}
+		if strings.TrimSpace(item.Title) == "" {
+			return fmt.Errorf("manifest runtime scenarios[%d] title is invalid", i)
+		}
+		if strings.TrimSpace(item.Summary) == "" {
+			return fmt.Errorf("manifest runtime scenarios[%d] summary is invalid", i)
+		}
+		if !validScenarioLayout(item.Layout) {
+			return fmt.Errorf("manifest runtime scenarios[%d] layout %q is invalid", i, item.Layout)
+		}
+		// Surfaces are the reason the scenario exists. An empty list would
+		// declare a composition that covers nothing, which the accessibility
+		// sweep and the matrix would both silently accept.
+		if len(item.Surfaces) == 0 {
+			return fmt.Errorf("manifest runtime scenarios[%d] declares no surfaces", i)
+		}
+		if err := validateStringSet(
+			fmt.Sprintf("manifest runtime scenarios[%d] surfaces", i),
+			item.Surfaces, false,
+			func(value string) error {
+				if !validComponentName(value) {
+					return fmt.Errorf("surface %q is not a component name", value)
+				}
+				return nil
+			},
+		); err != nil {
+			return err
+		}
+		if err := validateStringSet(
+			fmt.Sprintf("manifest runtime scenarios[%d] states", i),
+			item.States, false,
+			func(value string) error {
+				if !validUIState(value) {
+					return fmt.Errorf("state %q is not a known rendering state", value)
+				}
+				return nil
+			},
+		); err != nil {
+			return err
+		}
+		if _, ok := seen[item.Slug]; ok {
+			return fmt.Errorf("manifest runtime scenarios contain duplicate slug %q", item.Slug)
+		}
+		seen[item.Slug] = struct{}{}
+		if canonical && i > 0 && last > item.Slug {
+			return fmt.Errorf("manifest runtime scenarios must be sorted by slug")
+		}
+		last = item.Slug
+	}
+	return nil
+}
+
+// validateVisual checks the declared page surfaces of the comparison matrix.
+// Viewports are required rather than defaulted: a surface that quietly gained a
+// width would be compared against a baseline nobody captured, which reads as a
+// failure in the page instead of a gap in the declaration.
+func validateVisual(items []VisualContribution, canonical bool) error {
+	seen := make(map[string]struct{}, len(items))
+	last := ""
+	for i, item := range items {
+		if !validComponentName(item.ID) {
+			return fmt.Errorf("manifest runtime visual[%d] id is invalid", i)
+		}
+		if !strings.HasPrefix(item.Path, "/") {
+			return fmt.Errorf("manifest runtime visual[%d] path %q must be rooted", i, item.Path)
+		}
+		if item.Persona != "" && !validComponentName(item.Persona) {
+			return fmt.Errorf("manifest runtime visual[%d] persona is invalid", i)
+		}
+		if len(item.Viewports) == 0 {
+			return fmt.Errorf("manifest runtime visual[%d] declares no viewports", i)
+		}
+		if err := validateStringSet(
+			fmt.Sprintf("manifest runtime visual[%d] viewports", i),
+			item.Viewports, false,
+			func(value string) error {
+				if !validViewport(value) {
+					return fmt.Errorf("viewport %q is not a compared width", value)
+				}
+				return nil
+			},
+		); err != nil {
+			return err
+		}
+		if err := validateOptionalStringSet(
+			fmt.Sprintf("manifest runtime visual[%d] masks", i), item.Masks, false); err != nil {
+			return err
+		}
+		if _, ok := seen[item.ID]; ok {
+			return fmt.Errorf("manifest runtime visual contains duplicate id %q", item.ID)
+		}
+		seen[item.ID] = struct{}{}
+		if canonical && i > 0 && last > item.ID {
+			return fmt.Errorf("manifest runtime visual must be sorted by id")
+		}
+		last = item.ID
 	}
 	return nil
 }
@@ -1304,14 +1421,16 @@ func validShellSlot(value ShellSlot) bool {
 	}
 }
 
+// validGalleryFamily reads the ordered family list rather than restating it, so
+// the set the manifest accepts and the order the visual matrix walks can never
+// drift apart.
 func validGalleryFamily(value GalleryFamily) bool {
-	switch value {
-	case GalleryFoundations, GalleryActions, GalleryForms, GalleryNavigation, GalleryFeedback,
-		GalleryOverlays, GalleryData, GalleryCommunication, GalleryLayout, GalleryAdvanced:
-		return true
-	default:
-		return false
+	for _, family := range GalleryFamilies {
+		if family == value {
+			return true
+		}
 	}
+	return false
 }
 
 // validUIState is the closed set of rendering states a component may declare.
@@ -1329,6 +1448,31 @@ func validUIState(value string) bool {
 	switch value {
 	case "default", "disabled", "readonly", "busy", "loading",
 		"empty", "error", "success", "overflow":
+		return true
+	default:
+		return false
+	}
+}
+
+// validScenarioLayout is the closed set of shells a scenario may render inside.
+// It is narrower than the layouts the renderer has: "docs" is absent because a
+// scenario is a product surface, and rendering one in the documentation shell
+// would compare chrome no product page uses.
+func validScenarioLayout(value string) bool {
+	switch value {
+	case "public", "app", "admin":
+		return true
+	default:
+		return false
+	}
+}
+
+// validViewport is the closed set of widths the comparison job configures. A
+// value outside it names a Playwright project that does not exist, which would
+// silently drop the surface from the run instead of failing.
+func validViewport(value string) bool {
+	switch value {
+	case "desktop", "mobile":
 		return true
 	default:
 		return false

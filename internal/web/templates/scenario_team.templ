@@ -86,7 +86,9 @@ templ ScenarioTeam(gc GalleryContext) {
 			}
 		}
 		@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "team-summary"}}) {
-			@ui.CardHeader(ui.CardHeaderOpts{Title: "Northwind Robotics"}) {
+			// The summary card is the first thing on the surface, directly under
+			// the page title, so its title is h2 rather than skipping to h3.
+			@ui.CardHeader(ui.CardHeaderOpts{Title: "Northwind Robotics", Level: 2}) {
 				// The group summarises who is here before the table is read.
 				// No image sources: initials are generated from the name, so
 				// the scenario renders identically with no network at all,

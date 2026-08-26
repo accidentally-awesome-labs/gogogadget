@@ -76,6 +76,19 @@
           "href": "/#features",
           "label_key": "nav.features"
         }
+      ],
+      "visual": [
+        {
+          "id": "home",
+          "path": "/",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

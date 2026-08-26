@@ -44,7 +44,7 @@ func jobStatusLabel(ctx context.Context, status string) string {
 templ AdminJobsTable(rows []sqlc.ListJobsRow, now time.Time, filter string, page, totalPages int) {
 	<div id="table-container">
 		if len(rows) == 0 {
-			@ui.EmptyState(ui.EmptyStateOpts{Title: i18n.T(ctx, "admin.jobs.title"), Body: i18n.T(ctx, "admin.jobs.empty")}) {
+			@ui.EmptyState(ui.EmptyStateOpts{Level: 2, Title: i18n.T(ctx, "admin.jobs.title"), Body: i18n.T(ctx, "admin.jobs.empty")}) {
 			}
 		} else {
 			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "jobs-table"}}) {

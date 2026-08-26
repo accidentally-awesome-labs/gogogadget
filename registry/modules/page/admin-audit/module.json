@@ -67,6 +67,20 @@
             "nav.admin.flags"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "admin-audit",
+          "path": "/admin/audit",
+          "persona": "admin",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

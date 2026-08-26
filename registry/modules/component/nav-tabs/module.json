@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/nav-tabs.templ",
         "target": "internal/web/templates/ui/nav-tabs.templ",
         "class": "templ",
-        "sha256": "99038b09e0e3c064eec357ae1e769645f73685b9a2be7cc4a48a487dc9841396",
+        "sha256": "e3fe443fabfd9df8a848a7ff5502e4950993b749a0a85079d05bf7d4be23583c",
         "rewrite_module": true,
         "contract": true
       }

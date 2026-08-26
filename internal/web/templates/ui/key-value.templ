@@ -7,9 +7,14 @@ type KeyValueOpts struct {
 }
 
 // KeyValue renders one definition row.
+//
+// The dt and dd sit inside their own dl. A dt outside a dl is not a definition
+// term at all: the browser drops the association, so the pair reads as two
+// unrelated runs of text and the row conveys nothing about which value belongs
+// to which key. The wrapping div looked identical and reported that.
 templ KeyValue(o KeyValueOpts) {
-	<div { root("key-value", "flex items-center justify-between py-2", o.Attrs)... }>
+	<dl { root("key-value", "flex items-center justify-between py-2", o.Attrs)... }>
 		<dt class="text-fg-muted">{ o.Key }</dt>
 		<dd class="font-medium">{ o.Value }</dd>
-	</div>
+	</dl>
 }

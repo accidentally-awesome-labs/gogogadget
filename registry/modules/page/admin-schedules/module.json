@@ -77,6 +77,20 @@
             "nav.admin.content"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "admin-schedules",
+          "path": "/admin/schedules",
+          "persona": "admin",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

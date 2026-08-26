@@ -53,9 +53,9 @@
         {
           "id": "footer.company.blog",
           "area": "footer",
-          "group": "footer.company",
           "route_id": "content.post.index",
           "label_key": "footer.blog",
+          "group": "footer.company",
           "before": [
             "footer.company.about"
           ],
@@ -72,18 +72,34 @@
             "nav.public.pricing"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "blog",
+          "path": "/blog",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        },
+        {
+          "id": "blog-post",
+          "path": "/blog/hello-world",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "retain-data",
     "locales": {
       "en": {
         "blog.empty": "No posts yet.",
@@ -93,6 +109,14 @@
         "blog.empty": "Aún no hay publicaciones.",
         "blog.title": "Blog"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
   }
 }

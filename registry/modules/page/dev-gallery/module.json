@@ -140,7 +140,7 @@
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "9746a3ae3f6963c855ce298d793a06972fec6c55e8b970b48fffc29d25fbad78",
+        "sha256": "cc5b7390d2ddc51f0bd78262b199e164881c8a70be010b68f625d2c72b7bfa93",
         "rewrite_module": true,
         "contract": false
       },
@@ -172,7 +172,7 @@
         "source": "internal/web/templates/gallery_pager.templ",
         "target": "internal/web/templates/gallery_pager.templ",
         "class": "templ",
-        "sha256": "3fd4b3f371e68a6a772dbb85993899b0f6faa36c88a0c65c75151ea4ccc7ceae",
+        "sha256": "b1ce0e3ea4746fb24ce15583a20e3941d41d0e9ff6d8990821891ca8301e9ef4",
         "rewrite_module": true,
         "contract": false
       },
@@ -220,7 +220,7 @@
         "source": "internal/web/templates/scenario_content.templ",
         "target": "internal/web/templates/scenario_content.templ",
         "class": "templ",
-        "sha256": "072ca2fd71b000f8e6febe550cedb75633148b353c16cf99b3429c2974cbd912",
+        "sha256": "8acac47bb1bdee217c45d65bb9a759c15d746289cca94da17a0cb48f10a2164b",
         "rewrite_module": true,
         "contract": false
       },
@@ -236,7 +236,7 @@
         "source": "internal/web/templates/scenario_dashboard.templ",
         "target": "internal/web/templates/scenario_dashboard.templ",
         "class": "templ",
-        "sha256": "4b18f15fb18d268c143eda7f5a4314bf642872db31eb6dbd19e8a362117a5a81",
+        "sha256": "1e19c8fec4629eccfae5fa4c512cc3827a36b499141ac973871de962f9b0555d",
         "rewrite_module": true,
         "contract": false
       },
@@ -244,7 +244,7 @@
         "source": "internal/web/templates/scenario_developer.templ",
         "target": "internal/web/templates/scenario_developer.templ",
         "class": "templ",
-        "sha256": "e529b2cf0dc44c16373612ba778b6dd015f3d1b4fa29702a3810c69cd817a87c",
+        "sha256": "fdd3255e622a4b1fb39ecbdfdddbf0e490726721f7f9f52ced9be499b2236d85",
         "rewrite_module": true,
         "contract": false
       },
@@ -276,7 +276,7 @@
         "source": "internal/web/templates/scenario_resource_list.templ",
         "target": "internal/web/templates/scenario_resource_list.templ",
         "class": "templ",
-        "sha256": "d44ac51dcd833e05d8ef7d1ce31d5ff491a766b11179094d237a6fe60a685439",
+        "sha256": "b343577ccde577560e17c64f24d25185b1c530273a20b2d769782cb5e875cc18",
         "rewrite_module": true,
         "contract": false
       },
@@ -284,7 +284,7 @@
         "source": "internal/web/templates/scenario_settings.templ",
         "target": "internal/web/templates/scenario_settings.templ",
         "class": "templ",
-        "sha256": "2ea0e9e851b0d1f5e9ab4a847d2db8ebdec6b0171fe9c892abae89a40cce0f03",
+        "sha256": "27b06e21b9014a4d5ad9996cc4aa070848ec3d038e22a03b60671614513fc099",
         "rewrite_module": true,
         "contract": false
       },
@@ -292,7 +292,7 @@
         "source": "internal/web/templates/scenario_system_states.templ",
         "target": "internal/web/templates/scenario_system_states.templ",
         "class": "templ",
-        "sha256": "589abbd62d8f5327ff414817464ccc7c6dc26a28a77df71ed13e4692a70585ae",
+        "sha256": "a2d33a5e18a9b99b8996547a16fd7efb5c163ef602793a5b931f3e722a388765",
         "rewrite_module": true,
         "contract": false
       },
@@ -300,7 +300,7 @@
         "source": "internal/web/templates/scenario_team.templ",
         "target": "internal/web/templates/scenario_team.templ",
         "class": "templ",
-        "sha256": "a0aa07271c4608f95dbc43b68ad71f48e5af168dc86fa9931d2eb9cfe34f5235",
+        "sha256": "32819e4e80c8ce4c0a83868a0022088d5c25dde4ca34eff811c2f75c8070d331",
         "rewrite_module": true,
         "contract": false
       },
@@ -308,7 +308,7 @@
         "source": "internal/web/templates/scenarios.go",
         "target": "internal/web/templates/scenarios.go",
         "class": "go",
-        "sha256": "83631d7b219893a8b987aa6ed2fbd66422238474d651eb993239b05f7c679ec7",
+        "sha256": "f28f4f9a83b061974bf65e25285dc4313259fc87cc1f34521a8decf7e3eda9cc",
         "rewrite_module": true,
         "contract": false
       }
@@ -451,6 +451,252 @@
           "package": "internal/web",
           "handler": "handleDevUIAction",
           "enabled": "devAuthBypass"
+        }
+      ],
+      "scenarios": [
+        {
+          "slug": "analytics",
+          "title": "Analytics",
+          "summary": "Chart families with date filters, a data grid and the accessible summaries beside them.",
+          "layout": "app",
+          "surfaces": [
+            "bar-chart",
+            "line-chart",
+            "area-chart",
+            "donut-chart",
+            "sparkline",
+            "chart-legend",
+            "date-range-picker",
+            "data-grid"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "loading"
+          ]
+        },
+        {
+          "slug": "billing",
+          "title": "Billing",
+          "summary": "Plans, quotas, invoices, dunning notices and processing states.",
+          "layout": "app",
+          "surfaces": [
+            "plan-card",
+            "usage-card",
+            "meter",
+            "progress-bar",
+            "notice",
+            "banner",
+            "data-table"
+          ],
+          "states": [
+            "default",
+            "loading",
+            "error",
+            "success"
+          ]
+        },
+        {
+          "slug": "communication",
+          "title": "Communication",
+          "summary": "Notifications, comment threads, a chat log, a composer and attachments.",
+          "layout": "app",
+          "surfaces": [
+            "notification-item",
+            "comment",
+            "comment-thread",
+            "chat-log",
+            "chat-message",
+            "composer",
+            "attachment"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "loading"
+          ]
+        },
+        {
+          "slug": "content",
+          "title": "Content",
+          "summary": "The Markdown editor with media, revisions, server-rendered preview and attachments.",
+          "layout": "admin",
+          "surfaces": [
+            "markdown-editor",
+            "editor-toolbar",
+            "editor-preview",
+            "media-picker",
+            "attachment",
+            "panel-group"
+          ],
+          "states": [
+            "default",
+            "error",
+            "success"
+          ]
+        },
+        {
+          "slug": "dashboard",
+          "title": "Dashboard",
+          "summary": "First-run onboarding, headline metrics, a command trigger and recent activity.",
+          "layout": "app",
+          "surfaces": [
+            "onboarding-checklist",
+            "stat-group",
+            "metric",
+            "command-palette",
+            "activity-item"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "loading"
+          ]
+        },
+        {
+          "slug": "developer",
+          "title": "Developer",
+          "summary": "API keys, secret reveal, webhook endpoints, code samples and delivery states.",
+          "layout": "app",
+          "surfaces": [
+            "secret-reveal",
+            "code",
+            "copy-button",
+            "data-table",
+            "delivery-status",
+            "status-dot"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "error"
+          ]
+        },
+        {
+          "slug": "operations",
+          "title": "Operations",
+          "summary": "Jobs, schedules, feature flags and audit rows behind admin-role gating.",
+          "layout": "admin",
+          "surfaces": [
+            "data-table",
+            "badge",
+            "status-dot",
+            "row-actions",
+            "toolbar",
+            "pagination"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "readonly"
+          ]
+        },
+        {
+          "slug": "planning",
+          "title": "Planning",
+          "summary": "Calendar and scheduler, a board, a hierarchy and resizable panels together.",
+          "layout": "app",
+          "surfaces": [
+            "date-picker",
+            "scheduler",
+            "kanban",
+            "tree",
+            "tree-grid",
+            "panel-group"
+          ],
+          "states": [
+            "default",
+            "empty"
+          ]
+        },
+        {
+          "slug": "resource-list",
+          "title": "Resource list",
+          "summary": "A table with search, filter, sort, selection, bulk actions and pagination.",
+          "layout": "app",
+          "surfaces": [
+            "data-table",
+            "search-input",
+            "column-header",
+            "selection-bar",
+            "row-actions",
+            "pagination",
+            "empty-state"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "loading",
+            "error"
+          ]
+        },
+        {
+          "slug": "settings",
+          "title": "Settings",
+          "summary": "Account, organisation and security forms with validation, saving feedback and a danger zone.",
+          "layout": "app",
+          "surfaces": [
+            "nav-tabs",
+            "settings-section",
+            "description-list",
+            "field",
+            "text-input",
+            "alert-dialog"
+          ],
+          "states": [
+            "default",
+            "error",
+            "success",
+            "readonly"
+          ]
+        },
+        {
+          "slug": "system-states",
+          "title": "System states",
+          "summary": "Skeletons, progress, empty and error states, and every terminal page from 403 to 503.",
+          "layout": "public",
+          "surfaces": [
+            "skeleton",
+            "progress-bar",
+            "progress-circle",
+            "empty-state",
+            "error-state",
+            "terminal-page",
+            "banner"
+          ],
+          "states": [
+            "default",
+            "loading",
+            "error"
+          ]
+        },
+        {
+          "slug": "team",
+          "title": "Team",
+          "summary": "Members, invitations and roles, including the read-only view a non-admin sees.",
+          "layout": "app",
+          "surfaces": [
+            "avatar",
+            "avatar-group",
+            "member-item",
+            "data-table",
+            "badge",
+            "dropdown-menu"
+          ],
+          "states": [
+            "default",
+            "empty",
+            "readonly"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "gallery",
+          "path": "/dev/gallery",
+          "viewports": [
+            "desktop"
+          ]
         }
       ]
     },

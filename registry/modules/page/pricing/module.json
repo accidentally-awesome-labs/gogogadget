@@ -75,6 +75,19 @@
             "nav.public.features"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "pricing",
+          "path": "/pricing",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

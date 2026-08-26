@@ -100,11 +100,16 @@ templ NotConfigured(feature, docsSlug string) {
 }
 
 // usageCard is the shared shape of every quota meter: label, "x of y", bar.
+//
+// The meter carries the card's heading as its own label. A meter is announced by
+// its accessible name, and without one a screen reader reads a bare percentage
+// with no indication of which quota it measures - three unnamed meters on this
+// page were indistinguishable.
 templ usageCard(heading, detail string, pct int, testID string) {
 	<div class="card mb-6 max-w-lg" data-testid={ testID }>
 		<h2 class="text-sm font-semibold mb-2">{ heading }</h2>
 		<p class="text-sm text-fg-muted">{ detail }</p>
-		@ui.Meter(ui.MeterOpts{Percent: pct, Attrs: ui.Attrs{TestID: ""}})
+		@ui.Meter(ui.MeterOpts{Percent: pct, Label: heading, ValueText: detail})
 	</div>
 }
 

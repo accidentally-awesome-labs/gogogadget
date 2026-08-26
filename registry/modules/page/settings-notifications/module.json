@@ -76,6 +76,20 @@
             "nav.settings.webhooks"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "notifications-prefs",
+          "path": "/app/settings/notifications",
+          "persona": "pro",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

@@ -74,6 +74,32 @@
           "route_id": "admin.overview.index",
           "label_key": "sidebar.admin_overview"
         }
+      ],
+      "visual": [
+        {
+          "id": "admin",
+          "path": "/admin",
+          "persona": "admin",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        },
+        {
+          "id": "forbidden",
+          "path": "/admin",
+          "persona": "pro",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

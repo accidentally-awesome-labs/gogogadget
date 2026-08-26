@@ -122,8 +122,8 @@ func ScenarioContent(gc GalleryContext) templ.Component {
 				PersistKey:  "scenario-content",
 				Orientation: ui.OrientationHorizontal,
 				Panels: []ui.PanelData{
-					{ID: "content-draft", Title: "Draft", Size: 55, MinSize: 30, Content: contentDraftPanelBody(gc), Attrs: ui.Attrs{TestID: "content-draft-panel"}},
-					{ID: "content-preview", Title: "Preview", Size: 45, MinSize: 30, Content: contentPreviewPanelBody(gc), Attrs: ui.Attrs{TestID: "content-preview-panel"}},
+					{ID: "content-draft", Title: "Draft", Level: 2, Size: 55, MinSize: 30, Content: contentDraftPanelBody(gc), Attrs: ui.Attrs{TestID: "content-draft-panel"}},
+					{ID: "content-preview", Title: "Preview", Level: 2, Size: 45, MinSize: 30, Content: contentPreviewPanelBody(gc), Attrs: ui.Attrs{TestID: "content-preview-panel"}},
 				},
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

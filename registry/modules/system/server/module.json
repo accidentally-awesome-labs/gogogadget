@@ -212,7 +212,7 @@
         "source": "internal/web/templates/nav.templ",
         "target": "internal/web/templates/nav.templ",
         "class": "templ",
-        "sha256": "cd7abfff9f0e45434a53873df18f11eb62b7e36fc86940fcee2f11a00e097e6a",
+        "sha256": "784a84e8e2697ff31a7821c6b5aeffb643c8d9a70bc0b5b666eac8e3636189a8",
         "rewrite_module": true,
         "contract": false
       },
@@ -228,7 +228,7 @@
         "source": "internal/web/templates/sidebar.templ",
         "target": "internal/web/templates/sidebar.templ",
         "class": "templ",
-        "sha256": "39dc670ccf2e0ac5eafcb6b20c0be1bb4dfb999ae6efd739e574924a861dc6f7",
+        "sha256": "354be38414fa211da4b06ff9a2c9642c2d58c99af87fdbe56a07dc9c7a0d538b",
         "rewrite_module": true,
         "contract": false
       },
@@ -244,7 +244,7 @@
         "source": "internal/web/templates/ui_adapters.go",
         "target": "internal/web/templates/ui_adapters.go",
         "class": "go",
-        "sha256": "b0d558841a3045cba3bf089971095c587c545c73abdc7fc580d013df9dec6add",
+        "sha256": "ec7da0f26e5bc5b53a8e554d1c8987f05f7800f1c125264a5ec66cf8c3011153",
         "rewrite_module": true,
         "contract": false
       },
@@ -505,6 +505,19 @@
           "package": "internal/web",
           "handler": "handleReadyz"
         }
+      ],
+      "visual": [
+        {
+          "id": "not-found",
+          "path": "/nope",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],
@@ -585,6 +598,7 @@
         "sidebar.admin_overview": "Overview",
         "sidebar.admin_schedules": "Schedules",
         "sidebar.admin_users": "Users",
+        "sidebar.app_nav": "Product",
         "sidebar.dashboard": "Dashboard",
         "sidebar.files": "Files",
         "sidebar.notifications": "Notifications",
@@ -656,6 +670,7 @@
         "sidebar.admin_overview": "Resumen",
         "sidebar.admin_schedules": "Programaciones",
         "sidebar.admin_users": "Usuarios",
+        "sidebar.app_nav": "Producto",
         "sidebar.dashboard": "Panel",
         "sidebar.files": "Archivos",
         "sidebar.notifications": "Notificaciones",

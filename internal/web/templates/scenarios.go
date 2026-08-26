@@ -38,99 +38,59 @@ type Scenario struct {
 	Render func(GalleryContext) templ.Component
 }
 
-// ScenarioRegistry is every dev scenario, in the order the catalog presents
-// them: the surfaces a product actually has, roughly in the order a team builds
-// them.
-var ScenarioRegistry = []Scenario{
-	{
-		Slug: "dashboard", Title: "Dashboard", Layout: LayoutApp,
-		Summary:  "First-run onboarding, headline metrics, a command trigger and recent activity.",
-		Surfaces: []string{"onboarding-checklist", "stat-group", "metric", "command-palette", "activity-item"},
-		States:   []string{"default", "empty", "loading"},
-		Render:   ScenarioDashboard,
-	},
-	{
-		Slug: "resource-list", Title: "Resource list", Layout: LayoutApp,
-		Summary:  "A table with search, filter, sort, selection, bulk actions and pagination.",
-		Surfaces: []string{"data-table", "search-input", "column-header", "selection-bar", "row-actions", "pagination", "empty-state"},
-		States:   []string{"default", "empty", "loading", "error"},
-		Render:   ScenarioResourceList,
-	},
-	{
-		Slug: "settings", Title: "Settings", Layout: LayoutApp,
-		Summary:  "Account, organisation and security forms with validation, saving feedback and a danger zone.",
-		Surfaces: []string{"nav-tabs", "settings-section", "description-list", "field", "text-input", "alert-dialog"},
-		States:   []string{"default", "error", "success", "readonly"},
-		Render:   ScenarioSettings,
-	},
-	{
-		Slug: "team", Title: "Team", Layout: LayoutApp,
-		Summary:  "Members, invitations and roles, including the read-only view a non-admin sees.",
-		Surfaces: []string{"avatar", "avatar-group", "member-item", "data-table", "badge", "dropdown-menu"},
-		States:   []string{"default", "empty", "readonly"},
-		Render:   ScenarioTeam,
-	},
-	{
-		Slug: "billing", Title: "Billing", Layout: LayoutApp,
-		Summary:  "Plans, quotas, invoices, dunning notices and processing states.",
-		Surfaces: []string{"plan-card", "usage-card", "meter", "progress-bar", "notice", "banner", "data-table"},
-		States:   []string{"default", "loading", "error", "success"},
-		Render:   ScenarioBilling,
-	},
-	{
-		Slug: "developer", Title: "Developer", Layout: LayoutApp,
-		Summary:  "API keys, secret reveal, webhook endpoints, code samples and delivery states.",
-		Surfaces: []string{"secret-reveal", "code", "copy-button", "data-table", "delivery-status", "status-dot"},
-		States:   []string{"default", "empty", "error"},
-		Render:   ScenarioDeveloper,
-	},
-	{
-		Slug: "operations", Title: "Operations", Layout: LayoutAdmin,
-		Summary:  "Jobs, schedules, feature flags and audit rows behind admin-role gating.",
-		Surfaces: []string{"data-table", "badge", "status-dot", "row-actions", "toolbar", "pagination"},
-		States:   []string{"default", "empty", "readonly"},
-		Render:   ScenarioOperations,
-	},
-	{
-		Slug: "content", Title: "Content", Layout: LayoutAdmin,
-		Summary:  "The Markdown editor with media, revisions, server-rendered preview and attachments.",
-		Surfaces: []string{"markdown-editor", "editor-toolbar", "editor-preview", "media-picker", "attachment", "panel-group"},
-		States:   []string{"default", "error", "success"},
-		Render:   ScenarioContent,
-	},
-	{
-		Slug: "planning", Title: "Planning", Layout: LayoutApp,
-		Summary:  "Calendar and scheduler, a board, a hierarchy and resizable panels together.",
-		Surfaces: []string{"date-picker", "scheduler", "kanban", "tree", "tree-grid", "panel-group"},
-		States:   []string{"default", "empty"},
-		Render:   ScenarioPlanning,
-	},
-	{
-		Slug: "communication", Title: "Communication", Layout: LayoutApp,
-		Summary:  "Notifications, comment threads, a chat log, a composer and attachments.",
-		Surfaces: []string{"notification-item", "comment", "comment-thread", "chat-log", "chat-message", "composer", "attachment"},
-		States:   []string{"default", "empty", "loading"},
-		Render:   ScenarioCommunication,
-	},
-	{
-		Slug: "analytics", Title: "Analytics", Layout: LayoutApp,
-		Summary:  "Chart families with date filters, a data grid and the accessible summaries beside them.",
-		Surfaces: []string{"bar-chart", "line-chart", "area-chart", "donut-chart", "sparkline", "chart-legend", "date-range-picker", "data-grid"},
-		States:   []string{"default", "empty", "loading"},
-		Render:   ScenarioAnalytics,
-	},
-	{
-		Slug: "system-states", Title: "System states", Layout: LayoutPublic,
-		Summary:  "Skeletons, progress, empty and error states, and every terminal page from 403 to 503.",
-		Surfaces: []string{"skeleton", "progress-bar", "progress-circle", "empty-state", "error-state", "terminal-page", "banner"},
-		States:   []string{"default", "loading", "error"},
-		Render:   ScenarioSystemStates,
-	},
+// scenarioRenderers is the hand-owned half of a scenario: its composition. The
+// descriptor half is declared data, generated into scenarioDescriptors, because
+// the visual surface matrix needs it too and a manifest cannot name a Go
+// function. This map is the join between them, keyed by the declared slug.
+var scenarioRenderers = map[string]func(GalleryContext) templ.Component{
+	"analytics":     ScenarioAnalytics,
+	"billing":       ScenarioBilling,
+	"communication": ScenarioCommunication,
+	"content":       ScenarioContent,
+	"dashboard":     ScenarioDashboard,
+	"developer":     ScenarioDeveloper,
+	"operations":    ScenarioOperations,
+	"planning":      ScenarioPlanning,
+	"resource-list": ScenarioResourceList,
+	"settings":      ScenarioSettings,
+	"system-states": ScenarioSystemStates,
+	"team":          ScenarioTeam,
 }
 
-// ScenarioBySlug returns the declared scenario for a URL segment. An unknown
-// slug is not found rather than falling back to the first scenario: a typo that
-// silently renders a different page teaches the reader the wrong thing.
+// ScenarioRegistry is every declared dev scenario joined to its composition, in
+// the order the manifest declares them — sorted by slug, so the catalog index,
+// the visual matrix and the accessibility sweep all walk one stable order and a
+// reordered manifest is a reviewable diff rather than a silent baseline shuffle.
+var ScenarioRegistry = buildScenarioRegistry()
+
+// buildScenarioRegistry joins the generated descriptors to the hand-owned
+// renderers. A descriptor with no renderer still appears, carrying a nil Render
+// that the page reports as an unbuilt composition. A renderer with no
+// descriptor is the opposite problem — dead code that no URL can reach — so it
+// panics at init rather than staying invisible until someone greps for it.
+func buildScenarioRegistry() []Scenario {
+	registry := make([]Scenario, 0, len(scenarioDescriptors))
+	declared := make(map[string]struct{}, len(scenarioDescriptors))
+	for _, d := range scenarioDescriptors {
+		declared[d.Slug] = struct{}{}
+		registry = append(registry, Scenario{
+			Slug:     d.Slug,
+			Title:    d.Title,
+			Summary:  d.Summary,
+			Layout:   d.Layout,
+			Surfaces: d.Surfaces,
+			States:   d.States,
+			Render:   scenarioRenderers[d.Slug],
+		})
+	}
+	for slug := range scenarioRenderers {
+		if _, ok := declared[slug]; !ok {
+			panic("templates: scenario renderer " + slug + " has no declared descriptor")
+		}
+	}
+	return registry
+}
+
 // scenarioAxisTestID names an axis option. The state options keep their
 // original "state-<value>" ids because tests and the visual matrix already
 // reference them.
@@ -151,6 +111,9 @@ func scenarioContextSummary(gc GalleryContext) string {
 	return gc.Direction + " · " + content + " content · " + string(gc.Density.Value())
 }
 
+// ScenarioBySlug returns the declared scenario for a URL segment. An unknown
+// slug is not found rather than falling back to the first scenario: a typo that
+// silently renders a different page teaches the reader the wrong thing.
 func ScenarioBySlug(slug string) (Scenario, bool) {
 	for _, scenario := range ScenarioRegistry {
 		if scenario.Slug == slug {

@@ -1,7 +1,6 @@
 package ui
 
 // EmptyVariant is how an empty state is presented.
-//
 // The three cases are genuinely different: a table's empty row must sit inside
 // the table's own box, a card is the standalone resting state of a region, and a
 // page fills the viewport. One variant styled three ways by callers is how ad
@@ -34,7 +33,12 @@ type EmptyStateOpts struct {
 	ClearURL   string
 	ClearLabel string
 	Target     string
-	Attrs      Attrs
+	// Level is the title's heading level, defaulting to 3. An empty state's
+	// depth is a fact about the page, not the component: one rendered directly
+	// under the page title needs h2, and hardcoding h3 skips a level there -
+	// which sends heading navigation somewhere the reader did not ask for.
+	Level int
+	Attrs Attrs
 }
 
 // EmptyState renders the resting state of a region with no data.
@@ -44,7 +48,12 @@ type EmptyStateOpts struct {
 templ EmptyState(o EmptyStateOpts) {
 	<div { root("empty-state", emptyStateClass(o.Variant), o.Attrs)... }>
 		if o.Title != "" {
-			<h3 class="font-semibold">{ o.Title }</h3>
+			// Unstyled: the title's typography is this component's own, and
+			// borrowing a Size to obtain the tag would resize it.
+			@Heading(HeadingOpts{
+				Text: o.Title, Level: emptyStateLevel(o.Level),
+				Unstyled: true, Attrs: Attrs{Class: "font-semibold"},
+			})
 		}
 		<p class={ emptyBodyClass(o.Variant) }>{ o.Body }</p>
 		if o.Filtered && o.ClearURL != "" {
@@ -59,6 +68,15 @@ templ EmptyState(o EmptyStateOpts) {
 		}
 		{ children... }
 	</div>
+}
+
+// emptyStateLevel defaults to 3: most empty states stand in for a region that
+// already has a heading of its own.
+func emptyStateLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }
 
 func emptyStateClass(variant EmptyVariant) string {

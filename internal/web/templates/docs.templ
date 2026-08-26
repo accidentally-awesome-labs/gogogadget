@@ -11,6 +11,11 @@ templ DocsPage(docs *content.Docs, slug string) {
 	for i, p := range docs.Pages {
 		if p.Slug == slug {
 			<article class="prose max-w-none" data-testid="docs-page">
+				// The title lives in frontmatter and was never rendered, so every
+				// docs page had no h1 at all and its sections started at h2 -
+				// a document with no top-level heading gives a screen reader
+				// nothing to orient from, and the outline reads as fragments.
+				<h1>{ p.Title }</h1>
 				@templ.Raw(p.Body)
 			</article>
 

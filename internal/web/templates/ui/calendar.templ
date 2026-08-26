@@ -197,6 +197,11 @@ type SchedulerOpts struct {
 	// Label names the schedule for assistive technology.
 	Label string
 	Days  []ScheduleDay
+	// Level is each day heading's level, defaulting to 3. A schedule's depth is
+	// a fact about the page, not the component: one rendered directly under the
+	// page title needs h2, and hardcoding h3 skips a level there - which sends
+	// heading navigation somewhere the reader did not ask for.
+	Level int
 	Attrs Attrs
 }
 
@@ -223,13 +228,29 @@ type ScheduleEntry struct {
 // An agenda list, not a pixel grid: a time grid positions entries by offset,
 // which conveys duration visually and nothing at all to a screen reader, and
 // collapses badly on a phone. The list states each entry's times as text.
+//
+// The day heading cannot delegate to Heading: its text is a <time> element, and
+// Heading takes a plain string. Dropping the <time> to reuse the primitive would
+// trade the day's machine-readable date for a tag switch, so the switch stays
+// here and the level still comes from headingLevel.
 templ Scheduler(o SchedulerOpts) {
 	<div { rootWith("scheduler", "space-y-4", o.Attrs, "role", "region", "aria-label", o.Label)... }>
 		for _, day := range o.Days {
 			<section aria-labelledby={ o.ID + "-" + day.Date }>
-				<h3 id={ o.ID + "-" + day.Date } class="font-semibold text-sm">
-					<time datetime={ day.Date }>{ day.Label }</time>
-				</h3>
+				switch headingLevel(schedulerLevel(o.Level)) {
+					case 1:
+						<h1 id={ o.ID + "-" + day.Date } class="font-semibold text-sm"><time datetime={ day.Date }>{ day.Label }</time></h1>
+					case 2:
+						<h2 id={ o.ID + "-" + day.Date } class="font-semibold text-sm"><time datetime={ day.Date }>{ day.Label }</time></h2>
+					case 4:
+						<h4 id={ o.ID + "-" + day.Date } class="font-semibold text-sm"><time datetime={ day.Date }>{ day.Label }</time></h4>
+					case 5:
+						<h5 id={ o.ID + "-" + day.Date } class="font-semibold text-sm"><time datetime={ day.Date }>{ day.Label }</time></h5>
+					case 6:
+						<h6 id={ o.ID + "-" + day.Date } class="font-semibold text-sm"><time datetime={ day.Date }>{ day.Label }</time></h6>
+					default:
+						<h3 id={ o.ID + "-" + day.Date } class="font-semibold text-sm"><time datetime={ day.Date }>{ day.Label }</time></h3>
+				}
 				if len(day.Entries) == 0 {
 					<p class="text-sm text-fg-muted">{ day.Empty }</p>
 				} else {
@@ -316,6 +337,15 @@ func scheduleTimeRange(entry ScheduleEntry) string {
 		return entry.Start
 	}
 	return entry.Start + "–" + entry.End
+}
+
+// schedulerLevel defaults to 3: an agenda usually sits inside a titled region,
+// and h3 under that region's h2 is the ordinary case.
+func schedulerLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }
 
 func monthDayClass(day MonthDay) string {

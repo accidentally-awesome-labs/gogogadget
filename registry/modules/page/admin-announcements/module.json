@@ -75,6 +75,20 @@
             "nav.admin.jobs"
           ]
         }
+      ],
+      "visual": [
+        {
+          "id": "admin-announcements",
+          "path": "/admin/announcements",
+          "persona": "admin",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],

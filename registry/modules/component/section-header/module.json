@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/section-header.templ",
         "target": "internal/web/templates/ui/section-header.templ",
         "class": "templ",
-        "sha256": "40d885f48a59f81ce51180bb7ee20a98fff545dd7dffddf1530df910478b7541",
+        "sha256": "47a2bd376f9ccc295c9c891d39df1eddef5d87dec6f051ded3654c9c8c88958f",
         "rewrite_module": true,
         "contract": true
       }

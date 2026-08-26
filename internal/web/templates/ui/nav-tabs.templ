@@ -35,11 +35,15 @@ func MatchCurrent(path, match string) string {
 type NavTabsOpts struct {
 	Items      []NavItem
 	ActivePath string
-	Attrs      Attrs
+	// Label names this navigation landmark. It defaults rather than being
+	// required, because a page with two unnamed nav landmarks gives a screen
+	// reader two entries called "navigation" and no way to tell them apart.
+	Label string
+	Attrs Attrs
 }
 
 templ NavTabs(o NavTabsOpts) {
-	<nav { root("nav-tabs", "tab-bar", o.Attrs)... }>
+	<nav { root("nav-tabs", "tab-bar", o.Attrs)... } aria-label={ navTabsLabel(o) }>
 		for _, item := range o.Items {
 			<a
 				href={ templ.SafeURL(item.Href) }
@@ -52,4 +56,14 @@ templ NavTabs(o NavTabsOpts) {
 			>{ item.Label }</a>
 		}
 	</nav>
+}
+
+// navTabsLabel names the landmark. "Sections" rather than "Navigation": the
+// shell already owns a landmark called that, and two identically named
+// landmarks are the same problem as two unnamed ones.
+func navTabsLabel(o NavTabsOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return "Sections"
 }

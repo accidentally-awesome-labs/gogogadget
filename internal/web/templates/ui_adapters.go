@@ -47,6 +47,10 @@ func uiNavItems(ctx context.Context, items []NavItem) []ui.NavItem {
 // price is formatted here: ui renders the string it is given.
 func uiPlanCard(ctx context.Context, plan billing.Plan, current bool) ui.PlanCardOpts {
 	return ui.PlanCardOpts{
+		// h2: the plans sit directly under the page title, so the component's
+		// default h3 would skip a level and send heading navigation past the
+		// plans entirely.
+		Level:        2,
 		Name:         plan.Name,
 		Price:        plan.PriceDisplay,
 		Features:     plan.Features,

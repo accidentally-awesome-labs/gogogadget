@@ -46,6 +46,10 @@ e2e:
 e2e-ui:
 	cd e2e && npx playwright test --ui
 
+## visual: compare the committed visual baselines inside the pinned Playwright Linux container
+visual:
+	./scripts/visual.sh
+
 ## visual-update: regenerate visual baselines inside the pinned Playwright Linux container
 visual-update:
 	./scripts/visual-update.sh
@@ -77,4 +81,4 @@ docker-build:
 help:
 	@grep -E '^## ' Makefile | sed 's/## //' | column -t -s ':'
 
-.PHONY: setup generate dev check test fuzz e2e e2e-ui visual-update seed db-reset build smoke docker-build help
+.PHONY: setup generate dev check test fuzz e2e e2e-ui visual visual-update seed db-reset build smoke docker-build help

@@ -571,10 +571,10 @@ templ Gallery() {
 					{Label: "Billing"},
 					{Label: "Done"},
 				}})
-				@ui.Pagination(ui.PaginationOpts{Page: 4, TotalPages: 12, BaseURL: "/dev/gallery", Target: "#content", Numbered: true, Labels: pagerLabels(ctx)})
+				@ui.Pagination(ui.PaginationOpts{Page: 4, TotalPages: 12, BaseURL: "/dev/gallery", Target: "#content", Numbered: true, Label: "Numbered pagination example", Labels: pagerLabels(ctx)})
 				@ui.CursorPagination(ui.CursorPaginationOpts{
 					PrevURL: "/dev/gallery?before=abc", NextURL: "/dev/gallery?after=xyz",
-					Target: "#content",
+					Target: "#content", Label: "Keyset pagination example",
 				})
 				@ui.TableOfContents(ui.TableOfContentsOpts{Entries: []ui.TocEntry{
 					{Label: "Overview", Anchor: "overview"},
@@ -717,7 +717,7 @@ templ Gallery() {
 				}),
 				Pagination: ui.Pagination(ui.PaginationOpts{
 					Page: 1, TotalPages: 4, BaseURL: "/dev/gallery", Target: "#content",
-					Labels: pagerLabels(ctx),
+					Label: "Table card example pagination", Labels: pagerLabels(ctx),
 				}),
 			}) {
 				<tr>

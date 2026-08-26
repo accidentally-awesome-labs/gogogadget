@@ -89,11 +89,11 @@ func GalleryPagerBody(page int, query string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = ui.Pagination(ui.PaginationOpts{
+			Labels:     galleryPagerLabels("Interactive pagination demo"),
 			Page:       galleryPagerPage(page),
 			TotalPages: 5,
 			BaseURL:    "/dev/ui/pagination/page",
 			Target:     "#gallery-pager",
-			Labels:     pagerLabels(ctx),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -118,7 +118,7 @@ func GalleryPagerBody(page int, query string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(galleryPagerReadout(page, query))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery_pager.templ`, Line: 49, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/gallery_pager.templ`, Line: 52, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -149,6 +149,12 @@ func galleryPagerReadout(page int, query string) string {
 		return fmt.Sprintf("Page %d of 5, filtered by %s.", galleryPagerPage(page), query)
 	}
 	return fmt.Sprintf("Page %d of 5.", galleryPagerPage(page))
+}
+
+// galleryPagerLabels names this pager's landmark while keeping every other label
+// at its default: only the landmark name needs to differ.
+func galleryPagerLabels(name string) ui.PagerLabels {
+	return ui.PagerLabels{Aria: func(int, int) string { return name }}
 }
 
 var _ = templruntime.GeneratedTemplate

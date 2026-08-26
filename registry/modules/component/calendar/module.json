@@ -21,7 +21,7 @@
         "source": "internal/web/templates/ui/calendar.templ",
         "target": "internal/web/templates/ui/calendar.templ",
         "class": "templ",
-        "sha256": "4027396dd73e6f5f7814d4c67b7474014eac7487f858a44d363ada7c0e59563c",
+        "sha256": "d16ba5a8ac83f33f89fc7981ffec9781326a8c92b366a6ced79d97ff14f7d12f",
         "rewrite_module": true,
         "contract": true
       },
@@ -89,7 +89,7 @@
           "native_fallback": "native date input",
           "signature": "templ DateRangePicker(o DateRangePickerOpts)",
           "summary": "Renders two native date inputs plus a range calendar.",
-          "guidance": "Two inputs rather than one string: a range submitted as one value has to be parsed and re-validated, and a partially filled range cannot be represented at all. The server owns start<=end regardless of what the calendar allowed.",
+          "guidance": "Two inputs rather than one string: a range submitted as one value has to be parsed and re-validated, and a partially filled range cannot be represented at all. The server owns start\u003c=end regardless of what the calendar allowed.",
           "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
           "states": [
             "default",
@@ -117,7 +117,7 @@
           "family": "advanced",
           "signature": "templ MonthGrid(o MonthGridOpts)",
           "summary": "Renders a month as a table.",
-          "guidance": "A calendar is tabular data - days across, weeks down - so it is a <table> with real column headers. A grid of divs looks identical and tells a screen reader nothing about which weekday a date falls on, which is the one thing a calendar exists to convey.",
+          "guidance": "A calendar is tabular data - days across, weeks down - so it is a \u003ctable\u003e with real column headers. A grid of divs looks identical and tells a screen reader nothing about which weekday a date falls on, which is the one thing a calendar exists to convey.",
           "states": [
             "default",
             "disabled"
@@ -151,16 +151,6 @@
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web/templates/ui"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "vendors": [
       {
         "path": "static/vendor/cally-0.9.2.js",
@@ -171,6 +161,16 @@
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md"
       }
-    ]
+    ],
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

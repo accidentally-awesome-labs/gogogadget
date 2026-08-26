@@ -34,7 +34,7 @@
         "source": "internal/web/templates/admin_jobs.templ",
         "target": "internal/web/templates/admin_jobs.templ",
         "class": "templ",
-        "sha256": "3222883649b32857488ecd0411834aab388bdf6e51ff8274fb91a0058ea39b7a",
+        "sha256": "2f6902cce2ca6e7c80a3b746db715fc541214625bb2eaeb28de53189426aef82",
         "rewrite_module": true,
         "contract": false
       }

@@ -37,7 +37,7 @@
         "source": "internal/web/templates/billing.templ",
         "target": "internal/web/templates/billing.templ",
         "class": "templ",
-        "sha256": "78e4588eac56a0bf578e1ebc9f20eee80f31b4fbdde5e50dff80a0be763858cd",
+        "sha256": "ff93572efc9935f328a1813fa798fd812111751b86fa35e4f382f2295fe0c609",
         "rewrite_module": true,
         "contract": false
       }
@@ -75,6 +75,20 @@
           "label_key": "settings.tab_billing",
           "after": [
             "nav.settings.org"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "billing",
+          "path": "/app/settings/billing",
+          "persona": "pro",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
           ]
         }
       ]

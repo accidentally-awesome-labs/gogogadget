@@ -9,7 +9,12 @@ type ErrorStateOpts struct {
 	RetryURL   string
 	RetryLabel string
 	Target     string
-	Attrs      Attrs
+	// Level is the title's heading level, defaulting to 3. An error state's
+	// depth is a fact about the page, not the component: one rendered directly
+	// under the page title needs h2, and hardcoding h3 skips a level there -
+	// which sends heading navigation somewhere the reader did not ask for.
+	Level int
+	Attrs Attrs
 }
 
 // ErrorState renders a failed region with a retry.
@@ -20,7 +25,12 @@ type ErrorStateOpts struct {
 templ ErrorState(o ErrorStateOpts) {
 	<div { rootWith("error-state", "card text-center py-10", o.Attrs, "role", "alert")... }>
 		@Icon(IconOpts{Name: IconError, Attrs: Attrs{Class: "w-6 h-6 mx-auto text-danger-text"}})
-		<h3 class="font-semibold mt-2">{ o.Title }</h3>
+		// Unstyled: the title's typography is this component's own, and
+		// borrowing a Size to obtain the tag would resize it.
+		@Heading(HeadingOpts{
+			Text: o.Title, Level: errorStateLevel(o.Level),
+			Unstyled: true, Attrs: Attrs{Class: "font-semibold mt-2"},
+		})
 		<p class="text-sm text-fg-muted mt-1">{ o.Body }</p>
 		if o.RetryURL != "" {
 			<a
@@ -32,4 +42,13 @@ templ ErrorState(o ErrorStateOpts) {
 			>{ breadcrumbOrDefault(o.RetryLabel, "Try again") }</a>
 		}
 	</div>
+}
+
+// errorStateLevel defaults to 3: most error states stand in for a region that
+// already has a heading of its own.
+func errorStateLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }

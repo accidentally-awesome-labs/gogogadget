@@ -287,7 +287,14 @@ templ systemTerminalCatalogue(gc GalleryContext) {
 		@ui.Stack(ui.StackOpts{Gap: ui.GapXL}) {
 			for _, terminal := range systemTerminals(gc.LongContent) {
 				@ui.Card(ui.CardOpts{}) {
-					@ui.Heading(ui.HeadingOpts{Text: terminal.Label, Level: 3, Size: ui.SizeXS})
+					// A caption, not a heading. Each TerminalPage owns an h1, so
+					// a heading here lands between this section's h2 and that h1
+					// and the document order reads h2, h3, h1 - a skip on the way
+					// back down that makes the outline unusable for anyone
+					// navigating by heading.
+					@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+						{ terminal.Label }
+					}
 					@ui.TerminalPage(terminal.Page)
 				}
 			}

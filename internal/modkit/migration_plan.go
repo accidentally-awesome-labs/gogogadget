@@ -263,6 +263,7 @@ func isGeneratedOutput(path string) bool {
 	// emitter from overwriting authored source, so widening it stays deliberate.
 	switch path {
 	case ".env.example", "content/docs/configuration-reference.md", "e2e/generated/personas.ts",
+		"e2e/generated/surfaces.ts", "internal/web/templates/scenarios_gen.go",
 		"internal/web/templates/ui/reference_gen.go":
 		return true
 	}

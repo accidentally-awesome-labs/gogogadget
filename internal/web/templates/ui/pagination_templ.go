@@ -98,8 +98,12 @@ type PaginationOpts struct {
 	// hundred-page table the numbers are noise, and prev/next plus a position
 	// readout is the honest interface.
 	Numbered bool
-	Labels   PagerLabels
-	Attrs    Attrs
+	// Label names this navigation landmark, defaulting to "Pagination". Two
+	// pagers on one page otherwise give a screen reader two identical entries
+	// with no way to tell which list each one moves.
+	Label  string
+	Labels PagerLabels
+	Attrs  Attrs
 }
 
 func Pagination(o PaginationOpts) templ.Component {
@@ -128,7 +132,7 @@ func Pagination(o PaginationOpts) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", o.Labels.aria(o.Page, o.TotalPages)))
+			templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", paginationLabel(o)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -166,7 +170,7 @@ func Pagination(o PaginationOpts) templ.Component {
 						var templ_7745c5c3_Var2 string
 						templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(entry))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 114, Col: 124}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 118, Col: 124}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 						if templ_7745c5c3_Err != nil {
@@ -195,7 +199,7 @@ func Pagination(o PaginationOpts) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(o.Labels.pageOf(o.Page, o.TotalPages))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 121, Col: 71}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 125, Col: 71}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -267,7 +271,7 @@ func pageLink(o PaginationOpts, page int, label, class string) templ.Component {
 		var templ_7745c5c3_Var6 templ.SafeURL
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(PageURL(o.BaseURL, o.Param, page)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 142, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 146, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -285,7 +289,7 @@ func pageLink(o PaginationOpts, page int, label, class string) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(PageURL(o.BaseURL, o.Param, page))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 144, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 148, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -298,7 +302,7 @@ func pageLink(o PaginationOpts, page int, label, class string) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Target)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 145, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 149, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 			if templ_7745c5c3_Err != nil {
@@ -316,7 +320,7 @@ func pageLink(o PaginationOpts, page int, label, class string) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(o.Labels.pageLabel(page))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 149, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 153, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -342,7 +346,7 @@ func pageLink(o PaginationOpts, page int, label, class string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 151, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/pagination.templ`, Line: 155, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -388,6 +392,15 @@ func PageWindow(page, totalPages int) []int {
 		prev = i
 	}
 	return out
+}
+
+// paginationLabel prefers the caller's landmark name, then any Aria label
+// function, then the default.
+func paginationLabel(o PaginationOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return o.Labels.aria(o.Page, o.TotalPages)
 }
 
 var _ = templruntime.GeneratedTemplate

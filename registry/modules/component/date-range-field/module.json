@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/date-range-field.templ",
         "target": "internal/web/templates/ui/date-range-field.templ",
         "class": "templ",
-        "sha256": "6c8f3dee7409707106b40099321be86b4e0a4a91d93284e5d00af6200cc52a1c",
+        "sha256": "043b6cda16ba534438ae8f542cc3ac4dce6c67d64d8a8cd1c7b938e98dbb5bfb",
         "rewrite_module": true,
         "contract": true
       }

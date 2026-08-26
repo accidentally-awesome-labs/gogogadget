@@ -26,7 +26,7 @@
         "source": "internal/web/templates/docs.templ",
         "target": "internal/web/templates/docs.templ",
         "class": "templ",
-        "sha256": "e8c6e32b009447f92c786cd54999290e619109bc75b08c8d16f2ec03ca2adfb1",
+        "sha256": "620a02532e14531f0bdd9f5b51501269e4e6f5db84095b717d9845435863bd90",
         "rewrite_module": true,
         "contract": false
       }
@@ -55,18 +55,23 @@
           "package": "internal/web",
           "handler": "handleDocsPage"
         }
+      ],
+      "visual": [
+        {
+          "id": "docs",
+          "path": "/docs/getting-started",
+          "viewports": [
+            "desktop"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
       ]
     },
     "migrations": [],
     "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
-    "data": [],
-    "removal_policy": "free",
     "locales": {
       "en": {
         "docs.edit_page": "Edit this page →"
@@ -74,6 +79,14 @@
       "es": {
         "docs.edit_page": "Editar esta página →"
       }
-    }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
   }
 }

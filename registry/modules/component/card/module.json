@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/card.templ",
         "target": "internal/web/templates/ui/card.templ",
         "class": "templ",
-        "sha256": "a3cb024486587f76ab627a43c6a7dbba2d597e55a3c6a51d5cf78c61dc0c36f5",
+        "sha256": "9450e537720d6d75b97862457659e3ec83f6f4cf6e5ac17215df7c9ffbcc84fb",
         "rewrite_module": true,
         "contract": true
       }

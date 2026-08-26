@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/dialog.templ",
         "target": "internal/web/templates/ui/dialog.templ",
         "class": "templ",
-        "sha256": "79358dea65fad9204230f781573caf5d7c910a2772a4cee88a1b2e96bb2fb1ea",
+        "sha256": "8e0cbf23cc68cb48f14ffc0eb335d8c17941acc03a4753ea604d2f71b9d067f6",
         "rewrite_module": true,
         "contract": true
       }
@@ -31,9 +31,9 @@
           "alpine": "uiDialog",
           "native_fallback": "dialog element",
           "signature": "templ Dialog(o DialogOpts)",
-          "summary": "Renders a native <dialog>.",
+          "summary": "Renders a native \u003cdialog\u003e.",
           "guidance": "The platform supplies the top layer, the backdrop, the focus trap and Escape-to-close, and the close control is a `form method=\"dialog\"` submit button - so the dialog dismisses with no JavaScript at all. The Alpine `uiDialog` component only calls showModal().",
-          "keyboard": "Escape closes it: this is a native <dialog>, so the platform supplies dismissal and the focus trap.",
+          "keyboard": "Escape closes it: this is a native \u003cdialog\u003e, so the platform supplies dismissal and the focus trap.",
           "states": [
             "default"
           ]

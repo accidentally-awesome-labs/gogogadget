@@ -9,7 +9,13 @@ type AlertDialogOpts struct {
 	// lets ConfirmAction replace hx-confirm without changing the delete
 	// contract the server already honours.
 	ConfirmHX HX
-	Attrs     Attrs
+	// Level is the title's heading level, defaulting to 2. A dialog's depth is
+	// a fact about the page it opens over, not the component: one opened from
+	// inside a titled region reads as h3 there, and hardcoding h2 flattens that
+	// nesting - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
+	Attrs Attrs
 }
 
 // AlertDialog renders a modal requiring an explicit confirm or cancel.
@@ -35,7 +41,10 @@ templ AlertDialog(o AlertDialogOpts) {
 			"aria-describedby", o.ID+"-message")... }
 	>
 		<form method="dialog" class="flex flex-col gap-4">
-			<h2 id={ o.ID + "-title" } class={ alertTitleClass(o.Kind) }>{ o.Title }</h2>
+			@Heading(HeadingOpts{
+				Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
+				Attrs: Attrs{ID: o.ID + "-title", Class: alertTitleColour(o.Kind)},
+			})
 			<p id={ o.ID + "-message" } class="text-sm text-fg-muted">{ o.Message }</p>
 			<div class="flex justify-end gap-2">
 				<button type="submit" value="cancel" class="btn btn-ghost" data-ui-dialog-cancel>{ o.CancelLabel }</button>
@@ -51,11 +60,20 @@ templ AlertDialog(o AlertDialogOpts) {
 	</dialog>
 }
 
-// alertTitleClass colours the title by kind. The kind is normalized first: an
+// alertTitleColour colours the title by kind. The kind is normalized first: an
 // unset kind would otherwise compose the class "text--text", which matches
 // nothing and renders an uncoloured heading.
-func alertTitleClass(kind Kind) string {
-	return "section-title text-" + string(NormalizeKind(kind)) + "-text"
+func alertTitleColour(kind Kind) string {
+	return "text-" + string(NormalizeKind(kind)) + "-text"
+}
+
+// dialogLevel defaults to 2, shared by every modal: a dialog's content is its
+// own outline, and h2 under the page's single h1 is the ordinary case.
+func dialogLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 2
 }
 
 // applyHXAttrs renders the confirm control's request attributes, or nothing at

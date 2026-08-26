@@ -20,7 +20,7 @@
         "source": "internal/web/templates/ui/kanban.templ",
         "target": "internal/web/templates/ui/kanban.templ",
         "class": "templ",
-        "sha256": "d9525c85be21fc4c8c88da398d10c86015c18c8372f68948f309ba45094d9eab",
+        "sha256": "d57056b2cf3510cb01fd35e5ede05dc242f91835f45802106ddbadadfc9fa65d",
         "rewrite_module": true,
         "contract": true
       },

@@ -8,7 +8,13 @@ type SettingsSectionOpts struct {
 	// Danger marks a destructive block so it reads as separate from ordinary
 	// settings, which is why a "danger zone" exists at all.
 	Danger bool
-	Attrs  Attrs
+	// Level is the title's heading level, defaulting to 3. A settings block's
+	// depth is a fact about the page, not the component: a run of blocks
+	// rendered directly under the page title needs h2, and hardcoding h3 skips
+	// a level there - which sends heading navigation somewhere the reader did
+	// not ask for.
+	Level int
+	Attrs Attrs
 }
 
 // SettingsSection renders a titled settings block.
@@ -20,7 +26,13 @@ templ SettingsSection(o SettingsSectionOpts) {
 	<section { rootWith("settings-section", settingsSectionClass(o.Danger), o.Attrs, "aria-label", o.Title)... }>
 		<div class="grid gap-4 md:grid-cols-3">
 			<div class="md:col-span-1">
-				<h3 class={ settingsTitleClass(o.Danger) }>{ o.Title }</h3>
+				// Unstyled: the title's typography is this component's own -
+				// including the danger colour - and borrowing a Size to obtain
+				// the tag would resize it.
+				@Heading(HeadingOpts{
+					Text: o.Title, Level: settingsSectionLevel(o.Level),
+					Unstyled: true, Attrs: Attrs{Class: settingsTitleClass(o.Danger)},
+				})
 				if o.Description != "" {
 					<p class="text-sm text-fg-muted mt-1">{ o.Description }</p>
 				}
@@ -30,6 +42,15 @@ templ SettingsSection(o SettingsSectionOpts) {
 			</div>
 		</div>
 	</section>
+}
+
+// settingsSectionLevel defaults to 3: a settings page usually groups its blocks
+// under a tab or section heading of its own.
+func settingsSectionLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
 }
 
 func settingsSectionClass(danger bool) string {

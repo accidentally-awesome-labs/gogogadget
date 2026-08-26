@@ -1,6 +1,8 @@
 package templates
 
 import (
+	"context"
+
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 )
@@ -26,16 +28,24 @@ templ appNavLink(page Page, item NavItem) {
 // rendered by the desktop Sidebar and by the mobile drawer in Topbar. Links
 // are boosted and swap only #content, so the shell (and its SSE stream)
 // survives navigation. The item lists live in chrome.go.
-templ appNavSections(page Page) {
-	<nav class="flex flex-col gap-1 text-sm">
+// appNavSections takes a scope because it is rendered twice - once in the
+// desktop sidebar and once in the mobile drawer - and both copies are in the
+// DOM at the same time. Identical landmark names collide, and whether the
+// hidden copy is exempt depends on when Alpine cloaks it, which is not
+// something an accessibility guarantee should rest on. Distinct names hold
+// regardless.
+templ appNavSections(page Page, scope string) {
+	<nav class="flex flex-col gap-1 text-sm" aria-label={ navScopeLabel(ctx, scope, "sidebar.app_nav") }>
 		for _, item := range AppNav {
 			@appNavLink(page, item)
 		}
 	</nav>
 	if identity.IsStaff(page.User) {
 		<div>
+			// The eyebrow is a paragraph, so it names nothing on its own; the
+			// landmark carries the name itself.
 			<p class="eyebrow mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
-			<nav class="flex flex-col gap-1 text-sm">
+			<nav class="flex flex-col gap-1 text-sm" aria-label={ navScopeLabel(ctx, scope, "sidebar.admin") }>
 				for _, item := range AdminNav {
 					@appNavLink(page, item)
 				}
@@ -73,7 +83,7 @@ templ Sidebar(page Page) {
 				</span>
 			</a>
 		</div>
-		@appNavSections(page)
+		@appNavSections(page, "sidebar")
 		<div class="mt-auto pt-4 border-t border-border">
 			@LocaleSwitcher(page.Path)
 		</div>
@@ -100,7 +110,17 @@ templ Topbar(page Page) {
 			></div>
 		</div>
 		<div x-show="open" x-cloak @click.outside="close" @click="close" class="absolute top-topbar left-0 right-0 z-(--z-nav) bg-surface border-b border-border p-4 flex flex-col gap-4 md:hidden">
-			@appNavSections(page)
+			@appNavSections(page, "drawer")
 		</div>
 	</div>
+}
+
+// navScopeLabel names one copy of a duplicated navigation. The scope is appended
+// rather than replacing the name so both copies still say what they navigate.
+func navScopeLabel(ctx context.Context, scope, key string) string {
+	name := i18n.T(ctx, key)
+	if scope == "drawer" {
+		return name + " (" + i18n.T(ctx, "a11y.menu") + ")"
+	}
+	return name
 }
