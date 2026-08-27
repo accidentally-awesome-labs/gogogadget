@@ -323,6 +323,14 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/source_directory_test.go",
+        "target": "internal/modkit/source_directory_test.go",
+        "class": "test",
+        "sha256": "6d5123dd4a74ee658152b50ac9315b9b00855d1580e5cb2fa070a24cd8562c4b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/modkit/source_github.go",
         "target": "internal/modkit/source_github.go",
         "class": "go",
