@@ -318,7 +318,7 @@
         "source": "internal/modkit/source_directory.go",
         "target": "internal/modkit/source_directory.go",
         "class": "go",
-        "sha256": "bec470a69db4c4c41670063ceaad61fc0f6b752d6e82eaa701e4ff95afb4f525",
+        "sha256": "4c406b6fa697f56e098b78e8e220fe758c345439c015674d357f313096a6b56e",
         "rewrite_module": true,
         "contract": false
       },

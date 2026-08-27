@@ -16,6 +16,17 @@ import (
 	"time"
 )
 
+// directorySourceExclusions are paths whose presence must never reach the
+// snapshot. Two kinds: tool caches, and files a developer has locally that a
+// clone does not.
+//
+// The second kind is the one that bites. `.env` is gitignored, so every
+// developer has one and CI has none — and while it was hashed, a working tree
+// and a fresh checkout resolved DIFFERENT registry commits from identical
+// source. That made the committed generated headers depend on who ran the
+// generator, so CI's "generated code is committed and fresh" check could not
+// pass from any real working tree. The registry can only ever distribute
+// tracked source; anything else has no business in its identity.
 var directorySourceExclusions = map[string]struct{}{
 	".git":                  {},
 	".superpowers":          {},
@@ -24,6 +35,43 @@ var directorySourceExclusions = map[string]struct{}{
 	"e2e/playwright-report": {},
 	"e2e/test-results":      {},
 	"tmp":                   {},
+}
+
+// excludedSourceBases are names excluded wherever they appear, rather than at
+// one fixed path. A build drops `tmp/` beside whatever package it is serving,
+// and coverage output lands wherever it was invoked, so anchoring these to the
+// root would leave the same class of divergence one directory down.
+var excludedSourceBases = map[string]struct{}{
+	"tmp":          {},
+	"node_modules": {},
+}
+
+// excludedSourceFiles are local files, never distributed. `.env.example` IS
+// distributed and generated, so it is handled by the generated-output rule
+// rather than named here.
+var excludedSourceFiles = map[string]struct{}{
+	".env":            {},
+	".env.local":      {},
+	".DS_Store":       {},
+	"coverage.out":    {},
+	"cover.out":       {},
+	".golangci.cache": {},
+}
+
+// isExcludedSourcePath reports whether a walked path is outside the registry's
+// distributable identity, by exact path, by directory name at any depth, or by
+// file name at any depth.
+func isExcludedSourcePath(name string, isDir bool) bool {
+	if _, ok := directorySourceExclusions[name]; ok {
+		return true
+	}
+	base := path.Base(name)
+	if isDir {
+		_, ok := excludedSourceBases[base]
+		return ok
+	}
+	_, ok := excludedSourceFiles[base]
+	return ok
 }
 
 // DirectorySource resolves a local registry tree without using repository
@@ -66,7 +114,7 @@ func (s DirectorySource) Resolve(ctx context.Context, _, _ string) (Snapshot, er
 		if name == "." {
 			return nil
 		}
-		if _, excluded := directorySourceExclusions[name]; excluded {
+		if isExcludedSourcePath(name, entry.IsDir()) {
 			if entry.IsDir() {
 				return fs.SkipDir
 			}
