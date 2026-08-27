@@ -26,6 +26,47 @@ fail=0
 # Redirects to the hosted account portal are asserted by path, not by full URL:
 # the destination host comes from CLERK_PORTAL_URL and differs per deployment,
 # while the hosted sign-in/sign-up/sign-out paths do not.
+#
+# The three auth routes have TWO legitimate contracts, and which one holds is a
+# property of the server, not of this script. With Clerk configured they redirect
+# to the hosted portal. In the documented zero-account posture
+# (DEV_AUTH_BYPASS=true and no Clerk keys) `/login` and `/signup` go to
+# `/dev/login` and `/logout` clears the cookie and returns to `/`. Asserting the
+# portal contract unconditionally passed on any machine with Clerk keys in its
+# environment and failed in CI, which runs the zero-account posture on purpose —
+# so the script asserted one configuration while running another.
+#
+# The posture is read off `/login`'s own destination, because that is the only
+# signal that tracks the handlers' actual condition (bypass AND Clerk absent).
+# `/dev/login`'s existence tracks the bypass alone, so it says zero-account on a
+# server that has both the bypass and real keys — where the handlers take the
+# hosted path.
+#
+# This is not a weaker assertion than a fixed table. It requires `/login` to land
+# on one of exactly two documented destinations, and then requires the other two
+# routes to agree with the SAME posture — so a server that mixes them fails,
+# which the old table could not detect at all.
+login_location="$(curl -s -o /dev/null -w '%{redirect_url}' "${BASE}/login")"
+case "${login_location}" in
+  */sign-in*)
+    auth_mode="hosted"
+    login_expect='redirect|/sign-in'
+    signup_expect='redirect|/sign-up'
+    logout_expect='redirect|/sign-out'
+    ;;
+  */dev/login*)
+    auth_mode="zero-account"
+    login_expect='redirect|/dev/login'
+    signup_expect='redirect|/dev/login'
+    logout_expect='redirect|/'
+    ;;
+  *)
+    echo "FAIL /login: redirect ${login_location@Q} is neither the hosted portal nor /dev/login" >&2
+    exit 1
+    ;;
+esac
+echo "auth mode: ${auth_mode} (/login → ${login_location})"
+
 declare -A public_expect=(
   ["/"]='200|Ship your SaaS this weekend'
   ["/api/v1/openapi.yaml"]='200|openapi: 3.1.0'
@@ -33,13 +74,13 @@ declare -A public_expect=(
   ["/changelog"]='200|Changelog'
   ["/docs"]='redirect|/docs/index'
   ["/docs/search"]='200|data-testid="docs-search-form"'
-  ["/login"]='redirect|/sign-in'
-  ["/logout"]='redirect|/sign-out'
+  ["/login"]="${login_expect}"
+  ["/logout"]="${logout_expect}"
   ["/pricing"]='200|Pricing'
   ["/privacy"]='200|Privacy Policy'
   ["/robots.txt"]='200|Sitemap:'
   ["/rss.xml"]='200|<rss version="2.0">'
-  ["/signup"]='redirect|/sign-up'
+  ["/signup"]="${signup_expect}"
   ["/sitemap.xml"]='200|urlset'
   ["/terms"]='200|Terms of Service'
 )
