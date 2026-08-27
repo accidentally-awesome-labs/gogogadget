@@ -174,6 +174,39 @@ htmx dispatches a bubbling `toast` event; the `toastRoot` component in
 `static/app.js` renders it and auto-dismisses after five seconds. Toasts carry
 `role="status"` and `data-testid="toast"`.
 
+The stack itself is `ui.ToastRegion`, rendered by both shells **outside**
+`#content`: navigation swaps only `#content`, so a region inside it would be
+destroyed mid-swap and lose its queued toasts and its document listener. The
+live-region semantics sit on the container, not on each toast — a live region
+has to exist before its message arrives or nothing is announced.
+
+Dismissal is two steps. `toastRoot.dismiss` sets `leaving` on the toast, which
+binds to `data-leaving="true"` and starts the exit transition; a timer then
+removes it from the array, because removing it from the array is what unmounts
+the element. The timer is deliberately not a `transitionend` listener: an x-for
+entry has no element handle in that scope, and a transition collapsed to 0ms by
+a reduced-motion preference never fires the event.
+
+## Overlay motion
+
+Dialogs, drawers, popovers and toasts animate in and out through
+`@starting-style` plus `transition-behavior: allow-discrete`, which is the only
+CSP-safe way to animate across the platform's own `display` and top-layer
+toggles. There is no JavaScript and no fallback path: a browser without either
+feature shows the overlay with no animation.
+
+| Surface | Enter | Duration |
+|---|---|---|
+| `.dialog` | fade + rise + 0.98 scale, backdrop fades with it | `--motion-base` |
+| `.drawer-{right,left,top,bottom}` | slide from the anchored edge | `--motion-base` |
+| `[popover]` (menus, popovers, hover cards, command palette) | fade + 0.98 scale | `--motion-fast` |
+| `.toast` | rise + fade in, fade + settle out | `--motion-base` |
+
+Every duration is a token, so the `prefers-reduced-motion` collapse to `0ms`
+covers all of them at once. Boosted navigation names its own transition region
+with `#content { view-transition-name: content }`, which keeps the browser's
+cross-fade to the swapped region instead of snapshotting the whole document.
+
 ## Row deletes
 
 Deletes are row swaps, confirmed in a real dialog. `hx-confirm` is gone from
@@ -290,8 +323,18 @@ Dark mode is **token flipping, not `dark:` variants**. `static/app.js` loads
 **without `defer`** so the theme IIFE runs pre-paint: an explicit `light`/`dark`
 `theme` cookie wins, then `localStorage.theme`, then `prefers-color-scheme`; it
 sets the `.dark` class on `<html>`. `input.css` maps it with
-`@custom-variant dark (&:where(.dark, .dark *));`. The toggle
-(`data-testid="theme-toggle"`) flips the class and persists the choice.
+`@custom-variant dark (&:where(.dark, .dark *));`, and `:root`/`.dark` declare
+`color-scheme` so the UA's own surfaces — scrollbars, native pickers — follow
+too.
+
+The control is `ui.ThemeToggle` (`data-testid="theme-toggle"`), rendered by
+both shells. It flips the class, persists the choice, and dispatches
+`ui:theme-changed` on `window`: anything holding a colour it read from the
+stylesheet has to be told, because a canvas keeps whatever palette it was drawn
+with. The chart adapter listens for exactly that event. The Alpine controller
+stays in `static/app.js` beside the pre-paint initialisation and
+`persistTheme` — splitting the toggle's state from the code that decides the
+initial class is how a control ends up disagreeing with the page it is on.
 
 Every colour a template can name is a token, and the `.dark` block in
 `input.css` re-declares the ones that change. That is why a `dark:` class in a
@@ -337,8 +380,8 @@ Templates never name a ramp step; they name a semantic alias drawn from it.
 The brand FILL deliberately does not flip: a primary button is the same colour
 in both themes. Only the text and tint slots do.
 
-State colour comes in four kinds — `success`, `warn`, `danger`, `info` — each
-with the same six slots, so any kind substitutes for any other:
+State colour comes in six kinds — `brand`, `info`, `success`, `warn`, `danger`,
+`neutral` — each with the same six slots, so any kind substitutes for any other:
 
 | Slot | Role |
 |---|---|
@@ -349,12 +392,29 @@ with the same six slots, so any kind substitutes for any other:
 | `{kind}-subtle-fg` | text on the tinted background |
 | `{kind}-border` | border on the tinted background |
 
-### Structural tokens
+`danger` carries a seventh, `danger-hover`, because it is the one solid fill
+with a hover step of its own: fading the fill with an opacity utility dimmed
+the label with it.
+
+### Structural, motion and elevation tokens
 
 Layout dimensions are tokens so a shell restyle is a value edit:
 `max-w-page` (72rem), `max-w-narrow` (48rem), `w-sidebar`, `w-docnav`,
 `h-topbar`/`top-topbar`, `h-navbar`/`top-navbar`, and `text-micro` (one step
 below `text-xs`, for the notification counter).
+
+Radius has exactly two meanings: `--radius-control` (0.5rem) for something the
+user manipulates and `--radius-surface` (0.75rem) for something that contains
+content. Elevation has exactly two: `--shadow-raised` for what sits ON the page
+(cards, tables) and `--shadow-overlay` for what floats OVER it (dialogs,
+toasts). Both shadows become a lifted border in dark mode, because a drop
+shadow has nothing lighter to fall on.
+
+Motion is two durations and one curve: `--motion-fast` (150ms, a state change
+the user caused), `--motion-base` (250ms, a larger transition) and
+`--ease-standard` (`cubic-bezier(0.2, 0, 0, 1)`, decelerating into rest). A
+`prefers-reduced-motion` block collapses both durations to `0ms` at the token,
+so an animated rule honours the OS setting without its own media query.
 
 Stacking order is three plain custom properties, because Tailwind has no
 `--z-*` namespace: `z-(--z-nav)` (40, sticky header and drawer),
@@ -372,7 +432,10 @@ variant class still renders the whole component (`class="btn-primary"` works;
   `.btn-icon`. The size axis is what removed 26 `!padding` overrides, and
   each rung names a `--control-height-*` so a button and the input beside it
   line up.
-- **Inputs** — `.input` + `.input-sm` / `.input-xs`, `.label`, `.field-error`.
+- **Inputs** — `.input` + `.input-sm` / `.input-xs` / `.input-lg`, `.label`,
+  `.field-error`. Callers reach the size axis through `Size` on the control's
+  Opts, never by writing the class: `inputClass` in `ui/shared.go` is the one
+  mapping, shared by all thirteen controls that carry `.input`.
 - **State** — one shared matrix. `.k-brand|info|success|warn|danger|neutral`
   (and the per-family aliases `.badge-*`, `.alert-*`, `.banner-*`,
   `.toast-*`) each declare the same six variables — `--ui-solid`,
@@ -383,10 +446,18 @@ variant class still renders the whole component (`class="btn-primary"` works;
   `alert-neutral`, `banner-brand`, `banner-success` and `banner-neutral`
   rendered unstyled.
 - **Structure** — `.page-section`, `.page-narrow`, `.page-header`,
-  `.table-card`, `.table-empty`, `.card`, `.card-actions`, `.toolbar`,
-  `.form-actions`, `.meter` / `.meter-fill`, `.count-badge`, `.code-chip`.
+  `.table-card`, `.table-empty`, `.card` + `.card-p-none` / `.card-p-sm` /
+  `.card-p-lg`, `.card-actions`, `.toolbar`, `.form-actions`,
+  `.meter` / `.meter-fill`, `.count-badge`, `.code-chip`, `.truncate-lines`.
+- **Density** — `.table-compact` tightens `th`/`td` from `px-4 py-3` to
+  `px-3 py-2`. `TableOpts.Density` and `DataTableOpts.Density` emit it.
+- **Emphasis** — `.badge-solid` and `.badge-outline` sit beside the bare
+  `.badge` (subtle) and read the same `--ui-*` matrix, so all six kinds get
+  all three fills without a rule per pair. `BadgeOpts.Emphasis` selects.
 - **Typography** — `.hero-title`, `.display-title`, `.page-title`,
-  `.section-title`, `.error-code`, `.eyebrow`, `.prose`.
+  `.section-title`, `.error-code`, `.eyebrow`, `.prose`. `.hero-title` and
+  `.display-title` step at the `sm` breakpoint; `.page-section` and
+  `.page-narrow` step their inset the same way.
 - **Navigation** — `.nav-link`, `.doc-link`, `.tab` / `.tab-bar`. All three key
   off `aria-current="page"`, set server-side by `navCurrent` and re-derived
   client-side by `syncAppNavigation` (the shell never swaps, so the server
@@ -540,29 +611,37 @@ These routes are registered only when `DEV_AUTH_BYPASS` is on, which
 
 ## Rebranding
 
-In order, then `make generate`:
+Write the new values into `theme.local.css` at the repo root — the project's
+own override file, which upstream never touches, so `ggg update` cannot
+conflict on it:
 
-1. **The brand ramp** — `--color-brand-50` … `--color-brand-950` in `@theme`.
-   Replace all eleven: the semantic aliases point at 600/500/400/50/950, and the
-   `.dark` tints use the far ends.
-2. **Semantic aliases** — only if the mapping changes (e.g. a light brand needs
-   `--color-brand-fg: #000`).
-3. **State triads** — only if the product's success/warn/danger hues differ.
-4. **Structural tokens** — layout dimensions, if the shell proportions change.
-5. **`emailStyle`** in `templates/theme.go` — mail clients strip `<style>` and
+```css
+:root { --color-brand: #16a34a; --color-brand-hover: #15803d; }
+```
+
+`make css`, reload, and every primary button, link and focus ring follows, in
+both themes, with `input.css` byte-identical to upstream. It wins from the top
+of the file because Tailwind emits its tokens into `@layer theme` and unlayered
+author CSS beats any layer at equal specificity. Full recipe, including what to
+declare in `@theme` versus `:root`, is in
+[extending](/docs/extending#add-a-theme-rebrand).
+
+Three things live outside the stylesheet and still need a hand:
+
+1. **`emailStyle`** in `templates/theme.go` — mail clients strip `<style>` and
    cannot read custom properties, so email is the one surface that inlines hex.
-   Mirror the light-mode token values.
-6. **`chrome.go`** — `BrandName`, `DocsEditBase`, and the nav/footer lists.
-7. **The catalogs** — the product name appears inside translated prose
+   `TestEmailStyleTracksTheLightThemeTokens` fails, naming the field, when it
+   drifts from the `input.css` tokens.
+2. **`chrome.go`** — `BrandName`, `DocsEditBase`, and the nav/footer lists. The
+   logo mark is `IconLogo` in `icons.templ` and `static/favicon.svg`.
+3. **The catalogs** — the product name appears inside translated prose
    (`email.footer`, `email.*.subject`). Those strings live in the `locales`
    block of the module that owns them, not in `internal/i18n/catalog_*.go`,
    which is generated: word order around a brand differs per language, so it
    is not a template variable.
-8. `make generate`, then `make visual-update` to regenerate the baselines and
-   `make visual` to prove the new ones compare cleanly.
 
-The logo mark itself is `IconLogo` in `icons.templ` and
-`static/favicon.svg`.
+Then `make generate`, `make visual-update` to regenerate the baselines and
+`make visual` to prove the new ones compare cleanly.
 
 ## Adding a page or component
 

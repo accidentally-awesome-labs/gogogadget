@@ -20,12 +20,13 @@ type TruncateOpts struct {
 // the string server-side would make the rest unreachable, and a screen reader
 // would read the truncated version as if it were the whole value.
 templ Truncate(o TruncateOpts) {
-	<span { rootWith("truncate", truncateClass(o.Lines), o.Attrs, "title", o.Text)... }>{ o.Text }</span>
-}
-
-func truncateClass(lines int) string {
-	if lines > 1 {
-		return "overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:" + fmt.Sprint(lines) + "]"
+	if o.Lines > 1 {
+		<span
+			{ rootWith("truncate", "truncate-lines", o.Attrs,
+				"title", o.Text,
+				"style", "--truncate-lines:"+fmt.Sprint(o.Lines))... }
+		>{ o.Text }</span>
+	} else {
+		<span { rootWith("truncate", "block truncate", o.Attrs, "title", o.Text)... }>{ o.Text }</span>
 	}
-	return "block truncate"
 }

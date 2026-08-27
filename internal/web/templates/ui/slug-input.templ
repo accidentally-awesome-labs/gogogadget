@@ -10,6 +10,7 @@ type SlugInputOpts struct {
 	Prefix      string
 	Hint, Error string
 	Required    bool
+	Size        Size
 	Attrs       Attrs
 }
 
@@ -25,7 +26,7 @@ templ SlugInput(o SlugInputOpts) {
 			@InputAddon(InputAddonOpts{Text: o.Prefix})
 		}
 		<input
-			{ rootWith("slug-input", "input border-0 rounded-none", o.Attrs,
+			{ rootWith("slug-input", inputClass(o.Size)+" border-0 rounded-none", o.Attrs,
 				"x-data", "uiSlug",
 				"data-from", o.From)... }
 			{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }

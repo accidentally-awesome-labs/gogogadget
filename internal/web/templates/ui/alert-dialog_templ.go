@@ -87,7 +87,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("alert-dialog", "dialog card max-w-md w-full", o.Attrs,
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, rootWith("alert-dialog", "dialog card max-w-md w-full k-"+string(NormalizeKind(o.Kind)), o.Attrs,
 			"role", "alertdialog",
 			"aria-labelledby", o.ID+"-title",
 			"aria-describedby", o.ID+"-message"))
@@ -100,7 +100,7 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		}
 		templ_7745c5c3_Err = Heading(HeadingOpts{
 			Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
-			Attrs: Attrs{ID: o.ID + "-title", Class: alertTitleColour(o.Kind)},
+			Attrs: Attrs{ID: o.ID + "-title", Class: "dialog-title"},
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -248,13 +248,6 @@ func AlertDialog(o AlertDialogOpts) templ.Component {
 		}
 		return nil
 	})
-}
-
-// alertTitleColour colours the title by kind. The kind is normalized first: an
-// unset kind would otherwise compose the class "text--text", which matches
-// nothing and renders an uncoloured heading.
-func alertTitleColour(kind Kind) string {
-	return "text-" + string(NormalizeKind(kind)) + "-text"
 }
 
 // dialogLevel defaults to 2, shared by every modal: a dialog's content is its

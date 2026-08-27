@@ -127,12 +127,16 @@ func TestAlertDialogIsDismissibleWithoutJavaScript(t *testing.T) {
 	assert.Contains(t, html, `id="confirm-delete-message"`)
 }
 
-// An unset kind must still produce a real colour class: "text--text" matches no
-// rule and renders an uncoloured heading in a destructive confirmation.
+// An unset kind must still produce a real colour class. The title used to
+// compose "text-{kind}-text" at render time, which for an unset kind was
+// "text--text" - a class matching nothing - and for four of the six kinds named
+// a utility Tailwind never emitted. It now reads --ui-text from the kind matrix
+// the dialog root carries, so one rule covers every kind.
 func TestAlertDialogNormalizesItsKind(t *testing.T) {
 	html := renderComponent(t, AlertDialog(AlertDialogOpts{ID: "d", Title: "T", Message: "M"}))
 	assert.NotContains(t, html, "text--text")
-	assert.Contains(t, html, "text-neutral-text")
+	assert.Contains(t, html, "k-neutral")
+	assert.Contains(t, html, "dialog-title")
 }
 
 // A declared TestID must reach the DOM, and a declared Class must reach the
@@ -257,7 +261,7 @@ func renderers() map[string]any {
 		"Button": Button, "ButtonLink": ButtonLink, "IconButton": IconButton, "Link": Link, "VisuallyHidden": VisuallyHidden, "Heading": Heading, "Text": Text, "Code": Code, "Kbd": Kbd, "Avatar": Avatar, "AvatarGroup": AvatarGroup, "Prose": Prose, "Truncate": Truncate, "ToggleButton": ToggleButton, "ToggleGroup": ToggleGroup, "ButtonGroup": ButtonGroup, "CopyButton": CopyButton,
 		"CharCounter": CharCounter, "CheckboxGroup": CheckboxGroup, "ColorInput": ColorInput, "Combobox": Combobox, "DateField": DateField, "DateRangeField": DateRangeField, "DateTimeField": DateTimeField, "FileDropzone": FileDropzone, "FileInput": FileInput, "FormActions": FormActions, "Hint": Hint, "InputAddon": InputAddon, "InputGroup": InputGroup, "Label": Label, "MultiSelect": MultiSelect, "NumberInput": NumberInput, "OTPInput": OTPInput, "PasswordInput": PasswordInput, "RangeInput": RangeInput, "SlugInput": SlugInput, "TagsInput": TagsInput, "TimeField": TimeField,
 		"Accordion": Accordion, "BackLink": BackLink, "Breadcrumbs": Breadcrumbs, "Collapsible": Collapsible, "CursorPagination": CursorPagination, "Disclosure": Disclosure, "Menubar": Menubar, "NavigationMenu": NavigationMenu, "SkipLink": SkipLink, "Steps": Steps, "TabPanels": TabPanels, "TableOfContents": TableOfContents,
-		"ErrorState": ErrorState, "ProgressBar": ProgressBar, "ProgressCircle": ProgressCircle, "Skeleton": Skeleton, "StatusDot": StatusDot, "Toast": Toast,
+		"ErrorState": ErrorState, "ProgressBar": ProgressBar, "ProgressCircle": ProgressCircle, "Skeleton": Skeleton, "StatusDot": StatusDot, "Toast": Toast, "ToastRegion": ToastRegion, "ThemeToggle": ThemeToggle,
 		"ConfirmAction": ConfirmAction, "ContextMenu": ContextMenu, "Drawer": Drawer, "HoverCard": HoverCard,
 		"AspectRatio": AspectRatio, "Attachment": Attachment, "Center": Center, "ColumnHeader": ColumnHeader, "DataTable": DataTable, "RowActions": RowActions, "ScrollArea": ScrollArea, "Section": Section, "SelectionBar": SelectionBar, "Split": Split, "StatGroup": StatGroup, "StickyBar": StickyBar, "TableToolbar": TableToolbar, "Tile": Tile, "Toolbar": Toolbar,
 		"NotificationItem": NotificationItem, "ActivityItem": ActivityItem, "Timeline": Timeline, "Comment": Comment, "CommentThread": CommentThread, "Composer": Composer, "ChatMessage": ChatMessage, "ChatLog": ChatLog, "MentionChip": MentionChip, "DeliveryStatus": DeliveryStatus, "UsageCard": UsageCard, "OnboardingChecklist": OnboardingChecklist, "SettingsSection": SettingsSection, "MemberItem": MemberItem,

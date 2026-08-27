@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/textarea.templ",
         "target": "internal/web/templates/ui/textarea.templ",
         "class": "templ",
-        "sha256": "1cc6f8a1cf3e199e25f1a9e8b802c143b72f7374ecc47370713ff2fa9de15497",
+        "sha256": "7a801913ca36a6a3ffae5e844cad8bdc90c0a6d39f6f60e06ca52828d3266d2d",
         "rewrite_module": true,
         "contract": true
       }

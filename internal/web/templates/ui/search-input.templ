@@ -16,6 +16,7 @@ type SearchInputOpts struct {
 	GetURL      string
 	Target      string
 	IndicatorID string
+	Size        Size
 	Attrs       Attrs
 }
 
@@ -68,7 +69,7 @@ templ SearchInput(o SearchInputOpts) {
 		// browser keeps the FIRST, which meant any caller who set Attrs.Class
 		// silently lost the field's own `input max-w-sm`.
 		<input
-			{ attributes(withClass(o.Attrs, "input max-w-sm"))... }
+			{ attributes(withClass(o.Attrs, inputClass(o.Size)+" max-w-sm"))... }
 			type="search" name={ o.Name } value={ o.Value } placeholder={ o.Placeholder }
 			if o.Target != "" {
 				hx-get={ o.GetURL }

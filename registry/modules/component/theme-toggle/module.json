@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/theme-toggle",
+    "kind": "component",
+    "name": "theme-toggle",
+    "revision": 1,
+    "contract": 1,
+    "title": "Theme toggle",
+    "description": "The ThemeToggle renderer and its options.",
+    "requires": [
+      "element/button",
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/theme-toggle.templ",
+        "target": "internal/web/templates/ui/theme-toggle.templ",
+        "class": "templ",
+        "sha256": "fa3f20cb17a892851a73fdc8c4704dc50c44e7ebec2470f587d56ab293c7707b",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "theme-toggle",
+          "family": "actions",
+          "engine": "alpine",
+          "signature": "templ ThemeToggle(o ThemeToggleOpts)",
+          "summary": "Switches the document between the light and dark themes.",
+          "guidance": "It is the one shell control with no useful no-script behaviour: the theme is a client preference, and only the browser knows which way \"system\" points. The pre-paint script in the document head sets the initial class, so the page never flashes the wrong theme; this control flips it and persists the result. Its Alpine controller (themeToggle) is registered by the shell in static/app.js rather than in a module fragment, because it shares persistTheme and the pre-paint initialisation with the shell.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

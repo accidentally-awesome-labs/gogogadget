@@ -133,7 +133,8 @@ templ adminFlagsTable(d FlagsData) {
 								@ui.NumberInput(ui.NumberInputOpts{
 									ID: "rollout-" + f.Key, Name: "rollout",
 									Value: fmt.Sprint(f.Rollout), Min: "0", Max: "100",
-									Attrs: ui.Attrs{Class: "input-xs w-20", TestID: "flag-rollout-" + f.Key},
+									Size:  ui.SizeXS,
+									Attrs: ui.Attrs{Class: "w-20", TestID: "flag-rollout-" + f.Key},
 								})
 							}
 							@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "flags.set"), Type: ui.TypeSubmit, Size: ui.SizeXS})

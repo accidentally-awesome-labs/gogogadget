@@ -44,7 +44,7 @@ type AlertDialogOpts struct {
 templ AlertDialog(o AlertDialogOpts) {
 	<dialog
 		id={ o.ID }
-		{ rootWith("alert-dialog", "dialog card max-w-md w-full", o.Attrs,
+		{ rootWith("alert-dialog", "dialog card max-w-md w-full k-"+string(NormalizeKind(o.Kind)), o.Attrs,
 			"role", "alertdialog",
 			"aria-labelledby", o.ID+"-title",
 			"aria-describedby", o.ID+"-message")... }
@@ -52,7 +52,7 @@ templ AlertDialog(o AlertDialogOpts) {
 		<form method="dialog" class="flex flex-col gap-4">
 			@Heading(HeadingOpts{
 				Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
-				Attrs: Attrs{ID: o.ID + "-title", Class: alertTitleColour(o.Kind)},
+				Attrs: Attrs{ID: o.ID + "-title", Class: "dialog-title"},
 			})
 			<p id={ o.ID + "-message" } class="text-sm text-fg-muted">{ o.Message }</p>
 			<div class="flex justify-end gap-2">
@@ -78,13 +78,6 @@ templ AlertDialog(o AlertDialogOpts) {
 			</div>
 		</form>
 	</dialog>
-}
-
-// alertTitleColour colours the title by kind. The kind is normalized first: an
-// unset kind would otherwise compose the class "text--text", which matches
-// nothing and renders an uncoloured heading.
-func alertTitleColour(kind Kind) string {
-	return "text-" + string(NormalizeKind(kind)) + "-text"
 }
 
 // dialogLevel defaults to 2, shared by every modal: a dialog's content is its

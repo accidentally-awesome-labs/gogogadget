@@ -140,9 +140,24 @@ templ Gallery() {
 		}
 
 		@gallerySection("Badges") {
-			<div class="flex flex-wrap items-center gap-2">
-				for _, kind := range ui.Kinds {
-					@ui.Badge(ui.BadgeOpts{Text: string(kind), Kind: kind})
+			<div class="space-y-3">
+				for _, emphasis := range ui.Emphases {
+					<div class="flex flex-wrap items-center gap-2">
+						<span class="eyebrow w-16">{ string(emphasis) }</span>
+						for _, kind := range ui.Kinds {
+							@ui.Badge(ui.BadgeOpts{Text: string(kind), Kind: kind, Emphasis: emphasis})
+						}
+					</div>
+				}
+			</div>
+		}
+
+		@gallerySection("Cards — padding scale") {
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				for _, padding := range ui.Paddings {
+					@ui.Card(ui.CardOpts{Padding: padding}) {
+						<p class="text-sm text-fg-muted">{ "Padding: " + string(padding) }</p>
+					}
 				}
 			</div>
 		}
@@ -246,6 +261,21 @@ templ Gallery() {
 					@ui.EmptyState(ui.EmptyStateOpts{Body: "Nothing here yet — this is table-empty.", Variant: ui.EmptyInline})
 				}
 			</div>
+			<div class="mt-4">
+				@ui.Table(ui.TableOpts{
+					Caption: "The same rows at compact density",
+					Density: ui.DensityCompact,
+					Attrs:   ui.Attrs{TestID: "gallery-table-compact"},
+				}) {
+					<thead>
+						<tr><th>Name</th><th>Status</th></tr>
+					</thead>
+					<tbody>
+						<tr><td class="font-medium">First</td><td>@ui.Badge(ui.BadgeOpts{Text: "success", Kind: ui.KindSuccess})</td></tr>
+						<tr><td class="font-medium">Second</td><td>@ui.Badge(ui.BadgeOpts{Text: "warn", Kind: ui.KindWarn})</td></tr>
+					</tbody>
+				}
+			</div>
 		}
 
 		// Both of these used to target #gallery-pager, which no page rendered,
@@ -289,17 +319,16 @@ templ Gallery() {
 				@ui.Field(ui.FieldOpts{Name: "gallery-broken", Label: "Name", Error: "Name is required.", Required: false}) {
 			@ui.TextInput(ui.TextInputOpts{Name: "gallery-broken", Type: "text", Value: "", Placeholder: "Project name", Required: false, Error: "Name is required."})
 		}
-				<div>
-					<label class="label" for="gallery-select">Select</label>
-					<select id="gallery-select" class="input">
-						<option>One</option>
-						<option>Two</option>
-					</select>
-				</div>
-				<div>
-					<label class="label" for="gallery-small">Small input (input-sm)</label>
-					<input id="gallery-small" type="text" class="input input-sm"/>
-				</div>
+				@ui.Field(ui.FieldOpts{Name: "gallery-select", Label: "Select"}) {
+					@ui.Select(ui.SelectOpts{Name: "gallery-select", Options: []ui.Option{
+						{Value: "one", Label: "One"}, {Value: "two", Label: "Two"},
+					}})
+				}
+				for _, size := range ui.Sizes {
+					@ui.Field(ui.FieldOpts{Name: "gallery-size-" + string(size), Label: "Input at size " + string(size)}) {
+						@ui.TextInput(ui.TextInputOpts{Name: "gallery-size-" + string(size), Size: size, Placeholder: string(size)})
+					}
+				}
 				<div class="form-actions">
 					<button type="button" class="btn btn-primary">Save</button>
 					@ui.Spinner(ui.SpinnerOpts{})
@@ -411,6 +440,13 @@ templ Gallery() {
 					@ui.ToggleButton(ui.ToggleButtonOpts{Label: "Not starred"})
 					@ui.CopyButton(ui.CopyButtonOpts{Value: "ggg_sk_example_value", Label: "Copy token", CopiedLabel: "Copied", Size: ui.SizeSM})
 				</div>
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.ThemeToggle(ui.ThemeToggleOpts{
+						Label: "Toggle dark mode",
+						Attrs: ui.Attrs{TestID: "gallery-theme-toggle"},
+					})
+					<span class="text-sm text-fg-muted">The shell's own control — clicking it flips this page too.</span>
+				</div>
 				<div class="flex flex-wrap items-center gap-6">
 					@ui.ToggleGroup(ui.ToggleGroupOpts{Label: "Density", Options: []ui.ToggleOption{
 						{Value: "cosy", Label: "Cosy", Selected: true},
@@ -452,8 +488,12 @@ templ Gallery() {
 						{Name: "Alan Turing"}, {Name: "Katherine Johnson"}, {Name: "Jean Bartik"},
 					}})
 				</div>
-				<div class="max-w-xs">
+				<div class="max-w-xs space-y-2">
 					@ui.Truncate(ui.TruncateOpts{Text: "a-very-long-project-identifier-that-will-not-fit-on-one-line"})
+					@ui.Truncate(ui.TruncateOpts{
+						Lines: 3,
+						Text:  "A three-line clamp keeps a description readable in a card without letting one entry push every neighbour down the page. The full string stays in the DOM and in the title attribute, so it is still selectable and still findable with the browser's own find.",
+					})
 				</div>
 				@ui.Separator(ui.SeparatorOpts{Label: "Long-form content"})
 				@ui.Prose(ui.ProseOpts{}) {
@@ -636,6 +676,13 @@ templ Gallery() {
 					@ui.Toast(ui.ToastOpts{Kind: ui.KindSuccess, Text: "Project created."})
 					@ui.Toast(ui.ToastOpts{Kind: ui.KindDanger, Text: "Upload failed.", Live: ui.LiveAssertive, Dismissible: true})
 				</div>
+				// Rendered in flow rather than fixed: the shell already has the
+				// live region pinned bottom-right, and two stacks in the same
+				// corner would sit on top of each other. This copy shows the
+				// region's own markup and receives the same toast events.
+				@ui.ToastRegion(ui.ToastRegionOpts{Attrs: ui.Attrs{
+					Class: "static", TestID: "gallery-toast-region",
+				}})
 				<div class="max-w-md">
 					@ui.Skeleton(ui.SkeletonOpts{Lines: 3})
 				</div>
@@ -1322,6 +1369,7 @@ templ Gallery() {
 				}
 				<button type="button" class="btn btn-primary btn-sm" x-data="uiDialog" x-on:click="open('gallery-dialog')">Open dialog</button>
 				<button type="button" class="btn btn-danger btn-sm" x-data="uiDialog" x-on:click="open('gallery-alert')">Confirm delete</button>
+				<button type="button" class="btn btn-ghost btn-sm" x-data="uiDialog" x-on:click="open('gallery-alert-neutral')">Neutral confirm</button>
 			</div>
 			@ui.Dialog(ui.DialogOpts{ID: "gallery-dialog", Title: "Invite a teammate"}) {
 				@ui.Field(ui.FieldOpts{Name: "invite", Label: "Email"}) {
@@ -1332,6 +1380,11 @@ templ Gallery() {
 				ID: "gallery-alert", Title: "Delete project?",
 				Message:      "This removes the project and its files. It cannot be undone.",
 				ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+			})
+			@ui.AlertDialog(ui.AlertDialogOpts{
+				ID: "gallery-alert-neutral", Title: "Leave without saving?",
+				Message:      "The neutral kind takes its title colour from the same matrix every other kind reads.",
+				ConfirmLabel: "Leave", CancelLabel: "Stay",
 			})
 		}
 	</section>

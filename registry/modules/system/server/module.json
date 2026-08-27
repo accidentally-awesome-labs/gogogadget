@@ -180,7 +180,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "357924cfe0b79aa4695aa2d84e13aa045b207cdccc364891c1c8b8b7f4e93487",
+        "sha256": "4a24de5722b263b5297e74523693f16c467f71aa51d74754a76c1a055fd9f630",
         "rewrite_module": true,
         "contract": false
       },
@@ -204,7 +204,7 @@
         "source": "internal/web/templates/layouts.templ",
         "target": "internal/web/templates/layouts.templ",
         "class": "templ",
-        "sha256": "43c7532c1f717c6a617d571eb9087ab7d7f831fd49ffc15d5f94316aff2332bb",
+        "sha256": "ed7232f59d6f41fa2dc2eb8448e086e77310865590b634978b0c7ba5570c3ae3",
         "rewrite_module": true,
         "contract": false
       },
@@ -212,7 +212,7 @@
         "source": "internal/web/templates/nav.templ",
         "target": "internal/web/templates/nav.templ",
         "class": "templ",
-        "sha256": "784a84e8e2697ff31a7821c6b5aeffb643c8d9a70bc0b5b666eac8e3636189a8",
+        "sha256": "94caabf435f5f58811058df51b64b9fd4a5802af5994c28395ddd3c447571eae",
         "rewrite_module": true,
         "contract": false
       },
@@ -237,6 +237,14 @@
         "target": "internal/web/templates/theme.go",
         "class": "go",
         "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/theme_test.go",
+        "target": "internal/web/templates/theme_test.go",
+        "class": "test",
+        "sha256": "c4a47be453f851b0a4ab6c68db0265f346f0a20bd1dd25f95720d4fe9f05117f",
         "rewrite_module": true,
         "contract": false
       },
@@ -511,7 +519,9 @@
           "id": "not-found",
           "path": "/nope",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",
@@ -539,6 +549,7 @@
         "a11y.menu": "Open menu",
         "a11y.theme": "Toggle dark mode",
         "common.current_plan": "Current plan",
+        "docs.nav_toggle": "Documentation menu",
         "errors.back_home": "Back to home",
         "errors.code_403": "403",
         "errors.code_404": "404",
@@ -611,6 +622,7 @@
         "a11y.menu": "Abrir menú",
         "a11y.theme": "Cambiar a modo oscuro",
         "common.current_plan": "Plan actual",
+        "docs.nav_toggle": "Menú de documentación",
         "errors.back_home": "Volver al inicio",
         "errors.code_403": "403",
         "errors.code_404": "404",

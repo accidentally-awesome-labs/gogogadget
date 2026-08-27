@@ -45,7 +45,7 @@ transitive closure itself.
 | `element/ui-core` | UI core | — | `replacement-required` |
 | `element/visually-hidden` | VisuallyHidden | `element/ui-core` | `free` |
 
-## Components (122)
+## Components (124)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
@@ -163,10 +163,12 @@ transitive closure itself.
 | `component/terminal-page` | TerminalPage | `element/ui-core` | `free` |
 | `component/text-input` | TextInput | `element/ui-core` | `free` |
 | `component/textarea` | Textarea | `element/ui-core` | `free` |
+| `component/theme-toggle` | Theme toggle | `element/button` `element/icon` `element/ui-core` | `free` |
 | `component/tile` | Tile | `element/icon` `element/ui-core` | `free` |
 | `component/time-field` | TimeField | `element/ui-core` | `free` |
 | `component/timeline` | Timeline | `element/ui-core` | `free` |
 | `component/toast` | Toast | `element/icon` `element/icon-button` `element/ui-core` | `free` |
+| `component/toast-region` | Toast region | `component/toast` `element/ui-core` | `free` |
 | `component/toolbar` | Toolbar | `element/ui-core` | `free` |
 | `component/tooltip` | Tooltip | `element/ui-core` | `free` |
 | `component/tree` | Tree | `element/icon` `element/ui-core` | `free` |

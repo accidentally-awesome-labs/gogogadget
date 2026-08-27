@@ -198,6 +198,13 @@ document.addEventListener("alpine:init", function () {
         document.documentElement.classList.toggle("dark", this.dark);
         localStorage.setItem("theme", next);
         persistTheme(next);
+        // Anything holding a colour it read from the stylesheet has to be told:
+        // a canvas keeps whatever palette it was drawn with, so a chart stayed
+        // in the old theme until the next navigation repainted it. Dispatched
+        // on document, not window: the chart adapter listens on document, and
+        // an event fired at window never reaches a listener below it. bubbles
+        // carries it up to window as well, so both are addressable.
+        document.dispatchEvent(new CustomEvent("ui:theme-changed", { bubbles: true }));
       },
     };
   });
@@ -325,11 +332,26 @@ document.addEventListener("alpine:init", function () {
           type: type || "info",
           message: message || "",
           cls: "toast-" + kind,
+          // leaving drives the exit transition through a bound data attribute.
+          // It starts false so the toast renders at rest and the CSS
+          // @starting-style rule owns the entrance.
+          leaving: false,
         };
         this.toasts.push(t);
+        setTimeout(function () { self.dismiss(t); }, 5000);
+      },
+      // Removing the toast from the array unmounts the element, so the removal
+      // has to wait for the exit transition or there is no exit at all. The
+      // delay is a timer rather than a transitionend listener on purpose: an
+      // x-for entry has no element handle in this scope, and a transition that
+      // is interrupted or collapsed to 0ms by a reduced-motion preference never
+      // fires the event - which would leave the toast on screen forever.
+      dismiss: function (t) {
+        var self = this;
+        t.leaving = true;
         setTimeout(function () {
           self.toasts = self.toasts.filter(function (x) { return x.id !== t.id; });
-        }, 5000);
+        }, 300);
       },
       init: function () {
         var self = this;

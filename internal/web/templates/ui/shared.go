@@ -129,3 +129,22 @@ func gapClass(gap Gap) string {
 	}
 	return "gap-4"
 }
+
+// inputClass maps the control-scale axis onto the .input component classes.
+//
+// One helper rather than a switch per control: fourteen form controls share the
+// .input base, and a size axis reimplemented fourteen times is fourteen chances
+// to disagree. It exists at all because pages were reaching past the typed API
+// to write Attrs.Class: "input-xs" - which no test could see and no component
+// could size consistently.
+func inputClass(size Size) string {
+	switch size.Value() {
+	case SizeXS:
+		return "input input-xs"
+	case SizeSM:
+		return "input input-sm"
+	case SizeLG:
+		return "input input-lg"
+	}
+	return "input"
+}

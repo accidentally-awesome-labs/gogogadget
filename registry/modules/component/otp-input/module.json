@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/otp-input.templ",
         "target": "internal/web/templates/ui/otp-input.templ",
         "class": "templ",
-        "sha256": "c89a931f2a6030dfcf80a14828163270ce4c8deb87fca1306bf504e0331a3d45",
+        "sha256": "a7a68dcf995f42d2e2ac42b2c488776c902992450b2bb71bd4b81e8e5a6c33df",
         "rewrite_module": true,
         "contract": true
       },

@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/tags-input.templ",
         "target": "internal/web/templates/ui/tags-input.templ",
         "class": "templ",
-        "sha256": "935f13d4e8c88ce35f39d87d0d350ca64996509ce1bfc94818786ff4c1aa3dbc",
+        "sha256": "6fbf61c1c9fdcfb7bb62ef5a71f09dd98dc4c28afdf4aa49bb2a661db394f8ed",
         "rewrite_module": true,
         "contract": true
       }

@@ -119,21 +119,12 @@ templ skipLink() {
 	<a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:z-(--z-overlay) focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand focus:text-brand-fg focus:rounded-lg">{ i18n.T(ctx, "layout.skip_content") }</a>
 }
 
-// toastRoot renders the live toast stack. The variant class is computed in
-// app.js (toastRoot.push) rather than as a :class ternary here: a pure
-// property access is unambiguously CSP-safe, and the type→colour mapping is
-// one decision that belongs in one place.
+// toastRoot stays a named fragment because both shells render it, but the
+// markup now lives in ui.ToastRegion - a fixed stack with live-region
+// semantics and an Alpine hook is a component, and the shell had the only copy
+// of it in the whole catalog.
 templ toastRoot() {
-	<div x-data="toastRoot" class="fixed bottom-4 right-4 z-(--z-overlay) flex flex-col gap-2" role="status" aria-live="polite">
-		<template x-for="t in toasts" :key="t.id">
-			<div
-				data-testid="toast"
-				class="toast"
-				:class="t.cls"
-				x-text="t.message"
-			></div>
-		</template>
-	</div>
+	@ui.ToastRegion(ui.ToastRegionOpts{})
 }
 
 // phConsent is the analytics consent banner (rendered only when PostHog is
@@ -199,7 +190,7 @@ templ AppLayout(page Page, content templ.Component) {
 					@Topbar(page)
 					@announcementBanner(page)
 					@billingBanner(page)
-					@contentBox("flex-1 p-6 max-w-page w-full mx-auto", content)
+					@contentBox("flex-1 p-4 md:p-6 max-w-page w-full mx-auto", content)
 				</div>
 			</div>
 			@toastRoot()
@@ -282,45 +273,80 @@ templ docsBody(page Page, content templ.Component) {
 	<div class="max-w-page mx-auto px-4 py-8 flex gap-10">
 		<aside class="hidden md:block w-docnav shrink-0">
 			<nav class="sticky top-navbar pt-8 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
-				if page.Docs != nil {
-					@ui.Form(ui.FormOpts{
-						Method: "get", Action: "/docs/search",
-						Attrs: ui.Attrs{Class: "mb-6", TestID: "docs-search-form"},
-					}) {
-						<input
-							type="search" name="q"
-							placeholder={ i18n.T(ctx, "docs.search_placeholder") }
-							aria-label={ i18n.T(ctx, "docs.search_aria") }
-							class="input input-sm"
-						/>
-					}
-				}
-				if page.Docs != nil {
-					for _, section := range page.Docs.Sections {
-						<div>
-							<p class="eyebrow mb-2">{ section.Name }</p>
-							<ul class="space-y-1">
-								for _, doc := range section.Pages {
-									<li>
-										<a
-											href={ "/docs/" + doc.Slug }
-											hx-boost="true"
-											hx-target={ NavTarget }
-											hx-select={ NavTarget }
-											hx-swap={ NavSwap }
-											aria-current={ navCurrent(page, "/docs/" + doc.Slug) }
-											class="doc-link"
-										>{ doc.Title }</a>
-									</li>
-								}
-							</ul>
-						</div>
-					}
-				}
+				@docsSearch(page, "q", "docs-search-form")
+				@docsSections(page)
 			</nav>
 		</aside>
 		<div class="min-w-0 flex-1 pb-16">
+			// Below md the aside is gone, which left a docs reader with no way
+			// to reach any other page: the only navigation was the browser's
+			// Back button. A native <details> needs no script, no focus trap
+			// and no state to restore across a boosted swap.
+			<details class="md:hidden mb-6" data-testid="docs-nav-mobile">
+				<summary class="btn btn-ghost btn-sm">{ i18n.T(ctx, "docs.nav_toggle") }</summary>
+				<nav class="mt-4 space-y-6 text-sm" aria-label={ i18n.T(ctx, "a11y.documentation") }>
+					@docsSearch(page, "q-mobile", "docs-search-form-mobile")
+					@docsSections(page)
+				</nav>
+			</details>
 			@content
 		</div>
 	</div>
+}
+
+// docsSearch and docsSections are shared by the sidebar and the mobile
+// disclosure. Two copies of this markup would drift on the first change, and
+// the copy nobody looks at on a desktop is the phone one.
+//
+// controlID and testID are parameters because both copies are in the DOM at
+// once - only one is displayed at a time, but a duplicated element id makes
+// every `for=` resolve to the first match, and a duplicated test id turns a
+// Playwright locator into a strict-mode failure.
+templ docsSearch(page Page, controlID, testID string) {
+	if page.Docs != nil {
+		@ui.Form(ui.FormOpts{
+			Method: "get", Action: "/docs/search",
+			Attrs: ui.Attrs{Class: "mb-6", TestID: testID},
+		}) {
+			@ui.Field(ui.FieldOpts{
+				ID:          controlID,
+				Name:        "q",
+				Label:       i18n.T(ctx, "docs.search_aria"),
+				HiddenLabel: true,
+			}) {
+				@ui.TextInput(ui.TextInputOpts{
+					ID:          controlID,
+					Name:        "q",
+					Type:        ui.InputTypeSearch,
+					Placeholder: i18n.T(ctx, "docs.search_placeholder"),
+					Size:        ui.SizeSM,
+				})
+			}
+		}
+	}
+}
+
+templ docsSections(page Page) {
+	if page.Docs != nil {
+		for _, section := range page.Docs.Sections {
+			<div>
+				<p class="eyebrow mb-2">{ section.Name }</p>
+				<ul class="space-y-1">
+					for _, doc := range section.Pages {
+						<li>
+							<a
+								href={ "/docs/" + doc.Slug }
+								hx-boost="true"
+								hx-target={ NavTarget }
+								hx-select={ NavTarget }
+								hx-swap={ NavSwap }
+								aria-current={ navCurrent(page, "/docs/" + doc.Slug) }
+								class="doc-link"
+							>{ doc.Title }</a>
+						</li>
+					}
+				</ul>
+			</div>
+		}
+	}
 }

@@ -12,6 +12,7 @@ type ComboboxOpts struct {
 	Placeholder string
 	Hint, Error string
 	Required    bool
+	Size        Size
 	Attrs       Attrs
 }
 
@@ -23,7 +24,7 @@ type ComboboxOpts struct {
 // of that and usually ships without the keyboard half.
 templ Combobox(o ComboboxOpts) {
 	<input
-		{ controlRootWith("combobox", "input", o.Attrs, "list", controlID(o.ID, o.Attrs, o.Name)+"-options")... }
+		{ controlRootWith("combobox", inputClass(o.Size), o.Attrs, "list", controlID(o.ID, o.Attrs, o.Name)+"-options")... }
 		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
 		type="text"
 		id={ controlID(o.ID, o.Attrs, o.Name) }

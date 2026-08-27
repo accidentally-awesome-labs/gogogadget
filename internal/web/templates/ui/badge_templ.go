@@ -8,11 +8,14 @@ package ui
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// BadgeOpts is a small state pill: Kind picks the semantic colour.
+// BadgeOpts is a small state pill: Kind picks the semantic colour and Emphasis
+// picks the fill. Subtle is the default, because a badge that shouts by
+// accident is worse than one that whispers.
 type BadgeOpts struct {
-	Text  string
-	Kind  Kind
-	Attrs Attrs
+	Text     string
+	Kind     Kind
+	Emphasis Emphasis
+	Attrs    Attrs
 }
 
 func Badge(o BadgeOpts) templ.Component {
@@ -40,7 +43,7 @@ func Badge(o BadgeOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("badge", "badge badge-"+string(NormalizeKind(o.Kind)), o.Attrs))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("badge", badgeClass(o.Kind, o.Emphasis), o.Attrs))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +54,7 @@ func Badge(o BadgeOpts) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(o.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/badge.templ`, Line: 11, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/ui/badge.templ`, Line: 14, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -63,6 +66,19 @@ func Badge(o BadgeOpts) templ.Component {
 		}
 		return nil
 	})
+}
+
+// badgeClass composes the kind and emphasis axes. Both read the same --ui-*
+// matrix, so all six kinds support all three fills without a rule per pair.
+func badgeClass(kind Kind, emphasis Emphasis) string {
+	cls := "badge badge-" + string(NormalizeKind(kind))
+	switch emphasis.Value() {
+	case EmphasisSolid:
+		cls += " badge-solid"
+	case EmphasisOutline:
+		cls += " badge-outline"
+	}
+	return cls
 }
 
 var _ = templruntime.GeneratedTemplate

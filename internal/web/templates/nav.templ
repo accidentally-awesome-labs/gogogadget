@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 func navCurrent(page Page, match string) string {
@@ -24,18 +25,11 @@ templ logo() {
 	</a>
 }
 
+// themeToggle is the shell's wrapper around ui.ThemeToggle: it resolves the
+// accessible name from the request's locale, which the ui package - markup
+// only, no i18n import - cannot do for itself.
 templ themeToggle() {
-	<button
-		type="button"
-		x-data="themeToggle"
-		@click="toggle"
-		class="btn btn-ghost btn-icon"
-		aria-label={ i18n.T(ctx, "a11y.theme") }
-		data-testid="theme-toggle"
-	>
-		@Icon(IconSun, "w-5 h-5", templ.Attributes{"x-show": "!dark"})
-		@Icon(IconMoon, "w-5 h-5", templ.Attributes{"x-show": "dark", "x-cloak": true})
-	</button>
+	@ui.ThemeToggle(ui.ThemeToggleOpts{Label: i18n.T(ctx, "a11y.theme")})
 }
 
 // isAnchorLink reports an in-page target. Boosting these is worse than leaving

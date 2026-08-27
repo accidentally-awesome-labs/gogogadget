@@ -18,10 +18,10 @@ templ Skeleton(o SkeletonOpts) {
 	<div { rootWith("skeleton", "space-y-2", o.Attrs, "aria-hidden", "true")... }>
 		if o.Lines > 1 {
 			for i := 0; i < o.Lines; i++ {
-				<div class={ "h-4 rounded bg-surface-raised animate-pulse " + skeletonLineWidth(i, o.Lines) }></div>
+				<div class={ "skeleton h-4 " + skeletonLineWidth(i, o.Lines) }></div>
 			}
 		} else {
-			<div class="h-4 rounded bg-surface-raised animate-pulse w-full"></div>
+			<div class="skeleton h-4 w-full"></div>
 		}
 	</div>
 }

@@ -680,31 +680,108 @@ directory in the registry.
 
 ## Add a theme (rebrand)
 
-The whole product's look is a value edit, in this order:
+`theme.local.css` at the repo root is the seam. It is yours: upstream never
+writes to it, so `ggg update` can never conflict on it, and every token in
+`input.css` can be replaced from it without touching `input.css` at all. That
+is what keeps a rebranded project mergeable with the registry.
 
-1. **Brand ramp** — replace all eleven `--color-brand-50` … `--color-brand-950`
-   in the `@theme` block of `input.css`. The semantic aliases read 600/500/400
-   and the tints read 50/950, so a partial swap leaves the tints on the old
-   hue.
-2. **Semantic aliases** — `--color-brand`, `-hover`, `-fg`, `-fg-muted`,
-   `-text`, `-subtle`, `-subtle-fg`. Only if the mapping changes (a pale brand
-   needs a dark `--color-brand-fg`).
-3. **State triads** — `success` / `warn` / `danger` / `info`, six slots each,
-   plus their `.dark` overrides. The `.k-*` matrix reads them, so every
-   semantic family follows.
-4. **Structural tokens** — `--container-page`, `--container-narrow`,
-   `--spacing-sidebar`, `--spacing-docnav`, `--spacing-topbar`,
-   `--spacing-navbar` if the shell proportions change.
-5. **Email** — `emailStyle` in `internal/web/templates/theme.go`. Mail clients
+```css
+/* theme.local.css */
+:root {
+  /* Ramp steps first: a few tokens are declared as var(--color-brand-N)
+     rather than as a hex, so overriding only the aliases leaves them behind. */
+  --color-brand-400:        #4ade80;
+  --color-brand-500:        #22c55e;
+  --color-brand-600:        #16a34a;
+  --color-brand-950:        #052e16;
+
+  --color-brand:            #16a34a;
+  --color-brand-hover:      #15803d;
+  --color-brand-text:       #15803d;
+  --color-brand-subtle:     #f0fdf4;
+  --color-brand-subtle-fg:  #14532d;
+  --radius-control: 0.25rem;
+}
+
+.dark {
+  --color-brand-text:      #86efac;
+  --color-brand-subtle:    #052e16;
+  --color-brand-subtle-fg: #86efac;
+}
+```
+
+`make css`, reload: every primary button, link and focus ring is green in both
+themes, and `input.css` is byte-identical to upstream.
+
+The ramp steps are in that list for a reason. `--color-focus-ring` reads
+`--color-brand-500` in light and `--color-brand-400` in dark, and `.dark`'s
+brand text and tints read 400/950/300. Override only the semantic aliases and
+those keep the old hue — which shows up as an indigo focus ring on a green
+button.
+
+**Why a rule near the top of the file still wins.** CSS requires every
+`@import` to precede other statements, so the import of `theme.local.css`
+cannot sit at the end of `input.css`. It does not have to. Tailwind emits its
+tokens into `@layer theme` and its component classes into `@layer components`,
+and *unlayered author CSS beats any layer at equal specificity*. A plain rule
+in `theme.local.css` therefore overrides the boilerplate wherever it appears.
+
+Two kinds of edit:
+
+- **Override** a token or a component class: write a plain, unlayered rule.
+  Every utility and every component class reads its colour through `var()`, so
+  changing the variable restyles the whole product in both themes.
+- **Add** a token that needs generated utilities — a `bg-accent` class that does
+  not exist yet — inside `@theme { … }`. Tailwind only emits a utility for a
+  name it knows about, so a plain `:root` declaration gives you
+  `var(--accent)` and no `bg-accent`.
+
+A **module CSS fragment** overrides the same way and by the same rule: an
+unlayered rule in the fragment beats the boilerplate, and `@theme` /
+`@layer components` blocks in it extend the system. The generated import list
+(`internal/web/styles/modules_registry_gen.css`) loads before
+`theme.local.css`, so the project always wins over a module.
+
+### What the override file cannot reach
+
+Three things live outside the stylesheet and still need editing for a full
+rebrand:
+
+1. **Email** — `emailStyle` in `internal/web/templates/theme.go`. Mail clients
    strip `<style>` and cannot read custom properties, so email is the one
-   surface that inlines hex; mirror the light-mode token values.
-6. **Identity** — `BrandName`, `DocsEditBase` and the nav/footer lists in
+   surface that inlines hex. `TestEmailStyleTracksTheLightThemeTokens` reads the
+   light-mode value of each token out of `input.css` and fails with the field
+   name when the two drift — but it compares against `input.css`, not against
+   `theme.local.css`, so a rebrand done purely in the override file must still
+   carry its new hexes into `emailStyle` by hand.
+2. **Identity** — `BrandName`, `DocsEditBase` and the nav/footer lists in
    `internal/web/templates/chrome.go`; the logo mark is `IconLogo` in
    `icons.templ` and `static/favicon.svg`.
-7. **Catalogs** — the product name appears inside translated prose
+3. **Catalogs** — the product name appears inside translated prose
    (`email.footer`, `email.*.subject`), which lives in the owning manifests'
    `locales` blocks, not in a template variable: word order around a brand
    differs per language.
-8. `make generate`, open `/dev/gallery` in both themes, then
-   `make visual-update` and `make visual` to prove the new baselines compare
-   cleanly.
+
+Then `make generate`, open `/dev/gallery` in both themes, and
+`make visual-update` / `make visual` to prove the new baselines compare cleanly.
+
+### Editing input.css instead (the fork path)
+
+Changing `input.css` in place is still supported and is the right move when the
+*system* changes rather than its values — a new token family, a new component
+class, a different set of state kinds. It is a fork of a manifest-owned file, so
+`ggg update` stages upstream changes to it under `tmp/ggg/conflicts/` for
+`ggg resolve` instead of overwriting your edits. The order that matters there:
+
+1. **Brand ramp** — all eleven `--color-brand-50` … `--color-brand-950` in the
+   `@theme` block. The semantic aliases read 600/500/400 and the tints read
+   50/950, so a partial swap leaves the tints on the old hue.
+2. **Semantic aliases** — `--color-brand`, `-hover`, `-fg`, `-fg-muted`,
+   `-text`, `-subtle`, `-subtle-fg`. Only if the mapping changes (a pale brand
+   needs a dark `--color-brand-fg`).
+3. **State triads** — `success` / `warn` / `danger` / `info` / `neutral`, six
+   slots each, plus their `.dark` overrides. The `.k-*` matrix reads them, so
+   every semantic family follows.
+4. **Structural tokens** — `--container-page`, `--container-narrow`,
+   `--spacing-sidebar`, `--spacing-docnav`, `--spacing-topbar`,
+   `--spacing-navbar` if the shell proportions change.

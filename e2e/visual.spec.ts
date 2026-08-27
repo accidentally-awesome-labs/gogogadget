@@ -13,11 +13,15 @@ const shot = {
   caret: 'hide' as const,
 };
 
-// Mobile is a narrow phone in portrait, the composition a responsive layout is
-// actually judged on. Desktop deliberately has no entry: the config's default
+// Tablet is a portrait iPad and mobile is a narrow phone in portrait — the two
+// compositions a responsive layout is actually judged on either side of the
+// `md` breakpoint. Desktop deliberately has no entry: the config's default
 // viewport is the desktop baseline, so a surface cannot drift between the
 // visual suite and the rest of the e2e run.
-const mobileViewport = { width: 390, height: 844 };
+const viewportSizes: Partial<Record<Viewport, { width: number; height: number }>> = {
+  tablet: { width: 820, height: 1180 },
+  mobile: { width: 390, height: 844 },
+};
 
 async function openSurface(
   browser: Browser,
@@ -31,8 +35,9 @@ async function openSurface(
     ? await loginAs(browser, surface.persona as TestUser)
     : await browser.newContext();
   const page = await context.newPage();
-  if (viewport === 'mobile') {
-    await page.setViewportSize(mobileViewport);
+  const size = viewportSizes[viewport];
+  if (size) {
+    await page.setViewportSize(size);
   }
   if (theme === 'dark') {
     // Both halves are load-bearing: the shell reads localStorage, and

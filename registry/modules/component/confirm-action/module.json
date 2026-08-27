@@ -18,7 +18,7 @@
         "source": "internal/web/templates/ui/confirm-action.templ",
         "target": "internal/web/templates/ui/confirm-action.templ",
         "class": "templ",
-        "sha256": "529f2d59ab7f9d45aa9c1ee27a4da8301953c552ce39fbf9473db633fe9b4778",
+        "sha256": "a23045ccdca77f72ca2fa85a0234130eec5f4de9769a422aa9c0ae027855ed98",
         "rewrite_module": true,
         "contract": true
       },

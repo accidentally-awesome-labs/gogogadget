@@ -272,7 +272,10 @@ test.describe('admin', () => {
     await page.getByTestId('flag-create-form').getByRole('button', { name: 'Create flag' }).click();
     await expect(page.getByTestId(`flag-toggle-${key}`)).toHaveCount(1);
 
-    const trigger = page.getByTestId(`flag-delete-${key}`).getByRole('button');
+    // The ConfirmAction root wraps the trigger AND the dialog, so getByRole
+    // matches the dialog's cancel and confirm buttons too once the dialog is
+    // rendered. The trigger has its own hook.
+    const trigger = page.getByTestId(`flag-delete-${key}`).locator('[data-ui-confirm-trigger]');
     await trigger.click();
     await expect(openDialog(page)).toBeVisible();
     await openDialog(page).getByRole('button', { name: 'Cancel' }).click();

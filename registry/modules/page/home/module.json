@@ -82,7 +82,9 @@
           "id": "home",
           "path": "/",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

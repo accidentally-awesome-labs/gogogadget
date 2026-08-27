@@ -8,6 +8,7 @@ type TagsInputOpts struct {
 	// any custom popup.
 	Suggestions []Option
 	Hint, Error string
+	Size        Size
 	Attrs       Attrs
 }
 
@@ -19,7 +20,7 @@ type TagsInputOpts struct {
 // load, and cannot be edited with a keyboard without a custom keymap.
 templ TagsInput(o TagsInputOpts) {
 	<input
-		{ rootWith("tags-input", "input", o.Attrs,
+		{ rootWith("tags-input", inputClass(o.Size), o.Attrs,
 			"x-data", "uiTags",
 			"list", o.Name+"-suggestions")... }
 		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }

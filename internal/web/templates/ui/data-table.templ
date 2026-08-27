@@ -42,24 +42,30 @@ templ DataTable(o DataTableOpts) {
 			if o.RowCount == 0 && o.Empty != nil {
 				@o.Empty
 			} else {
-				<table class={ dataTableClass(o.Density) }>
-					<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
-					<thead>
-						<tr>
-							for _, column := range o.Columns {
-								@ColumnHeader(ColumnHeaderOpts{
-									Column:  column,
-									Sort:    dataTableSort(o, column),
-									BaseURL: o.BaseURL,
-									Target:  o.Target,
-								})
-							}
-						</tr>
-					</thead>
-					<tbody>
-						{ children... }
-					</tbody>
-				</table>
+				// Same reasoning as Table: the card clips to its radius, so the
+				// scroll container has to be inside it or a wide table loses
+				// its trailing columns on a narrow viewport - and it has to be
+				// focusable, or those columns are pointer-only.
+				<div { tableScrollAttrs(o.Caption)... }>
+					<table class={ dataTableClass(o.Density) }>
+						<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
+						<thead>
+							<tr>
+								for _, column := range o.Columns {
+									@ColumnHeader(ColumnHeaderOpts{
+										Column:  column,
+										Sort:    dataTableSort(o, column),
+										BaseURL: o.BaseURL,
+										Target:  o.Target,
+									})
+								}
+							</tr>
+						</thead>
+						<tbody>
+							{ children... }
+						</tbody>
+					</table>
+				</div>
 			}
 		</div>
 		if o.Pagination != nil {

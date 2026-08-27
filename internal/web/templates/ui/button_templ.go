@@ -81,12 +81,12 @@ func Button(o ButtonOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if o.Busy {
-			templ_7745c5c3_Err = Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: "w-4 h-4 animate-spin"}}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: iconSizeClass(o.Size) + " animate-spin"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else if o.Icon != "" {
-			templ_7745c5c3_Err = Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: iconSizeClass(o.Size)}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -134,6 +134,16 @@ func buttonClass(action Action, size Size) string {
 		cls += " btn-lg"
 	}
 	return cls
+}
+
+// iconSizeClass scales a control's icon with the control. A large button grew
+// its padding and its text and kept a 1rem glyph, which made the icon read as
+// an afterthought beside the label it is supposed to pair with.
+func iconSizeClass(size Size) string {
+	if size.Value() == SizeLG {
+		return "w-5 h-5"
+	}
+	return "w-4 h-4"
 }
 
 // boolAttr renders a boolean as an attribute value, or empty so rootWith drops

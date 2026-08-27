@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/time-field.templ",
         "target": "internal/web/templates/ui/time-field.templ",
         "class": "templ",
-        "sha256": "83750c38e7ac0bae63b8a8dd3e0d5442d1913493ccbb62f70f99e848df8c70f0",
+        "sha256": "b4fd58590b241c7a844d6b7340ee882b7da92615ce7fc7622341abc038ac724a",
         "rewrite_module": true,
         "contract": true
       }

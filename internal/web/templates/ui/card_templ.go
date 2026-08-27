@@ -9,7 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 type CardOpts struct {
-	Attrs Attrs
+	// Padding is the inset scale. MD is the standard card inset and adds no
+	// class of its own; the other three head their own rules in input.css.
+	Padding Padding
+	Attrs   Attrs
 }
 
 // Card is the bordered container every panel sits in.
@@ -38,7 +41,7 @@ func Card(o CardOpts) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("card", "card", o.Attrs))
+		templ_7745c5c3_Err = templ.RenderAttributes(ctx, templ_7745c5c3_Buffer, root("card", cardClass(o.Padding), o.Attrs))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -56,6 +59,21 @@ func Card(o CardOpts) templ.Component {
 		}
 		return nil
 	})
+}
+
+// cardClass maps the padding axis onto the component classes. MD is the bare
+// .card: a variant that restated the default inset would be a second place for
+// it to drift from.
+func cardClass(p Padding) string {
+	switch p.Value() {
+	case PaddingNone:
+		return "card card-p-none"
+	case PaddingSM:
+		return "card card-p-sm"
+	case PaddingLG:
+		return "card card-p-lg"
+	}
+	return "card"
 }
 
 // CardHeaderOpts configures a card header row.

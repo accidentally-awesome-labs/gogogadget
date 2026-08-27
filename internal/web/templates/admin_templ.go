@@ -832,8 +832,9 @@ func roleForm(u sqlc.User) templ.Component {
 						{Value: "support", Label: i18n.T(ctx, "admin.users.role_support"), Selected: u.AdminRole == "support"},
 						{Value: "admin", Label: i18n.T(ctx, "admin.users.role_admin"), Selected: u.AdminRole == "admin"},
 					},
+					Size: ui.SizeXS,
 					Attrs: ui.Attrs{
-						Class:  "input-xs w-28",
+						Class:  "w-28",
 						TestID: "role-select-" + u.ClerkUserID,
 						HX:     ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role", Trigger: "change", Swap: "none"},
 					},

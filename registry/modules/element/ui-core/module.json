@@ -46,7 +46,7 @@
         "source": "internal/web/templates/ui/contract_test.go",
         "target": "internal/web/templates/ui/contract_test.go",
         "class": "test",
-        "sha256": "ba40eb319904060db51e6bc9cc2d839eabd4a70ca3d61a19587e576dd7e7f33f",
+        "sha256": "a1c966f7fd79f2f3e61c81315b5f6ca7a2a81718ae43f0cdd45c31dcb3f38584",
         "rewrite_module": true,
         "contract": false
       },
@@ -134,7 +134,7 @@
         "source": "internal/web/templates/ui/shared.go",
         "target": "internal/web/templates/ui/shared.go",
         "class": "go",
-        "sha256": "06a38321628f176326a9e79233519006785a0f230d4e413b2aebb5d769f31ddf",
+        "sha256": "e08625ff24defd4bbce1ffdc57583e0a8e369b30cd4aabb07ef855f55c7e8ecb",
         "rewrite_module": false,
         "contract": false
       },

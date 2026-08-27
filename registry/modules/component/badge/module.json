@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/badge.templ",
         "target": "internal/web/templates/ui/badge.templ",
         "class": "templ",
-        "sha256": "7a68156d1abbfc76d85005bf31c3c430fa1e0f5180304fde10d71ff5b1f548bf",
+        "sha256": "7ff7cbe39a4c8bf59915174f1dc981e08362cc3078e6de3298fca75db4637b69",
         "rewrite_module": true,
         "contract": true
       }

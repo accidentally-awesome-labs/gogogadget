@@ -34,9 +34,9 @@ templ IconButton(o IconButtonOpts) {
 		disabled?={ o.Disabled }
 	>
 		if o.Busy {
-			@Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: "w-4 h-4 animate-spin"}})
+			@Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: iconSizeClass(o.Size) + " animate-spin"}})
 		} else {
-			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}})
+			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: iconSizeClass(o.Size)}})
 		}
 	</button>
 }

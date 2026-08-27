@@ -18,7 +18,7 @@
         "source": "internal/web/templates/ui/search-input.templ",
         "target": "internal/web/templates/ui/search-input.templ",
         "class": "templ",
-        "sha256": "b1af4d13b74ae9123693965d6819adce9e085950b84e0d76249f1a12897b322a",
+        "sha256": "a1c20db613e8fc42e09283253a1f4fc31cff10dcd6d467db484253994d362403",
         "rewrite_module": true,
         "contract": true
       },

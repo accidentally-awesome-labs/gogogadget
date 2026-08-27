@@ -216,7 +216,7 @@
         "source": "content/docs/extending.md",
         "target": "content/docs/extending.md",
         "class": "content",
-        "sha256": "f74d15da31c6e80eedbd67b1738b97fb6d22553164b9f83eaf473f0b252a7504",
+        "sha256": "4cc004fdfa5020aa242e10659316978a6f7863f6d210371dd3308b92129d07b6",
         "rewrite_module": false,
         "contract": false
       },
@@ -232,7 +232,7 @@
         "source": "content/docs/frontend.md",
         "target": "content/docs/frontend.md",
         "class": "content",
-        "sha256": "1ce2bf42e3a4acd310cfb550d3f9fb97fd202fad0397ad88aeda19b3da0dab31",
+        "sha256": "cb91ad856b1292f7171c907ee9d2a64471f12cc548525c6853d375a806264a8f",
         "rewrite_module": false,
         "contract": false
       },
@@ -360,7 +360,7 @@
         "source": "content/docs/ui-foundations.md",
         "target": "content/docs/ui-foundations.md",
         "class": "content",
-        "sha256": "a46b809d076972aa0a42d1b871f4021e68a989e1af310328d8d64a81cc3171bb",
+        "sha256": "5b49ed37c1f52a96b55fa1b0d100deca3ba3f35abe8acd57f2f427c3293186bb",
         "rewrite_module": false,
         "contract": false
       },

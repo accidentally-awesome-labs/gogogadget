@@ -17,7 +17,7 @@
         "source": "internal/web/templates/ui/data-table.templ",
         "target": "internal/web/templates/ui/data-table.templ",
         "class": "templ",
-        "sha256": "0b754fef416a24e8daa098feb28a34cced35e9fd78273e6782f0b5f8a18a888f",
+        "sha256": "fcdd05836d8bfc3ac76c087d62d909b8f1bf33ed93abfce16aa244bbdc3024bc",
         "rewrite_module": true,
         "contract": true
       }

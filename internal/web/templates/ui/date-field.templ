@@ -11,6 +11,7 @@ type DateFieldOpts struct {
 	Min, Max    string
 	Hint, Error string
 	Required    bool
+	Size        Size
 	Attrs       Attrs
 }
 
@@ -19,7 +20,7 @@ type DateFieldOpts struct {
 // has to re-earn all three and usually loses the keyboard.
 templ DateField(o DateFieldOpts) {
 	<input
-		{ controlRoot("date-field", "input", o.Attrs)... }
+		{ controlRoot("date-field", inputClass(o.Size), o.Attrs)... }
 		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
 		type="date"
 		id={ controlID(o.ID, o.Attrs, o.Name) }

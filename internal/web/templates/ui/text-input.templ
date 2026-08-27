@@ -19,12 +19,13 @@ type TextInputOpts struct {
 	Disabled     bool
 	ReadOnly     bool
 	Autocomplete string
+	Size         Size
 	Attrs        Attrs
 }
 
 templ TextInput(o TextInputOpts) {
 	<input
-		{ controlRoot("text-input", "input", o.Attrs)... }
+		{ controlRoot("text-input", inputClass(o.Size), o.Attrs)... }
 		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
 		id={ controlID(o.ID, o.Attrs, o.Name) }
 		name={ o.Name }

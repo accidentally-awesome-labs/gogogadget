@@ -81,7 +81,9 @@
           "id": "pricing",
           "path": "/pricing",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

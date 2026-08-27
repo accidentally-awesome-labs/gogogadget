@@ -454,7 +454,8 @@ func adminFlagsTable(d FlagsData) templ.Component {
 							templ_7745c5c3_Err = ui.NumberInput(ui.NumberInputOpts{
 								ID: "rollout-" + f.Key, Name: "rollout",
 								Value: fmt.Sprint(f.Rollout), Min: "0", Max: "100",
-								Attrs: ui.Attrs{Class: "input-xs w-20", TestID: "flag-rollout-" + f.Key},
+								Size:  ui.SizeXS,
+								Attrs: ui.Attrs{Class: "w-20", TestID: "flag-rollout-" + f.Key},
 							}).Render(ctx, templ_7745c5c3_Buffer)
 							if templ_7745c5c3_Err != nil {
 								return templ_7745c5c3_Err
@@ -495,7 +496,7 @@ func adminFlagsTable(d FlagsData) templ.Component {
 					var templ_7745c5c3_Var18 string
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(f.Rollout))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 142, Col: 65}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 143, Col: 65}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {
@@ -559,7 +560,7 @@ func adminFlagsTable(d FlagsData) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(i18n.T(ctx, "flags.hint"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 164, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 165, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -679,7 +680,7 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue("flag-override-row-" + o.ClerkOrgID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 208, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 47}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 				if templ_7745c5c3_Err != nil {
@@ -692,7 +693,7 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 				var templ_7745c5c3_Var25 string
 				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue("flag-override-" + o.ClerkOrgID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 208, Col: 95}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 95}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 				if templ_7745c5c3_Err != nil {
@@ -705,7 +706,7 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 				var templ_7745c5c3_Var26 string
 				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(o.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 210, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {

@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/number-input.templ",
         "target": "internal/web/templates/ui/number-input.templ",
         "class": "templ",
-        "sha256": "ed60bf2f6f6a80e53df9894d55916de9bfe83a0278c65b6988c37fbab801680c",
+        "sha256": "bea66c09b7072e8d99707fa85751e1994b18edfce34fb18402cfab2c5507d66f",
         "rewrite_module": true,
         "contract": true
       },

@@ -15,6 +15,7 @@ type NumberInputOpts struct {
 	Hint, Error    string
 	Required       bool
 	Disabled       bool
+	Size           Size
 	Attrs          Attrs
 }
 
@@ -23,7 +24,7 @@ type NumberInputOpts struct {
 // in JavaScript would be strictly worse.
 templ NumberInput(o NumberInputOpts) {
 	<input
-		{ controlRoot("number-input", "input", o.Attrs)... }
+		{ controlRoot("number-input", inputClass(o.Size), o.Attrs)... }
 		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
 		type="number"
 		id={ controlID(o.ID, o.Attrs, o.Name) }

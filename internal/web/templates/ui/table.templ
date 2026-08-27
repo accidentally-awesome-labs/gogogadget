@@ -9,15 +9,40 @@ type TableOpts struct {
 }
 
 // Table renders a semantic table with a caption and responsive overflow.
+//
+// The scroll container is an inner div, not the card: .table-card clips to its
+// own radius with overflow-hidden, and a horizontally scrollable element cannot
+// also be the clipping one - so a table wider than the phone simply lost its
+// last columns with no way to reach them.
 templ Table(o TableOpts) {
 	<div { root("table", "table-card", o.Attrs)... }>
-		<table class={ tableClasses(o) }>
-			if o.Caption != "" {
-				<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
-			}
-			{ children... }
-		</table>
+		<div { tableScrollAttrs(o.Caption)... }>
+			<table class={ tableClasses(o) }>
+				if o.Caption != "" {
+					<caption class={ captionClass(o.HiddenCaption) }>{ o.Caption }</caption>
+				}
+				{ children... }
+			</table>
+		</div>
 	</div>
+}
+
+// tableScrollAttrs builds the horizontal scroll container's attributes.
+//
+// tabindex is the load-bearing one: a region that scrolls but cannot take focus
+// is unreachable without a pointer, so the columns past the fold do not exist
+// for a keyboard user. That is axe's scrollable-region-focusable rule, and it
+// fired the moment the wrapper appeared. The caption names the region, because
+// an extra tab stop that announces nothing is its own defect - a table with no
+// caption stays focusable but claims no role rather than becoming an unnamed
+// landmark.
+func tableScrollAttrs(caption string) templ.Attributes {
+	out := templ.Attributes{"class": "overflow-x-auto", "tabindex": "0"}
+	if caption != "" {
+		out["role"] = "region"
+		out["aria-label"] = caption
+	}
+	return out
 }
 
 func tableClasses(o TableOpts) string {

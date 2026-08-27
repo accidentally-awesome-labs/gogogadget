@@ -138,7 +138,11 @@ test.describe('projects', () => {
     await page.goto('/app/projects');
 
     const row = page.getByTestId('project-row').filter({ hasText: 'Bravo' });
-    const trigger = row.getByRole('button', { name: 'Delete' });
+    // The ConfirmAction's own trigger, not a role+name match: the dialog it
+    // renders is a sibling inside the same row and its confirm control is also
+    // called "Delete permanently", so a substring name matches both the moment
+    // the dialog is rendered rather than display:none.
+    const trigger = row.locator('[data-ui-confirm-trigger]');
     await trigger.click();
     await expect(openDialog(page)).toBeVisible();
 

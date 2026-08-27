@@ -24,7 +24,7 @@
         "source": "input.css",
         "target": "input.css",
         "class": "style",
-        "sha256": "2114c280a42459f08155d7683d35a858dbb8d4e5c0e31db4e74c83699a16c8c7",
+        "sha256": "c96c76ca3266c40f1fdd23c8e27d209db22ccc1d99d0d08ff92315655a58224a",
         "rewrite_module": false,
         "contract": false
       },
@@ -48,7 +48,7 @@
         "source": "static/app.js",
         "target": "static/app.js",
         "class": "asset",
-        "sha256": "1cb16fd8eb150c3eb07e2e00eb7281f83fcf2da5010f31324e00401847359b69",
+        "sha256": "9ef7433cd2d426b5f331ff513f49c49d5b6016d5a7fa238572a7b8b101873f80",
         "rewrite_module": false,
         "contract": false
       },
@@ -137,6 +137,14 @@
         "target": "static/vendor/htmx.min.js",
         "class": "asset",
         "sha256": "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "theme.local.css",
+        "target": "theme.local.css",
+        "class": "asset",
+        "sha256": "cf4f825238618c46b3a13af796844ae9b6bced86dce124230794df6aeafc6a4c",
         "rewrite_module": false,
         "contract": false
       }

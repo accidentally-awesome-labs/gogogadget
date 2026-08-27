@@ -32,6 +32,8 @@ from acquiring a domain dependency. Page and domain templates stay in
 
 @import "./internal/web/styles/modules_registry_gen.css";
 
+@import "./theme.local.css";
+
 @custom-variant dark (&:where(.dark, .dark *));
 ```
 
@@ -43,6 +45,13 @@ a clean checkout, would not produce.
 `modules_registry_gen.css` is the generated import list of per-module CSS
 fragments. Tailwind v4 bundles local imports, so each module owns its own
 fragment and installing or removing one never patches this entry file by hand.
+
+`theme.local.css` is the project's own override file, and the import order is
+the precedence order: boilerplate, then modules, then you. It wins despite
+sitting near the top of the file because Tailwind emits its tokens into
+`@layer theme` and its component classes into `@layer components`, and
+unlayered author CSS beats any layer at equal specificity — see
+[extending](/docs/extending#add-a-theme-rebrand).
 
 ## Dark mode is token flipping
 

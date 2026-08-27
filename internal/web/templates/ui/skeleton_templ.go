@@ -57,7 +57,7 @@ func Skeleton(o SkeletonOpts) templ.Component {
 		}
 		if o.Lines > 1 {
 			for i := 0; i < o.Lines; i++ {
-				var templ_7745c5c3_Var2 = []any{"h-4 rounded bg-surface-raised animate-pulse " + skeletonLineWidth(i, o.Lines)}
+				var templ_7745c5c3_Var2 = []any{"skeleton h-4 " + skeletonLineWidth(i, o.Lines)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -81,7 +81,7 @@ func Skeleton(o SkeletonOpts) templ.Component {
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"h-4 rounded bg-surface-raised animate-pulse w-full\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"skeleton h-4 w-full\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

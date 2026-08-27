@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/password-input.templ",
         "target": "internal/web/templates/ui/password-input.templ",
         "class": "templ",
-        "sha256": "00850597d487596b761d9cad0d3a169c66bccce372acaef2ad76689a8e0b3e79",
+        "sha256": "17cccad4e4c858376510b1c68ec7b22fd2165fcc6d236831567f2abd2fb5820d",
         "rewrite_module": true,
         "contract": true
       },

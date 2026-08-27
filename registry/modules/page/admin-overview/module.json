@@ -37,7 +37,7 @@
         "source": "internal/web/templates/admin.templ",
         "target": "internal/web/templates/admin.templ",
         "class": "templ",
-        "sha256": "25c28b6b80b0e3dbe138967ae246a55ac4431bb6d85d64c7c32e4330c1cedcc7",
+        "sha256": "2438bfcd99708a363fb38a70b8cfd93a427d45cee59a7c1b3e8914f948d2aa33",
         "rewrite_module": true,
         "contract": false
       }
@@ -81,7 +81,9 @@
           "path": "/admin",
           "persona": "admin",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",
@@ -93,7 +95,9 @@
           "path": "/admin",
           "persona": "pro",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

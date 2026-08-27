@@ -70,7 +70,9 @@
           "id": "changelog",
           "path": "/changelog",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

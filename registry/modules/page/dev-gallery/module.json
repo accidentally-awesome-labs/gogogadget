@@ -140,7 +140,7 @@
         "source": "internal/web/templates/gallery.templ",
         "target": "internal/web/templates/gallery.templ",
         "class": "templ",
-        "sha256": "6f8e0c54efd2d92240c9a633a5807ff2e4a0fd42b4913b9727fe31493a0a89f8",
+        "sha256": "b232da58d4228240566100a26c6f11f58f54f3c664fc018743c55d3bf4495712",
         "rewrite_module": true,
         "contract": false
       },
@@ -703,7 +703,9 @@
           "id": "gallery",
           "path": "/dev/gallery",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ]
         }
       ]

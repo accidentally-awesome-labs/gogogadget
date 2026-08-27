@@ -1,0 +1,35 @@
+package ui
+
+// ThemeToggleOpts configures the light/dark switch.
+type ThemeToggleOpts struct {
+	// Label is the control's accessible name and is required: an icon-only
+	// button with no name is announced as "button" and nothing else. It is a
+	// caller parameter rather than a constant because this package renders
+	// markup and knows nothing about the request's locale - the shell resolves
+	// the translation and hands it over.
+	Label string
+	Attrs Attrs
+}
+
+// ThemeToggle renders the light/dark switch.
+//
+// Two icons with x-show rather than one swapped glyph: the pair is in the DOM
+// from first paint, so the control never renders empty in the window before
+// Alpine boots, and x-cloak keeps the wrong one from flashing.
+//
+// The Alpine component stays in static/app.js with the pre-paint theme
+// initialisation and persistTheme. Splitting the toggle's state away from the
+// code that decides the initial class is how a control ends up disagreeing with
+// the page it is on.
+templ ThemeToggle(o ThemeToggleOpts) {
+	<button
+		{ rootWith("theme-toggle", "btn btn-ghost btn-icon", defaultTestID(o.Attrs, "theme-toggle"),
+			"type", "button",
+			"aria-label", o.Label,
+			"x-data", "themeToggle",
+			"@click", "toggle")... }
+	>
+		@Icon(IconOpts{Name: IconSun, Attrs: Attrs{Class: "w-5 h-5", Alpine: Alpine{Show: "!dark"}}})
+		@Icon(IconOpts{Name: IconMoon, Attrs: Attrs{Class: "w-5 h-5", Alpine: Alpine{Show: "dark", Cloak: true}}})
+	</button>
+}

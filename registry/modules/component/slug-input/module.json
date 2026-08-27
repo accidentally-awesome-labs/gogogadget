@@ -16,7 +16,7 @@
         "source": "internal/web/templates/ui/slug-input.templ",
         "target": "internal/web/templates/ui/slug-input.templ",
         "class": "templ",
-        "sha256": "770fb350f5d3fcf6f5099dae20cae3bf44c37afb8526698fbdec341978e0cdf2",
+        "sha256": "8f18375fca64372b8f27eb2204f03635cc3ec10a33a8c021eacf6631bf05f9b1",
         "rewrite_module": true,
         "contract": true
       }

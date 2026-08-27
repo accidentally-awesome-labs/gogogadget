@@ -11,6 +11,7 @@ type DateTimeFieldOpts struct {
 	Min, Max    string
 	Hint, Error string
 	Required    bool
+	Size        Size
 	Attrs       Attrs
 }
 
@@ -21,7 +22,7 @@ type DateTimeFieldOpts struct {
 // that changes when the user travels.
 templ DateTimeField(o DateTimeFieldOpts) {
 	<input
-		{ controlRoot("date-time-field", "input", o.Attrs)... }
+		{ controlRoot("date-time-field", inputClass(o.Size), o.Attrs)... }
 		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
 		type="datetime-local"
 		id={ controlID(o.ID, o.Attrs, o.Name) }

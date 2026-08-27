@@ -1,18 +1,21 @@
 package templates
 
 import (
-	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/a-h/templ"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // The design system is three layers with one home each:
@@ -203,6 +206,81 @@ func TestEveryKindIsStyledForEveryStateFamily(t *testing.T) {
 	}
 }
 
+// The solid pair is a contrast contract. {k}-fg is painted directly on {k}, and
+// the smallest thing that does it is a solid badge at 12px — small text, so
+// WCAG AA wants 4.5:1. Two kinds shipped below it (#16a34a at 3.30, #d97706 at
+// 3.18) and nothing noticed, because until .badge-solid existed no rule ever
+// put text on the fill. axe found it the moment one did.
+//
+// The ratio is computed from input.css rather than asserted as a list of
+// approved hexes: a rebrand is supposed to change these values, and what has to
+// survive the change is the ratio, not the colour.
+func TestSolidFillsCarryTheirForegroundAtSmallText(t *testing.T) {
+	sheet := readInputCSS(t)
+
+	for _, kind := range ui.Kinds {
+		fill := resolveHex(t, sheet, "--color-"+string(kind))
+		text := resolveHex(t, sheet, "--color-"+string(kind)+"-fg")
+		ratio := contrastRatio(fill, text)
+		assert.GreaterOrEqualf(t, ratio, 4.5,
+			"--color-%s (%s) on --color-%s-fg (%s) is %.2f:1; a solid badge renders that pair at 12px, "+
+				"which WCAG AA scores as small text and needs 4.5:1",
+			kind, fill, kind, text, ratio)
+	}
+}
+
+// resolveHex reads a token's light-mode value out of input.css, following a
+// var() alias to the hex it ultimately names. The .dark block is cut first: a
+// solid fill never flips, so its light declaration is the only one.
+func resolveHex(t *testing.T, sheet, token string) string {
+	t.Helper()
+
+	light := sheet
+	if start := strings.Index(light, "  .dark {"); start >= 0 {
+		if end := strings.Index(light[start:], "\n  }"); end > 0 {
+			light = light[:start] + light[start+end:]
+		}
+	}
+
+	for range 8 {
+		m := regexp.MustCompile(regexp.QuoteMeta(token)+`:\s*([^;\n]+)`).FindStringSubmatch(light)
+		require.Lenf(t, m, 2, "input.css declares no light-mode %s", token)
+		value := strings.TrimSpace(m[1])
+		if inner := regexp.MustCompile(`^var\((--[a-z0-9-]+)\)$`).FindStringSubmatch(value); inner != nil {
+			token = inner[1]
+			continue
+		}
+		require.Regexpf(t, `^#[0-9a-fA-F]{6}$`, value, "%s is not a six-digit hex", token)
+		return strings.ToLower(value)
+	}
+	t.Fatalf("%s never resolves to a hex", token)
+	return ""
+}
+
+// contrastRatio is the WCAG 2.x formula over two six-digit hexes.
+func contrastRatio(a, b string) float64 {
+	la, lb := relativeLuminance(a), relativeLuminance(b)
+	if la < lb {
+		la, lb = lb, la
+	}
+	return (la + 0.05) / (lb + 0.05)
+}
+
+func relativeLuminance(hex string) float64 {
+	channel := func(offset int) float64 {
+		v, err := strconv.ParseUint(hex[offset:offset+2], 16, 8)
+		if err != nil {
+			return 0
+		}
+		c := float64(v) / 255
+		if c <= 0.03928 {
+			return c / 12.92
+		}
+		return math.Pow((c+0.055)/1.055, 2.4)
+	}
+	return 0.2126*channel(1) + 0.7152*channel(3) + 0.0722*channel(5)
+}
+
 // The Kind axis has a matrix above; the Size axis had nothing, and the gap was
 // real: buttonClass emitted `btn btn-lg` for Size: ui.SizeLG on Button,
 // ButtonLink and IconButton, while input.css defined only .btn-sm, .btn-xs and
@@ -267,6 +345,82 @@ func TestEverySizeIsStyledForEveryControlFamily(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+// The form controls have the same size axis the buttons do, and it had the same
+// hole: .input-lg did not exist at all, and pages that wanted a smaller control
+// wrote Attrs.Class: "input-xs" instead - reaching past the typed API, past
+// every test, and past the one place a control's scale is decided.
+//
+// The rule is the button rule: a size must contribute a class the default does
+// not, and that class must head its own declaration block. Naming it in the
+// focus or disabled selector lists is not styling it.
+func TestEveryInputSizeIsStyledForEveryFormControl(t *testing.T) {
+	source := readInputCSS(t)
+
+	families := map[string]func(ui.Size) templ.Component{
+		"TextInput": func(s ui.Size) templ.Component {
+			return ui.TextInput(ui.TextInputOpts{Name: "field", Size: s})
+		},
+		"NumberInput": func(s ui.Size) templ.Component {
+			return ui.NumberInput(ui.NumberInputOpts{Name: "field", Size: s})
+		},
+		"Select": func(s ui.Size) templ.Component {
+			return ui.Select(ui.SelectOpts{Name: "field", Size: s})
+		},
+		"Textarea": func(s ui.Size) templ.Component {
+			return ui.Textarea(ui.TextareaOpts{Name: "field", Size: s})
+		},
+	}
+
+	for family, render := range families {
+		base := rootClasses(t, renderComponent(t, render(ui.SizeMD)))
+		for _, class := range base {
+			assert.Containsf(t, source, "."+class,
+				"%s renders .%s, which input.css never mentions", family, class)
+		}
+
+		for _, size := range ui.Sizes {
+			if size == ui.SizeMD {
+				continue
+			}
+
+			added := addedClasses(base, rootClasses(t, renderComponent(t, render(size))))
+			require.NotEmptyf(t, added,
+				"%s with Size %q renders exactly what SizeMD renders, so the size is unreachable from CSS",
+				family, size)
+
+			for _, class := range added {
+				assert.Truef(t, hasOwnRule(source, class),
+					"%s with Size %q renders .%s, which input.css names in other selector lists "+
+						"but never declares on its own - the size is a dead class and the control "+
+						"renders at the default size",
+					family, size, class)
+			}
+		}
+	}
+}
+
+// Table density is the same shape of promise: TableOpts.Density and
+// DataTableOpts.Density both emit .table-compact, and for as long as no rule
+// declared it a compact table was byte-for-byte a comfortable one.
+//
+// Both cell selectors are asserted, because a rule on th alone leaves the body
+// - the rows the density exists to tighten - untouched.
+func TestCompactTableDensityIsStyled(t *testing.T) {
+	source := readInputCSS(t)
+
+	compact := rootClasses(t, renderComponent(t, ui.Table(ui.TableOpts{
+		Caption: "Rows", Density: ui.DensityCompact,
+	})))
+	assert.NotContains(t, compact, "table-compact",
+		"the density class belongs on the <table>, not on the card wrapper")
+
+	for _, selector := range []string{"table-compact th", "table-compact td"} {
+		assert.Truef(t, hasOwnRule(source, selector),
+			"input.css never declares .%s, so DensityCompact renders a table identical to the default",
+			selector)
 	}
 }
 
@@ -437,9 +591,13 @@ func TestSemanticTokenFamiliesExist(t *testing.T) {
 	for _, token := range []string{
 		"--color-focus-ring", "--color-overlay-scrim", "--color-selected",
 		"--color-selected-fg", "--radius-control", "--radius-surface",
-		"--shadow-raised", "--control-height-sm", "--control-height-md",
-		"--control-height-lg", "--motion-fast", "--motion-base",
-		"--disabled-opacity", "--color-chart-1", "--color-chart-6",
+		"--shadow-raised", "--shadow-overlay", "--control-height-sm",
+		"--control-height-md", "--control-height-lg", "--motion-fast",
+		"--motion-base", "--ease-standard", "--disabled-opacity",
+		"--color-chart-1", "--color-chart-6",
+		"--color-neutral", "--color-neutral-fg", "--color-neutral-text",
+		"--color-neutral-subtle", "--color-neutral-subtle-fg",
+		"--color-neutral-border", "--color-danger-hover",
 	} {
 		assert.Contains(t, sheet, token+":", "no %s token is declared", token)
 	}
@@ -454,7 +612,8 @@ func TestDarkModeFlipsInteractionTokens(t *testing.T) {
 	dark = dark[:strings.Index(dark, "\n  }")]
 
 	for _, token := range []string{
-		"--color-focus-ring", "--color-overlay-scrim", "--shadow-raised",
+		"--color-focus-ring", "--color-overlay-scrim",
+		"--shadow-raised", "--shadow-overlay",
 	} {
 		assert.Contains(t, dark, token+":",
 			"%s keeps its light value in dark mode", token)
@@ -523,6 +682,7 @@ func TestVarOnlyTokensAreNotThemeEntries(t *testing.T) {
 	for _, token := range []string{
 		"--color-chart-1", "--color-chart-2", "--color-chart-3",
 		"--color-chart-4", "--color-chart-5", "--color-chart-6",
+		"--shadow-overlay", "--ease-standard",
 	} {
 		assert.NotContains(t, theme, token+":",
 			"%s is consumed with var(), so an @theme declaration only survives while some source file mentions its name", token)
@@ -546,6 +706,7 @@ func TestVarConsumedTokensSurviveTheBuild(t *testing.T) {
 		"--color-focus-ring", "--color-overlay-scrim",
 		"--color-selected", "--color-selected-fg",
 		"--radius-control", "--radius-surface", "--shadow-raised",
+		"--shadow-overlay", "--ease-standard",
 		"--control-height-md", "--motion-fast", "--disabled-opacity",
 	} {
 		assert.Contains(t, built, token,

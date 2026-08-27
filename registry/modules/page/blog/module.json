@@ -78,7 +78,9 @@
           "id": "blog",
           "path": "/blog",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",
@@ -89,7 +91,9 @@
           "id": "blog-post",
           "path": "/blog/hello-world",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

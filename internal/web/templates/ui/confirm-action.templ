@@ -33,6 +33,7 @@ templ ConfirmAction(o ConfirmActionOpts) {
 		<button
 			type="button"
 			class={ buttonClass(confirmTriggerAction(o.Kind), SizeSM) }
+			data-ui-confirm-trigger
 			x-data="uiDialog"
 			x-on:click={ "open('" + o.ID + "')" }
 		>

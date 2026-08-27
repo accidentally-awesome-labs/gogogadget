@@ -1480,7 +1480,7 @@ func validScenarioLayout(value string) bool {
 // silently drop the surface from the run instead of failing.
 func validViewport(value string) bool {
 	switch value {
-	case "desktop", "mobile":
+	case "desktop", "tablet", "mobile":
 		return true
 	default:
 		return false

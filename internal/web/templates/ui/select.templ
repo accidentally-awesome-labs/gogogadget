@@ -9,13 +9,14 @@ type SelectOpts struct {
 	ID       string
 	Options  []Option
 	Required bool
+	Size     Size
 	Attrs    Attrs
 }
 
 // Select is a native select.
 templ Select(o SelectOpts) {
 	<select
-		{ controlRoot("select", "input", o.Attrs)... }
+		{ controlRoot("select", inputClass(o.Size), o.Attrs)... }
 		id={ controlID(o.ID, o.Attrs, o.Name) }
 		name={ o.Name }
 		required?={ o.Required }

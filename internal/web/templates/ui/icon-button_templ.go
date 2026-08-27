@@ -76,12 +76,12 @@ func IconButton(o IconButtonOpts) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if o.Busy {
-			templ_7745c5c3_Err = Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: "w-4 h-4 animate-spin"}}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconOpts{Name: IconSpinner, Attrs: Attrs{Class: iconSizeClass(o.Size) + " animate-spin"}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: iconSizeClass(o.Size)}}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

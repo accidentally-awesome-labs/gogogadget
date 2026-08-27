@@ -82,7 +82,9 @@
           "path": "/admin/announcements",
           "persona": "admin",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

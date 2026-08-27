@@ -72,7 +72,9 @@
           "path": "/app",
           "persona": "pro",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",

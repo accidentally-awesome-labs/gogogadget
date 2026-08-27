@@ -84,7 +84,9 @@
           "path": "/app/settings/billing",
           "persona": "pro",
           "viewports": [
-            "desktop"
+            "desktop",
+            "tablet",
+            "mobile"
           ],
           "masks": [
             "[data-testid=\"relative-time\"]",
