@@ -1,14 +1,41 @@
 #!/usr/bin/env bash
 # Vendors the frontend runtime into static/ from pinned jsDelivr URLs.
 # Every asset is sha256-verified: a CDN surprise must never reach production.
-# The results are COMMITTED to the repo — this script only runs on upgrades.
+# The results are COMMITTED to the repo.
+#
+# Two modes, and the default is the one that matches that last sentence:
+#
+#   (default)  VERIFY the committed bytes against their pinned digests. No
+#              network. This is what `make setup` needs — proof the tree is
+#              intact — and it is what the committed-results design implies.
+#   --fetch    RE-DOWNLOAD every asset. This is the upgrade path, and the only
+#              time the CDN is contacted.
+#
+# It used to fetch unconditionally, which meant every `make setup` — five CI jobs
+# per push, plus every `make dev` — re-downloaded roughly forty files that were
+# already committed and already correct. That is slow, and it made a transient
+# TLS error anywhere in that list fail a job for reasons unrelated to the change
+# under test. Two jobs died that way on one push with curl exit 35.
 set -euo pipefail
 
-fetch() { # name url dest sha256
+mode="verify"
+case "${1:-}" in
+  "")        ;;
+  --fetch)   mode="fetch" ;;
+  --verify)  mode="verify" ;;
+  *)
+    echo "usage: $0 [--fetch|--verify]" >&2
+    exit 2
+    ;;
+esac
+
+checked=0
+
+vendor() { # name url dest sha256
   local name="$1" url="$2" dest="$3" sha="$4"
 
-  # The digest is checked for SHAPE before it is used, because `shasum -c`
-  # rejects a malformed line exactly as it rejects a changed file. That made a
+  # The digest is checked for SHAPE before it is used, because a comparison
+  # against a malformed value fails exactly as a changed file does. That made a
   # digest recorded in the wrong encoding indistinguishable from a CDN
   # substitution: this script once carried a base64 SRI value here, and CI
   # reported "sha256 mismatch" while the committed bytes were in fact correct.
@@ -20,8 +47,30 @@ fetch() { # name url dest sha256
     exit 1
   fi
 
+  if [[ "${mode}" == "verify" ]]; then
+    if [[ ! -f "${dest}" ]]; then
+      echo "vendored asset missing: ${dest} (${name})" >&2
+      echo "  run ./scripts/vendor-frontend.sh --fetch to download it" >&2
+      exit 1
+    fi
+    local have
+    have="$(shasum -a 256 "${dest}" | cut -d' ' -f1)"
+    if [[ "${have}" != "${sha}" ]]; then
+      echo "sha256 mismatch for committed ${dest} (${name})" >&2
+      echo "  expected ${sha}" >&2
+      echo "  actual   ${have}" >&2
+      exit 1
+    fi
+    checked=$((checked + 1))
+    return
+  fi
+
   echo "fetching ${name} → ${dest}"
-  curl -sfL -o "${dest}.tmp" "${url}"
+  # --retry covers the transient TLS and connection failures that made this
+  # script the least reliable step in CI. Retrying a download whose bytes are
+  # then digest-checked adds no trust assumption: a substituted asset still
+  # fails, it just fails after three attempts instead of one.
+  curl -sfL --retry 3 --retry-delay 1 --retry-connrefused -o "${dest}.tmp" "${url}"
   local got
   got="$(shasum -a 256 "${dest}.tmp" | cut -d' ' -f1)"
   if [[ "${got}" != "${sha}" ]]; then
@@ -32,7 +81,11 @@ fetch() { # name url dest sha256
     exit 1
   fi
   mv "${dest}.tmp" "${dest}"
+  checked=$((checked + 1))
 }
+
+# fetch is the historical name every entry below calls.
+fetch() { vendor "$@"; }
 
 mkdir -p static/vendor static/fonts
 
@@ -87,7 +140,7 @@ fetch "inter-variable@5.3.0" \
   "static/fonts/inter-var.woff2" \
   "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62"
 
-echo "vendored frontend OK"
+
 
 # @clerk/clerk-js lazy chunks (components mount these on demand —
 # UserButton, OrganizationSwitcher, etc. 404 without them).
@@ -156,3 +209,9 @@ for entry in ${CLERK_CHUNKS}; do
     "static/vendor/${name}" \
     "${sha}"
 done
+
+if [[ "${mode}" == "verify" ]]; then
+  echo "vendored frontend verified (${checked} assets, no network)"
+else
+  echo "vendored frontend OK (${checked} assets fetched)"
+fi
