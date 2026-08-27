@@ -190,17 +190,41 @@ func (w *Worker) Run(ctx context.Context) {
 		default:
 		}
 
-		n, err := w.drain(ctx)
-		if err != nil {
-			w.log.Error("job worker", "error", err)
-		}
-		if err := w.schedulerPass(ctx); err != nil {
-			w.log.Error("schedule pass", "error", err)
-		}
+		n := w.pass(ctx)
 		if n == 0 {
 			w.sleep(ctx, w.jittered())
 		}
 	}
+}
+
+// pass runs one claim-and-schedule cycle and is the last place a panic can be
+// contained. dispatchSafely covers a panicking handler and janitorPass covers a
+// panicking sweep, but the claim itself sat outside both: a panic anywhere in
+// ClaimJob, CompleteJob, FailJob or schedulerPass unwound straight out of the
+// goroutine Module.Start launched, with no recover above it, and took the web
+// server down with it. That is the exact failure dispatchSafely exists to
+// prevent, one frame further out - and the one the queue cannot answer by
+// failing a row, because it never claimed one.
+//
+// Reporting zero work on a panic is what makes the next iteration sleep for a
+// poll interval instead of spinning: a queue that cannot be reached at all must
+// back off, not busy-loop on the failure.
+func (w *Worker) pass(ctx context.Context) (n int) {
+	defer func() {
+		if r := recover(); r != nil {
+			w.log.Error("job worker panicked", "panic", r, "stack", string(debug.Stack()))
+			n = 0
+		}
+	}()
+
+	n, err := w.drain(ctx)
+	if err != nil {
+		w.log.Error("job worker", "error", err)
+	}
+	if err := w.schedulerPass(ctx); err != nil {
+		w.log.Error("schedule pass", "error", err)
+	}
+	return n
 }
 
 func (w *Worker) jittered() time.Duration {

@@ -467,3 +467,51 @@ func TestAPanickingHandlerFailsItsJobRatherThanTheProcess(t *testing.T) {
 	assert.Contains(t, lastError.String, "panicked",
 		"the recorded error must name the panic, or the operator sees a failure with no cause")
 }
+
+// The guard above covers a panicking HANDLER. The claim itself sat outside it:
+// a worker whose queue cannot execute at all panics inside ClaimJob, one frame
+// below any recover, and unwinds out of the goroutine Module.Start launched -
+// taking the web server with it. CI caught exactly that, from a Worker built on
+// a zero-value Queries whose pool is nil.
+//
+// A worker that cannot reach its queue must back off and keep the process
+// alive, which is what reporting zero work does: the caller sleeps a poll
+// interval instead of spinning on the failure.
+func TestAPanickingClaimKeepsTheWorkerAliveRatherThanTheProcess(t *testing.T) {
+	log := slog.New(slog.DiscardHandler)
+	// A Queries with no pool behind it: every statement it runs dereferences
+	// nil. Constructible, and therefore reachable - the constructor can only
+	// check that the dependency is present, not that it can talk to Postgres.
+	w := NewWorker(&sqlc.Queries{}, mail.NewDevSender(log, t.TempDir()), log)
+
+	assert.NotPanics(t, func() {
+		assert.Zero(t, w.pass(t.Context()),
+			"a pass that could not claim anything must report no work, so the loop backs off")
+	})
+}
+
+// Run must survive the same failure end to end: the loop keeps going and Stop
+// still ends it. This is the shape the module lifecycle test hits, and before
+// the guard it was a race between the first claim and the cancel.
+func TestRunSurvivesAnUnusableQueueUntilTheContextEnds(t *testing.T) {
+	log := slog.New(slog.DiscardHandler)
+	w := NewWorker(&sqlc.Queries{}, mail.NewDevSender(log, t.TempDir()), log)
+	w.poll = time.Millisecond
+
+	ctx, cancel := context.WithCancel(t.Context())
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		w.Run(ctx)
+	}()
+
+	// Long enough for several passes, each of which panics and recovers.
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Run did not return after its context was cancelled")
+	}
+}
