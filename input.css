@@ -383,11 +383,16 @@
 
      It also owns the enter and exit. A modal that appears between two frames
      reads as a page replacement rather than a layer over the page, and there is
-     nowhere else to put this: the platform toggles `display` and the top layer,
-     so only `allow-discrete` plus @starting-style can animate across it. A
-     browser without either simply skips the animation and shows the dialog,
-     which is why there is no fallback path. Reduced motion is already handled -
-     --motion-base collapses to 0ms at the token. */
+     nowhere else to put this: the platform toggles `display` and the top layer.
+     The EXIT is a transition with `allow-discrete`, which is the only thing
+     that can hold `display: block` while the fade runs. The ENTER is a keyframes
+     animation scoped to :modal rather than an @starting-style transition like
+     the drawers below, and both differences are deliberate - see the :modal
+     rule for the parsed-open case that makes any animation at all on a
+     served-open dialog untenable. A browser without allow-discrete simply skips the
+     exit and shows the dialog closed, which is why there is no fallback path.
+     Reduced motion is already handled - --motion-base collapses to 0ms at the
+     token. */
   .dialog {
     color: var(--color-fg);
     opacity: 0;
@@ -402,11 +407,17 @@
     opacity: 1;
     transform: none;
   }
-  @starting-style {
-    .dialog[open] {
-      opacity: 0;
-      transform: translateY(0.5rem) scale(0.98);
-    }
+  /* :modal is the arriving dialog. A dialog opened with showModal() enters the
+     top layer - that is the moment the animation is ABOUT - while a dialog an
+     HTML document simply parsed with `open` was never opened at all: it has
+     been there since first paint, and animating it is semantically wrong as
+     well as practically catastrophic. Practically: Chromium's
+     scrollIntoViewIfNeeded never converges on an element whose rect moved
+     after the scroll started, so a parsed-open dialog that faded in made every
+     pointer action against it hang forever - the no-script suite caught this
+     as a 100%-reproducible click timeout, 28k pixels down the gallery page. */
+  .dialog[open]:modal {
+    animation: dialog-enter var(--motion-base) var(--ease-standard);
   }
 
   /* The scrim is a token so light and dark separate the dialog equally, and it
@@ -760,6 +771,17 @@
   0% { transform: scaleX(0); }
   40% { transform: scaleX(0.6); }
   100% { transform: scaleX(0.95); }
+}
+
+/* The dialog's arrival. A keyframes animation rather than an @starting-style
+   transition (see the .dialog rule for why): it runs on first render, which is
+   exactly the event "the dialog just appeared" needs to hook. `to` is implicit -
+   the open state's own values - so this cannot drift from them. */
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
 }
 
 @keyframes skeleton-pulse {
