@@ -79,7 +79,6 @@
             "mobile"
           ],
           "masks": [
-            "[data-testid=\"relative-time\"]",
             "img[alt*=\"avatar\" i]"
           ]
         }

@@ -43,7 +43,7 @@ export const surfaces: Surface[] = [
   { id: 'home', kind: 'page', path: '/', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: '', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },
   { id: 'pricing', kind: 'page', path: '/pricing', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: '', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },
   { id: 'admin-announcements', kind: 'page', path: '/admin/announcements', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: 'admin', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },
-  { id: 'admin-audit', kind: 'page', path: '/admin/audit', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: 'admin', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },
+  { id: 'admin-audit', kind: 'page', path: '/admin/audit', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: 'admin', masks: ['img[alt*="avatar" i]'] },
   { id: 'admin-content', kind: 'page', path: '/admin/content', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: 'admin', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },
   { id: 'admin', kind: 'page', path: '/admin', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: 'admin', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },
   { id: 'forbidden', kind: 'page', path: '/admin', fullPage: false, viewports: ['desktop', 'tablet', 'mobile'], persona: 'pro', masks: ['[data-testid="relative-time"]', 'img[alt*="avatar" i]'] },

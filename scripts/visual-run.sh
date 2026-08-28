@@ -32,6 +32,27 @@ fi
 VERSION="$(jq -r '.devDependencies["@playwright/test"]' e2e/package.json)"
 IMAGE="mcr.microsoft.com/playwright:v${VERSION}-jammy"
 
+# The architecture is the same class of variable as the version, and it was the
+# one left unpinned. The Playwright image is multi-arch, so on an Apple Silicon
+# host `docker run` picks arm64 while CI runs amd64 — and the two rasterize text
+# differently. Most surfaces stayed under maxDiffPixelRatio and one did not, so
+# the failure read as a real regression on a page nobody had touched. Pinning
+# amd64 costs emulation time locally and makes the harness reproduce CI on any
+# host, which is the whole promise of running it in a container.
+PLATFORM="${VISUAL_PLATFORM:-linux/amd64}"
+
+# Emulated Chromium crashes under Playwright's default parallelism: the symptom
+# is "Page crashed" on a different handful of surfaces every run, which reads as
+# flaky baselines rather than an exhausted host. One worker is slow and it is
+# correct, and it applies ONLY when the container architecture is not the host's
+# - CI runs amd64 on amd64 and keeps the default.
+HOST_ARCH="$(docker version --format '{{.Server.Arch}}' 2>/dev/null || echo unknown)"
+WORKERS=""
+if [[ "${PLATFORM}" != */"${HOST_ARCH}" ]]; then
+  echo "==> ${PLATFORM} is emulated on ${HOST_ARCH}; running single-threaded"
+  WORKERS="--workers=1"
+fi
+
 DB_PORT_NUM="${DB_PORT:-5432}"
 HOST_DB="postgres://postgres:postgres@localhost:${DB_PORT_NUM}/gogogadget_e2e?sslmode=disable"
 
@@ -65,13 +86,20 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
-PLAYWRIGHT="npx playwright test visual.spec.ts"
+PLAYWRIGHT="npx playwright test visual.spec.ts ${WORKERS}"
 if [[ "${MODE}" == update ]]; then
   PLAYWRIGHT="${PLAYWRIGHT} --update-snapshots"
 fi
 
-echo "==> Running visual specs (${MODE}) in ${IMAGE}"
+echo "==> Running visual specs (${MODE}) in ${IMAGE} (${PLATFORM})"
+# --ipc=host is Playwright's own requirement for Chromium in Docker: the default
+# 64 MB /dev/shm is not enough for its shared-memory allocations, and the symptom
+# is "Page crashed" on an arbitrary subset of surfaces rather than an out-of-
+# memory error. It went unnoticed while the suite was small and native; three
+# viewports and an emulated architecture made it reproducible.
 docker run --rm \
+  --platform "${PLATFORM}" \
+  --ipc=host \
   -v "$PWD":/work -w /work \
   -e E2E_NO_WEBSERVER=1 \
   -e E2E_VISUAL=1 \
