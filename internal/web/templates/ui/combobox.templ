@@ -1,0 +1,45 @@
+package ui
+
+// ComboboxOpts is a filterable select.
+type ComboboxOpts struct {
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
+	Value       string
+	Options     []Option
+	Placeholder string
+	Hint, Error string
+	Required    bool
+	Size        Size
+	Attrs       Attrs
+}
+
+// Combobox renders a text input backed by a native datalist.
+//
+// datalist is the engine-free choice: the browser supplies the filtering, the
+// popup, keyboard navigation and mobile behaviour, and the field still submits
+// a value with JavaScript disabled. A hand-built listbox has to reimplement all
+// of that and usually ships without the keyboard half.
+templ Combobox(o ComboboxOpts) {
+	<input
+		{ controlRootWith("combobox", inputClass(o.Size), o.Attrs, "list", controlID(o.ID, o.Attrs, o.Name)+"-options")... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="text"
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		value={ o.Value }
+		placeholder={ o.Placeholder }
+		required?={ o.Required }
+		autocomplete="off"
+	/>
+	// The datalist id follows the control id: two comboboxes sharing a name
+	// would otherwise share one list element, and the second row's options
+	// would silently be the first row's.
+	<datalist id={ controlID(o.ID, o.Attrs, o.Name) + "-options" }>
+		for _, opt := range o.Options {
+			<option value={ opt.Value }>{ opt.Label }</option>
+		}
+	</datalist>
+}

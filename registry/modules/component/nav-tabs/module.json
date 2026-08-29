@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/nav-tabs",
+    "kind": "component",
+    "name": "nav-tabs",
+    "revision": 1,
+    "contract": 1,
+    "title": "NavTabs",
+    "description": "The NavTabs renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/nav-tabs.templ",
+        "target": "internal/web/templates/ui/nav-tabs.templ",
+        "class": "templ",
+        "sha256": "e3fe443fabfd9df8a848a7ff5502e4950993b749a0a85079d05bf7d4be23583c",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "nav-tabs",
+          "family": "navigation",
+          "signature": "templ NavTabs(o NavTabsOpts)",
+          "summary": "The boosted sub-navigation inside a page (settings).",
+          "guidance": "ActivePath is the current request path.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

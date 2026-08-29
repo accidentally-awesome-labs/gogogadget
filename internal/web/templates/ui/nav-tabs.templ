@@ -1,0 +1,69 @@
+package ui
+
+import (
+	"strings"
+)
+
+// NavItem is one entry in a boosted sub-navigation. Label is the display text
+// (callers resolve it via i18n); MatchPath is the prefix marked current.
+type NavItem struct {
+	Label, Href, Match string
+}
+
+// MatchPath is the prefix current-matching compares the request path against.
+func (n NavItem) MatchPath() string {
+	if n.Match != "" {
+		return n.Match
+	}
+	return n.Href
+}
+
+// MatchCurrent returns the aria-current value for a nav item: "page" when the
+// request path matches, otherwise "".
+func MatchCurrent(path, match string) string {
+	if path == match {
+		return "page"
+	}
+	if match != "/app" && match != "/admin" && strings.HasPrefix(path, strings.TrimSuffix(match, "/")+"/") {
+		return "page"
+	}
+	return ""
+}
+
+// NavTabsOpts is the boosted sub-navigation inside a page (settings).
+// ActivePath is the current request path.
+type NavTabsOpts struct {
+	Items      []NavItem
+	ActivePath string
+	// Label names this navigation landmark. It defaults rather than being
+	// required, because a page with two unnamed nav landmarks gives a screen
+	// reader two entries called "navigation" and no way to tell them apart.
+	Label string
+	Attrs Attrs
+}
+
+templ NavTabs(o NavTabsOpts) {
+	<nav { root("nav-tabs", "tab-bar", o.Attrs)... } aria-label={ navTabsLabel(o) }>
+		for _, item := range o.Items {
+			<a
+				href={ templ.SafeURL(item.Href) }
+				hx-boost="true"
+				hx-target={ NavTarget }
+				hx-select={ NavTarget }
+				hx-swap={ NavSwap }
+				aria-current={ MatchCurrent(o.ActivePath, item.MatchPath()) }
+				class="tab"
+			>{ item.Label }</a>
+		}
+	</nav>
+}
+
+// navTabsLabel names the landmark. "Sections" rather than "Navigation": the
+// shell already owns a landmark called that, and two identically named
+// landmarks are the same problem as two unnamed ones.
+func navTabsLabel(o NavTabsOpts) string {
+	if o.Label != "" {
+		return o.Label
+	}
+	return "Sections"
+}

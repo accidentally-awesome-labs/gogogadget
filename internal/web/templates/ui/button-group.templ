@@ -1,0 +1,22 @@
+package ui
+
+// ButtonGroupOpts configures related controls presented as one unit.
+type ButtonGroupOpts struct {
+	// Label names what the set of controls does. A group with no name is just
+	// adjacent buttons as far as assistive technology is concerned.
+	Label string
+	Attrs Attrs
+}
+
+// ButtonGroup joins related controls visually and as one labelled group. Unlike
+// ToggleGroup the members are independent commands, not exclusive states, so
+// nothing here carries aria-pressed.
+templ ButtonGroup(o ButtonGroupOpts) {
+	<div
+		{ rootWith("button-group", "inline-flex items-center gap-2", o.Attrs,
+			"role", "group",
+			"aria-label", o.Label)... }
+	>
+		{ children... }
+	</div>
+}

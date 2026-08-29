@@ -1,0 +1,108 @@
+package ui
+
+// HeadingOpts configures a section heading.
+// Level and Size are separate on purpose. The level is document structure - a
+// screen reader user navigates by it, and skipping from h1 to h4 breaks that
+// outline. The size is visual weight. Tying them together forces a choice
+// between a correct outline and a correct design, and the usual casualty is the
+// outline.
+type HeadingOpts struct {
+	Text string
+	// Level is 1-6. An out-of-range level falls back to 2: a page's h1 is a
+	// deliberate, single decision, so silently minting another one is worse
+	// than nesting one level too deep.
+	Level int
+	Size  Size
+	// Unstyled renders the tag and the caller's own classes with no size
+	// class. A component that owns its typography still needs the right tag
+	// for the outline, and forcing a size on it would change how it looks to
+	// fix how it is structured - two unrelated decisions.
+	Unstyled bool
+	Attrs    Attrs
+}
+
+// headingBody is Text when the caller supplied it, and the caller's own markup
+// otherwise. A heading is frequently one sentence with one emphasized clause -
+// a brand-coloured second half, an italicised term - and a text-only primitive
+// forces that to flatten to a single tone. Flattening is a real loss: the
+// emphasis carried meaning, and the alternative is a hand-rolled <h1>, which
+// takes the whole structural decision out of the component that exists to own
+// it. Text wins when both are present so a caller cannot silently render two
+// competing bodies.
+templ headingBody(o HeadingOpts) {
+	if o.Text != "" {
+		{ o.Text }
+	} else {
+		{ children... }
+	}
+}
+
+// Heading renders a structural heading at an independent visual size.
+templ Heading(o HeadingOpts) {
+	switch headingLevel(o.Level) {
+		case 1:
+			<h1 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h1>
+		case 3:
+			<h3 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h3>
+		case 4:
+			<h4 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h4>
+		case 5:
+			<h5 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h5>
+		case 6:
+			<h6 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h6>
+		default:
+			<h2 { root("heading", headingSizeClass(o), o.Attrs)... }>
+				@headingBody(o) {
+					{ children... }
+				}
+			</h2>
+	}
+}
+
+func headingLevel(level int) int {
+	if level < 1 || level > 6 {
+		return 2
+	}
+	return level
+}
+
+// headingSizeClass is the base class the tag carries. An unstyled heading
+// contributes none, leaving the caller's own class the whole of it.
+func headingSizeClass(o HeadingOpts) string {
+	if o.Unstyled {
+		return ""
+	}
+	return headingClass(o.Size)
+}
+
+func headingClass(size Size) string {
+	switch size.Value() {
+	case SizeXS:
+		return "text-sm font-semibold"
+	case SizeSM:
+		return "section-title"
+	case SizeLG:
+		return "display-title"
+	}
+	return "page-title"
+}

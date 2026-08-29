@@ -86,8 +86,17 @@ func requestLocale(r *http.Request) string { return i18n.Tag(r.Context()).String
 
 // handleContentIndex serves a type's index: a listing for ModePages, every
 // entry on one anchored page for ModeSinglePage.
-func (s *Server) handleContentIndex(t content.Type) http.HandlerFunc {
+//
+// It takes the content type id rather than the resolved type because the route
+// table is generated: the pattern and the id are both known before boot, and
+// resolving here keeps the generated table free of domain types.
+func (s *Server) handleContentIndex(kind string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t, ok := s.contentTypeByKind(kind)
+		if !ok {
+			s.handleNotFound(w, r)
+			return
+		}
 		entries, err := s.cms.List(r.Context(), t.Kind, requestLocale(r))
 		if err != nil {
 			s.renderError(w, r, err.Error())
@@ -114,8 +123,13 @@ func (s *Server) contentIndexComponent(t content.Type, view contentView, entries
 }
 
 // handleContentDetail serves one entry of a ModePages type.
-func (s *Server) handleContentDetail(t content.Type) http.HandlerFunc {
+func (s *Server) handleContentDetail(kind string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t, ok := s.contentTypeByKind(kind)
+		if !ok {
+			s.handleNotFound(w, r)
+			return
+		}
 		entry, err := s.cms.BySlug(r.Context(), t.Kind, r.PathValue("slug"), requestLocale(r))
 		if err != nil {
 			s.renderError(w, r, err.Error())
@@ -269,4 +283,17 @@ func (s *Server) handleMedia(w http.ResponseWriter, r *http.Request) {
 	if err := s.store.ServeInline(r.Context(), w, m.StorageKey, m.ContentType); err != nil {
 		s.renderError(w, r, err.Error())
 	}
+}
+
+// contentTypeByKind resolves a generated content route's type id. A generated
+// route can only name a type the selected graph declared, so a miss means the
+// installed graph and the generated table disagree — 404 rather than panic, so
+// one stale aggregate cannot take the process down.
+func (s *Server) contentTypeByKind(kind string) (content.Type, bool) {
+	for _, t := range s.types.All() {
+		if t.Kind == kind {
+			return t, true
+		}
+	}
+	return content.Type{}, false
 }

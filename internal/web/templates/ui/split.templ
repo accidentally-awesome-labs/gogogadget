@@ -1,0 +1,32 @@
+package ui
+
+// SplitOpts is a two-pane layout.
+type SplitOpts struct {
+	// Ratio picks the primary pane's share. Only declared ratios exist: an
+	// arbitrary percentage prop is how a design system ends up with fourteen
+	// slightly different column widths.
+	Ratio Ratio
+	Gap   Gap
+	Attrs Attrs
+}
+
+// Split renders two panes side by side, stacking on small screens.
+//
+// Stacking is not optional: two panes side by side on a phone gives each about
+// twenty characters per line, which is unreadable.
+templ Split(o SplitOpts) {
+	<div { root("split", splitClass(o), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func splitClass(o SplitOpts) string {
+	cols := "md:grid-cols-2"
+	switch o.Ratio.Value() {
+	case RatioWide:
+		cols = "md:grid-cols-3 [&>*:first-child]:md:col-span-2"
+	case RatioPortrait:
+		cols = "md:grid-cols-3 [&>*:last-child]:md:col-span-2"
+	}
+	return "grid grid-cols-1 " + cols + " " + gapClass(o.Gap)
+}

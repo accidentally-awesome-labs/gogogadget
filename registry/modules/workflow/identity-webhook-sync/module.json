@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/identity-webhook-sync",
+    "kind": "workflow",
+    "name": "identity-webhook-sync",
+    "revision": 1,
+    "contract": 1,
+    "title": "Identity provider sync",
+    "description": "Receives Clerk user and organization events and mirrors them into the local tables.",
+    "requires": [
+      "system/identity",
+      "system/organizations",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/clerk_webhook_test.go",
+        "target": "internal/web/clerk_webhook_test.go",
+        "class": "test",
+        "sha256": "f91157a6ab1e89035738f821018670dae341c64f1bf3d8da279aba27834fadaa",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/handlers_webhooks.go",
+        "target": "internal/web/handlers_webhooks.go",
+        "class": "go",
+        "sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/webhook_bypass_test.go",
+        "target": "internal/web/webhook_bypass_test.go",
+        "class": "test",
+        "sha256": "1abdbf33cb793afe8ccb918d6883dc33a4d171b3b195d07ee7bc00f9616da8d9",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "identity.webhook.receive"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "identity.webhook.receive",
+          "method": "POST",
+          "pattern": "/webhooks/clerk",
+          "scope": "webhook",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "svix signature verified with CLERK_WEBHOOK_SECRET; not a browser form",
+            "rate_exempt": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 1048576,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleClerkWebhook"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "email.welcome.body": "Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.",
+        "email.welcome.cta": "Open your dashboard →",
+        "email.welcome.subject": "Welcome to GoGoGadget",
+        "email.welcome.title": "Welcome aboard%s!"
+      },
+      "es": {
+        "email.welcome.body": "Tu espacio de trabajo está listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
+        "email.welcome.cta": "Abre tu panel →",
+        "email.welcome.subject": "Te damos la bienvenida a GoGoGadget",
+        "email.welcome.title": "¡Bienvenido a bordo%s!"
+      }
+    }
+  }
+}

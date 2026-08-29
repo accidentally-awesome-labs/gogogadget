@@ -1,0 +1,19 @@
+package ui
+
+// TimelineOpts is an ordered sequence of events.
+type TimelineOpts struct {
+	// Label names the sequence for assistive technology.
+	Label string
+	Attrs Attrs
+}
+
+// Timeline renders events in order.
+//
+// An <ol> because the order carries the meaning: a screen reader announces
+// position in the list, which is exactly the information a timeline conveys
+// visually with its connecting line.
+templ Timeline(o TimelineOpts) {
+	<ol { rootWith("timeline", "relative border-l border-border pl-4 space-y-3", o.Attrs, "aria-label", o.Label)... }>
+		{ children... }
+	</ol>
+}

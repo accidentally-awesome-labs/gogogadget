@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/example-status",
+    "kind": "page",
+    "name": "example-status",
+    "revision": 1,
+    "contract": 1,
+    "title": "Example status page",
+    "description": "The static page of the example closure: one handler on *web.Server, one templ body rendered inside the real public shell, one generated route, one public navigation entry, and its own copy in both locales.",
+    "requires": [
+      "component/example-callout",
+      "system/i18n",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "registry/modules/page/example-status/page_example_status.go",
+        "target": "internal/web/page_example_status.go",
+        "class": "go",
+        "sha256": "5654ed0a9e28e2b171346cd59d746fc5eeb38db4692160767362a77d9e69c75e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "registry/modules/page/example-status/example-status.templ",
+        "target": "internal/web/templates/example-status.templ",
+        "class": "templ",
+        "sha256": "98074768c4f5b19c982961341c7c2ee9b75ba81393b227cc6783ebd222f6128f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "example-status.show"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "example-status.show",
+          "method": "GET",
+          "pattern": "/example-status",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExampleStatus"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "public.example-status",
+          "area": "public",
+          "route_id": "example-status.show",
+          "label_key": "example.status.nav"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "example.status.body": "Nothing is wrong. This page exists so the installer can prove a page module reaches a real URL.",
+        "example.status.nav": "Example status",
+        "example.status.title": "Example status"
+      },
+      "es": {
+        "example.status.body": "No hay ningún problema. Esta página existe para que el instalador demuestre que un módulo de página llega a una URL real.",
+        "example.status.nav": "Estado de ejemplo",
+        "example.status.title": "Estado de ejemplo"
+      }
+    },
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

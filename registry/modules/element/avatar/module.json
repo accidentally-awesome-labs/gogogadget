@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/avatar",
+    "kind": "element",
+    "name": "avatar",
+    "revision": 1,
+    "contract": 1,
+    "title": "Avatar",
+    "description": "The Avatar renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/avatar.templ",
+        "target": "internal/web/templates/ui/avatar.templ",
+        "class": "templ",
+        "sha256": "3fe8b6b3773669ac9b2b22dc11cd6bb7b88c92f3ed554530398c6cde6e6ba682",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/avatar_test.go",
+        "target": "internal/web/templates/ui/avatar_test.go",
+        "class": "test",
+        "sha256": "591a23c502f4bfa27708d2e6a18d11de6f2592a56958005460106b0279db7d66",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "avatar",
+          "family": "foundations",
+          "signature": "templ Avatar(o AvatarOpts)",
+          "summary": "Renders an image with an initials fallback.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

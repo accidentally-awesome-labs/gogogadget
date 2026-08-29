@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "kind": "element",
+  "items": [
+    "registry/modules/element/avatar-group/module.json",
+    "registry/modules/element/avatar/module.json",
+    "registry/modules/element/button-group/module.json",
+    "registry/modules/element/button-link/module.json",
+    "registry/modules/element/button/module.json",
+    "registry/modules/element/code/module.json",
+    "registry/modules/element/copy-button/module.json",
+    "registry/modules/element/divider/module.json",
+    "registry/modules/element/heading/module.json",
+    "registry/modules/element/icon-button/module.json",
+    "registry/modules/element/icon/module.json",
+    "registry/modules/element/kbd/module.json",
+    "registry/modules/element/link/module.json",
+    "registry/modules/element/prose/module.json",
+    "registry/modules/element/separator/module.json",
+    "registry/modules/element/spinner/module.json",
+    "registry/modules/element/text/module.json",
+    "registry/modules/element/toggle-button/module.json",
+    "registry/modules/element/toggle-group/module.json",
+    "registry/modules/element/truncate/module.json",
+    "registry/modules/element/ui-core/module.json",
+    "registry/modules/element/visually-hidden/module.json"
+  ]
+}

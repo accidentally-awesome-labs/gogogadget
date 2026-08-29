@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/dev-session",
+    "kind": "workflow",
+    "name": "dev-session",
+    "revision": 1,
+    "contract": 1,
+    "title": "Zero-account dev session",
+    "description": "Sets and rewrites the synthetic session cookie for the seeded demo user in DEV_AUTH_BYPASS mode, and owns the predicate that gates every dev-only route.",
+    "requires": [
+      "system/identity",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_dev_session.go",
+        "target": "internal/web/workflow_dev_session.go",
+        "class": "go",
+        "sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/workflow_dev_session_test.go",
+        "target": "internal/web/workflow_dev_session_test.go",
+        "class": "test",
+        "sha256": "c671249018f684fbaf2fad95b8db281deb5a6dcaab0dca8f3f70f6772763fea4",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "dev.login",
+        "dev.switch-org"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "dev.login",
+          "method": "GET",
+          "pattern": "/dev/login",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevLogin",
+          "enabled": "devAuthBypass"
+        },
+        {
+          "id": "dev.switch-org",
+          "method": "GET",
+          "pattern": "/dev/switch-org",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDevSwitchOrg",
+          "enabled": "devAuthBypass"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

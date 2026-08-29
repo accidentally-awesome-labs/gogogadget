@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/rate-limit",
+    "kind": "system",
+    "name": "rate-limit",
+    "revision": 1,
+    "contract": 1,
+    "title": "Request rate limiting",
+    "description": "Per-key token-bucket limiter with a bursting budget, used to shield the application from a single abusive client.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/ratelimit/module.go",
+        "target": "internal/ratelimit/module.go",
+        "class": "go",
+        "sha256": "b8299f03a416b9a885920aa8354f46be5974fce17cbe38ac7ac05e7c14438b2d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/ratelimit/module_test.go",
+        "target": "internal/ratelimit/module_test.go",
+        "class": "test",
+        "sha256": "58430e389219fde41f1381d777c38f485100e0ebf0765e5309d17f5aedc37da7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/ratelimit/ratelimit.go",
+        "target": "internal/ratelimit/ratelimit.go",
+        "class": "go",
+        "sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/ratelimit/ratelimit_test.go",
+        "target": "internal/ratelimit/ratelimit_test.go",
+        "class": "test",
+        "sha256": "8539621da7d98e3fbb86d0d1baba0bd491c592a3e7eeb34fd1f367d6f8ee6556",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/ratelimit"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/ratelimit",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Limiter",
+            "capability": "ratelimit.keyed",
+            "type": "*ratelimit.Keyed"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "RATE_LIMIT_RPM",
+        "field": "RateLimitPerMinute",
+        "type": "int",
+        "description": "Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard",
+        "default": "100",
+        "min": 1
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/ratelimit"
+      ]
+    },
+    "data": [],
+    "removal_policy": "major-version-only"
+  }
+}

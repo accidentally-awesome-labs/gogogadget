@@ -143,6 +143,53 @@ func TestFilesPageShowsMeterOnFreePlan(t *testing.T) {
 	assert.True(t, strings.Contains(body, "50"), "plan cap rendered")
 }
 
+// The pager swaps innerMorph into #table-container, whose wrapper FilesTable
+// must keep because the upload targets it with outerHTML. The GET fragment is
+// therefore a different renderer — the box's contents — or every page click
+// leaves a second element carrying the same id behind.
+func TestFilesFragmentDoesNotRepeatItsWrapper(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_ffrag", "org_ffrag", "org:admin")
+	cookie := sessionCookie("user_ffrag", "org_ffrag", "org:admin")
+
+	h := http.Header{}
+	h.Set("HX-Request", "true")
+	code, _, fragment := serve(t, s, "GET", "/app/files", nil, h, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, fragment, `data-testid="files-table"`, "the fragment is the table")
+	assert.NotContains(t, fragment, `id="table-container"`,
+		"the innerMorph target's wrapper belongs to the page, not to its own fragment")
+
+	code, _, page := serve(t, s, "GET", "/app/files", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Equal(t, 1, strings.Count(page, `id="table-container"`), "exactly one swap target")
+	// The upload's own outerHTML target, by contrast, must carry it.
+	assert.Contains(t, page, `hx-target="#table-container"`)
+}
+
+func TestFileDeleteIsGatedByAnInPageDialog(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_fcfm", "org_fcfm", "org:admin")
+	f, err := s.q.InsertFile(t.Context(), fileParamsFor("org_fcfm", "gated.txt", 12))
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM files WHERE clerk_org_id = 'org_fcfm'")
+	})
+
+	id := strconv.FormatInt(f.ID, 10)
+	code, _, body := serve(t, s, "GET", "/app/files", nil, nil, sessionCookie("user_fcfm", "org_fcfm", "org:admin"))
+	require.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, "hx-confirm",
+		"this page must not fall back to window.confirm; the repo-wide ban is "+
+			"TestNoProductionTemplateFallsBackToWindowConfirm in internal/web/templates")
+	assert.Contains(t, body, `data-ui="confirm-action"`)
+	assert.Contains(t, body, `id="file-delete-`+id+`"`, "one dialog per row, addressable by id")
+	// Unchanged delete contract: the request only moved onto the confirm button.
+	assert.Contains(t, body, `hx-delete="/app/files/`+id+`"`)
+	assert.Contains(t, body, `hx-target="closest tr"`)
+	assert.Contains(t, body, `hx-swap="outerHTML"`)
+}
+
 func TestServerDefaultsToDevStore(t *testing.T) {
 	s := integrationServer(t, nil)
 	_, ok := s.store.(*storage.DevStore)

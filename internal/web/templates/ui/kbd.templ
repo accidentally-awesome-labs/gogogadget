@@ -1,0 +1,22 @@
+package ui
+
+// KbdOpts configures a keyboard key.
+type KbdOpts struct {
+	// Keys are rendered in order, joined by a thin separator, so a chord reads
+	// as distinct keys rather than one string.
+	Keys  []string
+	Attrs Attrs
+}
+
+// Kbd renders one or more keyboard keys. <kbd> is the element that says "press
+// this", which matters when documentation is read aloud.
+templ Kbd(o KbdOpts) {
+	<span { root("kbd", "inline-flex items-center gap-1", o.Attrs)... }>
+		for i, key := range o.Keys {
+			if i > 0 {
+				<span class="text-fg-muted text-xs" aria-hidden="true">+</span>
+			}
+			<kbd class="rounded border border-border bg-surface-raised px-1.5 py-0.5 text-xs font-medium">{ key }</kbd>
+		}
+	</span>
+}

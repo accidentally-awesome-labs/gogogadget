@@ -1,0 +1,25 @@
+package ui
+
+// TimeFieldOpts is a time input.
+type TimeFieldOpts struct {
+	Name        string
+	Value       string
+	Step        string
+	Hint, Error string
+	Required    bool
+	Size        Size
+	Attrs       Attrs
+}
+
+// TimeField renders a native time input.
+templ TimeField(o TimeFieldOpts) {
+	<input
+		{ root("time-field", inputClass(o.Size), o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="time" id={ o.Name } name={ o.Name } value={ o.Value }
+		if o.Step != "" {
+			step={ o.Step }
+		}
+		required?={ o.Required }
+	/>
+}

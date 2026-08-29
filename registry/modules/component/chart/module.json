@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/chart",
+    "kind": "component",
+    "name": "chart",
+    "revision": 1,
+    "contract": 1,
+    "title": "Charts",
+    "description": "Bar, line, area, donut and sparkline figures. Each renders a caption, summary and semantic data table always; the Chart.js visual is added on top only when the engine loads.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/chart.templ",
+        "target": "internal/web/templates/ui/chart.templ",
+        "class": "templ",
+        "sha256": "f299b6b50d6fe78a86d220dc485a23baa9c3aefe201ecbd72d1242f9399a6f07",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/chart_test.go",
+        "target": "internal/web/templates/ui/chart_test.go",
+        "class": "test",
+        "sha256": "eab9208d19316bdaa6e0b974a273c0a8e045605efa5e99e3cc486c6dc900b6b7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/chart.js",
+        "target": "static/ui/chart.js",
+        "class": "asset",
+        "sha256": "f52cf045f4f46c7be45834f4d68a206379f65c74a6b5a05a239562d2fdbba0f5",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/chartjs-4.5.1.umd.min.js",
+        "target": "static/vendor/chartjs-4.5.1.umd.min.js",
+        "class": "asset",
+        "sha256": "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "area-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table",
+          "signature": "templ AreaChart(o AreaChartOpts)",
+          "summary": "Renders area data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "bar-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table",
+          "signature": "templ BarChart(o BarChartOpts)",
+          "summary": "Renders bar data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "chart-legend",
+          "family": "advanced",
+          "signature": "templ ChartLegend(o ChartLegendOpts)",
+          "summary": "Names each series in text with its colour swatch.",
+          "guidance": "The swatch is decoration: colour alone cannot distinguish series for a colour-blind reader, so the label is what carries the identity.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "donut-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table",
+          "signature": "templ DonutChart(o DonutChartOpts)",
+          "summary": "Renders donut data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "line-chart",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table",
+          "signature": "templ LineChart(o LineChartOpts)",
+          "summary": "Renders line data as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "sparkline",
+          "family": "advanced",
+          "engine": "chartjs",
+          "alpine": "uiChart",
+          "vendor": "chart.js@4.5.1",
+          "native_fallback": "data table",
+          "signature": "templ Sparkline(o SparklineOpts)",
+          "summary": "Renders a sparkline as a figure: caption, summary, semantic table, and a hidden visual mount.",
+          "guidance": "The order is the design. The table is the chart - it is rendered first, always present, and never hidden by default. The canvas is an enhancement that becomes visible only after the engine initialises successfully, and the adapter reads its data *out of that table* rather than from a duplicate payload, so the picture and the numbers cannot drift apart. If the engine never loads, the page is a table: complete, readable, and printable. BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts are separate types rather than one type with a shape field, so a caller cannot ask for a donut with two axes and the gallery cannot render a shape nobody declared.",
+          "states": [
+            "default"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "chartjs",
+          "path": "static/vendor/chartjs-4.5.1.umd.min.js",
+          "kind": "script",
+          "engine": "chartjs",
+          "integrity": "sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo="
+        },
+        {
+          "id": "ui-chart",
+          "path": "static/ui/chart.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "vendors": [
+      {
+        "path": "static/vendor/chartjs-4.5.1.umd.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js",
+        "version": "4.5.1",
+        "bytes": 208522,
+        "sha256": "48444a82d4edcb5bec0f1965faacdde18d9c17db3063d042abada2f705c9f54a",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "origins": [
+          "github.com",
+          "www.chartjs.org"
+        ]
+      }
+    ]
+  }
+}

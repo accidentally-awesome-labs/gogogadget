@@ -1,0 +1,30 @@
+package ui
+
+import "fmt"
+
+// StatGroupOpts is a row of metrics.
+type StatGroupOpts struct {
+	// Label names the set. Four unlabelled numbers side by side give a
+	// screen-reader user no indication of what they measure collectively.
+	Label   string
+	Columns int
+	Attrs   Attrs
+}
+
+// StatGroup renders metrics as a labelled group.
+templ StatGroup(o StatGroupOpts) {
+	<div
+		{ rootWith("stat-group", "grid grid-cols-1 gap-4 sm:grid-cols-"+fmt.Sprint(statColumns(o.Columns)), o.Attrs,
+			"role", "group",
+			"aria-label", o.Label)... }
+	>
+		{ children... }
+	</div>
+}
+
+func statColumns(columns int) int {
+	if columns <= 0 {
+		return 3
+	}
+	return columns
+}

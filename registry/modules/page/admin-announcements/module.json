@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-announcements",
+    "kind": "page",
+    "name": "admin-announcements",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin announcements list",
+    "description": "The platform banner announcements table with the create form.",
+    "requires": [
+      "system/announcements",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/announcements_test.go",
+        "target": "internal/web/announcements_test.go",
+        "class": "test",
+        "sha256": "e99d1009ffbb8d71faeb4db7598236e182debda7029908f676e46b489432fa2a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_admin_announcements.go",
+        "target": "internal/web/page_admin_announcements.go",
+        "class": "go",
+        "sha256": "6c9d3f200a4b3b7e9ef83cf29cc372edc2e6a8cedb34fa529185c16ac0fd05f6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_announcements.templ",
+        "target": "internal/web/templates/admin_announcements.templ",
+        "class": "templ",
+        "sha256": "544b7a36b17637dfcc53fe6a4ba543d73a3b93969d9dd08baae71d2fdd823cbb",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.announcements.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.announcements.index",
+          "method": "GET",
+          "pattern": "/admin/announcements",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminAnnouncements"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.announcements",
+          "area": "admin",
+          "route_id": "admin.announcements.index",
+          "label_key": "sidebar.admin_announcements",
+          "after": [
+            "nav.admin.jobs"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "admin-announcements",
+          "path": "/admin/announcements",
+          "persona": "admin",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "admin.announcements.activate": "Activate",
+        "admin.announcements.activated": "Announcement activated.",
+        "admin.announcements.active": "active",
+        "admin.announcements.col_actions": "Actions",
+        "admin.announcements.col_created": "Created",
+        "admin.announcements.col_kind": "Kind",
+        "admin.announcements.col_message": "Message",
+        "admin.announcements.col_status": "Status",
+        "admin.announcements.create": "Create",
+        "admin.announcements.create_title": "New announcement",
+        "admin.announcements.created": "Announcement created (inactive until activated).",
+        "admin.announcements.deactivate": "Deactivate",
+        "admin.announcements.deactivated": "Announcement deactivated.",
+        "admin.announcements.delete": "Delete",
+        "admin.announcements.delete_confirm": "Delete this announcement?",
+        "admin.announcements.delete_row": "Delete %s",
+        "admin.announcements.delete_title": "Delete this announcement?",
+        "admin.announcements.deleted": "Announcement deleted.",
+        "admin.announcements.empty": "No announcements yet.",
+        "admin.announcements.inactive": "inactive",
+        "admin.announcements.invalid": "Check the kind, a message of at most 280 characters, and an optional http(s) link.",
+        "admin.announcements.kind_critical": "Critical",
+        "admin.announcements.kind_info": "Info",
+        "admin.announcements.kind_label": "Kind",
+        "admin.announcements.kind_warning": "Warning",
+        "admin.announcements.message_label": "Message",
+        "admin.announcements.message_placeholder": "Scheduled maintenance Sunday 02:00 UTC",
+        "admin.announcements.one_active_hint": "Only one announcement is shown at a time — activating one deactivates the rest.",
+        "admin.announcements.row_actions_aria": "Actions for %s",
+        "admin.announcements.title": "Announcements",
+        "admin.announcements.url_label": "Link (optional)",
+        "admin.announcements.url_placeholder": "https://status.example.com/incident/123"
+      },
+      "es": {
+        "admin.announcements.activate": "Activar",
+        "admin.announcements.activated": "Anuncio activado.",
+        "admin.announcements.active": "activo",
+        "admin.announcements.col_actions": "Acciones",
+        "admin.announcements.col_created": "Creado",
+        "admin.announcements.col_kind": "Tipo",
+        "admin.announcements.col_message": "Mensaje",
+        "admin.announcements.col_status": "Estado",
+        "admin.announcements.create": "Crear",
+        "admin.announcements.create_title": "Nuevo anuncio",
+        "admin.announcements.created": "Anuncio creado (inactivo hasta que lo actives).",
+        "admin.announcements.deactivate": "Desactivar",
+        "admin.announcements.deactivated": "Anuncio desactivado.",
+        "admin.announcements.delete": "Eliminar",
+        "admin.announcements.delete_confirm": "¿Eliminar este anuncio?",
+        "admin.announcements.delete_row": "Eliminar %s",
+        "admin.announcements.delete_title": "¿Eliminar este anuncio?",
+        "admin.announcements.deleted": "Anuncio eliminado.",
+        "admin.announcements.empty": "Aún no hay anuncios.",
+        "admin.announcements.inactive": "inactivo",
+        "admin.announcements.invalid": "Revisa el tipo, un mensaje de máximo 280 caracteres y un enlace http(s) opcional.",
+        "admin.announcements.kind_critical": "Crítico",
+        "admin.announcements.kind_info": "Información",
+        "admin.announcements.kind_label": "Tipo",
+        "admin.announcements.kind_warning": "Advertencia",
+        "admin.announcements.message_label": "Mensaje",
+        "admin.announcements.message_placeholder": "Mantenimiento programado el domingo a las 02:00 UTC",
+        "admin.announcements.one_active_hint": "Solo se muestra un anuncio a la vez: al activar uno se desactivan los demás.",
+        "admin.announcements.row_actions_aria": "Acciones para %s",
+        "admin.announcements.title": "Anuncios",
+        "admin.announcements.url_label": "Enlace (opcional)",
+        "admin.announcements.url_placeholder": "https://status.example.com/incident/123"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

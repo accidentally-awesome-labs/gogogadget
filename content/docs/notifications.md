@@ -2,7 +2,7 @@
 title: Notifications
 description: In-app notifications — notify.Send, the unread badge, and the SSE stream.
 section: Features
-weight: 17
+weight: 18
 ---
 
 In-app notifications are per-user rows in the `notifications` table, a bell +

@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/skip-link",
+    "kind": "component",
+    "name": "skip-link",
+    "revision": 1,
+    "contract": 1,
+    "title": "SkipLink",
+    "description": "The SkipLink renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/skip-link.templ",
+        "target": "internal/web/templates/ui/skip-link.templ",
+        "class": "templ",
+        "sha256": "cd7113590bf6eb3fa91752955efe3695b9fbc97ea3bb28a33b9695ddf6a2407b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/skip-link_test.go",
+        "target": "internal/web/templates/ui/skip-link_test.go",
+        "class": "test",
+        "sha256": "b4c1950bad46ab1ccb2e5835fb85a24cb181a4fff974affe4155a301a6729fbd",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "skip-link",
+          "family": "navigation",
+          "signature": "templ SkipLink(o SkipLinkOpts)",
+          "summary": "Renders the first focusable control on the page.",
+          "guidance": "It is visually hidden until focused, not display:none - a hidden element is not focusable, so a display:none skip link is exactly as useless as none at all. It must be the first control in the document, otherwise a keyboard user tabs through the whole navigation before reaching the way to bypass it.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/metrics",
+    "kind": "system",
+    "name": "metrics",
+    "revision": 1,
+    "contract": 1,
+    "title": "Runtime metrics endpoint",
+    "description": "The bearer-gated /metrics endpoint. Production refuses to expose it without a token, because Go runtime stats must not be public by default.",
+    "requires": [
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/metrics.go",
+        "target": "internal/web/metrics.go",
+        "class": "go",
+        "sha256": "4cc539f0df540306583f509883e6f2fdd6930d6c25a8ca972da075bb79638353",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/metrics_test.go",
+        "target": "internal/web/metrics_test.go",
+        "class": "test",
+        "sha256": "f5c7bf4acfd614203323481de18b9e4fb3155951665afef6b9b6c4fffaeabc2f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "metrics.scrape"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "metrics.scrape",
+          "method": "GET",
+          "pattern": "/metrics",
+          "scope": "probe",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleMetrics",
+          "enabled": "metricsEnabled"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "METRICS_TOKEN",
+        "field": "MetricsToken",
+        "type": "string",
+        "description": "Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

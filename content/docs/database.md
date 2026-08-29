@@ -2,7 +2,7 @@
 title: Database
 description: Postgres, goose migrations, sqlc codegen, and the conventions that keep queries honest.
 section: Core
-weight: 5
+weight: 6
 ---
 
 The database is Postgres 16, reached through `pgx/v5`'s pool (max 10

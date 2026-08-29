@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "kind": "component",
+  "items": [
+    "registry/modules/component/example-callout/module.json"
+  ]
+}

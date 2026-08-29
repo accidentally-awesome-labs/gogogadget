@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lock.schema.json",
+  "$ref": "#/$defs/Lock",
+  "$defs": {
+    "Lock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "integer",
+          "const": 1
+        },
+        "registry_commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LockedModule"
+          }
+        }
+      },
+      "required": [
+        "schema",
+        "registry_commit",
+        "order",
+        "modules"
+      ]
+    },
+    "LockedModule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "contract": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_by": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        },
+        "manifest": {
+          "$ref": "module.schema.json#/$defs/Manifest"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LockedFile"
+          }
+        },
+        "migrations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LockedMigration"
+          }
+        },
+        "pending": {
+          "$ref": "#/$defs/PendingUpdate"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "contract",
+        "source_commit",
+        "reason",
+        "required_by",
+        "manifest",
+        "files",
+        "migrations"
+      ]
+    },
+    "LockedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "base_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "local_sha256": {
+          "type": "string",
+          "pattern": "^(?:[0-9a-f]{64})?$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "clean",
+            "modified",
+            "missing",
+            "conflicted"
+          ]
+        }
+      },
+      "required": [
+        "path",
+        "source",
+        "base_sha256",
+        "local_sha256",
+        "state"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "missing"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "local_sha256": {
+                "const": ""
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "local_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "LockedMigration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "number",
+        "path",
+        "sha256"
+      ]
+    },
+    "PendingUpdate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registry_commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest": {
+          "$ref": "module.schema.json#/$defs/Manifest"
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PendingConflict"
+          }
+        }
+      },
+      "required": [
+        "run_id",
+        "registry_commit",
+        "source_commit",
+        "manifest",
+        "conflicts"
+      ]
+    },
+    "PendingConflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*$"
+        },
+        "candidate_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "candidate_path": {
+          "type": "string",
+          "pattern": "^tmp/ggg/conflicts/[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)+$"
+        },
+        "diff_path": {
+          "type": "string",
+          "pattern": "^tmp/ggg/conflicts/[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)+$"
+        }
+      },
+      "required": [
+        "path",
+        "candidate_sha256",
+        "candidate_path",
+        "diff_path"
+      ]
+    }
+  }
+}

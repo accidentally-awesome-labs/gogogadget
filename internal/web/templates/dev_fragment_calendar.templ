@@ -1,0 +1,80 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// DevCalendarState is what the calendar example renders: the value the native
+// input now holds, or the error that stopped it changing.
+type DevCalendarState struct {
+	Value string
+	Err   string
+}
+
+// The window the example accepts. min/max are set on the input too, but the
+// server checks them again: a bound enforced only in the browser is not
+// enforced, and the picker writes into the input rather than validating it.
+const (
+	DevCalendarMin = "2026-01-01"
+	DevCalendarMax = "2026-12-31"
+)
+
+const devCalendarHint = "Any date in 2026."
+
+// devCalendarReadout states the value the server ended up with.
+//
+// Without it a successful round trip and a no-op look identical: the input would
+// show the date the user picked either way, because the picker already wrote it
+// there before the request left.
+func devCalendarReadout(state DevCalendarState) string {
+	if state.Value == "" {
+		return "No date selected."
+	}
+	return "The server has " + state.Value + "."
+}
+
+// DevCalendarExample renders the picker's resting state inside the box it swaps.
+templ DevCalendarExample() {
+	<div id="dev-calendar-region" data-testid="dev-calendar-region">
+		@DevCalendarFragment(DevCalendarState{})
+	</div>
+}
+
+// DevCalendarFragment is the native input as the server now sees it.
+//
+// The fragment is the field, not the calendar: the calendar writes into a native
+// date input and the input is what submits, so the only thing worth echoing back
+// is that input's value. Selecting a date fires change, which is what posts -
+// the submit button is there for the keyboard path and for no JavaScript at all.
+templ DevCalendarFragment(state DevCalendarState) {
+	@ui.Form(ui.FormOpts{
+		Method: "post", Action: "/dev/ui/calendar/select",
+		Target: "#dev-calendar-region", Swap: "innerHTML",
+		Attrs: ui.Attrs{
+			Class: "space-y-3", TestID: "dev-calendar-form",
+			HX: ui.HX{Post: "/dev/ui/calendar/select", Trigger: "change", Disable: true},
+		},
+	}) {
+		@ui.Field(ui.FieldOpts{
+			Name: "dev_date", Label: "Publish on",
+			Hint: devCalendarHint, Error: state.Err,
+		}) {
+			@ui.DatePicker(ui.DatePickerOpts{
+				Field: ui.DateFieldOpts{
+					Name: "dev_date", Value: state.Value,
+					Min: DevCalendarMin, Max: DevCalendarMax,
+					Hint: devCalendarHint, Error: state.Err,
+				},
+				Locale: "en-GB", TriggerLabel: "Choose a date", FirstDayOfWeek: 1,
+			})
+		}
+		@ui.FormActions(ui.FormActionsOpts{}) {
+			@ui.Spinner(ui.SpinnerOpts{})
+			@ui.Button(ui.ButtonOpts{
+				Label: "Use this date", Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+				Attrs: ui.Attrs{TestID: "dev-calendar-submit"},
+			})
+		}
+		<p role="status" class="text-sm text-fg-muted" data-testid="dev-calendar-readout">
+			{ devCalendarReadout(state) }
+		</p>
+	}
+}

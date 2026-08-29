@@ -1,0 +1,45 @@
+package ui
+
+// TocEntry is one heading in a table of contents.
+type TocEntry struct {
+	Label string
+	// Anchor is the target fragment, without the leading hash.
+	Anchor string
+	// Depth indents nested headings; 0 and 1 are both top level.
+	Depth int
+}
+
+// TableOfContentsOpts configures an in-page heading index.
+type TableOfContentsOpts struct {
+	Label   string
+	Entries []TocEntry
+	Attrs   Attrs
+}
+
+// TableOfContents renders an in-page index.
+//
+// The links are deliberately not boosted. Boosting an anchor link repaints the
+// content box at the top before scrolling, so the browser lands on the wrong
+// section - the native fragment jump is both correct and faster.
+templ TableOfContents(o TableOfContentsOpts) {
+	<nav { rootWith("table-of-contents", "text-sm", o.Attrs, "aria-label", breadcrumbOrDefault(o.Label, "On this page"))... }>
+		<ol class="space-y-1">
+			for _, entry := range o.Entries {
+				<li class={ tocIndent(entry.Depth) }>
+					<a href={ templ.SafeURL("#" + entry.Anchor) } class="doc-link block">{ entry.Label }</a>
+				</li>
+			}
+		</ol>
+	</nav>
+}
+
+func tocIndent(depth int) string {
+	switch {
+	case depth >= 3:
+		return "pl-8"
+	case depth == 2:
+		return "pl-4"
+	default:
+		return ""
+	}
+}

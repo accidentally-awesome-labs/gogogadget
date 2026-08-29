@@ -42,6 +42,7 @@ load-bearing:
 request
 └─ MaxBytesReader (10 MB cap, every route)
    └─ recover        panics → 500 page (+ Sentry when SENTRY_DSN is set)
+      └─ routeBodyLimit   narrows to RoutePolicy.MaxBodyBytes where a route declares a tighter cap
       └─ requestID   16-byte hex id, exposed as X-Request-Id
          └─ accessLog   one slog line per request (5xx at ERROR)
             └─ i18n.Detect   locale: ?lang= → ggg_lang cookie → Accept-Language → en

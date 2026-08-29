@@ -1,91 +1,157 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // FilesPage is the list page: header + upload form + quota meter + table.
 templ FilesPage(d FilesData) {
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "files.title") }</h1>
-		<form hx-post="/app/files" hx-encoding="multipart/form-data" hx-target="#table-container" hx-swap="outerHTML" hx-disable="this" class="flex items-center gap-2">
-			<input type="file" name="file" required class="input max-w-xs" aria-label={ i18n.T(ctx, "files.choose") } data-testid="file-input"/>
-			<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
-				@Spinner()
-				{ i18n.T(ctx, "files.upload") }
-			</button>
-		</form>
-	</div>
-
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "files.title")})
+	@FilesUpload()
 	@FilesQuota(d)
+	// #table-container is written once, here. FilesTable repeats it because it
+	// is also the upload's outerHTML target; the pager's innerMorph fragment is
+	// FilesTableBody, which returns the contents alone.
 	@FilesTable(d)
 }
 
-// FilesQuota shows the storage meter (like the projects usage meter).
-templ FilesQuota(d FilesData) {
-	if d.Plan.MaxStorageMB > 0 {
-		<div class="card mb-4 text-sm" data-testid="storage-meter">
-			{ i18n.T(ctx, "files.quota", usedMB(d.UsedBytes), fmt.Sprint(d.Plan.MaxStorageMB), d.Plan.Name) }
-		</div>
+// FilesUpload is the dropzone form. The zone wraps a real <input type="file">
+// inside its label, so the picker opens by click and by keyboard with no
+// script at all; the drag target is the enhancement on top.
+templ FilesUpload() {
+	@ui.Form(ui.FormOpts{
+		Target: "#table-container", Swap: "outerHTML",
+		Attrs: ui.Attrs{
+			Class: "card mb-4 space-y-3",
+			HX:    ui.HX{Post: "/app/files", Encoding: "multipart/form-data", Disable: true},
+		},
+	}) {
+		// No Hint: FileDropzone puts the caller's Hint into FieldARIA's
+		// aria-describedby but renders no element with that id, so a hint here
+		// would be a dangling reference. Reported as a catalog gap.
+		@ui.FileDropzone(ui.FileDropzoneOpts{
+			Name:  "file",
+			Label: i18n.T(ctx, "files.dropzone"),
+			Attrs: ui.Attrs{TestID: "file-input"},
+		})
+		@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "files.upload"), Type: ui.TypeSubmit,
+				Action: ui.ActionPrimary, Icon: ui.IconUpload,
+			})
+			// Sibling, not child: htmx flags the form, so any .htmx-indicator
+			// inside it shows, and the button's accessible name stays its label.
+			@ui.Spinner(ui.SpinnerOpts{})
+		}
 	}
 }
 
-// FilesTable is the list + row-delete target. The wrapper id matches the
-// Pagination component's hx-target so pager links morph the same box.
+// FilesQuota is the storage quota. Meter semantics, not progressbar: a quota is
+// a measurement inside a range, and a progress bar implies it will finish.
+templ FilesQuota(d FilesData) {
+	if d.Plan.MaxStorageMB > 0 {
+		@ui.UsageCard(ui.UsageCardOpts{
+			Title:      i18n.T(ctx, "files.quota_title", d.Plan.Name),
+			Used:       i18n.T(ctx, "files.megabytes", usedMB(d.UsedBytes)),
+			Limit:      i18n.T(ctx, "files.megabytes", fmt.Sprint(d.Plan.MaxStorageMB)),
+			Percent:    quotaPercent(d.UsedBytes, int64(d.Plan.MaxStorageMB)*1024*1024),
+			MeterLabel: i18n.T(ctx, "files.quota_meter_label"),
+			Attrs:      ui.Attrs{Class: "mb-4", TestID: "storage-meter"},
+		})
+	}
+}
+
+// FilesTable is the upload's outerHTML target, so it carries the wrapper. The
+// upload's 422 re-render lands here too, which is why the storage notice lives
+// inside the box rather than beside it.
 templ FilesTable(d FilesData) {
 	<div id="table-container">
-		if d.LimitHit {
-			<div class="alert-error mb-4" data-testid="storage-limit">
-				{ i18n.T(ctx, "files.limit_hit", fmt.Sprint(d.Plan.MaxStorageMB)) }
-				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
-			</div>
-		}
-		if len(d.Files) == 0 {
-			@EmptyState(i18n.T(ctx, "files.empty_title"), i18n.T(ctx, "files.empty_body"))
-		} else {
-			<div class="card !p-0 overflow-hidden">
-				<table class="table">
-					<thead>
-						<tr>
-							<th>{ i18n.T(ctx, "files.col_name") }</th>
-							<th>{ i18n.T(ctx, "files.col_size") }</th>
-							<th>{ i18n.T(ctx, "files.col_uploaded") }</th>
-							<th class="text-right">{ i18n.T(ctx, "projects.col_actions") }</th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, f := range d.Files {
-							<tr id={ fmt.Sprintf("file-%d", f.ID) } data-testid="file-row">
-								<td class="font-medium">{ f.Filename }</td>
-								<td class="text-fg-muted">{ humanBytes(f.SizeBytes) }</td>
-								<td class="text-fg-muted">{ f.CreatedAt.Time.Format("Jan 2, 2006") }</td>
-								<td class="text-right">
-									<div class="flex justify-end gap-2">
-										<a
-											href={ templ.SafeURL(fmt.Sprintf("/app/files/%d", f.ID)) }
-											class="btn-ghost !px-2 !py-1 text-xs"
-											download
-										>{ i18n.T(ctx, "files.download") }</a>
-										<button
-											type="button"
-											hx-delete={ fmt.Sprintf("/app/files/%d", f.ID) }
-											hx-confirm={ i18n.T(ctx, "files.delete_confirm") }
-											hx-target="closest tr"
-											hx-swap="outerHTML"
-											class="btn-danger !px-2 !py-1 text-xs"
-										>{ i18n.T(ctx, "projects.delete") }</button>
-									</div>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-			@Pagination(d.Page, d.TotalPages, "/app/files")
-		}
+		@FilesTableBody(d)
 	</div>
+}
+
+// FilesTableBody is the pager's innerMorph fragment: the contents of
+// #table-container without the wrapper. Repeating the wrapper here would leave
+// a second element carrying the same id after the first page click.
+templ FilesTableBody(d FilesData) {
+	if d.LimitHit {
+		@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4", TestID: "storage-limit"}}) {
+			{ i18n.T(ctx, "files.limit_hit", fmt.Sprint(d.Plan.MaxStorageMB)) }
+			@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "projects.upgrade"), Href: "/app/settings/billing", Attrs: ui.Attrs{Class: "font-semibold"}})
+		}
+	}
+	@ui.DataTable(filesTable(ctx, d)) {
+		for _, f := range d.Files {
+			<tr id={ fmt.Sprintf("file-%d", f.ID) } data-testid="file-row">
+				<td class="px-4 py-3 font-medium">{ f.Filename }</td>
+				<td class="px-4 py-3 text-fg-muted">{ humanBytes(f.SizeBytes) }</td>
+				<td class="px-4 py-3 text-fg-muted">{ f.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+				<td class="px-4 py-3">
+					<div class="card-actions">
+						<a
+							href={ templ.SafeURL(fmt.Sprintf("/app/files/%d", f.ID)) }
+							class="btn btn-ghost btn-xs"
+							download
+						>{ i18n.T(ctx, "files.download") }</a>
+						// hx-confirm is gone: the same hx-delete now rides the
+						// dialog's confirm control, so closest tr / outerHTML /
+						// 200-empty is unchanged.
+						@ui.ConfirmAction(ui.ConfirmActionOpts{
+							ID:           fmt.Sprintf("file-delete-%d", f.ID),
+							TriggerLabel: i18n.T(ctx, "files.delete_row", f.Filename),
+							TriggerIcon:  ui.IconDelete,
+							Title:        i18n.T(ctx, "files.delete_title"),
+							Message:      i18n.T(ctx, "files.delete_confirm"),
+							ConfirmLabel: i18n.T(ctx, "files.delete_action"),
+							CancelLabel:  i18n.T(ctx, "projects.cancel"),
+							Kind:         ui.KindDanger,
+							HX: ui.HX{
+								Delete: fmt.Sprintf("/app/files/%d", f.ID),
+								Target: "closest tr", Swap: "outerHTML",
+							},
+						})
+					</div>
+				</td>
+			</tr>
+		}
+	}
+}
+
+func filesTable(ctx context.Context, d FilesData) ui.DataTableOpts {
+	return ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "files.caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "name", Label: i18n.T(ctx, "files.col_name")},
+			{Key: "size", Label: i18n.T(ctx, "files.col_size")},
+			{Key: "uploaded", Label: i18n.T(ctx, "files.col_uploaded")},
+			{Key: "actions", Label: i18n.T(ctx, "projects.col_actions"), Align: ui.AlignEnd},
+		},
+		RowCount:   len(d.Files),
+		Empty:      filesEmpty(),
+		Pagination: filesPager(d),
+		Attrs:      ui.Attrs{ID: "files-table", TestID: "files-table"},
+	}
+}
+
+templ filesEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Level: 2, Variant: ui.EmptyInline,
+		Title: i18n.T(ctx, "files.empty_title"),
+		Body:  i18n.T(ctx, "files.empty_body"),
+	})
+}
+
+templ filesPager(d FilesData) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page: d.Page, TotalPages: d.TotalPages,
+		BaseURL: "/app/files", Target: "#table-container",
+		Labels: pagerLabels(ctx),
+	})
 }
 
 func usedMB(bytes int64) string {
@@ -94,7 +160,7 @@ func usedMB(bytes int64) string {
 
 // humanBytes renders 1.2 KB / 3.4 MB style sizes.
 func humanBytes(b int64) string {
-	const kb, mb = 1024, 1024*1024
+	const kb, mb = 1024, 1024 * 1024
 	switch {
 	case b >= mb:
 		return fmt.Sprintf("%.1f MB", float64(b)/mb)

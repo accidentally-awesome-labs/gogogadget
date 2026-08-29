@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -16,11 +15,7 @@ import (
 // exportProjectsCSV renders the org's projects to CSV through the storage
 // seam (DevStore when unconfigured — works zero-account), records a files row
 // so it shows on /app/files, and notifies the requesting user with the link.
-func (w *Worker) exportProjectsCSV(ctx context.Context, job sqlc.Job) error {
-	var p ExportProjectsPayload
-	if err := json.Unmarshal(job.Payload, &p); err != nil {
-		return err
-	}
+func (w *Worker) exportProjectsCSV(ctx context.Context, p ExportProjectsPayload) error {
 	if w.Storage == nil {
 		return fmt.Errorf("export.projects_csv: no storage configured on worker")
 	}

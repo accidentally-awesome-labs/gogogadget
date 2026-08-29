@@ -1,0 +1,32 @@
+package ui
+
+// CheckboxGroupOpts is a set of related checkboxes.
+type CheckboxGroupOpts struct {
+	Name        string
+	Legend      string
+	Options     []Option
+	Hint, Error string
+	Attrs       Attrs
+}
+
+// CheckboxGroup renders related checkboxes inside a fieldset.
+//
+// A fieldset with a legend is what associates the group's question with each
+// answer. Wrapping them in a div with a heading looks identical and tells a
+// screen-reader user nothing about what the checkboxes belong to.
+templ CheckboxGroup(o CheckboxGroupOpts) {
+	<fieldset
+		{ root("checkbox-group", "space-y-2", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error})... }
+	>
+		<legend class="label">{ o.Legend }</legend>
+		for _, opt := range o.Options {
+			@Checkbox(CheckboxOpts{
+				Name:    o.Name,
+				Value:   opt.Value,
+				Label:   opt.Label,
+				Checked: opt.Selected,
+			})
+		}
+	</fieldset>
+}

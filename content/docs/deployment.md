@@ -2,7 +2,7 @@
 title: Deployment
 description: One static binary, the Dockerfile, compose, fly.io, Neon, and the scaling caveats.
 section: Guides
-weight: 23
+weight: 24
 ---
 
 The whole app ships as **one static binary**: templates, static assets,
@@ -18,11 +18,12 @@ multi-stage so the final artifact carries no toolchain:
 | Stage | Base | What happens |
 |---|---|---|
 | tools | curl image | Downloads the Tailwind standalone binary (`linux-x64`), sha256-verified like `scripts/setup-tools.sh` |
-| build | `golang:1.26-alpine` | `go mod download` → `go tool templ generate` + `go tool sqlc generate` → `bin/tailwindcss -i input.css -o static/app.css --minify` → `CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=$VERSION" ./cmd/server` |
+| build | `golang:1.26-bookworm` | `go mod download` → `make generate TAILWIND=tailwindcss` (ggg sync → templ → sqlc → Tailwind, the same target CI runs) → `CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=$VERSION" ./cmd/server` |
 | final | `gcr.io/distroless/static-debian12:nonroot` | The binary only. `EXPOSE 8080` |
 
-- Generated code is produced **inside** the image build, so the shipped CSS
-  and sqlc output can never drift from their sources.
+- Generated code is produced **inside** the image build by the Makefile target
+  itself, so the shipped CSS, sqlc output and registry aggregates can never
+  drift from their sources or from what `make check` verifies locally.
 - The `-X main.version` stamp surfaces on `GET /healthz` as
   `{"status":"ok","version":"…"}` — deploy provenance for free.
 - Distroless `nonroot`: no shell, no package manager, runs unprivileged.

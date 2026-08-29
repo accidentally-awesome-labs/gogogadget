@@ -17,19 +17,26 @@ import (
 // CookieName is the persisted locale preference (set only by POST /set-locale).
 const CookieName = "ggg_lang"
 
-// Supported tags, first = default. The matcher is the single source of truth;
-// Locales drives the switcher UI.
-var (
-	matcher = language.NewMatcher([]language.Tag{language.English, language.Spanish})
-)
+// The matcher is built from the generated locale list so it can never resolve a
+// request to a language nothing is translated into, and the switcher can never
+// offer one. Both used to be hand-written and had to be kept in step by hand.
+var matcher = language.NewMatcher(supportedTags())
 
-// Locales are the switcher options in display order.
-var Locales = []struct {
-	Code, Label string
-	Tag         language.Tag
-}{
-	{"en", "English", language.English},
-	{"es", "Español", language.Spanish},
+func supportedTags() []language.Tag {
+	tags := make([]language.Tag, 0, len(Locales))
+	for _, l := range Locales {
+		tags = append(tags, l.Tag)
+	}
+	return tags
+}
+
+// DefaultTag is the first declared locale, which is the fallback everywhere a
+// request carries no usable preference.
+func DefaultTag() language.Tag {
+	if len(Locales) == 0 {
+		return language.English
+	}
+	return Locales[0].Tag
 }
 
 type state struct {
@@ -113,8 +120,8 @@ func Tag(ctx context.Context) language.Tag {
 	return stateFrom(ctx).tag
 }
 
-// ParseSupported maps a switcher code ("en"/"es") to its tag. ok is false for
-// anything else.
+// ParseSupported maps a switcher code to its tag. ok is false for anything not
+// declared by an installed module.
 func ParseSupported(code string) (language.Tag, bool) {
 	for _, l := range Locales {
 		if l.Code == code {
@@ -124,11 +131,11 @@ func ParseSupported(code string) (language.Tag, bool) {
 	return language.Und, false
 }
 
-// ParseOrDefault maps a stored locale code ("es"; "" = unset) to its tag,
-// defaulting to English.
+// ParseOrDefault maps a stored locale code ("" = unset) to its tag, defaulting
+// to the first declared locale.
 func ParseOrDefault(code string) language.Tag {
 	if tag, ok := ParseSupported(code); ok {
 		return tag
 	}
-	return language.English
+	return DefaultTag()
 }

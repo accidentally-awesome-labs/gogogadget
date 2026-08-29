@@ -1,0 +1,16 @@
+package ui
+
+// FieldsetOpts groups related fields under a legend.
+type FieldsetOpts struct {
+	Legend string
+	Attrs  Attrs
+}
+
+templ Fieldset(o FieldsetOpts) {
+	<fieldset { root("fieldset", "", o.Attrs)... }>
+		if o.Legend != "" {
+			<legend class="label">{ o.Legend }</legend>
+		}
+		{ children... }
+	</fieldset>
+}

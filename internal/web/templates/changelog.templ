@@ -3,6 +3,7 @@ package templates
 import (
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // ChangelogPage renders every release on one scrollable page, newest first.
@@ -12,26 +13,37 @@ import (
 // a stable anchor id, so a support reply can link straight at the release
 // that fixed someone's problem.
 templ ChangelogPage(releases []content.Release) {
-	<article class="max-w-3xl mx-auto px-4 py-16">
-		<h1 class="text-4xl font-bold tracking-tight">{ i18n.T(ctx, "changelog.title") }</h1>
-		<p class="mt-3 text-lg text-fg-muted">{ i18n.T(ctx, "changelog.intro") }</p>
+	<article class="page-narrow">
+		@ui.Heading(ui.HeadingOpts{Text: i18n.T(ctx, "changelog.title"), Level: 1, Size: ui.SizeLG})
+		@ui.Text(ui.TextOpts{Size: ui.SizeLG, Muted: true, Attrs: ui.Attrs{Class: "mt-3"}}) {
+			{ i18n.T(ctx, "changelog.intro") }
+		}
 		<div class="mt-12 space-y-16">
-			for _, r := range releases {
-				<section id={ r.Anchor } class="scroll-mt-24" data-testid="changelog-entry">
+			for _, release := range releases {
+				<section id={ release.Anchor } class="scroll-mt-24" data-testid="changelog-entry">
 					<div class="flex items-baseline gap-3 flex-wrap">
-						<h2 class="text-2xl font-bold">
-							<a href={ templ.SafeURL("#" + r.Anchor) } class="hover:text-brand-600 dark:hover:text-brand-400">{ r.Title }</a>
-						</h2>
-						<time datetime={ r.Date.Format("2006-01-02") } class="text-sm text-fg-muted" data-testid="changelog-date">
-							{ r.Date.Format("January 2, 2006") }
+						// Unstyled on both, and Boost off: this is an in-page
+						// fragment, so boosting it would repaint the content box
+						// at the top before scrolling and land on the wrong
+						// release. Heading owns the level; Link owns the anchor.
+						@ui.Heading(ui.HeadingOpts{Level: 2, Unstyled: true, Attrs: ui.Attrs{Class: "text-2xl font-bold"}}) {
+							@ui.Link(ui.LinkOpts{
+								Label: release.Title, Href: "#" + release.Anchor, Unstyled: true,
+								Attrs: ui.Attrs{Class: "hover:text-brand-text"},
+							})
+						}
+						<time datetime={ release.Date.Format("2006-01-02") } class="text-sm text-fg-muted" data-testid="changelog-date">
+							{ release.Date.Format("January 2, 2006") }
 						</time>
 					</div>
-					if r.Summary != "" {
-						<p class="mt-2 text-fg-muted">{ r.Summary }</p>
+					if release.Summary != "" {
+						@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
+							{ release.Summary }
+						}
 					}
-					<div class="prose mt-6">
-						@templ.Raw(r.Body)
-					</div>
+					@ui.Prose(ui.ProseOpts{Attrs: ui.Attrs{Class: "mt-6"}}) {
+						@templ.Raw(release.Body)
+					}
 				</section>
 			}
 		</div>

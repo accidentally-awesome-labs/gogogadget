@@ -1,6 +1,9 @@
-// cmd/seed loads a SQL fixture into the database named by DATABASE_URL.
-// With -reset it first drops and recreates that database, then applies
-// embedded migrations. Usage: go run ./cmd/seed [-reset] path/to/seed.sql
+// cmd/seed loads fixtures into the database named by DATABASE_URL. With -reset
+// it first drops and recreates that database, then applies embedded migrations.
+//
+// The default is -registry <dev|e2e>: the generated fragment order from
+// internal/db (module order), so a module's fixture loads with the module. A
+// positional .sql path is still accepted for one-off fixtures.
 package main
 
 import (
@@ -32,10 +35,30 @@ func run() error {
 		reset = true
 		args = args[1:]
 	}
-	if len(args) != 1 {
-		return fmt.Errorf("usage: seed [-reset] <file.sql>")
+	registrySet := ""
+	explicit := []string{}
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-registry" && i+1 < len(args) {
+			registrySet = args[i+1]
+			i++
+			continue
+		}
+		explicit = append(explicit, args[i])
 	}
-	seedFile := args[0]
+	if registrySet != "" && len(explicit) > 0 {
+		return fmt.Errorf("usage: seed [-reset] [-registry dev|e2e] [file.sql]")
+	}
+	files := explicit
+	if registrySet != "" {
+		fragments, ok := db.SeedFragments[registrySet]
+		if !ok || len(fragments) == 0 {
+			return fmt.Errorf("no seed fragments registered for set %q", registrySet)
+		}
+		files = fragments
+	}
+	if len(files) == 0 {
+		return fmt.Errorf("usage: seed [-reset] [-registry dev|e2e] [file.sql]")
+	}
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -59,14 +82,16 @@ func run() error {
 		return err
 	}
 
-	sql, err := os.ReadFile(seedFile)
-	if err != nil {
-		return err
+	for _, seedFile := range files {
+		sql, err := os.ReadFile(seedFile)
+		if err != nil {
+			return err
+		}
+		if _, err := pool.Exec(ctx, string(sql)); err != nil {
+			return fmt.Errorf("seed %s: %w", seedFile, err)
+		}
 	}
-	if _, err := pool.Exec(ctx, string(sql)); err != nil {
-		return fmt.Errorf("seed %s: %w", seedFile, err)
-	}
-	fmt.Println("seeded", seedFile)
+	fmt.Printf("seeded %d fragment(s)\n", len(files))
 
 	// The shipped markdown is the content corpus: import it into
 	// content_entries so a fresh clone has a populated blog and changelog.

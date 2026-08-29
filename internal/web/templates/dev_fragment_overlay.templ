@@ -1,0 +1,66 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// devOverlayPanel is the one panel this example serves.
+const devOverlayPanel = "filters"
+
+// DevOverlayHasPanel reports whether a panel name is one the example serves.
+//
+// The handler 404s on anything else. The response claims to be a specific panel,
+// so answering a made-up name with this one would make the parameter decorative
+// and hide a typo in whatever opened it.
+func DevOverlayHasPanel(name string) bool { return name == devOverlayPanel }
+
+// DevOverlayExample renders the trigger and the drawer whose body loads on open.
+//
+// Two things happen on one click, deliberately: Alpine's uiDialog calls
+// showModal - the platform's top layer, backdrop, focus trap and Escape all come
+// from that - and htmx fetches the panel into the already-open drawer. Fetching
+// on open rather than with the page is the point of the example: a filter panel
+// nobody opens should not cost the page anything.
+templ DevOverlayExample() {
+	<div class="space-y-3" data-testid="dev-overlay-example">
+		@ui.Button(ui.ButtonOpts{
+			Label: "Open filters", Action: ui.ActionPrimary, Size: ui.SizeSM, Icon: ui.IconFilter,
+			Attrs: ui.Attrs{
+				TestID: "dev-overlay-open",
+				Alpine: ui.Alpine{Data: "uiDialog", On: map[string]string{"click": "open('dev-overlay')"}},
+				HX: ui.HX{
+					Get:    "/dev/ui/overlay/open?panel=" + devOverlayPanel,
+					Target: "#dev-overlay-panel",
+					Swap:   "innerHTML",
+				},
+			},
+		})
+		@ui.Drawer(ui.DrawerOpts{ID: "dev-overlay", Title: "Filters", Side: ui.SideRight}) {
+			<div id="dev-overlay-panel" data-testid="dev-overlay-panel">
+				// A skeleton, because this region is genuinely empty until the
+				// panel lands. Skeletons are hidden from assistive technology,
+				// so nothing is announced for content that does not exist yet.
+				@ui.Skeleton(ui.SkeletonOpts{Lines: 3})
+			</div>
+		}
+	</div>
+}
+
+// DevOverlayPanel is the drawer's body.
+//
+// Controls only, no form: the drawer's dismiss control is itself a
+// `form method="dialog"` submit, and HTML forbids a nested form - a second one
+// here would silently drop whichever inputs the browser reparented.
+templ DevOverlayPanel() {
+	<div class="space-y-3" data-testid="dev-overlay-loaded">
+		@ui.Field(ui.FieldOpts{Name: "dev_overlay_status", Label: "Status"}) {
+			@ui.Select(ui.SelectOpts{Name: "dev_overlay_status", Options: []ui.Option{
+				{Value: "active", Label: "Active", Selected: true},
+				{Value: "paused", Label: "Paused"},
+				{Value: "failed", Label: "Failed"},
+			}})
+		}
+		@ui.Field(ui.FieldOpts{Name: "dev_overlay_owner", Label: "Owner"}) {
+			@ui.TextInput(ui.TextInputOpts{Name: "dev_overlay_owner", Placeholder: "Anyone"})
+		}
+		<p class="text-sm text-fg-muted">This panel was fetched when the drawer opened.</p>
+	</div>
+}

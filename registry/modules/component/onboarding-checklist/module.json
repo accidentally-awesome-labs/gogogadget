@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/onboarding-checklist",
+    "kind": "component",
+    "name": "onboarding-checklist",
+    "revision": 1,
+    "contract": 1,
+    "title": "OnboardingChecklist",
+    "description": "The OnboardingChecklist renderer and its options.",
+    "requires": [
+      "component/progress-bar",
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/onboarding-checklist.templ",
+        "target": "internal/web/templates/ui/onboarding-checklist.templ",
+        "class": "templ",
+        "sha256": "406f553ef21327c766727d9d6943a6137a02218a7462f6bf760238c0963af12e",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "onboarding-checklist",
+          "family": "communication",
+          "signature": "templ OnboardingChecklist(o OnboardingChecklistOpts)",
+          "summary": "Renders setup steps with progress.",
+          "guidance": "Every step stays visible and actionable once done, rather than disappearing: a list that shrinks as you complete it hides what the product can do, and a user who wants to revisit a step has nowhere to go.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

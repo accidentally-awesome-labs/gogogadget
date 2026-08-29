@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
@@ -19,26 +20,30 @@ import (
 // sitemap membership — with no migration, no table, no handler and no
 // template written for it.
 //
+// The type is no longer hand-built here. It is owned by the test-only module
+// page/test-content-guide (registry/testdata), declared in a non-test file, and
+// its routes come from the same expansion a shipped content type gets. Building
+// the fixture in the test would have proved only that the test can construct a
+// struct; going through the module path proves the mechanism.
+//
 // Label keys are borrowed from the built-in types so this test needs no
 // catalog entries; that a REAL new type needs them is asserted by
 // TestContentTypeKeysExistInCatalogs.
-func guideType() content.Type {
-	return content.Type{
-		Kind: "guide", LabelKey: "content.type.post", PluralKey: "content.type.posts",
-		Path: "/guides", Mode: content.ModePages, Slug: content.SlugFromTitle, Sitemap: true,
-		Fields: []content.Field{{Key: "level", LabelKey: "content.field.author",
-			Kind: content.FieldSelect, Required: true, Options: []string{"intro", "advanced"}}},
-	}
-}
+func guideType() content.Type { return testOnlyGuideType() }
 
 func guideServer(t *testing.T, mutate func(*content.Type)) (*Server, *http.Cookie) {
 	t.Helper()
-	guide := guideType()
-	if mutate != nil {
-		mutate(&guide)
-	}
 	s := integrationServer(t, func(d *Deps) {
+		d.TestOnlyModules = true
+		if mutate == nil {
+			return
+		}
+		// A caller that wants a variant still gets one, but it has to travel as
+		// an explicit content-type override rather than as the only way in.
+		guide := testOnlyGuideType()
+		mutate(&guide)
 		d.ContentTypes = append(content.DefaultTypes(), guide)
+		d.TestOnlyModules = false
 	})
 	return s, staffUser(t, s, "user_guide", "org_guide", identity.RoleAdmin)
 }
@@ -153,13 +158,19 @@ func TestUnknownKindIsNotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, code)
 }
 
-// An invalid declaration must not take the server down: NewServer falls back
-// to the built-in types and logs. cmd/server validates first and exits.
-func TestInvalidTypeDeclarationFallsBackToDefaults(t *testing.T) {
-	s := integrationServer(t, func(d *Deps) {
-		d.ContentTypes = []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}}
+// An invalid declaration is a wiring bug, so construction refuses it. There is
+// deliberately no fallback to the built-in types: silently serving a different
+// set of collections than the one declared hides the mistake until a reader
+// notices a missing page.
+func TestInvalidTypeDeclarationIsRefused(t *testing.T) {
+	_, err := NewServer(Deps{
+		Config:       &config.Config{Env: "test", AppURL: "http://localhost:18080"},
+		Log:          testLogger(),
+		Docs:         &content.Docs{},
+		ContentTypes: []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}},
 	})
-	assert.Len(t, s.types.All(), 2, "the built-in types")
-	code, _, _ := serve(t, s, "GET", "/blog", nil, nil)
-	assert.Equal(t, http.StatusOK, code)
+	if err == nil {
+		t.Fatal("NewServer accepted an invalid content type declaration")
+	}
+	assert.Contains(t, err.Error(), "content type")
 }

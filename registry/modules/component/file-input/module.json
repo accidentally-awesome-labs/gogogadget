@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/file-input",
+    "kind": "component",
+    "name": "file-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "FileInput",
+    "description": "The FileInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/file-input.templ",
+        "target": "internal/web/templates/ui/file-input.templ",
+        "class": "templ",
+        "sha256": "47cb00394611277d0563f26ce37193824f032ef1f7fd01243950de32338c1c24",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "file-input",
+          "family": "forms",
+          "signature": "templ FileInput(o FileInputOpts)",
+          "summary": "Renders a native file input.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

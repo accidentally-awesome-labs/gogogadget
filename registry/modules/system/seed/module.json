@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/seed",
+    "kind": "system",
+    "name": "seed",
+    "revision": 1,
+    "contract": 1,
+    "title": "Fixture loader",
+    "description": "Loads a SQL fixture into the database, with an optional reset that drops and recreates the schema first.",
+    "requires": [
+      "system/database"
+    ],
+    "files": [
+      {
+        "source": "cmd/seed/main.go",
+        "target": "cmd/seed/main.go",
+        "class": "go",
+        "sha256": "9f5f361dd2b63dcd1bfb0b16165b6847d35091d638c27377962037ec86c82111",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "cmd/seed"
+      ]
+    },
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

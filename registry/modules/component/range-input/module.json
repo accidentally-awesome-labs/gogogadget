@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/range-input",
+    "kind": "component",
+    "name": "range-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "RangeInput",
+    "description": "The RangeInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/range-input.templ",
+        "target": "internal/web/templates/ui/range-input.templ",
+        "class": "templ",
+        "sha256": "f798c7804ee21e4d3721a7149a08aaee164f9355f5b6b940ff881a1601d63e9a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "range-input",
+          "family": "forms",
+          "signature": "templ RangeInput(o RangeInputOpts)",
+          "summary": "Renders a native slider with a text readout.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

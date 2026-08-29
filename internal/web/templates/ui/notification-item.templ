@@ -1,0 +1,73 @@
+package ui
+
+// NotificationItemOpts is one entry in the notification list.
+type NotificationItemOpts struct {
+	Title string
+	Body  string
+	// Timestamp is pre-formatted by the caller: date formatting is locale
+	// dependent and ui never imports i18n.
+	Timestamp string
+	// MachineTime is the machine-readable value for <time datetime>, so the
+	// browser and assistive technology get an unambiguous instant even when
+	// the visible text is relative ("2 hours ago").
+	MachineTime string
+	Href        string
+	Kind        Kind
+	// Unread drives both the visual marker and the text below, because a dot
+	// alone is invisible to a screen reader.
+	Unread      bool
+	UnreadLabel string
+	// Actions is the row's controls - mark read, open, dismiss. It is a slot
+	// rather than a list of typed buttons because the requests are the caller's
+	// domain, and the wrapper is omitted when nil so a read-only list does not
+	// carry an empty cell that steals the row's remaining width.
+	Actions templ.Component
+	Attrs   Attrs
+}
+
+// NotificationItem renders one notification.
+templ NotificationItem(o NotificationItemOpts) {
+	<li { root("notification-item", notificationClass(o.Unread), o.Attrs)... }>
+		<span class="flex items-start gap-3">
+			@StatusDot(StatusDotOpts{Kind: o.Kind, Label: notificationDotLabel(o)})
+			<span class="min-w-0">
+				if o.Href != "" {
+					<a href={ templ.SafeURL(o.Href) } class="link font-medium">{ o.Title }</a>
+				} else {
+					<span class="font-medium">{ o.Title }</span>
+				}
+				if o.Body != "" {
+					<span class="block text-sm text-fg-muted">{ o.Body }</span>
+				}
+				if o.Timestamp != "" {
+					<time class="block text-xs text-fg-muted mt-1" datetime={ o.MachineTime }>{ o.Timestamp }</time>
+				}
+			</span>
+			if o.Actions != nil {
+				<span class="shrink-0 ml-auto">
+					@o.Actions
+				</span>
+			}
+		</span>
+	</li>
+}
+
+func notificationClass(unread bool) string {
+	base := "px-3 py-2 border-b border-border last:border-b-0"
+	if unread {
+		return base + " bg-selected"
+	}
+	return base
+}
+
+// notificationDotLabel states read state in words. The tinted background and
+// the dot are both colour-only signals, so the state has to be readable too.
+func notificationDotLabel(o NotificationItemOpts) string {
+	if !o.Unread {
+		return ""
+	}
+	if o.UnreadLabel != "" {
+		return o.UnreadLabel
+	}
+	return "Unread"
+}

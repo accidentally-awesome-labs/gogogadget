@@ -1,0 +1,240 @@
+package ui
+
+import "fmt"
+
+// TreeNodeData is one node in a tree.
+type TreeNodeData struct {
+	// ID is required: it is the node's identity for focus and for lazy loading.
+	ID    string
+	Label string
+	// Href makes the node a link. A node with no Href is a grouping label, not
+	// a destination.
+	Href string
+	Icon IconName
+	// Expanded is the initial state. Server-owned so a deep link can open the
+	// branch the user asked for.
+	Expanded bool
+	// HasChildren declares a branch whose children are not loaded yet, so the
+	// disclosure appears before the fetch rather than after it.
+	HasChildren bool
+	// Cells are the row's values when the node sits in a TreeGrid.
+	Cells    []string
+	Children []TreeNodeData
+}
+
+// TreeOpts configures a tree.
+type TreeOpts struct {
+	// ID and Label are required: an unlabelled tree is announced only as
+	// "tree", and a page with two of them is unnavigable.
+	ID    string
+	Label string
+	// LazyURL loads a branch's children on first expand.
+	LazyURL string
+	Nodes   []TreeNodeData
+	Attrs   Attrs
+}
+
+// Tree renders a disclosure tree.
+//
+// It is built from nested `details` elements, so with no JavaScript every branch
+// still opens and every leaf is still reachable. The controller adds the APG
+// keyboard model on top - roving focus, arrows, Home/End and typeahead - by
+// upgrading this markup rather than replacing it. A div-based tree would have to
+// implement disclosure, keyboard and semantics all at once, and would offer
+// nothing when any of the three failed.
+templ Tree(o TreeOpts) {
+	<div
+		{ rootWith("tree", "text-sm", o.Attrs,
+			"x-data", "uiTree",
+			"id", o.ID,
+			"data-tree-lazy-url", o.LazyURL)... }
+		aria-label={ o.Label }
+	>
+		<ul role="list" class="space-y-0.5">
+			for _, node := range o.Nodes {
+				@TreeNode(TreeNodeOpts{Node: node, Level: 1})
+			}
+		</ul>
+	</div>
+}
+
+// TreeNodeOpts configures one node.
+type TreeNodeOpts struct {
+	Node TreeNodeData
+	// Level is the 1-based depth. It is carried explicitly because a screen
+	// reader needs the depth stated, and nesting alone does not state it once
+	// the controller flattens focus into one tab stop.
+	Level int
+	Attrs Attrs
+}
+
+// TreeNode renders one node and its children.
+templ TreeNode(o TreeNodeOpts) {
+	<li { root("tree-node", "", o.Attrs)... } data-tree-node={ o.Node.ID }>
+		if treeIsBranch(o.Node) {
+			<details open?={ o.Node.Expanded } data-tree-branch>
+				// The depth travels as data, not as aria-level: aria-level is not
+				// allowed on a summary element, and emitting it is an invalid
+				// attribute rather than extra information. The controller applies
+				// the tree roles - and the level with them - once it is running,
+				// which is when the keyboard model those roles promise exists.
+				<summary
+					class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-surface-raised cursor-pointer"
+					data-tree-item
+					data-tree-level={ fmt.Sprint(treeLevel(o.Level)) }
+				>
+					if o.Node.Icon != "" {
+						@Icon(IconOpts{Name: o.Node.Icon})
+					}
+					<span>{ o.Node.Label }</span>
+				</summary>
+				<ul role="list" class="pl-4 border-l border-border ml-2 space-y-0.5">
+					if len(o.Node.Children) == 0 && o.Node.HasChildren {
+						// A branch declared to have children says so before they
+						// arrive. An empty open branch reads as a leaf.
+						<li class="px-2 py-1 text-fg-muted" data-tree-pending>Loading…</li>
+					}
+					for _, child := range o.Node.Children {
+						@TreeNode(TreeNodeOpts{Node: child, Level: treeLevel(o.Level) + 1})
+					}
+				</ul>
+			</details>
+		} else if o.Node.Href != "" {
+			<a
+				href={ templ.SafeURL(o.Node.Href) }
+				class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-surface-raised"
+				data-tree-item
+				data-tree-level={ fmt.Sprint(treeLevel(o.Level)) }
+			>
+				if o.Node.Icon != "" {
+					@Icon(IconOpts{Name: o.Node.Icon})
+				}
+				<span>{ o.Node.Label }</span>
+			</a>
+		} else {
+			// A leaf with no destination is a label, not a control. Rendering it
+			// as a button would promise an action that does not exist.
+			<span
+				class="flex items-center gap-1.5 px-2 py-1 text-fg-muted"
+				data-tree-item
+				data-tree-level={ fmt.Sprint(treeLevel(o.Level)) }
+			>
+				{ o.Node.Label }
+			</span>
+		}
+	</li>
+}
+
+// TreeGridOpts configures a tree table.
+type TreeGridOpts struct {
+	ID      string
+	Label   string
+	Columns []Column
+	Nodes   []TreeNodeData
+	Attrs   Attrs
+}
+
+// TreeGrid renders a hierarchy with columns.
+//
+// This is a table, because the data is rows and columns and a table already
+// reports both. It does NOT claim role="treegrid": that role promises a full
+// two-dimensional keyboard model, and this component has none - the tree
+// controller binds keys to tree items, not table rows.
+//
+// Depth therefore travels as text in the row header, not as aria-level.
+// aria-level and aria-expanded are only valid on treegrid rows, so on a plain
+// table they are invalid attributes that report nothing - and the indentation
+// beside them is a visual convention a screen reader never sees. "Level 2" in
+// the row's own name is the fact the user needs, and it survives every reading
+// order.
+templ TreeGrid(o TreeGridOpts) {
+	<div { rootWith("tree-grid", "table-card overflow-x-auto", o.Attrs, "id", o.ID)... }>
+		<table class="w-full text-sm">
+			<caption class="sr-only">{ o.Label }</caption>
+			<thead>
+				<tr>
+					for _, column := range o.Columns {
+						// The declared width is honoured here too, through the
+						// one helper: a Column that sizes itself in DataTable
+						// and sizes itself nowhere else is a contract that
+						// depends on which renderer the caller reached for.
+						if style := columnWidthStyle(column); style != "" {
+							<th scope="col" class="px-3 py-2 text-left font-medium" style={ style }>{ column.Label }</th>
+						} else {
+							<th scope="col" class="px-3 py-2 text-left font-medium">{ column.Label }</th>
+						}
+					}
+				</tr>
+			</thead>
+			<tbody>
+				@treeGridRows(o.Nodes, 1)
+			</tbody>
+		</table>
+	</div>
+}
+
+// treeGridRows flattens the hierarchy into rows carrying their depth.
+templ treeGridRows(nodes []TreeNodeData, level int) {
+	for _, node := range nodes {
+		<tr class="border-t border-border" data-tree-row={ node.ID } data-tree-level={ fmt.Sprint(level) }>
+			<th scope="row" class="px-3 py-2 text-left font-normal">
+				<span style={ treeIndent(level) }>{ node.Label }</span>
+				// Stated for every row below the root, and for a branch also
+				// whether it is open - the caret is invisible to a screen reader.
+				if level > 1 || treeIsBranch(node) {
+					<span class="sr-only">{ treeRowContext(node, level) }</span>
+				}
+			</th>
+			for _, cell := range node.Cells {
+				<td class="px-3 py-2">{ cell }</td>
+			}
+		</tr>
+		if node.Expanded {
+			@treeGridRows(node.Children, level+1)
+		}
+	}
+}
+
+// treeIsBranch reports whether a node discloses children. A node with declared
+// children but none loaded is still a branch: the disclosure has to exist before
+// the fetch, or there is nothing for the user to act on.
+func treeIsBranch(node TreeNodeData) bool {
+	return len(node.Children) > 0 || node.HasChildren
+}
+
+// treeRowContext states a row's depth, and for a branch whether it is open.
+// Both facts are visual otherwise - indentation and a caret - and a screen
+// reader sees neither.
+func treeRowContext(node TreeNodeData, level int) string {
+	out := ""
+	if level > 1 {
+		out = fmt.Sprintf("level %d", level)
+	}
+	if treeIsBranch(node) {
+		state := "collapsed"
+		if node.Expanded {
+			state = "expanded"
+		}
+		if out != "" {
+			out += ", "
+		}
+		out += state
+	}
+	return out
+}
+
+// treeLevel floors the depth at 1. A zero level would claim the node sits
+// outside the tree.
+func treeLevel(level int) int {
+	if level < 1 {
+		return 1
+	}
+	return level
+}
+
+// treeIndent is visual only, which is why the depth is also stated in
+// aria-level: this padding tells a sighted reader the shape and tells assistive
+// technology nothing.
+func treeIndent(level int) string {
+	return fmt.Sprintf("padding-left:%drem", (treeLevel(level)-1))
+}

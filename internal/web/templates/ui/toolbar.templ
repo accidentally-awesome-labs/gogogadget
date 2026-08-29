@@ -1,0 +1,23 @@
+package ui
+
+// ToolbarOpts is a labelled row of controls.
+type ToolbarOpts struct {
+	Label string
+	Attrs Attrs
+}
+
+// Toolbar renders a group of related controls.
+//
+// role="group", not role="toolbar": a toolbar promises arrow-key navigation
+// between its controls with a single tab stop. These controls are each
+// tabbable, so claiming toolbar would advertise a keyboard contract that is not
+// implemented.
+templ Toolbar(o ToolbarOpts) {
+	<div
+		{ rootWith("toolbar", "flex items-center gap-2 flex-wrap", o.Attrs,
+			"role", "group",
+			"aria-label", o.Label)... }
+	>
+		{ children... }
+	</div>
+}

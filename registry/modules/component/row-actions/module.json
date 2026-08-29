@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/row-actions",
+    "kind": "component",
+    "name": "row-actions",
+    "revision": 1,
+    "contract": 1,
+    "title": "RowActions",
+    "description": "The RowActions renderer and its options.",
+    "requires": [
+      "component/dropdown-menu",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/row-actions.templ",
+        "target": "internal/web/templates/ui/row-actions.templ",
+        "class": "templ",
+        "sha256": "b40b25b97b7fae04c9a2973c8c0c2c5479146430225ae683865498cbd4569d68",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "row-actions",
+          "family": "data",
+          "signature": "templ RowActions(o RowActionsOpts)",
+          "summary": "Renders a row's commands as a menu.",
+          "states": [
+            "default",
+            "disabled"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

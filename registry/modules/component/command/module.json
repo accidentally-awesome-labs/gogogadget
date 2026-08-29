@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/command",
+    "kind": "component",
+    "name": "command",
+    "revision": 1,
+    "contract": 1,
+    "title": "Command palette",
+    "description": "A search form in a native dialog where every command is a link. The combobox roles are applied by the controller that implements them, never rendered as an unfulfilled promise.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/command.templ",
+        "target": "internal/web/templates/ui/command.templ",
+        "class": "templ",
+        "sha256": "87a0ba957bcd40d6fd58b7dcdf0c4b0314ee2e68a36ccb11491e98e454abbf3a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/command_test.go",
+        "target": "internal/web/templates/ui/command_test.go",
+        "class": "test",
+        "sha256": "4057ad129d1ff85ebd61ec7abf045701ef63a590479c9476f1df2a45e1da3509",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/command.js",
+        "target": "static/ui/command.js",
+        "class": "asset",
+        "sha256": "1268d11a3b1a64d06c5aec4d54eb962a4a5470950664bb7a0a45d6992700d82d",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "command-group",
+          "family": "advanced",
+          "signature": "templ CommandGroup(o CommandGroupOpts)",
+          "summary": "Renders a titled group of commands.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "command-item",
+          "family": "advanced",
+          "signature": "templ CommandItem(o CommandItemOpts)",
+          "summary": "Renders one command as a link.",
+          "guidance": "A link, because every command has a destination. Rendering it as a div with a click handler would make it unreachable by keyboard, un-middle-clickable, and invisible to a screen reader's list of links.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "command-palette",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiCommand",
+          "signature": "templ CommandPalette(o CommandPaletteOpts)",
+          "summary": "Renders a searchable command dialog.",
+          "guidance": "The markup is a real form pointing at a real search page, inside a native dialog. With no JavaScript the palette is a search form that works; with it, the input becomes a combobox over a listbox and Cmd/Ctrl-K opens the dialog. The combobox roles are added by the controller, not baked into the markup, because an input claiming role=\"combobox\" with no active descendant and no key handling is worse than a plain text field.",
+          "keyboard": "Cmd/Ctrl-K opens the palette, ArrowUp/ArrowDown move the active option, Home/End jump to the ends, and Enter follows the highlighted command or submits the search when nothing is highlighted.",
+          "states": [
+            "default",
+            "empty",
+            "overflow"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-command",
+          "path": "static/ui/command.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

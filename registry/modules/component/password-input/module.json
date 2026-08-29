@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/password-input",
+    "kind": "component",
+    "name": "password-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "PasswordInput",
+    "description": "The PasswordInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/password-input.templ",
+        "target": "internal/web/templates/ui/password-input.templ",
+        "class": "templ",
+        "sha256": "17cccad4e4c858376510b1c68ec7b22fd2165fcc6d236831567f2abd2fb5820d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/password-input_test.go",
+        "target": "internal/web/templates/ui/password-input_test.go",
+        "class": "test",
+        "sha256": "a47c1c229c4e7ace27f14b4cf9ebfafa7a03b015d1cc6165a514532378fadac7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "password-input",
+          "family": "forms",
+          "signature": "templ PasswordInput(o PasswordInputOpts)",
+          "summary": "Renders a native password field.",
+          "guidance": "There is no reveal toggle here on purpose: it belongs to a module that owns the Alpine behaviour, and a half-built toggle that leaves the value in the DOM as plain text is worse than none.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

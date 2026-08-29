@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -61,11 +62,34 @@ func (s *Server) storeLocale(r *http.Request, locale string) {
 	}
 }
 
-// safeReturnTo accepts only same-site paths: must start with "/" and must not
-// start with "//" (protocol-relative → off-origin).
+// safeReturnTo accepts only a same-origin path. It parses rather than
+// prefix-matches: a prefix check passes `/\evil.com`, which WHATWG URL parsers
+// — and therefore every browser — read as the authority `evil.com` because a
+// backslash is a path separator in a special scheme. url.Parse populates Host
+// for anything with an authority, so rejecting a non-empty Host, a scheme, and
+// an opaque form covers protocol-relative, backslash, and absolute inputs in
+// one rule.
 func safeReturnTo(s string) string {
-	if strings.HasPrefix(s, "/") && !strings.HasPrefix(s, "//") {
-		return s
+	if s == "" || s[0] != '/' {
+		return "/"
 	}
-	return "/"
+	u, err := url.Parse(s)
+	if err != nil || u.Scheme != "" || u.Host != "" || u.Opaque != "" {
+		return "/"
+	}
+	// A backslash never appears in a legitimate internal path, and url.Parse
+	// keeps it in Path rather than treating it as a separator, so the browser and
+	// this check would disagree about the result. Refuse it outright.
+	if strings.ContainsAny(u.Path, "\\") || !strings.HasPrefix(u.Path, "/") {
+		return "/"
+	}
+	// Re-render from the parsed parts, so only path, query, and fragment survive.
+	out := u.EscapedPath()
+	if u.RawQuery != "" {
+		out += "?" + u.RawQuery
+	}
+	if u.Fragment != "" {
+		out += "#" + u.EscapedFragment()
+	}
+	return out
 }

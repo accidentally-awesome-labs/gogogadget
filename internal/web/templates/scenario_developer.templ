@@ -1,0 +1,316 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The developer scenario is the one surface where a rendering mistake leaks a
+// credential. The rule it demonstrates: a secret travels in a data attribute and
+// as text content, never inside an Alpine or HTMX expression. Under CSP an
+// expression cannot be evaluated at all, and a value spliced into one is a
+// single escaping bug away from the page's script surface - a secret containing
+// a quote would close the attribute. ui.SecretReveal and ui.CopyButton both own
+// that placement, which is why this scenario composes them instead of writing
+// its own reveal.
+
+// developerKey is one API key as the table shows it. The full secret is never in
+// this struct: a key is displayed once at creation and stored hashed, so a list
+// row has only the prefix, and a fixture that carried the whole value would be
+// modelling something the product cannot produce.
+type developerKey struct {
+	Name string
+	// Prefix is the visible identifying fragment, e.g. "ggg_live_7f2a".
+	Prefix      string
+	Scope       string
+	Created     string
+	LastUsed    string
+	MachineTime string
+	// Revoked keys stay in the list: a key that disappears when revoked leaves
+	// an engineer unable to tell whether it was revoked or never existed.
+	Revoked bool
+}
+
+// developerDelivery is one webhook delivery attempt.
+type developerDelivery struct {
+	Event       string
+	Endpoint    string
+	State       ui.DeliveryState
+	StateLabel  string
+	Detail      string
+	At          string
+	MachineTime string
+}
+
+// developerNewSecret is the reveal-once value. It is a literal because the
+// scenario must render byte-identically on every run: a generated key would
+// change the visual baseline on every screenshot, and a real one has no business
+// in a fixture.
+const developerNewSecret = "ggg_live_sk_9Fq3nZ2xR7tLmB4vHc6YsPd1"
+
+// developerQuickstart is the copyable sample. The key is an environment variable
+// rather than a literal: a snippet a reader pastes should not teach them to
+// paste credentials into a shell history.
+const developerQuickstart = "curl https://api.northwind.example/v1/projects \\\n" +
+	"  -H \"Authorization: Bearer $GGG_API_KEY\" \\\n" +
+	"  -H \"Idempotency-Key: 4f1c2a90\""
+
+	// ScenarioDeveloper renders API keys, a quickstart sample and webhook delivery
+	// state.
+
+templ ScenarioDeveloper(gc GalleryContext) {
+	@ui.Stack(ui.StackOpts{Gap: ui.GapLG}) {
+		if gc.State == "error" {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "developer-failure-notice"}}) {
+				{ developerFailureText(gc) }
+			}
+		}
+		if gc.State == "" || gc.State == "default" {
+			// The reveal panel exists only immediately after creation. Showing
+			// it on every visit would imply the product can show a secret
+			// again, which it deliberately cannot.
+			@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "developer-key-reveal"}}) {
+				// The reveal panel is the first thing on the surface, directly
+				// under the page title, so its card title is h2. The quickstart
+				// card below sits inside a titled section and keeps h3.
+				@ui.CardHeader(ui.CardHeaderOpts{Title: "Production key created", Level: 2}) {
+					@ui.Badge(ui.BadgeOpts{Text: "shown once", Kind: ui.KindWarn})
+				}
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
+					{ "Copy it now. We store a hash, so this is the only time the full key can be displayed." }
+				}
+				@ui.SecretReveal(ui.SecretRevealOpts{
+					Value:       developerNewSecret,
+					CopyLabel:   "Copy key",
+					CopiedLabel: "Copied",
+					Attrs:       ui.Attrs{TestID: "developer-secret"},
+				})
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "API keys", Level: 2, Attrs: ui.Attrs{ID: "developer-keys"}}) {
+			@ui.DataTable(ui.DataTableOpts{
+				Caption:  "API keys for Northwind Robotics",
+				Columns:  developerKeyColumns(),
+				Density:  gc.Density,
+				RowCount: len(developerKeys(gc)),
+				Empty: ui.EmptyState(ui.EmptyStateOpts{
+					Variant: ui.EmptyInline,
+					Title:   "No API keys",
+					Body:    "Create a key to call the API. The quickstart below is the request it will authorise.",
+				}),
+				Attrs: ui.Attrs{TestID: "developer-keys-table"},
+			}) {
+				for _, key := range developerKeys(gc) {
+					<tr data-testid={ "developer-key-" + key.Prefix }>
+						<td class="font-medium">{ key.Name }</td>
+						<td>
+							// The prefix is code, not prose: it is an exact
+							// string an engineer will compare character by
+							// character against a log line.
+							@ui.Code(ui.CodeOpts{Text: key.Prefix + "..."})
+						</td>
+						<td class="hidden sm:table-cell">
+							@ui.Badge(ui.BadgeOpts{Text: key.Scope, Kind: ui.KindNeutral})
+						</td>
+						<td class="hidden md:table-cell text-fg-muted">
+							<time datetime={ key.MachineTime }>{ key.Created }</time>
+						</td>
+						<td class="text-fg-muted">{ key.LastUsed }</td>
+						<td class="text-right">
+							// A dot with its label, never a dot alone: hue is
+							// invisible to a screen reader and a red "revoked"
+							// dot is indistinguishable from a green "active" one
+							// for a red-green colour-blind reader.
+							@ui.StatusDot(ui.StatusDotOpts{
+								Kind:  developerKeyKind(key),
+								Label: developerKeyLabel(key),
+								Attrs: ui.Attrs{Class: "justify-end"},
+							})
+						</td>
+					</tr>
+				}
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Quickstart", Level: 2, Attrs: ui.Attrs{ID: "developer-quickstart"}}) {
+			@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "developer-quickstart-card"}}) {
+				@ui.CardHeader(ui.CardHeaderOpts{Title: "List projects"}) {
+					// The snippet is a template, not a credential, so its value
+					// is safe to carry - and CopyButton places it on data-copy
+					// regardless, which is why the same control is safe for a
+					// secret.
+					@ui.CopyButton(ui.CopyButtonOpts{
+						Value: developerQuickstart, Label: "Copy request", CopiedLabel: "Copied",
+						Size: ui.SizeXS, Attrs: ui.Attrs{TestID: "developer-copy-request"},
+					})
+				}
+				@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true, Attrs: ui.Attrs{Class: "mb-3"}}) {
+					{ "Every write takes an " }
+					@ui.Code(ui.CodeOpts{Text: "Idempotency-Key"})
+					{ "header: retrying with the same key returns the first response instead of creating a second record." }
+				}
+				// tabindex and a name because the block scrolls sideways on a narrow
+				// screen: a scroll container with nothing focusable inside is
+				// pointer-only, so the end of every line would be unreachable by
+				// keyboard exactly where the overflow is worst.
+				<pre
+					class="bg-surface-raised border border-border rounded-lg p-4 text-xs overflow-x-auto"
+					tabindex="0"
+					role="region"
+					aria-label="Quickstart request"
+				><code>{ developerQuickstart }</code></pre>
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Recent deliveries", Level: 2, Attrs: ui.Attrs{ID: "developer-deliveries"}}) {
+			@ui.DataTable(ui.DataTableOpts{
+				Caption:  "Webhook delivery attempts, newest first",
+				Columns:  developerDeliveryColumns(),
+				Density:  gc.Density,
+				RowCount: len(developerDeliveries(gc)),
+				Empty: ui.EmptyState(ui.EmptyStateOpts{
+					Variant: ui.EmptyInline,
+					Title:   "No endpoints registered",
+					Body:    "Register an endpoint and the events it subscribes to will appear here with every attempt.",
+				}),
+				Attrs: ui.Attrs{TestID: "developer-deliveries-table"},
+			}) {
+				for _, delivery := range developerDeliveries(gc) {
+					<tr data-testid={ "developer-delivery-" + delivery.Event }>
+						<td class="font-medium">
+							@ui.Code(ui.CodeOpts{Text: delivery.Event})
+						</td>
+						<td class="hidden sm:table-cell text-fg-muted truncate">{ delivery.Endpoint }</td>
+						<td class="hidden md:table-cell text-fg-muted">
+							<time datetime={ delivery.MachineTime }>{ delivery.At }</time>
+						</td>
+						<td>
+							@ui.DeliveryStatus(ui.DeliveryStatusOpts{
+								State: delivery.State, Label: delivery.StateLabel, Detail: delivery.Detail,
+							})
+						</td>
+						<td class="text-right">
+							if delivery.State == ui.DeliveryFailed {
+								// A retry has to be reachable per row: a single
+								// "retry all" cannot express "this one endpoint
+								// was fixed". The catalog has no delivery queue,
+								// so the control shows the surface after a
+								// successful retry rather than being an inert
+								// button that looks broken.
+								@ui.ButtonLink(ui.ButtonLinkOpts{
+									Label: "Retry", Href: "/dev/scenarios/developer",
+									Action: ui.ActionPrimary, Size: ui.SizeXS, Icon: ui.IconRefresh,
+								})
+							}
+						</td>
+					</tr>
+				}
+			}
+			if gc.State == "error" {
+				@ui.ButtonLink(ui.ButtonLinkOpts{
+					Label: "Retry all failed deliveries", Href: "/dev/scenarios/developer",
+					Size: ui.SizeSM, Icon: ui.IconRefresh,
+					Attrs: ui.Attrs{Class: "mt-3", TestID: "developer-retry-all"},
+				})
+			}
+		}
+	}
+}
+
+func developerKeyColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "name", Label: "Name"},
+		{Key: "prefix", Label: "Key"},
+		{Key: "scope", Label: "Scope", HideBelow: ui.BreakpointSM},
+		// Created explains a row; last used is what an engineer acts on when
+		// deciding whether a key is safe to revoke. So created is the column
+		// that drops first on a narrow viewport.
+		{Key: "created", Label: "Created", HideBelow: ui.BreakpointMD},
+		{Key: "last_used", Label: "Last used"},
+		{Key: "state", Label: "State", Align: ui.AlignEnd},
+	}
+}
+
+func developerDeliveryColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "event", Label: "Event"},
+		{Key: "endpoint", Label: "Endpoint", HideBelow: ui.BreakpointSM},
+		{Key: "at", Label: "Attempted", HideBelow: ui.BreakpointMD},
+		{Key: "state", Label: "Outcome"},
+		{Key: "actions", Label: "Retry", Align: ui.AlignEnd},
+	}
+}
+
+// developerKeys is the key fixture. The empty state returns none: a project with
+// no keys is the genuine first-run surface, and it is the state where the
+// quickstart matters most, which is why the sample is rendered regardless.
+func developerKeys(gc GalleryContext) []developerKey {
+	if gc.State == "empty" {
+		return nil
+	}
+	keys := []developerKey{
+		{Name: "Production server", Prefix: "ggg_live_7f2a", Scope: "write", Created: "4 Nov 2025", MachineTime: "2025-11-04", LastUsed: "2 minutes ago"},
+		{Name: "Staging server", Prefix: "ggg_test_31be", Scope: "write", Created: "4 Nov 2025", MachineTime: "2025-11-04", LastUsed: "6 hours ago"},
+		{Name: "Analytics export", Prefix: "ggg_live_c04d", Scope: "read", Created: "19 Dec 2025", MachineTime: "2025-12-19", LastUsed: "Never used"},
+		{Name: "Laptop (rotated)", Prefix: "ggg_live_a91f", Scope: "write", Created: "2 Sep 2025", MachineTime: "2025-09-02", LastUsed: "11 Dec 2025", Revoked: true},
+	}
+	if gc.LongContent {
+		keys[2].Name = "Analytics export for the warehouse sync job owned by the data platform team"
+	}
+	return keys
+}
+
+// developerDeliveries is the attempt log. The error state replaces it rather
+// than adding to it: an endpoint that started returning 500 fails every event it
+// receives, so a log with one red row among four green ones would misrepresent
+// what an outage looks like.
+func developerDeliveries(gc GalleryContext) []developerDelivery {
+	switch gc.State {
+	case "empty":
+		return nil
+	case "error":
+		deliveries := []developerDelivery{
+			{Event: "project.created", Endpoint: "https://hooks.northwind.example/ggg", State: ui.DeliveryFailed, StateLabel: "Failed", Detail: "HTTP 500, attempt 4 of 6", At: "14:02", MachineTime: "2026-01-15T14:02:00Z"},
+			{Event: "project.updated", Endpoint: "https://hooks.northwind.example/ggg", State: ui.DeliveryFailed, StateLabel: "Failed", Detail: "HTTP 500, attempt 4 of 6", At: "13:57", MachineTime: "2026-01-15T13:57:00Z"},
+			{Event: "member.invited", Endpoint: "https://hooks.northwind.example/ggg", State: ui.DeliveryFailed, StateLabel: "Failed", Detail: "timed out after 10s, attempt 2 of 6", At: "13:41", MachineTime: "2026-01-15T13:41:00Z"},
+			{Event: "invoice.paid", Endpoint: "https://ledger.northwind.example/events", State: ui.DeliveryDelivered, StateLabel: "Delivered", Detail: "HTTP 200 in 84ms", At: "13:30", MachineTime: "2026-01-15T13:30:00Z"},
+		}
+		if gc.LongContent {
+			deliveries[0].Endpoint = "https://hooks.northwind.example/integrations/gogogadget/events/production/v2"
+			deliveries[0].Detail = "HTTP 500 \"upstream database unavailable\", attempt 4 of 6, next attempt in 8 minutes"
+		}
+		return deliveries
+	default:
+		deliveries := []developerDelivery{
+			{Event: "project.created", Endpoint: "https://hooks.northwind.example/ggg", State: ui.DeliveryDelivered, StateLabel: "Delivered", Detail: "HTTP 200 in 62ms", At: "14:02", MachineTime: "2026-01-15T14:02:00Z"},
+			{Event: "project.updated", Endpoint: "https://hooks.northwind.example/ggg", State: ui.DeliverySent, StateLabel: "Sent", Detail: "awaiting acknowledgement", At: "13:57", MachineTime: "2026-01-15T13:57:00Z"},
+			{Event: "member.invited", Endpoint: "https://hooks.northwind.example/ggg", State: ui.DeliveryPending, StateLabel: "Queued", Detail: "next attempt in 30s", At: "13:41", MachineTime: "2026-01-15T13:41:00Z"},
+			{Event: "invoice.paid", Endpoint: "https://ledger.northwind.example/events", State: ui.DeliveryFailed, StateLabel: "Failed", Detail: "HTTP 404, attempt 1 of 6", At: "13:30", MachineTime: "2026-01-15T13:30:00Z"},
+		}
+		if gc.LongContent {
+			deliveries[1].Endpoint = "https://hooks.northwind.example/integrations/gogogadget/events/production/v2"
+		}
+		return deliveries
+	}
+}
+
+// developerKeyKind is neutral for a revoked key, not danger: revocation is the
+// correct end of a key's life, and colouring it as a failure sends an engineer
+// looking for a problem that does not exist.
+func developerKeyKind(key developerKey) ui.Kind {
+	if key.Revoked {
+		return ui.KindNeutral
+	}
+	return ui.KindSuccess
+}
+
+func developerKeyLabel(key developerKey) string {
+	if key.Revoked {
+		return "Revoked"
+	}
+	return "Active"
+}
+
+func developerFailureText(gc GalleryContext) string {
+	if gc.LongContent {
+		return "Three deliveries to hooks.northwind.example failed in the last hour with HTTP 500. " +
+			"Attempts continue with exponential backoff for 24 hours, after which the endpoint is disabled " +
+			"and the events are kept for 7 days so they can be replayed once the endpoint is healthy again."
+	}
+	return "Three deliveries failed in the last hour with HTTP 500. Attempts continue with backoff for 24 hours."
+}

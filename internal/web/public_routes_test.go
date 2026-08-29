@@ -7,10 +7,9 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-// Untested public routes: legal pages, SEO endpoints, probes, dev-auth flows.
+// Untested public routes: legal pages, SEO endpoints, probes.
 
 func TestPublicRoutesServe(t *testing.T) {
 	s := integrationServer(t, nil)
@@ -54,36 +53,6 @@ func TestLogoutDevBranchClearsCookie(t *testing.T) {
 		}
 	}
 	assert.True(t, cleared, "session cookie must be expired")
-}
-
-func TestDevLoginSetsCookieAndRedirects(t *testing.T) {
-	s := integrationServer(t, nil)
-
-	code, header, _ := serve(t, s, "GET", "/dev/login", nil, nil)
-	assert.Equal(t, http.StatusSeeOther, code)
-	assert.Contains(t, header.Get("Location"), "/app")
-	var set bool
-	for _, c := range header.Values("Set-Cookie") {
-		if strings.HasPrefix(c, "__session=") {
-			set = true
-		}
-	}
-	assert.True(t, set, "dev login sets the synthetic session cookie")
-}
-
-func TestDevSwitchOrgRewritesRole(t *testing.T) {
-	s := integrationServer(t, nil)
-	seedMembership(t, s, "user_sw", "org_sw", "org:member")
-
-	code, header, _ := serve(t, s, "GET", "/dev/switch-org?org=org_sw", nil, nil, sessionCookie("user_sw", "org_other", "org:member"))
-	assert.Equal(t, http.StatusSeeOther, code)
-	var got string
-	for _, c := range header.Values("Set-Cookie") {
-		if strings.HasPrefix(c, "__session=") {
-			got = strings.SplitN(strings.TrimPrefix(c, "__session="), ";", 2)[0]
-		}
-	}
-	require.Equal(t, "e2e:user_sw:org_sw:org:member", got, "cookie rewritten with the target org + membership role")
 }
 
 func TestBillingPortalRedirectsWithMock(t *testing.T) {

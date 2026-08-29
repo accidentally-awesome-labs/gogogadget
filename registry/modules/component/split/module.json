@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/split",
+    "kind": "component",
+    "name": "split",
+    "revision": 1,
+    "contract": 1,
+    "title": "Split",
+    "description": "The Split renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/split.templ",
+        "target": "internal/web/templates/ui/split.templ",
+        "class": "templ",
+        "sha256": "12e3ff7ce1eafcc699b7387eb60a971e8ee1d315e84c4403b3ae15f4877231b8",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "split",
+          "family": "layout",
+          "signature": "templ Split(o SplitOpts)",
+          "summary": "Renders two panes side by side, stacking on small screens.",
+          "guidance": "Stacking is not optional: two panes side by side on a phone gives each about twenty characters per line, which is unreadable.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

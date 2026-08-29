@@ -1,161 +1,34 @@
 // Package config parses and validates environment configuration.
 // Stdlib only — no env library. `.env` is auto-loaded in development only,
 // via a tiny inline KEY=VALUE parser.
+//
+// The Config struct and every per-key parse are generated from module env
+// declarations (config_registry_gen.go), so a setting and the field it lands in
+// have one owner. What stays here is behaviour over those values: cross-field
+// derivations, the environment predicates, the render clock, and the readers.
 package config
 
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
-type Config struct {
-	Env         string // development | test | production
-	AppURL      string
-	Port        int
-	DatabaseURL string
+// LoadFrom reads configuration through lookup and validates the result. All
+// validation problems are reported together — an operator fixing one bad value
+// should not have to re-run to discover the next.
+//
+// Modules parse through this so a runtime can boot against a fixed environment
+// without touching the process.
+func LoadFrom(lookup func(string) string) (Config, error) {
+	cfg, errs := parseDeclared(lookup)
 
-	ClerkSecretKey      string
-	ClerkWebhookSecret  string
-	ClerkPortalURL      string // Account Portal base, e.g. https://accounts.example.com
-	ClerkPublishableKey string
-	ClerkFrontendAPIURL string // Clerk Frontend API origin — feeds CSP connect-src
+	// Cross-field behaviour, which is not expressible as a per-key declaration.
 
-	AdminEmail string
-
-	PolarAccessToken   string
-	PolarWebhookSecret string
-	PolarProductPro    string
-	PolarProductTeam   string
-	PolarServer        string // sandbox | production
-
-	ResendAPIKey string
-	EmailFrom    string
-
-	PostHogAPIKey string
-	PostHogHost   string
-
-	SentryDSN string
-
-	StorageR2AccountID       string
-	StorageR2AccessKeyID     string
-	StorageR2SecretAccessKey string
-	StorageR2Bucket          string
-	StorageR2Endpoint        string // override for AWS S3/MinIO compat; empty = R2 default
-
-	LLMAPIKey  string
-	LLMBaseURL string // default https://api.openai.com/v1
-	LLMModel   string
-
-	// TEST_NOW (RFC3339) freezes the render clock; honored only when Env == test.
-	testNow       time.Time
-	hasTestNow    bool
-	DevAuthBypass bool
-	// MaintenanceMode (MAINTENANCE_MODE=true) sheds all traffic except
-	// probes/static via a 503 page; JSON 503 under /api/.
-	MaintenanceMode bool
-	MetricsToken    string // METRICS_TOKEN: bearer gate for /metrics (prod requires it)
-	// RateLimitPerMinute is the per-IP request budget (burst = 2×). Tunable
-	// because load profiles differ — the e2e suite drives one IP hard.
-	RateLimitPerMinute int
-	// APIRateLimitPerMinute is the per-API-token budget (burst = 2×) on
-	// /api/v1. Separate from the per-IP shield above because a token is a
-	// better identity than an address: it survives NAT and roaming, and it
-	// is the thing a customer can rotate when they abuse it.
-	APIRateLimitPerMinute int
-	// AuditRetentionDays (AUDIT_RETENTION_DAYS): janitor deletes older audit
-	// rows; 0 = retain forever.
-	AuditRetentionDays int
-	LogLevel           string
-}
-
-// Load reads the environment, auto-loading `.env` in development, and validates
-// the result. All validation problems are reported together.
-func Load() (Config, error) {
-	env := getenv("APP_ENV", "development")
-	if env == "development" {
-		loadDotEnv(".env")                     // missing file is fine; real env wins
-		env = getenv("APP_ENV", "development") // .env may set APP_ENV
-	}
-
-	cfg := Config{
-		Env:         env,
-		AppURL:      strings.TrimRight(getenv("APP_URL", "http://localhost:8080"), "/"),
-		DatabaseURL: getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable"),
-
-		ClerkSecretKey:      getenv("CLERK_SECRET_KEY", ""),
-		ClerkWebhookSecret:  getenv("CLERK_WEBHOOK_SECRET", ""),
-		ClerkPortalURL:      strings.TrimRight(getenv("CLERK_PORTAL_URL", ""), "/"),
-		ClerkPublishableKey: getenv("CLERK_PUBLISHABLE_KEY", ""),
-		ClerkFrontendAPIURL: getenv("CLERK_FRONTEND_API_URL", ""),
-
-		AdminEmail: getenv("ADMIN_EMAIL", ""),
-
-		PolarAccessToken:   getenv("POLAR_ACCESS_TOKEN", ""),
-		PolarWebhookSecret: getenv("POLAR_WEBHOOK_SECRET", ""),
-		PolarProductPro:    getenv("POLAR_PRODUCT_PRO", ""),
-		PolarProductTeam:   getenv("POLAR_PRODUCT_TEAM", ""),
-		PolarServer:        getenv("POLAR_SERVER", "sandbox"),
-
-		PostHogAPIKey: getenv("POSTHOG_API_KEY", ""),
-		PostHogHost:   getenv("POSTHOG_HOST", "https://us.i.posthog.com"),
-
-		StorageR2AccountID:       getenv("STORAGE_R2_ACCOUNT_ID", ""),
-		StorageR2AccessKeyID:     getenv("STORAGE_R2_ACCESS_KEY_ID", ""),
-		StorageR2SecretAccessKey: getenv("STORAGE_R2_SECRET_ACCESS_KEY", ""),
-		StorageR2Bucket:          getenv("STORAGE_R2_BUCKET", ""),
-		StorageR2Endpoint:        strings.TrimRight(getenv("STORAGE_R2_ENDPOINT", ""), "/"),
-
-		LLMAPIKey:       getenv("LLM_API_KEY", ""),
-		LLMBaseURL:      strings.TrimRight(getenv("LLM_BASE_URL", "https://api.openai.com/v1"), "/"),
-		LLMModel:        getenv("LLM_MODEL", ""),
-		SentryDSN:       getenv("SENTRY_DSN", ""),
-		ResendAPIKey:    getenv("RESEND_API_KEY", ""),
-		EmailFrom:       getenv("EMAIL_FROM", "GoGoGadget <hello@example.com>"),
-		MaintenanceMode: parseBool(getenv("MAINTENANCE_MODE", "")),
-		MetricsToken:    getenv("METRICS_TOKEN", ""),
-	}
-
-	cfg.Port = 8080
-	if v := getenv("PORT", ""); v != "" {
-		p, err := strconv.Atoi(v)
-		if err != nil || p < 1 || p > 65535 {
-			return Config{}, fmt.Errorf("PORT: %q is not a valid port", v)
-		}
-		cfg.Port = p
-	}
-
-	cfg.RateLimitPerMinute = 100
-	if v := getenv("RATE_LIMIT_RPM", ""); v != "" {
-		rpm, err := strconv.Atoi(v)
-		if err != nil || rpm < 1 {
-			return Config{}, fmt.Errorf("RATE_LIMIT_RPM: %q must be a positive integer", v)
-		}
-		cfg.RateLimitPerMinute = rpm
-	}
-
-	cfg.APIRateLimitPerMinute = 60
-	if v := getenv("API_RATE_LIMIT_RPM", ""); v != "" {
-		rpm, err := strconv.Atoi(v)
-		if err != nil || rpm < 1 {
-			return Config{}, fmt.Errorf("API_RATE_LIMIT_RPM: %q must be a positive integer", v)
-		}
-		cfg.APIRateLimitPerMinute = rpm
-	}
-
-	if v := getenv("AUDIT_RETENTION_DAYS", ""); v != "" {
-		days, err := strconv.Atoi(v)
-		if err != nil || days < 0 {
-			return Config{}, fmt.Errorf("AUDIT_RETENTION_DAYS: %q must be a non-negative integer", v)
-		}
-		cfg.AuditRetentionDays = days
-	}
-
-	cfg.LogLevel = getenv("LOG_LEVEL", "")
+	// Chattier by default while developing; quiet enough to be readable in a log
+	// aggregator otherwise.
 	if cfg.LogLevel == "" {
 		if cfg.Development() {
 			cfg.LogLevel = "debug"
@@ -164,36 +37,21 @@ func Load() (Config, error) {
 		}
 	}
 
-	var errs []error
-
-	switch cfg.Env {
-	case "development", "test", "production":
-	default:
-		errs = append(errs, fmt.Errorf("APP_ENV: %q must be development, test, or production", cfg.Env))
-	}
-
-	// DEV_AUTH_BYPASS enables synthetic e2e: session tokens. It is honored only
-	// outside production — booting production with it on is a hard error.
-	cfg.DevAuthBypass = parseBool(getenv("DEV_AUTH_BYPASS", "false"))
+	// DEV_AUTH_BYPASS mints synthetic sessions. Booting production with it on
+	// would accept forged identities, so it is a hard refusal rather than a warning.
 	if cfg.DevAuthBypass && cfg.Production() {
 		errs = append(errs, errors.New("DEV_AUTH_BYPASS=true is refused when APP_ENV=production"))
 	}
 
 	if cfg.Production() {
-		// No dev fallback DSN in production: refuse to boot into the wrong database.
-		if os.Getenv("DATABASE_URL") == "" {
-			errs = append(errs, errors.New("DATABASE_URL is required when APP_ENV=production"))
-		}
-		for _, k := range []string{"CLERK_SECRET_KEY", "CLERK_WEBHOOK_SECRET", "CLERK_PORTAL_URL", "CLERK_PUBLISHABLE_KEY"} {
-			if os.Getenv(k) == "" {
-				errs = append(errs, fmt.Errorf("%s is required when APP_ENV=production", k))
-			}
-		}
+		errs = append(errs, requireProductionKeys(lookup)...)
 	}
 
+	// Clerk fronts the Frontend API at clerk.<domain> on a production instance
+	// and at a wildcard dev host otherwise. Derived from APP_URL rather than
+	// asked for, because getting it wrong breaks CSP in a way that is hard to read.
 	if cfg.ClerkFrontendAPIURL == "" {
 		if cfg.Production() {
-			// Production Clerk instances front the Frontend API at clerk.<domain>.
 			host := strings.TrimPrefix(strings.TrimPrefix(cfg.AppURL, "https://"), "http://")
 			cfg.ClerkFrontendAPIURL = "https://clerk." + host
 		} else {
@@ -201,20 +59,15 @@ func Load() (Config, error) {
 		}
 	}
 
-	if cfg.PolarServer != "sandbox" && cfg.PolarServer != "production" {
-		errs = append(errs, fmt.Errorf("POLAR_SERVER: %q must be sandbox or production", cfg.PolarServer))
-	}
-
-	if v := getenv("TEST_NOW", ""); v != "" && cfg.Env == "test" {
-		t, err := time.Parse(time.RFC3339, v)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("TEST_NOW: %v", err))
-		} else {
-			cfg.testNow, cfg.hasTestNow = t, true
-		}
-	}
-
 	return cfg, errors.Join(errs...)
+}
+
+// Load reads the process environment, auto-loading `.env` in development.
+func Load() (Config, error) {
+	if pick(os.Getenv, "APP_ENV", "development") == "development" {
+		loadDotEnv(".env") // missing file is fine; real env wins
+	}
+	return LoadFrom(os.Getenv)
 }
 
 func (c Config) Production() bool       { return c.Env == "production" }
@@ -243,15 +96,22 @@ func (c Config) LLMConfigured() bool {
 // Now returns the render clock: frozen at TEST_NOW under APP_ENV=test,
 // wall-clock otherwise. All rendered dates/times derive from this so visual
 // baselines never rot.
+//
+// The test-environment gate lives here rather than in the parse: whether a
+// parsed instant is honoured is behaviour, and a frozen clock leaking into
+// development would be a confusing way to find that out.
 func (c Config) Now() time.Time {
-	if c.hasTestNow {
+	if c.Test() && !c.testNow.IsZero() {
 		return c.testNow
 	}
 	return time.Now()
 }
 
-func getenv(key, def string) string {
-	if v, ok := os.LookupEnv(key); ok && v != "" {
+// pick returns the looked-up value, or def when it is unset or empty. Empty
+// and unset are the same thing here: an exported-but-blank variable is not a
+// configuration choice.
+func pick(lookup func(string) string, key, def string) string {
+	if v := lookup(key); v != "" {
 		return v
 	}
 	return def

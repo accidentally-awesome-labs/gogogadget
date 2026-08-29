@@ -1,0 +1,59 @@
+package ui
+
+// DateRangeFieldOpts is a pair of native date inputs.
+type DateRangeFieldOpts struct {
+	// StartName and EndName are separate fields: a range submitted as one
+	// string has to be parsed and re-validated, and a partially filled range
+	// cannot be represented at all.
+	StartName, EndName   string
+	StartValue, EndValue string
+	Legend               string
+	// StartLabel and EndLabel name the two inputs individually. They default to
+	// "Start date" and "End date" rather than being required, because every
+	// range needs them and a caller who omits them must not end up with two
+	// unnamed inputs.
+	StartLabel, EndLabel string
+	Hint, Error          string
+	Attrs                Attrs
+}
+
+// DateRangeField renders a start and end date as two native date inputs.
+//
+// The end input's min is bound to the start value by the Alpine behaviour, but
+// the server still validates the ordering: a range that only makes sense
+// because the browser prevented the mistake is not validated at all.
+//
+// Each input carries its own label, visually hidden. The legend names the group
+// and the "to" separator carries the meaning for a sighted reader - but that
+// separator is aria-hidden, so without per-input labels a screen-reader user
+// hears "date" twice with nothing to distinguish which end they are editing.
+templ DateRangeField(o DateRangeFieldOpts) {
+	<fieldset
+		{ rootWith("date-range-field", "space-y-2", o.Attrs, "x-data", "uiDateRange")... }
+		{ FieldARIA(FieldOpts{Name: o.StartName, Hint: o.Hint, Error: o.Error})... }
+	>
+		<legend class="label">{ o.Legend }</legend>
+		<div class="flex items-center gap-2">
+			<label for={ o.StartName } class="sr-only">{ rangeBoundLabel(o.StartLabel, "Start date") }</label>
+			<input
+				class="input" type="date" data-range-start
+				id={ o.StartName } name={ o.StartName } value={ o.StartValue }
+			/>
+			<span class="text-fg-muted text-sm" aria-hidden="true">to</span>
+			<label for={ o.EndName } class="sr-only">{ rangeBoundLabel(o.EndLabel, "End date") }</label>
+			<input
+				class="input" type="date" data-range-end
+				id={ o.EndName } name={ o.EndName } value={ o.EndValue }
+			/>
+		</div>
+	</fieldset>
+}
+
+// rangeBoundLabel lets a caller name the bounds in their own domain terms
+// ("Period from") while guaranteeing every input has a name.
+func rangeBoundLabel(given, fallback string) string {
+	if given != "" {
+		return given
+	}
+	return fallback
+}

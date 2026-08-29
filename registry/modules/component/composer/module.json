@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/composer",
+    "kind": "component",
+    "name": "composer",
+    "revision": 1,
+    "contract": 1,
+    "title": "Composer",
+    "description": "The Composer renderer and its options.",
+    "requires": [
+      "component/field-error",
+      "component/form-actions",
+      "component/textarea",
+      "element/button",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/composer.templ",
+        "target": "internal/web/templates/ui/composer.templ",
+        "class": "templ",
+        "sha256": "517fad38fd6bf13257db5aefd43b4915f389f995bf34b7d3858fc2c253e8343d",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "composer",
+          "family": "communication",
+          "signature": "templ Composer(o ComposerOpts)",
+          "summary": "Renders a message form.",
+          "guidance": "It is a real form with a submit button, so a message can be sent with no JavaScript and with the keyboard alone. There is no Enter-to-send here: a textarea where Enter submits makes multi-line messages impossible to write, and a caller who wants it can add it deliberately.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,62 @@
+/* This file is yours.
+ *
+ * Upstream never writes to it, so `ggg update` can never conflict on it: it is
+ * declared as an asset the project owns, not as boilerplate the registry keeps
+ * in step. Every value in input.css can be replaced from here without editing
+ * input.css at all — which is what keeps a rebranded project mergeable.
+ *
+ * HOW IT WINS
+ *
+ * Tailwind emits its own output into cascade layers (@layer theme for tokens,
+ * @layer components for the component classes). Unlayered author CSS beats any
+ * layer at equal specificity, no matter where it appears in the file. So the
+ * rules below - plain, unlayered - override the boilerplate even though this
+ * import sits near the top of input.css, where CSS requires imports to be.
+ *
+ * Two kinds of edit:
+ *
+ *   - Override a token or a component class: write a plain rule. Every utility
+ *     and every component class reads its colour through var(), so changing the
+ *     variable restyles the whole product, in both themes, with no other edit.
+ *
+ *   - Add a NEW token that needs generated utilities (a `bg-accent` class that
+ *     does not exist yet): declare it inside @theme { … }. Tailwind only emits
+ *     a utility for a name it knows about, so a plain :root declaration gives
+ *     you var(--accent) but no bg-accent.
+ *
+ * Rebuild with `make css` (or leave `make dev` running).
+ */
+
+/* Worked example — a green rebrand plus a squarer control radius.
+ *
+ * The ramp steps are in the list on purpose. A handful of tokens are declared
+ * as var(--color-brand-N) rather than as a hex — --color-focus-ring reads 500
+ * in light and 400 in dark, and .dark's brand text and tints read 400/950/300.
+ * Override only the semantic aliases and those keep the old hue, which shows up
+ * as an indigo focus ring on a green button.
+ *
+ * :root {
+ *   --color-brand-400:        #4ade80;
+ *   --color-brand-500:        #22c55e;
+ *   --color-brand-600:        #16a34a;
+ *   --color-brand-950:        #052e16;
+ *   --color-brand:            #16a34a;
+ *   --color-brand-hover:      #15803d;
+ *   --color-brand-text:       #15803d;
+ *   --color-brand-subtle:     #f0fdf4;
+ *   --color-brand-subtle-fg:  #14532d;
+ *   --radius-control: 0.25rem;
+ * }
+ *
+ * .dark {
+ *   --color-brand-text:      #86efac;
+ *   --color-brand-subtle:    #052e16;
+ *   --color-brand-subtle-fg: #86efac;
+ * }
+ *
+ * A new token that needs its own utilities:
+ *
+ * @theme {
+ *   --color-accent: #7c3aed;
+ * }
+ */

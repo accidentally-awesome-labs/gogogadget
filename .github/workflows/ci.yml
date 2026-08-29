@@ -104,6 +104,50 @@ jobs:
           path: e2e/playwright-report/
           retention-days: 7
 
+  visual:
+    needs: test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gogogadget_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d gogogadget_e2e"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.26.6"
+          cache: true
+
+      - name: Setup
+        run: make setup
+
+      # make visual owns seeding, the host server on :18080 and the pinned
+      # Playwright container. Do not add seed/start-server steps here: a second
+      # process would fail to bind :18080, and the baselines only reproduce
+      # against the harness that wrote them.
+      - name: Visual
+        run: make visual
+
+      # A red visual job without the diff images is unactionable — the report
+      # carries expected/actual/diff for every changed baseline.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-report
+          path: e2e/playwright-report/
+          retention-days: 7
+
   smoke:
     needs: test
     runs-on: ubuntu-latest
@@ -142,11 +186,13 @@ jobs:
       # the binary, so the public surface smoke.sh asserts on (a real post at
       # /blog/hello-world) only exists once the markdown corpus is imported.
       # Seeding is part of standing up the stack, and it exercises the
-      # importer in CI as a side effect.
+      # importer in CI as a side effect. -registry dev is the generated
+      # module-ordered fragment list; the monolithic testdata .sql files it
+      # replaced no longer exist.
       - name: Seed
         run: |
           DATABASE_URL="postgres://postgres:postgres@localhost:5432/gogogadget_test?sslmode=disable" \
-            go run ./cmd/seed internal/db/testdata/seed_dev.sql
+            go run ./cmd/seed -registry dev
 
       - name: Start server
         run: |

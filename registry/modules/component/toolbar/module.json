@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/toolbar",
+    "kind": "component",
+    "name": "toolbar",
+    "revision": 1,
+    "contract": 1,
+    "title": "Toolbar",
+    "description": "The Toolbar renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/toolbar.templ",
+        "target": "internal/web/templates/ui/toolbar.templ",
+        "class": "templ",
+        "sha256": "5d92152fd1f73a1dbd6a964888564d7b854f3187cd0a6ebb6a03bab3a3e1d280",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "toolbar",
+          "family": "layout",
+          "signature": "templ Toolbar(o ToolbarOpts)",
+          "summary": "Renders a group of related controls.",
+          "guidance": "role=\"group\", not role=\"toolbar\": a toolbar promises arrow-key navigation between its controls with a single tab stop. These controls are each tabbable, so claiming toolbar would advertise a keyboard contract that is not implemented.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

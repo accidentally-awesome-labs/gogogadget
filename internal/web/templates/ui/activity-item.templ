@@ -1,0 +1,46 @@
+package ui
+
+// ActivityItemOpts is one audit or activity row.
+type ActivityItemOpts struct {
+	// Actor, Action and Target are separate fields rather than a pre-joined
+	// sentence, because word order differs by language and a caller that
+	// concatenates them cannot be translated.
+	Actor       string
+	Action      string
+	Target      string
+	Timestamp   string
+	MachineTime string
+	// Detail is an optional slot for a diff, payload or badge cluster.
+	Detail templ.Component
+	Icon   IconName
+	Attrs  Attrs
+}
+
+// ActivityItem renders one activity entry.
+templ ActivityItem(o ActivityItemOpts) {
+	<li { root("activity-item", "flex items-start gap-3 py-2", o.Attrs)... }>
+		@Icon(IconOpts{Name: activityIcon(o.Icon), Attrs: Attrs{Class: "w-4 h-4 mt-0.5 shrink-0 text-fg-muted"}})
+		<div class="min-w-0 flex-1">
+			<p class="text-sm">
+				<span class="font-medium">{ o.Actor }</span>
+				{ " " + o.Action + " " }
+				<span class="font-medium">{ o.Target }</span>
+			</p>
+			if o.Timestamp != "" {
+				<time class="text-xs text-fg-muted" datetime={ o.MachineTime }>{ o.Timestamp }</time>
+			}
+			if o.Detail != nil {
+				<div class="mt-1">
+					@o.Detail
+				</div>
+			}
+		</div>
+	</li>
+}
+
+func activityIcon(icon IconName) IconName {
+	if icon == "" {
+		return IconClock
+	}
+	return icon
+}

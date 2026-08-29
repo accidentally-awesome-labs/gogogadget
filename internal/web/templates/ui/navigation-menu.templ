@@ -1,0 +1,45 @@
+package ui
+
+// NavigationMenuOpts configures a set of navigation links.
+type NavigationMenuOpts struct {
+	Label string
+	Items []NavItem
+	// ActivePath is the current path; the item whose MatchPath prefixes it gets
+	// aria-current.
+	ActivePath  string
+	Orientation Orientation
+	Attrs       Attrs
+}
+
+// NavigationMenu renders a labelled group of boosted navigation links.
+//
+// These are anchors, not role="menuitem": a menu promises arrow-key navigation
+// and a menu button, while this is a list of links a user tabs through. The
+// honest role is what a screen reader can act on.
+templ NavigationMenu(o NavigationMenuOpts) {
+	<nav { rootWith("navigation-menu", navigationMenuClass(o.Orientation), o.Attrs, "aria-label", o.Label)... }>
+		for _, item := range o.Items {
+			<a
+				href={ templ.SafeURL(item.Href) }
+				class="nav-link"
+				aria-current={ navCurrentAttr(o.ActivePath, item) }
+				hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
+			>{ item.Label }</a>
+		}
+	</nav>
+}
+
+func navigationMenuClass(orientation Orientation) string {
+	if orientation.Value() == OrientationVertical {
+		return "flex flex-col gap-1"
+	}
+	return "flex items-center gap-1"
+}
+
+// navCurrentAttr reuses the same prefix rule NavTabs uses, so a nav menu and a
+// tab bar on the same page cannot disagree about which item is current. It
+// returns empty rather than "false": some screen readers announce
+// aria-current="false" as if the item were current.
+func navCurrentAttr(activePath string, item NavItem) string {
+	return MatchCurrent(activePath, item.MatchPath())
+}

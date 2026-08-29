@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
@@ -19,40 +20,63 @@ var DigestFrequencies = []string{"off", "daily", "weekly"}
 
 templ SettingsNotificationsPage(prefs map[string]bool, digest string) {
 	@SettingsTabs("/app/settings/notifications")
-	<h1 class="text-2xl font-bold mb-2">{ i18n.T(ctx, "settings.notifications_title") }</h1>
-	<p class="text-fg-muted mb-6">{ i18n.T(ctx, "settings.notifications_intro") }</p>
-	<form hx-post="/app/settings/notifications" hx-swap="none" novalidate hx-disable="this" data-testid="notification-prefs-form" class="card max-w-lg space-y-4">
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "settings.notifications_title")})
+	@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mb-6"}}) {
+		{ i18n.T(ctx, "settings.notifications_intro") }
+	}
+	@ui.Form(ui.FormOpts{
+		Swap: "none",
+		Attrs: ui.Attrs{
+			Class:  "card max-w-lg space-y-4",
+			TestID: "notification-prefs-form",
+			HX:     ui.HX{Post: "/app/settings/notifications", Disable: true},
+		},
+	}) {
 		for _, kind := range notify.Kinds {
-			<label class="flex items-center gap-3 text-sm" data-testid={ "pref-" + kind }>
-				<input
-					type="checkbox"
-					name={ "kind_" + kind }
-					checked?={ prefs[kind] }
-					class="h-4 w-4 accent-brand-600"
-				/>
-				<span class="font-medium">{ i18n.T(ctx, kindKey(kind)) }</span>
-				<span class="text-fg-muted">{ kind }</span>
-			</label>
+			// The wrapper carries the test id because Checkbox spreads Attrs
+			// onto the input itself; the row, not the control, is what a test
+			// and a reader both address.
+			<div class="flex items-center gap-3" data-testid={ "pref-" + kind }>
+				@ui.Checkbox(ui.CheckboxOpts{
+					Name:    "kind_" + kind,
+					Label:   i18n.T(ctx, kindKey(kind)),
+					Checked: prefs[kind],
+				})
+				@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
+					{ kind }
+				}
+			</div>
 		}
 		<div class="border-t border-border pt-4">
-			<label class="block text-sm font-medium mb-1" for="digest_frequency">{ i18n.T(ctx, "settings.digest_label") }</label>
-			<p class="text-fg-muted text-sm mb-2">{ i18n.T(ctx, "settings.digest_hint") }</p>
 			// Options are spelled out rather than looped: a computed key
 			// ("settings.digest_" + f) is invisible to the catalog guard in
 			// i18n_test.go, and an unverifiable translation key is how a
 			// missing string reaches production. TestDigestFrequencyOptions
 			// keeps this list and DigestFrequencies from drifting apart.
-			<select id="digest_frequency" name="digest_frequency" class="input max-w-xs" data-testid="digest-frequency">
-				<option value="off" selected?={ digest == "off" }>{ i18n.T(ctx, "settings.digest_off") }</option>
-				<option value="daily" selected?={ digest == "daily" }>{ i18n.T(ctx, "settings.digest_daily") }</option>
-				<option value="weekly" selected?={ digest == "weekly" }>{ i18n.T(ctx, "settings.digest_weekly") }</option>
-			</select>
+			@ui.Field(ui.FieldOpts{
+				Name:  "digest_frequency",
+				Label: i18n.T(ctx, "settings.digest_label"),
+				Hint:  i18n.T(ctx, "settings.digest_hint"),
+			}) {
+				@ui.Select(ui.SelectOpts{
+					Name: "digest_frequency",
+					Options: []ui.Option{
+						{Value: "off", Label: i18n.T(ctx, "settings.digest_off"), Selected: digest == "off"},
+						{Value: "daily", Label: i18n.T(ctx, "settings.digest_daily"), Selected: digest == "daily"},
+						{Value: "weekly", Label: i18n.T(ctx, "settings.digest_weekly"), Selected: digest == "weekly"},
+					},
+					Attrs: ui.Attrs{Class: "max-w-xs", TestID: "digest-frequency"},
+				})
+			}
 		</div>
-		<div class="pt-2 flex items-center gap-3">
-			<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "settings.notifications_save") }</button>
-			@Spinner()
-		</div>
-	</form>
+		@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "settings.notifications_save"),
+				Type:  ui.TypeSubmit, Action: ui.ActionPrimary,
+			})
+			@ui.Spinner(ui.SpinnerOpts{})
+		}
+	}
 }
 
 // IsDigestFrequency reports whether a submitted value is one we offer — the

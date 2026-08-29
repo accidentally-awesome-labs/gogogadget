@@ -1,0 +1,16 @@
+package ui
+
+// ExampleCallout is a short titled notice in one of the declared tones.
+//
+// It renders one element with one attribute map spread once on the root, so
+// data-ui, the base class and the tone class cannot be dropped by a caller. An
+// empty Title renders no heading rather than an empty one, because an empty
+// heading is announced as a heading with no name.
+templ ExampleCallout(o ExampleCalloutOpts) {
+	<aside { root("example-callout", exampleCalloutClass(o.Tone), o.Attrs)... }>
+		if o.Title != "" {
+			<p class="example-callout-title">{ o.Title }</p>
+		}
+		<p class="example-callout-body">{ o.Body }</p>
+	</aside>
+}

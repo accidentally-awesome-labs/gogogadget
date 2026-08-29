@@ -1,0 +1,7 @@
+package ui
+
+type SpinnerOpts struct{ Attrs Attrs }
+
+templ Spinner(o SpinnerOpts) {
+	@Icon(IconOpts{Name: IconSpinner, Attrs: withClass(o.Attrs, "htmx-indicator w-4 h-4 animate-spin"), component: "spinner"})
+}

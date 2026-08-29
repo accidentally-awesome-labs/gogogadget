@@ -18,9 +18,12 @@ test('badge, page, read-all flow', async ({ browser }) => {
   await expect(page).toHaveURL('/app/notifications');
   await expect(page.getByTestId('notification-row').first()).toBeVisible();
 
-  const before = await page.request.get('/app/notifications/badge');
+  // Ask for the fragment the way htmx does, so this asserts on the bubble
+  // itself rather than on a full page that happens to contain the class.
+  const asFragment = { headers: { 'HX-Request': 'true', 'HX-Request-Type': 'partial' } };
+  const before = await page.request.get('/app/notifications/badge', asFragment);
   expect(before.ok()).toBeTruthy();
-  expect(await before.text()).toContain('rounded-full');
+  expect(await before.text()).toContain('count-badge');
 
   await page.getByTestId('notifications-read-all').click();
   // The click resolves on click, not on the htmx swap — poll the badge
@@ -28,9 +31,9 @@ test('badge, page, read-all flow', async ({ browser }) => {
   // parallel-suite load and flakes).
   await expect
     .poll(async () => {
-      const after = await page.request.get('/app/notifications/badge');
+      const after = await page.request.get('/app/notifications/badge', asFragment);
       expect(after.ok()).toBeTruthy();
-      return (await after.text()).includes('rounded-full');
+      return (await after.text()).includes('count-badge');
     })
     .toBe(false);
 

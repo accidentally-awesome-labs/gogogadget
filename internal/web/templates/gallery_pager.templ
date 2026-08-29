@@ -1,0 +1,80 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// GalleryPager is the pagination and search demo, rendered as its own fragment.
+//
+// It exists as a separate renderer because the demo has to swap *itself*: a
+// pager whose endpoint returns the whole gallery nests the entire page inside
+// the pager, which looks like a working swap and is not. Pointing it at a
+// fragment route makes the demo exercise the same request/response shape a real
+// paged table does.
+templ GalleryPager(page int, query string) {
+	<div id="gallery-pager" data-testid="gallery-pager" class="space-y-3">
+		@GalleryPagerBody(page, query)
+	</div>
+}
+
+// GalleryPagerBody is what the fragment route returns.
+//
+// The contents without the wrapper, because Pagination swaps innerMorph: a
+// fragment that repeats the wrapper would be nested one level deeper on every
+// click, which renders correctly and is wrong.
+templ GalleryPagerBody(page int, query string) {
+	<div class="space-y-3">
+		// Named distinctly. Two nav landmarks both called "Pagination" on one
+		// page give a screen reader two identical entries and no way to tell the
+		// interactive demo from the static one.
+		@ui.Pagination(ui.PaginationOpts{
+			Labels:     galleryPagerLabels("Interactive pagination demo"),
+			Page:       galleryPagerPage(page),
+			TotalPages: 5,
+			BaseURL:    "/dev/ui/pagination/page",
+			Target:     "#gallery-pager",
+		})
+		@ui.SearchInput(ui.SearchInputOpts{
+			Name:        "q",
+			Value:       query,
+			Placeholder: "Search…",
+			AriaLabel:   "Gallery search",
+			GetURL:      "/dev/ui/search/query",
+			Target:      "#gallery-pager",
+			IndicatorID: "gallery-search-indicator",
+			Attrs:       ui.Attrs{TestID: "gallery-search"},
+		})
+		// The readout is what proves the swap landed and carried its parameters.
+		// Without it a successful swap and a no-op look identical.
+		<p class="text-sm text-fg-muted" data-testid="gallery-pager-readout">
+			{ galleryPagerReadout(page, query) }
+		</p>
+	</div>
+}
+
+// galleryPagerPage clamps into the demo's five pages. An out-of-range page would
+// render a pager whose current position does not exist.
+func galleryPagerPage(page int) int {
+	if page < 1 {
+		return 1
+	}
+	if page > 5 {
+		return 5
+	}
+	return page
+}
+
+func galleryPagerReadout(page int, query string) string {
+	if query != "" {
+		return fmt.Sprintf("Page %d of 5, filtered by %s.", galleryPagerPage(page), query)
+	}
+	return fmt.Sprintf("Page %d of 5.", galleryPagerPage(page))
+}
+
+// galleryPagerLabels names this pager's landmark while keeping every other label
+// at its default: only the landmark name needs to differ.
+func galleryPagerLabels(name string) ui.PagerLabels {
+	return ui.PagerLabels{Aria: func(int, int) string { return name }}
+}

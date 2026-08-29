@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 // Port 18080 is e2e-only — never the dev port 8080, so Playwright cannot
 // attach to a stray dev server. The e2e database is disposable and reseeded
@@ -20,7 +20,21 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
+  projects: [
+    { name: 'chromium', use: { browserName: 'chromium' } },
+    // Mobile is scoped by testMatch on purpose. An unscoped project re-runs
+    // every spec at a phone viewport, and snapshot names are per project — so
+    // the visual suite would look for baselines that were never recorded, and
+    // the flow specs would assert desktop-only chrome. iPhone 12 is the same
+    // device descriptor mobile.spec.ts already uses; browserName follows it
+    // because the descriptor's own default is WebKit and isMobile emulation
+    // only works in Chromium.
+    {
+      name: 'mobile',
+      testMatch: /a11y-states\.spec\.ts$/,
+      use: { ...devices['iPhone 12'], browserName: 'chromium' },
+    },
+  ],
   // E2E_NO_WEBSERVER: the visual harness runs the server on the host and
   // Playwright inside the pinned container, which has no Go toolchain.
   webServer: process.env.E2E_NO_WEBSERVER
@@ -37,6 +51,15 @@ export default defineConfig({
       DATABASE_URL: databaseURL,
       DEV_AUTH_BYPASS: 'true',
       CLERK_PORTAL_URL: 'https://accounts.example.test',
+      // Blanked deliberately. The server auto-loads `.env` in development, so a
+      // developer with a real Clerk dev key gets clerk-js booted into every
+      // page — and csp.spec.ts asserts that a page loads no third-party
+      // origin, so it fails on their machine and passes in CI, which has no
+      // `.env`. A test environment that configures a third-party provider
+      // cannot check "no third-party requests". DEV_AUTH_BYPASS above is what
+      // supplies identity here, so nothing needs the keys.
+      CLERK_PUBLISHABLE_KEY: '',
+      CLERK_SECRET_KEY: '',
       TEST_NOW: '2026-01-15T00:00:00Z',
       // One IP drives the whole suite in parallel; the production default
       // (100/min) sheds e2e traffic as abuse.

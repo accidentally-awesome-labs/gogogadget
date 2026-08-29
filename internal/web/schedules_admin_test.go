@@ -28,7 +28,7 @@ func TestAdminSchedulesCRUD(t *testing.T) {
 	form := url.Values{"name": []string{"Too fast"}, "kind": []string{"email.digest"}, "every_seconds": []string{"30"}, "payload": []string{""}, "org": []string{""}}
 	code, _, body = postForm(t, s, "/admin/schedules", form, cookie)
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
-	assert.Contains(t, body, "alert-error")
+	assert.Contains(t, body, "alert-danger")
 
 	// Invalid: unschedulable kind → 422.
 	form = url.Values{"name": []string{"Bad kind"}, "kind": []string{"webhook.deliver"}, "every_seconds": []string{"3600"}, "payload": []string{""}, "org": []string{""}}

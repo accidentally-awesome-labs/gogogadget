@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/seo-discovery",
+    "kind": "workflow",
+    "name": "seo-discovery",
+    "revision": 1,
+    "contract": 1,
+    "title": "Search discovery surfaces",
+    "description": "robots.txt, the sitemap, and the RSS feed that let crawlers and readers discover content.",
+    "requires": [
+      "system/content",
+      "system/seo",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/seo_test.go",
+        "target": "internal/web/seo_test.go",
+        "class": "test",
+        "sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "seo.robots",
+        "seo.rss",
+        "seo.sitemap"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "seo.robots",
+          "method": "GET",
+          "pattern": "/robots.txt",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "crawler transport with no session and no mutation",
+            "rate_exempt": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleRobots"
+        },
+        {
+          "id": "seo.rss",
+          "method": "GET",
+          "pattern": "/rss.xml",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "feed reader transport with no session and no mutation",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleRSS"
+        },
+        {
+          "id": "seo.sitemap",
+          "method": "GET",
+          "pattern": "/sitemap.xml",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "crawler transport with no session and no mutation",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSitemap"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "footer.resources.rss",
+          "area": "footer",
+          "group": "footer.resources",
+          "route_id": "seo.rss",
+          "label_key": "footer.rss",
+          "after": [
+            "footer.resources.api"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

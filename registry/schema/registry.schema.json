@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "registry.schema.json",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/RegistryRoot"
+    },
+    {
+      "$ref": "#/$defs/CatalogIndex"
+    }
+  ],
+  "$defs": {
+    "RegistryRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "integer",
+          "const": 1
+        },
+        "includes": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "const": "registry/elements.json"
+            },
+            {
+              "const": "registry/components.json"
+            },
+            {
+              "const": "registry/pages.json"
+            },
+            {
+              "const": "registry/workflows.json"
+            },
+            {
+              "const": "registry/systems.json"
+            },
+            {
+              "const": "registry/profiles.json"
+            }
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "schema",
+        "includes"
+      ]
+    },
+    "CatalogIndex": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "integer",
+          "const": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "element",
+            "component",
+            "page",
+            "workflow",
+            "system",
+            "profile"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema",
+        "kind",
+        "items"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "element"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "items": {
+                "items": {
+                  "type": "string",
+                  "pattern": "^registry/modules/element/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "component"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "items": {
+                "items": {
+                  "type": "string",
+                  "pattern": "^registry/modules/component/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "page"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "items": {
+                "items": {
+                  "type": "string",
+                  "pattern": "^registry/modules/page/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "workflow"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "items": {
+                "items": {
+                  "type": "string",
+                  "pattern": "^registry/modules/workflow/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "system"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "items": {
+                "items": {
+                  "type": "string",
+                  "pattern": "^registry/modules/system/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "profile"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "items": {
+                "items": {
+                  "type": "string",
+                  "pattern": "^registry/profiles/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*(?:/\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*)*[.]json$"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

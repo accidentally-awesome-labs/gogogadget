@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/drawer",
+    "kind": "component",
+    "name": "drawer",
+    "revision": 1,
+    "contract": 1,
+    "title": "Drawer",
+    "description": "The Drawer renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/drawer.templ",
+        "target": "internal/web/templates/ui/drawer.templ",
+        "class": "templ",
+        "sha256": "bc1aa5cc9f9d21684c57c4b0e60b4efb4f221a8cd3ae57c7913deed0112dc8b2",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "drawer",
+          "family": "overlays",
+          "signature": "templ Drawer(o DrawerOpts)",
+          "summary": "Renders an edge-anchored modal panel.",
+          "guidance": "It is a native \u003cdialog\u003e, exactly like Dialog, because the platform supplies the top layer, the backdrop, the focus trap and Escape-to-close. Only the geometry differs, so a drawer that reimplemented any of that would be a second, worse dialog.",
+          "keyboard": "Escape closes it: this is a native \u003cdialog\u003e, so the platform supplies dismissal and the focus trap.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

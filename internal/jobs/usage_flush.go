@@ -15,7 +15,7 @@ import (
 // org's events at Polar. Idempotent by construction: Polar dedups on
 // external_id (we send ue-<usage_events.id>), so at-least-once retries are
 // safe. No billing client → no-op (events stay local).
-func (w *Worker) flushUsage(ctx context.Context, job sqlc.Job) error {
+func (w *Worker) flushUsage(ctx context.Context, _ SchedulePayload) error {
 	if w.Billing == nil {
 		w.log.Debug("usage.flush: billing unconfigured — events stay local")
 		return nil

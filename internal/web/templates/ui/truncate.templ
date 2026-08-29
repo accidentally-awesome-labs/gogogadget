@@ -1,0 +1,32 @@
+package ui
+
+import (
+	"fmt"
+)
+
+// TruncateOpts configures clipped text.
+type TruncateOpts struct {
+	Text string
+	// Lines clamps to a number of lines; 1 (the default) is a single line with
+	// an ellipsis.
+	Lines int
+	Attrs Attrs
+}
+
+// Truncate clips overflowing text.
+//
+// The full string is always in the DOM and carried in title, so it stays
+// selectable, searchable by the browser's find, and available on hover. Cutting
+// the string server-side would make the rest unreachable, and a screen reader
+// would read the truncated version as if it were the whole value.
+templ Truncate(o TruncateOpts) {
+	if o.Lines > 1 {
+		<span
+			{ rootWith("truncate", "truncate-lines", o.Attrs,
+				"title", o.Text,
+				"style", "--truncate-lines:"+fmt.Sprint(o.Lines))... }
+		>{ o.Text }</span>
+	} else {
+		<span { rootWith("truncate", "block truncate", o.Attrs, "title", o.Text)... }>{ o.Text }</span>
+	}
+}

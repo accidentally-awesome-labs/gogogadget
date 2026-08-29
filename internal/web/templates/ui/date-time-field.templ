@@ -1,0 +1,39 @@
+package ui
+
+// DateTimeFieldOpts is a local date-and-time input.
+type DateTimeFieldOpts struct {
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
+	Value       string
+	Min, Max    string
+	Hint, Error string
+	Required    bool
+	Size        Size
+	Attrs       Attrs
+}
+
+// DateTimeField renders a native datetime-local input.
+//
+// datetime-local, not datetime: the value carries no timezone, so the server
+// converts using the user's known zone rather than trusting a browser offset
+// that changes when the user travels.
+templ DateTimeField(o DateTimeFieldOpts) {
+	<input
+		{ controlRoot("date-time-field", inputClass(o.Size), o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="datetime-local"
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		value={ o.Value }
+		if o.Min != "" {
+			min={ o.Min }
+		}
+		if o.Max != "" {
+			max={ o.Max }
+		}
+		required?={ o.Required }
+	/>
+}

@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/button",
+    "kind": "element",
+    "name": "button",
+    "revision": 1,
+    "contract": 1,
+    "title": "Button",
+    "description": "The Button renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/button.templ",
+        "target": "internal/web/templates/ui/button.templ",
+        "class": "templ",
+        "sha256": "5baa5f15b22df4407e6d5055eb309c4fdd000eaa3fe699a6b27282ccbecbe3cd",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/button_test.go",
+        "target": "internal/web/templates/ui/button_test.go",
+        "class": "test",
+        "sha256": "8c885650e1b9a202d547e41f02b8dd365e8f753c7a962d220e9ff714b33dbe53",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "button",
+          "family": "actions",
+          "signature": "templ Button(o ButtonOpts)",
+          "summary": "Renders a control that acts.",
+          "states": [
+            "busy",
+            "default",
+            "disabled"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/docs-search",
+    "kind": "page",
+    "name": "docs-search",
+    "revision": 1,
+    "contract": 1,
+    "title": "Documentation search",
+    "description": "Full-text search across the embedded documentation corpus.",
+    "requires": [
+      "page/docs-index",
+      "system/content-assets",
+      "system/server"
+    ],
+    "files": [],
+    "claims": {
+      "routes": [
+        "docs.search"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "docs.search",
+          "method": "GET",
+          "pattern": "/docs/search",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleDocsSearch"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "docs.search_aria": "Search the docs",
+        "docs.search_clear": "Clear the search",
+        "docs.search_no_results": "No pages matched your search.",
+        "docs.search_placeholder": "Search the docs…",
+        "docs.search_prompt": "Type a term to search the documentation.",
+        "docs.search_results_for": "Results for “%s”",
+        "docs.search_title": "Search"
+      },
+      "es": {
+        "docs.search_aria": "Buscar en los docs",
+        "docs.search_clear": "Borrar la búsqueda",
+        "docs.search_no_results": "Ninguna página coincide con tu búsqueda.",
+        "docs.search_placeholder": "Buscar en los docs…",
+        "docs.search_prompt": "Escribe un término para buscar en la documentación.",
+        "docs.search_results_for": "Resultados para «%s»",
+        "docs.search_title": "Buscar"
+      }
+    }
+  }
+}

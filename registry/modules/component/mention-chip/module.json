@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/mention-chip",
+    "kind": "component",
+    "name": "mention-chip",
+    "revision": 1,
+    "contract": 1,
+    "title": "MentionChip",
+    "description": "The MentionChip renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/mention-chip.templ",
+        "target": "internal/web/templates/ui/mention-chip.templ",
+        "class": "templ",
+        "sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "mention-chip",
+          "family": "communication",
+          "signature": "templ MentionChip(o MentionChipOpts)",
+          "summary": "Renders an inline mention.",
+          "guidance": "The @ is decorative and hidden: a screen reader reading \"at Ada Lovelace\" inside a sentence is confusing, and the visual marker is what distinguishes a mention from ordinary text for sighted readers.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -5,6 +5,19 @@
 
 @source "internal/web/templates";
 
+/* Every module owns its own CSS fragment; sync regenerates this import list, so
+   installing or removing a module never patches this entry file by hand. */
+@import "./internal/web/styles/modules_registry_gen.css";
+
+/* The project's own overrides, last of the three sources: boilerplate, then
+   modules, then you. CSS requires every @import to precede other statements,
+   so this cannot sit at the end of the file - it does not have to. Tailwind
+   emits its tokens into @layer theme and its component classes into @layer
+   components, and UNLAYERED author CSS beats any layer at equal specificity.
+   A plain rule in theme.local.css therefore wins wherever the import appears.
+   See content/docs/extending.md, "Add a theme (rebrand)". */
+@import "./theme.local.css";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -23,21 +36,219 @@
   --color-brand-900: #312e81;
   --color-brand-950: #1e1b4b;
 
-  /* Semantic tokens — templates use ONLY these + component classes. */
+  /* A one-time code is read digit by digit, so the digits are separated far
+     more than any prose tracking step. It is a token rather than an arbitrary
+     value because it is a decision about how codes are read, not a nudge. */
+  --tracking-otp: 0.5em;
+
+  /* Structural tokens. Layout dimensions are tokens so a shell restyle is a
+     value edit, not a hunt through three template files. */
+  --container-page:   72rem;   /* max-w-page    — was max-w-6xl */
+  --container-narrow: 48rem;   /* max-w-narrow  — was max-w-3xl */
+  /* A chat bubble stops growing well before the page does: past roughly 80
+     characters the eye loses the line it was reading on the way back. */
+  --container-message: 42rem;  /* max-w-message — was max-w-[42rem] */
+  --spacing-sidebar:  15rem;   /* w-sidebar    — was w-60 */
+  --spacing-docnav:   14rem;   /* w-docnav     — was w-56 */
+  --spacing-topbar:   3.5rem;  /* h-topbar / top-topbar — was h-14 / top-14 */
+  --spacing-navbar:   4rem;    /* h-navbar / top-navbar — was h-16 / top-16 */
+
+  /* One step below text-xs, for counters that must fit inside a 1rem circle.
+     A scale entry rather than an arbitrary text-[10px] in a template. */
+  --text-micro: 0.625rem;
+  --text-micro--line-height: 1;
+
+  /* Semantic surfaces — templates use ONLY these + component classes. */
   --color-surface: #ffffff;
   --color-surface-raised: #f8fafc;
   --color-border: #e2e8f0;
   --color-fg: #0f172a;
   --color-fg-muted: #475569;
+
+  /* Brand semantics. Templates use ONLY these; the numeric ramp above is the
+     palette they are drawn from and is referenced only in this file. */
+  --color-brand:            var(--color-brand-600);
+  --color-brand-hover:      var(--color-brand-500);
+  --color-brand-fg:         #ffffff;
+  /* Secondary text ON the brand fill. Like --color-brand-fg it must NOT flip
+     in dark mode: the fill it sits on does not flip either. */
+  --color-brand-fg-muted:   var(--color-brand-100);
+  --color-brand-text:       var(--color-brand-600);
+  --color-brand-subtle:     var(--color-brand-50);
+  --color-brand-subtle-fg:  var(--color-brand-700);
+
+  /* State triads. Six slots per kind, one per role a state colour plays:
+       {k}            solid fill
+       {k}-fg         text on the solid fill
+       {k}-text       {k}-coloured text on a normal surface
+       {k}-subtle     tinted background
+       {k}-subtle-fg  text on the tinted background
+       {k}-border     border on the tinted background
+     Light values below; .dark overrides all but the solid pair.
+
+     The solid pair is a contrast contract, not a hue preference: {k}-fg is
+     white on every kind, so {k} has to clear 4.5:1 against it at 12px — the
+     size a badge renders. #16a34a and #d97706 cleared 3.3 and 3.2, which was
+     invisible while nothing painted text on the fill and became a WCAG AA
+     failure the moment .badge-solid did. Both now sit at their -text value,
+     which this system had already picked as the AA-on-white green and amber. */
+  --color-success: #15803d; --color-success-fg: #ffffff;
+  --color-success-text: #15803d; --color-success-subtle: #f0fdf4;
+  --color-success-subtle-fg: #15803d; --color-success-border: #bbf7d0;
+
+  --color-warn: #b45309; --color-warn-fg: #ffffff;
+  --color-warn-text: #b45309; --color-warn-subtle: #fffbeb;
+  --color-warn-subtle-fg: #b45309; --color-warn-border: #fde68a;
+
+  --color-danger: #dc2626; --color-danger-fg: #ffffff;
+  /* The one solid fill with a hover step of its own. Fading the fill with an
+     opacity utility dimmed the label with it; a darker fill is what "about to
+     delete" actually looks like. */
+  --color-danger-hover: #b91c1c;
+  --color-danger-text: #b91c1c; --color-danger-subtle: #fef2f2;
+  --color-danger-subtle-fg: #b91c1c; --color-danger-border: #fecaca;
+
+  --color-info: var(--color-brand-600); --color-info-fg: #ffffff;
+  --color-info-text: var(--color-brand-600); --color-info-subtle: var(--color-brand-50);
+  --color-info-subtle-fg: var(--color-brand-700); --color-info-border: var(--color-brand-200);
+
+  /* Neutral is a kind like any other, so it declares the same six slots. It
+     used to improvise them from --color-fg-muted and --color-surface, which
+     meant a neutral badge could not be told apart from an unstyled one and a
+     neutral tint was identical to a raised surface. */
+  --color-neutral: #475569; --color-neutral-fg: #ffffff;
+  --color-neutral-text: #475569; --color-neutral-subtle: #f1f5f9;
+  --color-neutral-subtle-fg: #334155; --color-neutral-border: #cbd5e1;
+
+  /* Interaction and surface semantics. These exist so a component never names
+     a raw utility for a *meaning*: two components that both mean "focused"
+     must not disagree, which is exactly what happened when .btn used an
+     outline and .input used a ring. */
+  --color-focus-ring:    var(--color-brand-500);
+  --color-overlay-scrim: rgb(15 23 42 / 0.55);
+  --color-selected:      var(--color-brand-subtle);
+  --color-selected-fg:   var(--color-brand-subtle-fg);
+
+  /* Radius has exactly two meanings: a control the user manipulates, and a
+     surface that contains content. Anything else is drift. */
+  --radius-control: 0.5rem;
+  --radius-surface: 0.75rem;
+
+  /* Two elevations, one per relationship to the page: raised sits ON it (cards,
+     tables), overlay floats OVER it (dialogs, toasts). --shadow-overlay lives
+     in :root below, because nothing ever names it as a utility. */
+  --shadow-raised: 0 1px 2px 0 rgb(15 23 42 / 0.06), 0 1px 3px 0 rgb(15 23 42 / 0.10);
 }
 
 @layer base {
+  /* Stacking order. Tailwind has no --z-* theme namespace, so these are plain
+     custom properties consumed as z-(--z-name). One scale, three layers. */
+  :root {
+    /* Tell the UA which palette it is painting into, so scrollbars, native
+       date pickers and form control defaults follow the theme instead of
+       staying light on a dark page. */
+    color-scheme: light;
+
+    --z-nav: 40;       /* sticky header, app drawer */
+    --z-overlay: 50;   /* toasts, dropdowns, consent, skip link */
+    --z-progress: 60;  /* navigation progress bar */
+
+    /* Control heights. Padding alone let a button and the input beside it end
+       up different heights; naming the height is what keeps a row aligned. */
+    --control-height-sm: 2rem;
+    --control-height-md: 2.5rem;
+    --control-height-lg: 3rem;
+
+    /* The floating elevation. It is a plain custom property rather than an
+       @theme entry for the same reason the chart series are: it is only ever
+       read with var(), never written as a shadow-* utility. */
+    --shadow-overlay: 0 10px 15px -3px rgb(15 23 42 / 0.10), 0 4px 6px -4px rgb(15 23 42 / 0.10);
+
+    /* Motion. Two durations: one for state changes the user caused, one for
+       larger transitions. Anything slower reads as lag. */
+    --motion-fast: 150ms;
+    --motion-base: 250ms;
+
+    /* One easing curve, so everything in the product accelerates and settles
+       the same way. It decelerates into rest: an element that eases out looks
+       like it arrived, one that eases linearly looks like it stopped. */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Chart series colours, ordered so adjacent series never share a hue. These
+       are plain custom properties, not @theme entries: the chart module reads
+       them with var() rather than as utility classes, and Tailwind drops an
+       unreferenced @theme colour from the build - which left every light-mode
+       series with no colour at all while dark mode kept its override. */
+    --color-chart-1: var(--color-brand-500);
+    --color-chart-2: #0d9488;
+    --color-chart-3: #d97706;
+    --color-chart-4: #db2777;
+    --color-chart-5: #7c3aed;
+    --color-chart-6: #65a30d;
+
+    /* Disabled is one opacity everywhere, or the same control looks differently
+       unavailable depending on which class it happens to carry. */
+    --disabled-opacity: 0.5;
+  }
+
+  /* Honour the OS setting: motion tokens collapse to zero rather than every
+     animated rule needing its own media query. */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-fast: 0ms;
+      --motion-base: 0ms;
+    }
+  }
+
+  /* Dark mode is token flipping, never a dark: variant in a template: every
+     utility and component class below is built on these names, so
+     re-declaring them here restyles the whole product. */
   .dark {
+    color-scheme: dark;
+
     --color-surface: #0b1120;
     --color-surface-raised: #111a2e;
     --color-border: #1e293b;
     --color-fg: #e2e8f0;
     --color-fg-muted: #94a3b8;
+
+    /* Brand fill stays at ramp step 600 in dark so buttons are identical in
+       both themes; only the text/tint slots flip. */
+    --color-brand-text:      var(--color-brand-400);
+    --color-brand-subtle:    var(--color-brand-950);
+    --color-brand-subtle-fg: var(--color-brand-300);
+
+    --color-success-text: #86efac; --color-success-subtle: #052e16;
+    --color-success-subtle-fg: #86efac; --color-success-border: #166534;
+    --color-warn-text: #fcd34d; --color-warn-subtle: #451a03;
+    --color-warn-subtle-fg: #fcd34d; --color-warn-border: #92400e;
+    --color-danger-text: #fca5a5; --color-danger-subtle: #450a0a;
+    --color-danger-subtle-fg: #fca5a5; --color-danger-border: #991b1b;
+    --color-info-text: var(--color-brand-400); --color-info-subtle: var(--color-brand-950);
+    --color-info-subtle-fg: var(--color-brand-300); --color-info-border: var(--color-brand-800);
+    --color-neutral-text: #94a3b8; --color-neutral-subtle: #1e293b;
+    --color-neutral-subtle-fg: #cbd5e1; --color-neutral-border: #334155;
+
+    /* The focus ring must stay visible against a dark surface, so it moves up
+       the ramp rather than keeping the light value. */
+    --color-focus-ring: var(--color-brand-400);
+
+    /* A darker scrim: the same translucency over a dark page barely separates
+       the dialog from what is behind it. */
+    --color-overlay-scrim: rgb(2 6 23 / 0.7);
+
+    /* Elevation in dark cannot be a drop shadow - there is nothing lighter for
+       it to fall on - so it becomes a lifted border instead. The overlay rung
+       lifts further, which is the only thing separating a dialog from the
+       page behind it once the shadow is gone. */
+    --shadow-raised: 0 0 0 1px rgb(226 232 240 / 0.06);
+    --shadow-overlay: 0 0 0 1px rgb(226 232 240 / 0.09);
+
+    --color-chart-2: #2dd4bf;
+    --color-chart-3: #fbbf24;
+    --color-chart-4: #f472b6;
+    --color-chart-5: #a78bfa;
+    --color-chart-6: #a3e635;
   }
 
   @font-face {
@@ -50,6 +261,15 @@
 
   [x-cloak] {
     display: none !important;
+  }
+
+  /* Boosted navigation swaps #content with transition:true. Naming the swapped
+     region is what keeps the browser's cross-fade to that region: without a
+     name the whole document is one snapshot, so the header, sidebar and toast
+     stack cross-fade against themselves on every click. The reduced-motion
+     block below already cancels the named group with its (*) wildcard. */
+  #content {
+    view-transition-name: content;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -67,7 +287,8 @@
   .clerk-org-slot:empty::before {
     content: attr(data-clerk-placeholder);
     line-height: 2rem;
-    @apply block h-8 w-full overflow-hidden whitespace-nowrap rounded-lg border border-border
+    border-radius: var(--radius-control);
+    @apply block h-8 w-full overflow-hidden whitespace-nowrap border border-border
       bg-surface px-3 text-sm font-medium text-fg-muted;
   }
   .clerk-user-slot:empty::before {
@@ -76,36 +297,209 @@
     @apply block h-8 w-8 rounded-full border border-border bg-surface-raised
       text-center text-xs font-semibold text-fg-muted;
   }
-  .btn, .btn-primary, .btn-ghost, .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
-      transition-colors duration-150 cursor-pointer
-      focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500
-      disabled:opacity-50 disabled:pointer-events-none;
+
+  /* Buttons. Every variant family lists its base selector alongside its
+     variants so a bare variant class still renders the full component. The
+     size axis (sm/xs/icon) is what removes ad-hoc !padding overrides. */
+  .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
+  .btn-sm, .btn-xs, .btn-lg, .btn-icon {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold
+      transition-colors cursor-pointer disabled:pointer-events-none;
+    border-radius: var(--radius-control);
+    min-height: var(--control-height-md);
+    transition-duration: var(--motion-fast);
   }
-  .btn-primary {
-    @apply bg-brand-600 text-white hover:bg-brand-500;
+  .btn:disabled, .btn-primary:disabled, .btn-ghost:disabled,
+  .btn-danger:disabled, .btn-inverse:disabled,
+  .btn-sm:disabled, .btn-xs:disabled, .btn-lg:disabled, .btn-icon:disabled {
+    opacity: var(--disabled-opacity);
   }
-  .btn-ghost {
-    @apply border border-border text-fg hover:bg-surface-raised;
-  }
-  .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-500;
-  }
+  .btn-primary { @apply bg-brand text-brand-fg hover:bg-brand-hover; }
+  .btn-ghost   { @apply border border-border text-fg hover:bg-surface-raised; }
+  .btn-danger  { @apply bg-danger text-danger-fg hover:bg-danger-hover; }
+  .btn-inverse { @apply bg-surface text-brand-text hover:bg-surface-raised; }
+  .btn-sm      { @apply px-3 py-1.5 text-sm; }
+  .btn-xs      { @apply px-2 py-1 text-xs; }
+  /* The base rule pins min-height to the md rung, so a large button has to
+     raise it as well as its padding - otherwise Size: SizeLG produced a button
+     with roomier text at exactly the default height. */
+  .btn-lg      { @apply px-5 py-2.5 text-base; min-height: var(--control-height-lg); }
+  .btn-icon    { @apply px-2 py-2; }
+
   .input {
-    @apply block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg
-      placeholder:text-fg-muted outline-none
-      focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30
-      disabled:opacity-50;
+    @apply block w-full border border-border bg-surface px-3 py-2 text-sm text-fg
+      placeholder:text-fg-muted;
+    border-radius: var(--radius-control);
+    min-height: var(--control-height-md);
   }
+  .input:disabled { opacity: var(--disabled-opacity); }
+  .input-sm { @apply py-1.5 text-sm; min-height: var(--control-height-sm); }
+  .input-xs { @apply py-1 text-xs; min-height: var(--control-height-sm); }
+  /* Same reasoning as .btn-lg: the base rule pins the md rung, so the large
+     input has to raise min-height as well as its padding. */
+  .input-lg { @apply px-4 py-2.5 text-base; min-height: var(--control-height-lg); }
+  /* One focus treatment, on every interactive element. This used to be an
+     outline on buttons and a ring on inputs - two things meaning "focused" and
+     looking different - while links, tabs and menu items had neither.
+     focus-visible (not focus) is what keeps a mouse click from painting a ring
+     the user did not ask for. */
+  .btn, .btn-primary, .btn-ghost, .btn-danger, .btn-inverse,
+  .btn-sm, .btn-xs, .btn-lg, .btn-icon,
+  .input, .input-sm, .input-xs, .input-lg,
+  .nav-link, .doc-link, .tab, .link,
+  a:focus-visible, button:focus-visible, summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline-color: var(--color-focus-ring);
+  }
+  .btn:focus-visible, .btn-primary:focus-visible, .btn-ghost:focus-visible,
+  .btn-danger:focus-visible, .btn-inverse:focus-visible,
+  .btn-sm:focus-visible, .btn-xs:focus-visible, .btn-lg:focus-visible,
+  .btn-icon:focus-visible,
+  .input:focus-visible, .input-sm:focus-visible, .input-xs:focus-visible,
+  .input-lg:focus-visible,
+  .nav-link:focus-visible, .doc-link:focus-visible, .tab:focus-visible,
+  .link:focus-visible,
+  a:focus-visible, button:focus-visible, summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline-style: solid;
+    outline-width: 2px;
+    outline-offset: 2px;
+  }
+
+  /* Drawer geometry. A drawer is a dialog anchored to an edge, so only the
+     position and radius differ from a centred one. */
+  .drawer-right, .drawer-left { @apply h-full max-w-sm w-full rounded-none; }
+  .drawer-right { margin-left: auto; margin-right: 0; }
+  .drawer-left  { margin-left: 0; margin-right: auto; }
+  .drawer-top, .drawer-bottom { @apply w-full max-w-none rounded-none; }
+  .drawer-top    { margin-top: 0; margin-bottom: auto; }
+  .drawer-bottom { margin-top: auto; margin-bottom: 0; }
+
+  /* A dialog must state its own foreground. The UA stylesheet gives <dialog>
+     `color: canvastext`, which follows the browser's colour scheme and not this
+     sheet's `.dark` class - so in dark mode every dialog rendered black text on
+     a dark card at 1.11 contrast, unreadable. No page-load scan sees it because
+     the dialog is closed until something opens it.
+
+     It also owns the enter and exit. A modal that appears between two frames
+     reads as a page replacement rather than a layer over the page, and there is
+     nowhere else to put this: the platform toggles `display` and the top layer.
+     The EXIT is a transition with `allow-discrete`, which is the only thing
+     that can hold `display: block` while the fade runs. The ENTER is a keyframes
+     animation scoped to :modal rather than an @starting-style transition like
+     the drawers below, and both differences are deliberate - see the :modal
+     rule for the parsed-open case that makes any animation at all on a
+     served-open dialog untenable. A browser without allow-discrete simply skips the
+     exit and shows the dialog closed, which is why there is no fallback path.
+     Reduced motion is already handled - --motion-base collapses to 0ms at the
+     token. */
+  .dialog {
+    color: var(--color-fg);
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+    transition:
+      opacity var(--motion-base) var(--ease-standard),
+      transform var(--motion-base) var(--ease-standard),
+      overlay var(--motion-base) allow-discrete,
+      display var(--motion-base) allow-discrete;
+  }
+  .dialog[open] {
+    opacity: 1;
+    transform: none;
+  }
+  /* :modal is the arriving dialog. A dialog opened with showModal() enters the
+     top layer - that is the moment the animation is ABOUT - while a dialog an
+     HTML document simply parsed with `open` was never opened at all: it has
+     been there since first paint, and animating it is semantically wrong as
+     well as practically catastrophic. Practically: Chromium's
+     scrollIntoViewIfNeeded never converges on an element whose rect moved
+     after the scroll started, so a parsed-open dialog that faded in made every
+     pointer action against it hang forever - the no-script suite caught this
+     as a 100%-reproducible click timeout, 28k pixels down the gallery page. */
+  .dialog[open]:modal {
+    animation: dialog-enter var(--motion-base) var(--ease-standard);
+  }
+
+  /* The scrim is a token so light and dark separate the dialog equally, and it
+     fades with the panel: a backdrop that snaps to full opacity while the
+     dialog is still arriving is the most visible half-animation there is. */
+  .dialog::backdrop {
+    background-color: transparent;
+    transition:
+      background-color var(--motion-base) var(--ease-standard),
+      overlay var(--motion-base) allow-discrete,
+      display var(--motion-base) allow-discrete;
+  }
+  .dialog[open]::backdrop {
+    background-color: var(--color-overlay-scrim);
+  }
+  @starting-style {
+    .dialog[open]::backdrop {
+      background-color: transparent;
+    }
+  }
+
+  /* A drawer enters from the edge it is anchored to, so it replaces the centred
+     dialog's rise. These sit after .dialog[open] deliberately: the selectors
+     have identical specificity, so source order is what decides. */
+  .drawer-right { transform: translateX(100%); }
+  .drawer-left  { transform: translateX(-100%); }
+  .drawer-top    { transform: translateY(-100%); }
+  .drawer-bottom { transform: translateY(100%); }
+  .drawer-right[open], .drawer-left[open],
+  .drawer-top[open], .drawer-bottom[open] { transform: none; }
+  @starting-style {
+    .drawer-right[open] { transform: translateX(100%); }
+    .drawer-left[open]  { transform: translateX(-100%); }
+    .drawer-top[open]    { transform: translateY(-100%); }
+    .drawer-bottom[open] { transform: translateY(100%); }
+  }
+
+  /* Menus, popovers, hover cards and the command palette are all native
+     popovers, so one rule covers every one of them. Faster than the dialog:
+     a menu is a response to the click that opened it, not a context switch. */
+  [popover] {
+    opacity: 0;
+    transform: scale(0.98);
+    transition:
+      opacity var(--motion-fast) var(--ease-standard),
+      transform var(--motion-fast) var(--ease-standard),
+      overlay var(--motion-fast) allow-discrete,
+      display var(--motion-fast) allow-discrete;
+  }
+  [popover]:popover-open {
+    opacity: 1;
+    transform: none;
+  }
+  @starting-style {
+    [popover]:popover-open {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+  }
+
+  /* The dialog's title takes its colour from the kind matrix on the dialog
+     root, so one rule covers all six kinds. It used to be composed at render
+     time as `text-{kind}-text`, which named a utility Tailwind never emitted
+     for four of the six - the title simply rendered uncoloured. */
+  .dialog-title {
+    color: var(--ui-text);
+  }
+
   .label {
     @apply block text-sm font-medium text-fg mb-1;
   }
   .card {
-    @apply rounded-xl border border-border bg-surface p-6 shadow-sm;
+    @apply border border-border bg-surface p-6;
+    border-radius: var(--radius-surface);
+    box-shadow: var(--shadow-raised);
   }
-  .badge {
-    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
-  }
+  /* The padding axis. Each variant heads its own rule at the same specificity
+     as .card and comes after it, so the later declaration wins; MD is the bare
+     .card and contributes no class at all. */
+  .card-p-none { @apply p-0; }
+  .card-p-sm   { @apply p-4; }
+  .card-p-lg   { @apply p-8; }
   .table {
     @apply min-w-full divide-y divide-border text-sm;
   }
@@ -121,24 +515,181 @@
   .table tbody {
     @apply divide-y divide-border;
   }
+  /* Compact density. Same specificity as the .table rules above and declared
+     after them, so a table carrying both classes takes the tighter cell. */
+  .table-compact th { @apply px-3 py-2; }
+  .table-compact td { @apply px-3 py-2; }
   .link {
-    @apply text-brand-600 underline underline-offset-4 hover:no-underline;
+    @apply text-brand-text underline underline-offset-4 hover:no-underline transition-colors;
+    transition-duration: var(--motion-fast);
   }
-  .dark .link {
-    @apply text-brand-400;
+
+  /* The semantic colour matrix. Each kind defines the same six variables once,
+     on one selector list shared by the kind class and every family alias, and
+     each family reads those variables — so a family supports all six kinds by
+     construction instead of needing a rule per family-kind pair.
+     
+     That combinatorial gap was real: `alert-brand`, `alert-neutral`,
+     `banner-brand`, `banner-success` and `banner-neutral` did not exist, so a
+     Notice or Banner rendered with one of those kinds came out unstyled. */
+  .k-brand, .badge-brand, .alert-brand, .banner-brand, .toast-brand {
+    --ui-solid: var(--color-brand-600);      --ui-solid-fg: #ffffff;
+    --ui-tint: var(--color-brand-subtle);    --ui-tint-fg: var(--color-brand-subtle-fg);
+    --ui-line: var(--color-brand-200);       --ui-text: var(--color-brand-text);
   }
-  .alert-success {
-    @apply rounded-lg border border-green-200 bg-green-50 text-green-800 p-3 text-sm;
+  .k-info, .badge-info, .alert-info, .banner-info, .toast-info {
+    --ui-solid: var(--color-info);            --ui-solid-fg: var(--color-info-fg);
+    --ui-tint: var(--color-info-subtle);      --ui-tint-fg: var(--color-info-subtle-fg);
+    --ui-line: var(--color-info-border);      --ui-text: var(--color-info-text);
   }
-  .dark .alert-success {
-    @apply border-green-900 bg-green-950 text-green-200;
+  .k-success, .badge-success, .alert-success, .banner-success, .toast-success {
+    --ui-solid: var(--color-success);         --ui-solid-fg: var(--color-success-fg);
+    --ui-tint: var(--color-success-subtle);   --ui-tint-fg: var(--color-success-subtle-fg);
+    --ui-line: var(--color-success-border);   --ui-text: var(--color-success-text);
   }
-  .alert-error {
-    @apply rounded-lg border border-red-200 bg-red-50 text-red-800 p-3 text-sm;
+  .k-warn, .badge-warn, .alert-warn, .banner-warn, .toast-warn {
+    --ui-solid: var(--color-warn);            --ui-solid-fg: var(--color-warn-fg);
+    --ui-tint: var(--color-warn-subtle);      --ui-tint-fg: var(--color-warn-subtle-fg);
+    --ui-line: var(--color-warn-border);      --ui-text: var(--color-warn-text);
   }
-  .dark .alert-error {
-    @apply border-red-900 bg-red-950 text-red-200;
+  .k-danger, .badge-danger, .alert-danger, .banner-danger, .toast-danger {
+    --ui-solid: var(--color-danger);          --ui-solid-fg: var(--color-danger-fg);
+    --ui-tint: var(--color-danger-subtle);    --ui-tint-fg: var(--color-danger-subtle-fg);
+    --ui-line: var(--color-danger-border);    --ui-text: var(--color-danger-text);
   }
+  .k-neutral, .badge-neutral, .alert-neutral, .banner-neutral, .toast-neutral {
+    --ui-solid: var(--color-neutral);         --ui-solid-fg: var(--color-neutral-fg);
+    --ui-tint: var(--color-neutral-subtle);   --ui-tint-fg: var(--color-neutral-subtle-fg);
+    --ui-line: var(--color-neutral-border);   --ui-text: var(--color-neutral-text);
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    background-color: var(--ui-tint);
+    color: var(--ui-tint-fg);
+  }
+
+  /* The emphasis axis. Subtle is the bare .badge above; these two are declared
+     after it and read the same matrix, so every kind gets all three fills
+     without a rule per kind-emphasis pair. */
+  .badge-solid {
+    background-color: var(--ui-solid);
+    color: var(--ui-solid-fg);
+  }
+  .badge-outline {
+    background-color: transparent;
+    border: 1px solid var(--ui-line);
+    color: var(--ui-text);
+  }
+
+  .alert {
+    @apply border p-3 text-sm;
+    border-radius: var(--radius-control);
+    border-color: var(--ui-line);
+    background-color: var(--ui-tint);
+    color: var(--ui-tint-fg);
+  }
+
+  /* Full-bleed shell notices (impersonation, announcement, billing). */
+  .banner {
+    @apply border-b px-4 py-2 text-sm;
+    border-color: var(--ui-line);
+    background-color: var(--ui-tint);
+    color: var(--ui-tint-fg);
+  }
+
+  /* The toast keeps a neutral surface and carries its kind on the left edge, so
+     a stack of toasts reads as one component with a status rather than four
+     differently-coloured boxes.
+
+     It arrives and leaves under its own power. A toast that appears between two
+     frames is easy to miss entirely, and one that vanishes the same way reads as
+     a rendering glitch rather than a dismissal. The exit is keyed on
+     data-leaving="true" - the value is matched, not just the attribute, because
+     a binding that writes "false" rather than removing the attribute would
+     otherwise hide every toast the moment it rendered. */
+  .toast {
+    @apply border border-border bg-surface px-4 py-3 text-sm border-l-4;
+    border-radius: var(--radius-surface);
+    box-shadow: var(--shadow-overlay);
+    border-left-color: var(--ui-solid);
+    transition:
+      opacity var(--motion-base) var(--ease-standard),
+      transform var(--motion-base) var(--ease-standard);
+  }
+  @starting-style {
+    .toast {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  .toast[data-leaving="true"] {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+
+  /* Structure and typography. One class per recurring shape, so a page is
+     composed from named ideas rather than retyped utility strings.
+
+     The page insets and the display sizes step at the small breakpoint. A
+     single desktop value is what made a phone read as a scaled-down desktop:
+     64px of vertical padding and a 48px hero on a 390px screen. */
+  .page-section { @apply max-w-page mx-auto px-4 py-12 sm:px-6 sm:py-16; }
+  .page-narrow  { @apply max-w-narrow mx-auto px-4 py-12 sm:px-6 sm:py-16; }
+  .page-header  { @apply flex items-center justify-between gap-4 flex-wrap mb-6; }
+  .page-title    { @apply text-2xl font-bold; }
+  .section-title { @apply text-lg font-semibold; }
+  .display-title { @apply text-3xl sm:text-4xl font-extrabold tracking-tight; }
+  .hero-title    { @apply text-4xl sm:text-5xl font-extrabold tracking-tight; }
+  .error-code    { @apply text-6xl font-extrabold text-brand-text; }
+  .eyebrow       { @apply text-xs font-semibold uppercase tracking-wide text-fg-muted; }
+  .table-card   { @apply border border-border bg-surface overflow-hidden;
+                  border-radius: var(--radius-surface); box-shadow: var(--shadow-raised); }
+  .table-empty  { @apply p-6 text-sm text-fg-muted; }
+  .card-actions { @apply flex justify-end gap-2 flex-wrap; }
+  .toolbar      { @apply flex items-center gap-2 mb-4; }
+  .form-actions { @apply flex items-center gap-3; }
+  .field-error  { @apply mt-1 text-sm text-danger-text; }
+  .code-chip    { @apply rounded bg-surface-raised border border-border px-1.5 py-0.5 text-xs; }
+  .meter        { @apply w-full bg-surface-raised rounded-full h-2 mt-2 overflow-hidden; }
+  .meter-fill   { @apply bg-brand h-2 rounded-full; }
+  .count-badge  { @apply absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand
+                    text-brand-fg text-micro font-bold flex items-center justify-center; }
+
+  /* Multi-line clamp. The line count is the one thing a caller varies, so it
+     arrives as a custom property on the element rather than as a class per
+     count - Tailwind cannot emit a utility for a number assembled at runtime,
+     which is exactly why the arbitrary-value version rendered nothing. */
+  .truncate-lines {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--truncate-lines, 2);
+    overflow: hidden;
+  }
+
+  /* Navigation link idioms. aria-current="page" is the active signal (set
+     server-side by navCurrent and client-side by syncAppNavigation). */
+  .nav-link { @apply px-3 py-2 text-sm text-fg-muted hover:bg-surface hover:text-fg
+                aria-[current=page]:font-semibold transition-colors;
+              border-radius: var(--radius-control);
+              transition-duration: var(--motion-fast); }
+  .nav-link[aria-current="page"] {
+    background-color: var(--color-selected);
+    color: var(--color-selected-fg);
+  }
+  .doc-link { @apply block px-3 py-1.5 text-fg-muted hover:text-fg hover:bg-surface-raised
+                aria-[current=page]:font-semibold transition-colors;
+              border-radius: var(--radius-control);
+              transition-duration: var(--motion-fast); }
+  .doc-link[aria-current="page"] { color: var(--color-selected-fg); }
+  /* whitespace-nowrap and shrink-0 are what make the scroll work: without them
+     the bar wraps each label onto two lines and never overflows, so the tabs
+     get shorter instead of scrolling. */
+  .tab      { @apply px-4 py-2 text-sm font-medium border-b-2 -mb-px border-transparent
+                text-fg-muted hover:text-fg transition-colors whitespace-nowrap shrink-0
+                aria-[current=page]:border-brand aria-[current=page]:text-fg;
+              transition-duration: var(--motion-fast); }
+  .tab-bar  { @apply flex gap-1 border-b border-border mb-8 overflow-x-auto; }
 
   /* htmx request indicator. htmx adds .htmx-request to the element that issued
      the request and to anything its hx-indicator names; these rules fade the
@@ -146,7 +697,7 @@
      htmx inject its own <style> — see the htmx-config meta tag in layouts.templ. */
   .htmx-indicator {
     opacity: 0;
-    transition: opacity 150ms ease;
+    transition: opacity var(--motion-fast) var(--ease-standard);
   }
   .htmx-request .htmx-indicator,
   .htmx-request.htmx-indicator {
@@ -166,8 +717,8 @@
     inset-inline: 0;
     top: 0;
     height: 2px;
-    z-index: 60;
-    background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-600));
+    z-index: var(--z-progress);
+    background: linear-gradient(90deg, var(--color-brand-hover), var(--color-brand));
     transform-origin: 0 50%;
     animation: nav-progress 8s cubic-bezier(0.1, 0.6, 0.3, 1) 150ms forwards;
   }
@@ -176,7 +727,7 @@
      rather than "ignored the click". Same delay, same reasoning. */
   html[data-navigating] #content {
     opacity: 0.6;
-    transition: opacity 200ms ease 150ms;
+    transition: opacity var(--motion-base) var(--ease-standard) 150ms;
   }
 
   /* .skeleton is the placeholder for regions that load after first paint
@@ -196,17 +747,18 @@
   .prose h2 { @apply text-2xl font-bold mt-10 mb-3; }
   .prose h3 { @apply text-xl font-semibold mt-8 mb-3; }
   .prose p { @apply my-4; }
-  .prose a { @apply text-brand-600 underline underline-offset-4 dark:text-brand-400; }
+  .prose a { @apply text-brand-text underline underline-offset-4; }
   .prose ul { @apply list-disc pl-6 my-4 space-y-1; }
   .prose ol { @apply list-decimal pl-6 my-4 space-y-1; }
   .prose li > ul, .prose li > ol { @apply my-1; }
   .prose blockquote { @apply border-l-4 border-border pl-4 my-4 text-fg-muted italic; }
   .prose code { @apply rounded bg-surface-raised px-1.5 py-0.5 text-sm border border-border; }
-  .prose pre { @apply rounded-xl border border-border bg-surface shadow-sm overflow-x-auto text-sm my-4 !p-4; }
+  .prose pre { @apply border border-border bg-surface overflow-x-auto text-sm my-4 !p-4;
+               border-radius: var(--radius-surface); box-shadow: var(--shadow-raised); }
   .prose pre code { @apply bg-transparent border-0 p-0; }
   .prose table { @apply min-w-full divide-y divide-border text-sm my-4; }
   .prose hr { @apply border-border my-8; }
-  .prose img { @apply rounded-xl my-4; }
+  .prose img { @apply my-4; border-radius: var(--radius-surface); }
   .prose strong { @apply font-semibold; }
 }
 
@@ -219,6 +771,17 @@
   0% { transform: scaleX(0); }
   40% { transform: scaleX(0.6); }
   100% { transform: scaleX(0.95); }
+}
+
+/* The dialog's arrival. A keyframes animation rather than an @starting-style
+   transition (see the .dialog rule for why): it runs on first render, which is
+   exactly the event "the dialog just appeared" needs to hook. `to` is implicit -
+   the open state's own values - so this cannot drift from them. */
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
 }
 
 @keyframes skeleton-pulse {

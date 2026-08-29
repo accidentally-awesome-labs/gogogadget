@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/time-field",
+    "kind": "component",
+    "name": "time-field",
+    "revision": 1,
+    "contract": 1,
+    "title": "TimeField",
+    "description": "The TimeField renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/time-field.templ",
+        "target": "internal/web/templates/ui/time-field.templ",
+        "class": "templ",
+        "sha256": "b4fd58590b241c7a844d6b7340ee882b7da92615ce7fc7622341abc038ac724a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "time-field",
+          "family": "forms",
+          "signature": "templ TimeField(o TimeFieldOpts)",
+          "summary": "Renders a native time input.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

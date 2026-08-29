@@ -1,0 +1,28 @@
+package ui
+
+// CenterOpts centres content within a measure.
+type CenterOpts struct {
+	Width Width
+	Attrs Attrs
+}
+
+// Center centres its content horizontally within a constrained measure.
+//
+// It does not centre text. Centred body copy forces the eye to find a new
+// left edge on every line, which is why this only centres the block.
+templ Center(o CenterOpts) {
+	<div { root("center", mergeClasses("mx-auto", centerWidthClass(o.Width)), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func centerWidthClass(width Width) string {
+	switch width.Value() {
+	case WidthNarrow:
+		return "max-w-narrow"
+	case WidthFull:
+		return ""
+	default:
+		return "max-w-page"
+	}
+}

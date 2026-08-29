@@ -66,11 +66,20 @@ func (q *Queries) CountJobs(ctx context.Context, filter string) (int64, error) {
 }
 
 const deadLetterJob = `-- name: DeadLetterJob :exec
-UPDATE jobs SET done_at = now(), last_error = 'exhausted' WHERE id = $1
+UPDATE jobs SET done_at = now(), last_error = $2 WHERE id = $1
 `
 
-func (q *Queries) DeadLetterJob(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deadLetterJob, id)
+type DeadLetterJobParams struct {
+	ID     int64       `json:"id"`
+	Reason pgtype.Text `json:"reason"`
+}
+
+// Dead-letter with an explicit reason. 'exhausted' means the handler kept
+// failing; 'module_uninstalled' means no module provides the kind any more, so
+// retrying is pointless. Both are terminal and both stay requeueable, because
+// reinstalling the module makes the queued work recoverable.
+func (q *Queries) DeadLetterJob(ctx context.Context, arg DeadLetterJobParams) error {
+	_, err := q.db.Exec(ctx, deadLetterJob, arg.ID, arg.Reason)
 	return err
 }
 
@@ -84,19 +93,30 @@ func (q *Queries) DeleteOldJobs(ctx context.Context) error {
 }
 
 const enqueueJob = `-- name: EnqueueJob :one
-INSERT INTO jobs (kind, payload, run_at)
-VALUES ($1, $2, COALESCE($3, now()))
+INSERT INTO jobs (kind, payload, run_at, max_attempts)
+VALUES ($1, $2, COALESCE($3, now()),
+        COALESCE(NULLIF($4::int, 0), 8))
 RETURNING id
 `
 
 type EnqueueJobParams struct {
-	Kind    string      `json:"kind"`
-	Payload []byte      `json:"payload"`
-	RunAt   interface{} `json:"run_at"`
+	Kind        string      `json:"kind"`
+	Payload     []byte      `json:"payload"`
+	RunAt       interface{} `json:"run_at"`
+	MaxAttempts int32       `json:"max_attempts"`
 }
 
+// max_attempts is written at enqueue time from the declaring module's budget,
+// and the row is dispatch truth from then on: a job queued before a module
+// changed its budget keeps the one it was enqueued under rather than silently
+// adopting the new value mid-flight. 0 falls back to the column default.
 func (q *Queries) EnqueueJob(ctx context.Context, arg EnqueueJobParams) (int64, error) {
-	row := q.db.QueryRow(ctx, enqueueJob, arg.Kind, arg.Payload, arg.RunAt)
+	row := q.db.QueryRow(ctx, enqueueJob,
+		arg.Kind,
+		arg.Payload,
+		arg.RunAt,
+		arg.MaxAttempts,
+	)
 	var id int64
 	err := row.Scan(&id)
 	return id, err
@@ -123,7 +143,7 @@ SELECT id, kind, payload, run_at, attempts, max_attempts, last_error, done_at, c
   WHEN done_at IS NULL AND attempts = 0 THEN 'pending'
   WHEN done_at IS NULL AND run_at > now() THEN 'retrying'
   WHEN done_at IS NULL THEN 'running'
-  WHEN last_error = 'exhausted' THEN 'dead'
+  WHEN last_error IN ('exhausted', 'module_uninstalled') THEN 'dead'
   ELSE 'done'
 END AS status
 FROM jobs
@@ -187,7 +207,7 @@ func (q *Queries) ListJobs(ctx context.Context, arg ListJobsParams) ([]ListJobsR
 
 const requeueDeadJob = `-- name: RequeueDeadJob :exec
 UPDATE jobs SET done_at = NULL, attempts = 0, last_error = NULL, run_at = now()
-WHERE id = $1 AND done_at IS NOT NULL AND last_error = 'exhausted'
+WHERE id = $1 AND done_at IS NOT NULL AND last_error IN ('exhausted', 'module_uninstalled')
 `
 
 // Dead-letter requeue: resets the row so ClaimJob picks it up immediately.

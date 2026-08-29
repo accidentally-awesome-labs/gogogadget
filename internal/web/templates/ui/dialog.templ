@@ -1,0 +1,30 @@
+package ui
+
+type DialogOpts struct {
+	ID, Title string
+	// Level is the title's heading level, defaulting to 2. A dialog's depth is
+	// a fact about the page it opens over, not the component: one opened from
+	// inside a titled region reads as h3 there, and hardcoding h2 flattens that
+	// nesting - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
+	Attrs Attrs
+}
+
+// Dialog renders a native <dialog>. The platform supplies the top layer, the
+// backdrop, the focus trap and Escape-to-close, and the close control is a
+// `form method="dialog"` submit button - so the dialog dismisses with no
+// JavaScript at all. The Alpine `uiDialog` component only calls showModal().
+templ Dialog(o DialogOpts) {
+	<dialog id={ o.ID } { root("dialog", "dialog card max-w-lg w-full", o.Attrs)... }>
+		<form method="dialog" class="flex flex-col gap-4">
+			<div class="flex items-center justify-between">
+				@Heading(HeadingOpts{Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM})
+				<button type="submit" class="btn btn-ghost btn-icon" aria-label="Close" data-ui-dialog-close>
+					@Icon(IconOpts{Name: IconClose, Attrs: Attrs{Class: "w-4 h-4"}})
+				</button>
+			</div>
+			{ children... }
+		</form>
+	</dialog>
+}

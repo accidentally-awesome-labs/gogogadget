@@ -1,0 +1,50 @@
+package ui
+
+// ButtonLinkOpts configures a navigation control styled as a button. This is
+// the only action element that accepts Href: keeping the destination on exactly
+// one renderer is what guarantees every anchor in the catalog is really a link
+// (middle-clickable, copyable, crawlable) and every button really acts.
+type ButtonLinkOpts struct {
+	Label  string
+	Href   string
+	Action Action
+	Size   Size
+	// External opens in a new tab. rel="noopener" comes with it, because a new
+	// tab that can reach back into window.opener is a tabnabbing vector, and
+	// the icon is added so the jump is visible before the click.
+	External bool
+	Icon     IconName
+	Attrs    Attrs
+}
+
+// ButtonLink renders a link that looks like a button.
+templ ButtonLink(o ButtonLinkOpts) {
+	<a
+		href={ templ.SafeURL(o.Href) }
+		{ rootWith("button-link", buttonClass(o.Action, o.Size), o.Attrs,
+			"target", externalTarget(o.External),
+			"rel", externalRel(o.External))... }
+	>
+		if o.Icon != "" {
+			@Icon(IconOpts{Name: o.Icon, Attrs: Attrs{Class: "w-4 h-4"}})
+		}
+		{ o.Label }
+		if o.External {
+			@Icon(IconOpts{Name: IconExternal, Attrs: Attrs{Class: "w-3 h-3"}})
+		}
+	</a>
+}
+
+func externalTarget(external bool) string {
+	if external {
+		return "_blank"
+	}
+	return ""
+}
+
+func externalRel(external bool) string {
+	if external {
+		return "noopener noreferrer"
+	}
+	return ""
+}

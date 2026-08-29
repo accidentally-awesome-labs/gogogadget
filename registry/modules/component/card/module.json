@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/card",
+    "kind": "component",
+    "name": "card",
+    "revision": 1,
+    "contract": 1,
+    "title": "Card",
+    "description": "The Card renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/card.templ",
+        "target": "internal/web/templates/ui/card.templ",
+        "class": "templ",
+        "sha256": "3a2b385ef404c6033ebe14e792a8a6ad18f97de0908ed0c0ac2aafdcff283d6b",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "card",
+          "family": "layout",
+          "signature": "templ Card(o CardOpts)",
+          "summary": "The bordered container every panel sits in.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "card-footer",
+          "family": "layout",
+          "signature": "templ CardFooter(o CardFooterOpts)",
+          "summary": "Renders a trailing action row.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "card-header",
+          "family": "layout",
+          "signature": "templ CardHeader(o CardHeaderOpts)",
+          "summary": "Renders a title row with optional trailing actions.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

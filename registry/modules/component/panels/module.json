@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/panels",
+    "kind": "component",
+    "name": "panels",
+    "revision": 1,
+    "contract": 1,
+    "title": "Resizable panels",
+    "description": "Stacked panels by default; on a wide screen a split with keyboard-operable role=separator handles carrying bounded aria-valuenow.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/panels.templ",
+        "target": "internal/web/templates/ui/panels.templ",
+        "class": "templ",
+        "sha256": "e3bac90cd912faf99405a81dd8161b7db7eb04e0ff72625599835eac4ac81330",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/panels_test.go",
+        "target": "internal/web/templates/ui/panels_test.go",
+        "class": "test",
+        "sha256": "3eb126cdeab0a892efe0816a638047e0e69d05e4b95b0dacd3451fab0a385bad",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/panels.js",
+        "target": "static/ui/panels.js",
+        "class": "asset",
+        "sha256": "1d6d0c43fe4d89be1c07c2008d89d2c02b0d532f4bd7d1833ad9d3ed30385455",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "panel",
+          "family": "advanced",
+          "signature": "templ Panel(o PanelOpts)",
+          "summary": "Renders one panel.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        },
+        {
+          "name": "panel-group",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiPanels",
+          "signature": "templ PanelGroup(o PanelGroupOpts)",
+          "summary": "Renders resizable panels.",
+          "guidance": "The fallback is stacked, full-width panels: with no JavaScript the content is simply laid out one after another, which is also what a narrow screen gets. Resizing is an enhancement on a layout that already works, never the thing that makes the content reachable.",
+          "keyboard": "The handle is a focusable role=\"separator\": arrow keys move the split by one percent, PageUp/PageDown by ten, and Home/End jump to its bounds.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "panel-handle",
+          "family": "advanced",
+          "signature": "templ PanelHandle(o PanelHandleOpts)",
+          "summary": "Renders the divider between two panels.",
+          "guidance": "It is a focusable role=\"separator\" with bounded aria-valuenow, which is what makes the split adjustable by keyboard. A bare styled div would be a pointer-only control, and a separator without the values reports a position of nothing.",
+          "keyboard": "The handle is a focusable role=\"separator\": arrow keys move the split by one percent, PageUp/PageDown by ten, and Home/End jump to its bounds.",
+          "states": [
+            "default"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-panels",
+          "path": "static/ui/panels.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

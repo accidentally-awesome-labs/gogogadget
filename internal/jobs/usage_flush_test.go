@@ -44,7 +44,7 @@ func TestUsageFlushNoOpWithoutBilling(t *testing.T) {
 	e := insertUsage(t, q, "org_u1", "ai_tokens", 100)
 	ageUsage(t, pool, e.ID)
 
-	require.NoError(t, w.flushUsage(context.Background(), sqlc.Job{Payload: []byte(`{}`)}))
+	require.NoError(t, w.flushUsage(context.Background(), SchedulePayload{}))
 
 	var flushed bool
 	require.NoError(t, pool.QueryRow(context.Background(), "SELECT flushed_at IS NOT NULL FROM usage_events WHERE id = $1", e.ID).Scan(&flushed))
@@ -64,7 +64,7 @@ func TestUsageFlushIngestsAndMarks(t *testing.T) {
 	ageUsage(t, pool, e1.ID)
 	ageUsage(t, pool, e2.ID)
 
-	require.NoError(t, w.flushUsage(context.Background(), sqlc.Job{Payload: []byte(`{}`)}))
+	require.NoError(t, w.flushUsage(context.Background(), SchedulePayload{}))
 
 	require.Len(t, mock.Ingested, 1, "one ingest call for the org's batch")
 	call := mock.Ingested[0]
@@ -96,7 +96,7 @@ func TestUsageFlushIngestFailureUnflushes(t *testing.T) {
 	e := insertUsage(t, q, "org_u3", "ai_tokens", 42)
 	ageUsage(t, pool, e.ID)
 
-	err := w.flushUsage(context.Background(), sqlc.Job{Payload: []byte(`{}`)})
+	err := w.flushUsage(context.Background(), SchedulePayload{})
 	require.Error(t, err, "ingest failure surfaces (job retries)")
 
 	var flushed bool

@@ -1,0 +1,42 @@
+package ui
+
+// ScrollAreaOpts is a bounded scrolling region.
+type ScrollAreaOpts struct {
+	Height Height
+	// Label names the region. A scrollable region needs a name and a tab stop,
+	// or a keyboard user cannot scroll it at all: without focus there is
+	// nothing for the arrow keys to act on.
+	Label string
+	Attrs Attrs
+}
+
+// ScrollArea renders a bounded, keyboard-scrollable region.
+//
+// tabindex="0" plus role="region" is the pairing that matters. A scrollable div
+// with neither is reachable only by pointer, so its content is unreadable to a
+// keyboard user once it overflows.
+templ ScrollArea(o ScrollAreaOpts) {
+	<div
+		{ rootWith("scroll-area", mergeClasses("overflow-y-auto rounded-lg border border-border", scrollHeightClass(o.Height)), o.Attrs,
+			"role", "region",
+			"aria-label", o.Label,
+			"tabindex", "0")... }
+	>
+		{ children... }
+	</div>
+}
+
+func scrollHeightClass(height Height) string {
+	switch height.Value() {
+	case HeightSM:
+		return "max-h-32"
+	case HeightLG:
+		return "max-h-96"
+	case HeightScreen:
+		return "max-h-screen"
+	case HeightAuto:
+		return ""
+	default:
+		return "max-h-64"
+	}
+}

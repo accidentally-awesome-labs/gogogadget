@@ -1,0 +1,14 @@
+package ui
+
+// ProseOpts configures a long-form content region.
+type ProseOpts struct {
+	Attrs Attrs
+}
+
+// Prose wraps rendered long-form content so headings, lists, tables and code
+// inside it inherit typographic rhythm. The class is applied to a wrapper
+// rather than to each element because the content is generated from Markdown
+// and cannot carry classes of its own.
+templ Prose(o ProseOpts) {
+	<div { root("prose", "prose", o.Attrs)... }>{ children... }</div>
+}

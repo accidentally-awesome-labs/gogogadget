@@ -1,0 +1,1414 @@
+package templates
+
+import (
+	"github.com/gogogadget/gogogadget/internal/i18n"
+)
+
+import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/billing"
+)
+
+// The component gallery: every token and every component in every variant, on
+// one URL. It is the reference a developer or an agent reads to learn the
+// system, and — because it renders everything at once — one visual baseline
+// that catches a regression anywhere in the component layer.
+//
+// Registered only when DEV_AUTH_BYPASS is on, which config refuses under
+// APP_ENV=production, so this cannot ship to a live site.
+//
+// Copy here is English literals on purpose: this is a dev surface, and the
+// repo already keeps handler-side strings out of the i18n catalogs.
+
+// swatchStyle paints a raw palette step. This is the ONE place a template may
+// name a numeric ramp step, and it does so through var() rather than a colour
+// utility precisely so the enforcement test needs no exemption.
+func swatchStyle(token string) string {
+	return "background:var(--color-" + token + ")"
+}
+
+var brandRamp = []string{
+	"brand-50", "brand-100", "brand-200", "brand-300", "brand-400",
+	"brand-500", "brand-600", "brand-700", "brand-800", "brand-900", "brand-950",
+}
+
+var surfaceTokens = []string{"surface", "surface-raised", "border", "fg", "fg-muted"}
+
+var stateSlots = []string{"", "-fg", "-text", "-subtle", "-subtle-fg", "-border"}
+
+var galleryPlan = billing.Plan{
+	Key: "pro", Name: "Pro", PriceDisplay: "$20/mo",
+	Features: []string{"Unlimited projects", "10 team members", "Priority support"},
+}
+
+// galleryTabs demonstrates NavTabs against real destinations. The second tab
+// used to point at /dev/gallery/other, which never existed: a dead link in the
+// reference for a navigation component is the worst possible example.
+var galleryTabs = []NavItem{
+	{LabelKey: "settings.tab_account", Href: "/dev/gallery"},
+	{LabelKey: "settings.tab_org", Href: "/dev/gallery/actions"},
+}
+
+templ Gallery() {
+	<section class="page-section space-y-16">
+		<div>
+			<p class="eyebrow">Design system</p>
+			<h1 class="display-title mt-2">Component gallery</h1>
+			<nav class="mt-4 flex flex-wrap gap-2" aria-label="Catalog" data-testid="gallery-nav">
+				for _, family := range ui.GalleryFamilies {
+					<a href={ templ.SafeURL("/dev/gallery/" + string(family)) } class="btn btn-ghost btn-xs capitalize">
+						{ string(family) }
+					</a>
+				}
+				<a href="/dev/scenarios/dashboard" class="btn btn-ghost btn-xs">scenarios</a>
+			</nav>
+			<p class="mt-4 text-fg-muted max-w-narrow">
+				Every token and component, in every variant. Toggle the theme in the
+				header: nothing on this page carries a per-theme variant class, so
+				anything that changes appearance did so by flipping a token.
+			</p>
+		</div>
+
+		@gallerySection("Tokens — brand ramp") {
+			<p class="text-sm text-fg-muted mb-3">
+				The palette. Templates never name these steps; the semantic aliases below do.
+			</p>
+			<div class="flex flex-wrap gap-2">
+				for _, token := range brandRamp {
+					@swatch(token)
+				}
+			</div>
+		}
+
+		@gallerySection("Tokens — surfaces") {
+			<div class="flex flex-wrap gap-2">
+				for _, token := range surfaceTokens {
+					@swatch(token)
+				}
+			</div>
+		}
+
+		@gallerySection("Tokens — brand semantics") {
+			<div class="flex flex-wrap gap-2">
+				@swatch("brand")
+				@swatch("brand-hover")
+				@swatch("brand-fg")
+				@swatch("brand-fg-muted")
+				@swatch("brand-text")
+				@swatch("brand-subtle")
+				@swatch("brand-subtle-fg")
+			</div>
+		}
+
+		@gallerySection("Tokens — state triads") {
+			<p class="text-sm text-fg-muted mb-3">
+				Six slots per kind: solid fill, text on the fill, coloured text on a
+				normal surface, tinted background, text on the tint, and the tint's border.
+			</p>
+			<div class="space-y-3">
+				for _, kind := range []ui.Kind{ui.KindSuccess, ui.KindWarn, ui.KindDanger, ui.KindInfo} {
+					<div>
+						<p class="eyebrow mb-2">{ string(kind) }</p>
+						<div class="flex flex-wrap gap-2">
+							for _, slot := range stateSlots {
+								@swatch(string(kind) + slot)
+							}
+						</div>
+					</div>
+				}
+			</div>
+		}
+
+		@gallerySection("Buttons") {
+			<div class="space-y-3">
+				for _, size := range []string{"", "btn-sm", "btn-xs", "btn-icon"} {
+					<div class="flex flex-wrap items-center gap-2">
+						<span class="code-chip w-24 shrink-0">{ sizeLabel(size) }</span>
+						<button type="button" class={ "btn btn-primary", size }>Primary</button>
+						<button type="button" class={ "btn btn-ghost", size }>Ghost</button>
+						<button type="button" class={ "btn btn-danger", size }>Danger</button>
+						<button type="button" class={ "btn btn-primary", size } disabled>Disabled</button>
+					</div>
+				}
+				<div class="bg-brand p-4 rounded-xl flex flex-wrap items-center gap-2">
+					<span class="text-brand-fg text-sm font-semibold">On the brand fill:</span>
+					<button type="button" class="btn btn-inverse">Inverse</button>
+				</div>
+			</div>
+		}
+
+		@gallerySection("Badges") {
+			<div class="space-y-3">
+				for _, emphasis := range ui.Emphases {
+					<div class="flex flex-wrap items-center gap-2">
+						<span class="eyebrow w-16">{ string(emphasis) }</span>
+						for _, kind := range ui.Kinds {
+							@ui.Badge(ui.BadgeOpts{Text: string(kind), Kind: kind, Emphasis: emphasis})
+						}
+					</div>
+				}
+			</div>
+		}
+
+		@gallerySection("Cards — padding scale") {
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+				for _, padding := range ui.Paddings {
+					@ui.Card(ui.CardOpts{Padding: padding}) {
+						<p class="text-sm text-fg-muted">{ "Padding: " + string(padding) }</p>
+					}
+				}
+			</div>
+		}
+
+		@gallerySection("Alerts") {
+			<div class="space-y-2 max-w-narrow">
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+					Info — a neutral notice.
+				}
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+					Success — the thing you asked for happened.
+				}
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+					Warning — this will need attention.
+				}
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "", TestID: ""}}) {
+					Danger — the request was refused.
+				}
+			</div>
+		}
+
+		@gallerySection("Banners") {
+			<div class="space-y-2">
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Live: ui.LivePolite, Attrs: ui.Attrs{TestID: ""}}) {
+					Info banner — full bleed inside the shell.
+				}
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindWarn, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: ""}}) {
+					Warning banner — impersonation and past-due use this.
+				}
+				@ui.Banner(ui.BannerOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: ""}}) {
+					Danger banner — a critical platform announcement.
+				}
+			</div>
+		}
+
+		@gallerySection("Toasts") {
+			<p class="text-sm text-fg-muted mb-3">
+				Rendered statically here; at runtime app.js pushes these and sets the
+				variant class from the toast type.
+			</p>
+			<div class="space-y-2 max-w-sm">
+				<div class="toast toast-info">Info toast</div>
+				<div class="toast toast-success">Success toast</div>
+				<div class="toast toast-danger">Danger toast</div>
+			</div>
+		}
+
+		@gallerySection("Typography") {
+			<div class="space-y-3">
+				<p class="eyebrow">eyebrow</p>
+				<h1 class="hero-title">hero-title</h1>
+				<h1 class="display-title">display-title</h1>
+				<h1 class="page-title">page-title</h1>
+				<h2 class="section-title">section-title</h2>
+				<p class="error-code">404</p>
+				<p>Body copy, and a <a href="/dev/gallery" class="link">link</a>, and a <code class="code-chip">code-chip</code>.</p>
+				<p class="field-error">field-error — the message under a rejected input.</p>
+			</div>
+		}
+
+		@gallerySection("Page header") {
+			@ui.PageHeader(ui.PageHeaderOpts{Title: "Page header with actions"}) {
+				<div class="card-actions">
+					<button type="button" class="btn btn-ghost btn-sm">Secondary</button>
+					<button type="button" class="btn btn-primary btn-sm">Primary</button>
+				</div>
+			}
+		}
+
+		@gallerySection("Tabs") {
+			@ui.NavTabs(ui.NavTabsOpts{Items: uiNavItems(ctx, galleryTabs), ActivePath: "/dev/gallery"})
+		}
+
+		@gallerySection("Table card") {
+			@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "gallery-table"}}) {
+				<table class="table">
+					<thead>
+						<tr><th>Name</th><th>Status</th><th class="text-right">Actions</th></tr>
+					</thead>
+					<tbody>
+						for _, row := range []struct {
+							Name string
+							Kind ui.Kind
+						}{{"First", ui.KindSuccess}, {"Second", ui.KindWarn}, {"Third", ui.KindDanger}} {
+							<tr>
+								<td class="font-medium">{ row.Name }</td>
+								<td>@ui.Badge(ui.BadgeOpts{Text: string(row.Kind), Kind: row.Kind})</td>
+								<td class="text-right">
+									<div class="card-actions">
+										<button type="button" class="btn btn-ghost btn-xs">Edit</button>
+										<button type="button" class="btn btn-danger btn-xs">Delete</button>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			<div class="mt-4">
+				@ui.TableCard(ui.TableCardOpts{Attrs: ui.Attrs{TestID: "gallery-table-empty"}}) {
+					@ui.EmptyState(ui.EmptyStateOpts{Body: "Nothing here yet — this is table-empty.", Variant: ui.EmptyInline})
+				}
+			</div>
+			<div class="mt-4">
+				@ui.Table(ui.TableOpts{
+					Caption: "The same rows at compact density",
+					Density: ui.DensityCompact,
+					Attrs:   ui.Attrs{TestID: "gallery-table-compact"},
+				}) {
+					<thead>
+						<tr><th>Name</th><th>Status</th></tr>
+					</thead>
+					<tbody>
+						<tr><td class="font-medium">First</td><td>@ui.Badge(ui.BadgeOpts{Text: "success", Kind: ui.KindSuccess})</td></tr>
+						<tr><td class="font-medium">Second</td><td>@ui.Badge(ui.BadgeOpts{Text: "warn", Kind: ui.KindWarn})</td></tr>
+					</tbody>
+				}
+			</div>
+		}
+
+		// Both of these used to target #gallery-pager, which no page rendered,
+		// so the swap reached nothing. They now swap a real region served by a
+		// fragment route - pointing them at the page itself would nest the whole
+		// gallery inside the pager, which looks like a working swap and is not.
+		@gallerySection("Pagination and search") {
+			@GalleryPager(2, "")
+		}
+
+		@gallerySection("Empty state") {
+			@ui.EmptyState(ui.EmptyStateOpts{Title: "No projects yet", Body: "Create one to get started."}) {
+				<button type="button" class="btn btn-primary">New project</button>
+			}
+		}
+
+		@gallerySection("Stat cards") {
+			<div class="grid sm:grid-cols-3 gap-4">
+				@ui.Metric(ui.MetricOpts{Title: "Active projects", Value: "12", Sub: ""})
+				@ui.Metric(ui.MetricOpts{Title: "Team members", Value: "4", Sub: ""})
+				@ui.Metric(ui.MetricOpts{Title: "Current plan", Value: "Pro", Sub: "$20/mo"})
+			</div>
+		}
+
+		@gallerySection("Plan cards") {
+			<div class="grid sm:grid-cols-2 gap-4 max-w-narrow">
+				@ui.PlanCard(uiPlanCard(ctx, galleryPlan, false)) {
+					<button type="button" class="btn btn-primary w-full">Choose Pro</button>
+				}
+				@ui.PlanCard(uiPlanCard(ctx, galleryPlan, true)) {
+					<span class="btn btn-ghost w-full border-transparent text-fg-muted pointer-events-none">Current plan</span>
+				}
+			</div>
+		}
+
+		@gallerySection("Form fields") {
+			@ui.Form(ui.FormOpts{Attrs: ui.Attrs{Class: "card max-w-lg space-y-4"}}) {
+				@ui.Field(ui.FieldOpts{Name: "gallery-name", Label: "Name", Error: "", Required: false}) {
+			@ui.TextInput(ui.TextInputOpts{Name: "gallery-name", Type: "text", Value: "Acme", Placeholder: "Project name", Required: false, Error: ""})
+		}
+				@ui.Field(ui.FieldOpts{Name: "gallery-broken", Label: "Name", Error: "Name is required.", Required: false}) {
+			@ui.TextInput(ui.TextInputOpts{Name: "gallery-broken", Type: "text", Value: "", Placeholder: "Project name", Required: false, Error: "Name is required."})
+		}
+				@ui.Field(ui.FieldOpts{Name: "gallery-select", Label: "Select"}) {
+					@ui.Select(ui.SelectOpts{Name: "gallery-select", Options: []ui.Option{
+						{Value: "one", Label: "One"}, {Value: "two", Label: "Two"},
+					}})
+				}
+				for _, size := range ui.Sizes {
+					@ui.Field(ui.FieldOpts{Name: "gallery-size-" + string(size), Label: "Input at size " + string(size)}) {
+						@ui.TextInput(ui.TextInputOpts{Name: "gallery-size-" + string(size), Size: size, Placeholder: string(size)})
+					}
+				}
+				<div class="form-actions">
+					<button type="button" class="btn btn-primary">Save</button>
+					@ui.Spinner(ui.SpinnerOpts{})
+				</div>
+			}
+		}
+
+		@gallerySection("Definition list") {
+			<div class="card max-w-lg">
+				@ui.DescriptionList(ui.DescriptionListOpts{Items: []ui.DescriptionItem{
+					{Term: "Name", Value: "Ada Lovelace"},
+					{Term: "Email", Value: "ada@example.com"},
+					{Term: "Member since", Value: "January 15, 2026"},
+				}})
+			</div>
+		}
+
+		@gallerySection("Meters") {
+			<div class="space-y-4 max-w-lg">
+				for _, pct := range []int{0, 50, 100} {
+					<div>
+						<p class="text-sm text-fg-muted">{ fmt.Sprintf("%d%%", pct) }</p>
+						@ui.Meter(ui.MeterOpts{
+							Percent: pct,
+							Label:   fmt.Sprintf("Storage used, %d percent", pct),
+							Attrs:   ui.Attrs{TestID: fmt.Sprintf("gallery-meter-%d", pct)},
+						})
+					</div>
+				}
+			</div>
+		}
+
+		@gallerySection("Copy row") {
+			<div class="card max-w-lg border-success">
+				<h2 class="font-semibold text-success-text">Secret created</h2>
+				<p class="text-sm text-fg-muted mt-1">Shown once. The value rides on data-copy, never inside an Alpine expression.</p>
+				@ui.SecretReveal(ui.SecretRevealOpts{Value: "ggg_sk_example_value", CopyLabel: "Copy", CopiedLabel: "Copied"})
+			</div>
+		}
+
+		@gallerySection("Loading") {
+			<div class="space-y-3 max-w-lg">
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-2/3"></div>
+				<div class="flex items-center gap-2 text-fg-muted htmx-request">
+					@ui.Spinner(ui.SpinnerOpts{})
+					<span class="text-sm">Spinner (shown here by a forced .htmx-request)</span>
+				</div>
+			</div>
+		}
+
+		@gallerySection("Icons") {
+			<div class="flex flex-wrap gap-6">
+				for _, name := range IconNames {
+					<div class="flex flex-col items-center gap-2 text-fg-muted">
+						@Icon(name, "w-6 h-6")
+						<span class="code-chip">{ string(name) }</span>
+					</div>
+				}
+			</div>
+		}
+
+		@gallerySection("Terminal pages") {
+			<div class="table-card">
+				@ui.TerminalPage(ui.TerminalPageOpts{Code: "404", Message: "That page doesn't exist.", BackHomeLabel: i18n.T(ctx, "errors.back_home")})
+			</div>
+		}
+
+		@gallerySection("Tokens — interaction and chart series") {
+			<div class="space-y-4">
+				<div class="flex flex-wrap gap-4">
+					for _, token := range []string{"focus-ring", "overlay-scrim", "selected", "selected-fg"} {
+						@swatch(token)
+					}
+				</div>
+				<div class="flex flex-wrap gap-4">
+					for _, token := range []string{"chart-1", "chart-2", "chart-3", "chart-4", "chart-5", "chart-6"} {
+						@swatch(token)
+					}
+				</div>
+				<p class="text-sm text-fg-muted">
+					Radius, elevation, control height, motion and disabled opacity are
+					not colours: every control below is sized and animated through them.
+				</p>
+			</div>
+		}
+
+		@gallerySection("Actions — buttons") {
+			<div class="space-y-4">
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.Button(ui.ButtonOpts{Label: "Primary", Action: ui.ActionPrimary})
+					@ui.Button(ui.ButtonOpts{Label: "Ghost"})
+					@ui.Button(ui.ButtonOpts{Label: "Danger", Action: ui.ActionDanger, Icon: ui.IconDelete})
+					@ui.Button(ui.ButtonOpts{Label: "Saving", Action: ui.ActionPrimary, Busy: true})
+					@ui.Button(ui.ButtonOpts{Label: "Unavailable", Disabled: true})
+					@ui.Button(ui.ButtonOpts{Label: "Acts like a link", Action: ui.ActionLink})
+				</div>
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.ButtonLink(ui.ButtonLinkOpts{Label: "Docs", Href: "/docs", Action: ui.ActionPrimary})
+					@ui.ButtonLink(ui.ButtonLinkOpts{Label: "Status page", Href: "https://example.com", External: true})
+					@ui.Link(ui.LinkOpts{Label: "A text link", Href: "/pricing"})
+					@ui.Link(ui.LinkOpts{Label: "An external one", Href: "https://example.com", External: true})
+				</div>
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.IconButton(ui.IconButtonOpts{Icon: ui.IconEdit, Label: "Edit project"})
+					@ui.IconButton(ui.IconButtonOpts{Icon: ui.IconDelete, Label: "Delete project", Action: ui.ActionDanger})
+					@ui.IconButton(ui.IconButtonOpts{Icon: ui.IconRefresh, Label: "Refresh", Busy: true})
+					@ui.ToggleButton(ui.ToggleButtonOpts{Label: "Starred", On: true, Icon: ui.IconCheck})
+					@ui.ToggleButton(ui.ToggleButtonOpts{Label: "Not starred"})
+					@ui.CopyButton(ui.CopyButtonOpts{Value: "ggg_sk_example_value", Label: "Copy token", CopiedLabel: "Copied", Size: ui.SizeSM})
+				</div>
+				<div class="flex flex-wrap items-center gap-3">
+					@ui.ThemeToggle(ui.ThemeToggleOpts{
+						Label: "Toggle dark mode",
+						Attrs: ui.Attrs{TestID: "gallery-theme-toggle"},
+					})
+					<span class="text-sm text-fg-muted">The shell's own control — clicking it flips this page too.</span>
+				</div>
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.ToggleGroup(ui.ToggleGroupOpts{Label: "Density", Options: []ui.ToggleOption{
+						{Value: "cosy", Label: "Cosy", Selected: true},
+						{Value: "compact", Label: "Compact"},
+					}})
+					@ui.ButtonGroup(ui.ButtonGroupOpts{Label: "Row actions"}) {
+						@ui.Button(ui.ButtonOpts{Label: "Approve", Size: ui.SizeSM, Action: ui.ActionPrimary})
+						@ui.Button(ui.ButtonOpts{Label: "Reject", Size: ui.SizeSM})
+					}
+				</div>
+			</div>
+		}
+
+		@gallerySection("Foundations — text and identity") {
+			<div class="space-y-6">
+				<div class="space-y-1">
+					@ui.Heading(ui.HeadingOpts{Text: "h2 at page size", Level: 2})
+					@ui.Heading(ui.HeadingOpts{Text: "h3 at section size", Level: 3, Size: ui.SizeSM})
+					@ui.Text(ui.TextOpts{Size: ui.SizeSM, }) {
+						Body copy in a paragraph, so a screen reader can move through prose one paragraph at a time.
+					}
+					@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+						Secondary copy, quieter and smaller.
+					}
+				</div>
+				<div class="flex flex-wrap items-center gap-4">
+					@ui.Code(ui.CodeOpts{Text: "ggg add component/badge"})
+					@ui.Kbd(ui.KbdOpts{Keys: []string{"Ctrl", "K"}})
+					@ui.VisuallyHidden(ui.VisuallyHiddenOpts{}) {
+						This text is only for assistive technology.
+					}
+					<span class="text-sm text-fg-muted">(a visually hidden label sits to the left)</span>
+				</div>
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.Avatar(ui.AvatarOpts{Name: "Ada Lovelace"})
+					@ui.Avatar(ui.AvatarOpts{Name: "Grace Hopper", Size: ui.SizeSM})
+					@ui.AvatarGroup(ui.AvatarGroupOpts{People: []ui.AvatarOpts{
+						{Name: "Ada Lovelace"}, {Name: "Grace Hopper"},
+						{Name: "Alan Turing"}, {Name: "Katherine Johnson"}, {Name: "Jean Bartik"},
+					}})
+				</div>
+				<div class="max-w-xs space-y-2">
+					@ui.Truncate(ui.TruncateOpts{Text: "a-very-long-project-identifier-that-will-not-fit-on-one-line"})
+					@ui.Truncate(ui.TruncateOpts{
+						Lines: 3,
+						Text:  "A three-line clamp keeps a description readable in a card without letting one entry push every neighbour down the page. The full string stays in the DOM and in the title attribute, so it is still selectable and still findable with the browser's own find.",
+					})
+				</div>
+				@ui.Separator(ui.SeparatorOpts{Label: "Long-form content"})
+				@ui.Prose(ui.ProseOpts{}) {
+					<p>Prose wraps generated content so headings, lists and code inherit typographic rhythm.</p>
+				}
+			</div>
+		}
+
+		@gallerySection("Forms — native controls") {
+			@ui.Form(ui.FormOpts{Method: "post", Action: "/dev/gallery"}) {
+				@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapMD}) {
+					@ui.Field(ui.FieldOpts{Name: "quantity", Label: "Quantity", Required: true, Hint: "Between 1 and 99"}) {
+						@ui.NumberInput(ui.NumberInputOpts{Name: "quantity", Value: "3", Min: "1", Max: "99", Step: "1", Hint: "Between 1 and 99", Required: true})
+					}
+					@ui.Field(ui.FieldOpts{Name: "secret", Label: "Password", Required: true}) {
+						@ui.PasswordInput(ui.PasswordInputOpts{Name: "secret", Autocomplete: "new-password", Required: true})
+					}
+					@ui.Field(ui.FieldOpts{Name: "starts", Label: "Start date"}) {
+						@ui.DateField(ui.DateFieldOpts{Name: "starts", Value: "2026-01-15"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "at", Label: "Reminder time"}) {
+						@ui.TimeField(ui.TimeFieldOpts{Name: "at", Value: "09:30"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "deploy", Label: "Deploy at"}) {
+						@ui.DateTimeField(ui.DateTimeFieldOpts{Name: "deploy", Value: "2026-01-15T09:30"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "logo", Label: "Logo", Optional: true}) {
+						@ui.FileInput(ui.FileInputOpts{Name: "logo", Accept: "image/*"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "rate", Label: "Sample rate"}) {
+						@ui.RangeInput(ui.RangeInputOpts{Name: "rate", Value: "40", Min: "0", Max: "100", Step: "10", ValueLabel: "40%"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "accent", Label: "Accent colour"}) {
+						@ui.ColorInput(ui.ColorInputOpts{Name: "accent"})
+					}
+					@ui.Field(ui.FieldOpts{Name: "price", Label: "Monthly price"}) {
+						@ui.InputGroup(ui.InputGroupOpts{}) {
+							@ui.InputAddon(ui.InputAddonOpts{Text: "$"})
+							@ui.TextInput(ui.TextInputOpts{Name: "price", Value: "20", Attrs: ui.Attrs{Class: "border-0 rounded-none"}})
+							@ui.InputAddon(ui.InputAddonOpts{Text: "/mo"})
+						}
+					}
+					@ui.CheckboxGroup(ui.CheckboxGroupOpts{
+						Name: "channels", Legend: "Notification channels",
+						Options: []ui.Option{
+							{Value: "email", Label: "Email", Selected: true},
+							{Value: "sms", Label: "SMS"},
+						},
+					})
+				}
+				@ui.Field(ui.FieldOpts{Name: "role_label", Label: "Custom control", HiddenLabel: true}) {
+					@ui.Label(ui.LabelOpts{For: "role_label", Text: "Role", Required: true})
+					@ui.Select(ui.SelectOpts{Name: "role_label", Options: []ui.Option{{Value: "member", Label: "Member", Selected: true}, {Value: "admin", Label: "Admin"}}})
+					@ui.Hint(ui.HintOpts{For: "role_label", Text: "Admins can change billing."})
+				}
+				@ui.FormActions(ui.FormActionsOpts{}) {
+					@ui.Button(ui.ButtonOpts{Label: "Cancel"})
+					@ui.Button(ui.ButtonOpts{Label: "Save", Type: ui.TypeSubmit, Action: ui.ActionPrimary})
+				}
+			}
+		}
+
+		@gallerySection("Forms — progressively enhanced") {
+			<div class="space-y-4">
+				@ui.Field(ui.FieldOpts{Name: "project_name", Label: "Project name"}) {
+					@ui.TextInput(ui.TextInputOpts{Name: "project_name", Placeholder: "Apollo Launch"})
+				}
+				@ui.Field(ui.FieldOpts{Name: "project_slug", Label: "Slug", Hint: "Mirrors the name until you edit it."}) {
+					@ui.SlugInput(ui.SlugInputOpts{Name: "project_slug", From: "project_name", Prefix: "gogogadget.dev/", Hint: "Mirrors the name until you edit it."})
+				}
+				@ui.Field(ui.FieldOpts{Name: "region", Label: "Region", Hint: "Type to filter, or enter your own."}) {
+					@ui.Combobox(ui.ComboboxOpts{Name: "region", Placeholder: "us-east-1", Hint: "Type to filter, or enter your own.", Options: []ui.Option{
+						{Value: "us-east-1", Label: "us-east-1"}, {Value: "eu-west-1", Label: "eu-west-1"},
+						{Value: "ap-south-1", Label: "ap-south-1"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "envs", Label: "Environments"}) {
+					@ui.MultiSelect(ui.MultiSelectOpts{Name: "envs", Options: []ui.Option{
+						{Value: "dev", Label: "Development", Selected: true},
+						{Value: "staging", Label: "Staging"},
+						{Value: "prod", Label: "Production"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "tags", Label: "Tags", Hint: "Comma separated."}) {
+					@ui.TagsInput(ui.TagsInputOpts{Name: "tags", Value: "go, htmx", Hint: "Comma separated.", Suggestions: []ui.Option{
+						{Value: "go", Label: "go"}, {Value: "htmx", Label: "htmx"}, {Value: "templ", Label: "templ"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "summary", Label: "Summary"}) {
+					@ui.Textarea(ui.TextareaOpts{Name: "summary", Rows: 3, Attrs: ui.Attrs{}})
+					@ui.CharCounter(ui.CharCounterOpts{For: "summary", Max: 280, Label: "characters"})
+				}
+				@ui.Field(ui.FieldOpts{Name: "code", Label: "One-time code", Hint: "Six digits from your authenticator."}) {
+					@ui.OTPInput(ui.OTPInputOpts{Name: "code", Length: 6, Hint: "Six digits from your authenticator."})
+				}
+				@ui.DateRangeField(ui.DateRangeFieldOpts{
+					StartName: "period_start", EndName: "period_end", Legend: "Billing period",
+					StartValue: "2026-01-01", EndValue: "2026-01-31",
+				})
+				@ui.FileDropzone(ui.FileDropzoneOpts{Name: "attachments", Label: "Drop files here, or click to choose", Multiple: true})
+			</div>
+		}
+
+		@gallerySection("Navigation — trails and pagers") {
+			<div class="space-y-6">
+				@ui.Breadcrumbs(ui.BreadcrumbsOpts{Crumbs: []ui.Crumb{
+					{Label: "Projects", Href: "/app/projects"},
+					{Label: "Apollo", Href: "/app/projects/apollo"},
+					{Label: "Settings"},
+				}})
+				@ui.BackLink(ui.BackLinkOpts{Href: "/app/projects", Label: "Back to projects"})
+				@ui.Steps(ui.StepsOpts{Current: 2, Steps: []ui.Step{
+					{Label: "Account", Done: true, Href: "/dev/gallery"},
+					{Label: "Organization"},
+					{Label: "Billing"},
+					{Label: "Done"},
+				}})
+				@ui.Pagination(ui.PaginationOpts{Page: 4, TotalPages: 12, BaseURL: "/dev/gallery", Target: "#content", Numbered: true, Label: "Numbered pagination example", Labels: pagerLabels(ctx)})
+				@ui.CursorPagination(ui.CursorPaginationOpts{
+					PrevURL: "/dev/gallery?before=abc", NextURL: "/dev/gallery?after=xyz",
+					Target: "#content", Label: "Keyset pagination example",
+				})
+				@ui.TableOfContents(ui.TableOfContentsOpts{Entries: []ui.TocEntry{
+					{Label: "Overview", Anchor: "overview"},
+					{Label: "Tokens", Anchor: "tokens", Depth: 2},
+					{Label: "Components", Anchor: "components", Depth: 2},
+				}})
+				@ui.NavigationMenu(ui.NavigationMenuOpts{Label: "Workspace", ActivePath: "/dev/gallery", Items: []ui.NavItem{
+					{Label: "Gallery", Href: "/dev/gallery"},
+					{Label: "Pricing", Href: "/pricing"},
+				}})
+				@ui.Menubar(ui.MenubarOpts{Label: "Editor", Menus: []ui.MenubarMenu{
+					{Label: "File", Items: []ui.MenuItem{{Label: "New", Href: "/dev/gallery"}, {Label: "Open", Href: "/dev/gallery"}}},
+					{Label: "Edit", Items: []ui.MenuItem{{Label: "Undo", Href: "/dev/gallery"}, {Separator: true}, {Label: "Delete", Kind: ui.KindDanger, Confirm: "Delete?", HX: ui.HX{Delete: "/dev/gallery"}}}},
+				}})
+			</div>
+		}
+
+		@gallerySection("Navigation — disclosure and tabs") {
+			<div class="space-y-6">
+				@ui.Disclosure(ui.DisclosureOpts{Summary: "What does native details give us?"}) {
+					<p>Toggle, button semantics, keyboard activation, expanded-state announcement, in-page search and print expansion — with no JavaScript.</p>
+				}
+				@ui.Accordion(ui.AccordionOpts{Exclusive: true, Name: "gallery-faq", Panels: []ui.AccordionPanel{
+					{Summary: "Is this exclusive?", Body: "Yes — the native name attribute closes the others.", Open: true},
+					{Summary: "Does it need script?", Body: "No. Exclusivity survives with JavaScript disabled."},
+					{Summary: "Can two accordions coexist?", Body: "Only if each declares its own Name."},
+				}})
+				@ui.Collapsible(ui.CollapsibleOpts{ID: "gallery-filters", Label: "Filters"}) {
+					<div class="card text-sm">A region toggled from a control elsewhere in the layout.</div>
+				}
+				@ui.TabPanels(ui.TabPanelsOpts{Label: "Environment", Panels: []ui.TabPanel{
+					{ID: "tab-dev", Label: "Development", Body: "Arrow keys move between tabs; Home and End jump to the ends."},
+					{ID: "tab-staging", Label: "Staging", Body: "Exactly one tab is in the tab order."},
+					{ID: "tab-prod", Label: "Production", Body: "Each panel is labelled by its tab."},
+				}})
+				@ui.SkipLink(ui.SkipLinkOpts{Label: "Skip to demo content (focus me with Tab)"})
+			</div>
+		}
+
+		@gallerySection("Feedback — state and progress") {
+			<div class="space-y-6">
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindSuccess, Label: "Healthy"})
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindWarn, Label: "Degraded"})
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindDanger, Label: "Failing"})
+					@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindNeutral, Label: "Unknown"})
+				</div>
+				<div class="space-y-3 max-w-md">
+					@ui.ProgressBar(ui.ProgressBarOpts{Value: 63, Max: 100, Label: "Storage used"})
+					@ui.ProgressBar(ui.ProgressBarOpts{Value: 3, Max: 8, Label: "Files uploaded", ValueText: "3 of 8 files"})
+					@ui.ProgressBar(ui.ProgressBarOpts{Value: -1, Label: "Importing"})
+				</div>
+				<div class="flex flex-wrap items-center gap-6">
+					@ui.ProgressCircle(ui.ProgressCircleOpts{Value: 25, Max: 100, Label: "Quota", Size: ui.SizeSM})
+					@ui.ProgressCircle(ui.ProgressCircleOpts{Value: 75, Max: 100, Label: "Quota"})
+					@ui.ProgressCircle(ui.ProgressCircleOpts{Value: -1, Label: "Working", Size: ui.SizeLG})
+				</div>
+				<div class="flex flex-wrap items-start gap-4">
+					@ui.Toast(ui.ToastOpts{Kind: ui.KindSuccess, Text: "Project created."})
+					@ui.Toast(ui.ToastOpts{Kind: ui.KindDanger, Text: "Upload failed.", Live: ui.LiveAssertive, Dismissible: true})
+				</div>
+				// Rendered in flow rather than fixed: the shell already has the
+				// live region pinned bottom-right, and two stacks in the same
+				// corner would sit on top of each other. This copy shows the
+				// region's own markup and receives the same toast events.
+				@ui.ToastRegion(ui.ToastRegionOpts{Attrs: ui.Attrs{
+					Class: "static", TestID: "gallery-toast-region",
+				}})
+				<div class="max-w-md">
+					@ui.Skeleton(ui.SkeletonOpts{Lines: 3})
+				</div>
+			</div>
+		}
+
+		@gallerySection("Feedback — empty and error states") {
+			<div class="space-y-6">
+				@ui.TableCard(ui.TableCardOpts{}) {
+					@ui.EmptyState(ui.EmptyStateOpts{Body: "Nothing here yet — the inline variant sits inside the table card.", Variant: ui.EmptyInline})
+				}
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Title: "No projects yet", Body: "Create one to get started.", Variant: ui.EmptyCard,
+				}) {
+					@ui.Button(ui.ButtonOpts{Label: "New project", Action: ui.ActionPrimary, Attrs: ui.Attrs{Class: "mt-4"}})
+				}
+				@ui.EmptyState(ui.EmptyStateOpts{
+					Title: "No results", Body: "No project matches that search.",
+					Variant: ui.EmptyCard, Filtered: true,
+					ClearURL: "/dev/gallery", Target: "#content",
+				})
+				@ui.ErrorState(ui.ErrorStateOpts{
+					Title: "Could not load activity", Body: "The request failed before it reached the server.",
+					RetryURL: "/dev/gallery", Target: "#content",
+				})
+			</div>
+		}
+
+		@gallerySection("Overlays — drawer, context menu, hover card, confirm") {
+			<div class="space-y-6">
+				<div class="flex flex-wrap items-center gap-4">
+					<button type="button" class="btn btn-ghost btn-sm" x-data="uiDialog" x-on:click="open('gallery-drawer')">Open drawer</button>
+					@ui.HoverCard(ui.HoverCardOpts{ID: "gallery-hovercard", Label: "Hover or focus me"}) {
+						<p>The panel opens on hover <em>and</em> focus, and is wired as a description rather than replacing the trigger's name.</p>
+					}
+					// A second instance, deliberately. Under the Alpine CSP build only
+					// properties declared in a component's returned literal are
+					// per-element; anything assigned onto `this` in init() is shared,
+					// so two instances cross-wire their triggers and nothing reports
+					// it. One instance per page cannot fail that way, which is why a
+					// singleton fixture hid the class entirely. The label differs
+					// because an accessible name that repeats - or merely contains
+					// another - is a strict-mode failure in every role-and-name
+					// assertion on the page.
+					@ui.HoverCard(ui.HoverCardOpts{ID: "gallery-hovercard-second", Label: "A second trigger"}) {
+						<p>Its own panel. If the two triggers share state, one of them opens the wrong one.</p>
+					}
+					@ui.ConfirmAction(ui.ConfirmActionOpts{
+						ID: "gallery-confirm", TriggerLabel: "Delete project", TriggerIcon: ui.IconDelete,
+						Title: "Delete project?", Message: "This removes the project and its files. It cannot be undone.",
+						ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+						HX: ui.HX{Delete: "/dev/gallery", Target: "closest span", Swap: "outerHTML"},
+					})
+					// The fixture above swaps its own trigger away, so the dialog is
+					// destroyed by the response no matter what. That hid a real bug:
+					// htmx preventDefaults a click on a type="submit" control, so the
+					// confirm button never submitted its form method="dialog" and the
+					// dialog only appeared to close because the swap removed it. This
+					// one posts with no swap, which is the shape a production
+					// confirmation usually has, and leaves the dialog on the page to
+					// close itself.
+					@ui.ConfirmAction(ui.ConfirmActionOpts{
+						ID: "gallery-confirm-noswap", TriggerLabel: "Send digest now",
+						Title: "Send the digest?", Message: "Every member receives it immediately. Sending cannot be recalled.",
+						ConfirmLabel: "Send it", CancelLabel: "Not yet", Kind: ui.KindBrand,
+						HX: ui.HX{Post: "/dev/ui/toast/show", Swap: "none", Vals: map[string]string{"kind": "success"}},
+					})
+				</div>
+				@ui.ContextMenu(ui.ContextMenuOpts{Label: "Row actions", Items: []ui.MenuItem{
+					{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+					{Label: "Duplicate", Href: "/dev/gallery", Icon: ui.IconCopy},
+					{Separator: true},
+					{Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger, HX: ui.HX{Delete: "/dev/gallery"}},
+				}}) {
+					<div class="card text-sm">Right-click this region, or use the visible trigger in its corner. Arrow keys and typeahead work in the menu.</div>
+				}
+			</div>
+			@ui.Drawer(ui.DrawerOpts{ID: "gallery-drawer", Title: "Filters", Side: ui.SideRight}) {
+				@ui.Field(ui.FieldOpts{Name: "drawer_status", Label: "Status"}) {
+					@ui.Select(ui.SelectOpts{Name: "drawer_status", Options: []ui.Option{
+						{Value: "active", Label: "Active", Selected: true},
+						{Value: "archived", Label: "Archived"},
+					}})
+				}
+			}
+		}
+
+		@gallerySection("Data — the full table surface") {
+			@ui.DataTable(ui.DataTableOpts{
+				Caption: "Projects, sorted by name ascending",
+				Columns: []ui.Column{
+					{Key: "name", Label: "Name", Sortable: true},
+					{Key: "owner", Label: "Owner", HideBelow: ui.BreakpointSM},
+					{Key: "status", Label: "Status"},
+					{Key: "runs", Label: "Runs", Numeric: true, Sortable: true},
+					{Key: "actions", Label: "Actions", Align: ui.AlignEnd},
+				},
+				SortKey: "name", SortDir: ui.SortAsc,
+				BaseURL: "/dev/gallery", Target: "#content",
+				RowCount: 2, Density: ui.DensityCompact,
+				Toolbar: dataTableToolbar(),
+				Selection: ui.SelectionBar(ui.SelectionBarOpts{
+					Count: 2, CountLabel: "2 projects selected",
+					ClearURL: "/dev/gallery", Target: "#content",
+				}),
+				Pagination: ui.Pagination(ui.PaginationOpts{
+					Page: 1, TotalPages: 4, BaseURL: "/dev/gallery", Target: "#content",
+					Label: "Table card example pagination", Labels: pagerLabels(ctx),
+				}),
+			}) {
+				<tr>
+					<td class="px-4 py-3">Apollo</td>
+					<td class="px-4 py-3 hidden sm:table-cell">Ada</td>
+					<td class="px-4 py-3">@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindSuccess, Label: "Active"})</td>
+					<td class="px-4 py-3 text-right tabular-nums">1,204</td>
+					<td class="px-4 py-3">
+						@ui.RowActions(ui.RowActionsOpts{Label: "Actions for Apollo", Items: []ui.MenuItem{
+							{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+							{Separator: true},
+							{Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger, HX: ui.HX{Delete: "/dev/gallery"}},
+						}})
+					</td>
+				</tr>
+				<tr>
+					<td class="px-4 py-3">Borealis</td>
+					<td class="px-4 py-3 hidden sm:table-cell">Grace</td>
+					<td class="px-4 py-3">@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindWarn, Label: "Paused"})</td>
+					<td class="px-4 py-3 text-right tabular-nums">87</td>
+					<td class="px-4 py-3">
+						@ui.RowActions(ui.RowActionsOpts{Label: "Actions for Borealis", Items: []ui.MenuItem{
+							{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+						}})
+					</td>
+				</tr>
+			}
+		}
+
+		@gallerySection("Data — details, tiles and files") {
+			<div class="space-y-6">
+				@ui.StatGroup(ui.StatGroupOpts{Label: "Workspace totals", Columns: 3}) {
+					@ui.Metric(ui.MetricOpts{Title: "Active projects", Value: "12"})
+					@ui.Metric(ui.MetricOpts{Title: "Team members", Value: "4"})
+					@ui.Metric(ui.MetricOpts{Title: "Runs this week", Value: "1,291", Sub: "+8% on last week"})
+				}
+				@ui.DescriptionList(ui.DescriptionListOpts{Columns: 2, Density: ui.DensityCompact, Items: []ui.DescriptionItem{
+					{Term: "Project ID", Value: "prj_8f2a41c9", Copyable: true},
+					{Term: "Region", Value: "eu-west-1", Hint: "Set at creation and immutable."},
+					{Term: "Plan", ValueSlot: ui.Badge(ui.BadgeOpts{Text: "Pro", Kind: ui.KindBrand})},
+					{Term: "Created", Value: "January 15, 2026"},
+				}})
+				@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD}) {
+					@ui.Tile(ui.TileOpts{Title: "Documentation", Body: "Guides and recipes.", Icon: ui.IconFile, Href: "/docs"})
+					@ui.Tile(ui.TileOpts{Title: "API tokens", Body: "Create and revoke.", Icon: ui.IconKey, Href: "/app/settings/api"})
+					@ui.Tile(ui.TileOpts{Title: "Not a link", Body: "A tile with no destination stays a card.", Icon: ui.IconInfo})
+				}
+				@ui.Stack(ui.StackOpts{Gap: ui.GapSM}) {
+					@ui.Attachment(ui.AttachmentOpts{Name: "architecture-decision-record.pdf", Size: "184 KB", Href: "/dev/gallery"})
+					@ui.Attachment(ui.AttachmentOpts{Name: "seed-data.sql", Size: "12 KB", Icon: ui.IconFolder})
+				}
+			</div>
+		}
+
+		@gallerySection("Layout — composition primitives") {
+			<div class="space-y-6">
+				@ui.Section(ui.SectionOpts{Title: "A named landmark", Level: 3, Attrs: ui.Attrs{ID: "gallery-section"}}) {
+					<p class="text-sm text-fg-muted">A section with an accessible name is a landmark a screen reader can jump to.</p>
+				}
+				@ui.Split(ui.SplitOpts{Ratio: ui.RatioWide, Gap: ui.GapMD}) {
+					<div class="card text-sm">Primary pane (two thirds)</div>
+					<div class="card text-sm">Secondary pane</div>
+				}
+				@ui.Center(ui.CenterOpts{Width: ui.WidthNarrow}) {
+					<div class="card text-sm text-center">Centred block, left-aligned text.</div>
+				}
+				@ui.AspectRatio(ui.AspectRatioOpts{Ratio: ui.RatioVideo}) {
+					<div class="w-full h-full bg-surface-raised flex items-center justify-center text-sm text-fg-muted">16:9 reserved box</div>
+				}
+				@ui.ScrollArea(ui.ScrollAreaOpts{Label: "Release notes", Height: ui.HeightSM}) {
+					<div class="p-3 space-y-2 text-sm">
+						for i := 1; i <= 12; i++ {
+							<p>Scrollable line { fmt.Sprint(i) } — this region is focusable, so arrow keys work.</p>
+						}
+					</div>
+				}
+				@ui.Toolbar(ui.ToolbarOpts{Label: "Editor actions"}) {
+					@ui.Button(ui.ButtonOpts{Label: "Format", Size: ui.SizeSM})
+					@ui.Button(ui.ButtonOpts{Label: "Run", Size: ui.SizeSM, Action: ui.ActionPrimary})
+				}
+				@ui.StickyBar(ui.StickyBarOpts{Side: ui.SideBottom}) {
+					<span class="text-sm text-fg-muted">Unsaved changes</span>
+					@ui.Button(ui.ButtonOpts{Label: "Save", Action: ui.ActionPrimary, Size: ui.SizeSM, Attrs: ui.Attrs{Class: "ml-auto"}})
+				}
+			</div>
+		}
+
+		@gallerySection("Communication — activity and discussion") {
+			<div class="space-y-6">
+				<ul class="table-card">
+					@ui.NotificationItem(ui.NotificationItemOpts{
+						Title: "Deployment finished", Body: "Apollo deployed to production.",
+						Timestamp: "2 hours ago", MachineTime: "2026-01-15T09:30:00Z",
+						Kind: ui.KindSuccess, Href: "/dev/gallery",
+					})
+					@ui.NotificationItem(ui.NotificationItemOpts{
+						Title: "Payment failed", Body: "Retry scheduled for tomorrow.",
+						Timestamp: "yesterday", MachineTime: "2026-01-14T09:30:00Z",
+						Kind: ui.KindDanger, Unread: true,
+					})
+				</ul>
+				@ui.Timeline(ui.TimelineOpts{Label: "Recent activity"}) {
+					@ui.ActivityItem(ui.ActivityItemOpts{
+						Actor: "Ada", Action: "invited", Target: "grace@example.com",
+						Timestamp: "10:04", MachineTime: "2026-01-15T10:04:00Z", Icon: ui.IconUser,
+					})
+					@ui.ActivityItem(ui.ActivityItemOpts{
+						Actor: "Grace", Action: "renamed", Target: "Apollo",
+						Timestamp: "09:12", MachineTime: "2026-01-15T09:12:00Z", Icon: ui.IconEdit,
+						Detail: ui.Badge(ui.BadgeOpts{Text: "was: Apollo Launch", Kind: ui.KindNeutral}),
+					})
+				}
+				@ui.CommentThread(ui.CommentThreadOpts{Label: "Discussion on Apollo"}) {
+					@ui.Comment(ui.CommentOpts{
+						Author: "Ada Lovelace", Timestamp: "10:04", MachineTime: "2026-01-15T10:04:00Z",
+						Body: "The migration looks right to me.",
+					})
+					@ui.Comment(ui.CommentOpts{
+						Author: "Grace Hopper", Timestamp: "10:11", MachineTime: "2026-01-15T10:11:00Z",
+						Body: "Agreed — shipping it.", Edited: true,
+					})
+				}
+				@ui.Composer(ui.ComposerOpts{
+					Name: "reply", Placeholder: "Write a reply…", SubmitLabel: "Post reply",
+					HX: ui.HX{Post: "/dev/gallery", Target: "closest form"},
+				})
+			</div>
+		}
+
+		@gallerySection("Communication — chat and delivery") {
+			<div class="space-y-6">
+				@ui.ChatLog(ui.ChatLogOpts{Label: "Assistant conversation", Streaming: true}) {
+					@ui.ChatMessage(ui.ChatMessageOpts{Role: ui.ChatRoleSystem, RoleLabel: "System", Body: "Session started."})
+					@ui.ChatMessage(ui.ChatMessageOpts{Role: ui.ChatRoleUser, RoleLabel: "You", Body: "Summarise the last deploy."})
+					@ui.ChatMessage(ui.ChatMessageOpts{
+						Role: ui.ChatRoleAssistant, RoleLabel: "Assistant",
+						Body: "The last deploy shipped 12 commits", Streaming: true,
+					})
+				}
+				<p class="text-sm">
+					Mentions render inline:
+					@ui.MentionChip(ui.MentionChipOpts{Name: "ada", Href: "/dev/gallery"})
+					and
+					@ui.MentionChip(ui.MentionChipOpts{Name: "platform-team"})
+				</p>
+				<div class="flex flex-wrap gap-6">
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{State: ui.DeliveryDelivered, Label: "Delivered", Detail: "200 in 84ms"})
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{State: ui.DeliveryPending, Label: "Pending", Detail: "attempt 1 of 8"})
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{State: ui.DeliveryFailed, Label: "Failed", Detail: "503 — retrying"})
+				</div>
+			</div>
+		}
+
+		@gallerySection("Product patterns") {
+			<div class="space-y-6">
+				@ui.Grid(ui.GridOpts{Cols: 2, Gap: ui.GapMD}) {
+					@ui.UsageCard(ui.UsageCardOpts{
+						Title: "Projects", Used: "12", Limit: "20", Percent: 60,
+						MeterLabel: "Project quota",
+					})
+					@ui.UsageCard(ui.UsageCardOpts{
+						Title: "Storage", Used: "9.4 GB", Limit: "10 GB", Percent: 94,
+						MeterLabel: "Storage quota",
+						Notice: ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn}),
+					})
+				}
+				@ui.OnboardingChecklist(ui.OnboardingChecklistOpts{
+					Title: "Finish setting up", ProgressLabel: "Onboarding progress",
+					Steps: []ui.ChecklistStep{
+						{Label: "Create an organization", Done: true},
+						{Label: "Invite a teammate", Body: "Collaborators can see every project.", Href: "/app/settings/org"},
+						{Label: "Connect billing", Body: "Required before the trial ends.", Href: "/app/settings/billing"},
+					},
+				})
+				@ui.SettingsSection(ui.SettingsSectionOpts{
+					Title: "Organization name", Description: "Shown to every member and on invoices.",
+				}) {
+					@ui.Field(ui.FieldOpts{Name: "org_name", Label: "Name", HiddenLabel: true}) {
+						@ui.TextInput(ui.TextInputOpts{Name: "org_name", Value: "Demo Org"})
+					}
+				}
+				@ui.SettingsSection(ui.SettingsSectionOpts{
+					Title: "Delete organization", Description: "This removes every project and cannot be undone.",
+					Danger: true,
+				}) {
+					@ui.ConfirmAction(ui.ConfirmActionOpts{
+						ID: "gallery-delete-org", TriggerLabel: "Delete organization",
+						Title: "Delete this organization?", Message: "Every project and file is removed. This cannot be undone.",
+						ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+						HX: ui.HX{Delete: "/dev/gallery"},
+					})
+				}
+				<ul class="table-card px-3">
+					@ui.MemberItem(ui.MemberItemOpts{
+						Name: "Ada Lovelace", Email: "ada@example.com", RoleLabel: "Owner",
+						Since: "Jan 2026", MachineTime: "2026-01-02",
+					})
+					@ui.MemberItem(ui.MemberItemOpts{
+						Name: "Grace Hopper", Email: "grace@example.com", RoleLabel: "Member",
+						Pending: true,
+					})
+				</ul>
+			</div>
+		}
+
+		@gallerySection("Advanced — charts") {
+			<div class="space-y-6">
+				<p class="text-sm text-fg-muted">
+					Every figure below renders its caption, summary and data table on the server.
+					Chart.js is fetched only because these roots exist, and the canvas appears
+					only once it initialises — with scripts disabled the tables are the charts.
+				</p>
+				@ui.BarChart(ui.BarChartOpts{Chart: galleryChartBase("gallery-bar", "Runs per day", true)})
+				@ui.LineChart(ui.LineChartOpts{Chart: galleryChartBase("gallery-line", "Latency trend", true)})
+				@ui.AreaChart(ui.AreaChartOpts{Chart: galleryChartBase("gallery-area", "Cumulative storage", false)})
+				@ui.DonutChart(ui.DonutChartOpts{Chart: gallerySingleSeries("gallery-donut", "Plan mix")})
+				@ui.Sparkline(ui.SparklineOpts{Chart: gallerySingleSeries("gallery-spark", "Weekly signups")})
+			</div>
+		}
+
+		@gallerySection("Advanced — dates and scheduling") {
+			<div class="space-y-6">
+				<p class="text-sm text-fg-muted">
+					The native inputs below are the controls: they stay visible, named and
+					submitted, and they work with no JavaScript. Cally is fetched only because
+					these pickers exist, and the calendar button appears only once it loads.
+				</p>
+				@ui.Field(ui.FieldOpts{Name: "starts_on", Label: "Starts on", Hint: "Type a date, or use the calendar."}) {
+					@ui.DatePicker(ui.DatePickerOpts{
+						Field: ui.DateFieldOpts{Name: "starts_on", Value: "2026-01-15", Hint: "Type a date, or use the calendar."},
+						Locale: "en-GB", TriggerLabel: "Open calendar", FirstDayOfWeek: 1,
+						DisabledDates: []string{"2026-01-20", "2026-01-21"},
+					})
+				}
+				@ui.Field(ui.FieldOpts{Name: "deploy_at", Label: "Deploy at"}) {
+					@ui.DateTimePicker(ui.DateTimePickerOpts{
+						Field: ui.DateTimeFieldOpts{Name: "deploy_at", Value: "2026-01-15T09:30"},
+						Locale: "en-GB", TriggerLabel: "Open calendar", FirstDayOfWeek: 1,
+					})
+				}
+				@ui.DateRangePicker(ui.DateRangePickerOpts{
+					Range: ui.DateRangeFieldOpts{
+						StartName: "window_start", EndName: "window_end", Legend: "Maintenance window",
+						StartValue: "2026-02-01", EndValue: "2026-02-07",
+					},
+					Locale: "en-GB", TriggerLabel: "Open range calendar", FirstDayOfWeek: 1,
+				})
+				@ui.MonthGrid(galleryMonthGrid())
+				@ui.Scheduler(galleryScheduler())
+				@ui.AvailabilityGrid(ui.AvailabilityGridOpts{
+					Name: "slots", Legend: "Pick your slots",
+					Slots: []ui.AvailabilitySlot{
+						{Value: "2026-02-02T09:00", Label: "09:00", Selected: true},
+						{Value: "2026-02-02T10:00", Label: "10:00"},
+						{Value: "2026-02-02T11:00", Label: "11:00", Disabled: true, DisabledReason: "already booked"},
+						{Value: "2026-02-02T12:00", Label: "12:00"},
+					},
+				})
+			</div>
+		}
+
+		@gallerySection("Advanced — Markdown editor") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					The textarea is the form value. Formatting buttons and Ctrl+B/I/K edit that
+					text through the browser's own undo history, so Ctrl+Z undoes a toolbar click
+					without losing what you typed. There is no client-side Markdown renderer:
+					the preview would come from the server's goldmark pipeline.
+				</p>
+				@ui.MarkdownEditor(ui.MarkdownEditorOpts{
+					Name: "release_notes", Label: "Release notes",
+					Value: "## What changed\n\n- The catalog is modular now.\n",
+					Placeholder: "Write Markdown…",
+					Rows: 8, MaxLength: 2000,
+					Hint: "Markdown is rendered by the server, never in the browser.",
+				}) {
+					@ui.MediaPicker(ui.MediaPickerOpts{
+						ID:          "release_notes-picker",
+						UploadLabel: "Drop an image, or click to choose",
+						EmptyLabel:  "No uploads yet.",
+						Items: []ui.MediaItem{
+							{URL: "/static/og.png", Alt: "GoGoGadget social preview", Name: "og.png"},
+						},
+					})
+				}
+				<p class="text-sm text-fg-muted">
+					The preview region below is what the server swaps rendered HTML into. It is a
+					polite live region, so an author is not interrupted mid-sentence as it updates.
+				</p>
+				@ui.EditorPreview(ui.EditorPreviewOpts{ID: "release_notes-preview"}) {
+					<h2>What changed</h2>
+					<ul>
+						<li>The catalog is modular now.</li>
+					</ul>
+				}
+
+			</div>
+		}
+
+		@gallerySection("Advanced — data grid") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					A table first. Sorting, searching and paging are links and forms the server
+					owns, so they work with no script and the sorted URL is shareable. The
+					enhancement adds one tab stop with arrow-key cell movement, column hiding,
+					and column resizing — and the pager stays, because windowed rows must never
+					be the only way to reach the data.
+				</p>
+				@ui.DataGrid(ui.DataGridOpts{
+					ID:      "gallery-grid",
+					Caption: "Projects by owner",
+					BaseURL: "/dev/gallery",
+					Target:  "#content",
+					Columns: []ui.GridColumn{
+						{Key: "name", Label: "Project", Sortable: true, Resizable: true, MinWidth: 120},
+						{Key: "owner", Label: "Owner", Sortable: true, Resizable: true},
+						{Key: "runs", Label: "Runs", Numeric: true, Sortable: true},
+						{Key: "region", Label: "Region", Pinnable: true},
+					},
+					SortKey:    "name",
+					Sort:       ui.SortAsc,
+					TotalRows:  4,
+					RowCount:   4,
+					Page:       1,
+					TotalPages: 3,
+					WindowSize: 2,
+				}) {
+					for _, row := range galleryGridRows() {
+						<tr data-grid-row class="border-t border-border">
+							<td class="px-3 py-2">{ row[0] }</td>
+							<td class="px-3 py-2">{ row[1] }</td>
+							<td class="px-3 py-2 text-right tabular-nums">{ row[2] }</td>
+							<td class="px-3 py-2">{ row[3] }</td>
+						</tr>
+					}
+				}
+				@ui.GridToolbar(ui.GridToolbarOpts{
+					For:       "gallery-grid",
+					SearchURL: "/dev/gallery",
+					Target:    "#content",
+					Columns: []ui.GridColumn{
+						{Key: "name", Label: "Project"},
+						{Key: "owner", Label: "Owner"},
+						{Key: "runs", Label: "Runs"},
+						{Key: "region", Label: "Region"},
+					},
+				})
+			</div>
+		}
+
+		@gallerySection("Advanced — kanban board") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					Every card carries a "Move to…" menu, and that menu is the interface.
+					Dragging is a shortcut layered on top: a drop fills in the card's own move
+					form and submits it, so both paths post the same payload to one endpoint and
+					the server decides. With no script the menus still work.
+				</p>
+				@GalleryBoard("", "")
+			</div>
+		}
+
+		@gallerySection("Advanced — tree and hierarchy") {
+			<div class="space-y-4">
+				<p class="text-sm text-fg-muted">
+					Nested <code>details</code> elements: every branch opens with no script at all.
+					The controller adds the APG keyboard model on top — one tab stop, arrows,
+					Home/End, and typeahead.
+				</p>
+				@ui.Tree(ui.TreeOpts{
+					ID: "gallery-tree", Label: "Project files",
+					Nodes: galleryTreeNodes(),
+				})
+				@ui.TreeGrid(ui.TreeGridOpts{
+					ID: "gallery-treegrid", Label: "Modules by size",
+					Columns: []ui.Column{{Key: "name", Label: "Module"}, {Key: "size", Label: "Files", Numeric: true}},
+					Nodes:   galleryTreeGridNodes(),
+				})
+			</div>
+		}
+		@gallerySection("Advanced — carousel") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					CSS scroll snap over a plain list. Autoplay is off, and the dots below are
+					real anchors to each slide — so they work with scripting disabled.
+				</p>
+				@ui.Carousel(ui.CarouselOpts{
+					ID: "gallery-carousel", Label: "What shipped",
+					Slides: []ui.SlideData{
+						{ID: "slide-registry", Title: "Source registry", Body: "Install, inspect, modify."},
+						{ID: "slide-catalog", Title: "Typed catalog", Body: "One renderer per module."},
+						{ID: "slide-widgets", Title: "Advanced widgets", Body: "Progressive, never required."},
+					},
+				})
+			</div>
+		}
+		@gallerySection("Advanced — command palette") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					A search form in a native dialog. Every command is a link, and the input only
+					claims <code>role="combobox"</code> once the controller that implements it is
+					running. Ctrl+K opens it.
+				</p>
+				@ui.CommandPalette(ui.CommandPaletteOpts{
+					ID: "gallery-command", Label: "Search commands",
+					FallbackURL: "/dev/gallery",
+					Groups: []ui.CommandGroupData{
+						{Title: "Navigate", Items: []ui.CommandItemData{
+							{ID: "cmd-projects", Label: "Go to projects", Href: "/app/projects", Icon: ui.IconFolder, Shortcut: "G P"},
+							{ID: "cmd-settings", Label: "Go to settings", Href: "/app/settings", Icon: ui.IconSettings},
+						}},
+						{Title: "Create", Items: []ui.CommandItemData{
+							{ID: "cmd-new", Label: "New project", Href: "/app/projects", Hint: "Projects", Icon: ui.IconAdd},
+						}},
+					},
+				})
+			</div>
+		}
+		@gallerySection("Advanced — resizable panels") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					Stacked on a narrow screen, split on a wide one. The divider is a focusable
+					<code>role="separator"</code>: arrows move it one percent, Page keys ten,
+					Home and End go to its bounds.
+				</p>
+				@ui.PanelGroup(ui.PanelGroupOpts{
+					ID: "gallery-panels", PersistKey: "gallery",
+					Orientation: ui.OrientationHorizontal,
+					Panels: []ui.PanelData{
+						{ID: "panel-list", Title: "Modules", Size: 35, MinSize: 20},
+						{ID: "panel-detail", Title: "Detail", MinSize: 25},
+					},
+				})
+			</div>
+		}
+		@gallerySection("Advanced — questionnaire") {
+			<div class="space-y-3">
+				<p class="text-sm text-fg-muted">
+					Native fields, and the step lives on the server: each answer posts and the
+					server decides what comes next, so a reload resumes instead of restarting.
+				</p>
+				@ui.Questionnaire(ui.QuestionnaireOpts{
+					ID: "gallery-wizard", SubmitURL: "/dev/gallery", Current: 2,
+					Questions: []ui.QuestionData{
+						{ID: "team_size", Label: "How large is your team?", Type: ui.QuestionSelect, Required: true,
+							Options: []ui.Option{{Value: "1", Label: "Just me"}, {Value: "10", Label: "2–10"}}},
+						{ID: "goals", Label: "What are you hoping to ship?", Type: ui.QuestionCheckbox,
+							Hint: "Pick as many as apply.",
+							Options: []ui.Option{{Value: "api", Label: "An API"}, {Value: "dash", Label: "A dashboard"}}},
+						{ID: "notes", Label: "Anything else?", Type: ui.QuestionLongText},
+					},
+				})
+			</div>
+		}
+
+		// The interactive examples. Each one calls its declared
+		// /dev/ui/{component}/{action} fragment route and exercises the same
+		// statuses and swaps production uses - a demo that returns 200 where the
+		// product returns 422 teaches the reader the wrong contract.
+		@gallerySection("Interactive — real requests") {
+			<div class="space-y-8">
+				@DevToastExample()
+				@DevCopyExample()
+				@DevTableExample("name", ui.SortAsc)
+				@DevSaveExample()
+				@DevUploadExample()
+				@DevCalendarExample()
+				@DevEditorExample()
+				@DevOverlayExample()
+			</div>
+		}
+
+		@gallerySection("Layout — card") {
+			@ui.Card(ui.CardOpts{}) {
+				@ui.CardHeader(ui.CardHeaderOpts{Title: "Card header"}) {
+					@ui.Badge(ui.BadgeOpts{Text: "new", Kind: ui.KindInfo})
+				}
+				<p class="text-sm text-fg-muted">Cards carry a surface, a border and the standard padding.</p>
+				@ui.CardFooter(ui.CardFooterOpts{}) {
+					<button type="button" class="btn btn-primary btn-sm">Save</button>
+					<button type="button" class="btn btn-ghost btn-sm">Cancel</button>
+				}
+			}
+		}
+
+		@gallerySection("Layout — structure") {
+			<div class="space-y-6">
+				@ui.Container(ui.ContainerOpts{Width: ui.WidthNarrow}) {
+					<p class="text-sm text-fg-muted">Container constrains a measure.</p>
+				}
+				@ui.Stack(ui.StackOpts{Gap: ui.GapMD}) {
+					<div class="card text-sm">Stack row one</div>
+					<div class="card text-sm">Stack row two</div>
+				}
+				@ui.Inline(ui.InlineOpts{Gap: ui.GapSM}) {
+					@ui.Badge(ui.BadgeOpts{Text: "inline", Kind: ui.KindNeutral})
+					@ui.Badge(ui.BadgeOpts{Text: "items", Kind: ui.KindNeutral})
+				}
+				@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD}) {
+					<div class="card text-sm">Grid 1</div>
+					<div class="card text-sm">Grid 2</div>
+					<div class="card text-sm">Grid 3</div>
+				}
+				@ui.SectionHeader(ui.SectionHeaderOpts{Text: "Section header", Attrs: ui.Attrs{Class: "pt-2"}})
+				@ui.Separator(ui.SeparatorOpts{})
+			</div>
+		}
+
+		@gallerySection("Data — table") {
+			@ui.Table(ui.TableOpts{Caption: "Recent projects", Density: ui.DensityCompact}) {
+				<thead>
+					<tr><th scope="col">Name</th><th scope="col">Status</th></tr>
+				</thead>
+				<tbody>
+					<tr><td>Apollo</td><td>@ui.Badge(ui.BadgeOpts{Text: "active", Kind: ui.KindSuccess})</td></tr>
+					<tr><td>Borealis</td><td>@ui.Badge(ui.BadgeOpts{Text: "paused", Kind: ui.KindWarn})</td></tr>
+				</tbody>
+			}
+		}
+
+		@gallerySection("Data — lists") {
+			<div class="space-y-6">
+				@ui.List(ui.ListOpts{}) {
+					@ui.Item(ui.ItemOpts{}) {
+						<span class="text-sm">First list item</span>
+					}
+					@ui.Item(ui.ItemOpts{}) {
+						<span class="text-sm">Second list item</span>
+					}
+				}
+				@ui.KeyValue(ui.KeyValueOpts{Key: "Plan", Value: "Pro"})
+				@ui.KeyValue(ui.KeyValueOpts{Key: "Seats", Value: "12"})
+			</div>
+		}
+
+		@gallerySection("Forms — grouped controls") {
+			@ui.Form(ui.FormOpts{Method: "post", Action: "/dev/gallery"}) {
+				@ui.Fieldset(ui.FieldsetOpts{Legend: "Notification channels"}) {
+					@ui.Checkbox(ui.CheckboxOpts{Name: "email", Label: "Email", Checked: true})
+					@ui.Switch(ui.SwitchOpts{Name: "digest", Label: "Weekly digest", On: true})
+					@ui.RadioGroup(ui.RadioGroupOpts{Name: "frequency", Options: []ui.Option{
+						{Value: "daily", Label: "Daily", Selected: true},
+						{Value: "weekly", Label: "Weekly"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "role", Label: "Role"}) {
+					@ui.Select(ui.SelectOpts{Name: "role", Options: []ui.Option{
+						{Value: "member", Label: "Member", Selected: true},
+						{Value: "admin", Label: "Admin"},
+					}})
+				}
+				@ui.Field(ui.FieldOpts{Name: "notes", Label: "Notes"}) {
+					@ui.Textarea(ui.TextareaOpts{Name: "notes", Rows: 3, Placeholder: "Anything else?"})
+				}
+			}
+		}
+
+		@gallerySection("Overlays") {
+			<div class="flex flex-wrap items-center gap-4">
+				@ui.DropdownMenu(ui.DropdownMenuOpts{Label: "Actions", Items: []ui.MenuItem{
+					{Label: "Rename", Href: "/dev/gallery", Icon: ui.IconEdit},
+					{Label: "Duplicate", Href: "/dev/gallery", Icon: ui.IconCopy},
+					{Separator: true},
+					{Label: "Archive", Icon: ui.IconFolder, Disabled: true},
+					{
+						Label: "Delete", Icon: ui.IconDelete, Kind: ui.KindDanger,
+						Confirm: "Delete this project? This cannot be undone.",
+						HX:      ui.HX{Delete: "/dev/gallery", Target: "closest div"},
+					},
+				}})
+				@ui.Popover(ui.PopoverOpts{Label: "Details"}) {
+					<p class="text-sm text-fg-muted">Popovers hold richer content than a tooltip.</p>
+				}
+				@ui.Tooltip(ui.TooltipOpts{Text: "Copied to clipboard"}) {
+					<button type="button" class="btn btn-ghost btn-sm">Hover me</button>
+				}
+				<button type="button" class="btn btn-primary btn-sm" x-data="uiDialog" x-on:click="open('gallery-dialog')">Open dialog</button>
+				<button type="button" class="btn btn-danger btn-sm" x-data="uiDialog" x-on:click="open('gallery-alert')">Confirm delete</button>
+				<button type="button" class="btn btn-ghost btn-sm" x-data="uiDialog" x-on:click="open('gallery-alert-neutral')">Neutral confirm</button>
+			</div>
+			@ui.Dialog(ui.DialogOpts{ID: "gallery-dialog", Title: "Invite a teammate"}) {
+				@ui.Field(ui.FieldOpts{Name: "invite", Label: "Email"}) {
+					@ui.TextInput(ui.TextInputOpts{Name: "invite", Type: ui.InputTypeEmail})
+				}
+			}
+			@ui.AlertDialog(ui.AlertDialogOpts{
+				ID: "gallery-alert", Title: "Delete project?",
+				Message:      "This removes the project and its files. It cannot be undone.",
+				ConfirmLabel: "Delete", CancelLabel: "Keep it", Kind: ui.KindDanger,
+			})
+			@ui.AlertDialog(ui.AlertDialogOpts{
+				ID: "gallery-alert-neutral", Title: "Leave without saving?",
+				Message:      "The neutral kind takes its title colour from the same matrix every other kind reads.",
+				ConfirmLabel: "Leave", CancelLabel: "Stay",
+			})
+		}
+	</section>
+}
+
+templ gallerySection(title string) {
+	<section class="space-y-4">
+		<h2 class="section-title border-b border-border pb-2">{ title }</h2>
+		{ children... }
+	</section>
+}
+
+// swatch renders one token as a chip plus its name, so the gallery doubles as
+// the token reference.
+templ swatch(token string) {
+	<div class="flex flex-col gap-1">
+		<div class="h-12 w-24 rounded-lg border border-border" style={ swatchStyle(token) }></div>
+		<span class="code-chip">{ token }</span>
+	</div>
+}
+
+func sizeLabel(size string) string {
+	if size == "" {
+		return "default"
+	}
+	return size
+}

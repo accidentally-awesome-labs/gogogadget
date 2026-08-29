@@ -1,0 +1,57 @@
+package ui
+
+// CursorPaginationOpts configures keyset pagination.
+type CursorPaginationOpts struct {
+	// PrevURL and NextURL are empty at the ends of the sequence. Cursor paging
+	// has no total and no page numbers by design: counting rows to offer a
+	// last page is the expensive query keyset paging exists to avoid.
+	PrevURL, NextURL string
+	PrevLabel        string
+	NextLabel        string
+	Label            string
+	Target           string
+	Attrs            Attrs
+}
+
+// CursorPagination renders previous/next controls for a keyset-paged list.
+templ CursorPagination(o CursorPaginationOpts) {
+	if o.PrevURL != "" || o.NextURL != "" {
+		<nav { rootWith("cursor-pagination", "flex items-center justify-between gap-4 mt-4 text-sm", o.Attrs, "aria-label", breadcrumbOrDefault(o.Label, "Pagination"))... }>
+			// Same rule as Pagination: the htmx attributes appear only with a
+			// target, because hx-target="" swaps into an empty selector and the
+			// working href is never used.
+			if o.PrevURL != "" {
+				@cursorLink(o, o.PrevURL, breadcrumbOrDefault(o.PrevLabel, "Previous"))
+			} else {
+				<span></span>
+			}
+			if o.NextURL != "" {
+				@cursorLink(o, o.NextURL, breadcrumbOrDefault(o.NextLabel, "Next"))
+			} else {
+				<span></span>
+			}
+		</nav>
+	}
+}
+
+func breadcrumbOrDefault(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
+}
+
+// cursorLink is one keyset control. Both directions share it so the htmx rule
+// cannot be applied to one and forgotten on the other.
+templ cursorLink(o CursorPaginationOpts, url, label string) {
+	<a
+		href={ templ.SafeURL(url) }
+		if o.Target != "" {
+			hx-get={ url }
+			hx-target={ o.Target }
+			hx-swap="innerMorph"
+			hx-push-url="true"
+		}
+		class="btn btn-ghost"
+	>{ label }</a>
+}

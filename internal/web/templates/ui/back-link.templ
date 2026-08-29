@@ -1,0 +1,23 @@
+package ui
+
+// BackLinkOpts configures a link to the parent view.
+type BackLinkOpts struct {
+	// Href is an explicit destination, never history.back(): a user who arrived
+	// by deep link has no history to go back to, and the button would either do
+	// nothing or leave the site.
+	Href  string
+	Label string
+	Attrs Attrs
+}
+
+// BackLink renders a link up to the parent view.
+templ BackLink(o BackLinkOpts) {
+	<a
+		href={ templ.SafeURL(o.Href) }
+		{ root("back-link", "inline-flex items-center gap-1 text-sm link", o.Attrs)... }
+		hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
+	>
+		@Icon(IconOpts{Name: IconArrowLeft, Attrs: Attrs{Class: "w-4 h-4"}})
+		{ o.Label }
+	</a>
+}

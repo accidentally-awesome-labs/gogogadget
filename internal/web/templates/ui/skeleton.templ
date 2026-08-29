@@ -1,0 +1,36 @@
+package ui
+
+// SkeletonOpts is a loading placeholder.
+type SkeletonOpts struct {
+	// Lines draws that many text-line placeholders; 0 draws a single block.
+	Lines int
+	Attrs Attrs
+}
+
+// Skeleton renders a loading placeholder.
+//
+// Always aria-hidden, with no exception: a screen reader announcing "loading,
+// loading, loading" for a stack of grey boxes is worse than silence, and the
+// region's own live announcement is what should report arrival. It is only for
+// an *initially empty* region - drawing skeletons over content that is already
+// on screen replaces real information with fake information.
+templ Skeleton(o SkeletonOpts) {
+	<div { rootWith("skeleton", "space-y-2", o.Attrs, "aria-hidden", "true")... }>
+		if o.Lines > 1 {
+			for i := 0; i < o.Lines; i++ {
+				<div class={ "skeleton h-4 " + skeletonLineWidth(i, o.Lines) }></div>
+			}
+		} else {
+			<div class="skeleton h-4 w-full"></div>
+		}
+	</div>
+}
+
+// skeletonLineWidth shortens the last line, because a paragraph's final line
+// rarely reaches the margin and a block of equal bars reads as a table.
+func skeletonLineWidth(index, total int) string {
+	if index == total-1 {
+		return "w-2/3"
+	}
+	return "w-full"
+}

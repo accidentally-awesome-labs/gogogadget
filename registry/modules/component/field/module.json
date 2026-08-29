@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/field",
+    "kind": "component",
+    "name": "field",
+    "revision": 1,
+    "contract": 1,
+    "title": "Field",
+    "description": "The Field renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/field.templ",
+        "target": "internal/web/templates/ui/field.templ",
+        "class": "templ",
+        "sha256": "6b849d6c88990bff4987a093ee0c55de4b73a47a3461ee24cc1663de33137ebc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/field_test.go",
+        "target": "internal/web/templates/ui/field_test.go",
+        "class": "test",
+        "sha256": "97802f10c78757b65b6df9283bcbe79cdb6c7d94fb4d50fe6ea51776a273fc55",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "field",
+          "family": "forms",
+          "signature": "templ Field(o FieldOpts)",
+          "summary": "Renders label + control + field-level error.",
+          "guidance": "The control arrives as children so any input type composes, and the hint/error ids come from FieldIDs so a custom control can wire the same aria-describedby.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

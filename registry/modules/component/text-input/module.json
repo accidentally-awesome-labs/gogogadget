@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/text-input",
+    "kind": "component",
+    "name": "text-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "TextInput",
+    "description": "The TextInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/text-input.templ",
+        "target": "internal/web/templates/ui/text-input.templ",
+        "class": "templ",
+        "sha256": "228b9c7aac6db9e6c7fdce0fdab6113d070a4a12a995f722728431b13ace4cd0",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "text-input",
+          "family": "forms",
+          "signature": "templ TextInput(o TextInputOpts)",
+          "summary": "A single-line text input.",
+          "states": [
+            "default",
+            "disabled",
+            "error",
+            "readonly"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

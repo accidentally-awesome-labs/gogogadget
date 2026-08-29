@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/tree",
+    "kind": "component",
+    "name": "tree",
+    "revision": 1,
+    "contract": 1,
+    "title": "Tree",
+    "description": "Nested details upgraded with the APG keyboard model: one tab stop, arrows, Home/End and typeahead. Every branch opens with no script.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/tree.templ",
+        "target": "internal/web/templates/ui/tree.templ",
+        "class": "templ",
+        "sha256": "dcd9096da6dfbea870d9d9e0ab5bd11e47efda1b4fc4c8eda5472e1f0f8dbfcd",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/tree_test.go",
+        "target": "internal/web/templates/ui/tree_test.go",
+        "class": "test",
+        "sha256": "d7e9f34dc501f4557fba56c5fbe7609907d2477093c9b09426baf64206013c4a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/tree.js",
+        "target": "static/ui/tree.js",
+        "class": "asset",
+        "sha256": "d331889c46746c0e4da42d1bdafbd5622479b6c5424af14a0f440709bbaf5e21",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "tree",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiTree",
+          "signature": "templ Tree(o TreeOpts)",
+          "summary": "Renders a disclosure tree.",
+          "guidance": "It is built from nested `details` elements, so with no JavaScript every branch still opens and every leaf is still reachable. The controller adds the APG keyboard model on top - roving focus, arrows, Home/End and typeahead - by upgrading this markup rather than replacing it. A div-based tree would have to implement disclosure, keyboard and semantics all at once, and would offer nothing when any of the three failed.",
+          "keyboard": "A roving tabindex gives the tree one tab stop; ArrowUp/ArrowDown move between visible nodes, ArrowRight opens a branch or steps into it, ArrowLeft closes it or steps out, Home/End jump to the ends, and printable characters start typeahead.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "tree-grid",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiTree",
+          "signature": "templ TreeGrid(o TreeGridOpts)",
+          "summary": "Renders a hierarchy with columns.",
+          "guidance": "This is a table, because the data is rows and columns and a table already reports both. Depth is carried by aria-level on each row rather than by indentation alone: indentation is a visual convention that conveys nothing to a screen reader, and \"level 3\" is the fact the user needs.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        },
+        {
+          "name": "tree-node",
+          "family": "advanced",
+          "signature": "templ TreeNode(o TreeNodeOpts)",
+          "summary": "Renders one node and its children.",
+          "states": [
+            "default",
+            "loading"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-tree",
+          "path": "static/ui/tree.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

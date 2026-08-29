@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/ui-core",
+    "kind": "element",
+    "name": "ui-core",
+    "revision": 1,
+    "contract": 1,
+    "title": "UI core",
+    "description": "The leaf presentation package: shared option structs, the closed enums, the typed attribute builder, the icon registry, the request-scoped CSRF token accessor and its hidden-field renderer, and the base renderers every other UI item builds on. Imports only templ and stdlib, never a domain package, so the compiler enforces the direction.",
+    "requires": [],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/attrs.go",
+        "target": "internal/web/templates/ui/attrs.go",
+        "class": "go",
+        "sha256": "23efc5838054a5e3feefc6de3e336289913af1f7733c4f1711452803d168b8a9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/attrs_build.go",
+        "target": "internal/web/templates/ui/attrs_build.go",
+        "class": "go",
+        "sha256": "d2ad26ed1873342e0a3db3d7761cde04a836898de5a44601046af4329ff05aca",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/attrs_build_test.go",
+        "target": "internal/web/templates/ui/attrs_build_test.go",
+        "class": "test",
+        "sha256": "254eb335996f3093c8dfada6c905480e16c1f257e505fd4965f070454ab82667",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/attrs_test.go",
+        "target": "internal/web/templates/ui/attrs_test.go",
+        "class": "test",
+        "sha256": "acf23f8286c3bdb5276c29f70a214dcca55c0483d9a902cebfd2b2ef24da07c3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/contract_test.go",
+        "target": "internal/web/templates/ui/contract_test.go",
+        "class": "test",
+        "sha256": "a1c966f7fd79f2f3e61c81315b5f6ca7a2a81718ae43f0cdd45c31dcb3f38584",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/control-id_test.go",
+        "target": "internal/web/templates/ui/control-id_test.go",
+        "class": "test",
+        "sha256": "6c865b4b1313271adc80699df9c793ededc828978559124eb033c62ab5314bfd",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/csrf.templ",
+        "target": "internal/web/templates/ui/csrf.templ",
+        "class": "templ",
+        "sha256": "1a8acb2a0a162a40d3d32fcf20aaf7c326083e04e0daf41a0bca4496c68c4925",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/enums.go",
+        "target": "internal/web/templates/ui/enums.go",
+        "class": "go",
+        "sha256": "f34d17d61319d9fb86f29eca140541cd45101c5023a5de14a33be764fce15b01",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/enums_test.go",
+        "target": "internal/web/templates/ui/enums_test.go",
+        "class": "test",
+        "sha256": "96375eced2cb91517f01d409cf4a9135f909dd2b50d3bd20c16a215dd547a21f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/gallery.go",
+        "target": "internal/web/templates/ui/gallery.go",
+        "class": "go",
+        "sha256": "76adeb1870f63ad9a03fe53a8d57cca6b791d11ab6fee5d565d62e0c10eba709",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/icons.go",
+        "target": "internal/web/templates/ui/icons.go",
+        "class": "go",
+        "sha256": "59c3948cde57f1f6ac1c3d6077baf7852f304579b4589db7e85f7a72c551bb76",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/icons_test.go",
+        "target": "internal/web/templates/ui/icons_test.go",
+        "class": "test",
+        "sha256": "3a48df4604c498775d1108d1e5b3ed06a325b3f5606d2902990ad15edcacabec",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/menu-item_test.go",
+        "target": "internal/web/templates/ui/menu-item_test.go",
+        "class": "test",
+        "sha256": "552f606b66ef9931e02959ee23d7c8ef63eac5f38548a4da68e48820b119dcb6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/opts_hx_test.go",
+        "target": "internal/web/templates/ui/opts_hx_test.go",
+        "class": "test",
+        "sha256": "ae4e0d3ed73198aeb39113787e06320dee25c01d0719ea6954fbbaa0e4c3d00d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/root.go",
+        "target": "internal/web/templates/ui/root.go",
+        "class": "go",
+        "sha256": "64c565ff82ffe53c293c7378ad8f6314f7eb73da0fa2200dc41e165cad12f40e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/shared.go",
+        "target": "internal/web/templates/ui/shared.go",
+        "class": "go",
+        "sha256": "e08625ff24defd4bbce1ffdc57583e0a8e369b30cd4aabb07ef855f55c7e8ecb",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui/ui.go",
+        "target": "internal/web/templates/ui/ui.go",
+        "class": "go",
+        "sha256": "bb6b71eb97f81a441f27f52c6f220d512cb0b72e3201c873ff52be79b1d3cdbd",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "static/ui/engines.js",
+        "target": "static/ui/engines.js",
+        "class": "asset",
+        "sha256": "46f5d6c40764c98cfe86ada9c92442b2b8e7e019e8e6498d00e29031c0a53950",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/ui/forms.js",
+        "target": "static/ui/forms.js",
+        "class": "asset",
+        "sha256": "cc9d720427bd6ac2c6628984a29383233ff383ad6c7ca49a1dc794190fd00465",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/ui/navigation.js",
+        "target": "static/ui/navigation.js",
+        "class": "asset",
+        "sha256": "67a482a0085d3028b97400394f73e7f86b6b4b610c676bbff62b9c7e3f351212",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/ui/overlays.js",
+        "target": "static/ui/overlays.js",
+        "class": "asset",
+        "sha256": "34a27b357e9c0aae29c6259e95a89def337c59eb877914fcba6bb758766846ff",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "assets": [
+        {
+          "id": "ui-engines",
+          "path": "static/ui/engines.js",
+          "kind": "script"
+        },
+        {
+          "id": "ui-forms",
+          "path": "static/ui/forms.js",
+          "kind": "script"
+        },
+        {
+          "id": "ui-navigation",
+          "path": "static/ui/navigation.js",
+          "kind": "script"
+        },
+        {
+          "id": "ui-overlays",
+          "path": "static/ui/overlays.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

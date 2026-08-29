@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/stack",
+    "kind": "component",
+    "name": "stack",
+    "revision": 1,
+    "contract": 1,
+    "title": "Stack",
+    "description": "The Stack renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/stack.templ",
+        "target": "internal/web/templates/ui/stack.templ",
+        "class": "templ",
+        "sha256": "0f4379144821f2d740c3eb917fede3db31b92ebcc10c889b529b8b5a8f8df36d",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "stack",
+          "family": "layout",
+          "signature": "templ Stack(o StackOpts)",
+          "summary": "Renders children in a vertical stack.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -2,7 +2,7 @@
 title: Observability
 description: Structured logs, request ids, Sentry, PostHog behind a consent gate, and pprof.
 section: Guides
-weight: 25
+weight: 26
 ---
 
 Everything is **env-gated**: with no keys set you get structured logs and

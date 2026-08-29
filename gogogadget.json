@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "registry": {
+    "repository": "gogogadget/gogogadget",
+    "ref": "main"
+  },
+  "modules": [
+    "profile/full"
+  ],
+  "exclude": [
+    "component/table-empty",
+    "element/divider"
+  ]
+}

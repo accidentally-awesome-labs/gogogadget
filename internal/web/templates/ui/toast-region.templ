@@ -1,0 +1,40 @@
+package ui
+
+// ToastRegionOpts configures the live toast stack.
+type ToastRegionOpts struct {
+	Attrs Attrs
+}
+
+// ToastRegion renders the shell's live toast stack.
+//
+// One region per document, in the shell and outside #content: navigation swaps
+// only #content, so a region rendered inside it would be destroyed mid-swap and
+// lose both its queued toasts and its document listener.
+//
+// role="status" with aria-live="polite" on the CONTAINER, not on each toast: the
+// live region has to exist before the message arrives or a screen reader has
+// nothing to observe, and announcing a container that appears at the same moment
+// as its content is silent.
+//
+// The variant class is computed in app.js (toastRoot.push) rather than as a
+// :class ternary here: a pure property access is unambiguously CSP-safe, and the
+// type-to-colour mapping is one decision that belongs in one place. data-leaving
+// drives the exit transition the same way.
+templ ToastRegion(o ToastRegionOpts) {
+	<div
+		{ rootWith("toast-region", "fixed bottom-4 right-4 z-(--z-overlay) flex flex-col gap-2", o.Attrs,
+			"x-data", "toastRoot",
+			"role", "status",
+			"aria-live", "polite")... }
+	>
+		<template x-for="t in toasts" :key="t.id">
+			<div
+				data-testid="toast"
+				class="toast"
+				:class="t.cls"
+				:data-leaving="t.leaving"
+				x-text="t.message"
+			></div>
+		</template>
+	</div>
+}

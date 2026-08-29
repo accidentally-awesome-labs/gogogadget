@@ -1,74 +1,84 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // Admin audit viewer — platform-wide, mirrors the org activity page.
 
+func adminAuditColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "when", Label: i18n.T(ctx, "activity.col_when")},
+		{Key: "actor", Label: i18n.T(ctx, "activity.col_actor")},
+		{Key: "org", Label: i18n.T(ctx, "admin.audit.col_org"), HideBelow: ui.BreakpointSM},
+		{Key: "action", Label: i18n.T(ctx, "activity.col_action")},
+		{Key: "details", Label: i18n.T(ctx, "activity.col_details")},
+	}
+}
+
 templ AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string, page, totalPages int) {
 	<div id="table-container">
-		if len(rows) == 0 {
-			@EmptyState(i18n.T(ctx, "admin.audit.title"), i18n.T(ctx, "admin.audit.empty")) {
-			}
-		} else {
-			<div class="card !p-0 overflow-hidden" data-testid="audit-table">
-				<table class="table">
-					<thead>
-						<tr><th>{ i18n.T(ctx, "activity.col_when") }</th><th>{ i18n.T(ctx, "activity.col_actor") }</th><th>{ i18n.T(ctx, "admin.audit.col_org") }</th><th>{ i18n.T(ctx, "activity.col_action") }</th><th>{ i18n.T(ctx, "activity.col_details") }</th></tr>
-					</thead>
-					<tbody>
-						for _, row := range rows {
-							<tr id={ fmt.Sprintf("audit-row-%d", row.ID) }>
-								<td>
-									<span data-testid="relative-time" title={ row.CreatedAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.CreatedAt.Time) }</span>
-								</td>
-								<td>
-									if row.ActorEmail != "" {
-										{ row.ActorEmail }
-									} else {
-										<span class="text-fg-muted">{ row.ClerkUserID.String }</span>
-									}
-								</td>
-								<td class="text-fg-muted">{ row.ClerkOrgID.String }</td>
-								<td><span class="badge bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">{ row.Action }</span></td>
-								<td>
-									if len(row.Metadata) > 2 {
-										<details>
-											<summary class="cursor-pointer text-fg-muted">{ i18n.T(ctx, "activity.metadata") }</summary>
-											<pre class="text-xs mt-1 overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
-										</details>
-									}
-								</td>
-							</tr>
+		@ui.DataTable(ui.DataTableOpts{
+			Caption:       i18n.T(ctx, "admin.audit.title"),
+			HiddenCaption: true,
+			Columns:       adminAuditColumns(ctx),
+			RowCount:      len(rows),
+			Empty:         adminAuditEmpty(filter),
+			Target:        "#table-container",
+			Attrs:         ui.Attrs{TestID: "audit-table"},
+			Pagination: ui.Pagination(ui.PaginationOpts{
+				Page: page, TotalPages: totalPages, BaseURL: "/admin/audit?q=" + filter,
+				Target: "#table-container", Labels: pagerLabels(ctx),
+			}),
+		}) {
+			for _, row := range rows {
+				<tr id={ fmt.Sprintf("audit-row-%d", row.ID) }>
+					<td>
+						<span data-testid="relative-time" title={ row.CreatedAt.Time.Format(time.RFC3339) }>{ RelTime(now, row.CreatedAt.Time) }</span>
+					</td>
+					<td>
+						if row.ActorEmail != "" {
+							{ row.ActorEmail }
+						} else {
+							<span class="text-fg-muted">{ row.ClerkUserID.String }</span>
 						}
-					</tbody>
-				</table>
-			</div>
-			@Pagination(page, totalPages, "/admin/audit?q="+filter)
+					</td>
+					<td class="text-fg-muted hidden sm:table-cell">{ row.ClerkOrgID.String }</td>
+					<td>
+						@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})
+					</td>
+					<td>
+						if len(row.Metadata) > 2 {
+							@ui.Disclosure(ui.DisclosureOpts{Summary: i18n.T(ctx, "activity.metadata")}) {
+								<pre class="text-xs mt-1 overflow-auto">{ prettyMetadata(row.Metadata) }</pre>
+							}
+						}
+					</td>
+				</tr>
+			}
 		}
 	</div>
 }
 
+templ adminAuditEmpty(filter string) {
+	@ui.EmptyState(ui.EmptyStateOpts{
+		Body:       i18n.T(ctx, "admin.audit.empty"),
+		Variant:    ui.EmptyInline,
+		Filtered:   filter != "",
+		ClearURL:   "/admin/audit",
+		ClearLabel: i18n.T(ctx, "admin.clear_search"),
+		Target:     "#table-container",
+	})
+}
+
 templ AdminAuditPage(rows []sqlc.ListAuditAllRow, now time.Time, filter string, page, totalPages int) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.audit.title") }</h1>
-	<div class="flex items-center gap-2 mb-4">
-		<input
-			type="search" name="q" value={ filter } placeholder={ i18n.T(ctx, "admin.audit.search_placeholder") }
-			class="input max-w-sm"
-			hx-get="/admin/audit" hx-trigger="input changed delay:300ms, search"
-			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
-			hx-sync="this:replace"
-			hx-indicator="#admin-audit-search-indicator"
-			aria-label={ i18n.T(ctx, "admin.audit.search_aria") }
-		/>
-		<span id="admin-audit-search-indicator" class="text-fg-muted">
-			@Spinner()
-		</span>
-	</div>
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.audit.title")})
+	@ui.SearchInput(ui.SearchInputOpts{Name: "q", Value: filter, Placeholder: i18n.T(ctx, "admin.audit.search_placeholder"), AriaLabel: i18n.T(ctx, "admin.audit.search_aria"), GetURL: "/admin/audit", Target: "#table-container", IndicatorID: "admin-audit-search-indicator"})
 	@AdminAuditTable(rows, now, filter, page, totalPages)
 }

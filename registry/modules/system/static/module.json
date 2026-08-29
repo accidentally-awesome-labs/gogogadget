@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/static",
+    "kind": "system",
+    "name": "static",
+    "revision": 1,
+    "contract": 1,
+    "title": "Static asset serving",
+    "description": "The embedded static file set — built CSS, client JavaScript, fonts, icons, and the vendored browser assets — served with content-addressed caching.",
+    "requires": [
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "VENDOR-LICENSES.md",
+        "target": "VENDOR-LICENSES.md",
+        "class": "asset",
+        "sha256": "f5cb8ddcb00e3349a95e772bd200f510bba3791c0286e8ae0aa85ce60d42b15b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "input.css",
+        "target": "input.css",
+        "class": "style",
+        "sha256": "6e9278d5bb7389ebcee4fdb304f05838e330b2b35db12c8bc488222a000ff4e3",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/analytics.js",
+        "target": "static/analytics.js",
+        "class": "asset",
+        "sha256": "cf50dd90a1c75c36b0cfae421904342cbc374528a14f3b4c27e7b3fd7be78316",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/app.css",
+        "target": "static/app.css",
+        "class": "generated",
+        "sha256": "",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/app.js",
+        "target": "static/app.js",
+        "class": "asset",
+        "sha256": "9ef7433cd2d426b5f331ff513f49c49d5b6016d5a7fa238572a7b8b101873f80",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/favicon.svg",
+        "target": "static/favicon.svg",
+        "class": "asset",
+        "sha256": "533ee38982aa471d21f2c81920c6db205177ce0fec377b374c60035b5cff0c7b",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/fonts/inter-var.woff2",
+        "target": "static/fonts/inter-var.woff2",
+        "class": "asset",
+        "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/og.png",
+        "target": "static/og.png",
+        "class": "asset",
+        "sha256": "f5e3a40dccbd7de822866bebf8934e698f17fdd5b8402b0e8147c11596fea93c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/site.webmanifest",
+        "target": "static/site.webmanifest",
+        "class": "asset",
+        "sha256": "742aab42ce40963c23418bc41bf8dd19447d0516df8901eaba7a60aaba6fc9cd",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/static.go",
+        "target": "static/static.go",
+        "class": "go",
+        "sha256": "a853f4a028473e00edbf573349533b5b24a4f8c0e7086892255c0f53c9412431",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "static/static_test.go",
+        "target": "static/static_test.go",
+        "class": "test",
+        "sha256": "94f6b728e0f531aa3af91ac255277a2efca6d94836b503e7a0d6c0b3bd7b0a22",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui-components.js",
+        "target": "static/ui-components.js",
+        "class": "generated",
+        "sha256": "",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/ui-engines.js",
+        "target": "static/ui-engines.js",
+        "class": "generated",
+        "sha256": "",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/alpine-csp.min.js",
+        "target": "static/vendor/alpine-csp.min.js",
+        "class": "asset",
+        "sha256": "566167134bb2347110904e2ced6e816d2e8d837200c158f98b72372b3bb0b9a6",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/alpine-focus.min.js",
+        "target": "static/vendor/alpine-focus.min.js",
+        "class": "asset",
+        "sha256": "ea7e215444f5110619549621cd0760cedfe273f708b144d4e658a87b702555f9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/htmx.min.js",
+        "target": "static/vendor/htmx.min.js",
+        "class": "asset",
+        "sha256": "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "theme.local.css",
+        "target": "theme.local.css",
+        "class": "asset",
+        "sha256": "cf4f825238618c46b3a13af796844ae9b6bced86dce124230794df6aeafc6a4c",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "static.assets",
+        "static.favicon"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "static.assets",
+          "method": "GET",
+          "pattern": "/static/",
+          "scope": "static",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "immutable asset transport with no session and no mutation",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "serveStaticAssets"
+        },
+        {
+          "id": "static.favicon",
+          "method": "GET",
+          "pattern": "/favicon.ico",
+          "scope": "static",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "static redirect with no session and no mutation",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "faviconRedirect"
+        }
+      ]
+    },
+    "vendors": [
+      {
+        "path": "static/vendor/alpine-csp.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/@alpinejs/csp@3.15.12/dist/cdn.min.js",
+        "version": "3.15.12",
+        "bytes": 61522,
+        "sha256": "566167134bb2347110904e2ced6e816d2e8d837200c158f98b72372b3bb0b9a6",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "origins": [
+          "alpinejs.dev"
+        ]
+      },
+      {
+        "path": "static/vendor/alpine-focus.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.15.12/dist/cdn.min.js",
+        "version": "3.15.12",
+        "bytes": 26051,
+        "sha256": "ea7e215444f5110619549621cd0760cedfe273f708b144d4e658a87b702555f9",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "origins": [
+          "github.com"
+        ]
+      },
+      {
+        "path": "static/vendor/htmx.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/htmx.org@4.0.0-beta6/dist/htmx.min.js",
+        "version": "4.0.0-beta6",
+        "bytes": 36282,
+        "sha256": "28fae7bbe8e8142b702debb9d5234a9a436d9435a4b5165b195aa1a7ed840d25",
+        "license": "BSD-2-Clause",
+        "license_at": "VENDOR-LICENSES.md"
+      }
+    ],
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

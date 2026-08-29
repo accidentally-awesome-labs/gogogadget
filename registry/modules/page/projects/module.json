@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/projects",
+    "kind": "page",
+    "name": "projects",
+    "revision": 1,
+    "contract": 1,
+    "title": "Projects list",
+    "description": "The organization's project list with free-text search and numbered pagination, rendered full-page or as an htmx table fragment.",
+    "requires": [
+      "system/database",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_projects.go",
+        "target": "internal/web/page_projects.go",
+        "class": "go",
+        "sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/projects_test.go",
+        "target": "internal/web/projects_test.go",
+        "class": "test",
+        "sha256": "131476df7a6ad0734d29446af475ae28711baab5e1c102f87382bff24a1e3026",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/projects.templ",
+        "target": "internal/web/templates/projects.templ",
+        "class": "templ",
+        "sha256": "cf9510729255b2843b4144ab98a244fda0f282ee30f3662189bd93c6163fe75f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "projects.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "projects.index",
+          "method": "GET",
+          "pattern": "/app/projects",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleProjects"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.projects",
+          "area": "app",
+          "route_id": "projects.index",
+          "label_key": "sidebar.projects",
+          "after": [
+            "nav.app.dashboard"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "projects",
+          "path": "/app/projects",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "projects.archive": "Archive",
+        "projects.cancel": "Cancel",
+        "projects.caption": "Projects in your organization",
+        "projects.clear_search": "Clear search",
+        "projects.col_actions": "Actions",
+        "projects.col_created": "Created",
+        "projects.col_name": "Name",
+        "projects.create": "Create project",
+        "projects.delete": "Delete",
+        "projects.delete_action": "Delete permanently",
+        "projects.delete_confirm": "Delete this project? This cannot be undone.",
+        "projects.delete_row": "Delete %s",
+        "projects.delete_title": "Delete project",
+        "projects.edit": "Edit",
+        "projects.edit_heading": "Edit project",
+        "projects.empty_body": "Create your first project to get going.",
+        "projects.empty_title": "No projects",
+        "projects.export": "Export CSV",
+        "projects.field_name": "Name",
+        "projects.field_placeholder": "Launch checklist",
+        "projects.filtered_empty_body": "No project matches “%s”.",
+        "projects.filtered_empty_title": "No matches",
+        "projects.fix_error": "Please fix the error below.",
+        "projects.limit_hit": "You've reached the %s plan limit of %s projects.",
+        "projects.new": "New project",
+        "projects.pagination_page": "Page %d",
+        "projects.save": "Save changes",
+        "projects.search_label": "Search projects",
+        "projects.search_placeholder": "Search projects…",
+        "projects.title": "Projects",
+        "projects.toolbar_label": "Project list controls",
+        "projects.upgrade": "Upgrade to create more →",
+        "projects.usage_meter_label": "Project quota",
+        "projects.usage_title": "Projects used on %s"
+      },
+      "es": {
+        "projects.archive": "Archivar",
+        "projects.cancel": "Cancelar",
+        "projects.caption": "Proyectos de tu organización",
+        "projects.clear_search": "Borrar la búsqueda",
+        "projects.col_actions": "Acciones",
+        "projects.col_created": "Creado",
+        "projects.col_name": "Nombre",
+        "projects.create": "Crear proyecto",
+        "projects.delete": "Eliminar",
+        "projects.delete_action": "Eliminar definitivamente",
+        "projects.delete_confirm": "¿Eliminar este proyecto? Esta acción no se puede deshacer.",
+        "projects.delete_row": "Eliminar %s",
+        "projects.delete_title": "Eliminar proyecto",
+        "projects.edit": "Editar",
+        "projects.edit_heading": "Editar proyecto",
+        "projects.empty_body": "Crea tu primer proyecto para comenzar.",
+        "projects.empty_title": "No hay proyectos",
+        "projects.export": "Exportar CSV",
+        "projects.field_name": "Nombre",
+        "projects.field_placeholder": "Lista de verificación de lanzamiento",
+        "projects.filtered_empty_body": "Ningún proyecto coincide con «%s».",
+        "projects.filtered_empty_title": "Sin coincidencias",
+        "projects.fix_error": "Corrige el error que aparece a continuación.",
+        "projects.limit_hit": "Has llegado al límite del plan %s de %s proyectos.",
+        "projects.new": "Nuevo proyecto",
+        "projects.pagination_page": "Página %d",
+        "projects.save": "Guardar cambios",
+        "projects.search_label": "Buscar proyectos",
+        "projects.search_placeholder": "Buscar proyectos…",
+        "projects.title": "Proyectos",
+        "projects.toolbar_label": "Controles de la lista de proyectos",
+        "projects.upgrade": "Mejora tu plan para crear más →",
+        "projects.usage_meter_label": "Cuota de proyectos",
+        "projects.usage_title": "Proyectos usados en el plan %s"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

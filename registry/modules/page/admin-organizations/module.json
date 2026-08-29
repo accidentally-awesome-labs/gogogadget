@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-organizations",
+    "kind": "page",
+    "name": "admin-organizations",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin organizations list",
+    "description": "The platform organization table with member counts and plan badges.",
+    "requires": [
+      "system/i18n",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_organizations.go",
+        "target": "internal/web/page_admin_organizations.go",
+        "class": "go",
+        "sha256": "2a55d98938962ec0cd41d6eb38baeb126f6eb8d0c8927f1ec76ef0cd0addb143",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.organizations.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.organizations.index",
+          "method": "GET",
+          "pattern": "/admin/orgs",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminOrgs"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.orgs",
+          "area": "admin",
+          "route_id": "admin.organizations.index",
+          "label_key": "sidebar.admin_orgs",
+          "after": [
+            "nav.admin.users"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.orgs.col_created": "Created",
+        "admin.orgs.col_members": "Members",
+        "admin.orgs.col_name": "Name",
+        "admin.orgs.col_plan": "Plan",
+        "admin.orgs.col_slug": "Slug",
+        "admin.orgs.empty": "No organizations yet.",
+        "admin.orgs.title": "Organizations"
+      },
+      "es": {
+        "admin.orgs.col_created": "Creada",
+        "admin.orgs.col_members": "Miembros",
+        "admin.orgs.col_name": "Nombre",
+        "admin.orgs.col_plan": "Plan",
+        "admin.orgs.col_slug": "Slug",
+        "admin.orgs.empty": "Aún no hay organizaciones.",
+        "admin.orgs.title": "Organizaciones"
+      }
+    }
+  }
+}

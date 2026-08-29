@@ -1,0 +1,467 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// The resource-list scenario: the paged, searchable, selectable table every
+// product grows. All four states go through one DataTable call, because the
+// point being demonstrated is that the toolbar and the pager are slots on the
+// table rather than siblings a caller conditionally omits.
+
+// resourceListPageSize is the fixture's rows per page. Twelve rows over four is
+// three pages, which is the smallest set where the numbered pager has to render
+// a middle page - one where prev and next are both live.
+const resourceListPageSize = 4
+
+// resourceListRow is one fixture project. Literal values, so two renders are
+// byte-identical and a visual difference means the markup changed.
+type resourceListRow struct {
+	ID, Name, Owner, Runs, Updated string
+	StatusLabel                    string
+	StatusKind                     ui.Kind
+	Selected                       bool
+}
+
+// ScenarioResourceList renders the project table.
+templ ScenarioResourceList(gc GalleryContext) {
+	<div class="space-y-4" data-testid="scenario-resource-list">
+		if gc.State == "error" {
+			// Announced, and above the table rather than inside it: the failure
+			// is news the moment it arrives, and a message hidden in the box
+			// that failed is the one place a user has stopped looking.
+			@ui.Notice(ui.NoticeOpts{
+				Kind: ui.KindDanger, Live: ui.LiveAssertive,
+				Attrs: ui.Attrs{TestID: "resource-list-notice"},
+			}) {
+				<p class="font-medium">Projects could not be loaded.</p>
+				<p class="text-sm">
+					{ resourceListFailure(gc.LongContent) }
+				</p>
+				@ui.ButtonLink(ui.ButtonLinkOpts{
+					Label: "Try again", Href: resourceListURL(""),
+					Size: ui.SizeSM, Icon: ui.IconRefresh,
+					Attrs: ui.Attrs{TestID: "resource-list-retry"},
+				})
+			}
+		}
+		@ui.DataTable(resourceListTable(gc)) {
+			if gc.State == "loading" {
+				for _, slot := range resourceListSkeletonRows() {
+					// The same six cells at the same padding as a real row, so
+					// the table does not change height when the data lands.
+					<tr data-testid={ slot }>
+						<td class="px-4 py-3">
+							@ui.Skeleton(ui.SkeletonOpts{})
+						</td>
+						<td class="px-4 py-3 hidden sm:table-cell">
+							@ui.Skeleton(ui.SkeletonOpts{})
+						</td>
+						<td class="px-4 py-3">
+							@ui.Skeleton(ui.SkeletonOpts{})
+						</td>
+						<td class="px-4 py-3">
+							@ui.Skeleton(ui.SkeletonOpts{})
+						</td>
+						<td class="px-4 py-3 hidden md:table-cell">
+							@ui.Skeleton(ui.SkeletonOpts{})
+						</td>
+						<td class="px-4 py-3">
+							@ui.Skeleton(ui.SkeletonOpts{})
+						</td>
+					</tr>
+				}
+			} else {
+				for _, row := range resourceListRows(gc) {
+					<tr id={ "project-" + row.ID }>
+						<td class="px-4 py-3">
+							// The checkbox's label is the project name, so the
+							// row selector carries a distinct accessible name.
+							// A separate select column would give every row a
+							// checkbox called "Select", which is a dozen
+							// identical controls to a screen reader.
+							@ui.Checkbox(ui.CheckboxOpts{
+								Name: "ids", Value: row.ID, Label: row.Name, Checked: row.Selected,
+								Attrs: ui.Attrs{TestID: "select-" + row.ID},
+							})
+						</td>
+						<td class="px-4 py-3 hidden sm:table-cell">{ row.Owner }</td>
+						<td class="px-4 py-3">
+							@ui.StatusDot(ui.StatusDotOpts{Kind: row.StatusKind, Label: row.StatusLabel})
+						</td>
+						<td class="px-4 py-3 text-right tabular-nums">{ row.Runs }</td>
+						<td class="px-4 py-3 hidden md:table-cell">{ row.Updated }</td>
+						<td class="px-4 py-3">
+							@ui.RowActions(ui.RowActionsOpts{
+								Label: "Actions for " + row.Name,
+								Items: resourceListRowMenu(row),
+								Attrs: ui.Attrs{TestID: "actions-" + row.ID},
+							})
+						</td>
+					</tr>
+				}
+			}
+		}
+	</div>
+}
+
+// resourceListTable assembles the table and its slots.
+// Empty, Toolbar, Selection and Pagination are passed for every state. That is
+// what keeps the search box on screen when the search matched nothing: a caller
+// that renders the table only when rows exist takes the filter away with the
+// rows, and the user has nothing left to undo.
+func resourceListTable(gc GalleryContext) ui.DataTableOpts {
+	return ui.DataTableOpts{
+		Caption: resourceListCaption(gc),
+		Columns: []ui.Column{
+			{Key: "name", Label: "Project", Sortable: true},
+			{Key: "owner", Label: "Owner", HideBelow: ui.BreakpointSM},
+			{Key: "status", Label: "Status"},
+			{Key: "runs", Label: "Runs", Numeric: true, Sortable: true},
+			{Key: "updated", Label: "Last run", HideBelow: ui.BreakpointMD},
+			{Key: "actions", Label: "Actions", Align: ui.AlignEnd},
+		},
+		// One sorted column: name ascending. Passing a direction for every
+		// column would mark them all sorted, which tells a screen-reader user
+		// the table is ordered six ways at once.
+		SortKey: "name", SortDir: ui.SortAsc,
+		BaseURL:    resourceListURL(gc.State),
+		Target:     ui.NavTarget,
+		Density:    gc.Density,
+		RowCount:   resourceListRowCount(gc),
+		Toolbar:    resourceListToolbar(gc),
+		Selection:  resourceListSelection(gc),
+		Empty:      resourceListEmpty(gc),
+		Pagination: resourceListPagination(gc),
+		Attrs:      ui.Attrs{TestID: "resource-list-table"},
+	}
+}
+
+// resourceListToolbar is the search row above the table.
+templ resourceListToolbar(gc GalleryContext) {
+	@ui.TableToolbar(ui.TableToolbarOpts{Label: "Project table controls", Attrs: ui.Attrs{TestID: "resource-list-toolbar"}}) {
+		@ui.SearchInput(ui.SearchInputOpts{
+			Name:        "q",
+			Value:       resourceListQuery(gc),
+			Placeholder: "Search projects…",
+			AriaLabel:   "Search projects",
+			GetURL:      resourceListURL(gc.State),
+			Target:      ui.NavTarget,
+			IndicatorID: "resource-list-search-indicator",
+			Attrs:       ui.Attrs{TestID: "resource-list-search"},
+		})
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: "New project", Href: "/dev/scenarios/settings",
+			Action: ui.ActionPrimary, Size: ui.SizeSM, Icon: ui.IconAdd,
+			Attrs: ui.Attrs{TestID: "resource-list-new"},
+		})
+	}
+}
+
+// resourceListSelection is the bulk bar for the rows checked on this page.
+//
+// The count is derived from the rows actually rendered, not a constant: a bar
+// claiming two selected above a page where none are checked is the kind of
+// fixture that makes a reviewer trust the surface less than no fixture at all.
+templ resourceListSelection(gc GalleryContext) {
+	@ui.SelectionBar(ui.SelectionBarOpts{
+		Count:      resourceListSelectedCount(gc),
+		CountLabel: resourceListSelectionLabel(gc),
+		ClearURL:   resourceListURL(""),
+		ClearLabel: "Clear selection",
+		Target:     ui.NavTarget,
+		Attrs:      ui.Attrs{TestID: "resource-list-selection"},
+	}) {
+		// Each bulk action navigates to the state it would produce. The dev
+		// surface owns no mutation endpoint, and a control wired to one it does
+		// not own either 404s or answers with another surface's fragment.
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: "Export selected", Href: resourceListURL("loading"),
+			Size: ui.SizeXS, Icon: ui.IconDownload,
+			Attrs: ui.Attrs{TestID: "resource-list-export"},
+		})
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: "Archive selected", Href: resourceListURL("empty"),
+			Size: ui.SizeXS, Icon: ui.IconFolder,
+			Attrs: ui.Attrs{TestID: "resource-list-archive"},
+		})
+	}
+}
+
+// resourceListEmpty is what the table card holds with no rows.
+//
+// Two different messages, because they need two different actions: a search
+// that matched nothing offers to clear itself, and a failure states that the
+// rows are absent rather than that none exist.
+templ resourceListEmpty(gc GalleryContext) {
+	if gc.State == "error" {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Variant: ui.EmptyInline,
+			// The table has a caption, not a heading, and it sits directly under
+			// the page title - so the empty state's title is this surface's
+			// first heading below h1 and must be h2.
+			Level: 2,
+			Title: "No rows to show",
+			Body:  "The list failed to load, so nothing is displayed. This is not an empty workspace.",
+			Attrs: ui.Attrs{TestID: "resource-list-empty-error"},
+		})
+	} else {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Variant:    ui.EmptyInline,
+			Filtered:   true,
+			Level:      2,
+			Title:      "No projects match that search",
+			Body:       fmt.Sprintf("Nothing in this workspace matches %q. All 12 projects are still there.", resourceListQuery(gc)),
+			ClearURL:   resourceListURL(""),
+			ClearLabel: "Clear search",
+			Target:     ui.NavTarget,
+			Attrs:      ui.Attrs{TestID: "resource-list-empty"},
+		})
+	}
+}
+
+// resourceListPagination is the numbered pager.
+//
+// No Target, so the numbers are ordinary links to this scenario's own URL: the
+// handler reads ?page= and renders that slice, which is the same path a browser
+// with no JavaScript takes. Numbered because three pages is small enough that
+// the digits are navigation rather than noise.
+templ resourceListPagination(gc GalleryContext) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page:       resourceListPage(gc),
+		TotalPages: resourceListTotalPages(gc),
+		BaseURL:    resourceListURL(gc.State),
+		Param:      "page",
+		Numbered:   true,
+		Labels:     resourceListPagerLabels(),
+		Attrs:      ui.Attrs{TestID: "resource-list-pager"},
+	})
+}
+
+// resourceListURL is the canonical URL for a state, so a sort, search or page
+// link returns to the state the reader was looking at instead of dropping them
+// on default.
+func resourceListURL(state string) string {
+	if state == "" || state == "default" {
+		return "/dev/scenarios/resource-list"
+	}
+	return "/dev/scenarios/resource-list?state=" + state
+}
+
+// resourceListRowCount decides rows versus the empty slot. Loading counts as
+// rows: the skeleton occupies the tbody, so the header row and the column
+// widths are already settled when the real rows replace it.
+func resourceListRowCount(gc GalleryContext) int {
+	switch gc.State {
+	case "empty", "error":
+		return 0
+	case "loading":
+		return len(resourceListSkeletonRows())
+	default:
+		return len(resourceListRows(gc))
+	}
+}
+
+func resourceListSkeletonRows() []string {
+	out := make([]string, 0, resourceListPageSize)
+	for i := 1; i <= resourceListPageSize; i++ {
+		out = append(out, fmt.Sprintf("resource-list-skeleton-%d", i))
+	}
+	return out
+}
+
+// resourceListRows is the slice on screen: the page the reader asked for, taken
+// from the whole fixture. Slicing here rather than rendering a fixed four rows
+// is what makes the pager a real control - the numbers change what is listed.
+func resourceListRows(gc GalleryContext) []resourceListRow {
+	all := resourceListCorpus(gc)
+	start := (resourceListPage(gc) - 1) * resourceListPageSize
+	if start >= len(all) {
+		return nil
+	}
+	end := start + resourceListPageSize
+	if end > len(all) {
+		end = len(all)
+	}
+	return all[start:end]
+}
+
+// resourceListCorpus is the whole fixture table: twelve projects, in the name
+// order the sorted column claims. Selection is spread across the pages so the
+// bulk bar is exercised on every one of them.
+func resourceListCorpus(gc GalleryContext) []resourceListRow {
+	return []resourceListRow{
+		{
+			ID: "apollo", Name: resourceListName(gc.LongContent, "Apollo", "Apollo ingest pipeline (europe-west4, migrated from the legacy tenant)"),
+			Owner: "Ada Lovelace", Runs: "1,204", Updated: "15 Jan 2026, 09:12",
+			StatusLabel: "Active", StatusKind: ui.KindSuccess, Selected: true,
+		},
+		{
+			ID: "borealis", Name: "Borealis", Owner: "Grace Hopper", Runs: "87", Updated: "14 Jan 2026, 17:40",
+			StatusLabel: "Paused", StatusKind: ui.KindWarn, Selected: true,
+		},
+		{
+			ID: "cygnus", Name: "Cygnus", Owner: "Ada Lovelace", Runs: "0", Updated: "Never",
+			StatusLabel: "Draft", StatusKind: ui.KindNeutral,
+		},
+		{
+			ID: "draco", Name: "Draco", Owner: "Marta Rodriguez", Runs: "412", Updated: "13 Jan 2026, 08:58",
+			StatusLabel: "Failing", StatusKind: ui.KindDanger,
+		},
+		{
+			ID: "eridanus", Name: "Eridanus", Owner: "Grace Hopper", Runs: "3,940", Updated: "15 Jan 2026, 06:20",
+			StatusLabel: "Active", StatusKind: ui.KindSuccess, Selected: true,
+		},
+		{
+			ID: "fornax", Name: "Fornax", Owner: "Ada Lovelace", Runs: "18", Updated: "11 Jan 2026, 22:04",
+			StatusLabel: "Paused", StatusKind: ui.KindWarn,
+		},
+		{
+			ID: "gemini", Name: "Gemini", Owner: "Marta Rodriguez", Runs: "205", Updated: "12 Jan 2026, 13:31",
+			StatusLabel: "Active", StatusKind: ui.KindSuccess,
+		},
+		{
+			ID: "hydra", Name: "Hydra", Owner: "Grace Hopper", Runs: "0", Updated: "Never",
+			StatusLabel: "Draft", StatusKind: ui.KindNeutral, Selected: true,
+		},
+		{
+			ID: "indus", Name: "Indus", Owner: "Ada Lovelace", Runs: "76", Updated: "10 Jan 2026, 09:47",
+			StatusLabel: "Failing", StatusKind: ui.KindDanger, Selected: true,
+		},
+		{
+			ID: "lyra", Name: "Lyra", Owner: "Marta Rodriguez", Runs: "1,013", Updated: "14 Jan 2026, 20:15",
+			StatusLabel: "Active", StatusKind: ui.KindSuccess,
+		},
+		{
+			ID: "mensa", Name: "Mensa", Owner: "Grace Hopper", Runs: "6", Updated: "09 Jan 2026, 07:02",
+			StatusLabel: "Paused", StatusKind: ui.KindWarn,
+		},
+		{
+			ID: "norma", Name: "Norma", Owner: "Ada Lovelace", Runs: "588", Updated: "13 Jan 2026, 15:26",
+			StatusLabel: "Active", StatusKind: ui.KindSuccess,
+		},
+	}
+}
+
+// resourceListRowMenu is one row's command set.
+//
+// Delete carries no Confirm: hx-confirm only gates an htmx request, so putting
+// it on a navigating item is a confirmation that never appears. The confirmed
+// destructive pattern is ConfirmAction, which the settings danger zone renders.
+func resourceListRowMenu(row resourceListRow) []ui.MenuItem {
+	return []ui.MenuItem{
+		{Label: "Open board", Href: "/dev/scenarios/planning", Icon: ui.IconExternal},
+		{Label: "Rename", Href: "/dev/scenarios/settings", Icon: ui.IconEdit},
+		{Separator: true},
+		// Disabled rather than absent: a command that vanishes when
+		// unavailable never explains that the project has to be paused first.
+		{Label: "Archive", Icon: ui.IconFolder, Disabled: row.StatusKind == ui.KindSuccess},
+		{Label: "Delete", Href: resourceListURL("empty"), Icon: ui.IconDelete, Kind: ui.KindDanger},
+	}
+}
+
+// resourceListCaption states the slice on screen, not just the noun. "Projects"
+// alone leaves a screen-reader user with no idea that they are on page two of a
+// sorted, filtered set.
+func resourceListCaption(gc GalleryContext) string {
+	switch gc.State {
+	case "empty":
+		return fmt.Sprintf("Projects matching %q, sorted by project ascending", resourceListQuery(gc))
+	case "error":
+		return "Projects, unavailable"
+	case "loading":
+		return "Projects, loading"
+	default:
+		first := (resourceListPage(gc)-1)*resourceListPageSize + 1
+		return fmt.Sprintf("Projects %d to %d of %d, sorted by project ascending",
+			first, first+len(resourceListRows(gc))-1, len(resourceListCorpus(gc)))
+	}
+}
+
+func resourceListQuery(gc GalleryContext) string {
+	if gc.State == "empty" {
+		return "obsolete-tenant"
+	}
+	return ""
+}
+
+// resourceListPage clamps the requested page into the pages this state has. An
+// out-of-range page would render a pager whose current position does not exist,
+// and an empty tbody that looks like a failure.
+func resourceListPage(gc GalleryContext) int {
+	total := resourceListTotalPages(gc)
+	if gc.Page < 1 {
+		return 1
+	}
+	if gc.Page > total {
+		return total
+	}
+	return gc.Page
+}
+
+// resourceListTotalPages keeps the pager honest per state: a filtered-to-nothing
+// result is one page, and a set that failed to load has no second page to visit.
+func resourceListTotalPages(gc GalleryContext) int {
+	if gc.State == "empty" || gc.State == "error" {
+		return 1
+	}
+	corpus := len(resourceListCorpus(gc))
+	pages := corpus / resourceListPageSize
+	if corpus%resourceListPageSize != 0 {
+		pages++
+	}
+	if pages < 1 {
+		return 1
+	}
+	return pages
+}
+
+func resourceListSelectedCount(gc GalleryContext) int {
+	if gc.State != "default" && gc.State != "" {
+		return 0
+	}
+	count := 0
+	for _, row := range resourceListRows(gc) {
+		if row.Selected {
+			count++
+		}
+	}
+	return count
+}
+
+// resourceListSelectionLabel names what was selected out of what. A bare "2"
+// beside a delete button does not say two of how many, which is the number that
+// decides whether the click is safe.
+func resourceListSelectionLabel(gc GalleryContext) string {
+	return fmt.Sprintf("%d of %d projects on this page selected",
+		resourceListSelectedCount(gc), len(resourceListRows(gc)))
+}
+
+// resourceListPagerLabels are English literals by design: the dev catalog is
+// not a translated surface, and routing its strings through i18n would put
+// fixture copy in the product's catalogs.
+func resourceListPagerLabels() ui.PagerLabels {
+	return ui.PagerLabels{
+		Aria:   func(page, totalPages int) string { return "Project pages" },
+		Prev:   func(page, totalPages int) string { return "Previous" },
+		Next:   func(page, totalPages int) string { return "Next" },
+		PageOf: func(page, totalPages int) string { return fmt.Sprintf("Page %d of %d", page, totalPages) },
+		Page:   func(page int) string { return fmt.Sprintf("Page %d", page) },
+	}
+}
+
+func resourceListFailure(long bool) string {
+	if long {
+		return "The workspace API answered 503 at 15 Jan 2026, 09:41 UTC after three attempts, so the rows for this page were never retrieved. Your search text and the sort you chose are still in the URL above, which means retrying resumes exactly where you were rather than starting from an unfiltered first page."
+	}
+	return "The workspace API answered 503 at 09:41. Your search and sort are still in the URL, so retrying resumes where you were."
+}
+
+func resourceListName(long bool, short, extended string) string {
+	if long {
+		return extended
+	}
+	return short
+}

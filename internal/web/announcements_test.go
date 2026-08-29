@@ -21,7 +21,7 @@ func TestAnnouncementCRUDAndBanner(t *testing.T) {
 	form := url.Values{"kind": []string{"info"}, "message": []string{""}}
 	code, _, body := postForm(t, s, "/admin/announcements", form, adminCookie)
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
-	assert.Contains(t, body, "alert-error")
+	assert.Contains(t, body, "alert-danger")
 
 	// Create (valid → inactive row).
 	form = url.Values{"kind": []string{"info"}, "message": []string{"Scheduled maintenance"}, "url": []string{""}}
@@ -80,4 +80,30 @@ func TestAnnouncementCRUDAndBanner(t *testing.T) {
 	// Non-admin cannot reach the CRUD.
 	code, _, _ = serve(t, s, "GET", "/admin/announcements", nil, nil, userCookie)
 	assert.Equal(t, http.StatusForbidden, code)
+}
+
+// The kind cell used to be written as class="badge { announcementBadgeClass(…) }",
+// which templ does not interpolate inside a quoted attribute: every row shipped
+// the literal expression as a class name and rendered unstyled. Assert the
+// resolved component class per kind.
+func TestAnnouncementKindBadgeIsStyled(t *testing.T) {
+	s := integrationServer(t, nil)
+	adminUser(t, s, "user_akb", "org_akb")
+	cookie := sessionCookie("user_akb", "org_akb", "org:admin")
+
+	for kind, want := range map[string]string{
+		"info":     "badge badge-info",
+		"warning":  "badge badge-warn",
+		"critical": "badge badge-danger",
+	} {
+		form := url.Values{"kind": {kind}, "message": {"Notice " + kind}, "url": {""}}
+		code, _, _ := postForm(t, s, "/admin/announcements", form, cookie)
+		require.Equal(t, http.StatusOK, code)
+
+		code, _, body := serve(t, s, "GET", "/admin/announcements", nil, nil, cookie)
+		require.Equal(t, http.StatusOK, code)
+		assert.Contains(t, body, `class="`+want+`"`, "kind %q must render its component class", kind)
+		assert.NotContains(t, body, "announcementBadgeClass",
+			"a templ expression must never reach the browser as a class name")
+	}
 }

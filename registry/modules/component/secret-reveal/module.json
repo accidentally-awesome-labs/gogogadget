@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/secret-reveal",
+    "kind": "component",
+    "name": "secret-reveal",
+    "revision": 1,
+    "contract": 1,
+    "title": "SecretReveal",
+    "description": "The SecretReveal renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/secret-reveal.templ",
+        "target": "internal/web/templates/ui/secret-reveal.templ",
+        "class": "templ",
+        "sha256": "596e49043640350459ce642aa9fb64bf042eeb91ab365dc76093fa51195e1ec0",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "secret-reveal",
+          "family": "feedback",
+          "signature": "templ SecretReveal(o SecretRevealOpts)",
+          "summary": "The reveal-once secret pattern: the value in a code box and a copy button carrying it on data-copy.",
+          "guidance": "The value never reaches an Alpine expression, so a secret containing quotes cannot break out of one.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

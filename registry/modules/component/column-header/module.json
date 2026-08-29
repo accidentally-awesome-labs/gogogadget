@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/column-header",
+    "kind": "component",
+    "name": "column-header",
+    "revision": 1,
+    "contract": 1,
+    "title": "ColumnHeader",
+    "description": "The ColumnHeader renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/column-header.templ",
+        "target": "internal/web/templates/ui/column-header.templ",
+        "class": "templ",
+        "sha256": "49d0670f3047f63cdb45032ca5be59bf8df3ba287b6a36908db680f85c9631bb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/column-header_test.go",
+        "target": "internal/web/templates/ui/column-header_test.go",
+        "class": "test",
+        "sha256": "249ee34933666319f7582d3fbc5c9a3d92e1f233634b110de366088519894015",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "column-header",
+          "family": "data",
+          "signature": "templ ColumnHeader(o ColumnHeaderOpts)",
+          "summary": "Renders a th with sort semantics.",
+          "guidance": "aria-sort is what tells a screen-reader user which column orders the table and in which direction. Without it a sorted table is indistinguishable from an unsorted one, and the little arrow glyph is invisible to them.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/admin-flags",
+    "kind": "workflow",
+    "name": "admin-flags",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin feature flag mutations",
+    "description": "Creating, toggling, rolling out, deleting and per-organization overriding of feature flags, with cache invalidation and audit entries.",
+    "requires": [
+      "page/admin-flags",
+      "system/audit",
+      "system/feature-flags",
+      "system/i18n",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_flags.go",
+        "target": "internal/web/workflow_admin_flags.go",
+        "class": "go",
+        "sha256": "030f15bde1015bf4a72dbc5385f32524149f83865bc325ff4d02a969e8bbd95c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.flags.create",
+        "admin.flags.delete",
+        "admin.flags.override_delete",
+        "admin.flags.override_set",
+        "admin.flags.rollout",
+        "admin.flags.toggle"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.flags.create",
+          "method": "POST",
+          "pattern": "/admin/flags",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlagCreate"
+        },
+        {
+          "id": "admin.flags.delete",
+          "method": "POST",
+          "pattern": "/admin/flags/{key}/delete",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlagDelete"
+        },
+        {
+          "id": "admin.flags.override_delete",
+          "method": "POST",
+          "pattern": "/admin/flags/{key}/overrides/{org}/delete",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlagOverrideDelete"
+        },
+        {
+          "id": "admin.flags.override_set",
+          "method": "POST",
+          "pattern": "/admin/flags/{key}/overrides",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlagOverrideSet"
+        },
+        {
+          "id": "admin.flags.rollout",
+          "method": "POST",
+          "pattern": "/admin/flags/{key}/rollout",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlagRollout"
+        },
+        {
+          "id": "admin.flags.toggle",
+          "method": "POST",
+          "pattern": "/admin/flags/{key}/toggle",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlagToggle"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

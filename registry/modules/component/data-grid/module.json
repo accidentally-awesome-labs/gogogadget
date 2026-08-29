@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/data-grid",
+    "kind": "component",
+    "name": "data-grid",
+    "revision": 1,
+    "contract": 1,
+    "title": "Data grid",
+    "description": "A progressive layer over DataTable: roving cell focus, column visibility and width, and windowed row fetches. Sort, search and pagination stay server-owned, and the pager is never removed.",
+    "requires": [
+      "component/column-header",
+      "component/pagination",
+      "component/search-input",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/data-grid.templ",
+        "target": "internal/web/templates/ui/data-grid.templ",
+        "class": "templ",
+        "sha256": "648c694027a5e6529ca3f1e1a12859e096a961ab9a2ab01bf0988984ff5166ec",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/data-grid_test.go",
+        "target": "internal/web/templates/ui/data-grid_test.go",
+        "class": "test",
+        "sha256": "d2cf0e9a3664086f16155085b887485a58f06990930935aab992b79f2afe3896",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/grid.js",
+        "target": "static/ui/grid.js",
+        "class": "asset",
+        "sha256": "11452fb0bbe0e6fe5938f548d5e5fcbabf48daba09c5b4fd073f388495e22fe9",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "column-picker",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiGrid",
+          "signature": "templ ColumnPicker(o ColumnPickerOpts)",
+          "summary": "Renders per-column visibility checkboxes inside a native disclosure.",
+          "guidance": "Checkboxes in a details element, not a custom menu: the state is a set of independent toggles, which is exactly what a checkbox group is, and the platform already supplies the keyboard model. The picker starts hidden because hiding a column has no effect without the controller.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "data-grid",
+          "family": "advanced",
+          "engine": "alpine",
+          "alpine": "uiGrid",
+          "native_fallback": "semantic table with pagination",
+          "signature": "templ DataGrid(o DataGridOpts)",
+          "summary": "Renders the grid surface.",
+          "guidance": "The table is a real table with real headers, and the enhancement adds cell focus and column controls on top of it. It is deliberately not role=\"grid\": that role promises a full two-dimensional keyboard model, and claiming it while the page still behaves like a table is worse for a screen-reader user than the honest table semantics they already understand.",
+          "keyboard": "Arrow keys move cell focus, Home/End jump to the row's ends (with Ctrl/Cmd, to the grid's first or last cell) and PageUp/PageDown move ten rows; a cell containing a text control keeps its own keys.",
+          "states": [
+            "default",
+            "empty",
+            "overflow"
+          ]
+        },
+        {
+          "name": "grid-toolbar",
+          "family": "advanced",
+          "signature": "templ GridToolbar(o GridToolbarOpts)",
+          "summary": "Renders search plus the column picker trigger.",
+          "states": [
+            "default"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "ui-grid",
+          "path": "static/ui/grid.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

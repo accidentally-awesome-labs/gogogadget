@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/table-empty",
+    "kind": "component",
+    "name": "table-empty",
+    "revision": 2,
+    "contract": 1,
+    "title": "TableEmpty",
+    "description": "Superseded by component/empty-state's inline variant.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

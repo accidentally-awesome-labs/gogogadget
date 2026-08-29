@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/organization-export",
+    "kind": "workflow",
+    "name": "organization-export",
+    "revision": 1,
+    "contract": 1,
+    "title": "Organization data export",
+    "description": "Enqueues the org:admin-only organization data export job and owns the session-claims org:admin check the org surfaces gate on.",
+    "requires": [
+      "system/audit",
+      "system/i18n",
+      "system/identity",
+      "system/jobs",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/jobs/export_org.go",
+        "target": "internal/jobs/export_org.go",
+        "class": "go",
+        "sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/export_org_test.go",
+        "target": "internal/jobs/export_org_test.go",
+        "class": "test",
+        "sha256": "abe8799fee875e5c81065ddf5cb6dad931c1eec814648040c0497096a10341f1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/workflow_organization_export.go",
+        "target": "internal/web/workflow_organization_export.go",
+        "class": "go",
+        "sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "routes": [
+        "organization-export.enqueue"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "organization-export.enqueue",
+          "method": "POST",
+          "pattern": "/app/settings/org/export",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleOrgExport"
+        }
+      ],
+      "jobs": [
+        {
+          "kind": "export.org_json",
+          "package": "internal/jobs",
+          "handler": "defineExportOrgJSON",
+          "schedulable": false,
+          "max_attempts": 0
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

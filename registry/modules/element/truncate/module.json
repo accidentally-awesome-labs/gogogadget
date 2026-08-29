@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/truncate",
+    "kind": "element",
+    "name": "truncate",
+    "revision": 1,
+    "contract": 1,
+    "title": "Truncate",
+    "description": "The Truncate renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/truncate.templ",
+        "target": "internal/web/templates/ui/truncate.templ",
+        "class": "templ",
+        "sha256": "0a53b0e9a32f388e8e7b4f0cb7fef300b040082c2cfd297637c5c015dd84cf32",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/truncate_test.go",
+        "target": "internal/web/templates/ui/truncate_test.go",
+        "class": "test",
+        "sha256": "de33aaaf5e1f770b59b866573019ad3a67457527858c1116c7b1e401ace4dfcc",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "truncate",
+          "family": "foundations",
+          "signature": "templ Truncate(o TruncateOpts)",
+          "summary": "Clips overflowing text.",
+          "guidance": "The full string is always in the DOM and carried in title, so it stays selectable, searchable by the browser's find, and available on hover. Cutting the string server-side would make the rest unreachable, and a screen reader would read the truncated version as if it were the whole value.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

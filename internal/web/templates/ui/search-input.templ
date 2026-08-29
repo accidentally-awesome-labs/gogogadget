@@ -1,0 +1,159 @@
+package ui
+
+import (
+	"net/url"
+	"slices"
+	"strings"
+)
+
+// SearchInputOpts is the debounced table search. It morphs Target and pushes
+// the URL, so a search is shareable and the Back button works.
+type SearchInputOpts struct {
+	Name        string
+	Value       string
+	Placeholder string
+	AriaLabel   string
+	GetURL      string
+	Target      string
+	IndicatorID string
+	Size        Size
+	Attrs       Attrs
+}
+
+// SearchInput renders the field inside its own GET form.
+//
+// The form is not decoration. A bare input has no submit path whatsoever: with
+// no scripting, Enter does nothing, there is nothing to press, and the query the
+// user typed cannot leave the page. The form gives the browser the same job htmx
+// does - send Name to GetURL - so the search degrades to a page load instead of
+// to silence.
+//
+// The form carries the htmx attributes too, so a submit is a morph rather than a
+// full navigation once htmx is loaded. Both the field and the form synchronise
+// on the form, so Enter (which fires the input's `search` event AND submits)
+// still results in exactly one request.
+//
+// hx-indicator is emitted only with something to point at. "#" is not an empty
+// selector, it is an invalid one: querySelector throws on it, which takes the
+// request down with it - so a caller who never named an indicator would lose the
+// search rather than the spinner.
+templ SearchInput(o SearchInputOpts) {
+	<form
+		{ root("search-input", "toolbar", Attrs{})... }
+		method="get" action={ searchAction(o.GetURL) }
+		if o.Target != "" {
+			hx-get={ o.GetURL }
+			hx-target={ o.Target }
+			hx-swap="innerMorph"
+			hx-push-url="true"
+			hx-sync="this:replace"
+		}
+		if o.Target != "" && o.IndicatorID != "" {
+			hx-indicator={ "#" + o.IndicatorID }
+		}
+	>
+		// Parameters GetURL already carries travel as fields, because a native
+		// GET submit REPLACES the query string: searching from
+		// /admin/content?kind=post would otherwise drop the kind and filter a
+		// different list than the one on screen.
+		for _, param := range searchHiddenParams(o) {
+			<input type="hidden" name={ param.Name } value={ param.Value }/>
+		}
+		// The htmx attributes appear only with a target. A search input with
+		// hx-target="" fires on every keystroke into an empty selector, so it
+		// looks live and filters nothing - worse than the plain field the form
+		// around it already makes submittable.
+		//
+		// One class attribute, merged: the spread map already carries
+		// Attrs.Class, so a second class= beside it was invalid HTML - and the
+		// browser keeps the FIRST, which meant any caller who set Attrs.Class
+		// silently lost the field's own `input max-w-sm`.
+		<input
+			{ attributes(withClass(o.Attrs, inputClass(o.Size)+" max-w-sm"))... }
+			type="search" name={ o.Name } value={ o.Value } placeholder={ o.Placeholder }
+			if o.Target != "" {
+				hx-get={ o.GetURL }
+				hx-trigger="input changed delay:300ms, search"
+				hx-target={ o.Target }
+				hx-swap="innerMorph"
+				hx-push-url="true"
+				hx-include="this"
+				hx-sync="closest form:replace"
+			}
+			if o.Target != "" && o.IndicatorID != "" {
+				hx-indicator={ "#" + o.IndicatorID }
+			}
+			aria-label={ o.AriaLabel }
+		/>
+		// Visually hidden until focused, like the skip link. A permanently
+		// visible Search button beside a field that already filters as you type
+		// is clutter that says the live filtering does not work; a button that
+		// only exists in JavaScript is a control a keyboard or no-script user
+		// cannot reach. Tab reveals it, and it is the form's submitter either
+		// way, which is what makes Enter in the field submit at all.
+		@Button(ButtonOpts{
+			Label: searchSubmitLabel(o), Type: TypeSubmit, Size: SizeSM,
+			Attrs: Attrs{Class: "sr-only focus:not-sr-only"},
+		})
+		if o.IndicatorID != "" {
+			<span id={ o.IndicatorID } class="text-fg-muted">
+				@Spinner(SpinnerOpts{})
+			</span>
+		}
+	</form>
+}
+
+// searchAction is the URL the browser submits to: GetURL without its query,
+// because a GET form builds the query itself out of its fields.
+func searchAction(getURL string) string {
+	if i := strings.IndexByte(getURL, '?'); i >= 0 {
+		return getURL[:i]
+	}
+	return getURL
+}
+
+type searchParam struct{ Name, Value string }
+
+// searchHiddenParams returns GetURL's own query parameters as fields, minus the
+// search parameter itself - the visible input owns that one, and two fields with
+// the same name would send the old query alongside the new one.
+//
+// Sorted, because map iteration order is randomised and this markup is compared
+// against visual baselines.
+func searchHiddenParams(o SearchInputOpts) []searchParam {
+	i := strings.IndexByte(o.GetURL, '?')
+	if i < 0 {
+		return nil
+	}
+	values, err := url.ParseQuery(o.GetURL[i+1:])
+	if err != nil {
+		return nil
+	}
+	out := make([]searchParam, 0, len(values))
+	for name, vals := range values {
+		if name == o.Name {
+			continue
+		}
+		for _, value := range vals {
+			out = append(out, searchParam{Name: name, Value: value})
+		}
+	}
+	slices.SortFunc(out, func(a, b searchParam) int {
+		if c := strings.Compare(a.Name, b.Name); c != 0 {
+			return c
+		}
+		return strings.Compare(a.Value, b.Value)
+	})
+	return out
+}
+
+// searchSubmitLabel names the submit control with the label the caller already
+// translated for the field, rather than introducing a second string that would
+// have to be localized separately - and would then be the only English word on
+// a Spanish page.
+func searchSubmitLabel(o SearchInputOpts) string {
+	if o.AriaLabel != "" {
+		return o.AriaLabel
+	}
+	return "Search"
+}

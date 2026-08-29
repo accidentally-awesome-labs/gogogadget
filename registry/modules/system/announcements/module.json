@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/announcements",
+    "kind": "system",
+    "name": "announcements",
+    "revision": 1,
+    "contract": 1,
+    "title": "Product announcements",
+    "description": "Administrator-authored banners shown to signed-in users, cached one at a time and invalidated on every admin mutation.",
+    "requires": [
+      "system/database"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/announcements.sql",
+        "target": "internal/db/queries/announcements.sql",
+        "class": "query",
+        "sha256": "4f97cb345d3095a23933fbaa9594f7ba613a222feb0f7baf8b8008a4aba23c50",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/dev/announcements.sql",
+        "target": "internal/db/testdata/seed/dev/announcements.sql",
+        "class": "seed",
+        "sha256": "d4f456bea303e6b99126c7171bec494d7b8b1e55cd3126514859bdf12d5daf32",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "queries": [
+        "announcements"
+      ]
+    },
+    "runtime": {
+      "queries": [
+        {
+          "name": "CreateAnnouncement",
+          "table": "announcements"
+        },
+        {
+          "name": "DeactivateAnnouncements",
+          "table": "announcements"
+        },
+        {
+          "name": "DeleteAnnouncement",
+          "table": "announcements"
+        },
+        {
+          "name": "GetActiveAnnouncement",
+          "table": "announcements"
+        },
+        {
+          "name": "ListAnnouncements",
+          "table": "announcements"
+        },
+        {
+          "name": "SetAnnouncementActive",
+          "table": "announcements"
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "0011_announcements",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0011_announcements.sql",
+        "sha256": "60e13a9b03a1581845f856adb771d96393ed25efefb7b4d44c9d27222eb84c23"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [
+      {
+        "table": "announcements",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data",
+    "locales": {
+      "en": {
+        "announcement.dismiss": "Dismiss announcement",
+        "announcement.link": "Learn more →"
+      },
+      "es": {
+        "announcement.dismiss": "Descartar anuncio",
+        "announcement.link": "Más información →"
+      }
+    }
+  }
+}

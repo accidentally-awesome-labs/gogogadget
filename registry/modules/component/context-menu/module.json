@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/context-menu",
+    "kind": "component",
+    "name": "context-menu",
+    "revision": 1,
+    "contract": 1,
+    "title": "ContextMenu",
+    "description": "The ContextMenu renderer and its options.",
+    "requires": [
+      "component/dropdown-menu",
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/context-menu.templ",
+        "target": "internal/web/templates/ui/context-menu.templ",
+        "class": "templ",
+        "sha256": "7d977c8638ddd530b510a9133728f309ba0a485d5355dc97efada3efacac4a48",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "context-menu",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiContextMenu",
+          "native_fallback": "visible trigger",
+          "signature": "templ ContextMenu(o ContextMenuOpts)",
+          "summary": "Renders a region whose commands are reachable by right-click and by an explicit trigger.",
+          "guidance": "The trigger is a real DropdownMenu, so the keyboard path is the same well-tested one every other menu uses; right-click is the addition, not the mechanism.",
+          "keyboard": "Right-click opens the menu, and its trigger carries the standard menu keys: Escape closes, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next matching one.",
+          "states": [
+            "default",
+            "disabled"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

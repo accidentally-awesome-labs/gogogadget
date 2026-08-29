@@ -1,0 +1,239 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The dashboard scenario: the surface a signed-in user lands on.
+//
+// Everything below is literal fixture data declared in this file. A dev surface
+// that reads the database renders differently on every machine, which makes a
+// visual baseline useless and a reported difference unfalsifiable.
+
+// ScenarioDashboard renders the app landing surface.
+//
+// The four regions - controls, onboarding, headline numbers, activity - are
+// emitted in the same order and the same containers in every state. That is the
+// whole point of the loading state: skeletons stand where the real content will
+// land, so arriving data does not move the button the user was about to press.
+templ ScenarioDashboard(gc GalleryContext) {
+	<div class="space-y-6" data-testid="scenario-dashboard">
+		// The command trigger sits outside the state switch: it is chrome, not
+		// data, and hiding it while the page loads removes the one control that
+		// works before the data does.
+		@ui.Toolbar(ui.ToolbarOpts{Label: "Dashboard controls", Attrs: ui.Attrs{TestID: "dashboard-controls"}}) {
+			@ui.CommandPalette(dashboardCommandPalette())
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: "New project", Href: "/dev/scenarios/resource-list",
+				Action: ui.ActionPrimary, Size: ui.SizeSM, Icon: ui.IconAdd,
+				Attrs: ui.Attrs{TestID: "dashboard-new-project"},
+			})
+		}
+		if gc.State == "loading" {
+			// A card, not a bare skeleton: the checklist's own border is part of
+			// the reserved space, so the region keeps its height and the
+			// sections below it do not shift upward.
+			@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "dashboard-onboarding-loading"}}) {
+				@ui.Skeleton(ui.SkeletonOpts{Lines: 5})
+			}
+		} else {
+			@ui.OnboardingChecklist(dashboardChecklist(gc))
+		}
+		@ui.StatGroup(ui.StatGroupOpts{
+			Label: "Workspace totals", Columns: 3,
+			Attrs: ui.Attrs{TestID: "dashboard-stats"},
+		}) {
+			if gc.State == "loading" {
+				for _, slot := range dashboardMetricSlots() {
+					@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: slot}}) {
+						@ui.Skeleton(ui.SkeletonOpts{Lines: 2})
+					}
+				}
+			} else {
+				for _, metric := range dashboardMetrics(gc) {
+					@ui.Metric(metric)
+				}
+			}
+		}
+		if gc.State == "empty" {
+			// Three zeroes with no explanation read as a broken query. This
+			// says what will fill them and where the first number comes from,
+			// which is the only thing a new workspace needs to know.
+			@ui.EmptyState(ui.EmptyStateOpts{
+				Title: "No numbers yet",
+				// Directly under the page title with no region heading between,
+				// so h2. The activity empty state below sits inside a titled
+				// section and keeps its default h3.
+				Level: 2,
+				Body:  dashboardText(gc.LongContent, "These totals count projects, runs and storage across the workspace. The first project you create starts them.", "These totals count projects, runs and storage across every member of the workspace, including the ones shared with you by other organisations you belong to. They stay at zero until the first project is created, and the first run of that project is what starts the weekly counters moving."),
+				Attrs: ui.Attrs{TestID: "dashboard-stats-empty"},
+			})
+		}
+		// Section rather than a bare list: the heading names the list through
+		// aria-labelledby, so a screen-reader user reaches "Recent activity"
+		// as a landmark instead of tabbing into an anonymous run of entries.
+		@ui.Section(ui.SectionOpts{
+			Title: "Recent activity", Level: 2,
+			Attrs: ui.Attrs{ID: "dashboard-activity", TestID: "dashboard-activity"},
+		}) {
+			switch gc.State {
+				case "loading":
+					@ui.Card(ui.CardOpts{Attrs: ui.Attrs{TestID: "dashboard-activity-loading"}}) {
+						@ui.Skeleton(ui.SkeletonOpts{Lines: 4})
+					}
+				case "empty":
+					@ui.EmptyState(ui.EmptyStateOpts{
+						Title: "Nothing has happened yet",
+						Body:  "Every create, invite and token rotation in this workspace appears here.",
+						Attrs: ui.Attrs{TestID: "dashboard-activity-empty"},
+					})
+				default:
+					@ui.Card(ui.CardOpts{}) {
+						@ui.List(ui.ListOpts{Attrs: ui.Attrs{TestID: "dashboard-activity-list"}}) {
+							for _, entry := range dashboardActivity(gc) {
+								@ui.ActivityItem(entry)
+							}
+						}
+					}
+			}
+		}
+	</div>
+}
+
+// dashboardCommandPalette wires the palette to destinations that exist.
+// SearchURL is deliberately empty. The scenario owns no fragment endpoint of
+// its own, and pointing the palette at another surface's fragment route would
+// swap that surface's markup into these results - a control that looks wired
+// and answers with the wrong thing. Without it the palette is exactly what it
+// degrades to with no scripting: a search form that submits to a real page.
+func dashboardCommandPalette() ui.CommandPaletteOpts {
+	return ui.CommandPaletteOpts{
+		ID:          "dashboard-command",
+		Label:       "Search commands",
+		FallbackURL: "/dev/gallery",
+		Target:      ui.NavTarget,
+		Attrs:       ui.Attrs{TestID: "dashboard-command"},
+		Groups: []ui.CommandGroupData{
+			{Title: "Go to", Items: []ui.CommandItemData{
+				{ID: "cmd-projects", Label: "Projects", Href: "/dev/scenarios/resource-list", Icon: ui.IconFolder, Hint: "Workspace"},
+				{ID: "cmd-settings", Label: "Settings", Href: "/dev/scenarios/settings", Icon: ui.IconSettings, Hint: "Workspace"},
+				{ID: "cmd-team", Label: "Team", Href: "/dev/scenarios/team", Icon: ui.IconTeam, Hint: "Workspace"},
+			}},
+			{Title: "Reference", Items: []ui.CommandItemData{
+				{ID: "cmd-components", Label: "Component catalog", Href: "/dev/gallery", Icon: ui.IconChart},
+				{ID: "cmd-forms", Label: "Form components", Href: "/dev/gallery/forms", Icon: ui.IconEdit},
+			}},
+		},
+	}
+}
+
+// dashboardChecklist is the setup list at two points in a workspace's life.
+//
+// The empty case is the same four steps with none complete rather than a
+// shorter list: a checklist that grows as you finish it never shows how much is
+// left, which is the only question a first-run user is asking.
+func dashboardChecklist(gc GalleryContext) ui.OnboardingChecklistOpts {
+	steps := []ui.ChecklistStep{
+		{
+			Label: "Create the workspace", Href: "/dev/scenarios/settings",
+			Body:      dashboardText(gc.LongContent, "Name it and pick a region.", "Name it, pick the region its data is stored in, and decide whether members join by invitation only or by verified email domain."),
+			Done:      true,
+			DoneLabel: "completed 12 Jan 2026",
+		},
+		{
+			Label: "Invite a teammate", Href: "/dev/scenarios/team",
+			Body:      "Owners can invite by email or share a join link.",
+			Done:      true,
+			DoneLabel: "completed 13 Jan 2026",
+		},
+		{
+			Label: "Create your first project", Href: "/dev/scenarios/resource-list",
+			Body: dashboardText(gc.LongContent, "A project holds runs, files and its own API tokens.", "A project holds its runs, its uploaded files and its own scoped API tokens, so revoking access to one project never affects the others in the workspace."),
+		},
+		{
+			Label: "Add a billing method", Href: "/dev/scenarios/billing",
+			Body: "The free plan covers 10 GB and 5,000 runs a month.",
+		},
+	}
+	if gc.State == "empty" {
+		// Brand-new org: nothing is done, so step one is the only live target.
+		for i := range steps {
+			steps[i].Done = false
+			steps[i].DoneLabel = ""
+		}
+	}
+	return ui.OnboardingChecklistOpts{
+		Title:         "Finish setting up",
+		ProgressLabel: "Workspace setup progress",
+		// First heading on the surface, directly under the page title.
+		Level: 2,
+		Steps: steps,
+		Attrs: ui.Attrs{TestID: "dashboard-onboarding"},
+	}
+}
+
+// dashboardMetricSlots names the loading placeholders so the skeleton count and
+// the metric count cannot drift apart: three cards either way, so the grid is
+// the same shape before and after the data arrives.
+func dashboardMetricSlots() []string {
+	return []string{"dashboard-stat-projects", "dashboard-stat-runs", "dashboard-stat-storage"}
+}
+
+func dashboardMetrics(gc GalleryContext) []ui.MetricOpts {
+	if gc.State == "empty" {
+		return []ui.MetricOpts{
+			{Title: "Active projects", Value: "0", Sub: "None created yet", Attrs: ui.Attrs{TestID: "dashboard-stat-projects"}},
+			{Title: "Runs this week", Value: "0", Sub: "No runs recorded", Attrs: ui.Attrs{TestID: "dashboard-stat-runs"}},
+			{Title: "Storage used", Value: "0 GB", Sub: "of 10 GB included", Attrs: ui.Attrs{TestID: "dashboard-stat-storage"}},
+		}
+	}
+	return []ui.MetricOpts{
+		{
+			Title: dashboardText(gc.LongContent, "Active projects", "Active projects across every organisation you belong to"),
+			Value: "12", Sub: "2 created since 08 Jan 2026",
+			Attrs: ui.Attrs{TestID: "dashboard-stat-projects"},
+		},
+		{
+			Title: "Runs this week",
+			Value: "1,204", Sub: "94% succeeded",
+			Attrs: ui.Attrs{TestID: "dashboard-stat-runs"},
+		},
+		{
+			Title: "Storage used",
+			Value: "3.2 GB", Sub: "of 10 GB included",
+			Attrs: ui.Attrs{TestID: "dashboard-stat-storage"},
+		},
+	}
+}
+
+// dashboardActivity is a fixed audit tail. The timestamps are literal strings
+// rather than a formatted clock reading, so two renders are byte-identical and
+// a visual difference means the markup changed.
+func dashboardActivity(gc GalleryContext) []ui.ActivityItemOpts {
+	return []ui.ActivityItemOpts{
+		{
+			Actor: "Ada Lovelace", Action: "created", Target: "Apollo",
+			Timestamp: "15 Jan 2026, 09:12", MachineTime: "2026-01-15T09:12:00Z", Icon: ui.IconAdd,
+		},
+		{
+			Actor: "Grace Hopper", Action: "invited", Target: dashboardText(gc.LongContent, "marta@example.com", "marta.rodriguez.de.la.fuente@a-deliberately-long-tenant-domain.example.com"),
+			Timestamp: "14 Jan 2026, 17:40", MachineTime: "2026-01-14T17:40:00Z", Icon: ui.IconTeam,
+		},
+		{
+			Actor: "Ada Lovelace", Action: "rotated the deploy token of", Target: "Apollo",
+			Timestamp: "14 Jan 2026, 11:05", MachineTime: "2026-01-14T11:05:00Z", Icon: ui.IconKey,
+		},
+		{
+			Actor: "Grace Hopper", Action: "archived", Target: "Borealis",
+			Timestamp: "13 Jan 2026, 08:58", MachineTime: "2026-01-13T08:58:00Z", Icon: ui.IconFolder,
+		},
+	}
+}
+
+// dashboardText picks the long variant when the reader asked to stress layout.
+// The long string is a real sentence rather than repeated filler: filler wraps
+// evenly and hides exactly the overflow a long proper noun causes.
+func dashboardText(long bool, short, extended string) string {
+	if long {
+		return extended
+	}
+	return short
+}

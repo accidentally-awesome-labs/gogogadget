@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/file-dropzone",
+    "kind": "component",
+    "name": "file-dropzone",
+    "revision": 1,
+    "contract": 1,
+    "title": "FileDropzone",
+    "description": "The FileDropzone renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/file-dropzone.templ",
+        "target": "internal/web/templates/ui/file-dropzone.templ",
+        "class": "templ",
+        "sha256": "748a895eaee35eac585913c52647bd525a1e9ce5d11f3c9747d32e72ebcb0ed8",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/file-dropzone_test.go",
+        "target": "internal/web/templates/ui/file-dropzone_test.go",
+        "class": "test",
+        "sha256": "9e81018fae7cee2faef6d5ca71e39245d85d7effac54bc0dbf38b9c8344af9b1",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "file-dropzone",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiDropzone",
+          "native_fallback": "native input",
+          "signature": "templ FileDropzone(o FileDropzoneOpts)",
+          "summary": "Renders a labelled drop target around a real file input.",
+          "guidance": "The input is a genuine \u003cinput type=\"file\"\u003e inside a \u003clabel\u003e, so clicking the zone opens the picker and the keyboard reaches the control with no script at all. Drag-and-drop is added on top by the Alpine behaviour: a drop target that is *only* droppable excludes every keyboard user.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

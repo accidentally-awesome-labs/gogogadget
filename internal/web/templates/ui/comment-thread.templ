@@ -1,0 +1,22 @@
+package ui
+
+// CommentThreadOpts is a discussion.
+type CommentThreadOpts struct {
+	// Label names the thread. Several threads can share a page - one per row,
+	// one per document - and an unnamed one is indistinguishable.
+	Label string
+	Attrs Attrs
+}
+
+// CommentThread groups comments into a named region.
+//
+// It is not a live region: a thread rendered with the page has nothing new to
+// announce. ChatLog is the live counterpart, for messages arriving after load.
+templ CommentThread(o CommentThreadOpts) {
+	<section
+		{ rootWith("comment-thread", "divide-y divide-border", o.Attrs,
+			"aria-label", o.Label)... }
+	>
+		{ children... }
+	</section>
+}

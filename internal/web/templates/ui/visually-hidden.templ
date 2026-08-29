@@ -1,0 +1,15 @@
+package ui
+
+// VisuallyHiddenOpts configures content that is available to assistive
+// technology but not painted.
+type VisuallyHiddenOpts struct {
+	Attrs Attrs
+}
+
+// VisuallyHidden hides content visually while keeping it in the accessibility
+// tree. This is not display:none and not hidden - both remove the content from
+// the tree entirely, which is the opposite of the intent. It exists so a
+// control can carry a name that the visual design does not have room for.
+templ VisuallyHidden(o VisuallyHiddenOpts) {
+	<span { root("visually-hidden", "sr-only", o.Attrs)... }>{ children... }</span>
+}

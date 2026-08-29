@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/analytics",
+    "kind": "system",
+    "name": "analytics",
+    "revision": 1,
+    "contract": 1,
+    "title": "Product analytics",
+    "description": "Capturer port with a PostHog adapter and a no-op default so every call site can fire and forget.",
+    "requires": [
+      "system/apphost",
+      "system/config"
+    ],
+    "files": [
+      {
+        "source": "internal/analytics/analytics.go",
+        "target": "internal/analytics/analytics.go",
+        "class": "go",
+        "sha256": "d1de5361a3f7e85136709c275051b86d288aa6922fac7ae56221f743b4d8c0c5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/analytics/analytics_test.go",
+        "target": "internal/analytics/analytics_test.go",
+        "class": "test",
+        "sha256": "e65ac6157126bf2e619e1667f581bc88ee855e0c0da6912c666a93e483485572",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/analytics/contract_test.go",
+        "target": "internal/analytics/contract_test.go",
+        "class": "test",
+        "sha256": "c5d2692ac52f67114b23efd9aa01082bde92105d10e3b9cfdc04a740352b936d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/analytics/module.go",
+        "target": "internal/analytics/module.go",
+        "class": "go",
+        "sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/analytics/module_test.go",
+        "target": "internal/analytics/module_test.go",
+        "class": "test",
+        "sha256": "05f780814dccbd9f9ef7acf80c638c674708061132a4361a8a00614bb244eb79",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/analytics"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/analytics",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Capturer",
+            "capability": "analytics.capturer",
+            "type": "analytics.Capturer"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "POSTHOG_API_KEY",
+        "field": "PostHogAPIKey",
+        "type": "string",
+        "description": "PostHog project key. Empty disables capture entirely: no client script, no `/ingest` proxy, server capture no-ops",
+        "secret": true
+      },
+      {
+        "key": "POSTHOG_HOST",
+        "field": "PostHogHost",
+        "type": "string",
+        "description": "Target of the `/ingest` reverse proxy",
+        "default": "https://us.i.posthog.com"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/analytics"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

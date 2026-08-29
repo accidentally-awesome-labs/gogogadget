@@ -1,15 +1,16 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"fmt"
 
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
 templ SettingsAPI(d APITokensData) {
 	@SettingsTabs("/app/settings/api")
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "api.title") }</h1>
-
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "api.title")})
 	<div id="api-tokens-container">
 		@APITokensSection(d)
 	</div>
@@ -17,81 +18,121 @@ templ SettingsAPI(d APITokensData) {
 
 templ APITokensSection(d APITokensData) {
 	if d.NewToken != "" {
-		<div class="card mb-6 max-w-lg border-green-500" data-testid="api-token-reveal">
-			<h2 class="font-semibold text-green-700 dark:text-green-300">{ i18n.T(ctx, "api.reveal_title") }</h2>
-			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "api.reveal_note") }</p>
-			<div class="mt-3 flex items-center gap-2" x-data="clipboard">
-				<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ d.NewToken }</code>
-				<button type="button" @click={ "copy('" + d.NewToken + "')" } class="btn-ghost !px-2 text-xs">
-					<span x-show="!copied">{ i18n.T(ctx, "api.copy") }</span>
-					<span x-show="copied" x-cloak>{ i18n.T(ctx, "api.copied") }</span>
-				</button>
-			</div>
-		</div>
-	}
-
-	<div class="card max-w-lg mb-6">
-		<h2 class="font-semibold mb-3">{ i18n.T(ctx, "api.create_title") }</h2>
-		if d.NameErr != "" {
-			<div class="alert-error mb-3" role="alert">{ d.NameErr }</div>
+		@ui.Card(ui.CardOpts{Attrs: ui.Attrs{Class: "mb-6 max-w-lg border-success", TestID: "api-token-reveal"}}) {
+			@ui.Heading(ui.HeadingOpts{
+				Text: i18n.T(ctx, "api.reveal_title"), Level: 2,
+				Unstyled: true, Attrs: ui.Attrs{Class: "font-semibold text-success-text"},
+			})
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-1"}}) {
+				{ i18n.T(ctx, "api.reveal_note") }
+			}
+			// The plaintext rides on data-copy, never inside an Alpine
+			// expression: under CSP the expression is a string the interpreter
+			// parses, and a secret containing a quote would break out of it.
+			@ui.SecretReveal(ui.SecretRevealOpts{Value: d.NewToken, CopyLabel: i18n.T(ctx, "api.copy"), CopiedLabel: i18n.T(ctx, "api.copied")})
 		}
-		<form hx-post="/app/settings/api/tokens" hx-target="#api-tokens-container" hx-swap="innerHTML" hx-disable="this" novalidate class="flex gap-3 items-end">
-			<div class="flex-1">
-				<label for="name" class="label">{ i18n.T(ctx, "api.name_label") }</label>
-				<input id="name" name="name" type="text" class="input" placeholder={ i18n.T(ctx, "api.name_placeholder") } required/>
-			</div>
-			<div>
-				<label for="scope" class="label">{ i18n.T(ctx, "api.scope_label") }</label>
-				<select id="scope" name="scope" class="input">
-					<option value="read">read</option>
-					<option value="write">write</option>
-				</select>
-			</div>
-			<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
-				@Spinner()
-				{ i18n.T(ctx, "api.create") }
-			</button>
-		</form>
-	</div>
+	}
+	@ui.Card(ui.CardOpts{Attrs: ui.Attrs{Class: "max-w-lg mb-6"}}) {
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "api.create_title"), Level: 2,
+			Unstyled: true, Attrs: ui.Attrs{Class: "font-semibold mb-3"},
+		})
+		@ui.Form(ui.FormOpts{
+			Target: "#api-tokens-container", Swap: "innerHTML",
+			Attrs: ui.Attrs{
+				Class: "flex gap-3 items-end",
+				HX:    ui.HX{Post: "/app/settings/api/tokens", Disable: true},
+			},
+		}) {
+			// The validation message is the field's own, not a card-level
+			// banner: it is what wires aria-invalid and aria-describedby to the
+			// control that was rejected, so a screen-reader user hears the
+			// reason on the input rather than hunting for it above the form.
+			@ui.Field(ui.FieldOpts{
+				Name: "name", Label: i18n.T(ctx, "api.name_label"), Required: true,
+				Error: d.NameErr, Attrs: ui.Attrs{Class: "flex-1"},
+			}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "name", Placeholder: i18n.T(ctx, "api.name_placeholder"),
+					Required: true, Error: d.NameErr,
+				})
+			}
+			@ui.Field(ui.FieldOpts{Name: "scope", Label: i18n.T(ctx, "api.scope_label")}) {
+				@ui.Select(ui.SelectOpts{Name: "scope", Options: []ui.Option{
+					{Value: "read", Label: "read"},
+					{Value: "write", Label: "write"},
+				}})
+			}
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "api.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+			})
+		}
+	}
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "api.table_caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "name", Label: i18n.T(ctx, "api.col_name")},
+			{Key: "scope", Label: i18n.T(ctx, "api.col_scope")},
+			{Key: "last_used", Label: i18n.T(ctx, "api.col_last_used"), HideBelow: ui.BreakpointSM},
+			{Key: "created", Label: i18n.T(ctx, "api.col_created"), HideBelow: ui.BreakpointMD},
+			{Key: "actions", Label: i18n.T(ctx, "api.col_actions"), Align: ui.AlignEnd},
+		},
+		RowCount: len(d.Tokens),
+		Empty: ui.EmptyState(ui.EmptyStateOpts{
+			Variant: ui.EmptyInline, Body: i18n.T(ctx, "api.empty"),
+		}),
+		Attrs: ui.Attrs{Class: "max-w-3xl"},
+	}) {
+		for _, t := range d.Tokens {
+			<tr>
+				// A row header, not a cell: the name is what identifies this row,
+				// so scope="row" makes a screen reader announce it alongside
+				// every other cell in the row.
+				<th scope="row" class="font-medium text-left">{ t.Name }</th>
+				<td>
+					@ui.Badge(ui.BadgeOpts{Text: t.Scope, Kind: ui.KindNeutral})
+				</td>
+				<td class="hidden sm:table-cell text-fg-muted">
+					if t.LastUsedAt.Valid {
+						{ t.LastUsedAt.Time.Format("Jan 2, 2006") }
+					} else {
+						{ i18n.T(ctx, "api.never_used") }
+					}
+				</td>
+				<td class="hidden md:table-cell text-fg-muted">{ t.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+				<td class="text-right">
+					@apiTokenAction(t)
+				</td>
+			</tr>
+		}
+	}
+}
 
-	<div class="card !p-0 overflow-hidden max-w-3xl">
-		<table class="table">
-			<thead>
-				<tr><th>{ i18n.T(ctx, "api.col_name") }</th><th>{ i18n.T(ctx, "api.col_scope") }</th><th>{ i18n.T(ctx, "api.col_last_used") }</th><th>{ i18n.T(ctx, "api.col_created") }</th><th class="text-right"></th></tr>
-			</thead>
-			<tbody>
-				if len(d.Tokens) == 0 {
-					<tr><td colspan="5" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "api.empty") }</td></tr>
-				}
-				for _, t := range d.Tokens {
-					<tr>
-						<td class="font-medium">{ t.Name }</td>
-						<td><span class="badge bg-surface-raised text-fg-muted">{ t.Scope }</span></td>
-						<td class="text-fg-muted">
-							if t.LastUsedAt.Valid {
-								{ t.LastUsedAt.Time.Format("Jan 2, 2006") }
-							} else {
-								{ i18n.T(ctx, "api.never_used") }
-							}
-						</td>
-						<td class="text-fg-muted">{ t.CreatedAt.Time.Format("Jan 2, 2006") }</td>
-						<td class="text-right">
-							if t.RevokedAt.Valid {
-								<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">{ i18n.T(ctx, "api.revoked") }</span>
-							} else {
-								<button
-									type="button"
-									hx-delete={ fmt.Sprintf("/app/settings/api/tokens/%d", t.ID) }
-									hx-confirm={ i18n.T(ctx, "api.revoke_confirm") }
-									hx-target="closest tr"
-									hx-swap="outerHTML"
-									class="btn-danger !px-2 !py-1 text-xs"
-								>{ i18n.T(ctx, "api.revoke") }</button>
-							}
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
+// apiTokenAction is a revoked token's badge or a live token's guarded revoke.
+//
+// The trigger names the token because a table of forty rows would otherwise
+// offer forty controls all called "Revoke": identical to a screen reader, and
+// ambiguous to getByRole. The dialog id is per-row for the same reason - one
+// shared id would make every trigger open the first row's dialog.
+templ apiTokenAction(token sqlc.ApiToken) {
+	if token.RevokedAt.Valid {
+		@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "api.revoked"), Kind: ui.KindDanger})
+	} else {
+		@ui.ConfirmAction(ui.ConfirmActionOpts{
+			ID:           fmt.Sprintf("api-token-revoke-%d", token.ID),
+			TriggerLabel: i18n.T(ctx, "api.revoke_named", token.Name),
+			TriggerIcon:  ui.IconDelete,
+			Title:        i18n.T(ctx, "api.revoke_title"),
+			Message:      i18n.T(ctx, "api.revoke_confirm"),
+			ConfirmLabel: i18n.T(ctx, "api.revoke_cta"),
+			CancelLabel:  i18n.T(ctx, "api.revoke_cancel"),
+			Kind:         ui.KindDanger,
+			HX: ui.HX{
+				Delete: fmt.Sprintf("/app/settings/api/tokens/%d", token.ID),
+				Target: "closest tr", Swap: "outerHTML",
+			},
+			Attrs: ui.Attrs{TestID: fmt.Sprintf("api-token-revoke-%d", token.ID)},
+		})
+	}
 }

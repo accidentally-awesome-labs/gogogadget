@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/dialog",
+    "kind": "component",
+    "name": "dialog",
+    "revision": 1,
+    "contract": 1,
+    "title": "Dialog",
+    "description": "The Dialog renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/dialog.templ",
+        "target": "internal/web/templates/ui/dialog.templ",
+        "class": "templ",
+        "sha256": "8e0cbf23cc68cb48f14ffc0eb335d8c17941acc03a4753ea604d2f71b9d067f6",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "dialog",
+          "family": "overlays",
+          "engine": "alpine",
+          "alpine": "uiDialog",
+          "native_fallback": "dialog element",
+          "signature": "templ Dialog(o DialogOpts)",
+          "summary": "Renders a native \u003cdialog\u003e.",
+          "guidance": "The platform supplies the top layer, the backdrop, the focus trap and Escape-to-close, and the close control is a `form method=\"dialog\"` submit button - so the dialog dismisses with no JavaScript at all. The Alpine `uiDialog` component only calls showModal().",
+          "keyboard": "Escape closes it: this is a native \u003cdialog\u003e, so the platform supplies dismissal and the focus trap.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

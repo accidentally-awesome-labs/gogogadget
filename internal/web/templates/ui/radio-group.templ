@@ -1,0 +1,21 @@
+package ui
+
+// RadioGroupOpts configures a radio group.
+type RadioGroupOpts struct {
+	Name     string
+	Options  []Option
+	Required bool
+	Attrs    Attrs
+}
+
+// RadioGroup renders a group of radios sharing a name.
+templ RadioGroup(o RadioGroupOpts) {
+	<div { rootWith("radio-group", "space-y-2", o.Attrs, "role", "radiogroup")... }>
+		for _, opt := range o.Options {
+			<label class="flex items-center gap-2 text-sm">
+				<input type="radio" name={ o.Name } value={ opt.Value } checked?={ opt.Selected } disabled?={ opt.Disabled } class="h-4 w-4"/>
+				{ opt.Label }
+			</label>
+		}
+	</div>
+}

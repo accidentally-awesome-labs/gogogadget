@@ -1,0 +1,18 @@
+package ui
+
+// InputAddonOpts is a fixed affix inside an InputGroup.
+type InputAddonOpts struct {
+	Text string
+	Attrs Attrs
+}
+
+// InputAddon renders a non-editable affix such as a currency symbol or domain
+// suffix. It is aria-hidden: the text is a visual hint about the field's format
+// and the field's own label already states what it is, so announcing "dollars"
+// between the label and the value would interrupt the reading.
+templ InputAddon(o InputAddonOpts) {
+	<span
+		{ rootWith("input-addon", "flex items-center px-3 bg-surface-raised text-sm text-fg-muted", o.Attrs,
+			"aria-hidden", "true")... }
+	>{ o.Text }</span>
+}

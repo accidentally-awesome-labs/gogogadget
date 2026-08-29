@@ -1,0 +1,351 @@
+package ui
+
+import "fmt"
+
+// QuestionData is one question.
+type QuestionData struct {
+	// ID and Label are required.
+	ID    string
+	Label string
+	Hint  string
+	// Type selects the native control. Everything here is a real input, so a
+	// questionnaire submits with no JavaScript at all.
+	Type QuestionType
+	// Options are the choices for radio, checkbox and select questions.
+	Options []Option
+	Value   string
+	// Values holds the selected set for multi-answer questions.
+	Values   []string
+	Required bool
+	// Error is the server's verdict. Validation is server-owned: a client-side
+	// check that lets a bad answer through is worse than no check.
+	Error string
+}
+
+// QuestionnaireOpts configures a multi-step questionnaire.
+type QuestionnaireOpts struct {
+	ID string
+	// Questions is the full set; Current is the 1-based step being answered.
+	// The position comes from the server, so a reload or a Back button lands on
+	// the step the user was actually on.
+	Questions []QuestionData
+	Current   int
+	SubmitURL string
+	Target    string
+	Attrs     Attrs
+}
+
+// Questionnaire renders one step of a questionnaire.
+//
+// State lives on the server. A wizard that keeps answers in the browser loses
+// them on reload, cannot be resumed on another device, and cannot be validated -
+// so each step posts its answer and the server decides what comes next.
+templ Questionnaire(o QuestionnaireOpts) {
+	<form
+		{ rootWith("questionnaire", "space-y-6", o.Attrs, "id", o.ID)... }
+		method="post"
+		action={ templ.SafeURL(o.SubmitURL) }
+		novalidate
+		hx-post={ o.SubmitURL }
+		hx-target={ questionnaireTarget(o) }
+		hx-swap="outerMorph"
+		hx-disable="this"
+	>
+		// A declared method="post" means a plain browser submit is checked, so the
+		// token has to be in the form: without it the no-script path this component
+		// advertises answers 403, which is a worse fallback than no form at all.
+		@CSRFField(CSRFFieldOpts{})
+		@Steps(StepsOpts{
+			Label:   "Questionnaire progress",
+			Steps:   questionnaireSteps(o),
+			Current: questionnaireCurrent(o),
+		})
+		// The step number is submitted, so the server is never guessing which
+		// answer arrived.
+		<input type="hidden" name="step" value={ fmt.Sprint(questionnaireCurrent(o)) }/>
+		if question, ok := questionnaireActive(o); ok {
+			@Question(QuestionOpts{Question: question})
+		}
+		@WizardActions(WizardActionsOpts{
+			CanBack:  questionnaireCurrent(o) > 1,
+			CanSkip:  questionnaireCanSkip(o),
+			Last:     questionnaireCurrent(o) >= len(o.Questions),
+		})
+	</form>
+}
+
+// QuestionOpts configures one question.
+type QuestionOpts struct {
+	Question QuestionData
+	Attrs    Attrs
+}
+
+// Question renders one question's native control.
+//
+// Radio and checkbox sets are a fieldset with a legend, because the question is
+// the group's label: without it a screen reader reads the options with no idea
+// what is being asked.
+templ Question(o QuestionOpts) {
+	<div { root("question", "space-y-2", o.Attrs)... } data-question={ o.Question.ID }>
+		if questionIsGroup(o.Question) {
+			@questionGroup(o.Question)
+		} else {
+			@questionSingle(o.Question)
+		}
+		if o.Question.Error != "" {
+			@FieldError(FieldErrorOpts{
+				Error: o.Question.Error,
+				Attrs: Attrs{ID: o.Question.ID + "-error"},
+			})
+		}
+	</div>
+}
+
+templ questionGroup(question QuestionData) {
+	<fieldset
+		{ FieldARIA(FieldOpts{
+			Name:     question.ID,
+			Hint:     question.Hint,
+			Error:    question.Error,
+			Required: question.Required,
+		})... }
+	>
+		<legend class="label">
+			{ question.Label }
+			if !question.Required {
+				<span class="text-fg-muted">{ " (optional)" }</span>
+			}
+		</legend>
+		if question.Hint != "" {
+			<p id={ question.ID + "-hint" } class="text-sm text-fg-muted">{ question.Hint }</p>
+		}
+		<div class="space-y-1 mt-1">
+			for _, option := range question.Options {
+				<label class="flex items-center gap-2 text-sm">
+					<input
+						type={ questionInputType(question) }
+						name={ questionFieldName(question) }
+						value={ option.Value }
+						checked?={ questionIsSelected(question, option) }
+						disabled?={ option.Disabled }
+						required?={ question.Required && question.Type == QuestionRadio }
+					/>
+					<span>{ option.Label }</span>
+				</label>
+			}
+		</div>
+	</fieldset>
+}
+
+// questionSingle wraps the control in Field, which owns the label, the hint and
+// the error wiring. Rendering a bare control here would leave the question
+// unlabelled - the one thing a question cannot be.
+templ questionSingle(question QuestionData) {
+	@Field(FieldOpts{
+		Name:     question.ID,
+		Label:    question.Label,
+		Hint:     question.Hint,
+		Error:    question.Error,
+		Required: question.Required,
+		Optional: !question.Required,
+	}) {
+		if question.Type.Value() == QuestionSelect {
+			@Select(SelectOpts{
+				Name:     question.ID,
+				Options:  questionSelectOptions(question),
+				Required: question.Required,
+			})
+		} else if question.Type.Value() == QuestionLongText {
+			@Textarea(TextareaOpts{
+				Name:     question.ID,
+				Value:    question.Value,
+				Required: question.Required,
+				Rows:     4,
+			})
+		} else {
+			@TextInput(TextInputOpts{
+				Name:     question.ID,
+				Value:    question.Value,
+				Hint:     question.Hint,
+				Error:    question.Error,
+				Required: question.Required,
+				Type:     questionTextType(question),
+			})
+		}
+	}
+}
+
+// WizardActionsOpts configures the step controls.
+type WizardActionsOpts struct {
+	// Labels default to the standard wording. They are overridable but never
+	// absent: an unlabelled Next button is a dead end.
+	BackLabel, SkipLabel, NextLabel, SubmitLabel string
+	CanBack, CanSkip, Last                       bool
+	Attrs                                        Attrs
+}
+
+// WizardActions renders Back, Skip and Next/Submit.
+//
+// The naming stays consistent across every step: the forward control is "Next"
+// until the final step, where it is the submit verb. Changing the wording
+// mid-flow makes the user re-read the button on every step to check what it now
+// does.
+templ WizardActions(o WizardActionsOpts) {
+	<div { root("wizard-actions", "form-actions flex-wrap", o.Attrs)... }>
+		if o.CanBack {
+			// A real submit, so going back is a server round trip that keeps the
+			// answers. history.back() would replay a stale step.
+			<button type="submit" name="action" value="back" class="btn btn-ghost">
+				{ wizardLabel(o.BackLabel, "Back") }
+			</button>
+		}
+		if o.CanSkip {
+			<button type="submit" name="action" value="skip" class="btn btn-ghost">
+				{ wizardLabel(o.SkipLabel, "Skip") }
+			</button>
+		}
+		<button type="submit" name="action" value={ wizardForwardAction(o) } class="btn btn-primary">
+			if o.Last {
+				{ wizardLabel(o.SubmitLabel, "Submit") }
+			} else {
+				{ wizardLabel(o.NextLabel, "Next") }
+			}
+		</button>
+		@Spinner(SpinnerOpts{})
+	</div>
+}
+
+// QuestionType is the closed set of question shapes.
+type QuestionType string
+
+const (
+	QuestionShortText QuestionType = ""
+	QuestionLongText  QuestionType = "long-text"
+	QuestionEmail     QuestionType = "email"
+	QuestionNumber    QuestionType = "number"
+	QuestionRadio     QuestionType = "radio"
+	QuestionCheckbox  QuestionType = "checkbox"
+	QuestionSelect    QuestionType = "select"
+)
+
+// QuestionTypes is every question shape, so a typo cannot invent one.
+var QuestionTypes = []QuestionType{
+	QuestionShortText, QuestionLongText, QuestionEmail,
+	QuestionNumber, QuestionRadio, QuestionCheckbox, QuestionSelect,
+}
+
+func (q QuestionType) Value() QuestionType { return normalize(q, QuestionTypes, QuestionShortText) }
+
+func (q QuestionType) Valid() bool { return q == q.Value() }
+
+// questionSelectOptions marks the stored answer as selected, so revisiting a
+// step shows what the user chose rather than resetting to the first option.
+func questionSelectOptions(question QuestionData) []Option {
+	out := make([]Option, 0, len(question.Options))
+	for _, option := range question.Options {
+		option.Selected = option.Value == question.Value
+		out = append(out, option)
+	}
+	return out
+}
+
+func questionIsGroup(question QuestionData) bool {
+	kind := question.Type.Value()
+	return kind == QuestionRadio || kind == QuestionCheckbox
+}
+
+func questionInputType(question QuestionData) string {
+	if question.Type.Value() == QuestionCheckbox {
+		return "checkbox"
+	}
+	return "radio"
+}
+
+// questionFieldName appends [] for multi-answer questions so the server receives
+// every checked box rather than only the last one.
+func questionFieldName(question QuestionData) string {
+	if question.Type.Value() == QuestionCheckbox {
+		return question.ID + "[]"
+	}
+	return question.ID
+}
+
+func questionIsSelected(question QuestionData, option Option) bool {
+	if question.Value == option.Value && option.Value != "" {
+		return true
+	}
+	for _, value := range question.Values {
+		if value == option.Value {
+			return true
+		}
+	}
+	return false
+}
+
+func questionTextType(question QuestionData) InputType {
+	switch question.Type.Value() {
+	case QuestionEmail:
+		return InputTypeEmail
+	case QuestionNumber:
+		return InputTypeNumber
+	default:
+		return InputTypeText
+	}
+}
+
+// questionnaireSteps titles each step after its question, so the trail says what
+// is being asked rather than "Step 3".
+func questionnaireSteps(o QuestionnaireOpts) []Step {
+	steps := make([]Step, 0, len(o.Questions))
+	for _, question := range o.Questions {
+		steps = append(steps, Step{Label: question.Label})
+	}
+	return steps
+}
+
+// questionnaireCurrent clamps the position into the questions that exist. An
+// out-of-range step would render a blank form with working buttons.
+func questionnaireCurrent(o QuestionnaireOpts) int {
+	if o.Current < 1 {
+		return 1
+	}
+	if len(o.Questions) > 0 && o.Current > len(o.Questions) {
+		return len(o.Questions)
+	}
+	return o.Current
+}
+
+func questionnaireActive(o QuestionnaireOpts) (QuestionData, bool) {
+	if len(o.Questions) == 0 {
+		return QuestionData{}, false
+	}
+	return o.Questions[questionnaireCurrent(o)-1], true
+}
+
+// questionnaireCanSkip offers Skip only for optional questions. Offering it on a
+// required one is a control that must fail.
+func questionnaireCanSkip(o QuestionnaireOpts) bool {
+	question, ok := questionnaireActive(o)
+	return ok && !question.Required
+}
+
+func questionnaireTarget(o QuestionnaireOpts) string {
+	if o.Target != "" {
+		return o.Target
+	}
+	return "#" + o.ID
+}
+
+func wizardForwardAction(o WizardActionsOpts) string {
+	if o.Last {
+		return "submit"
+	}
+	return "next"
+}
+
+func wizardLabel(given, fallback string) string {
+	if given != "" {
+		return given
+	}
+	return fallback
+}

@@ -1,0 +1,412 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The billing scenario is where two components that look identical must not be
+// swapped. A quota is a Meter: a measurement inside a known range, which does
+// not "finish" - seats at 18 of 25 will sit there all month. A plan change or an
+// export is a ProgressBar: a task advancing towards completion. Screen readers
+// announce the two differently, so rendering a quota as a progress bar tells a
+// user their storage is filling up towards an event, and rendering a running job
+// as a meter tells them it never ends. Both appear on this surface at once,
+// deliberately, so the distinction is visible side by side.
+//
+// Everything here is a view value. There is no billing type in this file and no
+// price arithmetic: currency formatting, proration and overage are billing's
+// rules, and a scenario that recomputed them would drift from the real ones.
+
+// billingPlan is one purchasable tier as the page displays it.
+type billingPlan struct {
+	Name  string
+	Price string
+	// Features are pre-formatted lines, not entitlements: the card shows what
+	// marketing wrote, and the entitlement check lives in the product.
+	Features []string
+	// ActionLabel and ActionHref are the card's control. Href is required for
+	// an enabled action, because a handler-less button in a catalog looks
+	// exactly like a working one.
+	ActionLabel string
+	ActionHref  string
+}
+
+// billingQuota is one metered allowance. Used and Limit are display strings and
+// Percent is the caller's calculation, so the card never divides two numbers it
+// does not own the units of.
+type billingQuota struct {
+	Title      string
+	Used       string
+	Limit      string
+	Percent    int
+	MeterLabel string
+	// NoticeBody warns before the limit is reached. Empty means the quota is
+	// unremarkable, which is most of them.
+	NoticeBody string
+}
+
+// billingInvoice is one issued invoice.
+type billingInvoice struct {
+	Number      string
+	Date        string
+	DateMachine string
+	Amount      string
+	Status      string
+	StatusKind  ui.Kind
+}
+
+// billingTask is work advancing towards completion: the ProgressBar half of
+// this surface. Step and Steps are counted rather than a percentage because
+// "step 2 of 5" is what the announcement should say, and a percentage derived
+// from five steps announces 40% at a moment nothing is 40% done.
+type billingTask struct {
+	Title     string
+	Label     string
+	Step      float64
+	Steps     float64
+	ValueText string
+	Detail    string
+}
+
+// ScenarioBilling renders plans, quotas, invoices and the states a payment
+// moves through.
+templ ScenarioBilling(gc GalleryContext) {
+	@ui.Stack(ui.StackOpts{Gap: ui.GapLG}) {
+		if gc.State == "error" {
+			// A dunning warning is shell-level news: the account is days from
+			// losing access, so it is a Banner above the page rather than a
+			// notice inside a card the reader may never scroll to. Assertive,
+			// because it appears in response to a failed charge and a polite
+			// region would be read after everything else on the page.
+			@ui.Banner(ui.BannerOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "billing-dunning-banner"}}) {
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<span>{ billingDunningText(gc) }</span>
+					// The catalog has no payment provider, so the control shows
+					// the resolved surface instead of pretending to charge a
+					// card. An inert button here would be indistinguishable
+					// from a broken one.
+					@ui.ButtonLink(ui.ButtonLinkOpts{
+						Label: "Update payment method", Href: "/dev/scenarios/billing?state=success",
+						Action: ui.ActionInverse, Size: ui.SizeSM,
+					})
+				</div>
+			}
+		}
+		if gc.State == "success" {
+			// Polite: the change already succeeded, so interrupting whatever
+			// the screen reader was reading buys the user nothing.
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{TestID: "billing-success-notice"}}) {
+				{ billingSuccessText(gc) }
+			}
+		}
+		if gc.State == "error" {
+			// The banner states the consequence; this states the mechanics next
+			// to the money it concerns. Both are needed: a user who dismisses
+			// shell chrome without reading it still has to find out why.
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveOff, Attrs: ui.Attrs{TestID: "billing-failure-notice"}}) {
+				{ billingFailureText(gc) }
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Plans", Level: 2, Attrs: ui.Attrs{ID: "billing-plans"}}) {
+			@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD, Attrs: ui.Attrs{TestID: "billing-plans-grid"}}) {
+				for _, plan := range billingPlans(gc.LongContent) {
+					@ui.PlanCard(ui.PlanCardOpts{
+						Name:         plan.Name,
+						Price:        plan.Price,
+						Features:     plan.Features,
+						Current:      billingCurrentPlan(gc) == plan.Name,
+						CurrentLabel: "Current",
+						Attrs:        ui.Attrs{TestID: "billing-plan-" + plan.Name},
+					}) {
+						@billingPlanAction(gc, plan)
+					}
+				}
+			}
+		}
+		@ui.Section(ui.SectionOpts{Title: "Usage this period", Level: 2, Attrs: ui.Attrs{ID: "billing-usage"}}) {
+			@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapMD}) {
+				for _, quota := range billingQuotas(gc.LongContent) {
+					@ui.UsageCard(ui.UsageCardOpts{
+						Title:      quota.Title,
+						Used:       quota.Used,
+						Limit:      quota.Limit,
+						Percent:    quota.Percent,
+						MeterLabel: quota.MeterLabel,
+						Notice:     billingQuotaNotice(quota),
+						Attrs:      ui.Attrs{TestID: "billing-quota-" + quota.Title},
+					})
+				}
+			}
+			// The task card sits directly under the quota cards so the two
+			// semantics are compared at a glance rather than a page apart.
+			@billingTaskCard(gc)
+		}
+		@ui.Section(ui.SectionOpts{Title: "Invoices", Level: 2, Attrs: ui.Attrs{ID: "billing-invoices"}}) {
+			@ui.DataTable(ui.DataTableOpts{
+				Caption:  "Invoices issued to Northwind Robotics",
+				Columns:  billingInvoiceColumns(),
+				Density:  gc.Density,
+				RowCount: len(billingInvoices(gc)),
+				Empty: ui.EmptyState(ui.EmptyStateOpts{
+					Variant: ui.EmptyInline,
+					Title:   "No invoices yet",
+					Body:    "The first invoice is issued at the end of the current period.",
+				}),
+				Attrs: ui.Attrs{TestID: "billing-invoices-table"},
+			}) {
+				for _, invoice := range billingInvoices(gc) {
+					<tr data-testid={ "billing-invoice-" + invoice.Number }>
+						<td class="font-medium">
+							@ui.Code(ui.CodeOpts{Text: invoice.Number})
+						</td>
+						<td class="text-fg-muted">
+							<time datetime={ invoice.DateMachine }>{ invoice.Date }</time>
+						</td>
+						<td class="text-right tabular-nums">{ invoice.Amount }</td>
+						<td class="text-right">
+							@ui.Badge(ui.BadgeOpts{Text: invoice.Status, Kind: invoice.StatusKind})
+						</td>
+					</tr>
+				}
+			}
+			// One real destination for the whole table rather than a per-row
+			// download link: the product issues invoice PDFs through the
+			// provider's portal, and inventing a per-invoice URL here would
+			// publish a link that 404s.
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: "Open billing portal", Href: "/app/settings/billing", Size: ui.SizeSM,
+				Attrs: ui.Attrs{Class: "mt-3"},
+			})
+		}
+	}
+}
+
+// billingPlanAction is the plan card's control.
+templ billingPlanAction(gc GalleryContext, plan billingPlan) {
+	if billingCurrentPlan(gc) == plan.Name {
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: "Manage payment method", Href: "/app/settings/billing", Size: ui.SizeSM,
+		})
+	} else if gc.State == "loading" {
+		// Busy, not a link: the request is already in flight, so the control
+		// has nothing left to do but report that. Busy keeps it focusable,
+		// because disabling the control a user just pressed throws focus to the
+		// top of the document and a screen reader loses its place mid-action.
+		@ui.Button(ui.ButtonOpts{
+			Label: "Applying change", Busy: true, Size: ui.SizeSM,
+			Attrs: ui.Attrs{TestID: "billing-plan-busy-" + plan.Name},
+		})
+	} else {
+		@ui.ButtonLink(ui.ButtonLinkOpts{
+			Label: plan.ActionLabel, Href: plan.ActionHref,
+			Action: ui.ActionPrimary, Size: ui.SizeSM,
+		})
+	}
+}
+
+// billingTaskCard renders the advancing work. It stays a ProgressBar in every
+// state it appears in, including the finished one: a task at 5 of 5 is still a
+// task, and swapping in a meter on completion would change what assistive
+// technology reports about the same fact.
+templ billingTaskCard(gc GalleryContext) {
+	if task, ok := billingTaskFor(gc); ok {
+		@ui.Card(ui.CardOpts{Attrs: ui.Attrs{Class: "mt-4", TestID: "billing-task"}}) {
+			@ui.CardHeader(ui.CardHeaderOpts{Title: task.Title}) {
+				<span class="text-sm text-fg-muted tabular-nums">{ task.ValueText }</span>
+			}
+			@ui.ProgressBar(ui.ProgressBarOpts{
+				Value: task.Step, Max: task.Steps,
+				Label: task.Label, ValueText: task.ValueText,
+				Attrs: ui.Attrs{TestID: "billing-task-progress"},
+			})
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true, Attrs: ui.Attrs{Class: "mt-2"}}) {
+				{ task.Detail }
+			}
+			if gc.State == "loading" {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Attrs: ui.Attrs{Class: "mt-3"}}) {
+					{ "You can leave this page. The change completes on our side and appears on your next invoice." }
+				}
+			}
+		}
+	}
+}
+
+// billingQuotaWarning is the over-quota slot's content. It is a templ renderer
+// rather than a direct ui.Notice call because Notice takes its message as
+// children, and children cannot be supplied from Go.
+templ billingQuotaWarning(body string) {
+	@ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn}) {
+		{ body }
+	}
+}
+
+// billingQuotaNotice fills the over-quota slot. It returns nil for a quota with
+// nothing to say, which omits the wrapper entirely rather than rendering an
+// empty box that reads as a message that failed to load.
+func billingQuotaNotice(quota billingQuota) templ.Component {
+	if quota.NoticeBody == "" {
+		return nil
+	}
+	return billingQuotaWarning(quota.NoticeBody)
+}
+
+// billingPlans is the tier fixture. Prices are literal strings: formatting a
+// currency here would duplicate a decision billing owns, and the duplicate is
+// the one that goes stale.
+func billingPlans(long bool) []billingPlan {
+	plans := []billingPlan{
+		{
+			Name: "Starter", Price: "$0",
+			Features:    []string{"3 projects", "1 GB storage", "Community support"},
+			ActionLabel: "Downgrade", ActionHref: "/dev/scenarios/billing?state=loading",
+		},
+		{
+			Name: "Team", Price: "$36 / month",
+			Features:    []string{"25 seats", "10 GB storage", "500,000 API calls", "Email support"},
+			ActionLabel: "Choose Team", ActionHref: "/dev/scenarios/billing?state=loading",
+		},
+		{
+			Name: "Scale", Price: "$480 / month",
+			Features:    []string{"Unlimited seats", "1 TB storage", "10,000,000 API calls", "Priority support", "SAML single sign-on"},
+			ActionLabel: "Upgrade", ActionHref: "/dev/scenarios/billing?state=loading",
+		},
+	}
+	if long {
+		// A feature line is the realistic long content on a pricing card: it is
+		// written by whoever is selling and is never length-checked.
+		plans[2].Features = append(plans[2].Features,
+			"Dedicated onboarding with a named solutions engineer, a quarterly architecture review and a private support channel with your account team")
+	}
+	return plans
+}
+
+// billingQuotas are the metered allowances. Percent is stated rather than
+// derived from Used and Limit because those are display strings in mixed units
+// ("8.4 GB" of "10 GB"), and parsing them back into numbers to divide would be
+// inventing arithmetic the card has no business doing.
+func billingQuotas(long bool) []billingQuota {
+	quotas := []billingQuota{
+		{Title: "Seats", Used: "18", Limit: "25", Percent: 72, MeterLabel: "Seats used of the 25 included"},
+		{Title: "Storage", Used: "8.4 GB", Limit: "10 GB", Percent: 84, MeterLabel: "Storage used of the 10 GB included"},
+		{
+			Title: "API calls", Used: "412,900", Limit: "500,000", Percent: 83,
+			MeterLabel: "API calls used of the 500,000 included",
+			NoticeBody: "Above 500,000 calls, overage is billed at $2 per 1,000 calls.",
+		},
+	}
+	if long {
+		quotas[2].Title = "API calls across every project and environment"
+		quotas[2].NoticeBody = "Above 500,000 calls in a billing period, overage is billed at $2 per 1,000 calls, " +
+			"charged on the invoice for the period in which the calls were made rather than the following one."
+	}
+	return quotas
+}
+
+func billingInvoiceColumns() []ui.Column {
+	return []ui.Column{
+		{Key: "number", Label: "Invoice"},
+		{Key: "date", Label: "Issued"},
+		{Key: "amount", Label: "Amount", Numeric: true},
+		{Key: "status", Label: "Status", Align: ui.AlignEnd},
+	}
+}
+
+// billingInvoices is the ledger. The error state prepends the invoice that
+// failed rather than restyling an existing row: the failure is a new, unpaid
+// invoice, and a paid row turning red would misrepresent money already taken.
+func billingInvoices(gc GalleryContext) []billingInvoice {
+	ledger := []billingInvoice{
+		{Number: "INV-2026-0031", Date: "1 Jan 2026", DateMachine: "2026-01-01", Amount: "$360.00", Status: "Paid", StatusKind: ui.KindSuccess},
+		{Number: "INV-2025-0030", Date: "1 Dec 2025", DateMachine: "2025-12-01", Amount: "$360.00", Status: "Paid", StatusKind: ui.KindSuccess},
+		{Number: "INV-2025-0029", Date: "1 Nov 2025", DateMachine: "2025-11-01", Amount: "$324.00", Status: "Paid", StatusKind: ui.KindSuccess},
+		{Number: "INV-2025-0028", Date: "1 Oct 2025", DateMachine: "2025-10-01", Amount: "$324.00", Status: "Refunded", StatusKind: ui.KindNeutral},
+	}
+	switch gc.State {
+	case "error":
+		failed := billingInvoice{
+			Number: "INV-2026-0032", Date: "1 Feb 2026", DateMachine: "2026-02-01",
+			Amount: "$360.00", Status: "Payment failed", StatusKind: ui.KindDanger,
+		}
+		return append([]billingInvoice{failed}, ledger...)
+	case "success":
+		upcoming := billingInvoice{
+			Number: "INV-2026-0032", Date: "1 Feb 2026", DateMachine: "2026-02-01",
+			Amount: "$480.00", Status: "Scheduled", StatusKind: ui.KindInfo,
+		}
+		return append([]billingInvoice{upcoming}, ledger...)
+	default:
+		return ledger
+	}
+}
+
+// billingCurrentPlan moves with the state, so the success view is a genuinely
+// different surface: the ring, the badge and the card's control all follow the
+// plan the account is now on.
+func billingCurrentPlan(gc GalleryContext) string {
+	if gc.State == "success" {
+		return "Scale"
+	}
+	return "Team"
+}
+
+// billingTaskFor picks the advancing work for this state, or reports that there
+// is none. The error state has no task: the charge failed, so nothing is
+// progressing, and a bar frozen at 40% would suggest otherwise.
+func billingTaskFor(gc GalleryContext) (billingTask, bool) {
+	switch gc.State {
+	case "loading":
+		return billingTask{
+			Title: "Applying your plan change",
+			Label: "Plan change progress",
+			Step:  2, Steps: 5,
+			ValueText: "step 2 of 5",
+			Detail:    "Reserving seats, then reconciling the current period before the new price takes effect.",
+		}, true
+	case "success":
+		return billingTask{
+			Title: "Plan change applied",
+			Label: "Plan change progress",
+			Step:  5, Steps: 5,
+			ValueText: "step 5 of 5",
+			Detail:    "Seats reserved, period reconciled, invoice scheduled.",
+		}, true
+	case "error":
+		return billingTask{}, false
+	default:
+		// The populated surface has one genuinely advancing job: the invoice
+		// archive the user asked for. It is here so the default view shows a
+		// meter and a progress bar together, which is the point of this
+		// scenario.
+		return billingTask{
+			Title: "Preparing your invoice archive",
+			Label: "Invoice archive export",
+			Step:  3, Steps: 8,
+			ValueText: "3 of 8 invoices prepared",
+			Detail:    "The archive is emailed to the billing contact once every invoice has been rendered.",
+		}, true
+	}
+}
+
+func billingDunningText(gc GalleryContext) string {
+	if gc.LongContent {
+		return "We could not charge the card ending 4242 for invoice INV-2026-0032. This was attempt 2 of 4; " +
+			"the next attempt is on 22 February 2026, and if it also fails the organisation moves to the free plan " +
+			"on 1 March 2026 with projects above the Starter limit switched to read-only until a payment succeeds."
+	}
+	return "We could not charge the card ending 4242. Attempt 2 of 4; next attempt 22 February 2026."
+}
+
+func billingFailureText(gc GalleryContext) string {
+	if gc.LongContent {
+		return "The card was declined by the issuing bank with the reason \"insufficient funds\". " +
+			"Nothing was charged and no seats were removed. Updating the card retries the invoice immediately " +
+			"rather than waiting for the next scheduled attempt."
+	}
+	return "The card was declined for insufficient funds. Nothing was charged. Updating the card retries immediately."
+}
+
+func billingSuccessText(gc GalleryContext) string {
+	if gc.LongContent {
+		return "Your plan change to Scale is active. Unlimited seats and 1 TB of storage are available now, " +
+			"and the invoice on 1 February 2026 will be $480.00 with the unused part of the Team period credited against it."
+	}
+	return "Your plan change to Scale is active. The invoice on 1 February 2026 will be $480.00."
+}

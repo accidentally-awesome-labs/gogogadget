@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/link",
+    "kind": "element",
+    "name": "link",
+    "revision": 1,
+    "contract": 1,
+    "title": "Link",
+    "description": "The Link renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/link.templ",
+        "target": "internal/web/templates/ui/link.templ",
+        "class": "templ",
+        "sha256": "33cb793e0e51c8f200de2e0e9040fa523784d113304f081b5792dea08b3ac398",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/link_test.go",
+        "target": "internal/web/templates/ui/link_test.go",
+        "class": "test",
+        "sha256": "86f51de7f67f77c55edc2f42dae2d8529e6daf69b7f112ef1de73e2b77212e28",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "link",
+          "family": "actions",
+          "signature": "templ Link(o LinkOpts)",
+          "summary": "Renders a text link.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

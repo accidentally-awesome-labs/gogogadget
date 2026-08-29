@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/timeline",
+    "kind": "component",
+    "name": "timeline",
+    "revision": 1,
+    "contract": 1,
+    "title": "Timeline",
+    "description": "The Timeline renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/timeline.templ",
+        "target": "internal/web/templates/ui/timeline.templ",
+        "class": "templ",
+        "sha256": "a16194ef671b9230ce49c6557e842fdca06ba68af74128acbf76c9d62b8896e4",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "timeline",
+          "family": "communication",
+          "signature": "templ Timeline(o TimelineOpts)",
+          "summary": "Renders events in order.",
+          "guidance": "An <ol> because the order carries the meaning: a screen reader announces position in the list, which is exactly the information a timeline conveys visually with its connecting line.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

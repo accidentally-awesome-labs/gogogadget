@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/icon-button",
+    "kind": "element",
+    "name": "icon-button",
+    "revision": 1,
+    "contract": 1,
+    "title": "IconButton",
+    "description": "The IconButton renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/icon-button.templ",
+        "target": "internal/web/templates/ui/icon-button.templ",
+        "class": "templ",
+        "sha256": "1982d2a264a0f92034475133041bcaf4cbd88fa32176c3b15bae2d33b55a213d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/icon-button_test.go",
+        "target": "internal/web/templates/ui/icon-button_test.go",
+        "class": "test",
+        "sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "icon-button",
+          "family": "actions",
+          "signature": "templ IconButton(o IconButtonOpts)",
+          "summary": "Renders an icon-only control with an accessible name.",
+          "states": [
+            "busy",
+            "default",
+            "disabled"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/security",
+    "kind": "system",
+    "name": "security",
+    "revision": 1,
+    "contract": 1,
+    "title": "Middleware and request security",
+    "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards. The CSRF step publishes the token twice: as the inherited request header htmx reads, and into the request context that ui.Form draws its hidden field from, so a form submitted with no JavaScript is accepted.",
+    "requires": [
+      "system/identity",
+      "system/organizations",
+      "system/rate-limit",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/auth.go",
+        "target": "internal/web/auth.go",
+        "class": "go",
+        "sha256": "06f513e15df3fce19ab446c7cd62723afd021d8d45fdee12307abfb69bc0fd3e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/csrf_form_test.go",
+        "target": "internal/web/csrf_form_test.go",
+        "class": "test",
+        "sha256": "0ab35b2d32f0337041923538a320c3577e5740377848d046f38d0d296f835c36",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/maintenance_test.go",
+        "target": "internal/web/maintenance_test.go",
+        "class": "test",
+        "sha256": "9c8f27f47036954c5bffdc6b5e50fb2e593481f8af574497a3680c27de702e5d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/middleware.go",
+        "target": "internal/web/middleware.go",
+        "class": "go",
+        "sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [
+      {
+        "key": "MAINTENANCE_MODE",
+        "field": "MaintenanceMode",
+        "type": "bool",
+        "description": "true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/`"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

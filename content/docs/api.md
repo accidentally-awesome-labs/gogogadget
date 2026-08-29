@@ -2,7 +2,7 @@
 title: Public API
 description: Org-scoped Bearer tokens and the versioned JSON API at /api/v1.
 section: Features
-weight: 12
+weight: 13
 ---
 
 The public API is a second transport over the same rules as the HTML app —

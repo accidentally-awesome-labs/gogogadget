@@ -2,7 +2,7 @@
 title: Email
 description: The Sender seam, templ email pairs, and rendered-at-enqueue payloads.
 section: Features
-weight: 9
+weight: 10
 ---
 
 Transactional email rides the [background job queue](/docs/background-jobs):

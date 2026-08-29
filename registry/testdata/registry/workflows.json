@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "kind": "workflow",
+  "items": [
+    "registry/modules/workflow/example-ping/module.json"
+  ]
+}

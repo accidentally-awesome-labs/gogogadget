@@ -190,6 +190,57 @@ func TestDashboardRenders(t *testing.T) {
 	assert.Contains(t, body, "Free") // plan name
 }
 
+// The list is swapped by search and by the pager, both with innerMorph, which
+// morphs the target's CHILDREN against the response. A fragment that repeats
+// its own wrapper therefore leaves a second element carrying the same id inside
+// the first — verified in a browser against the vendored htmx, where one search
+// took document.querySelectorAll('#table-container').length from 1 to 2.
+func TestProjectsFragmentDoesNotRepeatItsWrapper(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_frag", "org_frag", "org:admin")
+	cookie := sessionCookie("user_frag", "org_frag", "org:admin")
+
+	h := http.Header{}
+	h.Set("HX-Request", "true")
+	code, _, fragment := serve(t, s, "GET", "/app/projects", nil, h, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Contains(t, fragment, `data-testid="projects-table"`, "the fragment is the table")
+	assert.NotContains(t, fragment, `id="table-container"`,
+		"the innerMorph target's wrapper belongs to the page, not to its own fragment")
+
+	code, _, page := serve(t, s, "GET", "/app/projects", nil, nil, cookie)
+	require.Equal(t, http.StatusOK, code)
+	assert.Equal(t, 1, strings.Count(page, `id="table-container"`), "exactly one swap target")
+}
+
+// Every destructive control on the list is gated by ConfirmAction, and the
+// request rides the dialog's confirm button. hx-confirm called window.confirm:
+// untranslatable, unstyleable, and on some platforms offering a "prevent
+// further dialogs" checkbox that silently disables every later confirmation.
+func TestProjectDeleteIsGatedByAnInPageDialog(t *testing.T) {
+	s := integrationServer(t, nil)
+	seedMembership(t, s, "user_cfm", "org_cfm", "org:admin")
+	ctx := t.Context()
+	p, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_cfm", Name: "Confirmed"})
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_cfm'")
+	})
+
+	code, _, body := serve(t, s, "GET", "/app/projects", nil, nil, sessionCookie("user_cfm", "org_cfm", "org:admin"))
+	require.Equal(t, http.StatusOK, code)
+	assert.NotContains(t, body, "hx-confirm",
+		"this page must not fall back to window.confirm; the repo-wide ban is "+
+			"TestNoProductionTemplateFallsBackToWindowConfirm in internal/web/templates")
+	assert.Contains(t, body, `data-ui="confirm-action"`)
+	assert.Contains(t, body, fmt.Sprintf(`id="project-delete-%d"`, p.ID), "one dialog per row, addressable by id")
+	// The delete contract is unchanged: same method, same target, same swap —
+	// only the prompt moved into the page.
+	assert.Contains(t, body, fmt.Sprintf(`hx-delete="/app/projects/%d"`, p.ID))
+	assert.Contains(t, body, `hx-target="closest tr"`)
+	assert.Contains(t, body, `hx-swap="outerHTML"`)
+}
+
 var csrfTokenRe = regexp.MustCompile(`X-CSRF-Token(?:"|&#34;):\s*(?:"|&#34;)([^"&]+)`)
 
 // csrfFor returns a usable masked nosurf token + its cookie from ONE page

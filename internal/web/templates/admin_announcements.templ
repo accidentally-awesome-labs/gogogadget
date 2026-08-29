@@ -3,8 +3,10 @@ package templates
 import (
 	"context"
 	"fmt"
+
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // AnnouncementsData carries the admin list plus the create-form state (kept
@@ -17,62 +19,90 @@ type AnnouncementsData struct {
 	Invalid bool
 }
 
+func adminAnnouncementColumns(ctx context.Context) []ui.Column {
+	return []ui.Column{
+		{Key: "kind", Label: i18n.T(ctx, "admin.announcements.col_kind")},
+		{Key: "message", Label: i18n.T(ctx, "admin.announcements.col_message")},
+		{Key: "status", Label: i18n.T(ctx, "admin.announcements.col_status")},
+		{Key: "created", Label: i18n.T(ctx, "admin.announcements.col_created"), HideBelow: ui.BreakpointSM},
+		{Key: "actions", Label: i18n.T(ctx, "admin.announcements.col_actions"), Align: ui.AlignEnd},
+	}
+}
+
 templ AdminAnnouncementsPage(d AnnouncementsData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "admin.announcements.title") }</h1>
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "admin.announcements.title")})
 	if AdminWrite(ctx) {
 		<div id="announcement-form-wrap">
 			@AnnouncementForm(d)
 		</div>
 	}
-	<div class="card !p-0 overflow-hidden" data-testid="announcements-table">
-		if len(d.Items) == 0 {
-			<p class="p-6 text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.empty") }</p>
-		} else {
-			<table class="table">
-				<thead>
-					<tr><th>{ i18n.T(ctx, "admin.announcements.col_kind") }</th><th>{ i18n.T(ctx, "admin.announcements.col_message") }</th><th>{ i18n.T(ctx, "admin.announcements.col_status") }</th><th>{ i18n.T(ctx, "admin.announcements.col_created") }</th><th class="text-right">{ i18n.T(ctx, "admin.announcements.col_actions") }</th></tr>
-				</thead>
-				<tbody>
-					for _, a := range d.Items {
-						<tr id={ "announcement-row-" + fmt.Sprintf("%d", a.ID) }>
-							<td><span class="badge { announcementBadgeClass(a.Kind) }">{ announcementKindLabel(ctx, a.Kind) }</span></td>
-							<td class="max-w-md truncate font-medium" title={ a.Message }>{ a.Message }</td>
-							<td>
-								if a.Active {
-									<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "admin.announcements.active") }</span>
-								} else {
-									<span class="badge bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">{ i18n.T(ctx, "admin.announcements.inactive") }</span>
-								}
-							</td>
-							<td class="text-fg-muted">{ a.CreatedAt.Time.Format("Jan 2, 2006") }</td>
-							<td class="text-right">
-								if AdminWrite(ctx) {
-									<div class="flex justify-end gap-2">
-										if a.Active {
-											<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/deactivate" }
-												class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-deactivate-" + fmt.Sprintf("%d", a.ID) }>
-												{ i18n.T(ctx, "admin.announcements.deactivate") }
-											</button>
-										} else {
-											<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/activate" }
-												class="btn-ghost !px-2 !py-1 text-xs" data-testid={ "announcement-activate-" + fmt.Sprintf("%d", a.ID) }>
-												{ i18n.T(ctx, "admin.announcements.activate") }
-											</button>
-										}
-										<button type="button" hx-post={ "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/delete" }
-											hx-confirm={ i18n.T(ctx, "admin.announcements.delete_confirm") }
-											class="btn-ghost !px-2 !py-1 text-xs text-red-600 dark:text-red-400" data-testid={ "announcement-delete-" + fmt.Sprintf("%d", a.ID) }>
-											{ i18n.T(ctx, "admin.announcements.delete") }
-										</button>
-									</div>
-								}
-							</td>
-						</tr>
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "admin.announcements.title"),
+		HiddenCaption: true,
+		Columns:       adminAnnouncementColumns(ctx),
+		RowCount:      len(d.Items),
+		Empty:         adminAnnouncementsEmpty(),
+		Attrs:         ui.Attrs{TestID: "announcements-table"},
+	}) {
+		for _, a := range d.Items {
+			<tr id={ "announcement-row-" + fmt.Sprintf("%d", a.ID) }>
+				<td>
+					@ui.Badge(ui.BadgeOpts{Text: announcementKindLabel(ctx, a.Kind), Kind: announcementKind(a.Kind)})
+				</td>
+				<td class="max-w-md font-medium">
+					@ui.Truncate(ui.TruncateOpts{Text: a.Message})
+				</td>
+				<td>
+					if a.Active {
+						@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindSuccess, Label: i18n.T(ctx, "admin.announcements.active")})
+					} else {
+						@ui.StatusDot(ui.StatusDotOpts{Kind: ui.KindNeutral, Label: i18n.T(ctx, "admin.announcements.inactive")})
 					}
-				</tbody>
-			</table>
+				</td>
+				<td class="text-fg-muted hidden sm:table-cell">{ a.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+				<td class="text-right">
+					if AdminWrite(ctx) {
+						@ui.Toolbar(ui.ToolbarOpts{Label: i18n.T(ctx, "admin.announcements.row_actions_aria", a.Message), Attrs: ui.Attrs{Class: "justify-end"}}) {
+							if a.Active {
+								@ui.Button(ui.ButtonOpts{
+									Label: i18n.T(ctx, "admin.announcements.deactivate"),
+									Size:  ui.SizeXS,
+									Attrs: ui.Attrs{
+										TestID: "announcement-deactivate-" + fmt.Sprintf("%d", a.ID),
+										HX:     ui.HX{Post: "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/deactivate"},
+									},
+								})
+							} else {
+								@ui.Button(ui.ButtonOpts{
+									Label: i18n.T(ctx, "admin.announcements.activate"),
+									Size:  ui.SizeXS,
+									Attrs: ui.Attrs{
+										TestID: "announcement-activate-" + fmt.Sprintf("%d", a.ID),
+										HX:     ui.HX{Post: "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/activate"},
+									},
+								})
+							}
+							@ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID:           "announcement-delete-dialog-" + fmt.Sprintf("%d", a.ID),
+								TriggerLabel: i18n.T(ctx, "admin.announcements.delete_row", a.Message),
+								Title:        i18n.T(ctx, "admin.announcements.delete_title"),
+								Message:      i18n.T(ctx, "admin.announcements.delete_confirm"),
+								ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
+								CancelLabel:  i18n.T(ctx, "admin.cancel"),
+								Kind:         ui.KindDanger,
+								HX:           ui.HX{Post: "/admin/announcements/" + fmt.Sprintf("%d", a.ID) + "/delete"},
+								Attrs:        ui.Attrs{TestID: "announcement-delete-" + fmt.Sprintf("%d", a.ID)},
+							})
+						}
+					}
+				</td>
+			</tr>
 		}
-	</div>
+	}
+}
+
+templ adminAnnouncementsEmpty() {
+	@ui.EmptyState(ui.EmptyStateOpts{Body: i18n.T(ctx, "admin.announcements.empty"), Variant: ui.EmptyInline})
 }
 
 func announcementKindKey(kind string) string { return "admin.announcements.kind_" + kind }
@@ -81,49 +111,43 @@ func announcementKindLabel(ctx context.Context, kind string) string {
 	return i18n.T(ctx, announcementKindKey(kind))
 }
 
-func announcementBadgeClass(kind string) string {
-	switch kind {
-	case "warning":
-		return "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-	case "critical":
-		return "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-	default: // info
-		return "bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300"
-	}
-}
-
 // AnnouncementForm is the create card. Extracted so the 422 re-render swaps
 // exactly this fragment (project-form convention).
 templ AnnouncementForm(d AnnouncementsData) {
 	<div class="card mb-8 max-w-xl">
-		<h2 class="text-lg font-semibold mb-4">{ i18n.T(ctx, "admin.announcements.create_title") }</h2>
-		<form hx-post="/admin/announcements" hx-target="#announcement-form-wrap" hx-swap="outerHTML" novalidate hx-disable="this" data-testid="announcement-create-form" class="space-y-4">
-				if d.Invalid {
-					<div class="alert-error" role="alert">{ i18n.T(ctx, "admin.announcements.invalid") }</div>
+		@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "admin.announcements.create_title"), Attrs: ui.Attrs{Class: "mb-4"}})
+		@ui.Form(ui.FormOpts{
+			Target: "#announcement-form-wrap", Swap: "outerHTML",
+			Attrs: ui.Attrs{
+				Class: "space-y-4", TestID: "announcement-create-form",
+				HX: ui.HX{Post: "/admin/announcements", Disable: true},
+			},
+		}) {
+			if d.Invalid {
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
+					{ i18n.T(ctx, "admin.announcements.invalid") }
 				}
-				<div>
-					<label class="block text-sm font-medium mb-1" for="announcement-kind">{ i18n.T(ctx, "admin.announcements.kind_label") }</label>
-					<select id="announcement-kind" name="kind" class="input">
-						<option value="info" selected?={ d.Kind == "info" }>{ i18n.T(ctx, "admin.announcements.kind_info") }</option>
-						<option value="warning" selected?={ d.Kind == "warning" }>{ i18n.T(ctx, "admin.announcements.kind_warning") }</option>
-						<option value="critical" selected?={ d.Kind == "critical" }>{ i18n.T(ctx, "admin.announcements.kind_critical") }</option>
-					</select>
-				</div>
-				<div>
-					<label class="block text-sm font-medium mb-1" for="announcement-message">{ i18n.T(ctx, "admin.announcements.message_label") }</label>
-					<input id="announcement-message" type="text" name="message" value={ d.Message } maxlength="280"
-						placeholder={ i18n.T(ctx, "admin.announcements.message_placeholder") } class="input" />
-				</div>
-				<div>
-					<label class="block text-sm font-medium mb-1" for="announcement-url">{ i18n.T(ctx, "admin.announcements.url_label") }</label>
-					<input id="announcement-url" type="url" name="url" value={ d.Url }
-						placeholder={ i18n.T(ctx, "admin.announcements.url_placeholder") } class="input" />
-				</div>
-				<p class="text-sm text-fg-muted">{ i18n.T(ctx, "admin.announcements.one_active_hint") }</p>
-				<div class="flex items-center gap-3">
-					<button type="submit" class="btn btn-primary">{ i18n.T(ctx, "admin.announcements.create") }</button>
-					@Spinner()
-				</div>
-		</form>
+			}
+			@ui.Field(ui.FieldOpts{Name: "kind", Label: i18n.T(ctx, "admin.announcements.kind_label")}) {
+				@ui.Select(ui.SelectOpts{Name: "kind", Options: []ui.Option{
+					{Value: "info", Label: i18n.T(ctx, "admin.announcements.kind_info"), Selected: d.Kind == "info"},
+					{Value: "warning", Label: i18n.T(ctx, "admin.announcements.kind_warning"), Selected: d.Kind == "warning"},
+					{Value: "critical", Label: i18n.T(ctx, "admin.announcements.kind_critical"), Selected: d.Kind == "critical"},
+				}})
+			}
+			@ui.Field(ui.FieldOpts{Name: "message", Label: i18n.T(ctx, "admin.announcements.message_label")}) {
+				@ui.TextInput(ui.TextInputOpts{Name: "message", Value: d.Message, Placeholder: i18n.T(ctx, "admin.announcements.message_placeholder")})
+			}
+			@ui.Field(ui.FieldOpts{Name: "url", Label: i18n.T(ctx, "admin.announcements.url_label")}) {
+				@ui.TextInput(ui.TextInputOpts{Name: "url", Type: ui.InputTypeURL, Value: d.Url, Placeholder: i18n.T(ctx, "admin.announcements.url_placeholder")})
+			}
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true}) {
+				{ i18n.T(ctx, "admin.announcements.one_active_hint") }
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{Label: i18n.T(ctx, "admin.announcements.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary})
+				@ui.Spinner(ui.SpinnerOpts{})
+			}
+		}
 	</div>
 }

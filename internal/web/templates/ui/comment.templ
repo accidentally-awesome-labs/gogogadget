@@ -1,0 +1,59 @@
+package ui
+
+// CommentOpts is one comment.
+type CommentOpts struct {
+	Author      string
+	AvatarSrc   string
+	Timestamp   string
+	MachineTime string
+	// Body is plain text. Rendering user-authored Markdown belongs to a caller
+	// that has sanitized it; this component never takes templ.Raw, because a
+	// single unsanitized comment is a stored XSS on every page that shows it.
+	Body string
+	// BodySlot is the escape hatch for content the *caller* has rendered and
+	// sanitized, which keeps the decision visible at the call site.
+	BodySlot templ.Component
+	Actions  templ.Component
+	// Edited marks a modified comment, because silently changing history is
+	// worse than showing that it changed.
+	Edited      bool
+	EditedLabel string
+	Attrs       Attrs
+}
+
+// Comment renders one comment.
+templ Comment(o CommentOpts) {
+	<article { root("comment", "flex items-start gap-3 py-3", o.Attrs)... }>
+		@Avatar(AvatarOpts{Name: o.Author, Src: o.AvatarSrc, Size: SizeSM})
+		<div class="min-w-0 flex-1">
+			<p class="text-sm">
+				<span class="font-medium">{ o.Author }</span>
+				if o.Timestamp != "" {
+					<time class="ml-2 text-xs text-fg-muted" datetime={ o.MachineTime }>{ o.Timestamp }</time>
+				}
+				if o.Edited {
+					<span class="ml-2 text-xs text-fg-muted">{ commentEditedLabel(o.EditedLabel) }</span>
+				}
+			</p>
+			<div class="text-sm mt-1">
+				if o.BodySlot != nil {
+					@o.BodySlot
+				} else {
+					{ o.Body }
+				}
+			</div>
+			if o.Actions != nil {
+				<div class="mt-2">
+					@o.Actions
+				</div>
+			}
+		</div>
+	</article>
+}
+
+func commentEditedLabel(label string) string {
+	if label == "" {
+		return "(edited)"
+	}
+	return label
+}

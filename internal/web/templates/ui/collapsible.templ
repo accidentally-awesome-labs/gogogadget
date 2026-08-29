@@ -1,0 +1,34 @@
+package ui
+
+// CollapsibleOpts configures a region and the control that discloses it.
+type CollapsibleOpts struct {
+	// ID names the region, not the disclosure: a caller that swaps the content
+	// with htmx or scrolls to it needs a handle on the region itself, and the
+	// platform already wires the control to it.
+	ID    string
+	Label string
+	Open  bool
+	Attrs Attrs
+}
+
+// Collapsible renders a native details/summary around a region.
+//
+// It is the same platform primitive as Disclosure, differing only in that the
+// summary is dressed as a button and the region carries a caller-supplied id.
+// That is deliberate: a hand-built button plus a script-toggled region left the
+// content permanently display:none with scripting off, so the one thing the
+// component exists to reveal was unreachable. <details> supplies the toggle,
+// the button semantics, keyboard activation and the expanded-state
+// announcement with no script at all, which is why this component has no
+// Alpine controller to declare.
+templ Collapsible(o CollapsibleOpts) {
+	<details { root("collapsible", "", o.Attrs)... } open?={ o.Open }>
+		<summary class="btn btn-ghost btn-sm cursor-pointer">
+			{ o.Label }
+			@Icon(IconOpts{Name: IconChevronDown, Attrs: Attrs{Class: "w-4 h-4"}})
+		</summary>
+		<div id={ o.ID } class="mt-2">
+			{ children... }
+		</div>
+	</details>
+}

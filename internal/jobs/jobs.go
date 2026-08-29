@@ -7,9 +7,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"math/rand/v2"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -37,13 +39,10 @@ const (
 	KindExportOrgJSON        = "export.org_json"
 )
 
-// SchedulableKinds are the kinds a schedule row may reference — handlers
-// whose payloads are job-specific (webhook.deliver carries a delivery id,
-// emails carry a recipient) can't be scheduled generically and are absent
-// by design. Builders extend this list as they add recurring handlers.
-var SchedulableKinds = []string{KindEmailDigest, KindUsageFlush}
-
-// SchedulableKindsContains reports whether kind may back a schedule row.
+// SchedulableKindsContains reports whether kind may back a schedule row. The
+// list itself is generated from module declarations — a kind cannot be scheduled
+// unless its module said it may be, because a schedule pointing at a one-shot
+// handler would fire it forever.
 func SchedulableKindsContains(kind string) bool {
 	for _, k := range SchedulableKinds {
 		if k == kind {
@@ -91,7 +90,13 @@ func EnqueueAt(ctx context.Context, q *sqlc.Queries, kind string, payload any, r
 	if !runAt.IsZero() {
 		at = pgtype.Timestamptz{Time: runAt, Valid: true}
 	}
-	_, err = q.EnqueueJob(ctx, sqlc.EnqueueJobParams{Kind: kind, Payload: raw, RunAt: at})
+	// The declaring module's budget is applied here because the row is dispatch
+	// truth: a job keeps the budget it was enqueued under even if the module
+	// later changes its mind. An undeclared kind gets the column default — a
+	// project may queue work before the module that handles it is installed.
+	_, err = q.EnqueueJob(ctx, sqlc.EnqueueJobParams{
+		Kind: kind, Payload: raw, RunAt: at, MaxAttempts: int32(declaredAttempts[kind]),
+	})
 	return err
 }
 
@@ -109,6 +114,10 @@ type Worker struct {
 	sender mail.Sender
 	log    *slog.Logger
 	poll   time.Duration
+	// definitions is the dispatch table, keyed by kind. Built at construction
+	// from the generated declarations; a kind no installed module declares is
+	// absent, which is what makes a stale queued row dead-letter immediately.
+	definitions map[string]Definition
 	// OnDeadLetter reports exhausted jobs (wired to Sentry when enabled).
 	OnDeadLetter func(kind string, err error)
 	// Webhook delivery policy hooks — strict by default; tests swap these.
@@ -143,13 +152,33 @@ func (w *Worker) digestLocale() language.Tag {
 }
 
 func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
-	return &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second,
+	w := &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second,
 		WebhookGuard: guardWebhookURL, WebhookTransport: guardedTransport()}
+	// Built once from the generated table. The declarations close over w, so the
+	// collaborators callers assign after construction are still picked up.
+	w.definitions = make(map[string]Definition, len(workerDefinitions(w)))
+	for _, d := range workerDefinitions(w) {
+		w.definitions[d.Kind] = d
+	}
+	return w
 }
 
-// Run polls until ctx is done; a daily janitor pass deletes finished jobs
-// older than 7 days and webhook events older than 30 days.
+// Run polls until ctx is done; a janitor pass deletes finished jobs older than
+// 7 days and webhook events older than 30 days.
+//
+// The first pass runs immediately, and that is load-bearing rather than
+// cosmetic. A ticker alone put the first sweep 24 hours after PROCESS START and
+// reset the clock on every restart, so any deployment that recycles more often
+// than daily - a daily container recycle, a normal deploy cadence, a
+// crash-restart loop - never reached the janitor at all. Every failure was
+// silent: finished jobs accumulated forever, the inbound webhook idempotency
+// table grew without bound, AUDIT_RETENTION_DAYS was never enforced, expired
+// idempotency keys were never swept, and rotated webhook secrets were never
+// cleared past their grace window. Retention that only holds on a
+// long-uptime host is not retention.
 func (w *Worker) Run(ctx context.Context) {
+	w.janitorPass(ctx)
+
 	janitor := time.NewTicker(24 * time.Hour)
 	defer janitor.Stop()
 	for {
@@ -161,17 +190,41 @@ func (w *Worker) Run(ctx context.Context) {
 		default:
 		}
 
-		n, err := w.drain(ctx)
-		if err != nil {
-			w.log.Error("job worker", "error", err)
-		}
-		if err := w.schedulerPass(ctx); err != nil {
-			w.log.Error("schedule pass", "error", err)
-		}
+		n := w.pass(ctx)
 		if n == 0 {
 			w.sleep(ctx, w.jittered())
 		}
 	}
+}
+
+// pass runs one claim-and-schedule cycle and is the last place a panic can be
+// contained. dispatchSafely covers a panicking handler and janitorPass covers a
+// panicking sweep, but the claim itself sat outside both: a panic anywhere in
+// ClaimJob, CompleteJob, FailJob or schedulerPass unwound straight out of the
+// goroutine Module.Start launched, with no recover above it, and took the web
+// server down with it. That is the exact failure dispatchSafely exists to
+// prevent, one frame further out - and the one the queue cannot answer by
+// failing a row, because it never claimed one.
+//
+// Reporting zero work on a panic is what makes the next iteration sleep for a
+// poll interval instead of spinning: a queue that cannot be reached at all must
+// back off, not busy-loop on the failure.
+func (w *Worker) pass(ctx context.Context) (n int) {
+	defer func() {
+		if r := recover(); r != nil {
+			w.log.Error("job worker panicked", "panic", r, "stack", string(debug.Stack()))
+			n = 0
+		}
+	}()
+
+	n, err := w.drain(ctx)
+	if err != nil {
+		w.log.Error("job worker", "error", err)
+	}
+	if err := w.schedulerPass(ctx); err != nil {
+		w.log.Error("schedule pass", "error", err)
+	}
+	return n
 }
 
 func (w *Worker) jittered() time.Duration {
@@ -187,41 +240,39 @@ func (w *Worker) sleep(ctx context.Context, d time.Duration) {
 	}
 }
 
-// IdempotencyRetention is how long a stored API response stays replayable.
-// Long enough for any sane client retry schedule; short enough that the table
-// is a cache, not an archive.
-const IdempotencyRetention = 24 * time.Hour
+// Janitor is one declared cleanup sweep. Name is what the operator sees in the
+// log when it fails.
+type Janitor struct {
+	Name  string
+	Sweep func(context.Context) error
+}
 
+// janitorPass runs every declared sweep. Each is logged independently and a
+// failure does not stop the others: an unreachable table must not strand the
+// cleanup of every other one.
 func (w *Worker) janitorPass(ctx context.Context) {
-	if err := w.q.DeleteOldJobs(ctx); err != nil {
-		w.log.Error("janitor jobs", "error", err)
-	}
-	if err := w.q.DeleteOldWebhookEvents(ctx); err != nil {
-		w.log.Error("janitor webhook_events", "error", err)
-	}
-	cutoff := pgtype.Timestamptz{Time: time.Now().Add(-WebhookRotationGrace), Valid: true}
-	if n, err := w.q.ClearExpiredPreviousSecrets(ctx, cutoff); err != nil {
-		w.log.Error("janitor webhook secrets", "error", err)
-	} else if n > 0 {
-		w.log.Info("janitor webhook secrets", "cleared", n)
-	}
-	// Idempotency keys stop being useful once no client will retry; 24h
-	// covers any sane retry schedule and keeps the table small.
-	idemCutoff := pgtype.Timestamptz{Time: time.Now().Add(-IdempotencyRetention), Valid: true}
-	if n, err := w.q.DeleteOldIdempotencyKeys(ctx, idemCutoff); err != nil {
-		w.log.Error("janitor idempotency_keys", "error", err)
-	} else if n > 0 {
-		w.log.Info("janitor idempotency_keys", "deleted", n)
-	}
-	if w.AuditRetentionDays > 0 {
-		cutoff := pgtype.Timestamptz{Time: time.Now().AddDate(0, 0, -w.AuditRetentionDays), Valid: true}
-		n, err := w.q.DeleteOldAuditRows(ctx, cutoff)
-		if err != nil {
-			w.log.Error("janitor audit_log", "error", err)
-		} else if n > 0 {
-			w.log.Info("janitor audit_log", "deleted", n, "retention_days", w.AuditRetentionDays)
+	// A sweep that panics must not end the claim loop. The passes are
+	// independent maintenance, and losing retention is a much smaller failure
+	// than losing the worker.
+	defer func() {
+		if r := recover(); r != nil {
+			w.log.Error("janitor panicked", "panic", r, "stack", string(debug.Stack()))
+		}
+	}()
+	w.runJanitors(ctx, workerJanitors(w))
+}
+
+func (w *Worker) runJanitors(ctx context.Context, janitors []Janitor) {
+	for _, janitor := range janitors {
+		if err := janitor.Sweep(ctx); err != nil {
+			w.log.Error("janitor", "sweep", janitor.Name, "error", err)
 		}
 	}
+}
+
+// janitorOldJobs drops finished rows after a week. Owned by system/jobs.
+func (w *Worker) janitorOldJobs(ctx context.Context) error {
+	return w.q.DeleteOldJobs(ctx)
 }
 
 // drain processes every currently-claimable job; returns the count.
@@ -249,10 +300,22 @@ func (w *Worker) ProcessOne(ctx context.Context) (bool, error) {
 		return false, err
 	}
 
-	if err := w.dispatch(ctx, job); err != nil {
+	if err := w.dispatchSafely(ctx, job); err != nil {
 		w.log.Error("job failed", "id", job.ID, "kind", job.Kind, "attempts", job.Attempts, "error", err)
-		if job.Attempts >= job.MaxAttempts {
-			if derr := w.q.DeadLetterJob(ctx, job.ID); derr != nil {
+
+		// An uninstalled module's queued rows die on the first claim. Retrying a
+		// handler that cannot exist would burn the full backoff schedule — hours
+		// of queue capacity — and bury the real signal behind repeated failures.
+		reason := deadLetterReasonExhausted
+		terminal := job.Attempts >= job.MaxAttempts
+		if errors.Is(err, errUnknownKind) {
+			reason, terminal = deadLetterReasonUninstalled, true
+		}
+
+		if terminal {
+			if derr := w.q.DeadLetterJob(ctx, sqlc.DeadLetterJobParams{
+				ID: job.ID, Reason: pgtype.Text{String: reason, Valid: true},
+			}); derr != nil {
 				return true, derr
 			}
 			if w.OnDeadLetter != nil {
@@ -268,65 +331,114 @@ func (w *Worker) ProcessOne(ctx context.Context) (bool, error) {
 	return true, w.q.CompleteJob(ctx, job.ID)
 }
 
+// dispatchSafely turns a panicking handler into a failed job. Without it a
+// single bad handler takes down the whole process: Run is started in a goroutine
+// by Module.Start with no recover above it, so the panic unwinds past the web
+// server too. A background worker must not be able to kill the thing serving
+// traffic, and the queue already has the right answer for a handler that cannot
+// complete - fail it, back off, and dead-letter at the attempt budget.
+//
+// The stack is logged because a recovered panic with no stack is a bug report
+// with the evidence removed.
+func (w *Worker) dispatchSafely(ctx context.Context, job sqlc.Job) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			w.log.Error("job handler panicked", "id", job.ID, "kind", job.Kind,
+				"panic", r, "stack", string(debug.Stack()))
+			err = fmt.Errorf("handler panicked: %v", r)
+		}
+	}()
+	return w.dispatch(ctx, job)
+}
+
 // schedulerPass claims due schedules (next_run_at advanced in the same
 // statement — missed ticks are skipped by design) and enqueues their kind
 // with the wrapped payload. Runs every poll cycle.
+//
+// A failing enqueue logs and continues rather than returning. The claim already
+// advanced next_run_at for EVERY row it returned, so returning on the first
+// error abandoned the rest: five due schedules with a transient error on the
+// third meant two fired, three did not, and all five had their tick consumed.
+// One failure taking out its unrelated siblings is the same mistake the janitor
+// pass was corrected for.
+//
+// The remaining hole is honest and stated: the claim and the enqueue are not one
+// transaction, so a process killed between them loses that tick with no record.
+// The design comment above covers skipping ticks during DOWNTIME, which is a
+// different thing from a claim whose enqueue never happened.
 func (w *Worker) schedulerPass(ctx context.Context) error {
 	due, err := w.q.ClaimDueSchedules(ctx)
 	if err != nil {
 		return err
 	}
+	var failed int
 	for _, s := range due {
 		if err := Enqueue(ctx, w.q, s.Kind, SchedulePayload{ScheduleID: s.ID, Payload: s.Payload}); err != nil {
-			return err
+			failed++
+			w.log.Error("schedule enqueue", "schedule_id", s.ID, "kind", s.Kind, "error", err)
 		}
+	}
+	if failed > 0 {
+		return fmt.Errorf("enqueued %d of %d due schedules", len(due)-failed, len(due))
 	}
 	return nil
 }
 
-func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
-	switch job.Kind {
-	case KindEmailDigest:
-		return w.sendDigests(ctx, job)
-	case KindUsageFlush:
-		return w.flushUsage(ctx, job)
-	case KindWebhookDeliver:
-		return w.deliverWebhook(ctx, job)
-	case KindExportProjectsCSV:
-		return w.exportProjectsCSV(ctx, job)
-	case KindExportOrgJSON:
-		return w.exportOrgJSON(ctx, job)
-	case KindWelcome, KindPaymentFailed, KindSubscriptionCanceled, KindTrialEnding, KindDunningReminder, KindDunningFinal:
-		var p EmailPayload
-		if err := json.Unmarshal(job.Payload, &p); err != nil {
+// deadLetterReasonExhausted and deadLetterReasonUninstalled are the terminal
+// reasons a job can carry. They are literals shared with the admin status view
+// and the requeue guard, so they are named once here.
+const (
+	deadLetterReasonExhausted   = "exhausted"
+	deadLetterReasonUninstalled = "module_uninstalled"
+)
+
+// errUnknownKind marks a persisted row whose kind no installed module provides.
+// It is not a handler failure, so it never retries.
+var errUnknownKind = errors.New("no installed module provides this job kind")
+
+// sendTransactionalEmail is the shared body behind every email kind. The kind is
+// a parameter rather than a branch on the job row, because each kind is now its
+// own declaration and the row is no longer in scope here.
+func (w *Worker) sendTransactionalEmail(ctx context.Context, kind string, p EmailPayload) error {
+	if kind == KindTrialEnding {
+		if skip, err := w.trialNoLongerActive(ctx, p.OrgID); err != nil {
 			return err
+		} else if skip {
+			w.log.Info("trial-ending email skipped: subscription no longer trialing", "org", p.OrgID)
+			return nil
 		}
-		if job.Kind == KindTrialEnding {
-			if skip, err := w.trialNoLongerActive(ctx, p.OrgID); err != nil {
-				return err
-			} else if skip {
-				w.log.Info("trial-ending email skipped: subscription no longer trialing", "org", p.OrgID)
-				return nil
-			}
-		}
-		if job.Kind == KindDunningReminder || job.Kind == KindDunningFinal {
-			if skip, err := w.paymentRecovered(ctx, p.OrgID); err != nil {
-				return err
-			} else if skip {
-				w.log.Info("dunning email skipped: payment no longer failing", "kind", job.Kind, "org", p.OrgID)
-				return nil
-			}
-			if job.Kind == KindDunningFinal {
-				// The day-0 notification is a week stale by now; the last
-				// notice is the one worth putting back in front of them.
-				notify.SendOrg(ctx, w.q, p.OrgID, "payment_failed", "Final notice: payment still failing",
-					"Update your card to keep your plan active.", "/app/settings/billing")
-			}
-		}
-		return w.sender.Send(ctx, mail.Message{To: p.To, Subject: p.Subject, HTML: p.HTML, Text: p.Text})
-	default:
-		return errors.New("unknown job kind: " + job.Kind)
 	}
+	if kind == KindDunningReminder || kind == KindDunningFinal {
+		if skip, err := w.paymentRecovered(ctx, p.OrgID); err != nil {
+			return err
+		} else if skip {
+			w.log.Info("dunning email skipped: payment no longer failing", "kind", kind, "org", p.OrgID)
+			return nil
+		}
+		if kind == KindDunningFinal {
+			// The day-0 notification is a week stale by now; the last
+			// notice is the one worth putting back in front of them.
+			notify.SendOrg(ctx, w.q, p.OrgID, "payment_failed", "Final notice: payment still failing",
+				"Update your card to keep your plan active.", "/app/settings/billing")
+		}
+	}
+	return w.sender.Send(ctx, mail.Message{To: p.To, Subject: p.Subject, HTML: p.HTML, Text: p.Text})
+}
+
+// dispatch routes a claimed row to the declaration that owns its kind. The table
+// is generated from module manifests, so an uninstalled module's kind is simply
+// absent — which ProcessOne turns into an immediate dead-letter rather than a
+// retry of a handler that cannot exist.
+func (w *Worker) dispatch(ctx context.Context, job sqlc.Job) error {
+	definition, ok := w.definitions[job.Kind]
+	if !ok {
+		return fmt.Errorf("%w: %s", errUnknownKind, job.Kind)
+	}
+	// Attempt state comes from the row, not the declaration: a job keeps the
+	// budget it was enqueued under even if the module later changes its mind.
+	return definition.Handle(ctx, job.Payload, Attempt{
+		Number: int(job.Attempts), Max: int(job.MaxAttempts),
+	})
 }
 
 // paymentRecovered is the run-time guard for the dunning follow-ups. They are

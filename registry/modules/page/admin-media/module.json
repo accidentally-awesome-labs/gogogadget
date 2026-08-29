@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-media",
+    "kind": "page",
+    "name": "admin-media",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin media library",
+    "description": "The paginated platform image library that the content editor and admins browse.",
+    "requires": [
+      "system/content",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/media_test.go",
+        "target": "internal/web/media_test.go",
+        "class": "test",
+        "sha256": "1a37e1e9c8a9d4d2db7b3cc6e9b54c1495db8ad4ef16441c7164dbb4e28a3b81",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_admin_media.go",
+        "target": "internal/web/page_admin_media.go",
+        "class": "go",
+        "sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.media.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.media.index",
+          "method": "GET",
+          "pattern": "/admin/media",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminMedia"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.media.back_to_content": "Back to content",
+        "admin.media.col_actions": "Actions",
+        "admin.media.col_filename": "Filename",
+        "admin.media.col_preview": "Preview",
+        "admin.media.col_size": "Size",
+        "admin.media.col_uploaded": "Uploaded",
+        "admin.media.delete_confirm": "Delete this image? Posts referencing it will break.",
+        "admin.media.delete_row": "Delete %s",
+        "admin.media.delete_title": "Delete this image?",
+        "admin.media.deleted": "Image deleted.",
+        "admin.media.empty": "No media uploaded yet.",
+        "admin.media.invalid_missing": "Choose a file to upload.",
+        "admin.media.invalid_type": "Only PNG, JPEG, GIF and WebP images are accepted.",
+        "admin.media.row_actions_aria": "Actions for %s",
+        "admin.media.title": "Media",
+        "admin.media.upload": "Upload",
+        "admin.media.upload_label": "Image file",
+        "admin.media.uploaded": "Image uploaded."
+      },
+      "es": {
+        "admin.media.back_to_content": "Volver al contenido",
+        "admin.media.col_actions": "Acciones",
+        "admin.media.col_filename": "Nombre de archivo",
+        "admin.media.col_preview": "Previsualización",
+        "admin.media.col_size": "Tamaño",
+        "admin.media.col_uploaded": "Subido",
+        "admin.media.delete_confirm": "¿Eliminar esta imagen? Las entradas que la usen se romperán.",
+        "admin.media.delete_row": "Eliminar %s",
+        "admin.media.delete_title": "¿Eliminar esta imagen?",
+        "admin.media.deleted": "Imagen eliminada.",
+        "admin.media.empty": "Todavía no se han subido medios.",
+        "admin.media.invalid_missing": "Elige un archivo para subir.",
+        "admin.media.invalid_type": "Solo se aceptan imágenes PNG, JPEG, GIF y WebP.",
+        "admin.media.row_actions_aria": "Acciones para %s",
+        "admin.media.title": "Medios",
+        "admin.media.upload": "Subir",
+        "admin.media.upload_label": "Archivo de imagen",
+        "admin.media.uploaded": "Imagen subida."
+      }
+    }
+  }
+}

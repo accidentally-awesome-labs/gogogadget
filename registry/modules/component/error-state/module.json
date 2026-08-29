@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/error-state",
+    "kind": "component",
+    "name": "error-state",
+    "revision": 1,
+    "contract": 1,
+    "title": "ErrorState",
+    "description": "The ErrorState renderer and its options.",
+    "requires": [
+      "element/icon",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/error-state.templ",
+        "target": "internal/web/templates/ui/error-state.templ",
+        "class": "templ",
+        "sha256": "14a646ea953c51f00cf3df1116f2deaf51650756460035cd29c0dfa489b25020",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "error-state",
+          "family": "feedback",
+          "signature": "templ ErrorState(o ErrorStateOpts)",
+          "summary": "Renders a failed region with a retry.",
+          "guidance": "role=\"alert\" because a region that failed after the user acted must be announced - unlike EmptyState, which is a resting state and not news. The retry is a real link with an hx-get, so it works with scripts disabled.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

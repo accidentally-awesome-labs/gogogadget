@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/files",
+    "kind": "workflow",
+    "name": "files",
+    "revision": 1,
+    "contract": 1,
+    "title": "File upload, download and delete",
+    "description": "File mutations and object transport for the app UI: quota-enforced multipart upload, always-attachment download, and delete with best-effort object cleanup.",
+    "requires": [
+      "page/files",
+      "system/audit",
+      "system/database",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server",
+      "system/storage"
+    ],
+    "files": [
+      {
+        "source": "internal/db/queries/files.sql",
+        "target": "internal/db/queries/files.sql",
+        "class": "query",
+        "sha256": "6d420370621e851d8587117736cfe40f79be8c26bec2db5ec5d5a22fa17ff9bf",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/workflow_files.go",
+        "target": "internal/web/workflow_files.go",
+        "class": "go",
+        "sha256": "cd3d710bf99e084fd6468bc3eca786357a6d01e3b3abb2f7d3d6a30f186e8cd7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "files.delete",
+        "files.download",
+        "files.upload"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "files.delete",
+          "method": "DELETE",
+          "pattern": "/app/files/{id}",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFileDelete"
+        },
+        {
+          "id": "files.download",
+          "method": "GET",
+          "pattern": "/app/files/{id}",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFileDownload"
+        },
+        {
+          "id": "files.upload",
+          "method": "POST",
+          "pattern": "/app/files",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFileUpload"
+        }
+      ],
+      "queries": [
+        {
+          "name": "CountFilesByOrg",
+          "table": "files"
+        },
+        {
+          "name": "DeleteFile",
+          "table": "files"
+        },
+        {
+          "name": "GetFileByID",
+          "table": "files"
+        },
+        {
+          "name": "InsertFile",
+          "table": "files"
+        },
+        {
+          "name": "ListFilesByOrg",
+          "table": "files"
+        },
+        {
+          "name": "SumBytesByOrg",
+          "table": "files"
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "0003_files",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0003_files.sql",
+        "sha256": "5c361c8d9c9aed9fa7dd0d366ef1789278fd4922a4d6ed873771e3b1137987c6"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [
+      {
+        "table": "files",
+        "scope": "org",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade",
+        "external_objects": [
+          "object-storage"
+        ]
+      }
+    ],
+    "removal_policy": "free"
+  }
+}

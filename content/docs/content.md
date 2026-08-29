@@ -2,7 +2,7 @@
 title: Content
 description: A database-backed content registry — blog, changelog, and any type you declare — plus docs embedded in the binary.
 section: Features
-weight: 13
+weight: 14
 ---
 
 There are two content systems and the split is deliberate. **Editable

@@ -111,7 +111,7 @@ func TestAdminFlagCreateAndDuplicate(t *testing.T) {
 	form := url.Values{"key": []string{"Bad Key!"}, "description": []string{"x"}, "rollout": []string{"100"}}
 	code, _, body := postForm(t, s, "/admin/flags", form, sessionCookie("user_fc", "org_fc", "org:admin"))
 	assert.Equal(t, http.StatusUnprocessableEntity, code, "invalid key rejected")
-	assert.Contains(t, body, "alert-error")
+	assert.Contains(t, body, "alert-danger")
 
 	form = url.Values{"key": []string{"flag-e2e-new"}, "description": []string{"created by test"}, "rollout": []string{"100"}}
 	code, _, _ = postForm(t, s, "/admin/flags", form, sessionCookie("user_fc", "org_fc", "org:admin"))

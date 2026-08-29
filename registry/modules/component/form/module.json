@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/form",
+    "kind": "component",
+    "name": "form",
+    "revision": 1,
+    "contract": 1,
+    "title": "Form",
+    "description": "The Form renderer and its options. Renders the hidden CSRF field for every unsafe method, so a form submitted without JavaScript is accepted rather than refused with 403.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/form.templ",
+        "target": "internal/web/templates/ui/form.templ",
+        "class": "templ",
+        "sha256": "97d2502dc0eb7f3edaf8a6cac729ebc2abfca295f676983e92e63c4f972a2c76",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/form_test.go",
+        "target": "internal/web/templates/ui/form_test.go",
+        "class": "test",
+        "sha256": "135efb4c4b6626361e9b040a6410f2388f4f227484284c77fcdb814d97ff8673",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "form",
+          "family": "forms",
+          "signature": "templ Form(o FormOpts)",
+          "summary": "Renders a form wrapper; children are the fields.",
+          "guidance": "novalidate is always set: server validation is authoritative, and letting the browser block submission first means the server's rules never run. The hidden CSRF field is rendered here, not by callers, for every method the check applies to: the token htmx sends as an inherited request header is unreachable when htmx never loaded, and a form the server then refuses is a worse fallback than no form at all. GET and HEAD forms carry no field - a token in a GET is a token in the URL bar, the history and every access log.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

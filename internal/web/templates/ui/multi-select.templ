@@ -1,0 +1,49 @@
+package ui
+
+import "fmt"
+
+// MultiSelectOpts is a multiple-choice select.
+type MultiSelectOpts struct {
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID          string
+	Options     []Option
+	Size        int
+	Hint, Error string
+	Required    bool
+	Attrs       Attrs
+}
+
+// MultiSelect renders a native multiple select.
+//
+// Native multiple selection is unloved but it works everywhere, submits without
+// JavaScript, and is understood by every screen reader. The size attribute is
+// set so the list is visible rather than a one-line box the user must discover
+// they can expand.
+templ MultiSelect(o MultiSelectOpts) {
+	<select
+		{ controlRoot("multi-select", "input h-auto", o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		multiple
+		size={ fmt.Sprint(multiSelectSize(o.Size, len(o.Options))) }
+		required?={ o.Required }
+	>
+		for _, opt := range o.Options {
+			<option value={ opt.Value } selected?={ opt.Selected } disabled?={ opt.Disabled }>{ opt.Label }</option>
+		}
+	</select>
+}
+
+func multiSelectSize(size, options int) int {
+	if size > 0 {
+		return size
+	}
+	if options < 4 {
+		return options
+	}
+	return 4
+}

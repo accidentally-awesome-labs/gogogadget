@@ -1,0 +1,93 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// DevSaveState is what the save example renders.
+//
+// The submitted values travel back with the errors. A rejected form that clears
+// itself makes the user retype everything they got right, which is the moment
+// they stop trying.
+type DevSaveState struct {
+	Name, Email       string
+	NameErr, EmailErr string
+	Saved             bool
+}
+
+// devSaveNameHint and devSaveEmailHint are passed to BOTH the field and the
+// control. Field owns the hint element's id and the control owns
+// aria-describedby, so a hint given to only one of them produces either an
+// orphan paragraph or a dangling reference.
+const (
+	devSaveNameHint  = "Shown on the project card."
+	devSaveEmailHint = "Where release notes are sent."
+)
+
+// DevSaveExample renders the save form's resting state inside the box it swaps.
+templ DevSaveExample() {
+	<div id="dev-save-region" data-testid="dev-save-region">
+		@DevSaveFragment(DevSaveState{})
+	</div>
+}
+
+// DevSaveFragment is the form, and the body of BOTH the 200 and the 422.
+//
+// One renderer for both outcomes is the point. Production re-renders the same
+// section with the field errors filled in - the webhook create handler is the
+// pattern - so an accepted and a rejected submit cannot drift into two layouts
+// that disagree about where the error goes.
+//
+// innerHTML rather than a morph, matching that handler: on a rejected submit the
+// server's values are authoritative, and a morph preserves the live input
+// properties a user typed, which would leave the field showing one value while
+// the error underneath describes another.
+templ DevSaveFragment(state DevSaveState) {
+	@ui.Form(ui.FormOpts{
+		Method: "post", Action: "/dev/ui/form/save",
+		Target: "#dev-save-region", Swap: "innerHTML",
+		Attrs: ui.Attrs{
+			Class: "space-y-3", TestID: "dev-save-form",
+			// hx-disable="this" is what stops a second click from posting the
+			// same form again while the first request is still open. novalidate
+			// comes from Form itself: if the browser blocked the submit, the
+			// server's rules - the authoritative ones - would never run.
+			HX: ui.HX{Post: "/dev/ui/form/save", Disable: true},
+		},
+	}) {
+		if state.Saved {
+			@ui.Notice(ui.NoticeOpts{
+				Kind: ui.KindSuccess, Live: ui.LivePolite,
+				Attrs: ui.Attrs{TestID: "dev-save-notice"},
+			}) {
+				<p>Saved { state.Name }, notifying { state.Email }.</p>
+			}
+		}
+		@ui.Field(ui.FieldOpts{
+			Name: "dev_name", Label: "Display name", Required: true,
+			Hint: devSaveNameHint, Error: state.NameErr,
+		}) {
+			@ui.TextInput(ui.TextInputOpts{
+				Name: "dev_name", Value: state.Name, Required: true,
+				Hint: devSaveNameHint, Error: state.NameErr,
+			})
+		}
+		@ui.Field(ui.FieldOpts{
+			Name: "dev_email", Label: "Notify", Required: true,
+			Hint: devSaveEmailHint, Error: state.EmailErr,
+		}) {
+			@ui.TextInput(ui.TextInputOpts{
+				Name: "dev_email", Value: state.Email, Type: ui.InputTypeEmail, Required: true,
+				Hint: devSaveEmailHint, Error: state.EmailErr,
+			})
+		}
+		@ui.FormActions(ui.FormActionsOpts{}) {
+			// The spinner is inside the form so htmx shows it for the form's own
+			// request: htmx-indicator only reacts to a request its element is
+			// part of.
+			@ui.Spinner(ui.SpinnerOpts{})
+			@ui.Button(ui.ButtonOpts{
+				Label: "Save", Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+				Attrs: ui.Attrs{TestID: "dev-save-submit"},
+			})
+		}
+	}
+}

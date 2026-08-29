@@ -1,0 +1,67 @@
+package ui
+
+import (
+	"strings"
+)
+
+// AvatarOpts configures a person or organization avatar.
+type AvatarOpts struct {
+	// Name is required: it is the alt text when an image loads and the source
+	// of the initials when it does not. An avatar with no name is an unlabelled
+	// image, which a screen reader either skips or reads as a filename.
+	Name string
+	Src  string
+	Size Size
+	Attrs Attrs
+}
+
+// Avatar renders an image with an initials fallback.
+templ Avatar(o AvatarOpts) {
+	if o.Src != "" {
+		<img
+			{ rootWith("avatar", avatarClass(o.Size)+" object-cover", o.Attrs,
+				"alt", o.Name,
+				"loading", "lazy",
+				"decoding", "async")... }
+			src={ o.Src }
+		/>
+	} else {
+		// The initials block is not an image, so it carries the name as a label
+		// rather than alt text; title would only appear on hover.
+		<span
+			{ rootWith("avatar", avatarClass(o.Size)+" bg-brand-subtle text-brand-subtle-fg inline-flex items-center justify-center font-semibold", o.Attrs,
+				"role", "img",
+				"aria-label", o.Name)... }
+		>{ initials(o.Name) }</span>
+	}
+}
+
+func avatarClass(size Size) string {
+	cls := "rounded-full shrink-0"
+	switch size.Value() {
+	case SizeXS:
+		return cls + " w-6 h-6 text-xs"
+	case SizeSM:
+		return cls + " w-8 h-8 text-xs"
+	case SizeLG:
+		return cls + " w-12 h-12 text-base"
+	}
+	return cls + " w-10 h-10 text-sm"
+}
+
+// initials takes the first letter of the first and last words. Two letters is
+// the most that fits legibly, and first+last reads as a person's initials where
+// first+second would turn "Ada de Lovelace" into "AD".
+func initials(name string) string {
+	fields := strings.Fields(name)
+	if len(fields) == 0 {
+		return "?"
+	}
+	first := []rune(fields[0])
+	out := strings.ToUpper(string(first[0]))
+	if len(fields) > 1 {
+		last := []rune(fields[len(fields)-1])
+		out += strings.ToUpper(string(last[0]))
+	}
+	return out
+}

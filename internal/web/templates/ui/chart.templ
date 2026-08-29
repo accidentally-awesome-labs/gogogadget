@@ -1,0 +1,213 @@
+package ui
+
+import "fmt"
+
+// ChartPoint is one datum.
+//
+// Display is the pre-formatted value the table shows and a screen reader reads;
+// Value is the number the visual uses. They are separate because formatting is
+// locale-dependent and ui never imports i18n - and because "1.2k" is the right
+// label while 1204 is the right bar height.
+type ChartPoint struct {
+	Key, Label, Display string
+	Value               float64
+}
+
+// ChartSeries is one named set of points.
+type ChartSeries struct {
+	ID, Label string
+	// Kind selects the series colour from the semantic token set, so a chart
+	// rebrands with the rest of the product instead of carrying its own palette.
+	Kind   Kind
+	Points []ChartPoint
+}
+
+// ChartBase is everything every chart shape shares.
+type ChartBase struct {
+	// ID is required: the table, the caption and the visual mount reference each
+	// other by derived ids.
+	ID string
+	// Title and Summary are always rendered and always visible. A chart whose
+	// only description is the picture is unreadable to a screen reader and
+	// unreadable to anyone when the engine fails to load.
+	Title   string
+	Summary string
+	XLabel  string
+	YLabel  string
+	Series  []ChartSeries
+	Legend  bool
+	Tooltip bool
+}
+
+// BarChartOpts, LineChartOpts, AreaChartOpts, DonutChartOpts and SparklineOpts
+// are separate types rather than one type with a shape field, so a caller cannot
+// ask for a donut with two axes and the gallery cannot render a shape nobody
+// declared.
+type BarChartOpts struct {
+	Chart ChartBase
+	Attrs Attrs
+}
+
+type LineChartOpts struct {
+	Chart ChartBase
+	Attrs Attrs
+}
+
+type AreaChartOpts struct {
+	Chart ChartBase
+	Attrs Attrs
+}
+
+type DonutChartOpts struct {
+	Chart ChartBase
+	Attrs Attrs
+}
+
+type SparklineOpts struct {
+	Chart ChartBase
+	Attrs Attrs
+}
+
+type ChartLegendOpts struct {
+	Series []ChartSeries
+	Attrs  Attrs
+}
+
+templ BarChart(o BarChartOpts) {
+	@chartFigure("bar-chart", "bar", o.Chart, o.Attrs)
+}
+
+templ LineChart(o LineChartOpts) {
+	@chartFigure("line-chart", "line", o.Chart, o.Attrs)
+}
+
+templ AreaChart(o AreaChartOpts) {
+	@chartFigure("area-chart", "area", o.Chart, o.Attrs)
+}
+
+templ DonutChart(o DonutChartOpts) {
+	@chartFigure("donut-chart", "doughnut", o.Chart, o.Attrs)
+}
+
+templ Sparkline(o SparklineOpts) {
+	@chartFigure("sparkline", "sparkline", o.Chart, o.Attrs)
+}
+
+// chartFigure renders the whole figure: caption, summary, semantic table, and a
+// hidden visual mount.
+//
+// The order is the design. The table is the chart - it is rendered first, always
+// present, and never hidden by default. The canvas is an enhancement that
+// becomes visible only after the engine initialises successfully, and the
+// adapter reads its data *out of that table* rather than from a duplicate
+// payload, so the picture and the numbers cannot drift apart. If the engine
+// never loads, the page is a table: complete, readable, and printable.
+templ chartFigure(component, shape string, chart ChartBase, attrs Attrs) {
+	<figure
+		{ rootWith(component, "card", attrs,
+			"x-data", "uiChart",
+			"data-ui-engine", "chartjs",
+			"data-chart-shape", shape,
+			"data-chart-id", chart.ID,
+			"aria-labelledby", chart.ID+"-title",
+			"aria-describedby", chart.ID+"-summary")... }
+	>
+		<figcaption>
+			<span id={ chart.ID + "-title" } class="font-semibold">{ chart.Title }</span>
+			if chart.Summary != "" {
+				<span id={ chart.ID + "-summary" } class="block text-sm text-fg-muted mt-1">{ chart.Summary }</span>
+			}
+		</figcaption>
+		if chart.Legend {
+			@ChartLegend(ChartLegendOpts{Series: chart.Series, Attrs: Attrs{Class: "mt-3"}})
+		}
+		// The visual mount starts hidden and has no accessible content of its
+		// own: everything it shows is already in the table below it, so
+		// exposing it would duplicate the whole dataset to a screen reader.
+		<div data-chart-mount hidden aria-hidden="true" class="mt-3 h-64">
+			<canvas data-chart-canvas></canvas>
+		</div>
+		<div data-chart-table class="mt-3 overflow-x-auto">
+			<table class="table" id={ chart.ID + "-table" }>
+				<caption class="sr-only">{ chartTableCaption(chart) }</caption>
+				<thead>
+					<tr>
+						<th scope="col">{ chartAxisLabel(chart.XLabel, "Category") }</th>
+						for _, series := range chart.Series {
+							<th scope="col" data-series-id={ series.ID } data-series-kind={ string(NormalizeKind(series.Kind)) }>{ series.Label }</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					for _, row := range chartRows(chart) {
+						<tr>
+							<th scope="row" data-point-key={ row.Key }>{ row.Label }</th>
+							for _, cell := range row.Cells {
+								<td data-value={ fmt.Sprintf("%g", cell.Value) }>{ cell.Display }</td>
+							}
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</figure>
+}
+
+// ChartLegend names each series in text with its colour swatch. The swatch is
+// decoration: colour alone cannot distinguish series for a colour-blind reader,
+// so the label is what carries the identity.
+templ ChartLegend(o ChartLegendOpts) {
+	<ul { rootWith("chart-legend", "flex flex-wrap gap-4 text-sm", o.Attrs, "role", "list")... }>
+		for _, series := range o.Series {
+			<li class="inline-flex items-center gap-2">
+				<span class={ "w-3 h-3 rounded-sm shrink-0 bg-" + string(NormalizeKind(series.Kind)) } aria-hidden="true"></span>
+				{ series.Label }
+			</li>
+		}
+	</ul>
+}
+
+// chartRow is one table row: a category and one cell per series.
+type chartRow struct {
+	Key, Label string
+	Cells      []ChartPoint
+}
+
+// chartRows pivots series-major data into row-major table order. The first
+// series defines the categories: a series with a different key set would produce
+// a ragged table, and silently padding it would invent data.
+func chartRows(chart ChartBase) []chartRow {
+	if len(chart.Series) == 0 {
+		return nil
+	}
+	rows := make([]chartRow, 0, len(chart.Series[0].Points))
+	for i, point := range chart.Series[0].Points {
+		row := chartRow{Key: point.Key, Label: point.Label}
+		for _, series := range chart.Series {
+			if i < len(series.Points) {
+				row.Cells = append(row.Cells, series.Points[i])
+			} else {
+				// A missing point renders an empty cell rather than a zero:
+				// "no data" and "zero" are different facts, and a chart that
+				// conflates them lies about the gap.
+				row.Cells = append(row.Cells, ChartPoint{Display: "—"})
+			}
+		}
+		rows = append(rows, row)
+	}
+	return rows
+}
+
+func chartTableCaption(chart ChartBase) string {
+	if chart.Summary != "" {
+		return chart.Title + ". " + chart.Summary
+	}
+	return chart.Title
+}
+
+func chartAxisLabel(label, fallback string) string {
+	if label == "" {
+		return fallback
+	}
+	return label
+}

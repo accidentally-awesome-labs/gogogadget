@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "includes": [
+    "registry/elements.json",
+    "registry/components.json",
+    "registry/pages.json",
+    "registry/workflows.json",
+    "registry/systems.json",
+    "registry/profiles.json"
+  ]
+}

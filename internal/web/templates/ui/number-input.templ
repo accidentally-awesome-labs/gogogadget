@@ -1,0 +1,45 @@
+package ui
+
+// NumberInputOpts is a numeric input.
+type NumberInputOpts struct {
+	Name string
+	// ID overrides the element id, which defaults to Name. The same control
+	// repeated once per table row would otherwise emit one identical id on
+	// every row, and a label's for= resolves to the first match.
+	ID    string
+	Value string
+	// Min, Max and Step are strings so an unset bound renders no attribute at
+	// all. With numeric types a zero bound and an absent bound are the same
+	// value, and "min=0" on a field that allows negatives is a silent bug.
+	Min, Max, Step string
+	Hint, Error    string
+	Required       bool
+	Disabled       bool
+	Size           Size
+	Attrs          Attrs
+}
+
+// NumberInput renders a native number input. type=number gives the numeric
+// keypad on mobile and the browser's own step controls; reimplementing either
+// in JavaScript would be strictly worse.
+templ NumberInput(o NumberInputOpts) {
+	<input
+		{ controlRoot("number-input", inputClass(o.Size), o.Attrs)... }
+		{ FieldARIA(FieldOpts{Name: o.Name, ID: controlID(o.ID, o.Attrs, o.Name), Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+		type="number"
+		id={ controlID(o.ID, o.Attrs, o.Name) }
+		name={ o.Name }
+		value={ o.Value }
+		if o.Min != "" {
+			min={ o.Min }
+		}
+		if o.Max != "" {
+			max={ o.Max }
+		}
+		if o.Step != "" {
+			step={ o.Step }
+		}
+		required?={ o.Required }
+		disabled?={ o.Disabled }
+	/>
+}

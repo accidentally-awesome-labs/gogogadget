@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/steps",
+    "kind": "component",
+    "name": "steps",
+    "revision": 1,
+    "contract": 1,
+    "title": "Steps",
+    "description": "The Steps renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/steps.templ",
+        "target": "internal/web/templates/ui/steps.templ",
+        "class": "templ",
+        "sha256": "3d7fc5d914f077e6792c74ecaf4e296fd3cbbe2323f8afcfab8d8b326ab732bb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/steps_test.go",
+        "target": "internal/web/templates/ui/steps_test.go",
+        "class": "test",
+        "sha256": "0447435233583d8bc030e0bcd8dfe734e15ecb59a236aefc66559c61f57691a8",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "steps",
+          "family": "navigation",
+          "signature": "templ Steps(o StepsOpts)",
+          "summary": "Renders an ordered progress trail.",
+          "guidance": "The position is stated in text (\"Step 2 of 4\") rather than left to the styling: colour and a filled circle are invisible to a screen reader and ambiguous to anyone who cannot distinguish the two shades.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

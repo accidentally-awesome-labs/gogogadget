@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -36,7 +37,7 @@ type Server struct {
 	annExpires    time.Time
 	q             *sqlc.Queries
 	version       string
-	docs          *content.Docs   // embedded markdown; versions with the binary
+	docs          *content.Docs // embedded markdown; versions with the binary
 	types         *content.Registry
 	cms           *content.CMS
 	verifier      identity.Verifier
@@ -53,21 +54,37 @@ type Server struct {
 
 	// metrics is the process-local Prometheus registry (see metrics.go).
 	metrics metricsRegistry
+
+	// testOnlyModules mirrors Deps.TestOnlyModules; see that field.
+	testOnlyModules bool
+
+	// api is the /api/v1 transport, composed once (see api_transport.go).
+	api apiSurface
+
+	// staticAssets is the embedded-asset handler, built once at construction.
+	staticAssets http.Handler
+
+	// policies resolves a request to the policy its route declared.
+	policies *policyMatcher
 }
 
 // Deps is the server wiring bag: every external service enters here, behind
 // its seam interface.
 type Deps struct {
-	Config    config.Config
-	Log       *slog.Logger
-	DB        *pgxpool.Pool
-	Queries   *sqlc.Queries
-	Version   string
-	Docs      *content.Docs
+	Config  *config.Config
+	Log     *slog.Logger
+	DB      *pgxpool.Pool
+	Queries *sqlc.Queries
+	Version string
+	Docs    *content.Docs
 	// ContentTypes declares every content collection. nil → DefaultTypes()
 	// (blog posts and changelog releases). Appending one Type is all it takes
 	// to add a collection: no migration, no table, no handler, no template.
 	ContentTypes []content.Type
+	// TestOnlyModules enables surfaces owned by test-only modules under
+	// registry/testdata. web.NewModule — the constructor the generated bootstrap
+	// calls — never sets it, so a booted production runtime cannot reach them.
+	TestOnlyModules bool
 
 	Verifier        identity.Verifier
 	Fetcher         identity.UserFetcher
@@ -80,24 +97,25 @@ type Deps struct {
 	Reporter        observability.Reporter // nil → NoopReporter
 }
 
-func NewServer(d Deps) *Server {
+func NewServer(d Deps) (*Server, error) {
 	s := &Server{
-		cfg:           d.Config,
-		log:           d.Log,
-		db:            d.DB,
-		q:             d.Queries,
-		version:       d.Version,
-		docs:          d.Docs,
-		verifier:      d.Verifier,
-		fetcher:       d.Fetcher,
-		deleter:       d.IdentityDeleter,
-		billingClient: d.Billing,
-		analytics:     analytics.NoopCapturer{},
-		store:         d.Storage,
-		llm:           d.LLM,
-		flags:         d.Flags,
-		reporter:      d.Reporter,
-		mux:           http.NewServeMux(),
+		cfg:             *d.Config,
+		log:             d.Log,
+		db:              d.DB,
+		q:               d.Queries,
+		version:         d.Version,
+		testOnlyModules: d.TestOnlyModules,
+		docs:            d.Docs,
+		verifier:        d.Verifier,
+		fetcher:         d.Fetcher,
+		deleter:         d.IdentityDeleter,
+		billingClient:   d.Billing,
+		analytics:       analytics.NoopCapturer{},
+		store:           d.Storage,
+		llm:             d.LLM,
+		flags:           d.Flags,
+		reporter:        d.Reporter,
+		mux:             http.NewServeMux(),
 	}
 	if s.store == nil {
 		s.store = storage.NewDevStore("tmp/uploads")
@@ -108,29 +126,40 @@ func NewServer(d Deps) *Server {
 	if s.reporter == nil {
 		s.reporter = observability.NoopReporter{}
 	}
+	// A bad content-type declaration is a wiring bug, so it refuses here. There
+	// is deliberately no fallback to the defaults: silently serving a different
+	// set of collections than the one declared hides the mistake until a reader
+	// notices a missing page.
 	reg, err := content.NewRegistry(contentTypesOf(d))
 	if err != nil {
-		// cmd/server validates first and exits, so this only ever protects a
-		// test server: refuse the bad declaration, keep the app bootable.
-		s.log.Error("content types rejected, using defaults", "error", err)
-		reg, _ = content.NewRegistry(content.DefaultTypes())
+		return nil, fmt.Errorf("content types: %w", err)
 	}
 	s.types = reg
 	s.cms = content.NewCMS(s.q, s.types)
 	if d.Analytics != nil {
 		s.analytics = d.Analytics
 	}
-	s.routes()
-	return s
+	s.api = newAPISurface(s)
+	s.staticAssets = s.serveStatic()
+	if err := s.routes(); err != nil {
+		return nil, err
+	}
+	return s, nil
 }
 
 // contentTypesOf returns the declared collections, defaulting to the built-in
 // blog and changelog.
 func contentTypesOf(d Deps) []content.Type {
-	if d.ContentTypes == nil {
-		return content.DefaultTypes()
+	types := d.ContentTypes
+	if types == nil {
+		types = content.DefaultTypes()
 	}
-	return d.ContentTypes
+	if d.TestOnlyModules {
+		// Test-only modules contribute their collections here so the fixture
+		// travels the same path a shipped module does.
+		types = append(append([]content.Type{}, types...), testOnlyContentTypes()...)
+	}
+	return types
 }
 
 // currentAnnouncement returns the active platform announcement, cached for
@@ -166,9 +195,9 @@ func (s *Server) invalidateAnnouncementCache() {
 }
 
 // Handler applies the global middleware stack. The order is load-bearing —
-// see docs/architecture: recover → requestID → accessLog → i18n.Detect →
-// maintenanceMode → rateLimit → secureHeaders → sessionLoad (identity step) →
-// csrf → routes.
+// see docs/architecture: maxBytes → recover → routeBodyLimit → requestID →
+// accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders →
+// sessionLoad (identity step) → csrf → routes.
 func (s *Server) Handler() http.Handler {
 	h := http.Handler(s.mux)
 	h = s.csrf(h)
@@ -179,8 +208,31 @@ func (s *Server) Handler() http.Handler {
 	h = i18n.Detect(h)       // locale resolution: ?lang= → cookie → Accept-Language
 	h = s.accessLog(h)
 	h = s.requestID(h)
+	h = s.routeBodyLimit(h) // per-route declared cap, tighter than the global one
 	h = s.recover(h)
-	return maxBytes(h, 10<<20) // 10 MB request cap on every route
+	return maxBytes(h, globalMaxBodyBytes) // global request cap on every route
+}
+
+// globalMaxBodyBytes is the cap every route gets. A route may declare a tighter
+// one; none may raise it.
+const globalMaxBodyBytes int64 = 10 << 20
+
+// routeBodyLimit applies the cap the matched route declared. Without this,
+// RoutePolicy.MaxBodyBytes was generated, validated, and never read: the
+// webhook receivers declare 1 MiB and would still let io.ReadAll buffer 10 MB
+// before signature verification had a chance to reject it.
+//
+// It runs outside csrf on purpose — csrf parses the form, and parsing reads the
+// body — and it narrows rather than replaces the global cap, so a policy value
+// above globalMaxBodyBytes cannot widen anything.
+func (s *Server) routeBodyLimit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		policy, declared := s.policies.policyFor(r)
+		if declared && policy.MaxBodyBytes > 0 && policy.MaxBodyBytes < globalMaxBodyBytes {
+			r.Body = http.MaxBytesReader(w, r.Body, policy.MaxBodyBytes)
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func maxBytes(next http.Handler, n int64) http.Handler {

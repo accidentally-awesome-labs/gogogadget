@@ -1,0 +1,321 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/api-projects",
+    "kind": "workflow",
+    "name": "api-projects",
+    "revision": 1,
+    "contract": 1,
+    "title": "Projects API",
+    "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
+    "requires": [
+      "system/api",
+      "system/server",
+      "workflow/openapi-contract"
+    ],
+    "files": [
+      {
+        "source": "internal/web/api_test.go",
+        "target": "internal/web/api_test.go",
+        "class": "test",
+        "sha256": "e6adf3b0cfd0ec0dbe8b53c350ac6558eab17d0c564c223034155f50e0a73f35",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "api.projects.create",
+        "api.projects.list"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.projects.create",
+          "method": "POST",
+          "pattern": "/api/v1/projects",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPICreateProject"
+        },
+        {
+          "id": "api.projects.list",
+          "method": "GET",
+          "pattern": "/api/v1/projects",
+          "scope": "api-read",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIListProjects"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "openapi": {
+      "tags": [
+        {
+          "name": "projects",
+          "description": "The canonical CRUD resource."
+        }
+      ],
+      "components": {
+        "schemas": {
+          "Project": {
+            "type": "object",
+            "required": [
+              "id",
+              "clerk_org_id",
+              "name",
+              "status",
+              "created_at",
+              "updated_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "clerk_org_id": {
+                "type": "string",
+                "description": "The organization the token belongs to."
+              },
+              "name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "archived"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "route_id": "api.projects.list",
+          "operation_id": "listProjects",
+          "summary": "List projects for the token's organization.",
+          "responses": {
+            "200": {
+              "description": "A page of projects.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "projects",
+                      "limit",
+                      "offset",
+                      "next_cursor"
+                    ],
+                    "properties": {
+                      "projects": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/Project"
+                        }
+                      },
+                      "limit": {
+                        "type": "integer",
+                        "examples": [
+                          50
+                        ]
+                      },
+                      "offset": {
+                        "type": "integer",
+                        "examples": [
+                          0
+                        ]
+                      },
+                      "next_cursor": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Pass as `cursor` for the next page; null on the last page.",
+                        "examples": [
+                          "MTc3MjE1MzYwMDAwMDAwMDAwMC40Mg"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "The cursor is malformed (`invalid_cursor`).",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          },
+          "description": "Newest first. Two pagination modes share one response shape:\n\n- **`cursor` (preferred)** — keyset paging. Follow `next_cursor` from\n  the previous response. Stable under concurrent writes: a cursor\n  names a row, so projects created while you page do not shift rows\n  across page boundaries, and depth costs nothing server-side.\n- **`offset` (legacy)** — the original contract, still honoured. It\n  repeats or drops rows when the set changes mid-walk.\n\n`next_cursor` is `null` on the last page. Cursors are opaque: echo\nthem back verbatim, never parse or construct them.\n",
+          "tags": [
+            "projects"
+          ],
+          "parameters": [
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Page size. Values outside 1–100 fall back to the default.",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 50
+              }
+            },
+            {
+              "name": "cursor",
+              "in": "query",
+              "description": "Opaque position from a previous response's `next_cursor`.\nTakes precedence over `offset`. A malformed value is rejected\nwith 400 rather than silently restarting at the first page.\n",
+              "required": false,
+              "schema": {
+                "type": "string"
+              },
+              "examples": {
+                "page2": {
+                  "value": "MTc3MjE1MzYwMDAwMDAwMDAwMC40Mg"
+                }
+              }
+            },
+            {
+              "name": "offset",
+              "in": "query",
+              "description": "Legacy. Rows to skip; negative values are treated as 0. Ignored\nwhen `cursor` is supplied.\n",
+              "deprecated": true,
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0
+              }
+            }
+          ]
+        },
+        {
+          "route_id": "api.projects.create",
+          "operation_id": "createProject",
+          "summary": "Create a project.",
+          "responses": {
+            "201": {
+              "description": "The created project.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Project"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/InvalidJSON"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "402": {
+              "$ref": "#/components/responses/PlanLimit"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "422": {
+              "$ref": "#/components/responses/ValidationError"
+            },
+            "409": {
+              "$ref": "#/components/responses/IdempotencyConflict"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          },
+          "description": "Enforces the same plan limit as the UI: at the cap the call fails with\n402 `plan_limit` rather than silently succeeding.\n",
+          "tags": [
+            "projects"
+          ],
+          "request_body": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 80,
+                      "description": "Trimmed; required after trimming.",
+                      "examples": [
+                        "Launch checklist"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

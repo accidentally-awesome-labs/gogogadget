@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/combobox",
+    "kind": "component",
+    "name": "combobox",
+    "revision": 1,
+    "contract": 1,
+    "title": "Combobox",
+    "description": "The Combobox renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/combobox.templ",
+        "target": "internal/web/templates/ui/combobox.templ",
+        "class": "templ",
+        "sha256": "78cee7fa92263ebfe82d62720bffab7368bad712e44cd524801e56e6b23a35a5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/combobox_test.go",
+        "target": "internal/web/templates/ui/combobox_test.go",
+        "class": "test",
+        "sha256": "dbff2970aa6e66c7e1c8abc34cca2dcd51ca89d13719912926a69033c4fda90a",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "combobox",
+          "family": "forms",
+          "signature": "templ Combobox(o ComboboxOpts)",
+          "summary": "Renders a text input backed by a native datalist.",
+          "guidance": "datalist is the engine-free choice: the browser supplies the filtering, the popup, keyboard navigation and mobile behaviour, and the field still submits a value with JavaScript disabled. A hand-built listbox has to reimplement all of that and usually ships without the keyboard half.",
+          "states": [
+            "default",
+            "disabled",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

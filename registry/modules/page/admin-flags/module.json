@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-flags",
+    "kind": "page",
+    "name": "admin-flags",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin feature flags list",
+    "description": "The feature-flag table showing each flag's enabled state and percentage rollout.",
+    "requires": [
+      "system/feature-flags",
+      "system/i18n",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/flags_test.go",
+        "target": "internal/web/flags_test.go",
+        "class": "test",
+        "sha256": "2011cb5c6964e880f4f1cfb9d2e892c718efbb6b95068e433478468c02e7ddb4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_admin_flags.go",
+        "target": "internal/web/page_admin_flags.go",
+        "class": "go",
+        "sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_flags.templ",
+        "target": "internal/web/templates/admin_flags.templ",
+        "class": "templ",
+        "sha256": "f45d297cea9b7382632c5f765c8fa9af9eb5f4c551930c279d1224d18c8a9872",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.flags.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.flags.index",
+          "method": "GET",
+          "pattern": "/admin/flags",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminFlags"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.flags",
+          "area": "admin",
+          "route_id": "admin.flags.index",
+          "label_key": "sidebar.admin_flags",
+          "after": [
+            "nav.admin.orgs"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "flags.back": "← All flags",
+        "flags.col_actions": "Actions",
+        "flags.col_description": "Description",
+        "flags.col_enabled": "Enabled",
+        "flags.col_key": "Key",
+        "flags.col_org": "Org",
+        "flags.col_override": "Override",
+        "flags.col_rollout": "Rollout %",
+        "flags.create": "Create flag",
+        "flags.create_title": "New flag",
+        "flags.created": "Flag created.",
+        "flags.delete": "Delete",
+        "flags.delete_confirm": "Delete this flag and all its per-org overrides?",
+        "flags.delete_row": "Delete %s",
+        "flags.delete_title": "Delete this flag?",
+        "flags.deleted": "Flag deleted.",
+        "flags.description_label": "Description",
+        "flags.description_placeholder": "What this flag gates",
+        "flags.empty": "No flags yet.",
+        "flags.exists": "That key already exists.",
+        "flags.hint": "Missing keys evaluate to off; per-org overrides win over the global setting.",
+        "flags.invalid": "Key must be lowercase letters, digits, and dashes (max 64); description max 200 chars; rollout 0–100.",
+        "flags.key_label": "Key",
+        "flags.key_placeholder": "my-feature",
+        "flags.off": "off",
+        "flags.on": "on",
+        "flags.override_add": "Set override",
+        "flags.override_delete": "Remove",
+        "flags.override_delete_confirm": "Remove this override? The org goes back to the global setting.",
+        "flags.override_delete_row": "Remove the override for %s",
+        "flags.override_delete_title": "Remove this override?",
+        "flags.override_deleted": "Override removed.",
+        "flags.override_org_label": "Organization",
+        "flags.override_saved": "Override saved.",
+        "flags.override_state_label": "State",
+        "flags.overrides_empty": "No overrides — every org follows the global setting.",
+        "flags.overrides_heading": "Per-org overrides",
+        "flags.rollout_aria": "Rollout percent for %s",
+        "flags.rollout_label": "Rollout %",
+        "flags.set": "Set",
+        "flags.title": "Feature flags"
+      },
+      "es": {
+        "flags.back": "← Todas las flags",
+        "flags.col_actions": "Acciones",
+        "flags.col_description": "Descripción",
+        "flags.col_enabled": "Activa",
+        "flags.col_key": "Clave",
+        "flags.col_org": "Organización",
+        "flags.col_override": "Anulación",
+        "flags.col_rollout": "Despliegue %",
+        "flags.create": "Crear flag",
+        "flags.create_title": "Nueva flag",
+        "flags.created": "Flag creada.",
+        "flags.delete": "Eliminar",
+        "flags.delete_confirm": "¿Eliminar esta flag y todas sus anulaciones por organización?",
+        "flags.delete_row": "Eliminar %s",
+        "flags.delete_title": "¿Eliminar esta bandera?",
+        "flags.deleted": "Flag eliminada.",
+        "flags.description_label": "Descripción",
+        "flags.description_placeholder": "Qué controla esta flag",
+        "flags.empty": "Aún no hay banderas.",
+        "flags.exists": "Esa clave ya existe.",
+        "flags.hint": "Las claves inexistentes evalúan como inactivas; las excepciones por organización prevalecen sobre el ajuste global.",
+        "flags.invalid": "La clave debe tener minúsculas, dígitos y guiones (máx. 64); descripción máx. 200 caracteres; despliegue 0–100.",
+        "flags.key_label": "Clave",
+        "flags.key_placeholder": "mi-funcionalidad",
+        "flags.off": "inactiva",
+        "flags.on": "activa",
+        "flags.override_add": "Fijar anulación",
+        "flags.override_delete": "Quitar",
+        "flags.override_delete_confirm": "¿Quitar esta anulación? La organización vuelve al ajuste global.",
+        "flags.override_delete_row": "Quitar la excepción de %s",
+        "flags.override_delete_title": "¿Quitar esta excepción?",
+        "flags.override_deleted": "Anulación eliminada.",
+        "flags.override_org_label": "Organización",
+        "flags.override_saved": "Anulación guardada.",
+        "flags.override_state_label": "Estado",
+        "flags.overrides_empty": "Sin anulaciones: cada organización sigue el ajuste global.",
+        "flags.overrides_heading": "Anulaciones por organización",
+        "flags.rollout_aria": "Porcentaje de despliegue de %s",
+        "flags.rollout_label": "Despliegue %",
+        "flags.set": "Fijar",
+        "flags.title": "Banderas de funciones"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

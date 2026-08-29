@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/notifications",
+    "kind": "page",
+    "name": "notifications",
+    "revision": 1,
+    "contract": 1,
+    "title": "Notifications list",
+    "description": "The signed-in user's notification inbox list with unread count and pagination, rendered full-page or as an htmx list fragment.",
+    "requires": [
+      "system/i18n",
+      "system/identity",
+      "system/notifications",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/notifications_test.go",
+        "target": "internal/web/notifications_test.go",
+        "class": "test",
+        "sha256": "fdd48b18ead1921b448409c9e94acc48345b90c8af2e4b8cfc689b43deabf747",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_notifications.go",
+        "target": "internal/web/page_notifications.go",
+        "class": "go",
+        "sha256": "048399492453c24b42a7d241ca67a5dd9268f7f529eb493a5baa5b87e4a33b30",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/notifications.templ",
+        "target": "internal/web/templates/notifications.templ",
+        "class": "templ",
+        "sha256": "b1d147bf2529f444367ca3d2b661267aff9a23be6cce61a48a808dd3b1486a25",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "notifications.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "notifications.index",
+          "method": "GET",
+          "pattern": "/app/notifications",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleNotifications"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "notifications.empty_body": "You're all caught up.",
+        "notifications.empty_title": "No notifications",
+        "notifications.kind.export_ready": "Export ready",
+        "notifications.kind.payment_failed": "Payment failed",
+        "notifications.kind.webhook_failed": "Webhook delivery failed",
+        "notifications.kind.welcome": "Welcome",
+        "notifications.mark_read": "Mark read",
+        "notifications.open": "Open",
+        "notifications.read_all": "Mark all read",
+        "notifications.title": "Notifications",
+        "notifications.unread": "Unread",
+        "notifications.unread_aria": "%d unread notifications"
+      },
+      "es": {
+        "notifications.empty_body": "Estás al día.",
+        "notifications.empty_title": "No hay notificaciones",
+        "notifications.kind.export_ready": "Exportación lista",
+        "notifications.kind.payment_failed": "Pago fallido",
+        "notifications.kind.webhook_failed": "Entrega de webhook fallida",
+        "notifications.kind.welcome": "Bienvenida",
+        "notifications.mark_read": "Marcar como leído",
+        "notifications.open": "Abrir",
+        "notifications.read_all": "Marcar todo como leído",
+        "notifications.title": "Notificaciones",
+        "notifications.unread": "Sin leer",
+        "notifications.unread_aria": "%d notificaciones sin leer"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

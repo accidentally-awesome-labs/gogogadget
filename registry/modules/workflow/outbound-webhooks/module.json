@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/outbound-webhooks",
+    "kind": "workflow",
+    "name": "outbound-webhooks",
+    "revision": 1,
+    "contract": 1,
+    "title": "Outbound webhook management",
+    "description": "Creating, enabling, disabling, and rotating customer webhook endpoints, and replaying a delivery.",
+    "requires": [
+      "page/settings-webhooks",
+      "system/audit",
+      "system/security",
+      "system/server",
+      "system/webhooks"
+    ],
+    "files": [
+      {
+        "source": "internal/jobs/webhooks_deliver.go",
+        "target": "internal/jobs/webhooks_deliver.go",
+        "class": "go",
+        "sha256": "6d8fc1f1ffa459e951d9f7c5ea656a63fe531964000a48e7b28a7274c3db6643",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/webhooks_deliver_test.go",
+        "target": "internal/jobs/webhooks_deliver_test.go",
+        "class": "test",
+        "sha256": "e7d48756c7e4884d07b10f834f423fe36e641c997b92709bd99990fc54c278db",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "webhooks.delivery.replay",
+        "webhooks.endpoint.create",
+        "webhooks.endpoint.disable",
+        "webhooks.endpoint.enable",
+        "webhooks.endpoint.rotate"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "webhooks.delivery.replay",
+          "method": "POST",
+          "pattern": "/app/settings/webhooks/deliveries/{id}/replay",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleWebhookDeliveryReplay"
+        },
+        {
+          "id": "webhooks.endpoint.create",
+          "method": "POST",
+          "pattern": "/app/settings/webhooks/endpoints",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleWebhookEndpointCreate"
+        },
+        {
+          "id": "webhooks.endpoint.disable",
+          "method": "POST",
+          "pattern": "/app/settings/webhooks/endpoints/{id}/disable",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleWebhookEndpointToggle"
+        },
+        {
+          "id": "webhooks.endpoint.enable",
+          "method": "POST",
+          "pattern": "/app/settings/webhooks/endpoints/{id}/enable",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleWebhookEndpointToggle"
+        },
+        {
+          "id": "webhooks.endpoint.rotate",
+          "method": "POST",
+          "pattern": "/app/settings/webhooks/endpoints/{id}/rotate",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleWebhookEndpointRotate"
+        }
+      ],
+      "jobs": [
+        {
+          "kind": "webhook.deliver",
+          "package": "internal/jobs",
+          "handler": "defineWebhookDeliver",
+          "schedulable": false,
+          "max_attempts": 0
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

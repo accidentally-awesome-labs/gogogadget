@@ -62,12 +62,18 @@ func TestEnqueueProcessComplete(t *testing.T) {
 	assert.Contains(t, string(raw), "<h1>hi</h1>")
 }
 
+// A poison job is a KNOWN kind whose handler keeps failing — a malformed payload
+// makes the email arm fail on unmarshal every attempt. It deliberately does not
+// use an unknown kind any more: an unknown kind is an uninstalled module and now
+// dies on the first claim, which is a different contract (see
+// TestUnknownKindDeadLettersImmediately).
 func TestPoisonJobFailsWithBackoff(t *testing.T) {
 	pool, q := testSetup(t)
 	ctx := context.Background()
 	w := testWorker(q, t.TempDir())
 
-	require.NoError(t, Enqueue(ctx, q, "unknown.kind", map[string]string{"x": "y"}))
+	// org_id is a string in EmailPayload, so a number fails to unmarshal.
+	require.NoError(t, Enqueue(ctx, q, KindWelcome, map[string]any{"org_id": 12345}))
 
 	done, err := w.ProcessOne(ctx)
 	require.NoError(t, err)
@@ -80,7 +86,7 @@ func TestPoisonJobFailsWithBackoff(t *testing.T) {
 	require.NoError(t, pool.QueryRow(ctx,
 		`SELECT attempts, COALESCE(last_error,''), run_at FROM jobs`).Scan(&attempts, &lastError, &runAt))
 	assert.Equal(t, int32(1), attempts)
-	assert.Contains(t, lastError, "unknown job kind")
+	assert.Contains(t, lastError, "cannot unmarshal")
 	assert.True(t, runAt.After(time.Now().Add(time.Minute)), "backoff must push run_at into the future")
 
 	// So an immediate re-claim finds nothing.
@@ -97,7 +103,7 @@ func TestDeadLetterAtMaxAttempts(t *testing.T) {
 	var deadLettered string
 	w.OnDeadLetter = func(kind string, err error) { deadLettered = kind }
 
-	require.NoError(t, Enqueue(ctx, q, "unknown.kind", nil))
+	require.NoError(t, Enqueue(ctx, q, KindWelcome, map[string]any{"org_id": 12345}))
 	for i := 0; i < 8; i++ {
 		done, err := w.ProcessOne(ctx)
 		require.NoError(t, err)
@@ -106,7 +112,7 @@ func TestDeadLetterAtMaxAttempts(t *testing.T) {
 		_, err = pool.Exec(ctx, `UPDATE jobs SET run_at = now() WHERE done_at IS NULL`)
 		require.NoError(t, err)
 	}
-	assert.Equal(t, "unknown.kind", deadLettered)
+	assert.Equal(t, KindWelcome, deadLettered)
 
 	// Dead-lettered: done_at set, last_error='exhausted', never claimable again.
 	var lastError string
@@ -389,4 +395,123 @@ func TestDunningEmailSkippedWithoutSubscription(t *testing.T) {
 	require.NoError(t, err, "a missing subscription is a skip, not a failure")
 	assert.True(t, done)
 	assert.Empty(t, sender.sent)
+}
+
+// A ticker alone put the first janitor sweep 24 hours after process start and
+// reset that clock on every restart, so any deployment recycling more often than
+// daily never reached it. Retention that only holds on a long-uptime host is not
+// retention, and every consequence was silent: unbounded job rows, an unbounded
+// inbound-idempotency table, AUDIT_RETENTION_DAYS never enforced, rotated
+// webhook secrets never cleared.
+func TestJanitorRunsBeforeItsFirstTick(t *testing.T) {
+	pool, q := testdb.Open(t, "jobs")
+	defer pool.Close()
+
+	stale := time.Now().Add(-30 * 24 * time.Hour)
+	_, err := pool.Exec(t.Context(),
+		`INSERT INTO jobs (kind, payload, attempts, max_attempts, run_at, done_at, created_at)
+		 VALUES ('email.digest', '{}', 1, 8, $1, $1, $1)`, stale)
+	require.NoError(t, err)
+
+	before := countJobs(t, pool)
+	require.Positive(t, before, "the fixture row must exist, or this proves nothing")
+
+	// Run with a live context and stop as soon as the sweep is observable. A
+	// cancelled context would make the sweep a no-op, which would pass for the
+	// wrong reason: the query would fail rather than the row being kept.
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	log := slog.New(slog.DiscardHandler)
+	go NewWorker(q, mail.NewDevSender(log, t.TempDir()), log).Run(ctx)
+
+	deadline := time.Now().Add(10 * time.Second)
+	for countJobs(t, pool) >= before && time.Now().Before(deadline) {
+		time.Sleep(50 * time.Millisecond)
+	}
+	assert.Less(t, countJobs(t, pool), before,
+		"the janitor must sweep on start; waiting for the first 24h tick means it never runs on a host that restarts daily")
+}
+
+func countJobs(t *testing.T, pool *pgxpool.Pool) int {
+	t.Helper()
+	var n int
+	require.NoError(t, pool.QueryRow(t.Context(), `SELECT count(*) FROM jobs`).Scan(&n))
+	return n
+}
+
+// Run is started in a goroutine by Module.Start with no recover above it, so
+// before this a panicking handler unwound past the web server and took the whole
+// process down. A background worker must not be able to kill the thing serving
+// traffic, and the queue already has the right answer for a handler that cannot
+// complete: fail it, back off, dead-letter at the budget.
+func TestAPanickingHandlerFailsItsJobRatherThanTheProcess(t *testing.T) {
+	pool, q := testdb.Open(t, "jobs")
+	defer pool.Close()
+
+	log := slog.New(slog.DiscardHandler)
+	w := NewWorker(q, mail.NewDevSender(log, t.TempDir()), log)
+	w.definitions["test.panic"] = Define("test.panic", false, 2,
+		func(context.Context, struct{}) error { panic("handler exploded") })
+
+	require.NoError(t, Enqueue(t.Context(), q, "test.panic", struct{}{}))
+
+	handled, err := w.ProcessOne(t.Context())
+	require.True(t, handled, "the job must be claimed and handled")
+	require.NoError(t, err, "a panicking handler is a failed job, not a failed worker")
+
+	var attempts int
+	var lastError pgtype.Text
+	require.NoError(t, pool.QueryRow(t.Context(),
+		`SELECT attempts, last_error FROM jobs WHERE kind = 'test.panic'`).Scan(&attempts, &lastError))
+	assert.Equal(t, 1, attempts, "the attempt must be recorded so the backoff schedule advances")
+	assert.Contains(t, lastError.String, "panicked",
+		"the recorded error must name the panic, or the operator sees a failure with no cause")
+}
+
+// The guard above covers a panicking HANDLER. The claim itself sat outside it:
+// a worker whose queue cannot execute at all panics inside ClaimJob, one frame
+// below any recover, and unwinds out of the goroutine Module.Start launched -
+// taking the web server with it. CI caught exactly that, from a Worker built on
+// a zero-value Queries whose pool is nil.
+//
+// A worker that cannot reach its queue must back off and keep the process
+// alive, which is what reporting zero work does: the caller sleeps a poll
+// interval instead of spinning on the failure.
+func TestAPanickingClaimKeepsTheWorkerAliveRatherThanTheProcess(t *testing.T) {
+	log := slog.New(slog.DiscardHandler)
+	// A Queries with no pool behind it: every statement it runs dereferences
+	// nil. Constructible, and therefore reachable - the constructor can only
+	// check that the dependency is present, not that it can talk to Postgres.
+	w := NewWorker(&sqlc.Queries{}, mail.NewDevSender(log, t.TempDir()), log)
+
+	assert.NotPanics(t, func() {
+		assert.Zero(t, w.pass(t.Context()),
+			"a pass that could not claim anything must report no work, so the loop backs off")
+	})
+}
+
+// Run must survive the same failure end to end: the loop keeps going and Stop
+// still ends it. This is the shape the module lifecycle test hits, and before
+// the guard it was a race between the first claim and the cancel.
+func TestRunSurvivesAnUnusableQueueUntilTheContextEnds(t *testing.T) {
+	log := slog.New(slog.DiscardHandler)
+	w := NewWorker(&sqlc.Queries{}, mail.NewDevSender(log, t.TempDir()), log)
+	w.poll = time.Millisecond
+
+	ctx, cancel := context.WithCancel(t.Context())
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		w.Run(ctx)
+	}()
+
+	// Long enough for several passes, each of which panics and recovers.
+	time.Sleep(50 * time.Millisecond)
+	cancel()
+
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Run did not return after its context was cancelled")
+	}
 }

@@ -1,0 +1,31 @@
+package ui
+
+// SeparatorOpts configures a rule between content.
+type SeparatorOpts struct {
+	Orientation Orientation
+	// Label names the boundary for assistive technology. With a label the rule
+	// is a real separator in the accessibility tree; without one it is purely
+	// decorative and is hidden, because announcing "separator" between every
+	// pair of rows is noise.
+	Label string
+	Attrs Attrs
+}
+
+// Separator renders a horizontal or vertical rule.
+templ Separator(o SeparatorOpts) {
+	if o.Orientation.Value() == OrientationVertical {
+		<div
+			{ rootWith("separator", "self-stretch w-px bg-border", o.Attrs,
+				"role", "separator",
+				"aria-orientation", "vertical",
+				"aria-label", o.Label,
+				"aria-hidden", boolAttr(o.Label == ""))... }
+		></div>
+	} else {
+		<hr
+			{ rootWith("separator", "border-t border-border", o.Attrs,
+				"aria-label", o.Label,
+				"aria-hidden", boolAttr(o.Label == ""))... }
+		/>
+	}
+}

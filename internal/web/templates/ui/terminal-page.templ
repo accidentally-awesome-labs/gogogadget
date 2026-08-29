@@ -1,0 +1,36 @@
+package ui
+
+// TerminalPageOpts is the one shape every terminal page takes: a big code or
+// title, a sentence, optional detail, optional way home. An empty BackHomeLabel
+// suppresses the link.
+type TerminalPageOpts struct {
+	Code          string
+	Message       string
+	Detail        string
+	BackHomeLabel string
+	Attrs         Attrs
+}
+
+templ TerminalPage(o TerminalPageOpts) {
+	<section { root("terminal-page", "page-narrow text-center", o.Attrs)... }>
+		<h1 class={ errorHeadingClass(o.Code) }>{ o.Code }</h1>
+		<p class="mt-4 text-lg text-fg-muted">{ o.Message }</p>
+		if o.Detail != "" {
+			<pre class="mt-8 card text-xs overflow-auto whitespace-pre-wrap text-left">{ o.Detail }</pre>
+		}
+		if o.BackHomeLabel != "" {
+			<a href="/" class="btn btn-primary mt-8">{ o.BackHomeLabel }</a>
+		}
+	</section>
+}
+
+// errorHeadingClass sizes the terminal-page heading: a numeric HTTP status is
+// the giant code, anything else is a title and reads at display size.
+func errorHeadingClass(code string) string {
+	for _, r := range code {
+		if r < '0' || r > '9' {
+			return "display-title text-brand-text"
+		}
+	}
+	return "error-code"
+}

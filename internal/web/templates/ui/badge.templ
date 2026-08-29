@@ -1,0 +1,28 @@
+package ui
+
+// BadgeOpts is a small state pill: Kind picks the semantic colour and Emphasis
+// picks the fill. Subtle is the default, because a badge that shouts by
+// accident is worse than one that whispers.
+type BadgeOpts struct {
+	Text     string
+	Kind     Kind
+	Emphasis Emphasis
+	Attrs    Attrs
+}
+
+templ Badge(o BadgeOpts) {
+	<span { root("badge", badgeClass(o.Kind, o.Emphasis), o.Attrs)... }>{ o.Text }</span>
+}
+
+// badgeClass composes the kind and emphasis axes. Both read the same --ui-*
+// matrix, so all six kinds support all three fills without a rule per pair.
+func badgeClass(kind Kind, emphasis Emphasis) string {
+	cls := "badge badge-" + string(NormalizeKind(kind))
+	switch emphasis.Value() {
+	case EmphasisSolid:
+		cls += " badge-solid"
+	case EmphasisOutline:
+		cls += " badge-outline"
+	}
+	return cls
+}

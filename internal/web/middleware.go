@@ -15,17 +15,19 @@ import (
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 	"github.com/justinas/nosurf"
 )
 
 // Middleware chain (outermost → innermost), assembled in Handler:
 //
-//	recover → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
+//	maxBytes → recover → routeBodyLimit → requestID → accessLog → i18n.Detect → maintenanceMode → rateLimit → secureHeaders → sessionLoad → csrf → routes
 //
 // The order is load-bearing. sessionLoad lands in the identity step, between
 // secureHeaders and csrf. maintenanceMode sits inside i18n.Detect (the 503
 // page needs the locale) but outside rateLimit (shed load before the limiter
-// churns).
+// churns). routeBodyLimit sits outside csrf because csrf parses the form, which
+// reads the body — a cap applied after that has already been bypassed.
 //
 // maintenanceMode returns 503 for everything when MAINTENANCE_MODE is on,
 // except /healthz, /readyz, /static/, and /favicon.ico (probes + CSS must
@@ -38,12 +40,7 @@ func (s *Server) maintenanceMode(next http.Handler) http.Handler {
 			return
 		}
 		p := r.URL.Path
-		switch p {
-		case "/healthz", "/readyz", "/favicon.ico":
-			next.ServeHTTP(w, r)
-			return
-		}
-		if strings.HasPrefix(p, "/static/") {
+		if policy, declared := s.policies.policyFor(r); declared && policy.MaintenanceExempt {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -171,8 +168,13 @@ func (s *Server) rateLimit(next http.Handler) http.Handler {
 	}
 	rl := ratelimit.PerMinute(rpm)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p := r.URL.Path
-		if strings.HasPrefix(p, "/static/") || strings.HasPrefix(p, "/ingest/") || p == "/healthz" {
+		if policy, declared := s.policies.policyFor(r); declared && policy.RateExempt {
+			next.ServeHTTP(w, r)
+			return
+		}
+		// The analytics proxy is registered method-less, outside the route table
+		// (see structurallyCSRFExempt), so its exemption is named here too.
+		if strings.HasPrefix(r.URL.Path, "/ingest/") {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -231,14 +233,26 @@ func (s *Server) secureHeaders(next http.Handler) http.Handler {
 	})
 }
 
-// csrf wraps nosurf. Webhook/API/ingest/health/static paths are exempt —
-// webhooks are signature-verified, the API is cookieless Bearer.
+// csrf wraps nosurf. Which requests are exempt is decided by the policy each
+// route declared, not by a path pattern; see structurallyCSRFExempt for the two
+// surfaces that are registered outside the route table by design.
+//
+// The token is published to the page along two paths, and both are live: an
+// inherited request header for htmx (the only path a fragment request has, since
+// a button with hx-delete has no form) and a hidden field inside every unsafe
+// ui.Form (the only path a submit has when htmx never loaded). This middleware
+// owns the second one: it puts the masked token into the request context, so
+// ui.Form can render the field without any handler having to remember to pass a
+// token in. nosurf has already computed that token by the time next runs, so
+// this is a context lookup, not extra work per request.
 //
 // Cookie name differs by environment on purpose: production uses the
 // __Host- prefix (requires Secure); a __Host- cookie without Secure is
 // REJECTED by Safari, which would silently break non-localhost dev.
 func (s *Server) csrf(next http.Handler) http.Handler {
-	ns := nosurf.New(next)
+	ns := nosurf.New(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(ui.WithCSRFToken(r.Context(), nosurf.Token(r))))
+	}))
 	ns.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		detail := "Your session expired or the form token was invalid. Go back and try again."
 		if !s.cfg.Production() {
@@ -259,13 +273,18 @@ func (s *Server) csrf(next http.Handler) http.Handler {
 	ns.SetIsTLSFunc(func(r *http.Request) bool {
 		return r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https"
 	})
-	ns.ExemptRegexps(
-		`^/webhooks/.*`,
-		`^/api/.*`,
-		`^/ingest/.*`,
-		`^/static/.*`,
-	)
-	ns.ExemptPaths("/healthz", "/readyz")
+	// Exemptions come from the route that declared them, resolved through the
+	// same matching rules that dispatch the request. There is deliberately no
+	// prefix or regex list: `^/api/.*` exempts every future path under /api
+	// whether or not anyone reasoned about it, and that is how an exemption
+	// silently widens.
+	ns.ExemptFunc(func(r *http.Request) bool {
+		policy, declared := s.policies.policyFor(r)
+		if declared {
+			return policy.CSRFExempt
+		}
+		return s.structurallyCSRFExempt(r)
+	})
 	return ns
 }
 
@@ -274,4 +293,19 @@ func csrfCookieName(production bool) string {
 		return "__Host-csrf"
 	}
 	return "csrf_token"
+}
+
+// structurallyCSRFExempt covers the two surfaces registered outside the
+// generated route table, because the Route contract (one method, one pattern)
+// cannot express either of them. Both are named here with a reason rather than
+// hidden in a regex list, and both are transports that carry no browser session:
+//
+//   - /api/ is the JSON catch-all for unknown API paths. It answers 404 in JSON;
+//     without this an unknown API POST would get an HTML 403 from CSRF instead
+//     of the API error shape its client can parse.
+//   - /ingest/ is the same-origin analytics proxy, registered method-less and
+//     only when a provider is configured. The browser SDK sends no CSRF token.
+func (s *Server) structurallyCSRFExempt(r *http.Request) bool {
+	path := r.URL.Path
+	return strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/ingest/")
 }

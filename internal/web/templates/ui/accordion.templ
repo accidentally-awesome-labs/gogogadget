@@ -1,0 +1,49 @@
+package ui
+
+// AccordionPanel is one section of an accordion.
+type AccordionPanel struct {
+	Summary string
+	Body    string
+	Open    bool
+}
+
+// AccordionOpts configures a set of expandable sections.
+type AccordionOpts struct {
+	Panels []AccordionPanel
+	// Exclusive closes the other panels when one opens. It is implemented with
+	// the native `name` attribute on details, so exclusivity needs no
+	// JavaScript and survives with scripts disabled.
+	Exclusive bool
+	// Name groups exclusive panels. Two accordions on one page must not share
+	// a name, or opening a panel in one closes a panel in the other.
+	Name  string
+	Attrs Attrs
+}
+
+// Accordion renders sections as native details elements.
+templ Accordion(o AccordionOpts) {
+	<div { root("accordion", "divide-y divide-border rounded-xl border border-border", o.Attrs)... }>
+		for _, panel := range o.Panels {
+			<details
+				class="px-4 py-2"
+				open?={ panel.Open }
+				if o.Exclusive {
+					name={ accordionName(o.Name) }
+				}
+			>
+				<summary class="cursor-pointer font-medium py-1">{ panel.Summary }</summary>
+				<p class="pt-2 pb-1 text-sm text-fg-muted">{ panel.Body }</p>
+			</details>
+		}
+	</div>
+}
+
+// accordionName falls back to a fixed group name. Two exclusive accordions with
+// no name would share the fallback and fight each other, which is why Name is
+// worth setting whenever a page has more than one.
+func accordionName(name string) string {
+	if name == "" {
+		return "ui-accordion"
+	}
+	return name
+}

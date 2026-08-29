@@ -1,0 +1,61 @@
+package ui
+
+type PlanFeature = string
+
+// PlanCardOpts renders one plan on the pricing page or in an upgrade CTA.
+// Price is pre-formatted by the caller: currency and period formatting is a
+// billing concern, and ui does not import billing.
+type PlanCardOpts struct {
+	Name         string
+	Price        string
+	Features     []PlanFeature
+	Current      bool
+	CurrentLabel string
+	// Level is the plan name's heading level, defaulting to 3. A card's depth
+	// is a fact about the page, not the component: a plan grid rendered
+	// directly under the page title needs h2, and hardcoding h3 skips a level
+	// there - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
+	Attrs Attrs
+}
+
+templ PlanCard(o PlanCardOpts) {
+	<div { root("plan-card", planCardClasses(o), o.Attrs)... }>
+		<div class="flex items-center justify-between">
+			@Heading(HeadingOpts{Text: o.Name, Level: planCardLevel(o.Level), Size: SizeSM})
+			if o.Current {
+				@Badge(BadgeOpts{Text: o.CurrentLabel, Kind: KindBrand})
+			}
+		</div>
+		<div class="text-3xl font-bold">{ o.Price }</div>
+		<ul class="space-y-2 text-sm text-fg-muted flex-1">
+			for _, feature := range o.Features {
+				<li class="flex gap-2">
+					@Icon(IconOpts{Name: IconCheck, Attrs: Attrs{Class: "w-4 h-4 mt-0.5 shrink-0 text-success"}})
+					{ feature }
+				</li>
+			}
+		</ul>
+		{ children... }
+	</div>
+}
+
+// planCardLevel defaults to 3: a plan grid usually sits under a "Plans" or
+// "Pricing" heading of its own.
+func planCardLevel(level int) int {
+	if level > 0 {
+		return level
+	}
+	return 3
+}
+
+// planCardClasses rings the current plan. The ring is the only difference, so
+// it is expressed as one conditional class rather than a second renderer.
+func planCardClasses(o PlanCardOpts) string {
+	base := "card flex flex-col gap-4"
+	if o.Current {
+		return base + " ring-2 ring-brand"
+	}
+	return base
+}

@@ -1,0 +1,182 @@
+package ui
+
+import "fmt"
+
+// SlideData is one slide's content.
+type SlideData struct {
+	// ID is required: the dots reference each slide.
+	ID    string
+	Title string
+	Body  string
+	Image string
+	// Alt is required whenever Image is set; an undescribed image is invisible
+	// to a screen reader.
+	Alt  string
+	Href string
+}
+
+// CarouselOpts configures a carousel.
+type CarouselOpts struct {
+	ID     string
+	Label  string
+	Slides []SlideData
+	// Autoplay is off by default and stays off under reduced motion. Content
+	// that moves on its own is unreadable for anyone who reads slowly, and it
+	// steals attention from the rest of the page.
+	Autoplay   bool
+	IntervalMS int
+	Attrs      Attrs
+}
+
+// Carousel renders a horizontally scrollable region.
+//
+// It is CSS scroll snap over a plain list, so every slide is reachable by
+// scrolling, by keyboard, and with no JavaScript at all. It is deliberately not
+// an ARIA carousel widget: the browser's own scroll container already gives
+// keyboard scrolling and a scrollbar, and re-implementing that as a slideshow
+// would hide the slides that are currently off screen.
+templ Carousel(o CarouselOpts) {
+	<section
+		{ rootWith("carousel", "space-y-2", o.Attrs,
+			"x-data", "uiCarousel",
+			"id", o.ID,
+			"data-carousel-autoplay", carouselAutoplay(o),
+			"data-carousel-interval", fmt.Sprint(carouselInterval(o)))... }
+		aria-label={ o.Label }
+		aria-roledescription="carousel"
+	>
+		// tabindex makes the scroller focusable, so arrow keys scroll it. A
+		// scrollable region with no tab stop is reachable by pointer only.
+		<ul
+			class="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2"
+			role="list"
+			tabindex="0"
+			data-carousel-track
+			aria-label={ o.Label + " slides" }
+		>
+			for index, slide := range o.Slides {
+				@Slide(SlideOpts{Slide: slide, Index: index + 1, Total: len(o.Slides)})
+			}
+		</ul>
+		if len(o.Slides) > 1 {
+			@CarouselDots(CarouselDotsOpts{
+				Slides: carouselSlideIDs(o),
+				Active: 1,
+				Label:  o.Label,
+			})
+		}
+	</section>
+}
+
+// SlideOpts configures one slide.
+type SlideOpts struct {
+	Slide SlideData
+	// Index and Total state the position in text, because "3 of 7" is the fact
+	// a screen-reader user needs and a scrollbar does not provide it.
+	Index, Total int
+	Attrs        Attrs
+}
+
+// Slide renders one slide.
+templ Slide(o SlideOpts) {
+	<li
+		{ root("carousel-slide", "snap-start shrink-0 w-72 card p-4 space-y-2", o.Attrs)... }
+		id={ o.Slide.ID }
+		data-carousel-slide={ o.Slide.ID }
+	>
+		if o.Total > 1 {
+			<p class="text-xs text-fg-muted">{ fmt.Sprintf("%d of %d", o.Index, o.Total) }</p>
+		}
+		if o.Slide.Image != "" {
+			<img src={ o.Slide.Image } alt={ o.Slide.Alt } loading="lazy" class="w-full h-32 object-cover rounded"/>
+		}
+		<p class="font-medium">{ o.Slide.Title }</p>
+		if o.Slide.Body != "" {
+			<p class="text-sm text-fg-muted">{ o.Slide.Body }</p>
+		}
+		if o.Slide.Href != "" {
+			<a href={ templ.SafeURL(o.Slide.Href) } class="btn btn-ghost btn-xs">
+				{ "Open " + o.Slide.Title }
+			</a>
+		}
+	</li>
+}
+
+// CarouselDotsOpts configures the position indicator.
+//
+// It carries the slide IDs rather than a count. The plan specified a Count, but
+// a count cannot produce a working link: the dots would have to be buttons that
+// a controller wires up, which means they do nothing with JavaScript disabled -
+// the exact no-op control this catalog refuses everywhere else. Holding the IDs
+// also removes a second source of truth that could disagree with the slides.
+type CarouselDotsOpts struct {
+	// Slides are the slide element IDs, in order.
+	Slides []string
+	// Active is the 1-based current slide.
+	Active int
+	Label  string
+	Attrs  Attrs
+}
+
+// CarouselDots renders links to each slide.
+//
+// They are real anchors to each slide's id, so they work with no JavaScript and
+// the browser scrolls the slide into view itself. Each carries the position as
+// text: a row of unlabelled dots is a set of controls a screen reader cannot
+// tell apart.
+templ CarouselDots(o CarouselDotsOpts) {
+	<nav { root("carousel-dots", "flex items-center gap-1.5", o.Attrs)... } aria-label={ o.Label + " slide navigation" }>
+		for index, id := range o.Slides {
+			<a
+				href={ templ.SafeURL("#" + id) }
+				class={ carouselDotClass(index+1 == o.Active) }
+				data-carousel-dot={ fmt.Sprint(index + 1) }
+				aria-current={ carouselCurrent(index+1 == o.Active) }
+			>
+				<span class="sr-only">{ fmt.Sprintf("Slide %d of %d", index+1, len(o.Slides)) }</span>
+			</a>
+		}
+	</nav>
+}
+
+func carouselAutoplay(o CarouselOpts) string {
+	if o.Autoplay {
+		return "true"
+	}
+	return "false"
+}
+
+// carouselInterval floors the delay. A sub-second rotation is unreadable, so a
+// caller asking for one gets the floor rather than the number they typed.
+func carouselInterval(o CarouselOpts) int {
+	if o.IntervalMS < 4000 {
+		return 4000
+	}
+	return o.IntervalMS
+}
+
+// carouselSlideIDs collects the slide anchors the dots link to.
+func carouselSlideIDs(o CarouselOpts) []string {
+	ids := make([]string, 0, len(o.Slides))
+	for _, slide := range o.Slides {
+		ids = append(ids, slide.ID)
+	}
+	return ids
+}
+
+func carouselDotClass(active bool) string {
+	base := "w-2.5 h-2.5 rounded-full border border-border"
+	if active {
+		return base + " bg-brand"
+	}
+	return base + " bg-surface-raised"
+}
+
+// carouselCurrent marks the active dot. aria-current is what a screen reader
+// reads; the filled circle is invisible to it.
+func carouselCurrent(active bool) string {
+	if active {
+		return "true"
+	}
+	return "false"
+}

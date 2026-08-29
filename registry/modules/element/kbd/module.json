@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/kbd",
+    "kind": "element",
+    "name": "kbd",
+    "revision": 1,
+    "contract": 1,
+    "title": "Kbd",
+    "description": "The Kbd renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/kbd.templ",
+        "target": "internal/web/templates/ui/kbd.templ",
+        "class": "templ",
+        "sha256": "14ad7af9b0b0f7e7db751316a039c236616c7911c7c84af33ae83e3908606e74",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/kbd_test.go",
+        "target": "internal/web/templates/ui/kbd_test.go",
+        "class": "test",
+        "sha256": "02715e47aa22dd531667fe3d9820e72ac22fad90629e517a784e4ed216595ccf",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "kbd",
+          "family": "foundations",
+          "signature": "templ Kbd(o KbdOpts)",
+          "summary": "Renders one or more keyboard keys.",
+          "guidance": "<kbd> is the element that says \"press this\", which matters when documentation is read aloud.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

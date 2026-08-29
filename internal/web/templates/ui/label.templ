@@ -1,0 +1,33 @@
+package ui
+
+// LabelOpts configures a standalone label.
+type LabelOpts struct {
+	// For must name the control this labels. A label with no `for` and no
+	// wrapped control labels nothing, which is invisible in review and obvious
+	// only to a screen-reader user.
+	For      string
+	Text     string
+	Required bool
+	Hidden   bool
+	Attrs    Attrs
+}
+
+// Label renders a control label. Field renders its own; this exists for a
+// custom control that needs the same label semantics.
+templ Label(o LabelOpts) {
+	<label
+		{ rootWith("label", labelClass(o.Hidden), o.Attrs, "for", o.For)... }
+	>
+		{ o.Text }
+		if o.Required {
+			<span class="text-danger-text" aria-hidden="true">*</span>
+		}
+	</label>
+}
+
+func labelClass(hidden bool) string {
+	if hidden {
+		return "sr-only"
+	}
+	return "label"
+}

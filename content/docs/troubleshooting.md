@@ -2,7 +2,7 @@
 title: Troubleshooting
 description: The failures you will actually meet — CSRF 403s, webhook 400s, 503s, and stale baselines.
 section: Guides
-weight: 27
+weight: 28
 ---
 
 Every failure here has a mechanical cause. Check the exact symptom, not the
@@ -65,11 +65,67 @@ so you can't reach this state there.
 ## sqlc / templ compile errors after editing queries or templates
 
 You edited a generated file, or edited the source without regenerating.
-Sources are `internal/db/queries/*.sql`, `internal/web/templates/*.templ`,
-and `input.css`; outputs are `internal/db/sqlc/`, `*_templ.go`, and
-`static/app.css`. **Never edit outputs** — run `make generate`. CI enforces
-this with `git diff --exit-code`: if CI is red right after `make generate`,
-someone hand-edited generated code.
+Outputs are `internal/db/sqlc/`, every `*_templ.go`, every
+`*_registry_gen.*`, `static/app.css`, `static/ui-components.js`,
+`static/ui-engines.js`, `.env.example`,
+`content/docs/configuration-reference.md`,
+`content/docs/module-reference.md`, `content/docs/component-reference.md`,
+`e2e/generated/personas.ts`,
+`e2e/generated/surfaces.ts`, `internal/web/templates/scenarios_gen.go` and
+`internal/web/templates/ui/reference_gen.go`. **Never edit outputs** — run
+`make generate`. CI enforces it with `git diff --exit-code`: if CI is red
+right after `make generate`, someone hand-edited generated code.
+
+## My edit to a route, an env key or a catalog string vanished
+
+You edited a `*_registry_gen.*` file. Those are rendered by `ggg sync` from
+the module manifests, so the next `make generate` overwrites them without a
+word. Change the declaration instead:
+
+| You wanted to change | Edit this |
+|---|---|
+| a route, its scope or its CSRF/rate policy | the owning manifest's `runtime.routes` |
+| a sidebar or settings nav entry | `runtime.navigation` |
+| an env key, its type or its default | the manifest's `environment` |
+| a UI string in either language | the manifest's `locales` |
+| a job kind or its retry budget | `runtime.jobs` |
+| a persona or a visual surface | `personas` / `runtime.visual` |
+
+Then `go run ./cmd/ggg registry build && make generate`.
+
+## `ggg sync` fails with "payload … sha256 mismatch"
+
+You edited a file that a manifest owns, in the registry's own tree. The
+manifest records a digest per payload, so the source and its declaration have
+drifted. This is the authoring step, not a corruption:
+
+```sh
+go run ./cmd/ggg registry build     # re-reads every payload, rewrites the digests
+go run ./cmd/ggg sync --offline
+```
+
+Run the two together. Between them another process writing the same file
+re-opens the same gap, which is the usual cause of a mismatch naming a file
+you did not touch.
+
+## `ggg update` exited 4
+
+Not an error: safe modules updated and at least one conflict is staged
+because you had edited a file upstream also changed. Your bytes were not
+touched. `ggg diff --upstream` names the diff files under
+`tmp/ggg/conflicts/`; read one, then `ggg resolve KIND/NAME --path PATH` with
+`--accept-upstream`, `--keep-local` or `--merged`. `sync --check` keeps
+failing until you do, on purpose: a staged conflict lives in ignored `tmp/`,
+so it must never be committable as a green state. See
+[Extending](/docs/extending).
+
+## `ggg doctor` reports `candidate_missing`
+
+You cloned a repository whose lock carries conflict metadata but whose
+ignored `tmp/` is empty. Rerun `ggg update` at the lock's target
+`registry_commit`; it re-downloads, re-verifies and re-materializes the
+candidates without touching your source, and `ggg resolve` then works
+normally.
 
 ## Safari drops cookies in local dev
 
@@ -83,10 +139,16 @@ localhost.
 
 Baselines are font-rendering-sensitive and pinned to the **Playwright Linux
 container**; a Mac will always diff slightly. Never regenerate baselines
-locally — `make visual-update` runs the suite dockerized with
-`--update-snapshots`, and CI runs the same pinned image. Rendered dates come
-from the frozen `TEST_NOW` clock, so if a diff shows a date, your run is
-missing `APP_ENV=test`/`TEST_NOW`. See [Testing](/docs/testing).
+outside it. `make visual` compares inside the pinned image and is read-only —
+run it first, because it reproduces CI's required `visual` job exactly.
+`make visual-update` is the only command allowed to overwrite a committed
+screenshot; follow it with `make visual` to prove the new baselines compare
+cleanly. Rendered dates come from the frozen `TEST_NOW` clock, so if a diff
+shows a date, your run is missing `APP_ENV=test`/`TEST_NOW`. If a diff shows
+a Clerk user button or portal that CI never renders, your environment
+supplied a real `CLERK_PUBLISHABLE_KEY`: the harness blanks the `CLERK_*`
+keys precisely so a developer's `.env` cannot change the pixels. See
+[Testing](/docs/testing).
 
 ## Session dies ~60 seconds after login
 
@@ -133,7 +195,8 @@ place. See [Frontend](/docs/frontend).
 
 `hx-swap` is missing `show:top`. htmx defaults only boosted **forms** to
 scrolling, never links, so a boosted link keeps the previous scroll offset.
-`templates.NavSwap` carries it for every nav link. (`scroll:window:top` reads
+`ui.NavSwap` carries it for every nav link (`templates.NavSwap` and
+`web.NavSwap` are aliases of that one constant). (`scroll:window:top` reads
 like the same thing but is a no-op in 4.0.0-beta6.)
 
 ## Clicking an in-page anchor flashes the wrong section
@@ -142,6 +205,33 @@ The link got boosted. htmx fetches the page, repaints `#content` at the top of
 the document, and only then scrolls to the fragment. Links whose `href` contains
 a `#` must stay unboosted (`isAnchorLink` in `nav.templ`) — the browser then
 scrolls natively with no request at all.
+
+## `make check` fails with "design-system violation"
+
+`internal/web/templates/designsystem_test.go` reads every `*.templ` in the
+`templates` package and refuses
+raw hex, `dark:` variants, palette ramps (`text-red-600`), numeric brand steps
+(`bg-brand-600`), `!` utility overrides, arbitrary lengths (`text-[10px]`) and
+templ expressions inside quoted attributes. The failure names the file, the
+line, the offending text and the fix.
+
+There are **no exemptions** on purpose: the previous "templates use only
+tokens" claim was documented for months while false in eighty-odd places, and
+an exemption list is how that happens. So the fix is always to move the value
+into the layer that owns it — a token in `@theme`, a class in
+`@layer components`, or a renderer in `internal/web/templates/ui/`. See
+[Frontend → Design system](/docs/frontend).
+
+Watch for the trap that a `dark:` or `!` in *prose* (a comment, or documentation
+copy rendered by a template) also matches: the scanner reads file text, which is
+what makes the rule cheap and absolute. Reword the prose.
+
+## An element renders with a literal `{ someFunc(x) }` as its class
+
+templ does **not** interpolate inside a quoted attribute. `class="badge { f(x) }"`
+emits the expression verbatim, so the element renders unstyled and nothing warns
+you. Write `class={ "badge", f(x) }` (or `attr={ expr }` for any other
+attribute). Rule 7 of the design-system test catches this now.
 
 ## 429s during load tests
 

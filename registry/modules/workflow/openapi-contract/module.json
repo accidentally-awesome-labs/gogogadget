@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/openapi-contract",
+    "kind": "workflow",
+    "name": "openapi-contract",
+    "revision": 1,
+    "contract": 1,
+    "title": "OpenAPI description",
+    "description": "Serves the generated OpenAPI description of the JSON API.",
+    "requires": [
+      "system/api",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/api_transport.go",
+        "target": "internal/web/api_transport.go",
+        "class": "go",
+        "sha256": "bbc77d3e34d1637e9ad5b38695c5b16f8d1484ed98e8ed2492a921b8c3ef398b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/openapi_test.go",
+        "target": "internal/web/openapi_test.go",
+        "class": "test",
+        "sha256": "295a161b6b26171818daa6cc41fd3f93b70693660ef5463f458f00a6422a10b3",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "api.openapi"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.openapi",
+          "method": "GET",
+          "pattern": "/api/v1/openapi.yaml",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "public contract document; a client needs it before it has a token",
+            "rate_exempt": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIOpenAPISpec"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "openapi": {
+      "info": {
+        "title": "GoGoGadget API",
+        "version": "1.0.0",
+        "summary": "Bearer-authenticated JSON API for projects and metered AI chat.",
+        "description": "The second transport. Every rule the HTML app enforces (plan limits,\nvalidation, org scoping) applies identically here — the handlers share\nthe same query layer and plan logic, they only differ in how they answer.\n\nAuthentication is a Bearer token minted at `/app/settings/api`\n(`ggg_…`, SHA-256 hashed at rest, shown once). Tokens carry a scope:\n`read` satisfies read operations, `write` satisfies both.\n\nThe token determines the organization — there is no org parameter, and a\ntoken can never read another org's rows.\n",
+        "license": {
+          "name": "MIT"
+        }
+      },
+      "servers": [
+        {
+          "url": "/",
+          "description": "Same origin as the app."
+        }
+      ],
+      "tags": [
+        {
+          "name": "meta",
+          "description": "Machine-readable description of this API."
+        }
+      ],
+      "operations": [
+        {
+          "route_id": "api.openapi",
+          "operation_id": "getOpenAPISpec",
+          "summary": "This document.",
+          "responses": {
+            "200": {
+              "description": "The OpenAPI document.",
+              "content": {
+                "application/yaml": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "description": "Unauthenticated so tooling can fetch the contract before holding a token.",
+          "tags": [
+            "meta"
+          ]
+        }
+      ]
+    }
+  }
+}

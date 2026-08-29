@@ -92,7 +92,7 @@ func TestDigestSendsOnlyToDueUsersWithContent(t *testing.T) {
 	seedDigestUser(t, pool, "u_recent", "recent@example.com", "weekly", time.Now().Add(-time.Hour))
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_recent", "Too soon")
 
-	require.NoError(t, w.sendDigests(ctx, sqlc.Job{Kind: KindEmailDigest}))
+	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 
 	assert.Equal(t, []string{"due@example.com"}, cap.to(),
 		"only an opted-in, due user with something to report gets mail")
@@ -114,11 +114,11 @@ func TestDigestStampsAfterSendAndStopsRepeating(t *testing.T) {
 	seedDigestUser(t, pool, "u_once", "once@example.com", "daily", nil)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_once", "First thing")
 
-	require.NoError(t, w.sendDigests(ctx, sqlc.Job{}))
+	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 	require.Len(t, cap.sent, 1)
 
 	// Same pass again: the stamp makes the user no longer due.
-	require.NoError(t, w.sendDigests(ctx, sqlc.Job{}))
+	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 	assert.Len(t, cap.sent, 1, "a second pass must not re-send the same digest")
 }
 
@@ -134,7 +134,7 @@ func TestDigestLeavesUserDueWhenSendFails(t *testing.T) {
 	seedDigestUser(t, pool, "u_fail", "fail@example.com", "daily", nil)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_fail", "Unsent")
 
-	require.Error(t, w.sendDigests(ctx, sqlc.Job{}), "the job must fail so the queue retries it")
+	require.Error(t, w.sendDigests(ctx, SchedulePayload{}), "the job must fail so the queue retries it")
 	u := getUser(t, q, "u_fail")
 	assert.False(t, u.LastDigestAt.Valid, "an unsent digest must stay owed")
 }
@@ -154,7 +154,7 @@ func TestDigestWindowStartsAtLastSend(t *testing.T) {
 	require.NoError(t, err)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_win", "Fresh news")
 
-	require.NoError(t, w.sendDigests(ctx, sqlc.Job{}))
+	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 	require.Len(t, cap.sent, 1)
 	body := cap.sent[0].Text + cap.sent[0].HTML
 	assert.Contains(t, body, "Fresh news")
@@ -171,7 +171,7 @@ func TestDigestEmailLinksAndContent(t *testing.T) {
 	seedDigestUser(t, pool, "u_link", "link@example.com", "daily", nil)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_link", "Export ready")
 
-	require.NoError(t, w.sendDigests(ctx, sqlc.Job{}))
+	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 	require.Len(t, cap.sent, 1)
 	m := cap.sent[0]
 	assert.NotEmpty(t, m.Subject)
@@ -221,7 +221,7 @@ func TestDigestSpeaksTheUsersLanguage(t *testing.T) {
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_es", "Exportación lista")
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_en", "Export ready")
 
-	require.NoError(t, w.sendDigests(ctx, sqlc.Job{}))
+	require.NoError(t, w.sendDigests(ctx, SchedulePayload{}))
 	require.Len(t, cap.sent, 2)
 
 	byTo := map[string]mail.Message{}

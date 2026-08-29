@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/color-input",
+    "kind": "component",
+    "name": "color-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "ColorInput",
+    "description": "The ColorInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/color-input.templ",
+        "target": "internal/web/templates/ui/color-input.templ",
+        "class": "templ",
+        "sha256": "8f5d5d269bfca44d74aca0269b660cf434354bec15fbd037c531c4069e43098d",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "color-input",
+          "family": "forms",
+          "signature": "templ ColorInput(o ColorInputOpts)",
+          "summary": "Renders a native colour input paired with its hex value.",
+          "guidance": "The hex text is shown because a swatch alone cannot be read, compared, copied, or communicated - and it is the value the user will paste elsewhere.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

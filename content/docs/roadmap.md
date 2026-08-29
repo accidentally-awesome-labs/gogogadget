@@ -2,7 +2,7 @@
 title: Roadmap
 description: Researched feature gaps vs. production SaaS norms — what exists, what's tiered, what's deliberately delegated.
 section: Guides
-weight: 28
+weight: 29
 ---
 
 This page is a point-in-time audit (2026-08-17) of what a production SaaS

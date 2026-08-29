@@ -1,0 +1,294 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The settings scenario: read-only facts, editable fields, and the danger zone,
+// in the four conditions a settings page is actually seen in - untouched, saved,
+// rejected, and viewed by someone who may not change it.
+
+// settingsActivePath is the tab this scenario stands in for. NavTabs computes
+// aria-current by comparing it against each item's match path, so the value has
+// to be a path one of the items really has.
+const settingsActivePath = "/app/settings/account"
+
+// ScenarioSettings renders the workspace settings surface.
+templ ScenarioSettings(gc GalleryContext) {
+	<div class="space-y-6" data-testid="scenario-settings">
+		// The tabs point at the product's real settings routes rather than
+		// fabricated dev URLs: aria-current is only meaningful when the paths
+		// being compared are paths that exist.
+		@ui.NavTabs(ui.NavTabsOpts{
+			Items:      settingsScenarioTabs(),
+			ActivePath: settingsActivePath,
+			Attrs:      ui.Attrs{TestID: "settings-tabs"},
+		})
+		switch gc.State {
+			case "success":
+				// Polite: the save has already happened, so interrupting the
+				// screen reader mid-sentence buys nothing.
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindSuccess, Live: ui.LivePolite, Attrs: ui.Attrs{TestID: "settings-saved"}}) {
+					<p class="font-medium">Changes saved.</p>
+					<p class="text-sm">Display name and billing email were updated 15 Jan 2026, 09:41.</p>
+				}
+			case "error":
+				// Assertive, and it counts the fields: a summary that says only
+				// "there were errors" makes the user hunt a long form for them.
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{TestID: "settings-rejected"}}) {
+					<p class="font-medium">Two fields were rejected. Nothing was saved.</p>
+					<p class="text-sm">The values you entered are still below, with the reason on each field.</p>
+				}
+			case "readonly":
+				// Stated once at the top and again beside the disabled Save,
+				// because the top of a long form scrolls out of sight exactly
+				// when the user reaches the control that will not respond.
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindInfo, Attrs: ui.Attrs{TestID: "settings-permission"}}) {
+					<p class="font-medium">You can read these settings but not change them.</p>
+					<p class="text-sm">{ settingsPermissionReason }</p>
+				}
+		}
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       "Workspace",
+			Description: "Identity and plan facts. These are set at creation or by billing, not on this page.",
+			// Every block on this page sits directly under the page title with
+			// no region heading between, so they are h2 - the tabs above are
+			// navigation, not an outline level.
+			Level: 2,
+			Attrs: ui.Attrs{TestID: "settings-workspace"},
+		}) {
+			// A description list, not disabled inputs: a fact nobody can edit
+			// is not a form control, and rendering it as one invites the user
+			// to try.
+			@ui.DescriptionList(ui.DescriptionListOpts{
+				Items:   settingsFacts(gc),
+				Columns: 2,
+				Density: gc.Density,
+				Attrs:   ui.Attrs{TestID: "settings-facts"},
+			})
+		}
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       "Account details",
+			Description: "How you appear to the rest of the workspace, and where invoices are sent.",
+			Level:       2,
+			Attrs:       ui.Attrs{TestID: "settings-account"},
+		}) {
+			@ui.Form(ui.FormOpts{Method: "get", Action: settingsURL(""), Attrs: ui.Attrs{TestID: "settings-account-form"}}) {
+				<div class="space-y-4">
+					for _, field := range settingsAccountFields(gc) {
+						@settingsTextField(gc, field)
+					}
+				</div>
+				@ui.FormActions(ui.FormActionsOpts{}) {
+					if gc.State == "readonly" {
+						@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+							{ settingsPermissionReason }
+						}
+						@ui.Button(ui.ButtonOpts{
+							Label: "Save changes", Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+							Disabled: true, Attrs: ui.Attrs{TestID: "settings-save"},
+						})
+					} else {
+						@ui.Button(ui.ButtonOpts{
+							Label: "Save changes", Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+							Attrs: ui.Attrs{TestID: "settings-save"},
+						})
+					}
+				}
+			}
+		}
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       "Security",
+			Description: "Applies to every member of the workspace, including invited guests.",
+			Level:       2,
+			Attrs:       ui.Attrs{TestID: "settings-security"},
+		}) {
+			@ui.Form(ui.FormOpts{Method: "get", Action: settingsURL(""), Attrs: ui.Attrs{TestID: "settings-security-form"}}) {
+				<div class="space-y-4">
+					@ui.Switch(ui.SwitchOpts{
+						Name: "require_mfa", Label: "Require two-factor authentication", On: true,
+						Attrs: ui.Attrs{TestID: "settings-mfa"},
+					})
+					@settingsTextField(gc, settingsField{
+						Name: "session_minutes", Label: "Sign members out after (minutes)",
+						Value: "480", Type: ui.InputTypeNumber,
+						Hint: "Between 15 and 1440. Members with an active upload are not interrupted.",
+					})
+				</div>
+				@ui.FormActions(ui.FormActionsOpts{}) {
+					@ui.Button(ui.ButtonOpts{
+						Label: "Update security", Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+						Disabled: gc.State == "readonly",
+						Attrs:    ui.Attrs{TestID: "settings-security-save"},
+					})
+				}
+			}
+		}
+		@ui.SettingsSection(ui.SettingsSectionOpts{
+			Title:       "Danger zone",
+			Description: "Deleting the workspace removes every project, run and uploaded file in it.",
+			Level:       2,
+			Danger:      true,
+			Attrs:       ui.Attrs{TestID: "settings-danger"},
+		}) {
+			if gc.State == "readonly" {
+				// Disabled and explained, in that order. A greyed-out Delete
+				// with no reason teaches the reader nothing; the sentence is
+				// what tells them whose permission to ask for.
+				@ui.Button(ui.ButtonOpts{
+					Label: "Delete workspace", Action: ui.ActionDanger, Size: ui.SizeSM,
+					Icon: ui.IconDelete, Disabled: true,
+					Attrs: ui.Attrs{TestID: "settings-delete"},
+				})
+				@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+					{ settingsPermissionReason }
+				}
+			} else {
+				// ConfirmAction renders the AlertDialog and the trigger that
+				// opens it, so the confirmation copy is real markup: it can be
+				// translated, styled and asserted on, which hx-confirm's
+				// window.confirm string cannot.
+				//
+				// The confirm control carries no request. This fixture shares
+				// the demo workspace every other scenario renders from, and a
+				// dev surface that really deletes it takes the whole catalog
+				// with it. The dialog still does its job: it opens, traps
+				// focus, dismisses on Escape, and records the choice.
+				@ui.ConfirmAction(ui.ConfirmActionOpts{
+					ID:           "settings-delete-dialog",
+					TriggerLabel: "Delete workspace",
+					TriggerIcon:  ui.IconDelete,
+					Title:        "Delete Ada Labs?",
+					Message:      settingsDeleteMessage(gc.LongContent),
+					ConfirmLabel: "Delete workspace",
+					CancelLabel:  "Keep workspace",
+					Kind:         ui.KindDanger,
+					Attrs:        ui.Attrs{TestID: "settings-delete"},
+				})
+			}
+		}
+	</div>
+}
+
+// settingsField is one editable field's fixture.
+type settingsField struct {
+	Name, Label, Value, Hint string
+	Type                     ui.InputType
+	Autocomplete             string
+}
+
+// settingsTextField renders one field with its control.
+//
+// The Field and the TextInput are given the same Hint and Error strings. That
+// looks redundant and is not: Field renders the elements, the input references
+// them by id, and a control told only its name would emit an aria-describedby
+// pointing at an element that was never rendered.
+templ settingsTextField(gc GalleryContext, field settingsField) {
+	@ui.Field(ui.FieldOpts{
+		Name: field.Name, Label: field.Label, Hint: field.Hint,
+		Error:    settingsFieldError(gc, field.Name),
+		Required: true,
+	}) {
+		@ui.TextInput(ui.TextInputOpts{
+			Name: field.Name, Value: field.Value, Type: field.Type,
+			Hint:         field.Hint,
+			Error:        settingsFieldError(gc, field.Name),
+			Required:     true,
+			Disabled:     gc.State == "readonly",
+			Autocomplete: field.Autocomplete,
+		})
+	}
+}
+
+// settingsPermissionReason names the role and who can change it. "Insufficient
+// permissions" tells the reader they are blocked; this tells them what to do.
+const settingsPermissionReason = "You have the Member role in Ada Labs. Only an Owner can change workspace settings - Ada Lovelace and Grace Hopper are Owners."
+
+// settingsTabs are the real settings routes. The third is named for what it
+// actually is: calling it "Security" while it navigates to the API tokens page
+// is a label that lies about its destination.
+func settingsScenarioTabs() []ui.NavItem {
+	return []ui.NavItem{
+		{Label: "Account", Href: "/app/settings/account"},
+		{Label: "Organisation", Href: "/app/settings/org"},
+		{Label: "API tokens", Href: "/app/settings/api"},
+	}
+}
+
+// settingsURL is this scenario's canonical URL for a state.
+func settingsURL(state string) string {
+	if state == "" || state == "default" {
+		return "/dev/scenarios/settings"
+	}
+	return "/dev/scenarios/settings?state=" + state
+}
+
+// settingsFacts is the read-only half of the page. The workspace ID is copyable
+// because it is the value a user pastes into a support ticket or a CLI flag.
+func settingsFacts(gc GalleryContext) []ui.DescriptionItem {
+	return []ui.DescriptionItem{
+		{Term: "Workspace ID", Value: "org_2Nk9TfQ1", Copyable: true, Hint: "Quote this in support requests."},
+		{Term: "Workspace name", Value: settingsWorkspaceName(gc.LongContent)},
+		{Term: "Plan", Value: "Team", Hint: "8 of 25 seats used."},
+		{Term: "Created", Value: "12 Jan 2026 by Ada Lovelace"},
+		{Term: "Data region", Value: "europe-west4", Hint: "Set at creation and cannot be moved."},
+		{Term: "Owners", Value: "Ada Lovelace, Grace Hopper"},
+	}
+}
+
+// settingsAccountFields carries the values the user last submitted, which is why
+// the error state shows the offending input rather than the stored value: a form
+// that silently reverts what someone typed makes the error impossible to fix.
+func settingsAccountFields(gc GalleryContext) []settingsField {
+	name := settingsField{
+		Name: "display_name", Label: "Display name", Value: "Ada Lovelace",
+		Hint: "Shown on activity entries and comments.", Type: ui.InputTypeText,
+		Autocomplete: "name",
+	}
+	email := settingsField{
+		Name: "billing_email", Label: "Billing email", Value: "billing@ada-labs.example.com",
+		Hint: "Invoices and payment failures are sent here.", Type: ui.InputTypeEmail,
+		Autocomplete: "email",
+	}
+	slug := settingsField{
+		Name: "workspace_slug", Label: "Workspace URL", Value: "ada-labs",
+		Hint: "Appears in every project URL. Changing it breaks existing links.", Type: ui.InputTypeText,
+	}
+	if gc.State == "error" {
+		name.Value = "Ada Lovelace, Countess of Lovelace, Analytical Engine Programme, Ada Labs Research Division"
+		email.Value = "billing@"
+	}
+	return []settingsField{name, email, slug}
+}
+
+// settingsFieldError is the server's verdict on one field. Only the error state
+// has any: a validation message that renders on first paint accuses the user of
+// a mistake they have not made yet.
+func settingsFieldError(gc GalleryContext, name string) string {
+	if gc.State != "error" {
+		return ""
+	}
+	switch name {
+	case "display_name":
+		return "Use 60 characters or fewer. This is 95."
+	case "billing_email":
+		return "This address has no domain, so an invoice sent to it would bounce."
+	default:
+		return ""
+	}
+}
+
+func settingsWorkspaceName(long bool) string {
+	if long {
+		return "Ada Labs Analytical Engine Programme (Research Division, europe-west4)"
+	}
+	return "Ada Labs"
+}
+
+// settingsDeleteMessage states the consequence in counts. "This cannot be
+// undone" is true of every destructive dialog and tells the reader nothing
+// about what they are about to lose.
+func settingsDeleteMessage(long bool) string {
+	if long {
+		return "This deletes 12 projects, 7,461 recorded runs and 3.2 GB of uploaded files, and removes all 8 members from the workspace. Exports already downloaded are unaffected; anything still queued is cancelled. The workspace URL ada-labs becomes available for anyone to claim after 30 days."
+	}
+	return "This deletes 12 projects, 7,461 runs and 3.2 GB of files, and removes all 8 members. It cannot be undone."
+}

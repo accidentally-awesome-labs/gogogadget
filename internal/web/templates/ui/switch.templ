@@ -1,0 +1,18 @@
+package ui
+
+// SwitchOpts configures a toggle switch.
+type SwitchOpts struct {
+	Name, Label string
+	On          bool
+	Attrs       Attrs
+}
+
+// Switch is a labelled toggle.
+templ Switch(o SwitchOpts) {
+	<label { root("switch", "flex items-center gap-2 text-sm", Attrs{})... }>
+		// Merged, not a second class attribute: see Checkbox for what two class
+		// attributes on one element cost.
+		<input { attributes(withClass(o.Attrs, "h-4 w-4"))... } type="checkbox" name={ o.Name } checked?={ o.On }/>
+		{ o.Label }
+	</label>
+}

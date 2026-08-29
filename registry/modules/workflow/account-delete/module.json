@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/account-delete",
+    "kind": "workflow",
+    "name": "account-delete",
+    "revision": 1,
+    "contract": 1,
+    "title": "Account deletion",
+    "description": "GDPR self-serve account deletion: email confirmation and sole-admin guard, then provider delete before local delete, with sole-member organizations removed alongside the user.",
+    "requires": [
+      "page/settings-account",
+      "system/audit",
+      "system/i18n",
+      "system/identity",
+      "system/impersonation",
+      "system/organizations",
+      "system/security",
+      "system/server",
+      "workflow/auth-session"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_account_delete.go",
+        "target": "internal/web/workflow_account_delete.go",
+        "class": "go",
+        "sha256": "c14d401aad4a60cb7ae2aa4a67ad027f3ed2b0d40587f546cec87314178b01df",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "account-delete.submit"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "account-delete.submit",
+          "method": "POST",
+          "pattern": "/app/settings/account/delete",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAccountDelete"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

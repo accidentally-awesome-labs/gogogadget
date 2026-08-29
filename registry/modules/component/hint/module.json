@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/hint",
+    "kind": "component",
+    "name": "hint",
+    "revision": 1,
+    "contract": 1,
+    "title": "Hint",
+    "description": "The Hint renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/hint.templ",
+        "target": "internal/web/templates/ui/hint.templ",
+        "class": "templ",
+        "sha256": "510e68ad739281fe755ef7e290ca59a4fc788331200714f93083114f6ce3f7db",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "hint",
+          "family": "forms",
+          "signature": "templ Hint(o HintOpts)",
+          "summary": "Renders help text below a control.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

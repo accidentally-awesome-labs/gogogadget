@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/date-range-field",
+    "kind": "component",
+    "name": "date-range-field",
+    "revision": 1,
+    "contract": 1,
+    "title": "DateRangeField",
+    "description": "The DateRangeField renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/date-range-field.templ",
+        "target": "internal/web/templates/ui/date-range-field.templ",
+        "class": "templ",
+        "sha256": "043b6cda16ba534438ae8f542cc3ac4dce6c67d64d8a8cd1c7b938e98dbb5bfb",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "date-range-field",
+          "family": "forms",
+          "engine": "alpine",
+          "alpine": "uiDateRange",
+          "native_fallback": "native input",
+          "signature": "templ DateRangeField(o DateRangeFieldOpts)",
+          "summary": "Renders a start and end date as two native date inputs.",
+          "guidance": "The end input's min is bound to the start value by the Alpine behaviour, but the server still validates the ordering: a range that only makes sense because the browser prevented the mistake is not validated at all.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

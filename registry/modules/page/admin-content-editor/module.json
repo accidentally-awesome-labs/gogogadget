@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-content-editor",
+    "kind": "page",
+    "name": "admin-content-editor",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin content editor",
+    "description": "The admin editor form for a new or existing content entry, including its declared meta fields, revision history, and media picker.",
+    "requires": [
+      "system/content",
+      "system/i18n",
+      "system/security",
+      "system/server",
+      "workflow/admin-content"
+    ],
+    "files": [
+      {
+        "source": "internal/web/admin_content_editor_test.go",
+        "target": "internal/web/admin_content_editor_test.go",
+        "class": "test",
+        "sha256": "8bfb2ff940a7586bf1e9ea4bcddf63ad38aef0191735ce58faf6e8fd486bcdda",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/page_admin_content_editor.go",
+        "target": "internal/web/page_admin_content_editor.go",
+        "class": "go",
+        "sha256": "3a4de18f3d467b50aeba559f174d01bc356e3c0c63136ff56a10e38101462166",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.content.edit",
+        "admin.content.new"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.content.edit",
+          "method": "GET",
+          "pattern": "/admin/content/{id}",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentEdit"
+        },
+        {
+          "id": "admin.content.new",
+          "method": "GET",
+          "pattern": "/admin/content/new",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentNew"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

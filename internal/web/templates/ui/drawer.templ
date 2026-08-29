@@ -1,0 +1,68 @@
+package ui
+
+// DrawerOpts configures an edge-anchored panel.
+type DrawerOpts struct {
+	// ID and Title are both required: the ID is how the trigger opens it, and
+	// a modal with no accessible name is announced as "dialog" and nothing
+	// else.
+	ID    string
+	Title string
+	// Side is the edge the panel attaches to.
+	Side Side
+	// Level is the title's heading level, defaulting to 2. A drawer's depth is
+	// a fact about the page it opens over, not the component: one opened from
+	// inside a titled region reads as h3 there, and hardcoding h2 flattens that
+	// nesting - which sends heading navigation somewhere the reader did not ask
+	// for.
+	Level int
+	Attrs Attrs
+}
+
+// Drawer renders an edge-anchored modal panel.
+//
+// It is a native <dialog>, exactly like Dialog, because the platform supplies
+// the top layer, the backdrop, the focus trap and Escape-to-close. Only the
+// geometry differs, so a drawer that reimplemented any of that would be a
+// second, worse dialog.
+templ Drawer(o DrawerOpts) {
+	<dialog
+		id={ o.ID }
+		{ rootWith("drawer", "dialog card "+drawerClass(o.Side), o.Attrs,
+			"aria-labelledby", o.ID+"-title")... }
+	>
+		<form method="dialog" class="flex h-full flex-col gap-4">
+			<div class="flex items-center justify-between">
+				@Heading(HeadingOpts{
+					Text: o.Title, Level: dialogLevel(o.Level), Size: SizeSM,
+					Attrs: Attrs{ID: o.ID + "-title"},
+				})
+				<button type="submit" class="btn btn-ghost btn-icon" aria-label="Close" data-ui-dialog-close>
+					@Icon(IconOpts{Name: IconClose, Attrs: Attrs{Class: "w-4 h-4"}})
+				</button>
+			</div>
+			<div class="flex-1 overflow-y-auto">
+				{ children... }
+			</div>
+		</form>
+	</dialog>
+}
+
+// drawerClass defaults an *unset* side to the right edge, which is where a
+// filter or detail panel belongs in a left-to-right layout. The Side enum's own
+// default is top, so the empty case is handled before normalizing - otherwise
+// the documented default and the rendered one would disagree.
+func drawerClass(side Side) string {
+	if side == "" {
+		return "drawer-right"
+	}
+	switch side.Value() {
+	case SideLeft:
+		return "drawer-left"
+	case SideTop:
+		return "drawer-top"
+	case SideBottom:
+		return "drawer-bottom"
+	default:
+		return "drawer-right"
+	}
+}

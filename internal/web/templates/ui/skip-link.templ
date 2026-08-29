@@ -1,0 +1,29 @@
+package ui
+
+// SkipLinkOpts configures the keyboard bypass link.
+type SkipLinkOpts struct {
+	// Target is the fragment the link jumps to, e.g. "#content".
+	Target string
+	Label  string
+	Attrs  Attrs
+}
+
+// SkipLink renders the first focusable control on the page.
+//
+// It is visually hidden until focused, not display:none - a hidden element is
+// not focusable, so a display:none skip link is exactly as useless as none at
+// all. It must be the first control in the document, otherwise a keyboard user
+// tabs through the whole navigation before reaching the way to bypass it.
+templ SkipLink(o SkipLinkOpts) {
+	<a
+		href={ templ.SafeURL(skipTarget(o.Target)) }
+		{ root("skip-link", "sr-only focus:not-sr-only focus:absolute focus:z-(--z-overlay) focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-brand focus:text-brand-fg focus:rounded-lg", o.Attrs)... }
+	>{ o.Label }</a>
+}
+
+func skipTarget(target string) string {
+	if target == "" {
+		return NavTarget
+	}
+	return target
+}

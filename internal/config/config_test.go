@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -243,5 +244,109 @@ func TestAPIRateLimitRPMParsing(t *testing.T) {
 		_, err = Load()
 		require.Error(t, err, "%q must be rejected at boot, not silently become a zero budget", bad)
 		assert.Contains(t, err.Error(), "API_RATE_LIMIT_RPM")
+	}
+}
+
+// Every validation problem is reported together. Fixing one misconfiguration,
+// re-running, and discovering the next is the failure mode this prevents — and
+// it is exactly what an early return produces.
+func TestLoadFromAggregatesEveryValidationError(t *testing.T) {
+	env := map[string]string{
+		"APP_ENV":              "staging", // not a known environment
+		"PORT":                 "abc",     // not a number
+		"RATE_LIMIT_RPM":       "0",       // below the minimum
+		"API_RATE_LIMIT_RPM":   "-5",      // below the minimum
+		"AUDIT_RETENTION_DAYS": "-1",      // below the minimum
+		"POLAR_SERVER":         "staging", // not a known server
+	}
+	_, err := LoadFrom(func(k string) string { return env[k] })
+	if err == nil {
+		t.Fatal("LoadFrom accepted six invalid values")
+	}
+	message := err.Error()
+	for key := range env {
+		if !strings.Contains(message, key) {
+			t.Fatalf("error omits %s, so fixing the others would not be enough:\n%s", key, message)
+		}
+	}
+}
+
+// Reported in declaration order, so the same broken environment always produces
+// the same message — a diffable one.
+func TestLoadFromReportsErrorsInDeclarationOrder(t *testing.T) {
+	env := map[string]string{"PORT": "abc", "RATE_LIMIT_RPM": "0", "APP_ENV": "staging"}
+	first, err := LoadFrom(func(k string) string { return env[k] })
+	if err == nil {
+		t.Fatal("expected errors")
+	}
+	second, err2 := LoadFrom(func(k string) string { return env[k] })
+	if err2 == nil || err.Error() != err2.Error() {
+		t.Fatalf("error order is unstable:\n%s\n---\n%v", err.Error(), err2)
+	}
+	_, _ = first, second
+
+	order := []string{}
+	for _, key := range ConfigRegistry {
+		if idx := strings.Index(err.Error(), key); idx >= 0 {
+			order = append(order, key)
+		}
+	}
+	if len(order) < 3 {
+		t.Fatalf("expected all three keys named, got %v", order)
+	}
+	positions := []int{}
+	for _, key := range order {
+		positions = append(positions, strings.Index(err.Error(), key))
+	}
+	for i := 1; i < len(positions); i++ {
+		if positions[i] < positions[i-1] {
+			t.Fatalf("errors are not in declaration order: %v at %v", order, positions)
+		}
+	}
+}
+
+// AGENTS.md promises a fresh clone runs end-to-end with no third-party
+// accounts, and .env.example is the file that has to deliver it. Generating the
+// file from declarations put that promise at risk, so it is asserted directly:
+// the shipped example must be a valid configuration that signs a developer in.
+func TestEnvExampleIsAWorkingZeroAccountSetup(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join("..", "..", ".env.example"))
+	require.NoError(t, err)
+
+	values := map[string]string{}
+	for _, line := range strings.Split(string(raw), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if key, value, ok := strings.Cut(line, "="); ok {
+			values[strings.TrimSpace(key)] = strings.TrimSpace(value)
+		}
+	}
+
+	cfg, err := LoadFrom(func(k string) string { return values[k] })
+	require.NoError(t, err, ".env.example must itself be a valid configuration")
+
+	assert.True(t, cfg.DevAuthBypass,
+		"DEV_AUTH_BYPASS must ship on, or /dev/login cannot sign anyone in on a fresh clone")
+	assert.Contains(t, cfg.DatabaseURL, "localhost",
+		"DATABASE_URL must ship pointing at the compose database")
+	assert.True(t, cfg.Development(), "the shipped example must be a development configuration")
+
+	// The credential-bearing keys must ship blank: a plausible-looking fake
+	// secret is the kind of thing that reaches production.
+	for _, key := range []string{
+		"CLERK_SECRET_KEY", "CLERK_WEBHOOK_SECRET", "POLAR_ACCESS_TOKEN",
+		"POLAR_WEBHOOK_SECRET", "RESEND_API_KEY", "SENTRY_DSN",
+		"STORAGE_R2_SECRET_ACCESS_KEY", "LLM_API_KEY", "METRICS_TOKEN",
+	} {
+		assert.Empty(t, values[key], "%s must ship without a value", key)
+	}
+
+	// Every declared key appears, so a reader is never left guessing that a
+	// setting exists. This is the drift that shipped five keys short.
+	for _, key := range ConfigRegistry {
+		_, present := values[key]
+		assert.True(t, present, "%s is declared but missing from .env.example", key)
 	}
 }

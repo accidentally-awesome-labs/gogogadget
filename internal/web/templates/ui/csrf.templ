@@ -1,0 +1,83 @@
+package ui
+
+import "context"
+
+// The CSRF token reaches the browser twice, on purpose, because two different
+// clients read it and neither can use the other's copy:
+//
+//   - htmx reads it from the inherited request header declared on <body>. That
+//     is the only path a fragment request has: a button with hx-delete has no
+//     form around it, so there is no field for it to send.
+//   - the browser reads it from a hidden field inside the form. That is the
+//     only path a submit has when the scripts never loaded, and it is the
+//     reason this file exists - a form that publishes the token only through a
+//     header cannot be submitted without JavaScript at all.
+//
+// Both paths stay live. nosurf prefers the header over the field, so a scripted
+// submit that happens to carry both is unaffected by the field being there.
+
+// CSRFFieldName is the form field the CSRF middleware reads the token from. It
+// must equal nosurf.FormFieldName, and it is spelled out rather than imported
+// because this package is the presentation leaf: pulling an HTTP middleware in
+// here would put it into every adopter's build whether they use it or not.
+// TestFormFieldIsTheOneNosurfReads pins the two spellings together.
+const CSRFFieldName = "csrf_token"
+
+// csrfTokenKey is unexported so a token can only enter a context through
+// WithCSRFToken.
+type csrfTokenKey struct{}
+
+// WithCSRFToken publishes the request's token to every component rendered from
+// ctx.
+//
+// The CSRF middleware calls this, not the page handlers, and that is the whole
+// point: a handler cannot render a form without a token by forgetting to pass
+// one, because there is no parameter to forget. Threading it through Page
+// instead would work only for the forms someone remembered to thread it to.
+func WithCSRFToken(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, csrfTokenKey{}, token)
+}
+
+// CSRFTokenFrom returns the published token, or "" when ctx is not a request
+// context - a component rendered by a unit test, say.
+func CSRFTokenFrom(ctx context.Context) string {
+	token, _ := ctx.Value(csrfTokenKey{}).(string)
+	return token
+}
+
+// CSRFFieldOpts configures the hidden field. Token overrides the token this
+// request published, for a caller that already holds one; empty - the normal
+// case - means "whatever the middleware put in the context".
+type CSRFFieldOpts struct {
+	Token string
+	Attrs Attrs
+}
+
+// CSRFField renders the hidden token field. Form renders it for every unsafe
+// method, so ordinary callers never call this; a hand-written <form> that posts
+// has to, and this is the one helper it should reach for.
+//
+// Nothing is rendered when there is no token at all. A field carrying value=""
+// would claim to be a token and then fail as a *bad* one, which sends whoever
+// reads the 403 looking for an expired session instead of a missing middleware.
+//
+// This is the one renderer in the package with no data-ui marker, and that is
+// deliberate: data-ui declares a catalog component, every catalog component has
+// to be rendered on a reference page, and a hidden input has nothing to show.
+templ CSRFField(o CSRFFieldOpts) {
+	if token := csrfFieldToken(ctx, o); token != "" {
+		<input
+			{ attributes(o.Attrs)... }
+			type="hidden" name={ CSRFFieldName } value={ token }
+		/>
+	}
+}
+
+// csrfFieldToken prefers the caller's explicit token and falls back to the one
+// the middleware published for this request.
+func csrfFieldToken(ctx context.Context, o CSRFFieldOpts) string {
+	if o.Token != "" {
+		return o.Token
+	}
+	return CSRFTokenFrom(ctx)
+}

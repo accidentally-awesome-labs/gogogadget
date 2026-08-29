@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/breadcrumbs",
+    "kind": "component",
+    "name": "breadcrumbs",
+    "revision": 1,
+    "contract": 1,
+    "title": "Breadcrumbs",
+    "description": "The Breadcrumbs renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/breadcrumbs.templ",
+        "target": "internal/web/templates/ui/breadcrumbs.templ",
+        "class": "templ",
+        "sha256": "956c1927d2d754df8b5f9eca49bd5e805333db7a90a452c1fb356fff4ee2eebe",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/breadcrumbs_test.go",
+        "target": "internal/web/templates/ui/breadcrumbs_test.go",
+        "class": "test",
+        "sha256": "e33d748e2374214368a9c3164f0a4eabb36a2cb183b8fa60869c3562c26775ca",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "breadcrumbs",
+          "family": "navigation",
+          "signature": "templ Breadcrumbs(o BreadcrumbsOpts)",
+          "summary": "Renders an ordered trail to the current page.",
+          "guidance": "It is an <ol> because the order is the meaning, and the separators are aria-hidden: a screen reader announces list position already, so reading a slash between every item is noise.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

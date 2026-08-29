@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/description-list",
+    "kind": "component",
+    "name": "description-list",
+    "revision": 1,
+    "contract": 1,
+    "title": "DescriptionList",
+    "description": "The DescriptionList renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/description-list.templ",
+        "target": "internal/web/templates/ui/description-list.templ",
+        "class": "templ",
+        "sha256": "af043eb308903a76e976ead7bbc12a98a4e8ef414a46398f3e2cf328e9d293e1",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "description-list",
+          "family": "data",
+          "signature": "templ DescriptionList(o DescriptionListOpts)",
+          "summary": "The read-only detail pattern (account, org).",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

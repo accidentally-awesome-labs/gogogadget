@@ -1,0 +1,20 @@
+package ui
+
+// ListOpts configures a generic list.
+type ListOpts struct {
+	Attrs Attrs
+}
+
+// List renders an unordered list.
+templ List(o ListOpts) {
+	<ul { root("list", "space-y-2", o.Attrs)... }>
+		{ children... }
+	</ul>
+}
+
+// ItemOpts renders one list entry.
+type ItemOpts struct{ Attrs Attrs }
+
+templ Item(o ItemOpts) {
+	<li { root("item", "", o.Attrs)... }>{ children... }</li>
+}

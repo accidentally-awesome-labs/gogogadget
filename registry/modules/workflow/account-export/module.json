@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/account-export",
+    "kind": "workflow",
+    "name": "account-export",
+    "revision": 1,
+    "contract": 1,
+    "title": "Personal data export",
+    "description": "Streams the GDPR self-serve JSON download of everything the platform holds about one user across every organization, and audits the export.",
+    "requires": [
+      "system/audit",
+      "system/identity",
+      "system/notifications",
+      "system/organizations",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/account_data_test.go",
+        "target": "internal/web/account_data_test.go",
+        "class": "test",
+        "sha256": "500fef0243a92f2784508ddf7996fc4a549171993abf5c66b49d362ecd78e0bc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/workflow_account_export.go",
+        "target": "internal/web/workflow_account_export.go",
+        "class": "go",
+        "sha256": "f021ea1653a15497947fc07e14bd8296c9b6469a10f57b47a8dad4c41db7b645",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "account-export.download"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "account-export.download",
+          "method": "GET",
+          "pattern": "/app/settings/account/export",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAccountExport"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

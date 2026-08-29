@@ -1,0 +1,18 @@
+package ui
+
+// StackOpts configures a vertical stack.
+type StackOpts struct {
+	Gap   Gap
+	Attrs Attrs
+}
+
+// Stack renders children in a vertical stack.
+templ Stack(o StackOpts) {
+	<div { root("stack", stackClasses(o), o.Attrs)... }>
+		{ children... }
+	</div>
+}
+
+func stackClasses(o StackOpts) string {
+	return mergeClasses("flex flex-col "+gapClass(o.Gap), o.Attrs.Class)
+}

@@ -1,0 +1,432 @@
+package templates
+
+import "github.com/gogogadget/gogogadget/internal/web/templates/ui"
+
+// The system-states scenario: every way the product tells a reader that
+// something is loading, absent, or over.
+//
+// These are the surfaces nobody designs and everybody sees. Collecting them on
+// one page is the only way to notice that the 500 page offers no next step while
+// the 404 does, or that two spinners disagree about size - differences that are
+// invisible when each state lives on its own route.
+//
+// Nothing here sets an HTTP status. These are renderings of the terminal pages,
+// not the pages themselves: the scenario route answers 200 because the page
+// loaded fine, and claiming 503 for a page that rendered would break every
+// crawler and monitor that reads the status honestly.
+templ ScenarioSystemStates(gc GalleryContext) {
+	switch gc.State {
+		case "loading":
+			@systemStatesInFlight(gc)
+		case "error":
+			@systemStatesFailed(gc)
+		default:
+			@systemStatesCatalogue(gc)
+	}
+}
+
+// systemStatesCatalogue is the reference surface: one of everything.
+templ systemStatesCatalogue(gc GalleryContext) {
+	@ui.Section(ui.SectionOpts{
+		Title: "Banners", Level: 2,
+		Attrs: ui.Attrs{ID: "system-banners"},
+	}) {
+		@ui.Stack(ui.StackOpts{Gap: ui.GapSM}) {
+			for _, banner := range systemBanners(gc.LongContent) {
+				@ui.Banner(ui.BannerOpts{Kind: banner.Kind, Live: banner.Live}) {
+					{ banner.Message }
+				}
+			}
+		}
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Progress", Level: 2,
+		Attrs: ui.Attrs{ID: "system-progress"},
+	}) {
+		@systemProgressBars()
+		@systemProgressCircles()
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Placeholders", Level: 2,
+		Attrs: ui.Attrs{ID: "system-skeletons"},
+	}) {
+		@systemSkeletons()
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Nothing to show", Level: 2,
+		Attrs: ui.Attrs{ID: "system-empty"},
+	}) {
+		@systemEmptyStates()
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Something failed", Level: 2,
+		Attrs: ui.Attrs{ID: "system-error"},
+	}) {
+		@systemErrorRegion()
+	}
+	@systemTerminalCatalogue(gc)
+}
+
+// systemStatesInFlight is the page while it is still loading.
+//
+// No empty states and no terminal renderings: "nothing here" and "this failed"
+// are both conclusions, and a page that has not finished loading has not reached
+// either. Showing an empty state during load is how a reader ends up believing
+// they have no projects.
+templ systemStatesInFlight(gc GalleryContext) {
+	@ui.Banner(ui.BannerOpts{Kind: ui.KindInfo, Live: ui.LivePolite}) {
+		{ "Restoring this workspace from the 12 March backup. Pages appear as their data arrives." }
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Progress", Level: 2,
+		Attrs: ui.Attrs{ID: "system-progress"},
+	}) {
+		@systemProgressBars()
+		@systemProgressCircles()
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Regions still arriving", Level: 2,
+		Attrs: ui.Attrs{ID: "system-skeletons"},
+	}) {
+		// Three regions at three shapes: a heading block, a paragraph and a
+		// table's worth of rows. A single skeleton shape everywhere is how a
+		// loading page ends up a different size from the page it becomes.
+		@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapLG}) {
+			@ui.Card(ui.CardOpts{}) {
+				@ui.Skeleton(ui.SkeletonOpts{Lines: 2})
+			}
+			@ui.Card(ui.CardOpts{}) {
+				@ui.Skeleton(ui.SkeletonOpts{Lines: 5})
+			}
+			@ui.Card(ui.CardOpts{}) {
+				@ui.Skeleton(ui.SkeletonOpts{Lines: 9})
+			}
+		}
+	}
+}
+
+// systemStatesFailed is the page after the request behind it failed.
+//
+// The banner is assertive because it reports a failure the reader caused by
+// acting and must respond to; the retry below it is a real link, so the recovery
+// path works with scripts disabled.
+templ systemStatesFailed(gc GalleryContext) {
+	@ui.Banner(ui.BannerOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive}) {
+		{ "We could not load this workspace. The last three attempts failed at the database. Retry below, or check status.example.test before reporting it." }
+	}
+	@ui.Section(ui.SectionOpts{
+		Title: "Something failed", Level: 2,
+		Attrs: ui.Attrs{ID: "system-error"},
+	}) {
+		@systemErrorRegion()
+	}
+	@systemTerminalCatalogue(gc)
+}
+
+// systemProgressBars renders the three progress cases that behave differently.
+//
+// Determinate, nearly-done and indeterminate are separate cases rather than one
+// component with a number, because a negative value is not "zero progress": it
+// means the extent is unknown, which is a different promise to the reader and a
+// different announcement to a screen reader.
+templ systemProgressBars() {
+	@ui.Card(ui.CardOpts{}) {
+		@ui.Stack(ui.StackOpts{Gap: ui.GapMD}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+				{ "Exporting files - 3 of 8" }
+			}
+			@ui.ProgressBar(ui.ProgressBarOpts{
+				Value: 3, Max: 8,
+				Label:     "Exporting files",
+				ValueText: "3 of 8 files",
+			})
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+				{ "Rebuilding the search index - 92%" }
+			}
+			@ui.ProgressBar(ui.ProgressBarOpts{
+				Value: 92, Max: 100,
+				Label:     "Rebuilding the search index",
+				ValueText: "92 per cent",
+			})
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+				{ "Restoring from backup - extent unknown" }
+			}
+			@ui.ProgressBar(ui.ProgressBarOpts{
+				Value:     -1,
+				Label:     "Restoring from backup",
+				ValueText: "Time remaining unknown",
+			})
+		}
+	}
+}
+
+// systemProgressCircles renders the ring at every size, plus the indeterminate
+// ring. The four sizes sit together because the only way to catch two of them
+// looking identical is to see them side by side.
+templ systemProgressCircles() {
+	@ui.Card(ui.CardOpts{}) {
+		@ui.Inline(ui.InlineOpts{Gap: ui.GapLG}) {
+			@ui.ProgressCircle(ui.ProgressCircleOpts{
+				Value: 25, Max: 100, Size: ui.SizeXS,
+				Label: "Uploading avatar", ValueText: "25 per cent",
+			})
+			@ui.ProgressCircle(ui.ProgressCircleOpts{
+				Value: 50, Max: 100, Size: ui.SizeSM,
+				Label: "Encoding attachment", ValueText: "50 per cent",
+			})
+			@ui.ProgressCircle(ui.ProgressCircleOpts{
+				Value: 75, Max: 100, Size: ui.SizeMD,
+				Label: "Building the export archive", ValueText: "75 per cent",
+			})
+			@ui.ProgressCircle(ui.ProgressCircleOpts{
+				Value: -1, Size: ui.SizeLG,
+				Label: "Waiting for the provider", ValueText: "Extent unknown",
+			})
+		}
+	}
+}
+
+// systemSkeletons renders the placeholder at the three shapes real regions take.
+templ systemSkeletons() {
+	@ui.Grid(ui.GridOpts{Cols: 3, Gap: ui.GapLG}) {
+		@ui.Card(ui.CardOpts{}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+				{ "One block - a single value" }
+			}
+			@ui.Skeleton(ui.SkeletonOpts{Attrs: ui.Attrs{Class: "mt-2"}})
+		}
+		@ui.Card(ui.CardOpts{}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+				{ "Three lines - a paragraph" }
+			}
+			@ui.Skeleton(ui.SkeletonOpts{Lines: 3, Attrs: ui.Attrs{Class: "mt-2"}})
+		}
+		@ui.Card(ui.CardOpts{}) {
+			@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+				{ "Six lines - a table" }
+			}
+			@ui.Skeleton(ui.SkeletonOpts{Lines: 6, Attrs: ui.Attrs{Class: "mt-2"}})
+		}
+	}
+}
+
+// systemEmptyStates renders all four empty cases.
+//
+// The inline variant is inside a table card because that is the only place it
+// makes sense: it draws no border of its own, so on its own it reads as unstyled
+// text rather than a deliberate empty row.
+templ systemEmptyStates() {
+	@ui.Stack(ui.StackOpts{Gap: ui.GapLG}) {
+		@ui.TableCard(ui.TableCardOpts{}) {
+			@ui.EmptyState(ui.EmptyStateOpts{
+				Title:   "No projects yet",
+				Body:    "Create a project and it appears in this table.",
+				Variant: ui.EmptyInline,
+			})
+		}
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Title:   "No activity in this workspace",
+			Body:    "Deploys, invitations and exports are recorded here as they happen.",
+			Variant: ui.EmptyCard,
+		})
+		// Filtered is a different message from "nothing exists yet", and it
+		// needs a different action: offering "create your first project" to
+		// someone whose search missed is the wrong answer to the wrong question.
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Title:      "No results for that filter",
+			Body:       "Nothing in this workspace matches the current filter.",
+			Variant:    ui.EmptyCard,
+			Filtered:   true,
+			ClearURL:   "/dev/scenarios/system-states",
+			ClearLabel: "Clear the filter",
+			Target:     ui.NavTarget,
+		})
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Title:   "This workspace is empty",
+			Body:    "Nothing has been created here yet. The page variant fills the viewport, for a route whose entire purpose is the thing that is missing.",
+			Variant: ui.EmptyPage,
+		})
+	}
+}
+
+// systemErrorRegion is the in-page failure: announced, and recoverable.
+//
+// The retry points at this scenario's own path, so it genuinely reloads the
+// surface rather than pointing at an endpoint that does not exist. It is an
+// anchor with an hx-get, which means it also works with scripts disabled.
+templ systemErrorRegion() {
+	@ui.ErrorState(ui.ErrorStateOpts{
+		Title:      "We could not load your activity",
+		Body:       "The request timed out after 30 seconds. Nothing was changed, so retrying is safe.",
+		RetryURL:   "/dev/scenarios/system-states",
+		RetryLabel: "Try again",
+		Target:     ui.NavTarget,
+	})
+}
+
+// systemTerminalCatalogue renders the six terminal pages.
+//
+// Every one names what the reader can do next. A status code on its own is a
+// dead end: "500" tells a reader that something they cannot see went wrong
+// somewhere they cannot reach, and leaves them with the reload button and hope.
+// The detail block carries the machine-readable half - a reference to quote, a
+// retry instant, a status URL - because "contact support" with nothing to quote
+// wastes the one exchange the reader was willing to have.
+templ systemTerminalCatalogue(gc GalleryContext) {
+	@ui.Section(ui.SectionOpts{
+		Title: "Terminal pages", Level: 2,
+		Attrs: ui.Attrs{ID: "system-terminals"},
+	}) {
+		// Stated rather than hidden: each rendering below owns an h1, because in
+		// production it is the only heading on its page. Stacking six of them
+		// here gives this scenario several h1 elements, which is an artefact of
+		// showing them together and not a defect in the component.
+		@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+			{ "Each rendering below is a whole page in production, headline and all. They are stacked here so the six can be compared; no HTTP status is set." }
+		}
+		@ui.Stack(ui.StackOpts{Gap: ui.GapXL}) {
+			for _, terminal := range systemTerminals(gc.LongContent) {
+				@ui.Card(ui.CardOpts{}) {
+					// A caption, not a heading. Each TerminalPage owns an h1, so
+					// a heading here lands between this section's h2 and that h1
+					// and the document order reads h2, h3, h1 - a skip on the way
+					// back down that makes the outline unusable for anyone
+					// navigating by heading.
+					@ui.Text(ui.TextOpts{Size: ui.SizeXS, Muted: true}) {
+						{ terminal.Label }
+					}
+					@ui.TerminalPage(terminal.Page)
+				}
+			}
+		}
+	}
+}
+
+// systemBanner is one shell banner and the urgency it is announced with.
+type systemBanner struct {
+	Kind    ui.Kind
+	Live    ui.Live
+	Message string
+}
+
+// systemBanners is the four banners the product actually raises.
+//
+// Live is set per banner rather than uniformly. The maintenance notice is
+// polite: it is scheduled, and interrupting a reader mid-sentence to tell them
+// about Sunday is rude. The payment failure is assertive, because it has a
+// deadline and a consequence. The impersonation and upgrade notices are neither:
+// they are rendered with the page and have nothing new to announce.
+func systemBanners(long bool) []systemBanner {
+	return []systemBanner{
+		{
+			Kind: ui.KindInfo, Live: ui.LiveOff,
+			Message: "You are viewing this workspace as Dana Whitfield. Leave impersonation to return to your own account.",
+		},
+		{
+			Kind: ui.KindWarn, Live: ui.LivePolite,
+			Message: systemStretch(long,
+				"Scheduled maintenance on 15 March 2026, 02:00 to 04:00 UTC. Exports queued during the window run once it closes.",
+				"Scheduled maintenance on 15 March 2026, 02:00 to 04:00 UTC. The workspace stays readable throughout; exports, webhook deliveries and scheduled reports queued during the window run once it closes, in the order they were requested, so nothing needs to be submitted twice."),
+		},
+		{
+			Kind: ui.KindDanger, Live: ui.LiveAssertive,
+			Message: "Payment failed on 12 March. Update the card by 19 March to keep this workspace active.",
+		},
+		{
+			Kind: ui.KindSuccess, Live: ui.LiveOff,
+			Message: "Plan upgraded to Team. The new seat limit applies immediately.",
+		},
+	}
+}
+
+// systemTerminal is one terminal page plus the label the catalogue lists it
+// under, so a reader scanning the page can find the case they are looking for
+// without reading six headlines.
+type systemTerminal struct {
+	Label string
+	Page  ui.TerminalPageOpts
+}
+
+// systemTerminals is every terminal rendering, each stating a next step.
+//
+// The link label is the same on all six because the component's link always
+// points at the start page: it takes no destination, so "choose another
+// workspace" is a promise it cannot keep. The specific next step therefore lives
+// in the message, where it can be honest.
+func systemTerminals(long bool) []systemTerminal {
+	return []systemTerminal{
+		{
+			Label: "403 - signed in, not permitted",
+			Page: ui.TerminalPageOpts{
+				Code:          "403",
+				Message:       "You are signed in, but not a member of this workspace. Ask one of its owners to invite you, then open the link again.",
+				Detail:        "Workspace: northwind\nSigned in as: dana@example.test\nOwners: marco@example.test, priya@example.test",
+				BackHomeLabel: "Go to the start page",
+			},
+		},
+		{
+			Label: "404 - no such page",
+			Page: ui.TerminalPageOpts{
+				Code: "404",
+				Message: systemStretch(long,
+					"This page does not exist. Check the address for a typo, or start from the dashboard and navigate to what you were looking for.",
+					"This page does not exist. Check the address for a typo - a trailing character pasted from a chat message is the usual cause - or start from the dashboard and navigate to what you were looking for, which also confirms whether the record was deleted rather than moved."),
+				BackHomeLabel: "Go to the start page",
+			},
+		},
+		{
+			Label: "429 - rate limited",
+			Page: ui.TerminalPageOpts{
+				Code:          "429",
+				Message:       "Too many requests. Wait a minute before trying again, or slow the client down to stay under the limit.",
+				Detail:        "Limit: 600 requests per minute\nRetry after: 60 seconds\nCounted against: token pat_live_7f3a",
+				BackHomeLabel: "Go to the start page",
+			},
+		},
+		{
+			Label: "500 - our fault",
+			Page: ui.TerminalPageOpts{
+				Code:    "500",
+				Message: "Something broke on our side. Nothing you sent was saved, so it is safe to try again. If it keeps failing, send us the reference below.",
+				// The reference is the whole point of the detail block: "contact
+				// support" with nothing to quote wastes the one exchange the
+				// reader was willing to have.
+				Detail:        "Reference: err_7f3a91c2\nAt: 12 March 2026, 14:02 UTC\nSupport: support@example.test",
+				BackHomeLabel: "Go to the start page",
+			},
+		},
+		{
+			Label: "503 - temporarily unavailable",
+			Page: ui.TerminalPageOpts{
+				Code:          "503",
+				Message:       "This part of the product is not available right now. It usually returns within a few minutes; the status page says whether it is a known incident.",
+				Detail:        "Component: file storage\nSince: 12 March 2026, 13:58 UTC\nStatus: status.example.test",
+				BackHomeLabel: "Go to the start page",
+			},
+		},
+		{
+			Label: "Maintenance - planned, and finite",
+			Page: ui.TerminalPageOpts{
+				// A word rather than a number: the component renders a
+				// non-numeric code at display size instead of as a giant status
+				// digit, which is right here - the reader does not need a code,
+				// they need to know when it ends.
+				Code:          "Maintenance",
+				Message:       "We are upgrading the database. Everything is read-only until 04:00 UTC, and queued work runs once the window closes.",
+				Detail:        "Window: 15 March 2026, 02:00 to 04:00 UTC\nRead-only: yes\nStatus: status.example.test",
+				BackHomeLabel: "Go to the start page",
+			},
+		},
+	}
+}
+
+// systemStretch substitutes a deliberately long string when the reader asked for
+// long content. The chosen call sites are a banner and a terminal message: both
+// are single centred or full-bleed lines with nothing to wrap against, which is
+// where an unexpectedly long translation actually breaks.
+func systemStretch(long bool, normal, stretched string) string {
+	if long {
+		return stretched
+	}
+	return normal
+}

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/usage-card",
+    "kind": "component",
+    "name": "usage-card",
+    "revision": 1,
+    "contract": 1,
+    "title": "UsageCard",
+    "description": "The UsageCard renderer and its options.",
+    "requires": [
+      "component/meter",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/usage-card.templ",
+        "target": "internal/web/templates/ui/usage-card.templ",
+        "class": "templ",
+        "sha256": "97a20ad99ed025dde7b8e95eecd8aa237201e4d7c967c0204ae9cfd6b0e31ce2",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "usage-card",
+          "family": "communication",
+          "signature": "templ UsageCard(o UsageCardOpts)",
+          "summary": "Renders a quota with its meter.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -50,7 +50,7 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 		DevAuthBypass:       true,
 	}
 	deps := Deps{
-		Config: cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
+		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
 		Docs:     &content.Docs{},
 		Verifier: identity.FakeVerifier{},
 		Fetcher:  identity.DevUserFetcher{},
@@ -58,7 +58,11 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	if mutate != nil {
 		mutate(&deps)
 	}
-	return NewServer(deps)
+	server, err := NewServer(deps)
+	if err != nil {
+		t.Fatalf("NewServer: %v", err)
+	}
+	return server
 }
 
 // seedEntries inserts content rows, invalidates the CMS cache so the very

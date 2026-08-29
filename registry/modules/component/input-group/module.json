@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/input-group",
+    "kind": "component",
+    "name": "input-group",
+    "revision": 1,
+    "contract": 1,
+    "title": "InputGroup",
+    "description": "The InputGroup renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/input-group.templ",
+        "target": "internal/web/templates/ui/input-group.templ",
+        "class": "templ",
+        "sha256": "6412b0afd81d554fc037ec37c876cc2e6300314b190d48e324cdee4868c4f39a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "input-group",
+          "family": "forms",
+          "signature": "templ InputGroup(o InputGroupOpts)",
+          "summary": "Joins addons and a control into one visual field.",
+          "guidance": "The addons are separate elements rather than placeholder text, because placeholder text disappears the moment the user types and was never a label to begin with.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

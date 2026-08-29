@@ -1,0 +1,330 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "system/billing",
+    "kind": "system",
+    "name": "billing",
+    "revision": 1,
+    "contract": 1,
+    "title": "Billing",
+    "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
+    "requires": [
+      "system/apphost",
+      "system/config",
+      "system/organizations"
+    ],
+    "files": [
+      {
+        "source": "internal/billing/client.go",
+        "target": "internal/billing/client.go",
+        "class": "go",
+        "sha256": "9955dc7e497593f2c17d1eb1f9a4cac59351993915dd41a1726c5cd4a3c961c6",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/contract_test.go",
+        "target": "internal/billing/contract_test.go",
+        "class": "test",
+        "sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/entitlements.go",
+        "target": "internal/billing/entitlements.go",
+        "class": "go",
+        "sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/entitlements_test.go",
+        "target": "internal/billing/entitlements_test.go",
+        "class": "test",
+        "sha256": "ee3216f422e41b8a748219a50a0c6c4019fabc6a5eef12f375fa84d3f1c04617",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/mock.go",
+        "target": "internal/billing/mock.go",
+        "class": "go",
+        "sha256": "287bce46aaed812c90555769fd80d11ffa666b8206be29e76b0d2cf47d79758f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/module.go",
+        "target": "internal/billing/module.go",
+        "class": "go",
+        "sha256": "7a46696bf8f887a06ef5c67b25e9b81d68df89d607054dec35f8d273aa0d835d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/module_test.go",
+        "target": "internal/billing/module_test.go",
+        "class": "test",
+        "sha256": "72026abe266096f059c3777b31fe63310b003ddd3254da2dc72a6b8b978baab8",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/mrr_test.go",
+        "target": "internal/billing/mrr_test.go",
+        "class": "test",
+        "sha256": "74da08f94bf65cadd0c853bf9cac9ab85e036bd74fd14bba258eb36617af5718",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/plans.go",
+        "target": "internal/billing/plans.go",
+        "class": "go",
+        "sha256": "87b44bcdd25160de9efdef17aaefa3a5eb57defa169910b898382914a4481c9f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/polar.go",
+        "target": "internal/billing/polar.go",
+        "class": "go",
+        "sha256": "02138636c09e4a2af9d983cd1716887bad68c2ff9996d85635a3fb51d5fb71d3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/polar_test.go",
+        "target": "internal/billing/polar_test.go",
+        "class": "test",
+        "sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/billing/webhook.go",
+        "target": "internal/billing/webhook.go",
+        "class": "go",
+        "sha256": "48f7295089c996511d51da44b49893b4359afc836f34186a557f30a9b2f815c7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/subscriptions.sql",
+        "target": "internal/db/queries/subscriptions.sql",
+        "class": "query",
+        "sha256": "d603d4a8c6364f3f4e48a8420fcc42f0536ccace896540b2fc076e108918c5e4",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/billing.sql",
+        "target": "internal/db/testdata/seed/e2e/billing.sql",
+        "class": "seed",
+        "sha256": "4609de70d17e99531e9f0d2dd91895db147754bfa4caf6ce973f2b3dccaedc41",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/dunning_test.go",
+        "target": "internal/web/dunning_test.go",
+        "class": "test",
+        "sha256": "e214aa1ee6ae6ef6c97fbd7776dcf96994a5986ced227e7e7f8d51ae9053db81",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/billing"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/billing",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Client",
+            "capability": "billing.client",
+            "type": "billing.Client"
+          }
+        ],
+        "start": false,
+        "stop": false
+      },
+      "jobs": [
+        {
+          "kind": "email.dunning_final",
+          "package": "internal/jobs",
+          "handler": "defineEmailDunningFinal",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.dunning_reminder",
+          "package": "internal/jobs",
+          "handler": "defineEmailDunningReminder",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.payment_failed",
+          "package": "internal/jobs",
+          "handler": "defineEmailPaymentFailed",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.subscription_canceled",
+          "package": "internal/jobs",
+          "handler": "defineEmailSubscriptionCanceled",
+          "schedulable": false,
+          "max_attempts": 0
+        },
+        {
+          "kind": "email.trial_ending",
+          "package": "internal/jobs",
+          "handler": "defineEmailTrialEnding",
+          "schedulable": false,
+          "max_attempts": 0
+        }
+      ],
+      "queries": [
+        {
+          "name": "CountActiveSubscriptions",
+          "table": "subscriptions"
+        },
+        {
+          "name": "GetSubscriptionByOrg",
+          "table": "subscriptions"
+        },
+        {
+          "name": "ListRevenueSubscriptions",
+          "table": "subscriptions"
+        },
+        {
+          "name": "UpsertSubscription",
+          "table": "subscriptions"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "POLAR_ACCESS_TOKEN",
+        "field": "PolarAccessToken",
+        "type": "string",
+        "description": "Polar API token. Empty means billing routes render 503 not-configured",
+        "secret": true
+      },
+      {
+        "key": "POLAR_PRODUCT_PRO",
+        "field": "PolarProductPro",
+        "type": "string",
+        "description": "Polar product id for the Pro plan"
+      },
+      {
+        "key": "POLAR_PRODUCT_TEAM",
+        "field": "PolarProductTeam",
+        "type": "string",
+        "description": "Polar product id for the Team plan"
+      },
+      {
+        "key": "POLAR_SERVER",
+        "field": "PolarServer",
+        "type": "string",
+        "description": "sandbox | production",
+        "default": "sandbox",
+        "enum": [
+          "sandbox",
+          "production"
+        ]
+      },
+      {
+        "key": "POLAR_WEBHOOK_SECRET",
+        "field": "PolarWebhookSecret",
+        "type": "string",
+        "description": "Verifies `webhook-*` signatures on `/webhooks/polar`",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/billing"
+      ]
+    },
+    "data": [
+      {
+        "table": "subscriptions",
+        "scope": "org",
+        "export": true,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "major-version-only",
+    "locales": {
+      "en": {
+        "email.canceled.body_a": "Your plan remains active until",
+        "email.canceled.body_b": ". After that you drop to the free plan — your projects stay, within free limits.",
+        "email.canceled.cta": "Reactivate anytime →",
+        "email.canceled.subject": "Your subscription is canceled",
+        "email.canceled.title": "Your subscription is canceled",
+        "email.dunning_final.body": "We've been unable to charge your card for a week. Without a working payment method your plan will be canceled and your team will lose access to paid features.",
+        "email.dunning_final.body_dated": "We've been unable to charge your card for a week. Without a working payment method your plan will be canceled on",
+        "email.dunning_final.cta": "Update your payment method now:",
+        "email.dunning_final.subject": "Final notice: your plan is about to be canceled",
+        "email.dunning_final.title": "Last notice before your plan is canceled",
+        "email.dunning_reminder.body": "Your plan is still active while we retry, but the charge keeps failing. Updating your card takes a minute and stops the retries.",
+        "email.dunning_reminder.cta": "Update your payment method:",
+        "email.dunning_reminder.subject": "Your payment is still failing",
+        "email.dunning_reminder.title": "We still can't charge your card",
+        "email.payment_failed.body": "We couldn't charge your card on file. Your plan stays active while we retry — update your payment method to avoid interruption.",
+        "email.payment_failed.cta": "Update payment method →",
+        "email.payment_failed.subject": "Your payment failed",
+        "email.payment_failed.title": "Your payment failed",
+        "email.trial_ending.body_a": "Your trial ends on",
+        "email.trial_ending.body_b": "Add a payment method now to keep your plan without interruption.",
+        "email.trial_ending.cta": "Review billing →",
+        "email.trial_ending.subject": "Your trial ends soon",
+        "email.trial_ending.title": "Your trial ends soon"
+      },
+      "es": {
+        "email.canceled.body_a": "Tu plan permanece activo hasta",
+        "email.canceled.body_b": ". Después de eso pasas al plan gratuito — tus proyectos se conservan, dentro de los límites gratuitos.",
+        "email.canceled.cta": "Reactiva cuando quieras →",
+        "email.canceled.subject": "Tu suscripción está cancelada",
+        "email.canceled.title": "Tu suscripción está cancelada",
+        "email.dunning_final.body": "Llevamos una semana sin poder cobrar tu tarjeta. Sin un método de pago válido, tu plan se cancelará y tu equipo perderá el acceso a las funciones de pago.",
+        "email.dunning_final.body_dated": "Llevamos una semana sin poder cobrar tu tarjeta. Sin un método de pago válido, tu plan se cancelará el",
+        "email.dunning_final.cta": "Actualiza tu método de pago ahora:",
+        "email.dunning_final.subject": "Aviso final: tu plan está por cancelarse",
+        "email.dunning_final.title": "Último aviso antes de cancelar tu plan",
+        "email.dunning_reminder.body": "Tu plan sigue activo mientras reintentamos, pero el cobro continúa fallando. Actualizar tu tarjeta toma un minuto y detiene los reintentos.",
+        "email.dunning_reminder.cta": "Actualiza tu método de pago:",
+        "email.dunning_reminder.subject": "Tu pago sigue fallando",
+        "email.dunning_reminder.title": "Todavía no podemos cobrar tu tarjeta",
+        "email.payment_failed.body": "No pudimos cobrar tu tarjeta registrada. Tu plan sigue activo mientras reintentamos — actualiza tu método de pago para evitar interrupciones.",
+        "email.payment_failed.cta": "Actualiza tu método de pago →",
+        "email.payment_failed.subject": "Tu pago falló",
+        "email.payment_failed.title": "Tu pago falló",
+        "email.trial_ending.body_a": "Tu prueba termina el",
+        "email.trial_ending.body_b": "Añade un método de pago ahora para mantener tu plan sin interrupciones.",
+        "email.trial_ending.cta": "Revisa la facturación →",
+        "email.trial_ending.subject": "Tu prueba termina pronto",
+        "email.trial_ending.title": "Tu prueba termina pronto"
+      }
+    }
+  }
+}

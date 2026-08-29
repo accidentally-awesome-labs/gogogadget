@@ -1,62 +1,53 @@
 package templates
 
 import (
+	"context"
+
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 )
 
+// appNavLink is one shell navigation link. Desktop sidebar and mobile drawer
+// render the same component, so the two can never drift; data-nav-match is
+// what lets app.js re-derive aria-current after a #content-only swap.
+templ appNavLink(page Page, item NavItem) {
+	<a
+		href={ templ.SafeURL(item.Href) }
+		hx-boost="true"
+		hx-target={ NavTarget }
+		hx-select={ NavTarget }
+		hx-swap={ NavSwap }
+		data-app-nav
+		data-nav-match={ item.MatchPath() }
+		aria-current={ navCurrent(page, item.MatchPath()) }
+		class="nav-link"
+	>{ NavLabel(ctx, item) }</a>
+}
+
 // appNavSections is the single source for the app-shell navigation items:
 // rendered by the desktop Sidebar and by the mobile drawer in Topbar. Links
 // are boosted and swap only #content, so the shell (and its SSE stream)
-// survives navigation.
-templ appNavSections(page Page) {
-	<nav class="flex flex-col gap-1 text-sm">
-		for _, item := range []struct{ Label, Href, Match string }{
-			{i18n.T(ctx, "sidebar.dashboard"), "/app", "/app"},
-			{i18n.T(ctx, "sidebar.projects"), "/app/projects", "/app/projects"},
-			{i18n.T(ctx, "sidebar.files"), "/app/files", "/app/files"},
-			{i18n.T(ctx, "sidebar.activity"), "/app/activity", "/app/activity"},
-			{i18n.T(ctx, "sidebar.settings"), "/app/settings/account", "/app/settings"},
-		} {
-			<a
-				href={ templ.SafeURL(item.Href) }
-				hx-boost="true"
-				hx-target={ NavTarget }
-				hx-select={ NavTarget }
-				hx-swap={ NavSwap }
-				data-app-nav
-				data-nav-match={ item.Match }
-				aria-current={ navCurrent(page, item.Match) }
-				class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
-			>{ item.Label }</a>
+// survives navigation. The item lists live in chrome.go.
+// appNavSections takes a scope because it is rendered twice - once in the
+// desktop sidebar and once in the mobile drawer - and both copies are in the
+// DOM at the same time. Identical landmark names collide, and whether the
+// hidden copy is exempt depends on when Alpine cloaks it, which is not
+// something an accessibility guarantee should rest on. Distinct names hold
+// regardless.
+templ appNavSections(page Page, scope string) {
+	<nav class="flex flex-col gap-1 text-sm" aria-label={ navScopeLabel(ctx, scope, "sidebar.app_nav") }>
+		for _, item := range AppNav {
+			@appNavLink(page, item)
 		}
 	</nav>
 	if identity.IsStaff(page.User) {
 		<div>
-			<p class="text-xs font-semibold uppercase tracking-wide text-fg-muted mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
-			<nav class="flex flex-col gap-1 text-sm">
-				for _, item := range []struct{ Label, Href, Match string }{
-					{i18n.T(ctx, "sidebar.admin_overview"), "/admin", "/admin"},
-					{i18n.T(ctx, "sidebar.admin_users"), "/admin/users", "/admin/users"},
-					{i18n.T(ctx, "sidebar.admin_orgs"), "/admin/orgs", "/admin/orgs"},
-					{i18n.T(ctx, "sidebar.admin_flags"), "/admin/flags", "/admin/flags"},
-					{i18n.T(ctx, "sidebar.admin_audit"), "/admin/audit", "/admin/audit"},
-					{i18n.T(ctx, "sidebar.admin_jobs"), "/admin/jobs", "/admin/jobs"},
-					{i18n.T(ctx, "sidebar.admin_announcements"), "/admin/announcements", "/admin/announcements"},
-					{i18n.T(ctx, "sidebar.admin_content"), "/admin/content", "/admin/content"},
-					{i18n.T(ctx, "sidebar.admin_schedules"), "/admin/schedules", "/admin/schedules"},
-				} {
-					<a
-						href={ templ.SafeURL(item.Href) }
-						hx-boost="true"
-						hx-target={ NavTarget }
-						hx-select={ NavTarget }
-						hx-swap={ NavSwap }
-						data-app-nav
-						data-nav-match={ item.Match }
-						aria-current={ navCurrent(page, item.Match) }
-						class="rounded-lg px-3 py-2 text-fg-muted hover:bg-surface hover:text-fg aria-[current=page]:bg-surface aria-[current=page]:text-fg aria-[current=page]:font-semibold"
-					>{ item.Label }</a>
+			// The eyebrow is a paragraph, so it names nothing on its own; the
+			// landmark carries the name itself.
+			<p class="eyebrow mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
+			<nav class="flex flex-col gap-1 text-sm" aria-label={ navScopeLabel(ctx, scope, "sidebar.admin") }>
+				for _, item := range AdminNav {
+					@appNavLink(page, item)
 				}
 			</nav>
 		</div>
@@ -67,7 +58,7 @@ templ appNavSections(page Page) {
 // at #org-switcher when clerk-js is configured (identity step). Site admins
 // also get the admin section.
 templ Sidebar(page Page) {
-	<aside class="hidden md:flex w-60 shrink-0 flex-col border-r border-border bg-surface-raised p-4 gap-6">
+	<aside class="hidden md:flex w-sidebar shrink-0 flex-col border-r border-border bg-surface-raised p-4 gap-6">
 		@logo()
 		<div
 			id="org-switcher"
@@ -82,9 +73,7 @@ templ Sidebar(page Page) {
 			<a href="/app/notifications" data-testid="notifications-bell" aria-label={ i18n.T(ctx, "notifications.title") }
 				hx-boost="true" hx-target={ NavTarget } hx-select={ NavTarget } hx-swap={ NavSwap }
 				class="relative inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
-				<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path>
-				</svg>
+				@Icon(IconBell, "w-5 h-5")
 				{ i18n.T(ctx, "sidebar.notifications") }
 				<span id="notif-badge" hx-get="/app/notifications/badge" hx-trigger="load, notifications" data-testid="notifications-badge">
 					// Placeholder until the count arrives, so the bell does not
@@ -94,7 +83,7 @@ templ Sidebar(page Page) {
 				</span>
 			</a>
 		</div>
-		@appNavSections(page)
+		@appNavSections(page, "sidebar")
 		<div class="mt-auto pt-4 border-t border-border">
 			@LocaleSwitcher(page.Path)
 		</div>
@@ -105,15 +94,16 @@ templ Sidebar(page Page) {
 // and drawer are md:hidden; the drawer reuses appNavSections so mobile and
 // desktop navigation never drift.
 templ Topbar(page Page) {
-	<div class="relative border-b border-border bg-surface px-4 h-14 flex items-center justify-between" x-data="mobileNav">
-		<div class="flex items-center gap-2 md:hidden">
-			<button type="button" @click="toggle" :aria-expanded="open.toString()" aria-label={ i18n.T(ctx, "a11y.menu") } data-testid="mobile-nav-toggle" class="btn-ghost btn !px-2">
-				<svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-					<path d="M4 6h16M4 12h16M4 18h16"></path>
-				</svg>
+	<div class="relative border-b border-border bg-surface px-4 h-topbar flex items-center justify-between" x-data="mobileNav">
+		// A header landmark, because at phone width this bar is the only shell
+		// chrome on screen and its brand link otherwise sits outside every
+		// landmark - leaving part of the page unreachable by landmark navigation.
+		<header class="flex items-center gap-2 md:hidden">
+			<button type="button" @click="toggle" :aria-expanded="open.toString()" aria-label={ i18n.T(ctx, "a11y.menu") } data-testid="mobile-nav-toggle" class="btn btn-ghost btn-icon">
+				@Icon(IconMenu, "w-6 h-6")
 			</button>
 			@logo()
-		</div>
+		</header>
 		<div class="ml-auto flex items-center gap-3">
 			@themeToggle()
 			<div
@@ -122,8 +112,18 @@ templ Topbar(page Page) {
 				data-clerk-placeholder={ clerkUserPlaceholder(page.User) }
 			></div>
 		</div>
-		<div x-show="open" x-cloak @click.outside="close" @click="close" class="absolute top-14 left-0 right-0 z-40 bg-surface border-b border-border p-4 flex flex-col gap-4 md:hidden">
-			@appNavSections(page)
+		<div x-show="open" x-cloak @click.outside="close" @click="close" class="absolute top-topbar left-0 right-0 z-(--z-nav) bg-surface border-b border-border p-4 flex flex-col gap-4 md:hidden">
+			@appNavSections(page, "drawer")
 		</div>
 	</div>
+}
+
+// navScopeLabel names one copy of a duplicated navigation. The scope is appended
+// rather than replacing the name so both copies still say what they navigate.
+func navScopeLabel(ctx context.Context, scope, key string) string {
+	name := i18n.T(ctx, key)
+	if scope == "drawer" {
+		return name + " (" + i18n.T(ctx, "a11y.menu") + ")"
+	}
+	return name
 }

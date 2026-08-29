@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/number-input",
+    "kind": "component",
+    "name": "number-input",
+    "revision": 1,
+    "contract": 1,
+    "title": "NumberInput",
+    "description": "The NumberInput renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/number-input.templ",
+        "target": "internal/web/templates/ui/number-input.templ",
+        "class": "templ",
+        "sha256": "bea66c09b7072e8d99707fa85751e1994b18edfce34fb18402cfab2c5507d66f",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/number-input_test.go",
+        "target": "internal/web/templates/ui/number-input_test.go",
+        "class": "test",
+        "sha256": "cbd4f14ecbeffce2191f997668df8957d18eb544feb2b438268f2559e1dfa911",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "number-input",
+          "family": "forms",
+          "signature": "templ NumberInput(o NumberInputOpts)",
+          "summary": "Renders a native number input.",
+          "guidance": "type=number gives the numeric keypad on mobile and the browser's own step controls; reimplementing either in JavaScript would be strictly worse.",
+          "states": [
+            "default",
+            "disabled",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/kanban",
+    "kind": "component",
+    "name": "kanban",
+    "revision": 1,
+    "contract": 1,
+    "title": "Kanban board",
+    "description": "A board where every card carries a keyboard-operable move menu. Dragging is a shortcut layered on top: it fills and submits the same move form, and the server's response is authoritative.",
+    "requires": [
+      "component/badge",
+      "component/dropdown-menu",
+      "component/notice",
+      "element/avatar-group",
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/kanban.templ",
+        "target": "internal/web/templates/ui/kanban.templ",
+        "class": "templ",
+        "sha256": "fbe920fb38fad746e6c3c309f55bdf835f40ee13b70432f00f64e7b7a4969ba9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/kanban_test.go",
+        "target": "internal/web/templates/ui/kanban_test.go",
+        "class": "test",
+        "sha256": "d14a9bf9d2bbea0377f490b1500ff9605703794078e5c486f66313c98e161ecc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "static/ui/kanban.js",
+        "target": "static/ui/kanban.js",
+        "class": "asset",
+        "sha256": "f68ae7673e487c8fedb28d29c1d2af4063e38833b0f6316aef71069a60720eec",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "static/vendor/sortablejs-1.15.7.min.js",
+        "target": "static/vendor/sortablejs-1.15.7.min.js",
+        "class": "asset",
+        "sha256": "bf4241bc73fef7f11c59a283a69fe8051cdd31c6d8ff5a2b9ba219e7831fcf76",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "kanban",
+          "family": "advanced",
+          "engine": "sortablejs",
+          "alpine": "uiKanban",
+          "vendor": "sortablejs@1.15.7",
+          "native_fallback": "move buttons in every card's form",
+          "signature": "templ Kanban(o KanbanOpts)",
+          "summary": "Renders the board.",
+          "guidance": "Dragging is never the only way to move a card, and neither is scripting. Every card renders its destinations as real submit buttons inside the card's own move form, so a move is one click and one POST with nothing but HTML. The keyboard-operable \"Move to...\" menu offers that same list in a tidier place, and the controller hides the buttons once the menu is operable so one command is not offered twice. The drag is a shortcut on top of both, not a replacement: a board that can only be operated by dragging excludes keyboard users, screen reader users, and anyone on a touch screen where a drag competes with scroll.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        },
+        {
+          "name": "kanban-card",
+          "family": "advanced",
+          "signature": "templ KanbanCard(o KanbanCardOpts)",
+          "summary": "Renders one card.",
+          "guidance": "The card is a list item carrying a real form, and that one form is what every path uses: the no-script buttons inside it submit it by navigation, the menu posts the same fields to the same endpoint, and a drag fills in the destination and submits it. The server's response is authoritative, so a rejected move re-renders the board rather than leaving the card where it was dropped.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "kanban-column",
+          "family": "advanced",
+          "signature": "templ KanbanColumn(o KanbanColumnOpts)",
+          "summary": "Renders one column and its cards.",
+          "guidance": "It is a list with a heading, not a generic div: a screen-reader user needs to know how many cards a column holds and where its boundary is, and a list already reports both.",
+          "states": [
+            "default",
+            "empty"
+          ]
+        }
+      ],
+      "assets": [
+        {
+          "id": "sortablejs",
+          "path": "static/vendor/sortablejs-1.15.7.min.js",
+          "kind": "script",
+          "engine": "sortablejs",
+          "integrity": "sha256-v0JBvHP+9/EcWaKDpp/oBRzdMcbY/1orm6IZ54Mfz3Y="
+        },
+        {
+          "id": "ui-kanban",
+          "path": "static/ui/kanban.js",
+          "kind": "script"
+        }
+      ]
+    },
+    "vendors": [
+      {
+        "path": "static/vendor/sortablejs-1.15.7.min.js",
+        "source": "https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js",
+        "version": "1.15.7",
+        "bytes": 45478,
+        "sha256": "bf4241bc73fef7f11c59a283a69fe8051cdd31c6d8ff5a2b9ba219e7831fcf76",
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md"
+      }
+    ],
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

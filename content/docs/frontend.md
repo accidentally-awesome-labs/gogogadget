@@ -2,11 +2,12 @@
 title: Frontend
 description: HTMX fragments, Alpine CSP components, and the design-token system.
 section: Features
-weight: 11
+weight: 12
 ---
 
-The frontend is server-rendered templ with htmx for partial updates and ~5 KB
-of Alpine.js (CSP build) for client state. No bundler, no SPA, no hydration.
+The frontend is server-rendered templ with htmx for partial updates and the
+Alpine.js CSP build (`static/vendor/alpine-csp.min.js`, 61,522 bytes on the
+wire, ~20 KB gzipped) for client state. No bundler, no SPA, no hydration.
 
 ## The fragment rule
 
@@ -173,21 +174,78 @@ htmx dispatches a bubbling `toast` event; the `toastRoot` component in
 `static/app.js` renders it and auto-dismisses after five seconds. Toasts carry
 `role="status"` and `data-testid="toast"`.
 
+The stack itself is `ui.ToastRegion`, rendered by both shells **outside**
+`#content`: navigation swaps only `#content`, so a region inside it would be
+destroyed mid-swap and lose its queued toasts and its document listener. The
+live-region semantics sit on the container, not on each toast — a live region
+has to exist before its message arrives or nothing is announced.
+
+Dismissal is two steps. `toastRoot.dismiss` sets `leaving` on the toast, which
+binds to `data-leaving="true"` and starts the exit transition; a timer then
+removes it from the array, because removing it from the array is what unmounts
+the element. The timer is deliberately not a `transitionend` listener: an x-for
+entry has no element handle in that scope, and a transition collapsed to 0ms by
+a reduced-motion preference never fires the event.
+
+## Overlay motion
+
+Dialogs, drawers, popovers and toasts animate in and out through
+`@starting-style` plus `transition-behavior: allow-discrete`, which is the only
+CSP-safe way to animate across the platform's own `display` and top-layer
+toggles. There is no JavaScript and no fallback path: a browser without either
+feature shows the overlay with no animation.
+
+| Surface | Enter | Duration |
+|---|---|---|
+| `.dialog` | fade + rise + 0.98 scale, backdrop fades with it | `--motion-base` |
+| `.drawer-{right,left,top,bottom}` | slide from the anchored edge | `--motion-base` |
+| `[popover]` (menus, popovers, hover cards, command palette) | fade + 0.98 scale | `--motion-fast` |
+| `.toast` | rise + fade in, fade + settle out | `--motion-base` |
+
+Every duration is a token, so the `prefers-reduced-motion` collapse to `0ms`
+covers all of them at once. Boosted navigation names its own transition region
+with `#content { view-transition-name: content }`, which keeps the browser's
+cross-fade to the swapped region instead of snapshotting the whole document.
+
 ## Row deletes
 
-Deletes are row swaps, confirmed in the browser:
+Deletes are row swaps, confirmed in a real dialog. `hx-confirm` is gone from
+production: it calls `window.confirm`, whose copy cannot be translated,
+styled or asserted on, and which only ever gated an htmx request. The
+contract itself is unchanged — the same `hx-delete` now rides the dialog's
+confirm control:
 
-```html
-<button
-  hx-delete="/app/projects/42"
-  hx-confirm="Delete this project? This cannot be undone."
-  hx-target="closest tr"
-  hx-swap="outerHTML"
->Delete</button>
+```go
+@ui.ConfirmAction(ui.ConfirmActionOpts{
+	ID:           fmt.Sprintf("project-delete-%d", p.ID),
+	TriggerLabel: i18n.T(ctx, "projects.delete_row", p.Name),
+	TriggerIcon:  ui.IconDelete,
+	Title:        i18n.T(ctx, "projects.delete_title"),
+	Message:      i18n.T(ctx, "projects.delete_confirm"),
+	ConfirmLabel: i18n.T(ctx, "projects.delete_action"),
+	CancelLabel:  i18n.T(ctx, "projects.cancel"),
+	Kind:         ui.KindDanger,
+	HX: ui.HX{
+		Delete: fmt.Sprintf("/app/projects/%d", p.ID),
+		Target: "closest tr", Swap: "outerHTML",
+	},
+})
 ```
 
 The handler returns `200` with an empty body; htmx replaces the `<tr>` with
-nothing.
+nothing. Note the trigger label carries the row's subject: forty controls all
+called "Delete" are indistinguishable to a screen reader and to a test.
+
+The ban is enforced, not just documented:
+`TestNoProductionTemplateFallsBackToWindowConfirm` scans every production
+template for `hx-confirm` and for a `Confirm:` field.
+
+`Attrs.HX.Confirm` and `ui.MenuItem.Confirm` still exist and still emit
+`hx-confirm`; they are for dev-only surfaces and menu items where the prompt is
+not user-facing product copy. `MenuItem.Confirm` is honoured only on an item
+that actually issues a request — a boosted link or an `HX` verb. On a plain link
+or an inert button htmx never processes the click, so the attribute would promise
+a prompt that never appears, and the component drops it instead.
 
 ## Search and pagination
 
@@ -215,7 +273,7 @@ nothing.
 
 The content security policy is `script-src 'self'`: **no inline scripts and
 no inline Alpine expressions**. All component logic is registered with
-`Alpine.data` in `static/app.js`; templates only reference it:
+`Alpine.data`; templates only reference it by name:
 
 ```html
 <div x-data="dropdown">
@@ -224,49 +282,390 @@ no inline Alpine expressions**. All component logic is registered with
 </div>
 ```
 
-Shipped components: `themeToggle`, `dropdown`, `modal`, `tabs`, `mobileNav`,
-`clipboard`, `checklist`, `selectOrg`, `toastRoot`. `x-cloak` hides pre-boot
-markup (a CSS rule in `input.css`), and the vendored `@alpinejs/focus` plugin
-is loaded for focus trapping on modal-style components. New client behavior
-means a new `Alpine.data` registration — never an inline `x-data="{ … }"`
-object literal.
+Client logic has two owners. The **shell** is hand-owned in `static/app.js`:
+`themeToggle`, `mobileNav`, `dismissible`, `copy`, `slugify`, `selectOrg`,
+`toastRoot`. Everything else belongs to the component module that needs it,
+in `static/ui/*.js`, and registers on `alpine:init`: `uiDialog`, `uiMenu`,
+`uiContextMenu`, `uiHoverCard`, `uiTabs`, `uiTree`, `uiPanels`, `uiGrid`,
+`uiCarousel`, `uiCommand`, `uiKanban`, `uiChart`, `uiCalendar`,
+`uiDateRange`, `uiMarkdownEditor`, `uiDropzone`, `uiCharCounter`, `uiSlug`,
+`uiTags`.
+
+`headScripts` in `layouts.templ` loads them in a load-bearing order:
+`app.js` (no `defer`, so the theme IIFE runs pre-paint) → htmx →
+`@alpinejs/focus` → every `ui.AlpineFragments` entry → the generated
+`ui-engines.js` and `ui-components.js` → `alpine-csp.min.js` last. A
+fragment that ran after Alpine booted would register a component nothing can
+see, and under CSP an unregistered `x-data` name is silently inert rather
+than an error — which is why `ui-components.js` publishes the expected names
+for a dev check to compare against.
+
+`x-cloak` hides pre-boot markup (a CSS rule in `input.css`). New client
+behavior means a new `Alpine.data` registration in the owning module's
+fragment — never an inline `x-data="{ … }"` object literal.
+
+Two rules the CSP build forces:
+
+- **`$el` and `$refs` are only readable from `init()`**, never from an
+  expression. A per-row control therefore carries its own `x-data`, so
+  `this.$el` IS that control (`copy` reads `data-copy` this way).
+- **Never interpolate a value into an expression.** `@click="copy('<token>')"`
+  put a live API secret in the page's script surface; the value belongs in a
+  `data-` attribute the component reads.
+
+`dismissible` is the one dismiss-and-remember component: `data-key` names the
+`localStorage` entry, so the announcement banner and the dashboard checklist
+share it instead of each shipping their own.
 
 ## Dark mode
 
-`static/app.js` loads **without `defer`** so the theme IIFE runs pre-paint:
-`localStorage.theme` wins, falling back to `prefers-color-scheme`, and sets
-the `.dark` class on `<html>`. `input.css` maps it with
-`@custom-variant dark (&:where(.dark, .dark *));`. The toggle
-(`data-testid="theme-toggle"`) flips the class and persists the choice.
+Dark mode is **token flipping, not `dark:` variants**. `static/app.js` loads
+**without `defer`** so the theme IIFE runs pre-paint: an explicit `light`/`dark`
+`theme` cookie wins, then `localStorage.theme`, then `prefers-color-scheme`; it
+sets the `.dark` class on `<html>`. `input.css` maps it with
+`@custom-variant dark (&:where(.dark, .dark *));`, and `:root`/`.dark` declare
+`color-scheme` so the UA's own surfaces — scrollbars, native pickers — follow
+too.
 
-## Design tokens
+The control is `ui.ThemeToggle` (`data-testid="theme-toggle"`), rendered by
+both shells. It flips the class, persists the choice, and dispatches
+`ui:theme-changed` on `window`: anything holding a colour it read from the
+stylesheet has to be told, because a canvas keeps whatever palette it was drawn
+with. The chart adapter listens for exactly that event. The Alpine controller
+stays in `static/app.js` beside the pre-paint initialisation and
+`persistTheme` — splitting the toggle's state from the code that decides the
+initial class is how a control ends up disagreeing with the page it is on.
 
-All styling flows through one `@theme` block in `input.css`:
+Every colour a template can name is a token, and the `.dark` block in
+`input.css` re-declares the ones that change. That is why a `dark:` class in a
+`.templ` file is a build failure (see [Enforcement](#enforcement)): it means a
+token is missing, and the fix is to add the token — not the variant.
 
-- `--color-brand-50`…`--color-brand-950` — the brand scale (indigo by
-  default). Rebranding is editing this one block.
-- Semantic tokens — `--color-surface`, `--color-surface-raised`,
-  `--color-border`, `--color-fg`, `--color-fg-muted` — with `.dark`
-  overrides.
-- Component classes — `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-danger`,
-  `.input`, `.label`, `.card`, `.badge`, `.table`, `.link`, `.alert-success`,
-  `.alert-error`.
+Open any `/dev/gallery/{family}` page and toggle the theme: nothing there
+carries a per-theme class, so everything that changes changed because a token
+did.
 
-Templates use ONLY semantic tokens and component classes — never raw hex
-values or ad-hoc pixel sizes.
+## Design system
+
+Three layers, one home each. Nothing lives in two places.
+
+| Layer | Home | What belongs there |
+|---|---|---|
+| **Tokens** | `input.css` `@theme` + `.dark`; `theme.go` for email | every colour, the layout dimensions, the z-index scale |
+| **Component classes** | `input.css` `@layer components` | every recurring visual: `.btn`, `.badge`, `.alert`, `.card`, `.table-card`, `.page-title` … |
+| **templ components** | `internal/web/templates/ui/*.templ` (package `ui`), plus `icons.templ` | every recurring *structure*: `@ui.PageHeader`, `@ui.DataTable`, `@ui.Pagination`, `@ui.Icon` … |
+
+Templates consume those and nothing else — no raw hex, no palette ramp, no
+`dark:` variant, no `!` override, no arbitrary length.
+
+### Colour tokens
+
+The brand **ramp** (`--color-brand-50` … `--color-brand-950`) is the palette.
+Templates never name a ramp step; they name a semantic alias drawn from it.
+
+| Token | Role | Light | Dark |
+|---|---|---|---|
+| `brand` | solid brand fill (buttons, meters, progress) | `brand-600` | `brand-600` |
+| `brand-hover` | that fill on hover | `brand-500` | `brand-500` |
+| `brand-fg` | text on the brand fill | white | white |
+| `brand-fg-muted` | secondary text on the brand fill | `brand-100` | `brand-100` |
+| `brand-text` | brand-coloured text on a normal surface | `brand-600` | `brand-400` |
+| `brand-subtle` | brand-tinted background | `brand-50` | `brand-950` |
+| `brand-subtle-fg` | text on that tint | `brand-700` | `brand-300` |
+| `surface` | page background, cards | white | `#0b1120` |
+| `surface-raised` | sidebars, table stripes, chips | `#f8fafc` | `#111a2e` |
+| `border` | every border and divider | `#e2e8f0` | `#1e293b` |
+| `fg` / `fg-muted` | body text / secondary text | `#0f172a` / `#475569` | `#e2e8f0` / `#94a3b8` |
+
+The brand FILL deliberately does not flip: a primary button is the same colour
+in both themes. Only the text and tint slots do.
+
+State colour comes in six kinds — `brand`, `info`, `success`, `warn`, `danger`,
+`neutral` — each with the same six slots, so any kind substitutes for any other:
+
+| Slot | Role |
+|---|---|
+| `{kind}` | solid fill |
+| `{kind}-fg` | text on the solid fill |
+| `{kind}-text` | `{kind}`-coloured text on a normal surface |
+| `{kind}-subtle` | tinted background |
+| `{kind}-subtle-fg` | text on the tinted background |
+| `{kind}-border` | border on the tinted background |
+
+`danger` carries a seventh, `danger-hover`, because it is the one solid fill
+with a hover step of its own: fading the fill with an opacity utility dimmed
+the label with it.
+
+### Structural, motion and elevation tokens
+
+Layout dimensions are tokens so a shell restyle is a value edit:
+`max-w-page` (72rem), `max-w-narrow` (48rem), `w-sidebar`, `w-docnav`,
+`h-topbar`/`top-topbar`, `h-navbar`/`top-navbar`, and `text-micro` (one step
+below `text-xs`, for the notification counter).
+
+Radius has exactly two meanings: `--radius-control` (0.5rem) for something the
+user manipulates and `--radius-surface` (0.75rem) for something that contains
+content. Elevation has exactly two: `--shadow-raised` for what sits ON the page
+(cards, tables) and `--shadow-overlay` for what floats OVER it (dialogs,
+toasts). Both shadows become a lifted border in dark mode, because a drop
+shadow has nothing lighter to fall on.
+
+Motion is two durations and one curve: `--motion-fast` (150ms, a state change
+the user caused), `--motion-base` (250ms, a larger transition) and
+`--ease-standard` (`cubic-bezier(0.2, 0, 0, 1)`, decelerating into rest). A
+`prefers-reduced-motion` block collapses both durations to `0ms` at the token,
+so an animated rule honours the OS setting without its own media query.
+
+Stacking order is three plain custom properties, because Tailwind has no
+`--z-*` namespace: `z-(--z-nav)` (40, sticky header and drawer),
+`z-(--z-overlay)` (50, toasts, dropdowns, consent, skip link) and
+`--z-progress` (60, the navigation bar, used from CSS only).
+
+### Component classes
+
+Every variant family lists its base selector alongside its variants, so a bare
+variant class still renders the whole component (`class="btn-primary"` works;
+`class="btn btn-primary"` is the house style).
+
+- **Buttons** — `.btn` + `.btn-primary` / `.btn-ghost` / `.btn-danger` /
+  `.btn-inverse`, crossed with `.btn-sm` / `.btn-xs` / `.btn-lg` /
+  `.btn-icon`. The size axis is what removed 26 `!padding` overrides, and
+  each rung names a `--control-height-*` so a button and the input beside it
+  line up.
+- **Inputs** — `.input` + `.input-sm` / `.input-xs` / `.input-lg`, `.label`,
+  `.field-error`. Callers reach the size axis through `Size` on the control's
+  Opts, never by writing the class: `inputClass` in `ui/shared.go` is the one
+  mapping, shared by all thirteen controls that carry `.input`.
+- **State** — one shared matrix. `.k-brand|info|success|warn|danger|neutral`
+  (and the per-family aliases `.badge-*`, `.alert-*`, `.banner-*`,
+  `.toast-*`) each declare the same six variables — `--ui-solid`,
+  `--ui-solid-fg`, `--ui-tint`, `--ui-tint-fg`, `--ui-line`, `--ui-text` —
+  and `.badge`, `.alert`, `.banner` and `.toast` read them. Every family
+  therefore supports every kind by construction, instead of needing a rule
+  per family-kind pair. It did not before, and `alert-brand`,
+  `alert-neutral`, `banner-brand`, `banner-success` and `banner-neutral`
+  rendered unstyled.
+- **Structure** — `.page-section`, `.page-narrow`, `.page-header`,
+  `.table-card`, `.table-empty`, `.card` + `.card-p-none` / `.card-p-sm` /
+  `.card-p-lg`, `.card-actions`, `.toolbar`, `.form-actions`,
+  `.meter` / `.meter-fill`, `.count-badge`, `.code-chip`, `.truncate-lines`.
+- **Density** — `.table-compact` tightens `th`/`td` from `px-4 py-3` to
+  `px-3 py-2`. `TableOpts.Density` and `DataTableOpts.Density` emit it.
+- **Emphasis** — `.badge-solid` and `.badge-outline` sit beside the bare
+  `.badge` (subtle) and read the same `--ui-*` matrix, so all six kinds get
+  all three fills without a rule per pair. `BadgeOpts.Emphasis` selects.
+- **Typography** — `.hero-title`, `.display-title`, `.page-title`,
+  `.section-title`, `.error-code`, `.eyebrow`, `.prose`. `.hero-title` and
+  `.display-title` step at the `sm` breakpoint; `.page-section` and
+  `.page-narrow` step their inset the same way.
+- **Navigation** — `.nav-link`, `.doc-link`, `.tab` / `.tab-bar`. All three key
+  off `aria-current="page"`, set server-side by `navCurrent` and re-derived
+  client-side by `syncAppNavigation` (the shell never swaps, so the server
+  cannot update it after a navigation).
+
+Utility layer beats component layer in Tailwind v4, so `text-danger-text` on a
+`.btn-ghost` wins with no `!` needed. That is why the `!` rule can be absolute.
+
+### The component contract
+
+Reusable presentation lives in `internal/web/templates/ui` (`package ui`),
+which imports templ and stdlib leaf packages and **never**
+`internal/web/templates`, `billing`, `identity`, sqlc or any other domain
+package. Page and domain templates stay in `package templates` and import
+`ui`. The compiler enforces that direction, which is what a single
+`components.templ` could not do.
+
+Every exported renderer has exactly one shape:
+
+```go
+templ Name(o NameOpts)   // NameOpts embeds ui.Attrs as the field Attrs
+```
+
+`Attrs` is the one attribute bundle a caller may set: `ID`, `Class`,
+`TestID`, `Title`, `Decorative`, `Data`, and the CSP-safe named `Alpine` and
+`HX` structs. There is deliberately **no arbitrary-attribute map**, so a
+caller cannot override the `role`, `aria-*`, `tabindex`, `type` or base class
+the component owns. A component builds one `templ.Attributes` map and spreads
+it once on its root; `Class` is additive and `Data` reserves `data-ui` and
+`data-ui-*`. Primary content is templ children; named secondary slots are
+`templ.Component` fields that omit their wrapper when nil.
+
+Three tests in `internal/web/templates/ui/contract_test.go` hold that line:
+`TestEveryExportedRendererTakesOneOptionsStruct`,
+`TestAttrsHasNoArbitraryAttributeEscapeHatch` and
+`TestEveryRendererPropagatesItsAttrs` — the last one reflects over every
+renderer the AST scan finds, so it covers the whole package rather than a
+hand-kept sample of it, and it asserts the caller's class lands on the element
+that carries the caller's test id.
+
+Values come from closed enums: `Kind` in `ui/ui.go`, and `Size`, `Emphasis`,
+`Action`, `ButtonType`, `InputType`, `Live`, `Density`, `Orientation`,
+`SortDirection`, `Align`, `Side`, `Placement`, `Gap`, `Padding`, `Width`,
+`Height`, `Ratio` and `Breakpoint` in `ui/enums.go`. Each exposes its
+complete ordered plural slice (`ui.Kinds`, `ui.Sizes`, …) and a normalizer:
+an empty or unrecognised value collapses to the documented base
+(`NormalizeKind` returns `KindNeutral`), so a component can never render with
+a half-applied variant class like `badge-`.
+
+`Kind` is the semantic colour axis shared by `Badge`, `Notice`, `Banner` and
+the toast. Domain values map onto it next to their data (`jobKind`,
+`subKind`, `announcementKind`, `contentStatusKind`, `onOffKind`) — that
+mapping is the only domain-specific part; the shades are not. `Live` replaces
+the old free-form `role` parameter: `LivePolite` renders `role="status"`,
+`LiveAssertive` renders `role="alert"`, and `LiveOff` renders neither.
+`role="alert"` interrupts a screen reader mid-sentence, which a success
+message has not earned, so the choice is now a typed one.
+
+There is **no hand-maintained signature list here**, on purpose: 172
+renderers ship across 143 element and component modules, and a list that long
+rots. The generated
+inventory is authoritative in three places that cannot disagree, because all
+three come from the same manifests:
+
+- `go run ./cmd/ggg info component/<name>` — signature, files, gallery link,
+  verification commands.
+- `internal/web/templates/ui/reference_gen.go` — `ReferenceRegistry`, one
+  `Reference{Name, Family, Module, Signature, Summary, Guidance, Keyboard,
+  States}` per installed renderer.
+- `/dev/gallery/{family}/{component}` — the same record, rendered, in every
+  state.
+
+### Chrome configuration
+
+`templates/chrome.go` holds the product identity and navigation as data, not
+markup: `BrandName`, `DocsEditBase`, `PublicNav`, `AppNav`, `AdminNav`,
+`FooterColumns`. Labels are **i18n keys**, not resolved strings — these are
+package-level values and `i18n.T` needs the request context. Overriding them at
+startup restyles the shell without touching a template.
+
+### Enforcement
+
+`internal/web/templates/designsystem_test.go` reads every `*.templ` in the
+`templates` package and fails the build on any of these, with **zero
+exemptions**:
+
+| Rule | Because |
+|---|---|
+| no raw hex | colour lives in tokens; email colour lives in `emailStyle` |
+| no `dark:` variant | a `dark:` in a template means a missing token |
+| no non-brand palette ramp (`text-red-600` …) | use a state token |
+| no numeric brand step (`bg-brand-600` …) | the ramp is `input.css`'s alone |
+| no `!` utility override | an override means a missing variant |
+| no arbitrary length (`text-[10px]`) | sizes come from the scales |
+| no templ expression inside a quoted attribute | `class="badge { f(x) }"` is emitted literally and renders unstyled — this rule exists because it happened |
+
+A companion test walks every `IconName` and asserts it renders an `<svg>`, so
+a new const cannot be added without its switch arm.
+
+That scanner covers the `templates` package only. The `ui` package is held to
+the structural contract above by `ui/contract_test.go`, and its rendered
+output is held by the visual and axe sweeps over
+`/dev/gallery/{family}`. Alongside them, `designsystem_test.go` also asserts
+facts about the built stylesheet rather than the templates:
+`TestEveryKindIsStyledForEveryStateFamily` (six kinds × badge/alert/banner/
+toast), `TestEverySizeIsStyledForEveryControlFamily`,
+`TestBuiltStylesheetCarriesKindVariables`, `TestDarkModeFlipsInteractionTokens`,
+`TestReducedMotionCollapsesMotionTokens`, and
+`TestGalleryCoversEveryInstalledComponent`, which compares the installed
+component registry against the `data-ui` values the gallery actually renders.
+
+### Which layer does my change belong to?
+
+1. **A new colour** → a token in `@theme` (and `.dark` if it flips).
+2. **A recurring visual** → a component class in `@layer components`, or the
+   owning module's own CSS fragment.
+3. **A recurring structure** → a new renderer in
+   `internal/web/templates/ui/`, declared by a `component/<name>` module.
+4. **A one-off composition** → utilities, drawn from the token scales.
+
+If you are about to type the same utility string a third time, it is step 2 or 3.
+
+## Component gallery
+
+The gallery is generated from the installed UI manifests, not hand-written:
+
+```text
+GET /dev/gallery                          every family
+GET /dev/gallery/{family}                 every component in one family
+GET /dev/gallery/{family}/{component}     one component, every state
+GET /dev/scenarios/{scenario}             a realistic composed page
+```
+
+The ten families are `foundations`, `actions`, `forms`, `navigation`,
+`feedback`, `overlays`, `data`, `communication`, `layout` and `advanced`. A
+component detail page renders its exact signature, when-to-use guidance, its
+keyboard contract, every declared state, and its native fallback — all read
+from `ReferenceRegistry`, so it cannot describe a component the tree does not
+have. Scenario pages compose whole surfaces (`dashboard`, `resource-list`,
+`settings`, `billing`, `analytics`, `planning`, `communication`,
+`system-states`, …) from deterministic dev fixtures.
+
+Each family page is a visual baseline (`family-<name>-light` /
+`family-<name>-dark`) and each scenario is one at desktop and mobile; both are
+generated into `e2e/generated/surfaces.ts` and swept by axe. A regression
+anywhere in the component layer therefore fails a named screenshot instead of
+leaking into a page nobody captures.
+
+These routes are registered only when `DEV_AUTH_BYPASS` is on, which
+`internal/config` refuses under `APP_ENV=production`.
+
+## Rebranding
+
+Write the new values into `theme.local.css` at the repo root — the project's
+own override file, which upstream never touches, so `ggg update` cannot
+conflict on it:
+
+```css
+:root { --color-brand: #16a34a; --color-brand-hover: #15803d; }
+```
+
+`make css`, reload, and every primary button, link and focus ring follows, in
+both themes, with `input.css` byte-identical to upstream. It wins from the top
+of the file because Tailwind emits its tokens into `@layer theme` and unlayered
+author CSS beats any layer at equal specificity. Full recipe, including what to
+declare in `@theme` versus `:root`, is in
+[extending](/docs/extending#add-a-theme-rebrand).
+
+Three things live outside the stylesheet and still need a hand:
+
+1. **`emailStyle`** in `templates/theme.go` — mail clients strip `<style>` and
+   cannot read custom properties, so email is the one surface that inlines hex.
+   `TestEmailStyleTracksTheLightThemeTokens` fails, naming the field, when it
+   drifts from the `input.css` tokens.
+2. **`chrome.go`** — `BrandName`, `DocsEditBase`, and the nav/footer lists. The
+   logo mark is `IconLogo` in `icons.templ` and `static/favicon.svg`.
+3. **The catalogs** — the product name appears inside translated prose
+   (`email.footer`, `email.*.subject`). Those strings live in the `locales`
+   block of the module that owns them, not in `internal/i18n/catalog_*.go`,
+   which is generated: word order around a brand differs per language, so it
+   is not a template variable.
+
+Then `make generate`, `make visual-update` to regenerate the baselines and
+`make visual` to prove the new ones compare cleanly.
 
 ## Adding a page or component
 
-1. Write the templ component in `internal/web/templates/`, composed into a
-   layout (`PublicLayout`, `AppLayout`, `AdminLayout`, `DocsLayout`).
-2. Write the handler in the matching `internal/web/handlers_*.go`, returning
-   fragments per the rule above.
-3. Register the route in `internal/web/routes.go` inside the right chain
-   (public, `appChain`, or `adminChain`).
-4. `make generate` (templ + sqlc + tailwind), then `make check`.
+1. Decide the layer (see [Which layer does my change belong to?](#which-layer-does-my-change-belong-to)).
+   A reusable renderer is a `component/<name>` module under
+   `internal/web/templates/ui/`; a page is a `page/<name>` module whose
+   template lives in `internal/web/templates/` and composes a layout
+   (`PublicLayout`, `AppLayout`, `AdminLayout`, `DocsLayout`) out of `ui.*`
+   renderers rather than retyped utility strings.
+2. Write the handler in the module's own `internal/web/page_<name>.go` or
+   `workflow_<name>.go`, returning fragments per the rule above.
+3. **Declare** the route in the module manifest's `runtime.routes` with the
+   right `scope` (`public`, `app`, `admin`, `api-read`, `api-write`, …) and
+   claim its id. `internal/web/routes.go` no longer holds registrations: the
+   mux is built from `internal/web/routes_registry_gen.go`, so an edit there
+   is undone by the next `sync`.
+4. `go run ./cmd/ggg registry build`, then `make generate` (ggg sync + templ +
+   sqlc + tailwind), then `make check`. The design-system test and the
+   no-drift check both run there.
 
-Put `data-testid` on every element a test will assert on — Playwright never
-selects by visible copy. See [Testing](/docs/testing).
+Put `data-testid` on every element a test asserts container or state identity
+on, and give every control a real accessible name so a spec can find it by
+role — the suite uses both axes and neither selects by visible copy alone.
+See [Testing](/docs/testing).
 
 ## Theme
 
@@ -289,12 +688,12 @@ browser knows the OS setting, and guessing server-side reintroduces the flash.
 
 Two controls write it:
 
-- **The topbar toggle** flips light↔dark. It `hx-post`s `/set-theme` with no
-  value and the server flips from the same current value the client just
-  flipped from, so repeated clicks stay in agreement. It cannot send the
-  desired value: the vendored Alpine CSP build forbids the inline expression
-  that would compute one, and a value baked in at render time goes stale after
-  the first click. The response is `204` — the class is already correct.
+- **The topbar toggle** flips light↔dark locally, then `persistTheme` in
+  `app.js` POSTs the RESULTING value to `/set-theme` with a plain `fetch`. It
+  has to send the resolved value: when the stored preference is `system`, only
+  the browser knows which way the OS points, so a server that flipped on its
+  own would disagree with what the user just saw. The response is `204` — the
+  class is already correct, there is nothing to swap.
 - **Settings → Account → Appearance** sets a value exactly. Those forms carry
   `returnTo`, so the server answers with a hard redirect: the theme class
   lives on `<html>`, which boosted navigation never re-renders.

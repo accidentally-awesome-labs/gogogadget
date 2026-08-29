@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/date-field",
+    "kind": "component",
+    "name": "date-field",
+    "revision": 1,
+    "contract": 1,
+    "title": "DateField",
+    "description": "The DateField renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/date-field.templ",
+        "target": "internal/web/templates/ui/date-field.templ",
+        "class": "templ",
+        "sha256": "e7618ecbbd9ff858da32ff79cd30b4c248b157248fd0e357777968d41cf39df4",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "date-field",
+          "family": "forms",
+          "signature": "templ DateField(o DateFieldOpts)",
+          "summary": "Renders a native date input.",
+          "guidance": "The platform picker already handles locale format, keyboard entry, and the mobile date wheel; a custom calendar has to re-earn all three and usually loses the keyboard.",
+          "states": [
+            "default",
+            "error"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

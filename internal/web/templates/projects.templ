@@ -1,133 +1,243 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 templ ProjectsPage(d ProjectListData) {
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "projects.title") }</h1>
-		<div class="flex items-center gap-2">
-			<button type="button" hx-post="/app/projects/export" hx-swap="none" class="btn btn-ghost" data-testid="projects-export">{ i18n.T(ctx, "projects.export") }</button>
-			<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
-		</div>
-	</div>
-
-	if d.Plan.MaxProjects > 0 {
-		<div class="card mb-4 text-sm" data-testid="usage-meter">
-			{ i18n.T(ctx, "projects.usage", fmt.Sprint(d.Count), fmt.Sprint(d.Plan.MaxProjects), d.Plan.Name) }
-		</div>
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "projects.title")}) {
+		@ui.Inline(ui.InlineOpts{Gap: ui.GapSM}) {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "projects.export"),
+				Icon:  ui.IconDownload,
+				Attrs: ui.Attrs{
+					TestID: "projects-export",
+					HX:     ui.HX{Post: "/app/projects/export", Swap: "none"},
+				},
+			})
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "projects.new"), Href: "/app/projects/new",
+				Action: ui.ActionPrimary, Icon: ui.IconAdd,
+			})
+		}
 	}
-
-	<div class="flex items-center gap-2 mb-4">
-		<input
-			type="search" name="q" value={ d.Query } placeholder={ i18n.T(ctx, "projects.search_placeholder") }
-			class="input max-w-sm"
-			hx-get="/app/projects" hx-trigger="input changed delay:300ms, search"
-			hx-target="#table-container" hx-swap="innerMorph" hx-push-url="true" hx-include="this"
-			hx-sync="this:replace"
-			hx-indicator="#projects-search-indicator"
-			aria-label={ i18n.T(ctx, "projects.search_label") }
-		/>
-		<span id="projects-search-indicator" class="text-fg-muted">
-			@Spinner()
-		</span>
+	if d.Plan.MaxProjects > 0 {
+		@ui.UsageCard(ui.UsageCardOpts{
+			Title:      i18n.T(ctx, "projects.usage_title", d.Plan.Name),
+			Used:       fmt.Sprint(d.Count),
+			Limit:      fmt.Sprint(d.Plan.MaxProjects),
+			Percent:    quotaPercent(d.Count, int64(d.Plan.MaxProjects)),
+			MeterLabel: i18n.T(ctx, "projects.usage_meter_label"),
+			Attrs:      ui.Attrs{Class: "mb-4", TestID: "usage-meter"},
+		})
+	}
+	// The search box stays OUTSIDE the swap target. It morphs #table-container
+	// on every keystroke; a control inside the box it replaces is re-created
+	// mid-word, which loses the caret and the composition in progress.
+	@ui.TableToolbar(ui.TableToolbarOpts{Label: i18n.T(ctx, "projects.toolbar_label")}) {
+		@ui.SearchInput(ui.SearchInputOpts{
+			Name: "q", Value: d.Query,
+			Placeholder: i18n.T(ctx, "projects.search_placeholder"),
+			AriaLabel:   i18n.T(ctx, "projects.search_label"),
+			GetURL:      "/app/projects", Target: "#table-container",
+			IndicatorID: "projects-search-indicator",
+		})
+	}
+	<div id="table-container">
+		@ProjectsTable(d)
 	</div>
-	@ProjectsTable(d)
 }
 
+// ProjectsTable is the search and pager fragment: the CONTENTS of
+// #table-container, never the box itself. Both controls swap innerMorph, which
+// morphs the target's children against the response — so a fragment repeating
+// its own wrapper leaves a second element carrying the same id behind.
 templ ProjectsTable(d ProjectListData) {
-	<div id="table-container">
-		if len(d.Projects) == 0 {
-			@EmptyState(i18n.T(ctx, "projects.empty_title"), i18n.T(ctx, "projects.empty_body")) {
-				<a href="/app/projects/new" class="btn btn-primary">{ i18n.T(ctx, "projects.new") }</a>
-			}
-		} else {
-			<div class="card !p-0 overflow-hidden">
-				<table class="table">
-					<thead>
-						<tr><th>{ i18n.T(ctx, "projects.col_name") }</th><th>{ i18n.T(ctx, "projects.col_created") }</th><th class="text-right">{ i18n.T(ctx, "projects.col_actions") }</th></tr>
-					</thead>
-					<tbody>
-						for _, p := range d.Projects {
-							<tr id={ fmt.Sprintf("project-%d", p.ID) } data-testid="project-row">
-								<td class="font-medium">{ p.Name }</td>
-								<td class="text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
-								<td class="text-right">
-									<div class="flex justify-end gap-2">
-										<a href={ templ.SafeURL(fmt.Sprintf("/app/projects/%d/edit", p.ID)) } class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "projects.edit") }</a>
-										<button
-											type="button"
-											hx-post={ fmt.Sprintf("/app/projects/%d/archive", p.ID) }
-											class="btn-ghost !px-2 !py-1 text-xs"
-										>{ i18n.T(ctx, "projects.archive") }</button>
-										<button
-											type="button"
-											hx-delete={ fmt.Sprintf("/app/projects/%d", p.ID) }
-											hx-confirm={ i18n.T(ctx, "projects.delete_confirm") }
-											hx-target="closest tr"
-											hx-swap="outerHTML"
-											class="btn-danger !px-2 !py-1 text-xs"
-										>{ i18n.T(ctx, "projects.delete") }</button>
-									</div>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-			@Pagination(d.Page, d.TotalPages, "/app/projects?q="+d.Query)
+	@ui.DataTable(projectsTable(ctx, d)) {
+		for _, p := range d.Projects {
+			<tr id={ fmt.Sprintf("project-%d", p.ID) } data-testid="project-row">
+				<td class="px-4 py-3 font-medium">{ p.Name }</td>
+				<td class="px-4 py-3 text-fg-muted">{ p.CreatedAt.Time.Format("Jan 2, 2006") }</td>
+				<td class="px-4 py-3">
+					<div class="card-actions">
+						@ui.ButtonLink(ui.ButtonLinkOpts{
+							Label: i18n.T(ctx, "projects.edit"),
+							Href:  fmt.Sprintf("/app/projects/%d/edit", p.ID),
+							Size:  ui.SizeXS,
+						})
+						@ui.Button(ui.ButtonOpts{
+							Label: i18n.T(ctx, "projects.archive"), Size: ui.SizeXS,
+							Attrs: ui.Attrs{HX: ui.HX{Post: fmt.Sprintf("/app/projects/%d/archive", p.ID)}},
+						})
+						// hx-confirm is gone: the request now rides on the
+						// dialog's confirm control, so the delete contract
+						// (closest tr, outerHTML, 200-empty) is unchanged while
+						// the prompt becomes translatable and assertable.
+						@ui.ConfirmAction(ui.ConfirmActionOpts{
+							ID: fmt.Sprintf("project-delete-%d", p.ID),
+							// The row's subject is in the trigger's name: forty
+							// controls all called "Delete" are indistinguishable
+							// to a screen reader and to a test.
+							TriggerLabel: i18n.T(ctx, "projects.delete_row", p.Name),
+							TriggerIcon:  ui.IconDelete,
+							Title:        i18n.T(ctx, "projects.delete_title"),
+							Message:      i18n.T(ctx, "projects.delete_confirm"),
+							ConfirmLabel: i18n.T(ctx, "projects.delete_action"),
+							CancelLabel:  i18n.T(ctx, "projects.cancel"),
+							Kind:         ui.KindDanger,
+							HX: ui.HX{
+								Delete: fmt.Sprintf("/app/projects/%d", p.ID),
+								Target: "closest tr", Swap: "outerHTML",
+							},
+						})
+					</div>
+				</td>
+			</tr>
 		}
-	</div>
+	}
+}
+
+// projectsTable assembles the list and its slots. Empty and Pagination are
+// passed in every state: a caller that renders the table only when rows exist
+// takes the pager away with the rows.
+func projectsTable(ctx context.Context, d ProjectListData) ui.DataTableOpts {
+	return ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "projects.caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "name", Label: i18n.T(ctx, "projects.col_name")},
+			{Key: "created", Label: i18n.T(ctx, "projects.col_created")},
+			{Key: "actions", Label: i18n.T(ctx, "projects.col_actions"), Align: ui.AlignEnd},
+		},
+		RowCount:   len(d.Projects),
+		Empty:      projectsEmpty(d),
+		Pagination: projectsPager(d),
+		Attrs:      ui.Attrs{ID: "projects-table", TestID: "projects-table"},
+	}
+}
+
+// projectsEmpty distinguishes "nothing exists yet" from "your search matched
+// nothing". Offering "create your first project" to someone whose query missed
+// is the wrong answer to the wrong question.
+templ projectsEmpty(d ProjectListData) {
+	if d.Query != "" {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2, Variant: ui.EmptyInline, Filtered: true,
+			Title:      i18n.T(ctx, "projects.filtered_empty_title"),
+			Body:       i18n.T(ctx, "projects.filtered_empty_body", d.Query),
+			ClearURL:   "/app/projects",
+			ClearLabel: i18n.T(ctx, "projects.clear_search"),
+			Target:     "#table-container",
+		})
+	} else {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2, Variant: ui.EmptyInline,
+			Title: i18n.T(ctx, "projects.empty_title"),
+			Body:  i18n.T(ctx, "projects.empty_body"),
+		}) {
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "projects.new"), Href: "/app/projects/new",
+				Action: ui.ActionPrimary, Attrs: ui.Attrs{Class: "mt-3"},
+			})
+		}
+	}
+}
+
+templ projectsPager(d ProjectListData) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page: d.Page, TotalPages: d.TotalPages,
+		BaseURL: "/app/projects?q=" + d.Query, Target: "#table-container",
+		Numbered: true,
+		Labels:   numberedPagerLabels(ctx),
+	})
 }
 
 templ ProjectForm(d ProjectFormData) {
 	<div id="project-form">
 		if d.LimitHit {
-			<div class="alert-error mb-4" data-testid="plan-limit">
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4", TestID: "plan-limit"}}) {
 				{ i18n.T(ctx, "projects.limit_hit", d.Plan.Name, fmt.Sprint(d.Plan.MaxProjects)) }
-				<a href="/app/settings/billing" class="link font-semibold">{ i18n.T(ctx, "projects.upgrade") }</a>
-			</div>
+				@ui.Link(ui.LinkOpts{Label: i18n.T(ctx, "projects.upgrade"), Href: "/app/settings/billing", Attrs: ui.Attrs{Class: "font-semibold"}})
+			}
 		}
 		if d.NameErr != "" {
-			<div class="alert-error mb-4" role="alert">{ i18n.T(ctx, "projects.fix_error") }</div>
-		}
-		<form
-			if d.ID == 0 {
-				hx-post="/app/projects"
-			} else {
-				hx-post={ fmt.Sprintf("/app/projects/%d", d.ID) }
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4"}}) {
+				{ i18n.T(ctx, "projects.fix_error") }
 			}
-			hx-target="#project-form"
-			hx-swap="innerHTML"
-			hx-disable="this"
-			novalidate
-			class="card max-w-lg space-y-4"
-		>
-			@FormField("name", i18n.T(ctx, "projects.field_name"), "text", d.Name, d.NameErr, i18n.T(ctx, "projects.field_placeholder"), true)
-			<div class="flex gap-3">
-				<button type="submit" class="btn btn-primary inline-flex items-center gap-2">
-					@Spinner()
-					if d.ID == 0 {
-						{ i18n.T(ctx, "projects.create") }
-					} else {
-						{ i18n.T(ctx, "projects.save") }
-					}
-				</button>
-				<a href="/app/projects" class="btn btn-ghost">{ i18n.T(ctx, "projects.cancel") }</a>
-			</div>
-		</form>
+		}
+		@ui.Form(ui.FormOpts{
+			Target: "#project-form", Swap: "innerHTML",
+			Attrs: ui.Attrs{
+				Class: "card max-w-lg space-y-4",
+				HX:    ui.HX{Post: projectFormAction(d), Disable: true},
+			},
+		}) {
+			@ui.Field(ui.FieldOpts{Name: "name", Label: i18n.T(ctx, "projects.field_name"), Error: d.NameErr, Required: true}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "name", Value: d.Name, Required: true, Error: d.NameErr,
+					Placeholder: i18n.T(ctx, "projects.field_placeholder"),
+				})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{
+					Label: projectSubmitLabel(ctx, d), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+				})
+				// The indicator is a sibling, not a child of the button: htmx
+				// flags the requesting element (the form), so any
+				// .htmx-indicator inside it shows — and the button keeps an
+				// accessible name that is only its label.
+				@ui.Spinner(ui.SpinnerOpts{})
+				@ui.ButtonLink(ui.ButtonLinkOpts{Label: i18n.T(ctx, "projects.cancel"), Href: "/app/projects"})
+			}
+		}
 	</div>
 }
 
 templ ProjectNewPage(d ProjectFormData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "projects.new") }</h1>
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "projects.new")})
 	@ProjectForm(d)
 }
 
 templ ProjectEditPage(d ProjectFormData) {
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "projects.edit_heading") }</h1>
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "projects.edit_heading")})
 	@ProjectForm(d)
+}
+
+// projectFormAction posts to the collection for a create and to the row for an
+// edit, which is the contract the handlers already implement.
+func projectFormAction(d ProjectFormData) string {
+	if d.ID == 0 {
+		return "/app/projects"
+	}
+	return fmt.Sprintf("/app/projects/%d", d.ID)
+}
+
+func projectSubmitLabel(ctx context.Context, d ProjectFormData) string {
+	if d.ID == 0 {
+		return i18n.T(ctx, "projects.create")
+	}
+	return i18n.T(ctx, "projects.save")
+}
+
+// quotaPercent is the used share of a quota, rounded down. An unlimited or
+// unknown cap is 0 rather than a divide by zero: the caller decides whether to
+// render a meter at all.
+func quotaPercent(used, limit int64) int {
+	if limit <= 0 {
+		return 0
+	}
+	return int(used * 100 / limit)
+}
+
+// numberedPagerLabels is pagerLabels plus the per-number link name. Without it
+// a screen reader hears only the digit, which in a row of digits says nothing
+// about what the control does.
+func numberedPagerLabels(ctx context.Context) ui.PagerLabels {
+	labels := pagerLabels(ctx)
+	labels.Page = func(page int) string { return i18n.T(ctx, "projects.pagination_page", page) }
+	return labels
 }

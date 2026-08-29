@@ -3,7 +3,9 @@ package templates
 import (
 	"fmt"
 
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
 )
 
 // NotificationsBadge is the unread-bubble FRAGMENT returned by the badge
@@ -12,100 +14,122 @@ import (
 // innerHTML swap, so the shell never carries a drifted hx-swap literal.
 templ NotificationsBadge(unread int64) {
 	if unread > 0 {
-		<span class="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center" aria-label={ i18n.T(ctx, "notifications.unread_aria", unread) }>{ fmt.Sprint(unread) }</span>
+		<span class="count-badge" aria-label={ i18n.T(ctx, "notifications.unread_aria", unread) }>{ fmt.Sprint(unread) }</span>
 	}
 }
 
-// NotificationsPage is the list: unread rows bolded, per-row read buttons,
+// NotificationsPage is the list: unread rows marked, per-row read buttons,
 // read-all, pagination.
 templ NotificationsPage(d NotificationsData) {
-	<div class="flex items-center justify-between mb-6">
-		<h1 class="text-2xl font-bold">{ i18n.T(ctx, "notifications.title") }</h1>
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "notifications.title")}) {
 		if d.Unread > 0 {
-			<button
-				type="button"
-				hx-post="/app/notifications/read-all"
-				hx-target="#notif-list"
-				hx-swap="outerHTML"
-				class="btn btn-ghost"
-				data-testid="notifications-read-all"
-			>{ i18n.T(ctx, "notifications.read_all") }</button>
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "notifications.read_all"), Icon: ui.IconCheck,
+				Attrs: ui.Attrs{
+					TestID: "notifications-read-all",
+					HX: ui.HX{
+						Post: "/app/notifications/read-all",
+						// outerHTML, so the response replaces the box: the read
+						// handlers return NotificationsList, wrapper and all.
+						Target: "#notif-list", Swap: "outerHTML",
+					},
+				},
+			})
 		}
-	</div>
+	}
 	@NotificationsList(d)
 }
 
-// NotificationsList is the swap target (#notif-list) for read/read-all.
+// NotificationsList is the outerHTML target for read and read-all, so it
+// carries the #notif-list wrapper. Those handlers return this renderer.
 templ NotificationsList(d NotificationsData) {
 	<div id="notif-list">
-		if len(d.Items) == 0 {
-			@EmptyState(i18n.T(ctx, "notifications.empty_title"), i18n.T(ctx, "notifications.empty_body"))
-		} else {
-			<div class="card !p-0 overflow-hidden">
-				<ul class="divide-y divide-border">
-					for _, n := range d.Items {
-						<li class={ "flex items-start gap-3 px-4 py-3", templ.KV("font-medium", !n.ReadAt.Valid), "text-fg-muted", templ.KV("text-fg", !n.ReadAt.Valid) } data-testid="notification-row">
-							<div class="flex-1 min-w-0">
-								<p class="text-sm">{ n.Title }</p>
-								if n.Body != "" {
-									<p class="text-xs text-fg-muted mt-0.5">{ n.Body }</p>
-								}
-								<p class="text-xs text-fg-muted mt-1">{ n.CreatedAt.Time.Format("Jan 2, 2006 15:04") }</p>
-							</div>
-							<div class="flex items-center gap-2 shrink-0">
-								if n.Url != "" {
-									<a
-										href={ templ.SafeURL(n.Url) }
-										hx-boost="true"
-										hx-target={ NavTarget }
-										hx-select={ NavTarget }
-										hx-swap={ NavSwap }
-										class="btn-ghost !px-2 !py-1 text-xs"
-										data-testid="notification-link"
-									>{ i18n.T(ctx, "notifications.open") }</a>
-								}
-								if !n.ReadAt.Valid {
-									<button
-										type="button"
-										hx-post={ fmt.Sprintf("/app/notifications/%d/read", n.ID) }
-										hx-target="#notif-list"
-										hx-swap="outerHTML"
-										class="btn-ghost !px-2 !py-1 text-xs"
-										data-testid="notification-read"
-									>{ i18n.T(ctx, "notifications.mark_read") }</button>
-								}
-							</div>
-						</li>
-					}
-				</ul>
-			</div>
-			@NotificationsPagination(d.Page, d.TotalPages)
-		}
+		@NotificationsListBody(d)
 	</div>
 }
 
-// NotificationsPagination mirrors Pagination but targets #notif-list.
-templ NotificationsPagination(page, totalPages int) {
-	if totalPages > 1 {
-		<nav class="flex items-center justify-between mt-4 text-sm" aria-label={ i18n.T(ctx, "activity.pagination_aria") }>
-			if page > 1 {
-				<a href={ templ.SafeURL(fmt.Sprintf("/app/notifications?page=%d", page-1)) }
-					hx-get={ fmt.Sprintf("/app/notifications?page=%d", page-1) }
-					hx-target="#notif-list" hx-swap="innerMorph" hx-push-url="true"
-					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_prev") }</a>
-			} else {
-				<span></span>
+// NotificationsListBody is the pager's innerMorph fragment: the contents of
+// #notif-list without the wrapper. innerMorph morphs the target's children
+// against the response, so repeating the wrapper here would leave a second
+// element carrying the same id inside the first.
+templ NotificationsListBody(d NotificationsData) {
+	if len(d.Items) == 0 {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2,
+			Title: i18n.T(ctx, "notifications.empty_title"),
+			Body:  i18n.T(ctx, "notifications.empty_body"),
+		})
+	} else {
+		@ui.TableCard(ui.TableCardOpts{}) {
+			@ui.List(ui.ListOpts{}) {
+				for _, n := range d.Items {
+					@ui.NotificationItem(ui.NotificationItemOpts{
+						Title:       n.Title,
+						Body:        n.Body,
+						Timestamp:   n.CreatedAt.Time.Format("Jan 2, 2006 15:04"),
+						MachineTime: n.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00"),
+						Kind:        notificationKind(n.Kind),
+						Unread:      !n.ReadAt.Valid,
+						UnreadLabel: i18n.T(ctx, "notifications.unread"),
+						Actions:     notificationActions(n),
+						Attrs: ui.Attrs{
+							ID:     fmt.Sprintf("notification-%d", n.ID),
+							TestID: "notification-row",
+						},
+					})
+				}
 			}
-			<span class="text-fg-muted">{ i18n.T(ctx, "activity.pagination_page_of", page, totalPages) }</span>
-			if page < totalPages {
-				<a href={ templ.SafeURL(fmt.Sprintf("/app/notifications?page=%d", page+1)) }
-					hx-get={ fmt.Sprintf("/app/notifications?page=%d", page+1) }
-					hx-target="#notif-list" hx-swap="innerMorph" hx-push-url="true"
-					class="btn-ghost">{ i18n.T(ctx, "activity.pagination_next") }</a>
-			} else {
-				<span></span>
-			}
-		</nav>
+		}
+		@ui.Pagination(ui.PaginationOpts{
+			Page: d.Page, TotalPages: d.TotalPages,
+			BaseURL: "/app/notifications", Target: "#notif-list",
+			Labels: pagerLabels(ctx),
+		})
 	}
 }
 
+// notificationActions is the row's control cluster. The title is deliberately
+// NOT the link: "Open" carries the boosted navigation attributes, and turning
+// the title into a second anchor to the same place would give a screen reader's
+// link list two entries for one destination.
+templ notificationActions(n sqlc.Notification) {
+	@ui.Inline(ui.InlineOpts{Gap: ui.GapXS}) {
+		if n.Url != "" {
+			@ui.ButtonLink(ui.ButtonLinkOpts{
+				Label: i18n.T(ctx, "notifications.open"), Href: n.Url, Size: ui.SizeXS,
+				Attrs: ui.Attrs{
+					TestID: "notification-link",
+					HX:     ui.HX{Boost: true, Target: NavTarget, Select: NavTarget, Swap: NavSwap},
+				},
+			})
+		}
+		if !n.ReadAt.Valid {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "notifications.mark_read"), Size: ui.SizeXS,
+				Attrs: ui.Attrs{
+					TestID: "notification-read",
+					HX: ui.HX{
+						Post:   fmt.Sprintf("/app/notifications/%d/read", n.ID),
+						Target: "#notif-list", Swap: "outerHTML",
+					},
+				},
+			})
+		}
+	}
+}
+
+// notificationKind maps the persisted kind onto the semantic colour. An
+// unrecognised kind is neutral rather than brand: a new kind nobody has
+// classified yet must not arrive dressed as an announcement.
+func notificationKind(kind string) ui.Kind {
+	switch kind {
+	case "payment_failed", "webhook_failed":
+		return ui.KindDanger
+	case "export_ready":
+		return ui.KindSuccess
+	case "welcome":
+		return ui.KindBrand
+	default:
+		return ui.KindNeutral
+	}
+}

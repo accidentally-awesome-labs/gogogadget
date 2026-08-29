@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-jobs",
+    "kind": "page",
+    "name": "admin-jobs",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin job queue",
+    "description": "The background job queue with state, attempt count, and dead-letter detail.",
+    "requires": [
+      "system/jobs",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/admin_viewers_test.go",
+        "target": "internal/web/admin_viewers_test.go",
+        "class": "test",
+        "sha256": "f7c61ae70a40c9e6486710b26bf0fc361c39d71803f1bcd6062ef3208cf74a3b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/handlers_admin_jobs.go",
+        "target": "internal/web/handlers_admin_jobs.go",
+        "class": "go",
+        "sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_jobs.templ",
+        "target": "internal/web/templates/admin_jobs.templ",
+        "class": "templ",
+        "sha256": "b5a3c6e8186eabea7a0b9066ddfe3264f503eb214236ac94f4fe73c819f01cfa",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.jobs.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.jobs.index",
+          "method": "GET",
+          "pattern": "/admin/jobs",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminJobs"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.jobs",
+          "area": "admin",
+          "route_id": "admin.jobs.index",
+          "label_key": "sidebar.admin_jobs",
+          "after": [
+            "nav.admin.audit"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "admin.jobs.col_actions": "Actions",
+        "admin.jobs.col_attempts": "Attempts",
+        "admin.jobs.col_error": "Last error",
+        "admin.jobs.col_kind": "Kind",
+        "admin.jobs.col_run_at": "Run at",
+        "admin.jobs.col_status": "Status",
+        "admin.jobs.empty": "No jobs match.",
+        "admin.jobs.requeue": "Requeue",
+        "admin.jobs.requeue_confirm": "Requeue this dead-lettered job? It will be claimed immediately.",
+        "admin.jobs.requeue_row": "Requeue %s",
+        "admin.jobs.requeue_title": "Requeue this job?",
+        "admin.jobs.requeued": "Job requeued.",
+        "admin.jobs.search_aria": "Search jobs",
+        "admin.jobs.search_placeholder": "Filter by kind…",
+        "admin.jobs.status_dead": "dead",
+        "admin.jobs.status_done": "done",
+        "admin.jobs.status_pending": "pending",
+        "admin.jobs.status_retrying": "retrying",
+        "admin.jobs.status_running": "running",
+        "admin.jobs.title": "Jobs"
+      },
+      "es": {
+        "admin.jobs.col_actions": "Acciones",
+        "admin.jobs.col_attempts": "Intentos",
+        "admin.jobs.col_error": "Último error",
+        "admin.jobs.col_kind": "Tipo",
+        "admin.jobs.col_run_at": "Ejecuta",
+        "admin.jobs.col_status": "Estado",
+        "admin.jobs.empty": "No hay trabajos que coincidan.",
+        "admin.jobs.requeue": "Reencolar",
+        "admin.jobs.requeue_confirm": "¿Reencolar este trabajo fallido? Se reclamará de inmediato.",
+        "admin.jobs.requeue_row": "Reencolar %s",
+        "admin.jobs.requeue_title": "¿Reencolar este trabajo?",
+        "admin.jobs.requeued": "Trabajo reencolado.",
+        "admin.jobs.search_aria": "Buscar trabajos",
+        "admin.jobs.search_placeholder": "Filtrar por tipo…",
+        "admin.jobs.status_dead": "fallido",
+        "admin.jobs.status_done": "completado",
+        "admin.jobs.status_pending": "pendiente",
+        "admin.jobs.status_retrying": "reintentando",
+        "admin.jobs.status_running": "en ejecución",
+        "admin.jobs.title": "Trabajos"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

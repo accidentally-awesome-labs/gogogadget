@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/notification-preferences",
+    "kind": "workflow",
+    "name": "notification-preferences",
+    "revision": 1,
+    "contract": 1,
+    "title": "Notification preference saving",
+    "description": "Persists per-kind in-app notification mutes from checkbox presence and the digest cadence, ignoring an unknown cadence rather than hitting the column CHECK.",
+    "requires": [
+      "page/settings-notifications",
+      "system/i18n",
+      "system/identity",
+      "system/notifications",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_notification_preferences.go",
+        "target": "internal/web/workflow_notification_preferences.go",
+        "class": "go",
+        "sha256": "59bbe4b136bf0fe0a575a1320a095c045735515c66625ecd8da08a5916a59c63",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "notification-preferences.save"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "notification-preferences.save",
+          "method": "POST",
+          "pattern": "/app/settings/notifications",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsNotificationsSave"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

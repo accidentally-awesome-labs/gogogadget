@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "element/text",
+    "kind": "element",
+    "name": "text",
+    "revision": 1,
+    "contract": 1,
+    "title": "Text",
+    "description": "The Text renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/text.templ",
+        "target": "internal/web/templates/ui/text.templ",
+        "class": "templ",
+        "sha256": "2397b4e5ff90e6d49e75b247d9247b9ab3c786ca23479dfad0068b4e2fb7f1a5",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/text_test.go",
+        "target": "internal/web/templates/ui/text_test.go",
+        "class": "test",
+        "sha256": "abdf59f4da6e69a1c2a4662e3b8d25c815a98ae9710d25f38f0abafabcaa6039",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "text",
+          "family": "foundations",
+          "signature": "templ Text(o TextOpts)",
+          "summary": "Renders body copy.",
+          "guidance": "It is a <p>, not a <div>: paragraph structure is what lets a screen reader user move through prose a paragraph at a time.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

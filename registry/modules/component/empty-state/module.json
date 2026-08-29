@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/empty-state",
+    "kind": "component",
+    "name": "empty-state",
+    "revision": 1,
+    "contract": 1,
+    "title": "EmptyState",
+    "description": "The EmptyState renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/empty-state.templ",
+        "target": "internal/web/templates/ui/empty-state.templ",
+        "class": "templ",
+        "sha256": "c8e3ad379eb910526be1e60f3bdcae8e4d00f6fd88de75b5d303dd347035f7eb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/ui/empty-state_test.go",
+        "target": "internal/web/templates/ui/empty-state_test.go",
+        "class": "test",
+        "sha256": "2bd206c01bc213e30e58237ad4be08fe9fabb3a628418de61c3b11f68605e871",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "empty-state",
+          "family": "feedback",
+          "signature": "templ EmptyState(o EmptyStateOpts)",
+          "summary": "Renders the resting state of a region with no data.",
+          "guidance": "It carries no role and no live region: an empty list is not news. ErrorState is the announced counterpart for a region that failed.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web/templates/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/changelog",
+    "kind": "page",
+    "name": "changelog",
+    "revision": 1,
+    "contract": 1,
+    "title": "Changelog",
+    "description": "The changelog, rendered as every release on one anchored page.",
+    "requires": [
+      "system/content",
+      "system/content-assets",
+      "system/i18n",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/changelog.templ",
+        "target": "internal/web/templates/changelog.templ",
+        "class": "templ",
+        "sha256": "419b3d6dc1f0df1b73871c95232566ad9cce287b0d9e21b701449386cc6d058b",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "content_types": [
+        "release"
+      ]
+    },
+    "runtime": {
+      "content_types": [
+        {
+          "id": "release",
+          "mode": "single",
+          "paths": [
+            "/changelog"
+          ],
+          "package": "internal/web",
+          "handler": "handleContent"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "footer.company.changelog",
+          "area": "footer",
+          "route_id": "content.release.index",
+          "label_key": "footer.changelog",
+          "group": "footer.company",
+          "before": [
+            "footer.company.about"
+          ],
+          "after": [
+            "footer.company.blog"
+          ]
+        },
+        {
+          "id": "nav.public.changelog",
+          "area": "public",
+          "route_id": "content.release.index",
+          "label_key": "nav.changelog",
+          "after": [
+            "nav.public.docs"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "changelog",
+          "path": "/changelog",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "changelog.intro": "Everything that shipped, newest first. Each release links to itself, so you can point someone at the exact one.",
+        "changelog.title": "Changelog"
+      },
+      "es": {
+        "changelog.intro": "Todo lo que se ha lanzado, lo más reciente primero. Cada versión enlaza a sí misma, para que puedas señalar exactamente cuál.",
+        "changelog.title": "Novedades"
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

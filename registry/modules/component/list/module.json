@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/list",
+    "kind": "component",
+    "name": "list",
+    "revision": 1,
+    "contract": 1,
+    "title": "List",
+    "description": "The List renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/list.templ",
+        "target": "internal/web/templates/ui/list.templ",
+        "class": "templ",
+        "sha256": "7325464a607edbfd9e7df0ce2f66cc1f19a14c5ef75cecb11e62c1dd08cf028a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "item",
+          "family": "data",
+          "signature": "templ Item(o ItemOpts)",
+          "summary": "Renders one list entry.",
+          "states": [
+            "default"
+          ]
+        },
+        {
+          "name": "list",
+          "family": "data",
+          "signature": "templ List(o ListOpts)",
+          "summary": "Renders an unordered list.",
+          "states": [
+            "default"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

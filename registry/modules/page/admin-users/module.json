@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-users",
+    "kind": "page",
+    "name": "admin-users",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin users list",
+    "description": "The platform user table with search and pagination, served whole or as an HTMX table fragment.",
+    "requires": [
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_users.go",
+        "target": "internal/web/page_admin_users.go",
+        "class": "go",
+        "sha256": "156f541e3b51d9b264d26a137e7ec94c6bf0505ed38a1a71c0ab8a751f28f715",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.users.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.users.index",
+          "method": "GET",
+          "pattern": "/admin/users",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminUsers"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.users",
+          "area": "admin",
+          "route_id": "admin.users.index",
+          "label_key": "sidebar.admin_users",
+          "after": [
+            "nav.admin.overview"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free",
+    "locales": {
+      "en": {
+        "admin.users.col_actions": "Actions",
+        "admin.users.col_email": "Email",
+        "admin.users.col_joined": "Joined",
+        "admin.users.col_name": "Name",
+        "admin.users.col_role": "Staff role",
+        "admin.users.col_status": "Status",
+        "admin.users.confirm_disable": "Disable %s? They will lose access immediately.",
+        "admin.users.confirm_enable": "Re-enable %s?",
+        "admin.users.disable": "Disable",
+        "admin.users.disable_row": "Disable %s",
+        "admin.users.disable_title": "Disable this account?",
+        "admin.users.empty": "No users match.",
+        "admin.users.enable": "Enable",
+        "admin.users.enable_row": "Enable %s",
+        "admin.users.enable_title": "Re-enable this account?",
+        "admin.users.impersonate": "Impersonate",
+        "admin.users.role_admin": "Admin",
+        "admin.users.role_aria": "Staff role for %s",
+        "admin.users.role_last_admin": "This is the last admin — promote someone else first.",
+        "admin.users.role_none": "—",
+        "admin.users.role_support": "Support",
+        "admin.users.row_actions_aria": "Actions for %s",
+        "admin.users.search_aria": "Search users",
+        "admin.users.search_placeholder": "Search by email…",
+        "admin.users.status_active": "active",
+        "admin.users.status_disabled": "disabled",
+        "admin.users.title": "Users"
+      },
+      "es": {
+        "admin.users.col_actions": "Acciones",
+        "admin.users.col_email": "Correo",
+        "admin.users.col_joined": "Se unió",
+        "admin.users.col_name": "Nombre",
+        "admin.users.col_role": "Rol de equipo",
+        "admin.users.col_status": "Estado",
+        "admin.users.confirm_disable": "¿Deshabilitar a %s? Perderá el acceso de inmediato.",
+        "admin.users.confirm_enable": "¿Reactivar a %s?",
+        "admin.users.disable": "Deshabilitar",
+        "admin.users.disable_row": "Deshabilitar a %s",
+        "admin.users.disable_title": "¿Deshabilitar esta cuenta?",
+        "admin.users.empty": "Ningún usuario coincide.",
+        "admin.users.enable": "Reactivar",
+        "admin.users.enable_row": "Reactivar a %s",
+        "admin.users.enable_title": "¿Reactivar esta cuenta?",
+        "admin.users.impersonate": "Suplantar",
+        "admin.users.role_admin": "Administrador",
+        "admin.users.role_aria": "Rol de equipo de %s",
+        "admin.users.role_last_admin": "Es el último administrador: asciende a otra persona primero.",
+        "admin.users.role_none": "—",
+        "admin.users.role_support": "Soporte",
+        "admin.users.row_actions_aria": "Acciones para %s",
+        "admin.users.search_aria": "Buscar usuarios",
+        "admin.users.search_placeholder": "Buscar por correo…",
+        "admin.users.status_active": "activo",
+        "admin.users.status_disabled": "deshabilitado",
+        "admin.users.title": "Usuarios"
+      }
+    }
+  }
+}

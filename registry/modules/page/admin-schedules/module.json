@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "page/admin-schedules",
+    "kind": "page",
+    "name": "admin-schedules",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin schedules list",
+    "description": "The recurring-work table listing every schedule, its kind, scope, interval and next fire, plus the create form.",
+    "requires": [
+      "system/i18n",
+      "system/jobs",
+      "system/organizations",
+      "system/schedules",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/page_admin_schedules.go",
+        "target": "internal/web/page_admin_schedules.go",
+        "class": "go",
+        "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/schedules_admin_test.go",
+        "target": "internal/web/schedules_admin_test.go",
+        "class": "test",
+        "sha256": "fedd3c9be9f55c1a606ca00179ba395c13ee32b403e3b2844c4ab7fa7e5f018e",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/admin_schedules.templ",
+        "target": "internal/web/templates/admin_schedules.templ",
+        "class": "templ",
+        "sha256": "197f9f239442091a29c2a1ef70083706ff87c06d33c1fec293fc96d291e824f5",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.schedules.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.schedules.index",
+          "method": "GET",
+          "pattern": "/admin/schedules",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminSchedules"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.schedules",
+          "area": "admin",
+          "route_id": "admin.schedules.index",
+          "label_key": "sidebar.admin_schedules",
+          "after": [
+            "nav.admin.content"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "admin-schedules",
+          "path": "/admin/schedules",
+          "persona": "admin",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "locales": {
+      "en": {
+        "admin.schedules.col_actions": "Actions",
+        "admin.schedules.col_enabled": "Enabled",
+        "admin.schedules.col_every": "Every",
+        "admin.schedules.col_kind": "Kind",
+        "admin.schedules.col_name": "Name",
+        "admin.schedules.col_next": "Next run",
+        "admin.schedules.col_scope": "Scope",
+        "admin.schedules.create": "Create schedule",
+        "admin.schedules.create_title": "New schedule",
+        "admin.schedules.created": "Schedule created.",
+        "admin.schedules.delete": "Delete",
+        "admin.schedules.delete_confirm": "Delete this schedule? In-flight jobs are unaffected.",
+        "admin.schedules.delete_row": "Delete %s",
+        "admin.schedules.delete_title": "Delete this schedule?",
+        "admin.schedules.deleted": "Schedule deleted.",
+        "admin.schedules.empty": "No schedules yet.",
+        "admin.schedules.every_label": "Every (seconds)",
+        "admin.schedules.hint": "Schedules enqueue their kind each interval; missed ticks are skipped, never caught up. Minimum interval 60s.",
+        "admin.schedules.invalid": "Name max 100 chars, kind must be schedulable, interval 60s–30 days, payload must be a JSON object.",
+        "admin.schedules.kind_label": "Kind",
+        "admin.schedules.name_label": "Name",
+        "admin.schedules.name_placeholder": "Daily digest",
+        "admin.schedules.off": "off",
+        "admin.schedules.on": "on",
+        "admin.schedules.payload_label": "Payload (JSON)",
+        "admin.schedules.payload_placeholder": "{\"filter\":\"unread\"}",
+        "admin.schedules.row_actions_aria": "Actions for %s",
+        "admin.schedules.run_now": "Run now",
+        "admin.schedules.run_started": "Scheduled for the next worker pass.",
+        "admin.schedules.scope_label": "Scope",
+        "admin.schedules.scope_system": "System-wide",
+        "admin.schedules.title": "Schedules",
+        "admin.schedules.toggled": "Schedule updated."
+      },
+      "es": {
+        "admin.schedules.col_actions": "Acciones",
+        "admin.schedules.col_enabled": "Activada",
+        "admin.schedules.col_every": "Intervalo",
+        "admin.schedules.col_kind": "Tipo",
+        "admin.schedules.col_name": "Nombre",
+        "admin.schedules.col_next": "Próxima",
+        "admin.schedules.col_scope": "Ámbito",
+        "admin.schedules.create": "Crear programación",
+        "admin.schedules.create_title": "Nueva programación",
+        "admin.schedules.created": "Programación creada.",
+        "admin.schedules.delete": "Eliminar",
+        "admin.schedules.delete_confirm": "¿Eliminar esta programación? Los trabajos en curso no se ven afectados.",
+        "admin.schedules.delete_row": "Eliminar %s",
+        "admin.schedules.delete_title": "¿Eliminar esta programación?",
+        "admin.schedules.deleted": "Programación eliminada.",
+        "admin.schedules.empty": "Aún no hay programaciones.",
+        "admin.schedules.every_label": "Cada (segundos)",
+        "admin.schedules.hint": "Cada programación encola su tipo en cada intervalo; los ticks perdidos se saltan, nunca se recuperan. Intervalo mínimo 60s.",
+        "admin.schedules.invalid": "Nombre máx. 100, tipo programable, intervalo 60s–30 días, payload debe ser un objeto JSON.",
+        "admin.schedules.kind_label": "Tipo",
+        "admin.schedules.name_label": "Nombre",
+        "admin.schedules.name_placeholder": "Resumen diario",
+        "admin.schedules.off": "inactiva",
+        "admin.schedules.on": "activa",
+        "admin.schedules.payload_label": "Payload (JSON)",
+        "admin.schedules.payload_placeholder": "{\"filter\":\"unread\"}",
+        "admin.schedules.row_actions_aria": "Acciones para %s",
+        "admin.schedules.run_now": "Ejecutar ya",
+        "admin.schedules.run_started": "Programada para el siguiente ciclo del worker.",
+        "admin.schedules.scope_label": "Ámbito",
+        "admin.schedules.scope_system": "Todo el sistema",
+        "admin.schedules.title": "Programaciones",
+        "admin.schedules.toggled": "Programación actualizada."
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

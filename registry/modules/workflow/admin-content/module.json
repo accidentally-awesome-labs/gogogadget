@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "workflow/admin-content",
+    "kind": "workflow",
+    "name": "admin-content",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin content mutations",
+    "description": "Creates, updates, publishes, unpublishes, deletes, and restores content entries, owning the editor form contract, validation, revision snapshots, live Markdown preview, and audit effects.",
+    "requires": [
+      "system/audit",
+      "system/content",
+      "system/i18n",
+      "system/identity",
+      "system/security",
+      "system/server"
+    ],
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_content.go",
+        "target": "internal/web/workflow_admin_content.go",
+        "class": "go",
+        "sha256": "3e0c7de535f3266d717b03eaebdc2a52cf283be818c8e2384196138982e8d2a5",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "routes": [
+        "admin.content.create",
+        "admin.content.delete",
+        "admin.content.preview_fragment",
+        "admin.content.publish",
+        "admin.content.restore",
+        "admin.content.unpublish",
+        "admin.content.update"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.content.create",
+          "method": "POST",
+          "pattern": "/admin/content",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentCreate"
+        },
+        {
+          "id": "admin.content.delete",
+          "method": "POST",
+          "pattern": "/admin/content/{id}/delete",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentDelete"
+        },
+        {
+          "id": "admin.content.preview_fragment",
+          "method": "POST",
+          "pattern": "/admin/content/preview",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentPreview"
+        },
+        {
+          "id": "admin.content.publish",
+          "method": "POST",
+          "pattern": "/admin/content/{id}/publish",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentPublish"
+        },
+        {
+          "id": "admin.content.restore",
+          "method": "POST",
+          "pattern": "/admin/content/{id}/revisions/{rev}/restore",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentRestore"
+        },
+        {
+          "id": "admin.content.unpublish",
+          "method": "POST",
+          "pattern": "/admin/content/{id}/unpublish",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentUnpublish"
+        },
+        {
+          "id": "admin.content.update",
+          "method": "POST",
+          "pattern": "/admin/content/{id}",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": true
+          },
+          "package": "internal/web",
+          "handler": "handleAdminContentUpdate"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

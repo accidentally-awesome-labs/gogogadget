@@ -1,0 +1,37 @@
+package ui
+
+// SlugInputOpts is a URL-slug field derived from another field.
+type SlugInputOpts struct {
+	Name  string
+	Value string
+	// From is the field name this slug is derived from while untouched.
+	From string
+	// Prefix is shown before the editable part, e.g. "example.com/".
+	Prefix      string
+	Hint, Error string
+	Required    bool
+	Size        Size
+	Attrs       Attrs
+}
+
+// SlugInput renders a text input that mirrors another field until edited.
+//
+// It is a plain text input first: with no JavaScript the user types the slug
+// themselves and the form works. The Alpine behaviour only stops mirroring once
+// the user edits the slug directly, because silently overwriting what someone
+// typed is worse than not helping at all.
+templ SlugInput(o SlugInputOpts) {
+	@InputGroup(InputGroupOpts{}) {
+		if o.Prefix != "" {
+			@InputAddon(InputAddonOpts{Text: o.Prefix})
+		}
+		<input
+			{ rootWith("slug-input", inputClass(o.Size)+" border-0 rounded-none", o.Attrs,
+				"x-data", "uiSlug",
+				"data-from", o.From)... }
+			{ FieldARIA(FieldOpts{Name: o.Name, Hint: o.Hint, Error: o.Error, Required: o.Required})... }
+			type="text" id={ o.Name } name={ o.Name } value={ o.Value }
+			required?={ o.Required }
+		/>
+	}
+}

@@ -1,8 +1,11 @@
 package templates
 
 import (
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+	"context"
 	"fmt"
 
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 )
 
@@ -10,8 +13,7 @@ import (
 // endpoints table + delivery log.
 templ WebhooksPage(d WebhooksData) {
 	@SettingsTabs("/app/settings/webhooks")
-	<h1 class="text-2xl font-bold mb-6">{ i18n.T(ctx, "webhooks.title") }</h1>
-
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "webhooks.title")})
 	<div id="webhooks-container">
 		@WebhooksSection(d)
 	</div>
@@ -19,145 +21,249 @@ templ WebhooksPage(d WebhooksData) {
 
 templ WebhooksSection(d WebhooksData) {
 	if d.NewSecret != "" {
-		<div class="card mb-6 max-w-lg border-green-500" data-testid="webhook-secret-reveal">
-			<h2 class="font-semibold text-green-700 dark:text-green-300">{ i18n.T(ctx, "webhooks.secret_title") }</h2>
-			<p class="text-sm text-fg-muted mt-1">{ i18n.T(ctx, "webhooks.secret_note") }</p>
-			if d.Rotated {
-				<p class="text-sm text-amber-700 dark:text-amber-300 mt-1" data-testid="webhook-rotate-note">{ i18n.T(ctx, "webhooks.rotate_note") }</p>
+		@ui.Card(ui.CardOpts{Attrs: ui.Attrs{Class: "mb-6 max-w-lg border-success", TestID: "webhook-secret-reveal"}}) {
+			@ui.Heading(ui.HeadingOpts{
+				Text: i18n.T(ctx, "webhooks.secret_title"), Level: 2,
+				Unstyled: true, Attrs: ui.Attrs{Class: "font-semibold text-success-text"},
+			})
+			@ui.Text(ui.TextOpts{Size: ui.SizeSM, Muted: true, Attrs: ui.Attrs{Class: "mt-1"}}) {
+				{ i18n.T(ctx, "webhooks.secret_note") }
 			}
-			<div class="mt-3 flex items-center gap-2" x-data="clipboard">
-				<code class="flex-1 text-sm bg-surface-raised border border-border rounded-lg px-3 py-2 overflow-x-auto">{ d.NewSecret }</code>
-				<button type="button" @click={ "copy('" + d.NewSecret + "')" } class="btn-ghost !px-2 text-xs">
-					<span x-show="!copied">{ i18n.T(ctx, "api.copy") }</span>
-					<span x-show="copied" x-cloak>{ i18n.T(ctx, "api.copied") }</span>
-				</button>
-			</div>
-		</div>
-	}
-
-	<div class="card max-w-lg mb-6">
-		<h2 class="font-semibold mb-3">{ i18n.T(ctx, "webhooks.create_title") }</h2>
-		if d.URLErr != "" {
-			<div class="alert-error mb-3" role="alert">{ d.URLErr }</div>
+			if d.Rotated {
+				// The grace window is the only thing that makes rotating a live
+				// integration safe, so it is announced rather than implied.
+				@ui.Notice(ui.NoticeOpts{Kind: ui.KindWarn, Live: ui.LivePolite, Attrs: ui.Attrs{Class: "mt-3", TestID: "webhook-rotate-note"}}) {
+					{ i18n.T(ctx, "webhooks.rotate_note") }
+				}
+			}
+			// The signing secret rides on data-copy and never enters an Alpine
+			// expression: under CSP the expression is parsed as source, so a
+			// secret containing a quote would break out of it.
+			@ui.SecretReveal(ui.SecretRevealOpts{Value: d.NewSecret, CopyLabel: i18n.T(ctx, "api.copy"), CopiedLabel: i18n.T(ctx, "api.copied")})
 		}
-		<form hx-post="/app/settings/webhooks/endpoints" hx-target="#webhooks-container" hx-swap="innerHTML" hx-disable="this" novalidate class="space-y-3">
-			<div>
-				<label for="url" class="label">{ i18n.T(ctx, "webhooks.url_label") }</label>
-				<input id="url" name="url" type="url" class="input" placeholder="https://example.com/hooks/gogogadget" required data-testid="webhook-url"/>
-			</div>
-			<div>
-				<label for="description" class="label">{ i18n.T(ctx, "webhooks.description_label") }</label>
-				<input id="description" name="description" type="text" class="input" placeholder={ i18n.T(ctx, "webhooks.description_placeholder") }/>
-			</div>
-			<fieldset>
-				<legend class="label">{ i18n.T(ctx, "webhooks.events_label") }</legend>
-				<p class="text-xs text-fg-muted mb-2">{ i18n.T(ctx, "webhooks.events_hint") }</p>
-				for _, et := range d.EventTypes {
-					<label class="flex items-center gap-2 text-sm py-0.5">
-						<input type="checkbox" name="event_types" value={ et } class="rounded"/>
-						<code class="text-xs">{ et }</code>
-					</label>
-				}
-			</fieldset>
-			<button type="submit" class="btn btn-primary inline-flex items-center gap-2" data-testid="webhook-create">
-				@Spinner()
-				{ i18n.T(ctx, "webhooks.create") }
-			</button>
-		</form>
-	</div>
+	}
+	@ui.Card(ui.CardOpts{Attrs: ui.Attrs{Class: "max-w-lg mb-6"}}) {
+		@ui.Heading(ui.HeadingOpts{
+			Text: i18n.T(ctx, "webhooks.create_title"), Level: 2,
+			Unstyled: true, Attrs: ui.Attrs{Class: "font-semibold mb-3"},
+		})
+		@ui.Form(ui.FormOpts{
+			Target: "#webhooks-container", Swap: "innerHTML",
+			Attrs: ui.Attrs{
+				Class: "space-y-3",
+				HX:    ui.HX{Post: "/app/settings/webhooks/endpoints", Disable: true},
+			},
+		}) {
+			// The rejection is the field's own, not a banner above the form:
+			// that is what puts aria-invalid on the control that was refused and
+			// points aria-describedby at the reason.
+			@ui.Field(ui.FieldOpts{
+				Name: "url", Label: i18n.T(ctx, "webhooks.url_label"), Required: true, Error: d.URLErr,
+			}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "url", Type: ui.InputTypeURL, Placeholder: "https://example.com/hooks/gogogadget",
+					Required: true, Error: d.URLErr, Attrs: ui.Attrs{TestID: "webhook-url"},
+				})
+			}
+			@ui.Field(ui.FieldOpts{Name: "description", Label: i18n.T(ctx, "webhooks.description_label"), Optional: true}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "description", Placeholder: i18n.T(ctx, "webhooks.description_placeholder"),
+				})
+			}
+			// CheckboxGroup owns the legend and points aria-describedby at the
+			// hint below; Hint renders the element that id names. "None selected
+			// = all events" is the rule a reader has to know before ticking
+			// nothing, so it must be part of the group, not loose text near it.
+			@ui.CheckboxGroup(ui.CheckboxGroupOpts{
+				Name:    "event_types",
+				Legend:  i18n.T(ctx, "webhooks.events_label"),
+				Hint:    i18n.T(ctx, "webhooks.events_hint"),
+				Options: webhookEventOptions(d.EventTypes),
+			})
+			@ui.Hint(ui.HintOpts{For: "event_types", Text: i18n.T(ctx, "webhooks.events_hint")})
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "webhooks.create"), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+				Attrs: ui.Attrs{TestID: "webhook-create"},
+			})
+		}
+	}
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "webhooks.endpoints_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "webhooks.endpoints_caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "url", Label: i18n.T(ctx, "webhooks.col_url")},
+			{Key: "events", Label: i18n.T(ctx, "webhooks.col_events"), HideBelow: ui.BreakpointSM},
+			{Key: "status", Label: i18n.T(ctx, "webhooks.col_status")},
+			{Key: "actions", Label: i18n.T(ctx, "webhooks.col_actions"), Align: ui.AlignEnd},
+		},
+		RowCount: len(d.Endpoints),
+		Empty: ui.EmptyState(ui.EmptyStateOpts{
+			Variant: ui.EmptyInline, Body: i18n.T(ctx, "webhooks.endpoints_empty"),
+		}),
+		Attrs: ui.Attrs{Class: "max-w-3xl mb-6"},
+	}) {
+		for _, ep := range d.Endpoints {
+			<tr data-testid="webhook-endpoint-row">
+				// A row header, not a cell: the URL is what identifies this row,
+				// and scope="row" is what makes a screen reader announce it
+				// alongside every other cell instead of reading "Disable" with
+				// no indication of which endpoint it disables.
+				<th scope="row" class="font-medium max-w-0 truncate text-left">{ ep.Url }</th>
+				<td class="hidden sm:table-cell text-fg-muted text-xs">
+					if len(ep.EventTypes) == 0 {
+						{ i18n.T(ctx, "webhooks.all_events") }
+					} else {
+						{ fmt.Sprint(len(ep.EventTypes)) }
+					}
+				</td>
+				<td>
+					if ep.DisabledAt.Valid {
+						@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "webhooks.disabled"), Kind: ui.KindDanger})
+					} else {
+						@ui.Badge(ui.BadgeOpts{Text: i18n.T(ctx, "webhooks.enabled"), Kind: ui.KindSuccess})
+					}
+				</td>
+				<td class="text-right">
+					@webhookEndpointActions(ep)
+				</td>
+			</tr>
+		}
+	}
+	@ui.SectionHeader(ui.SectionHeaderOpts{Text: i18n.T(ctx, "webhooks.deliveries_heading"), Attrs: ui.Attrs{Class: "mb-3"}})
+	@ui.DataTable(ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "webhooks.deliveries_caption"),
+		HiddenCaption: true,
+		Columns: []ui.Column{
+			{Key: "event", Label: i18n.T(ctx, "webhooks.col_event")},
+			{Key: "endpoint", Label: i18n.T(ctx, "webhooks.col_endpoint"), HideBelow: ui.BreakpointSM},
+			{Key: "status", Label: i18n.T(ctx, "webhooks.col_status")},
+			{Key: "attempts", Label: i18n.T(ctx, "webhooks.col_attempts"), Numeric: true},
+			{Key: "when", Label: i18n.T(ctx, "webhooks.col_when"), HideBelow: ui.BreakpointMD},
+			{Key: "actions", Label: i18n.T(ctx, "webhooks.col_actions"), Align: ui.AlignEnd},
+		},
+		RowCount: len(d.Deliveries),
+		Empty: ui.EmptyState(ui.EmptyStateOpts{
+			Variant: ui.EmptyInline, Body: i18n.T(ctx, "webhooks.deliveries_empty"),
+		}),
+		Attrs: ui.Attrs{Class: "max-w-3xl"},
+	}) {
+		for _, del := range d.Deliveries {
+			<tr data-testid="webhook-delivery-row">
+				<th scope="row" class="text-left font-normal">
+					@ui.Code(ui.CodeOpts{Text: del.EventType})
+				</th>
+				<td class="hidden sm:table-cell text-fg-muted text-xs max-w-0 truncate">{ del.EndpointUrl }</td>
+				<td>
+					// A dot with the outcome in words. The previous badge printed
+					// the raw column value, so "dead" reached the reader
+					// untranslated, and its colour carried meaning no
+					// screen-reader user could hear.
+					@ui.DeliveryStatus(ui.DeliveryStatusOpts{
+						State: deliveryState(del.Status),
+						Label: deliveryLabel(ctx, del.Status),
+					})
+				</td>
+				<td class="text-right tabular-nums text-fg-muted">{ fmt.Sprint(del.Attempts) }</td>
+				<td class="hidden md:table-cell text-fg-muted">{ del.CreatedAt.Time.Format("Jan 2, 15:04") }</td>
+				<td class="text-right">
+					if del.Status != "pending" {
+						@ui.Button(ui.ButtonOpts{
+							Label: i18n.T(ctx, "webhooks.replay"), Size: ui.SizeXS, Icon: ui.IconRefresh,
+							HX: ui.HX{
+								Post:   fmt.Sprintf("/app/settings/webhooks/deliveries/%d/replay", del.ID),
+								Target: "#webhooks-container", Swap: "innerHTML",
+							},
+							Attrs: ui.Attrs{TestID: "webhook-replay"},
+						})
+					}
+				</td>
+			</tr>
+		}
+	}
+}
 
-	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "webhooks.endpoints_heading") }</h2>
-	<div class="card !p-0 overflow-hidden max-w-3xl mb-6">
-		<table class="table">
-			<thead>
-				<tr>
-					<th>{ i18n.T(ctx, "webhooks.col_url") }</th>
-					<th>{ i18n.T(ctx, "webhooks.col_events") }</th>
-					<th>{ i18n.T(ctx, "webhooks.col_status") }</th>
-					<th class="text-right"></th>
-				</tr>
-			</thead>
-			<tbody>
-				if len(d.Endpoints) == 0 {
-					<tr><td colspan="4" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "webhooks.endpoints_empty") }</td></tr>
-				}
-				for _, ep := range d.Endpoints {
-					<tr data-testid="webhook-endpoint-row">
-						<td class="font-medium max-w-0 truncate">{ ep.Url }</td>
-						<td class="text-fg-muted text-xs">
-							if len(ep.EventTypes) == 0 {
-								{ i18n.T(ctx, "webhooks.all_events") }
-							} else {
-								{ fmt.Sprint(len(ep.EventTypes)) }
-							}
-						</td>
-						<td>
-							if ep.DisabledAt.Valid {
-								<span class="badge bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">{ i18n.T(ctx, "webhooks.disabled") }</span>
-							} else {
-								<span class="badge bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">{ i18n.T(ctx, "webhooks.enabled") }</span>
-							}
-						</td>
-						<td class="text-right">
-							<div class="flex justify-end gap-2">
-								<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/rotate", ep.ID) }
-									hx-target="#webhooks-container" hx-swap="innerHTML"
-									hx-confirm={ i18n.T(ctx, "webhooks.rotate_confirm") }
-									class="btn-ghost !px-2 !py-1 text-xs" data-testid={ fmt.Sprintf("webhook-rotate-%d", ep.ID) }>
-									{ i18n.T(ctx, "webhooks.rotate") }
-								</button>
-								if ep.DisabledAt.Valid {
-									<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/enable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.enable") }</button>
-								} else {
-									<button type="button" hx-post={ fmt.Sprintf("/app/settings/webhooks/endpoints/%d/disable", ep.ID) } hx-target="#webhooks-container" hx-swap="innerHTML" class="btn-ghost !px-2 !py-1 text-xs">{ i18n.T(ctx, "webhooks.disable") }</button>
-								}
-							</div>
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
+// webhookEndpointActions is one endpoint's controls.
+//
+// Rotation is confirmed and disable/enable is not, because they are not the
+// same kind of act: rotating invalidates the secret every live integration is
+// signing with, while disabling is undone by the button that replaces it.
+//
+// The rotate trigger names its endpoint and its dialog id is per row. Forty
+// rows offering forty controls called "Rotate" are indistinguishable to a
+// screen reader, and one shared dialog id would make every trigger in the table
+// open the first row's dialog.
+templ webhookEndpointActions(endpoint sqlc.WebhookEndpoint) {
+	<div class="card-actions">
+		@ui.ConfirmAction(ui.ConfirmActionOpts{
+			ID:           fmt.Sprintf("webhook-rotate-dialog-%d", endpoint.ID),
+			TriggerLabel: i18n.T(ctx, "webhooks.rotate_named", endpoint.Url),
+			TriggerIcon:  ui.IconKey,
+			Title:        i18n.T(ctx, "webhooks.rotate_title"),
+			Message:      i18n.T(ctx, "webhooks.rotate_confirm"),
+			ConfirmLabel: i18n.T(ctx, "webhooks.rotate_cta"),
+			CancelLabel:  i18n.T(ctx, "webhooks.rotate_cancel"),
+			Kind:         ui.KindWarn,
+			HX: ui.HX{
+				Post:   fmt.Sprintf("/app/settings/webhooks/endpoints/%d/rotate", endpoint.ID),
+				Target: "#webhooks-container", Swap: "innerHTML",
+			},
+			Attrs: ui.Attrs{TestID: fmt.Sprintf("webhook-rotate-%d", endpoint.ID)},
+		})
+		if endpoint.DisabledAt.Valid {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "webhooks.enable"), Size: ui.SizeXS, Icon: ui.IconPlay,
+				HX: ui.HX{
+					Post:   fmt.Sprintf("/app/settings/webhooks/endpoints/%d/enable", endpoint.ID),
+					Target: "#webhooks-container", Swap: "innerHTML",
+				},
+			})
+		} else {
+			@ui.Button(ui.ButtonOpts{
+				Label: i18n.T(ctx, "webhooks.disable"), Size: ui.SizeXS, Icon: ui.IconPause,
+				HX: ui.HX{
+					Post:   fmt.Sprintf("/app/settings/webhooks/endpoints/%d/disable", endpoint.ID),
+					Target: "#webhooks-container", Swap: "innerHTML",
+				},
+			})
+		}
 	</div>
+}
 
-	<h2 class="text-lg font-semibold mb-3">{ i18n.T(ctx, "webhooks.deliveries_heading") }</h2>
-	<div class="card !p-0 overflow-hidden max-w-3xl">
-		<table class="table">
-			<thead>
-				<tr>
-					<th>{ i18n.T(ctx, "webhooks.col_event") }</th>
-					<th>{ i18n.T(ctx, "webhooks.col_endpoint") }</th>
-					<th>{ i18n.T(ctx, "webhooks.col_status") }</th>
-					<th>{ i18n.T(ctx, "webhooks.col_attempts") }</th>
-					<th>{ i18n.T(ctx, "webhooks.col_when") }</th>
-					<th class="text-right"></th>
-				</tr>
-			</thead>
-			<tbody>
-				if len(d.Deliveries) == 0 {
-					<tr><td colspan="6" class="text-center text-fg-muted py-6">{ i18n.T(ctx, "webhooks.deliveries_empty") }</td></tr>
-				}
-				for _, del := range d.Deliveries {
-					<tr data-testid="webhook-delivery-row">
-						<td><code class="text-xs">{ del.EventType }</code></td>
-						<td class="text-fg-muted text-xs max-w-0 truncate">{ del.EndpointUrl }</td>
-						<td><span class="badge bg-surface-raised text-fg-muted">{ del.Status }</span></td>
-						<td class="text-fg-muted">{ fmt.Sprint(del.Attempts) }</td>
-						<td class="text-fg-muted">{ del.CreatedAt.Time.Format("Jan 2, 15:04") }</td>
-						<td class="text-right">
-							if del.Status != "pending" {
-								<button
-									type="button"
-									hx-post={ fmt.Sprintf("/app/settings/webhooks/deliveries/%d/replay", del.ID) }
-									hx-target="#webhooks-container"
-									hx-swap="innerHTML"
-									class="btn-ghost !px-2 !py-1 text-xs"
-									data-testid="webhook-replay"
-								>{ i18n.T(ctx, "webhooks.replay") }</button>
-							}
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
+// webhookEventOptions turns the event catalog into checkbox options. Nothing is
+// preselected: an endpoint with no boxes ticked subscribes to everything, which
+// is the documented default and what the hint says.
+func webhookEventOptions(eventTypes []string) []ui.Option {
+	options := make([]ui.Option, 0, len(eventTypes))
+	for _, eventType := range eventTypes {
+		options = append(options, ui.Option{Value: eventType, Label: eventType})
+	}
+	return options
+}
+
+// deliveryState maps the persisted status onto the catalog's delivery axis. An
+// unknown status normalizes to pending inside the component, which is the safe
+// answer: claiming a webhook arrived when nobody knows is the one wrong one.
+func deliveryState(status string) ui.DeliveryState {
+	switch status {
+	case "success":
+		return ui.DeliveryDelivered
+	case "dead":
+		return ui.DeliveryFailed
+	default:
+		return ui.DeliveryPending
+	}
+}
+
+// deliveryLabel is the outcome in the reader's language. "dead" is a column
+// value, not a sentence anyone should have to read.
+func deliveryLabel(ctx context.Context, status string) string {
+	switch status {
+	case "success":
+		return i18n.T(ctx, "webhooks.status_success")
+	case "dead":
+		return i18n.T(ctx, "webhooks.status_dead")
+	default:
+		return i18n.T(ctx, "webhooks.status_pending")
+	}
 }

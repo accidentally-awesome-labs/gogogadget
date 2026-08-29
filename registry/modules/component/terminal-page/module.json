@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "module": {
+    "id": "component/terminal-page",
+    "kind": "component",
+    "name": "terminal-page",
+    "revision": 1,
+    "contract": 1,
+    "title": "TerminalPage",
+    "description": "The TerminalPage renderer and its options.",
+    "requires": [
+      "element/ui-core"
+    ],
+    "files": [
+      {
+        "source": "internal/web/templates/ui/terminal-page.templ",
+        "target": "internal/web/templates/ui/terminal-page.templ",
+        "class": "templ",
+        "sha256": "14a13467c9ecb34e63efbb226f0886e40f9a2bbc29138355c24c71537be92e86",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {},
+    "runtime": {
+      "ui": [
+        {
+          "name": "terminal-page",
+          "family": "navigation",
+          "signature": "templ TerminalPage(o TerminalPageOpts)",
+          "summary": "The one shape every terminal page takes: a big code or title, a sentence, optional detail, optional way home.",
+          "guidance": "An empty BackHomeLabel suppresses the link.",
+          "states": [
+            "default",
+            "overflow"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}
