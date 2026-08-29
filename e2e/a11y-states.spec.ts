@@ -305,7 +305,12 @@ const interactionCases: StateCase[] = [
       const picker = page.locator('[data-ui="date-picker"]').filter({ has: page.locator('#starts_on') });
       try {
         await page.waitForFunction(() => window.customElements.get('calendar-date') !== undefined, null, {
-          timeout: 20_000,
+          // 40s, not 20s: the fetch is same-origin over HTTP/1.1, and this
+          // suite runs many contexts in parallel - each holding an eternal SSE
+          // connection - against one host with six connection slots. A queued
+          // module script can wait out 20s with the request merely pending,
+          // which reads exactly like this failure and is not the loader's.
+          timeout: 40_000,
         });
       } catch (error) {
         // Say which of the three it was rather than leaving a bare timeout. The
@@ -314,7 +319,7 @@ const interactionCases: StateCase[] = [
         // that is a product bug and must not read the same as a slow fetch.
         const notes = assetNotes.get(page) ?? [];
         throw new Error(
-          `the cally engine never defined <calendar-date> within 20s. Recorded asset/console activity:\n${
+          `the cally engine never defined <calendar-date> within 40s. Recorded asset/console activity:\n${
             notes.join('\n') || '(none — no request failed and nothing errored, so the fetch was merely slow)'
           }`,
           { cause: error },
@@ -422,7 +427,10 @@ for (const theme of THEMES) {
           c.desktopOnly === true && test.info().project.name === 'mobile',
           'the control does not exist below the md breakpoint',
         );
-        test.setTimeout(30_000 * (c.scans ?? 1) + (c.awaitsVendor === true ? 30_000 : 0));
+        // The vendor allowance has to clear the engine wait above (40s) with
+        // room for the scan that follows it, or the test times out before its
+        // own diagnostic can fire and the failure reads as a bare timeout.
+        test.setTimeout(30_000 * (c.scans ?? 1) + (c.awaitsVendor === true ? 50_000 : 0));
         const { page, close } = await open(browser, '', theme);
         try {
           await galleryReady(page);

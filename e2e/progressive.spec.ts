@@ -301,6 +301,27 @@ test.describe('no script — dialogs', () => {
     }
   });
 
+  // A drawer is a dialog with geometry, and it is the one shape the motion
+  // system broke in production-shaped CSS: animating an element that was
+  // parsed already-open moves its rect after first paint, which is the state
+  // Chromium's scrollIntoViewIfNeeded never converges on. The dismissed-path
+  // assertions double as the pin that a served-open drawer renders AT REST -
+  // the click below hangs forever if it ever animates again.
+  test('a drawer dismisses through its form method="dialog" close control', async ({ browser }) => {
+    const { page, context } = await noScript(browser);
+    try {
+      await withOpenDialog(page, 'gallery-drawer');
+      const drawer = page.locator('#gallery-drawer');
+      await expect(drawer).toBeVisible();
+      const close = drawer.getByRole('button', { name: 'Close' });
+      await expect(close).toHaveAttribute('type', 'submit');
+      await close.click();
+      await expect(drawer).toBeHidden();
+    } finally {
+      await context.close();
+    }
+  });
+
   test('an alert dialog cancels through its own submit control', async ({ browser }) => {
     const { page, context } = await noScript(browser);
     try {
@@ -760,15 +781,29 @@ test.describe('reduced motion', () => {
 
   // Chart.js owns the animation, so its own public registry is the honest place
   // to read the resolved setting; there is no DOM state that reports it.
+  //
+  // ENGINE_BUDGET covers the lazily fetched vendor bundle, not a race. The
+  // fetch is same-origin over HTTP/1.1 and this suite runs many contexts in
+  // parallel - each holding an eternal SSE connection - against one host with
+  // six connection slots, so a queued 208KB bundle can sit pending for tens of
+  // seconds with no request failing and nothing logged. Every test that waits
+  // on an engine raises its own timeout to match, or the test budget expires
+  // first and the failure reads as a broken widget instead of a slow fetch.
+  const ENGINE_BUDGET = 40_000;
+
   async function chartAnimation(page: Page): Promise<unknown> {
     await page.goto('/dev/gallery');
-    await page.waitForFunction(() => {
-      const runtime = window as unknown as {
-        Chart?: { getChart(node: Element): { options: { animation: unknown } } | undefined };
-      };
-      const canvas = document.querySelector('[data-ui="bar-chart"] [data-chart-canvas]');
-      return Boolean(runtime.Chart && canvas && runtime.Chart.getChart(canvas));
-    });
+    await page.waitForFunction(
+      () => {
+        const runtime = window as unknown as {
+          Chart?: { getChart(node: Element): { options: { animation: unknown } } | undefined };
+        };
+        const canvas = document.querySelector('[data-ui="bar-chart"] [data-chart-canvas]');
+        return Boolean(runtime.Chart && canvas && runtime.Chart.getChart(canvas));
+      },
+      null,
+      { timeout: ENGINE_BUDGET },
+    );
     // The visible consequence of a successful init: the mount is revealed, so
     // the assertion below is about a chart that really drew.
     await expect(page.locator('[data-ui="bar-chart"] [data-chart-mount]')).toBeVisible();
@@ -782,6 +817,7 @@ test.describe('reduced motion', () => {
   }
 
   test('chart animation is disabled under reduced motion', async ({ browser }) => {
+    test.setTimeout(75_000);
     const { page, context } = await open(browser, 'reduce');
     try {
       expect(await chartAnimation(page)).toBe(false);
@@ -791,6 +827,7 @@ test.describe('reduced motion', () => {
   });
 
   test('charts animate when motion is allowed', async ({ browser }) => {
+    test.setTimeout(75_000);
     const { page, context } = await open(browser, 'no-preference');
     try {
       expect(await chartAnimation(page)).not.toBe(false);
@@ -803,13 +840,17 @@ test.describe('reduced motion', () => {
   // Sortable.get is its documented accessor for the instance on an element.
   async function kanbanAnimation(page: Page): Promise<number> {
     await page.goto('/dev/gallery');
-    await page.waitForFunction(() => {
-      const runtime = window as unknown as {
-        Sortable?: { get(node: Element): { options: { animation: number } } | undefined };
-      };
-      const list = document.querySelector('[data-ui="kanban"] [data-kanban-list]');
-      return Boolean(runtime.Sortable && list && runtime.Sortable.get(list));
-    });
+    await page.waitForFunction(
+      () => {
+        const runtime = window as unknown as {
+          Sortable?: { get(node: Element): { options: { animation: number } } | undefined };
+        };
+        const list = document.querySelector('[data-ui="kanban"] [data-kanban-list]');
+        return Boolean(runtime.Sortable && list && runtime.Sortable.get(list));
+      },
+      null,
+      { timeout: ENGINE_BUDGET },
+    );
     return page.evaluate(() => {
       const runtime = window as unknown as {
         Sortable: { get(node: Element): { options: { animation: number } } };
@@ -820,6 +861,7 @@ test.describe('reduced motion', () => {
   }
 
   test('kanban drag animation is zero under reduced motion', async ({ browser }) => {
+    test.setTimeout(75_000);
     const { page, context } = await open(browser, 'reduce');
     try {
       expect(await kanbanAnimation(page)).toBe(0);
@@ -829,6 +871,7 @@ test.describe('reduced motion', () => {
   });
 
   test('kanban cards animate when motion is allowed', async ({ browser }) => {
+    test.setTimeout(75_000);
     const { page, context } = await open(browser, 'no-preference');
     try {
       expect(await kanbanAnimation(page)).toBeGreaterThan(0);
