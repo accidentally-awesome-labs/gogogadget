@@ -441,19 +441,23 @@
 
   /* A drawer enters from the edge it is anchored to, so it replaces the centred
      dialog's rise. These sit after .dialog[open] deliberately: the selectors
-     have identical specificity, so source order is what decides. */
+     have identical specificity, so source order is what decides.
+
+     The enter animation is scoped to :modal for the same reason the dialog's
+     is, and expressed as keyframes for the same reason: a drawer an HTML
+     document parsed with `open` was never arriving, and animating it moves its
+     rect after first paint - which is the state Chromium's
+     scrollIntoViewIfNeeded cannot converge on. */
   .drawer-right { transform: translateX(100%); }
   .drawer-left  { transform: translateX(-100%); }
   .drawer-top    { transform: translateY(-100%); }
   .drawer-bottom { transform: translateY(100%); }
   .drawer-right[open], .drawer-left[open],
   .drawer-top[open], .drawer-bottom[open] { transform: none; }
-  @starting-style {
-    .drawer-right[open] { transform: translateX(100%); }
-    .drawer-left[open]  { transform: translateX(-100%); }
-    .drawer-top[open]    { transform: translateY(-100%); }
-    .drawer-bottom[open] { transform: translateY(100%); }
-  }
+  .drawer-right[open]:modal { animation: drawer-right-enter var(--motion-base) var(--ease-standard); }
+  .drawer-left[open]:modal  { animation: drawer-left-enter var(--motion-base) var(--ease-standard); }
+  .drawer-top[open]:modal    { animation: drawer-top-enter var(--motion-base) var(--ease-standard); }
+  .drawer-bottom[open]:modal { animation: drawer-bottom-enter var(--motion-base) var(--ease-standard); }
 
   /* Menus, popovers, hover cards and the command palette are all native
      popovers, so one rule covers every one of them. Faster than the dialog:
@@ -783,6 +787,13 @@
     transform: translateY(0.5rem) scale(0.98);
   }
 }
+
+/* The drawer's arrival, one per anchored edge - explicit rather than a custom
+   property indirection, so the edge a drawer slides from is readable here. */
+@keyframes drawer-right-enter { from { transform: translateX(100%); } }
+@keyframes drawer-left-enter  { from { transform: translateX(-100%); } }
+@keyframes drawer-top-enter   { from { transform: translateY(-100%); } }
+@keyframes drawer-bottom-enter { from { transform: translateY(100%); } }
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }

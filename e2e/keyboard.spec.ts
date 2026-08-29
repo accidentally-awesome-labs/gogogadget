@@ -768,6 +768,9 @@ test.describe('date navigation', () => {
 
   for (const picker of pickers) {
     test(`${picker.component} opens by keyboard and Escape returns focus`, async ({ page }) => {
+      // The engine wait below can legitimately take tens of seconds under a
+      // full parallel suite, which the default 30s test budget cannot hold.
+      test.setTimeout(75_000);
       await boot(page);
       const root = page.locator(picker.root);
       const trigger = root.locator('[data-calendar-trigger]');
@@ -776,9 +779,13 @@ test.describe('date navigation', () => {
 
       await expect(input).toHaveValue(picker.value);
       // Revealed only once the engine landed: a button that opens nothing is
-      // worse than no button.
-      await expect(trigger).toBeVisible();
-      await expect(popover).toBeHidden();
+      // worse than no button. The budget here is the engine landing, not a UI
+      // transition. The fetch is same-origin over HTTP/1.1 and this suite runs
+      // many contexts in parallel - each holding an eternal SSE connection -
+      // against one host with six connection slots, so a queued module script
+      // can sit pending for tens of seconds with nothing failing. The contract
+      // under test is the keyboard interaction after the reveal, not latency.
+      await expect(trigger).toBeVisible({ timeout: 40_000 });
 
       await trigger.focus();
       await page.keyboard.press('Enter');

@@ -24,7 +24,7 @@
         "source": "input.css",
         "target": "input.css",
         "class": "style",
-        "sha256": "6e9278d5bb7389ebcee4fdb304f05838e330b2b35db12c8bc488222a000ff4e3",
+        "sha256": "0f35e5c4842721e57f6780eace36c7c01aff228656fadb8f22c57428ebd0aeed",
         "rewrite_module": false,
         "contract": false
       },
