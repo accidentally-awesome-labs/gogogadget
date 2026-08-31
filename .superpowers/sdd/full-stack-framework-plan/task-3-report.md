@@ -43,7 +43,7 @@ The full validator output also reports the four original element/component/page/
 
 ## Commit
 
-Implementation changes are based on reviewed commit `d9f2137`; the final implementation commit is recorded immediately after this report is committed.
+Implementation changes are based on reviewed commit `d9f2137`; implementation commit: `e170f3b`.
 
 ## Concerns
 
