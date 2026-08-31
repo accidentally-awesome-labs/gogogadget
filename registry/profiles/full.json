@@ -250,8 +250,19 @@
       "ggg/workflow/seo-discovery"
     ],
     "name": "full",
-    "provider_defaults": {},
-    "required_provider_slots": [],
+    "provider_defaults": {
+      "ggg/mail": {
+        "development": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
+        "test": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
+        "production": {"adapter": "ggg/system/mail-resend", "target": "resend"}
+      },
+      "ggg/storage": {
+        "development": {"adapter": "ggg/system/storage-filesystem", "target": "filesystem"},
+        "test": {"adapter": "ggg/system/storage-filesystem", "target": "filesystem"},
+        "production": {"adapter": "ggg/system/storage-s3", "target": "r2"}
+      }
+    },
+    "required_provider_slots": ["ggg/mail", "ggg/storage"],
     "revision": 1,
     "title": "Full GoGoGadget"
   },

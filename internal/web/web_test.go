@@ -7,12 +7,15 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/a-h/templ"
-
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
+	"github.com/gogogadget/gogogadget/internal/flags"
+	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,7 +33,9 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
 	server, err := NewServer(Deps{
 		Config: &cfg, Log: log, Version: "test",
-		Docs: &content.Docs{},
+		Docs: &content.Docs{}, Storage: storagefs.NewDevStore(t.TempDir()),
+		Flags: flags.NewDBEvaluator(nil, 30*time.Second),
+		Reporter: observability.NoopReporter{},
 	})
 	if err != nil {
 		t.Fatalf("NewServer: %v", err)

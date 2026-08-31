@@ -32,6 +32,12 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 		return nil, fmt.Errorf("server: database pool dependency is required")
 	case d.Queries == nil:
 		return nil, fmt.Errorf("server: queries dependency is required")
+	case d.Storage == nil:
+		return nil, fmt.Errorf("server: storage store capability is required")
+	case d.Flags == nil:
+		return nil, fmt.Errorf("server: flags evaluator capability is required")
+	case d.Reporter == nil:
+		return nil, fmt.Errorf("server: observability reporter capability is required")
 	}
 	if err := ctx.Err(); err != nil {
 		return nil, err

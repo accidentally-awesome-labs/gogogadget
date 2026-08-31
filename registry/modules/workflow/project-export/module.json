@@ -1,137 +1,135 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "projects.export"
-      ]
-    },
+    "id": "ggg/workflow/project-export",
+    "kind": "workflow",
+    "name": "project-export",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Project CSV export",
+    "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
+    "requires": [
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/jobs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
         "source": "internal/jobs/export_csv.go",
-        "target": "internal/jobs/export_csv.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
-        "source": "internal/jobs/export_csv_test.go",
-        "target": "internal/jobs/export_csv_test.go"
-      },
-      {
+        "target": "internal/jobs/export_csv.go",
         "class": "go",
-        "contract": false,
+        "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
         "rewrite_module": true,
-        "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/export_csv_test.go",
+        "target": "internal/jobs/export_csv_test.go",
+        "class": "test",
+        "sha256": "83929189bc028ef89cf0fe6e1e68ef5a6dd61c3c611699a10bdfd8d7c9781d26",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_project_export.go",
-        "target": "internal/web/workflow_project_export.go"
+        "target": "internal/web/workflow_project_export.go",
+        "class": "go",
+        "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/workflow/project-export",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "project-export",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/jobs"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
+    "claims": {
+      "routes": [
+        "projects.export"
+      ]
+    },
     "runtime": {
-      "jobs": [
-        {
-          "handler": "defineExportProjectsCSV",
-          "kind": "export.projects_csv",
-          "max_attempts": 0,
-          "package": "internal/jobs",
-          "schedulable": false
-        }
-      ],
       "routes": [
         {
-          "handler": "handleProjectsExport",
           "id": "projects.export",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/app/projects/export",
+          "scope": "app",
           "policy": {
-            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": false
           },
-          "scope": "app"
+          "package": "internal/web",
+          "handler": "handleProjectsExport"
+        }
+      ],
+      "jobs": [
+        {
+          "kind": "export.projects_csv",
+          "package": "internal/jobs",
+          "handler": "defineExportProjectsCSV"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Project CSV export"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

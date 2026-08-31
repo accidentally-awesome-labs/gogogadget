@@ -10,9 +10,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
-	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/mail/dev"
+	"github.com/gogogadget/gogogadget/internal/mail/resend"
 	"github.com/gogogadget/gogogadget/internal/observability"
-	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/storage/filesystem"
 )
 
 // bootHost is an otherwise unconfigured environment pointed at an empty scratch
@@ -69,11 +70,11 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 	}
 
 	// Ports with a local stand-in must be live.
-	if _, ok := runtime.MailSender.(*mail.DevSender); !ok {
-		t.Fatalf("MailSender = %T, want *mail.DevSender", runtime.MailSender)
+	if _, ok := runtime.MailSender.(*dev.DevSender); !ok {
+		t.Fatalf("MailSender = %T, want *dev.DevSender", runtime.MailSender)
 	}
-	if _, ok := runtime.StorageStore.(*storage.DevStore); !ok {
-		t.Fatalf("StorageStore = %T, want *storage.DevStore", runtime.StorageStore)
+	if _, ok := runtime.StorageStore.(*filesystem.DevStore); !ok {
+		t.Fatalf("StorageStore = %T, want *filesystem.DevStore", runtime.StorageStore)
 	}
 	if _, ok := runtime.ObservabilityReporter.(observability.NoopReporter); !ok {
 		t.Fatalf("ObservabilityReporter = %T, want observability.NoopReporter", runtime.ObservabilityReporter)
@@ -95,13 +96,21 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 	}
 }
 
-// Configuration reaches the modules through the host, so flipping one host value
-// must change which adapter the generated graph selects.
+// Configuration reaches the modules through the host, so APP_ENV chooses the
+// production adapter set rather than credentials selecting it.
 func TestBootSelectsConfiguredAdapters(t *testing.T) {
 	host := bootHost(t, "boot_configured", map[string]string{
-		"DEV_AUTH_BYPASS": "true",
-		"RESEND_API_KEY":  "re_test",
-		"EMAIL_FROM":      "hello@example.com",
+		"APP_ENV":                 "production",
+		"CLERK_PORTAL_URL":        "https://accounts.example.com",
+		"CLERK_PUBLISHABLE_KEY":   "pk_live_fixture",
+		"CLERK_SECRET_KEY":        "sk_live_fixture",
+		"CLERK_WEBHOOK_SECRET":    "whsec_fixture",
+		"RESEND_API_KEY":          "re_test",
+		"STORAGE_R2_ACCESS_KEY_ID": "ak_fixture",
+		"STORAGE_R2_ACCOUNT_ID":   "acct_fixture",
+		"STORAGE_R2_BUCKET":       "bucket_fixture",
+		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
+		"EMAIL_FROM":              "hello@example.com",
 	})
 
 	runtime, err := Boot(context.Background(), host, Options{})
@@ -109,8 +118,8 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		t.Fatalf("Boot: %v", err)
 	}
 	t.Cleanup(func() { closeRuntime(t, runtime) })
-	if _, ok := runtime.MailSender.(*mail.ResendSender); !ok {
-		t.Fatalf("MailSender = %T, want *mail.ResendSender", runtime.MailSender)
+	if _, ok := runtime.MailSender.(*resend.ResendSender); !ok {
+		t.Fatalf("MailSender = %T, want *resend.ResendSender", runtime.MailSender)
 	}
 	if runtime.IdentityVerifier == nil {
 		t.Fatal("IdentityVerifier = nil, want the dev bypass verifier")

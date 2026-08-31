@@ -11,6 +11,9 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
+	"github.com/gogogadget/gogogadget/internal/flags"
+	"github.com/gogogadget/gogogadget/internal/observability"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -25,6 +28,9 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 		Config:  &config.Config{Env: "test", AppURL: "http://localhost:8080"},
 		DB:      pool,
 		Queries: queries,
+		Storage: storagefs.NewDevStore(t.TempDir()),
+		Flags: flags.NewDBEvaluator(queries, 30*time.Second),
+		Reporter: observability.NoopReporter{},
 	})
 	if err != nil {
 		t.Fatalf("NewModule: %v", err)

@@ -1,4 +1,4 @@
-package storage
+package s3
 
 import (
 	"bytes"
@@ -12,9 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-// R2Store talks to Cloudflare R2 (S3-compatible API). This is the only
-// SDK-touching file in the storage seam; STORAGE_R2_ENDPOINT redirects it at
-// any S3-compatible endpoint (AWS S3, MinIO).
+// R2Store talks to an S3-compatible API. The endpoint may point at R2, MinIO,
+// or another S3-compatible service; the adapter owns SDK details.
 type R2Store struct {
 	client  *s3.Client
 	presign *s3.PresignClient

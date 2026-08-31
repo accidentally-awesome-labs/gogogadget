@@ -13,7 +13,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
-	"github.com/gogogadget/gogogadget/internal/storage"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -36,7 +36,7 @@ var onePixelPNG = []byte{
 func mediaServer(t *testing.T, id string) (*Server, *http.Cookie, string) {
 	t.Helper()
 	root := t.TempDir()
-	s := integrationServer(t, func(d *Deps) { d.Storage = storage.NewDevStore(root) })
+	s := integrationServer(t, func(d *Deps) { d.Storage = storagefs.NewDevStore(root) })
 	return s, staffUser(t, s, "user_"+id, "org_"+id, identity.RoleAdmin), root
 }
 

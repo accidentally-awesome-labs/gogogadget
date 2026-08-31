@@ -248,7 +248,7 @@ transitive closure itself.
 | `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (33)
+## Systems (37)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
@@ -268,7 +268,9 @@ transitive closure itself.
 | `ggg/system/impersonation` | Support impersonation | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/jobs` | Background job queue | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/mail` `ggg/system/observability` `ggg/system/storage` | `drain-required` |
 | `ggg/system/llm` | Language model | `ggg/system/apphost` `ggg/system/config` | `free` |
-| `ggg/system/mail` | Transactional mail | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/mail` | Transactional mail seam | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/mail-dev` | Filesystem mail | `ggg/system/apphost` `ggg/system/config` `ggg/system/mail` | `free` |
+| `ggg/system/mail-resend` | Resend mail | `ggg/system/apphost` `ggg/system/config` `ggg/system/mail` | `free` |
 | `ggg/system/metrics` | Runtime metrics endpoint | `ggg/system/server` | `free` |
 | `ggg/system/modkit` | Module registry engine | — | `replacement-required` |
 | `ggg/system/notifications` | In-app notifications | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
@@ -281,7 +283,9 @@ transitive closure itself.
 | `ggg/system/seo` | Discovery surfaces | `ggg/system/server` | `free` |
 | `ggg/system/server` | HTTP server core | `ggg/system/analytics` `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` `ggg/system/content` `ggg/system/content-assets` `ggg/system/database` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/identity` `ggg/system/llm` `ggg/system/observability` `ggg/system/storage` | `replacement-required` |
 | `ggg/system/static` | Static asset serving | `ggg/system/server` | `replacement-required` |
-| `ggg/system/storage` | Object storage | `ggg/system/apphost` `ggg/system/config` | `retain-data` |
+| `ggg/system/storage` | Object storage seam | `ggg/system/apphost` `ggg/system/config` | `retain-data` |
+| `ggg/system/storage-filesystem` | Filesystem storage | `ggg/system/apphost` `ggg/system/config` `ggg/system/storage` | `free` |
+| `ggg/system/storage-s3` | S3-compatible storage | `ggg/system/apphost` `ggg/system/config` `ggg/system/storage` | `retain-data` |
 | `ggg/system/testdb` | Per-package test databases | `ggg/system/database` | `free` |
 | `ggg/system/usage` | Usage metering | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/webhooks` | Outbound webhooks | `ggg/system/database` `ggg/system/organizations` | `retain-data` |

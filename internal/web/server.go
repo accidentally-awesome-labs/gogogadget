@@ -44,9 +44,9 @@ type Server struct {
 	verifier      identity.Verifier
 	fetcher       identity.UserFetcher
 	deleter       identity.Deleter // nil → local-only account deletion
-	billingClient billing.Client   // nil when Polar is unconfigured
+	billingClient billing.Client
 	analytics     analytics.Capturer
-	store         storage.Store // DevStore by default; R2 when configured
+	store         storage.Store
 	llm           llm.Completer // nil when unconfigured → 503
 	flags         flags.Evaluator
 	reporter      observability.Reporter
@@ -89,13 +89,13 @@ type Deps struct {
 
 	Verifier        identity.Verifier
 	Fetcher         identity.UserFetcher
-	IdentityDeleter identity.Deleter // nil → local-only deletion; DevDeleter under bypass
+	IdentityDeleter identity.Deleter
 	Billing         billing.Client
 	Analytics       analytics.Capturer
-	Storage         storage.Store          // nil → DevStore(tmp/uploads)
-	LLM             llm.Completer          // nil → AI routes 503 not_configured
-	Flags           flags.Evaluator        // nil → DB-backed evaluator (30s cache)
-	Reporter        observability.Reporter // nil → NoopReporter
+	Storage         storage.Store
+	LLM             llm.Completer          // nil when unconfigured → AI routes 503
+	Flags           flags.Evaluator
+	Reporter        observability.Reporter
 }
 
 func NewServer(d Deps) (*Server, error) {
@@ -114,18 +114,9 @@ func NewServer(d Deps) (*Server, error) {
 		analytics:       analytics.NoopCapturer{},
 		store:           d.Storage,
 		llm:             d.LLM,
-		flags:           d.Flags,
+		flags:            d.Flags,
 		reporter:        d.Reporter,
-		mux:             http.NewServeMux(),
-	}
-	if s.store == nil {
-		s.store = storage.NewDevStore("tmp/uploads")
-	}
-	if s.flags == nil {
-		s.flags = flags.NewDBEvaluator(s.q, 30*time.Second)
-	}
-	if s.reporter == nil {
-		s.reporter = observability.NoopReporter{}
+		mux:              http.NewServeMux(),
 	}
 	// A bad content-type declaration is a wiring bug, so it refuses here. There
 	// is deliberately no fallback to the defaults: silently serving a different

@@ -1,45 +1,99 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "admin.media.index"
-      ]
-    },
+    "id": "ggg/page/admin-media",
+    "kind": "page",
+    "name": "admin-media",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Admin media library",
+    "description": "The paginated platform image library that the content editor and admins browse.",
+    "requires": [
+      {
+        "id": "ggg/system/content",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The paginated platform image library that the content editor and admins browse.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "1a37e1e9c8a9d4d2db7b3cc6e9b54c1495db8ad4ef16441c7164dbb4e28a3b81",
         "source": "internal/web/media_test.go",
-        "target": "internal/web/media_test.go"
+        "target": "internal/web/media_test.go",
+        "class": "test",
+        "sha256": "23994c4d9e9f44748b4c2ac7f6676767c521baf64d79a9143773658fbbb35df4",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
         "source": "internal/web/page_admin_media.go",
-        "target": "internal/web/page_admin_media.go"
+        "target": "internal/web/page_admin_media.go",
+        "class": "go",
+        "sha256": "5f9faac05bc9256fb66d7850ad707f7f42b09fde6fc80558aac3ee632c903d05",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/admin-media",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "admin.media.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.media.index",
+          "method": "GET",
+          "pattern": "/admin/media",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminMedia"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "admin.media.back_to_content": "Back to content",
@@ -65,16 +119,16 @@
         "admin.media.back_to_content": "Volver al contenido",
         "admin.media.col_actions": "Acciones",
         "admin.media.col_filename": "Nombre de archivo",
-        "admin.media.col_preview": "Previsualizaci\u00f3n",
-        "admin.media.col_size": "Tama\u00f1o",
+        "admin.media.col_preview": "Previsualización",
+        "admin.media.col_size": "Tamaño",
         "admin.media.col_uploaded": "Subido",
-        "admin.media.delete_confirm": "\u00bfEliminar esta imagen? Las entradas que la usen se romper\u00e1n.",
+        "admin.media.delete_confirm": "¿Eliminar esta imagen? Las entradas que la usen se romperán.",
         "admin.media.delete_row": "Eliminar %s",
-        "admin.media.delete_title": "\u00bfEliminar esta imagen?",
+        "admin.media.delete_title": "¿Eliminar esta imagen?",
         "admin.media.deleted": "Imagen eliminada.",
-        "admin.media.empty": "Todav\u00eda no se han subido medios.",
+        "admin.media.empty": "Todavía no se han subido medios.",
         "admin.media.invalid_missing": "Elige un archivo para subir.",
-        "admin.media.invalid_type": "Solo se aceptan im\u00e1genes PNG, JPEG, GIF y WebP.",
+        "admin.media.invalid_type": "Solo se aceptan imágenes PNG, JPEG, GIF y WebP.",
         "admin.media.row_actions_aria": "Acciones para %s",
         "admin.media.title": "Medios",
         "admin.media.upload": "Subir",
@@ -82,67 +136,13 @@
         "admin.media.uploaded": "Imagen subida."
       }
     },
-    "migrations": [],
-    "name": "admin-media",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/content"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "routes": [
-        {
-          "handler": "handleAdminMedia",
-          "id": "admin.media.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/admin/media",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "admin"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin media library"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -1,4 +1,4 @@
-package storage
+package storage_test
 
 import (
 	"context"
@@ -9,13 +9,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	s3store "github.com/gogogadget/gogogadget/internal/storage/s3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestDevStoreRoundTrip(t *testing.T) {
+func TestFilesystemStoreRoundTrip(t *testing.T) {
 	root := t.TempDir()
-	s := NewDevStore(root)
+	s := filesystem.NewDevStore(root)
 	ctx := context.Background()
 
 	n, err := s.Put(ctx, "orgs/org_1/abc.txt", "text/plain", strings.NewReader("hello bytes"))
@@ -35,9 +38,9 @@ func TestDevStoreRoundTrip(t *testing.T) {
 	require.Error(t, err, "deleted object must not be servable")
 }
 
-func TestDevStoreContainsTraversal(t *testing.T) {
+func TestFilesystemStoreContainsTraversal(t *testing.T) {
 	root := t.TempDir()
-	s := NewDevStore(root)
+	s := filesystem.NewDevStore(root)
 	ctx := context.Background()
 
 	// "../" cannot escape the root: Clean("/"+key) flattens it INSIDE root.
@@ -50,8 +53,8 @@ func TestDevStoreContainsTraversal(t *testing.T) {
 	_ = s.Serve(ctx, rec, "orgs/../../../../etc/passwd", "x", "")
 	assert.NotContains(t, rec.Header().Get("Content-Disposition"), "etc", "no root escape")
 }
-func TestDevStoreFilenamesSanitized(t *testing.T) {
-	s := NewDevStore(t.TempDir())
+func TestFilesystemStoreFilenamesSanitized(t *testing.T) {
+	s := filesystem.NewDevStore(t.TempDir())
 	ctx := context.Background()
 	_, err := s.Put(ctx, "k", "text/plain", strings.NewReader("x"))
 	require.NoError(t, err)
@@ -63,17 +66,15 @@ func TestDevStoreFilenamesSanitized(t *testing.T) {
 }
 
 func TestNewKeyShape(t *testing.T) {
-	k := NewKey("org_42", "Quarterly Report FINAL v2.pdf")
+	k := storage.NewKey("org_42", "Quarterly Report FINAL v2.pdf")
 	dir, base := filepath.Split(k)
 	assert.Equal(t, "orgs/org_42/", dir)
 	// base = 32 hex chars + original ext (case preserved from the regexp).
 	assert.Regexp(t, `^[0-9a-f]{32}\.pdf$`, base)
-
-	k2 := NewKey("org_42", "no-extension")
+	k2 := storage.NewKey("org_42", "no-extension")
 	_, base2 := filepath.Split(k2)
 	assert.Regexp(t, `^[0-9a-f]{32}$`, base2)
-
-	k3 := NewKey("org_42", ".hidden-longextensionfile")
+	k3 := storage.NewKey("org_42", ".hidden-longextensionfile")
 	_, base3 := filepath.Split(k3)
 	assert.NotContains(t, base3, "hidden", "weird extensions are dropped, not glued")
 }
@@ -92,7 +93,7 @@ func TestR2StorePutAgainstFakeEndpoint(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 
-	s, err := NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", "mybucket", srv.URL)
+	s, err := s3store.NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", "mybucket", srv.URL)
 	require.NoError(t, err)
 
 	n, err := s.Put(context.Background(), "orgs/o1/k1.bin", "application/octet-stream", strings.NewReader("PAYLOAD"))
@@ -110,7 +111,7 @@ func TestR2StoreServeRedirectsToPresignedURL(t *testing.T) {
 	}))
 	t.Cleanup(srv.Close)
 
-	s, err := NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", "mybucket", srv.URL)
+	s, err := s3store.NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", "mybucket", srv.URL)
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()

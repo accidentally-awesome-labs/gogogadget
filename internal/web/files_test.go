@@ -14,6 +14,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -192,6 +193,6 @@ func TestFileDeleteIsGatedByAnInPageDialog(t *testing.T) {
 
 func TestServerDefaultsToDevStore(t *testing.T) {
 	s := integrationServer(t, nil)
-	_, ok := s.store.(*storage.DevStore)
+	_, ok := s.store.(*storagefs.DevStore)
 	assert.True(t, ok, "unconfigured server uses DevStore, never nil")
 }

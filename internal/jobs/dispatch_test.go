@@ -9,7 +9,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
-	"github.com/gogogadget/gogogadget/internal/mail"
+	maildev "github.com/gogogadget/gogogadget/internal/mail/dev"
 )
 
 func dispatchTestLogger() *slog.Logger {
@@ -24,7 +24,7 @@ func TestUnknownKindDeadLettersImmediately(t *testing.T) {
 	pool, queries := testdb.Open(t, "jobs_dispatch")
 	defer pool.Close()
 
-	worker := NewWorker(queries, mail.NewDevSender(dispatchTestLogger(), t.TempDir()), dispatchTestLogger())
+	worker := NewWorker(queries, maildev.NewDevSender(dispatchTestLogger(), t.TempDir()), dispatchTestLogger())
 
 	id, err := queries.EnqueueJob(context.Background(), sqlc.EnqueueJobParams{
 		Kind: "module.that.was.removed", Payload: []byte(`{}`),

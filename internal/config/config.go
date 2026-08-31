@@ -73,19 +73,10 @@ func Load() (Config, error) {
 func (c Config) Production() bool       { return c.Env == "production" }
 func (c Config) Development() bool      { return c.Env == "development" }
 func (c Config) Test() bool             { return c.Env == "test" }
-func (c Config) ClerkConfigured() bool  { return c.ClerkSecretKey != "" }
-func (c Config) PolarConfigured() bool  { return c.PolarAccessToken != "" }
-func (c Config) PostHogEnabled() bool   { return c.PostHogAPIKey != "" }
-func (c Config) SentryEnabled() bool    { return c.SentryDSN != "" }
-func (c Config) ResendConfigured() bool { return c.ResendAPIKey != "" }
-
-// StorageConfigured reports whether R2 (or S3-compatible) credentials are
-// present. Unconfigured → DevStore (tmp/uploads), so a fresh clone needs zero
-// accounts.
-func (c Config) StorageConfigured() bool {
-	return c.StorageR2AccountID != "" && c.StorageR2AccessKeyID != "" &&
-		c.StorageR2SecretAccessKey != "" && c.StorageR2Bucket != ""
-}
+func (c Config) ClerkConfigured() bool { return c.ClerkSecretKey != "" }
+func (c Config) PolarConfigured() bool { return c.PolarAccessToken != "" }
+func (c Config) PostHogEnabled() bool  { return c.PostHogAPIKey != "" }
+func (c Config) SentryEnabled() bool   { return c.SentryDSN != "" }
 
 // LLMConfigured reports whether an OpenAI-compatible backend is set. Empty →
 // the AI route renders a 503 not-configured (same degrade as billing).

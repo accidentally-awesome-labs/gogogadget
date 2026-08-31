@@ -16,7 +16,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
+	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/observability"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	svix "github.com/svix/svix-webhooks/go"
@@ -54,6 +57,9 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 		Docs:     &content.Docs{},
 		Verifier: identity.FakeVerifier{},
 		Fetcher:  identity.DevUserFetcher{},
+		Storage:  storagefs.NewDevStore(t.TempDir()),
+		Flags:    flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second),
+		Reporter: observability.NoopReporter{},
 	}
 	if mutate != nil {
 		mutate(&deps)

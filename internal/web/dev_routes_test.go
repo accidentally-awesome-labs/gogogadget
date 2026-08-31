@@ -156,6 +156,11 @@ func productionServer(t *testing.T) *Server {
 		"CLERK_WEBHOOK_SECRET":  testWebhookSecret,
 		"CLERK_PORTAL_URL":      "https://accounts.example.com",
 		"CLERK_PUBLISHABLE_KEY": "pk_live_fixture",
+		"RESEND_API_KEY":         "re_fixture",
+		"STORAGE_R2_ACCESS_KEY_ID": "ak_fixture",
+		"STORAGE_R2_ACCOUNT_ID":   "acct_fixture",
+		"STORAGE_R2_BUCKET":        "bucket_fixture",
+		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
 	}
 	cfg, err := config.LoadFrom(func(k string) string { return env[k] })
 	require.NoError(t, err, "fixture must be a configuration production accepts")
@@ -252,6 +257,11 @@ func TestDevGateCannotLoadUnderProduction(t *testing.T) {
 		"CLERK_WEBHOOK_SECRET":  testWebhookSecret,
 		"CLERK_PORTAL_URL":      "https://accounts.example.com",
 		"CLERK_PUBLISHABLE_KEY": "pk_live_fixture",
+		"RESEND_API_KEY": "re_fixture",
+		"STORAGE_R2_ACCESS_KEY_ID": "ak_fixture",
+		"STORAGE_R2_ACCOUNT_ID": "acct_fixture",
+		"STORAGE_R2_BUCKET": "bucket_fixture",
+		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
 		"DEV_AUTH_BYPASS":       "true",
 	}
 	_, err := config.LoadFrom(func(k string) string { return env[k] })

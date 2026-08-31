@@ -47,6 +47,10 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 		"gogogadget.json": true, "gogogadget.lock.json": true,
 		".env.example": true, "registry.json": true,
 		"internal/modkit/task2_followup_test.go": true,
+		// Candidate adapters are manifest-owned but intentionally absent from
+		// the current lock when another adapter is selected for every env.
+		"internal/mail/smtp/smtp.go": true,
+		"internal/mail/smtp/contract_test.go": true,
 	}
 
 	var orphans []string

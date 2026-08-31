@@ -34,7 +34,7 @@ degradation behave.
 | `LLM_BASE_URL` | `ggg/system/llm` |  | `https://api.openai.com/v1` | Any OpenAI-compatible API base |
 | `LLM_MODEL` | `ggg/system/llm` |  |  | Forced server-side, so callers cannot pick a model |
 | `EMAIL_FROM` | `ggg/system/mail` |  | `GoGoGadget <hello@example.com>` | From header on outbound mail |
-| `RESEND_API_KEY` | `ggg/system/mail` |  |  | Resend API key. Empty selects DevSender, which logs mail and writes rendered HTML to `tmp/emails/`. Secret: ships blank in `.env.example` |
+| `RESEND_API_KEY` | `ggg/system/mail-resend` | **always** |  | Resend API key. Secret: ships blank in `.env.example` |
 | `SENTRY_DSN` | `ggg/system/observability` |  |  | Sentry DSN. Empty selects the no-op reporter. Secret: ships blank in `.env.example` |
 | `AUDIT_RETENTION_DAYS` | `ggg/system/audit` |  |  | The daily janitor deletes audit rows older than this many days; 0 retains forever. Integer >= 0 |
 | `POLAR_ACCESS_TOKEN` | `ggg/system/billing` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
@@ -44,11 +44,11 @@ degradation behave.
 | `POLAR_WEBHOOK_SECRET` | `ggg/system/billing` |  |  | Verifies `webhook-*` signatures on `/webhooks/polar`. Secret: ships blank in `.env.example` |
 | `RATE_LIMIT_RPM` | `ggg/system/rate-limit` |  | `100` | Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard. Integer >= 1 |
 | `API_RATE_LIMIT_RPM` | `ggg/system/api` |  | `60` | Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated. Integer >= 1 |
-| `STORAGE_R2_ACCESS_KEY_ID` | `ggg/system/storage` |  |  | R2 API token with Object Read & Write. Secret: ships blank in `.env.example` |
-| `STORAGE_R2_ACCOUNT_ID` | `ggg/system/storage` |  |  | Cloudflare account id. With the three keys below this enables R2 storage; any one missing selects DevStore (`tmp/uploads/`) |
-| `STORAGE_R2_BUCKET` | `ggg/system/storage` |  |  | Bucket name |
-| `STORAGE_R2_ENDPOINT` | `ggg/system/storage` |  |  | Override for AWS S3 or MinIO compatibility; empty uses the R2 endpoint for the account |
-| `STORAGE_R2_SECRET_ACCESS_KEY` | `ggg/system/storage` |  |  | Secret half of the R2 API token. Secret: ships blank in `.env.example` |
 | `PORT` | `ggg/system/server` |  | `8080` | HTTP listen port. Integer between 1 and 65535 |
 | `METRICS_TOKEN` | `ggg/system/metrics` |  |  | Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default. Secret: ships blank in `.env.example` |
 | `MAINTENANCE_MODE` | `ggg/system/security` |  |  | true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/` |
+| `STORAGE_R2_ACCESS_KEY_ID` | `ggg/system/storage-s3` | **always** |  | S3 access key id. Secret: ships blank in `.env.example` |
+| `STORAGE_R2_ACCOUNT_ID` | `ggg/system/storage-s3` | **always** |  | R2 account id used for the default endpoint |
+| `STORAGE_R2_BUCKET` | `ggg/system/storage-s3` | **always** |  | S3 bucket name |
+| `STORAGE_R2_SECRET_ACCESS_KEY` | `ggg/system/storage-s3` | **always** |  | S3 secret access key. Secret: ships blank in `.env.example` |
+| `STORAGE_S3_ENDPOINT` | `ggg/system/storage-s3` |  |  | S3-compatible endpoint override; empty uses the R2 account endpoint |

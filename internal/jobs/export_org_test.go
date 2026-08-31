@@ -13,7 +13,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
-	"github.com/gogogadget/gogogadget/internal/storage"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -57,7 +57,7 @@ func seedExportOrg(t *testing.T, pool poolExec, q *sqlc.Queries, orgID string) {
 func exportWorker(t *testing.T, q *sqlc.Queries, sender mail.Sender) *Worker {
 	t.Helper()
 	w := NewWorker(q, sender, slog.New(slog.NewTextHandler(io.Discard, nil)))
-	w.Storage = storage.NewDevStore(t.TempDir())
+	w.Storage = storagefs.NewDevStore(t.TempDir())
 	return w
 }
 

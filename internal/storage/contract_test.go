@@ -1,4 +1,4 @@
-package storage
+package storage_test
 
 import (
 	"bytes"
@@ -11,17 +11,19 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	s3store "github.com/gogogadget/gogogadget/internal/storage/s3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
 const fakeBucket = "mybucket"
 
 // runStoreContract is the Store seam contract: every implementation must pass
 // the same behavioral cases. Impl-specific concerns (path-style addressing,
 // SigV4 headers, traversal containment, filename sanitization) stay in
 // per-impl tests in storage_test.go.
-func runStoreContract(t *testing.T, factory func(t *testing.T) Store) {
+func runStoreContract(t *testing.T, factory func(t *testing.T) storage.Store) {
 	t.Helper()
 	ctx := context.Background()
 	payload := []byte("hello bytes \x00\x01\xf4 binary")
@@ -102,10 +104,8 @@ func runStoreContract(t *testing.T, factory func(t *testing.T) Store) {
 
 // fetchObject resolves an object's bytes through the Store delivery contract:
 // a direct 200 stream, or a 303 redirect whose target is fetched. Any non-200
-// final status is an error, unifying not-found across impls (DevStore errors
-// inside Serve; R2 presigns offline, so the 404 surfaces at the redirect
-// target).
-func fetchObject(t *testing.T, s Store, key, filename, contentType string) ([]byte, error) {
+// final status is an error, unifying not-found across implementations.
+func fetchObject(t *testing.T, s storage.Store, key, filename, contentType string) ([]byte, error) {
 	t.Helper()
 	rec := httptest.NewRecorder()
 	if err := s.Serve(context.Background(), rec, key, filename, contentType); err != nil {
@@ -195,16 +195,16 @@ func (f *fakeS3) object(key string) (fakeObject, bool) {
 	return o, ok
 }
 
-func TestDevStoreContract(t *testing.T) {
-	runStoreContract(t, func(t *testing.T) Store {
-		return NewDevStore(t.TempDir())
+func TestFilesystemStoreContract(t *testing.T) {
+	runStoreContract(t, func(t *testing.T) storage.Store {
+		return filesystem.NewDevStore(t.TempDir())
 	})
 }
 
-func TestR2StoreContract(t *testing.T) {
-	runStoreContract(t, func(t *testing.T) Store {
+func TestS3StoreContract(t *testing.T) {
+	runStoreContract(t, func(t *testing.T) storage.Store {
 		srv, _ := newFakeS3(t)
-		s, err := NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", fakeBucket, srv.URL)
+		s, err := s3store.NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", fakeBucket, srv.URL)
 		require.NoError(t, err)
 		return s
 	})

@@ -13,7 +13,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/mail"
-
+	maildev "github.com/gogogadget/gogogadget/internal/mail/dev"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -31,7 +31,7 @@ func testSetup(t *testing.T) (*pgxpool.Pool, *sqlc.Queries) {
 
 func testWorker(q *sqlc.Queries, dir string) *Worker {
 	log := slog.New(slog.NewTextHandler(io.Discard, nil))
-	return NewWorker(q, mail.NewDevSender(log, dir), log)
+	return NewWorker(q, maildev.NewDevSender(log, dir), log)
 }
 
 func TestEnqueueProcessComplete(t *testing.T) {
@@ -422,7 +422,7 @@ func TestJanitorRunsBeforeItsFirstTick(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 	log := slog.New(slog.DiscardHandler)
-	go NewWorker(q, mail.NewDevSender(log, t.TempDir()), log).Run(ctx)
+	go NewWorker(&sqlc.Queries{}, maildev.NewDevSender(log, t.TempDir()), log).Run(ctx)
 
 	deadline := time.Now().Add(10 * time.Second)
 	for countJobs(t, pool) >= before && time.Now().Before(deadline) {
@@ -449,7 +449,7 @@ func TestAPanickingHandlerFailsItsJobRatherThanTheProcess(t *testing.T) {
 	defer pool.Close()
 
 	log := slog.New(slog.DiscardHandler)
-	w := NewWorker(q, mail.NewDevSender(log, t.TempDir()), log)
+	w := NewWorker(q, maildev.NewDevSender(log, t.TempDir()), log)
 	w.definitions["test.panic"] = Define("test.panic", false, 2,
 		func(context.Context, struct{}) error { panic("handler exploded") })
 
@@ -482,7 +482,7 @@ func TestAPanickingClaimKeepsTheWorkerAliveRatherThanTheProcess(t *testing.T) {
 	// A Queries with no pool behind it: every statement it runs dereferences
 	// nil. Constructible, and therefore reachable - the constructor can only
 	// check that the dependency is present, not that it can talk to Postgres.
-	w := NewWorker(&sqlc.Queries{}, mail.NewDevSender(log, t.TempDir()), log)
+	w := NewWorker(&sqlc.Queries{}, maildev.NewDevSender(log, t.TempDir()), log)
 
 	assert.NotPanics(t, func() {
 		assert.Zero(t, w.pass(t.Context()),
@@ -495,7 +495,7 @@ func TestAPanickingClaimKeepsTheWorkerAliveRatherThanTheProcess(t *testing.T) {
 // the guard it was a race between the first claim and the cancel.
 func TestRunSurvivesAnUnusableQueueUntilTheContextEnds(t *testing.T) {
 	log := slog.New(slog.DiscardHandler)
-	w := NewWorker(&sqlc.Queries{}, mail.NewDevSender(log, t.TempDir()), log)
+	w := NewWorker(&sqlc.Queries{}, maildev.NewDevSender(log, t.TempDir()), log)
 	w.poll = time.Millisecond
 
 	ctx, cancel := context.WithCancel(t.Context())

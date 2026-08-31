@@ -173,15 +173,12 @@ func TestConfiguredPredicates(t *testing.T) {
 	assert.False(t, cfg.PolarConfigured())
 	assert.False(t, cfg.PostHogEnabled())
 	assert.False(t, cfg.SentryEnabled())
-	assert.False(t, cfg.ResendConfigured())
-	assert.False(t, cfg.StorageConfigured(), "any missing R2 credential ⇒ DevStore")
 	assert.False(t, cfg.LLMConfigured(), "needs key AND model")
 
 	t.Setenv("CLERK_SECRET_KEY", "sk_1")
 	t.Setenv("POLAR_ACCESS_TOKEN", "pol_1")
 	t.Setenv("POSTHOG_API_KEY", "phc_1")
 	t.Setenv("SENTRY_DSN", "http://k@h/1")
-	t.Setenv("RESEND_API_KEY", "re_1")
 	t.Setenv("STORAGE_R2_ACCOUNT_ID", "a")
 	t.Setenv("STORAGE_R2_ACCESS_KEY_ID", "b")
 	t.Setenv("STORAGE_R2_SECRET_ACCESS_KEY", "c")
@@ -194,8 +191,6 @@ func TestConfiguredPredicates(t *testing.T) {
 	assert.True(t, cfg.PolarConfigured())
 	assert.True(t, cfg.PostHogEnabled())
 	assert.True(t, cfg.SentryEnabled())
-	assert.True(t, cfg.ResendConfigured())
-	assert.True(t, cfg.StorageConfigured())
 	assert.True(t, cfg.LLMConfigured())
 }
 

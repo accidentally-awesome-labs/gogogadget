@@ -1,14 +1,65 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "organization-export.enqueue"
-      ]
-    },
+    "id": "ggg/workflow/organization-export",
+    "kind": "workflow",
+    "name": "organization-export",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Organization data export",
+    "description": "Enqueues the org:admin-only organization data export job and owns the session-claims org:admin check the org surfaces gate on.",
+    "requires": [
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/jobs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -19,130 +70,77 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Enqueues the org:admin-only organization data export job and owns the session-claims org:admin check the org surfaces gate on.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
         "source": "internal/jobs/export_org.go",
-        "target": "internal/jobs/export_org.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "abe8799fee875e5c81065ddf5cb6dad931c1eec814648040c0497096a10341f1",
-        "source": "internal/jobs/export_org_test.go",
-        "target": "internal/jobs/export_org_test.go"
-      },
-      {
+        "target": "internal/jobs/export_org.go",
         "class": "go",
-        "contract": true,
+        "sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
         "rewrite_module": true,
-        "sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/export_org_test.go",
+        "target": "internal/jobs/export_org_test.go",
+        "class": "test",
+        "sha256": "02e45d0fe3ebbccdf52bb25349472f41568684add7b3280292d2c17a547bed77",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/workflow_organization_export.go",
-        "target": "internal/web/workflow_organization_export.go"
+        "target": "internal/web/workflow_organization_export.go",
+        "class": "go",
+        "sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
-    "id": "ggg/workflow/organization-export",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "organization-export",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/jobs"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
+    "claims": {
+      "routes": [
+        "organization-export.enqueue"
+      ]
+    },
     "runtime": {
-      "jobs": [
-        {
-          "handler": "defineExportOrgJSON",
-          "kind": "export.org_json",
-          "max_attempts": 0,
-          "package": "internal/jobs",
-          "schedulable": false
-        }
-      ],
       "routes": [
         {
-          "handler": "handleOrgExport",
           "id": "organization-export.enqueue",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/app/settings/org/export",
+          "scope": "app",
           "policy": {
-            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": false
           },
-          "scope": "app"
+          "package": "internal/web",
+          "handler": "handleOrgExport"
+        }
+      ],
+      "jobs": [
+        {
+          "kind": "export.org_json",
+          "package": "internal/jobs",
+          "handler": "defineExportOrgJSON"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Organization data export"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

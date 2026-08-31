@@ -99,7 +99,7 @@
         "source": "internal/jobs/dispatch_test.go",
         "target": "internal/jobs/dispatch_test.go",
         "class": "test",
-        "sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
+        "sha256": "eeea0520908ddb06f6d96d014a35b870d7b988df2a67a46db41b6f364781a6cd",
         "rewrite_module": true,
         "contract": false
       },
@@ -115,7 +115,7 @@
         "source": "internal/jobs/jobs_test.go",
         "target": "internal/jobs/jobs_test.go",
         "class": "test",
-        "sha256": "efbdcfc87c568ff9e4a76fa14cf889fe1c4f36fcece57dac25b9f5766e86c70e",
+        "sha256": "4562deda3384923ed2fbace04e754846adc60390bed7451be944145170bb41f9",
         "rewrite_module": true,
         "contract": false
       },

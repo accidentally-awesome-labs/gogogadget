@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	"github.com/gogogadget/gogogadget/internal/storage"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +18,7 @@ func TestExportProjectsCSVJob(t *testing.T) {
 	ctx := context.Background()
 	w := testWorker(q, t.TempDir())
 	dir := t.TempDir()
-	w.Storage = storage.NewDevStore(dir)
+	w.Storage = storagefs.NewDevStore(dir)
 
 	_, err := pool.Exec(ctx, "INSERT INTO users (clerk_user_id, email, name, avatar_url) VALUES ('user_ex', 'ex@example.com', 'EX', '') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)

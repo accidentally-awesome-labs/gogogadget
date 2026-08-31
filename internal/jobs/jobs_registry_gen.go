@@ -63,8 +63,26 @@ var declaredAttempts = map[string]int{
 func providerActive(env, slot, adapter string) bool {
 	switch env {
 	case "development":
+		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
+			return true
+		}
+		if slot == "ggg/storage" && adapter == "ggg/system/storage-filesystem" {
+			return true
+		}
 	case "test":
+		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
+			return true
+		}
+		if slot == "ggg/storage" && adapter == "ggg/system/storage-filesystem" {
+			return true
+		}
 	case "production":
+		if slot == "ggg/mail" && adapter == "ggg/system/mail-resend" {
+			return true
+		}
+		if slot == "ggg/storage" && adapter == "ggg/system/storage-s3" {
+			return true
+		}
 	}
 	return false
 }

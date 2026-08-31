@@ -1,23 +1,19 @@
-// Package mail is the Sender seam: handlers and job workers never import an
-// email SDK directly. Swapping Resend for another provider means replacing
-// one file.
+// Package mail is the constructor-free Sender seam. Handlers and job workers
+// depend on these provider-neutral types; concrete adapters live in sibling
+// packages under internal/mail.
 package mail
+
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
-	"os"
-	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/a-h/templ"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
-	"github.com/resendlabs/resend-go"
 	"golang.org/x/text/language"
 )
+
 
 type Message struct {
 	To, Subject, HTML, Text string
@@ -28,69 +24,8 @@ type Sender interface {
 	Send(ctx context.Context, msg Message) error
 }
 
-// ResendSender sends via the Resend API.
-type ResendSender struct {
-	client *resend.Client
-	from   string
-}
-
-func NewResendSender(apiKey, from string) *ResendSender {
-	return &ResendSender{client: resend.NewClient(apiKey), from: from}
-}
-
-// Send delivers via the Resend API. resend-go has no context support, so ctx
-// is accepted for the interface and not forwarded.
-func (s *ResendSender) Send(_ context.Context, msg Message) error {
-	_, err := s.client.Emails.Send(&resend.SendEmailRequest{
-		From:    s.from,
-		To:      []string{msg.To},
-		Subject: msg.Subject,
-		Html:    msg.HTML,
-		Text:    msg.Text,
-	})
-	return err
-}
-
-// DevSender is the zero-infra default: logs the subject/recipient AND writes
-// the rendered HTML to tmp/emails/ so emails are viewable in a browser.
-type DevSender struct {
-	log *slog.Logger
-	dir string
-}
-
-func NewDevSender(log *slog.Logger, dir string) *DevSender {
-	return &DevSender{log: log, dir: dir}
-}
-
-func (s *DevSender) Send(ctx context.Context, msg Message) error {
-	if err := os.MkdirAll(s.dir, 0o755); err != nil {
-		return err
-	}
-	name := fmt.Sprintf("%d-%s.html", time.Now().UnixNano(), sanitizeFilename(msg.To))
-	path := filepath.Join(s.dir, name)
-	if err := os.WriteFile(path, []byte(msg.HTML), 0o644); err != nil {
-		return err
-	}
-	s.log.Info("dev email", "to", msg.To, "subject", msg.Subject, "file", path)
-	return nil
-}
-
-func sanitizeFilename(s string) string {
-	mapped := strings.Map(func(r rune) rune {
-		switch {
-		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9', r == '-', r == '.':
-			return r
-		default:
-			return '_'
-		}
-	}, s)
-	// Dots are kept (email domains read naturally: new_example.com) but dot
-	// runs are collapsed so the result can never carry a "../" traversal.
-	for strings.Contains(mapped, "..") {
-		mapped = strings.ReplaceAll(mapped, "..", ".")
-	}
-	return mapped
-}
+// Message builders and the Sender contract intentionally live in this seam;
+// adapter packages only implement Sender.
 
 // --- Message builders: render the templ components to strings at enqueue
 // time, so job payloads carry rendered bodies and workers never touch templates.

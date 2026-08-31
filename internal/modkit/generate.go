@@ -2518,7 +2518,7 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("func requireProductionKeys(lookup func(string) string) []error {\n")
 	b.WriteString("\tvar errs []error\n")
 	for _, e := range declarations {
-		if !e.ProductionRequired && !e.Required {
+		if !e.ProductionRequired {
 			continue
 		}
 		expr := requiredExpression(e, lock)
