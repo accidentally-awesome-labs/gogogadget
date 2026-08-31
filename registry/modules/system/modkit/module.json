@@ -166,7 +166,7 @@
         "source": "internal/modkit/model.go",
         "target": "internal/modkit/model.go",
         "class": "go",
-        "sha256": "e3b5c7238f4bf9754ea5451cbd20467af9c01485d43654eb9e2d9cb95911d87c",
+        "sha256": "28632f3b6206c397ca1513b1a62a720c582a8e74c0d013a7b4543ce64d49b9bf",
         "rewrite_module": true,
         "contract": true
       },

@@ -15,6 +15,7 @@ import (
 type Deps struct {
 	Config *config.Config
 }
+
 // Module is the constructed analytics closure. Capturer is always live so every
 // call site can fire and forget. If the selected capturer buffers events, the
 // module owns its shutdown.
@@ -24,6 +25,8 @@ type Module struct {
 	closeOnce sync.Once
 	closed    chan struct{}
 }
+
+var _ apphost.Lifecycle = (*Module)(nil)
 
 // NewModule selects PostHog when configured and the no-op capturer otherwise.
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
@@ -55,7 +58,7 @@ func (m *Module) Stop(ctx context.Context) error {
 	}
 	m.closeOnce.Do(func() {
 		go func() {
-			if c, ok := m.Capturer.(interface{ Close() }); ok {
+			if c, ok := m.Capturer.(BufferingCapturer); ok {
 				c.Close()
 			}
 			close(m.closed)

@@ -1461,6 +1461,9 @@
         "stop": {
           "type": "boolean"
         },
+        "health": {
+          "type": "boolean"
+        },
         "adapter": {
           "$ref": "#/$defs/AdapterContribution"
         }

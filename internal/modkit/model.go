@@ -259,24 +259,24 @@ type NamespaceClaims struct {
 type RuntimeContributions struct {
 	System        *SystemContribution        `json:"system,omitempty"`
 	ProviderSlots []ProviderSlotContribution `json:"provider_slots,omitempty"`
-	Routes       []RouteContribution       `json:"routes,omitempty"`
-	Jobs         []JobContribution         `json:"jobs,omitempty"`
-	Janitors     []JanitorContribution     `json:"janitors,omitempty"`
-	Queries      []QueryContribution       `json:"queries,omitempty"`
-	ContentTypes []ContentTypeContribution `json:"content_types,omitempty"`
-	Navigation   []NavigationContribution  `json:"navigation,omitempty"`
-	Slots        []SlotContribution        `json:"slots,omitempty"`
-	UI           []UIContribution          `json:"ui,omitempty"`
-	Assets       []AssetContribution       `json:"assets,omitempty"`
-	Scenarios    []ScenarioContribution    `json:"scenarios,omitempty"`
-	Visual       []VisualContribution      `json:"visual,omitempty"`
+	Routes        []RouteContribution        `json:"routes,omitempty"`
+	Jobs          []JobContribution          `json:"jobs,omitempty"`
+	Janitors      []JanitorContribution      `json:"janitors,omitempty"`
+	Queries       []QueryContribution        `json:"queries,omitempty"`
+	ContentTypes  []ContentTypeContribution  `json:"content_types,omitempty"`
+	Navigation    []NavigationContribution   `json:"navigation,omitempty"`
+	Slots         []SlotContribution         `json:"slots,omitempty"`
+	UI            []UIContribution           `json:"ui,omitempty"`
+	Assets        []AssetContribution        `json:"assets,omitempty"`
+	Scenarios     []ScenarioContribution     `json:"scenarios,omitempty"`
+	Visual        []VisualContribution       `json:"visual,omitempty"`
 }
 
 // ProviderSlotContribution declares a constructor-free provider seam and the
 // typed capabilities every adapter for the slot must provide.
 type ProviderSlotContribution struct {
-	ID           string                 `json:"id"`
-	Critical     bool                   `json:"critical"`
+	ID           string                   `json:"id"`
+	Critical     bool                     `json:"critical"`
 	Capabilities []CapabilityContribution `json:"capabilities"`
 }
 
@@ -289,7 +289,7 @@ type CapabilityContribution struct {
 // AdapterContribution marks a system module as an implementation of a
 // provider slot and advertises its selectable service targets.
 type AdapterContribution struct {
-	Slot    string         `json:"slot"`
+	Slot    string          `json:"slot"`
 	Targets []ServiceTarget `json:"targets"`
 }
 
@@ -318,12 +318,12 @@ type SystemContribution struct {
 	// DO-NOT-EDIT file. A path whose first segment contains a dot is an external
 	// module path used verbatim; anything else is module-relative and qualified
 	// against the target module, exactly like Package.
-	TypeImports []string `json:"type_imports,omitempty"`
-	Start       bool     `json:"start"`
-	Stop        bool     `json:"stop"`
+	TypeImports []string             `json:"type_imports,omitempty"`
+	Start       bool                 `json:"start"`
+	Stop        bool                 `json:"stop"`
+	Health      bool                 `json:"health,omitempty"`
 	Adapter     *AdapterContribution `json:"adapter,omitempty"`
 }
-
 
 // RuntimeNeed is one typed constructor dependency.
 type RuntimeNeed struct {

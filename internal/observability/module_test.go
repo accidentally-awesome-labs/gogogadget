@@ -15,6 +15,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 )
+
 // Reporting always has a live seam: unconfigured resolves to the no-op so
 // callers never nil-check, and a DSN swaps in Sentry.
 func TestNewModuleFallsBackToNoopReporter(t *testing.T) {
@@ -60,11 +61,12 @@ type blockingTransport struct {
 	started chan struct{}
 	release chan struct{}
 	flushes atomic.Int32
+	closes  atomic.Int32
 }
 
 func (t *blockingTransport) Configure(sentry.ClientOptions) {}
-func (t *blockingTransport) SendEvent(*sentry.Event)         {}
 func (t *blockingTransport) Flush(time.Duration) bool       { return true }
+func (t *blockingTransport) SendEvent(*sentry.Event)        {}
 func (t *blockingTransport) FlushWithContext(ctx context.Context) bool {
 	t.flushes.Add(1)
 	close(t.started)
@@ -75,7 +77,7 @@ func (t *blockingTransport) FlushWithContext(ctx context.Context) bool {
 		return false
 	}
 }
-func (t *blockingTransport) Close() {}
+func (t *blockingTransport) Close() { t.closes.Add(1) }
 
 func TestModuleStopIsIdempotentAndContextBounded(t *testing.T) {
 	transport := &blockingTransport{started: make(chan struct{}), release: make(chan struct{})}
@@ -100,11 +102,14 @@ func TestModuleStopIsIdempotentAndContextBounded(t *testing.T) {
 	case <-time.After(time.Second):
 		t.Fatal("shutdown did not finish after transport released")
 	}
-	if err := m.Stop(context.Background()); !errors.Is(err, context.DeadlineExceeded) {
-		t.Fatalf("second Stop error = %v, want original deadline error", err)
+	if err := m.Stop(context.Background()); err != nil {
+		t.Fatalf("second Stop should retry successfully: %v", err)
 	}
 	if got := transport.flushes.Load(); got != 1 {
 		t.Fatalf("flush calls after second Stop = %d, want 1", got)
+	}
+	if got := transport.closes.Load(); got != 1 {
+		t.Fatalf("close calls after second Stop = %d, want 1", got)
 	}
 }
 

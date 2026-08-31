@@ -16,18 +16,19 @@ import (
 type Deps struct {
 	Config *config.Config
 }
+
 // Module is the constructed reporting closure. Reporter is always live so call
 // sites never nil-check. A configured module owns its Sentry client and flushes
 // it during shutdown.
-
 type Module struct {
 	Reporter Reporter
 	client   *sentry.Client
 
 	stopOnce sync.Once
 	stopped  chan struct{}
-	stopErr  error
 }
+
+var _ apphost.Lifecycle = (*Module)(nil)
 
 // NewModule selects Sentry when a DSN is configured and the no-op reporter
 // otherwise.
@@ -55,26 +56,23 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	return m, nil
 }
 
-// Stop flushes the module-owned Sentry client once. The flush runs
-// asynchronously so the caller's context always bounds its wait.
+// Stop flushes and closes the module-owned Sentry client once. The flush and
+// close use a detached context so a caller that times out can retry with a
+// fresh context while the in-flight shutdown completes.
 func (m *Module) Stop(ctx context.Context) error {
 	if m == nil || m.client == nil {
 		return nil
 	}
 	m.stopOnce.Do(func() {
 		go func() {
-			if !m.client.FlushWithContext(ctx) {
-				m.stopErr = ctx.Err()
-				if m.stopErr == nil {
-					m.stopErr = context.DeadlineExceeded
-				}
-			}
+			_ = m.client.FlushWithContext(context.Background())
+			m.client.Close()
 			close(m.stopped)
 		}()
 	})
 	select {
 	case <-m.stopped:
-		return m.stopErr
+		return nil
 	case <-ctx.Done():
 		return ctx.Err()
 	}

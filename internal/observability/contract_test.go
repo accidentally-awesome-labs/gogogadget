@@ -41,9 +41,9 @@ func runReporterContract(t *testing.T, factory func(t *testing.T) Reporter) {
 func TestNoopReporterContract(t *testing.T) {
 	runReporterContract(t, func(t *testing.T) Reporter { return NoopReporter{} })
 }
+
 // TestSentryReporterContract runs the contract against a reporter backed by
 // its own client. The reporter must not depend on sentry's process-global hub.
-
 func TestSentryReporterContract(t *testing.T) {
 	var mu sync.Mutex
 	var paths, bodies []string

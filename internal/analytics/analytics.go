@@ -18,6 +18,13 @@ type Capturer interface {
 	Capture(userID, event string, props map[string]any)
 }
 
+// BufferingCapturer is the lifecycle contract for capturers that queue events.
+// No-op capturers intentionally implement only Capturer.
+type BufferingCapturer interface {
+	Capturer
+	Close()
+}
+
 // NoopCapturer discards events (POSTHOG_API_KEY empty).
 type NoopCapturer struct{}
 

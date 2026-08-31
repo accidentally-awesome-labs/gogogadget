@@ -11,6 +11,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Compile-time conformance for every Capturer implementation and the
+// buffering lifecycle contract.
+var (
+	_ Capturer          = NoopCapturer{}
+	_ Capturer          = (*PostHogCapturer)(nil)
+	_ BufferingCapturer = (*PostHogCapturer)(nil)
+)
+
 // runCapturerContract is the Capturer seam contract: Capture never panics,
 // never blocks, and (where the impl flushes) the event reaches the provider
 // with distinct id, event name, and properties intact.
@@ -38,8 +46,8 @@ func runCapturerContract(t *testing.T, factory func(t *testing.T) Capturer, flus
 func TestNoopCapturerContract(t *testing.T) {
 	runCapturerContract(t,
 		func(t *testing.T) Capturer { return NoopCapturer{} },
-		nil,   // nothing to flush
-		nil)   // nothing delivered — the point of the no-op
+		nil, // nothing to flush
+		nil) // nothing delivered — the point of the no-op
 }
 
 func TestPostHogCapturerContract(t *testing.T) {

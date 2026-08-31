@@ -30,6 +30,18 @@ type Host interface {
 // ctx.Err() when the context expires.
 type Stop func(context.Context) error
 
+// Lifecycle is the reusable module shutdown contract. Implementations must
+// perform shutdown at most once and honor the caller's context deadline.
+type Lifecycle interface {
+	Stop(context.Context) error
+}
+
+// HealthChecker is the reusable provider health contract. A nil error means
+// the provider is healthy; implementations must honor context cancellation.
+type HealthChecker interface {
+	Health(context.Context) error
+}
+
 // osHost implements Host against the real process environment.
 type osHost struct {
 	version string
