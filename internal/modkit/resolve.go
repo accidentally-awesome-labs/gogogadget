@@ -357,3 +357,30 @@ func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, m
 	}
 	return order, nil
 }
+
+// RuntimeOrdersFor computes independent runtime DAGs for each environment.
+// Mutually exclusive adapters are intentionally never topologically unioned.
+func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) (RuntimeOrders, error) {
+	byID := make(map[string]Manifest, len(modules))
+	for _, module := range modules { byID[module.ID] = module }
+	build := func(env string) ([]string, error) {
+		selected := map[string]struct{}{}
+		for id, module := range byID {
+			if module.Runtime.System == nil || module.Runtime.System.Adapter == nil { selected[id] = struct{}{} }
+		}
+		for slot, choices := range project.Providers {
+			choice := choices.Development
+			if env == "test" { choice = choices.Test }
+			if env == "production" { choice = choices.Production }
+			if _, ok := byID[choice.Adapter]; !ok { return nil, fmt.Errorf("provider %s adapter %q missing", slot, choice.Adapter) }
+			selected[choice.Adapter] = struct{}{}
+		}
+		return stableTopologicalOrder(ctx, selected, byID)
+	}
+	var err error
+	var orders RuntimeOrders
+	if orders.Development, err = build("development"); err != nil { return RuntimeOrders{}, err }
+	if orders.Test, err = build("test"); err != nil { return RuntimeOrders{}, err }
+	if orders.Production, err = build("production"); err != nil { return RuntimeOrders{}, err }
+	return orders, nil
+}
