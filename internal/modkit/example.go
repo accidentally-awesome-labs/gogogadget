@@ -64,18 +64,37 @@ type ExampleResult struct {
 	Generated []string `json:"generated"`
 	Compiled  []string `json:"compiled"`
 	Tested    []string `json:"tested"`
-	// Retained is every path that legitimately survives removal. Only immutable
-	// migrations belong here; anything else appearing would be a leak.
-	Retained []string `json:"retained"`
-	// LockIdentityOnly names the generated aggregates whose bodies came back
-	// byte-identical but whose header still differs, because the header is a
-	// digest of the lock and the lock legitimately still records the removal.
-	// Listing them is the point: a body difference would be a leak, and lumping
-	// the two together would hide it.
-	LockIdentityOnly []string `json:"lock_identity_only"`
-	// Compared is the number of tree entries checked for byte equality after
-	// removal, so "restored" is a measured claim rather than an adjective.
-	Compared int `json:"compared"`
+	// ProviderSlot and ProviderSelections are populated for the mail/storage
+	// permutation closures. They make the environment switch an observed part
+	// of registry validation rather than a claim hidden in fixture metadata.
+	ProviderSlot       string                       `json:"provider_slot,omitempty"`
+	ProviderSelections map[string]ProviderSelection `json:"provider_selections,omitempty"`
+	ProviderSwitched   bool                         `json:"provider_switched,omitempty"`
+	Retained           []string                     `json:"retained"`
+	LockIdentityOnly   []string                     `json:"lock_identity_only"`
+	Compared           int                          `json:"compared"`
+}
+
+type providerFixtureSpec struct {
+	slot, local, managed string
+	legacy               []string
+}
+
+func providerFixtureSpecFor(id string) (providerFixtureSpec, bool) {
+	switch id {
+	case "fixture/system/mail-providers":
+		return providerFixtureSpec{
+			slot: "ggg/mail", local: "fixture/system/mail-local", managed: "fixture/system/mail-managed",
+			legacy: []string{"ggg/system/mail-dev", "ggg/system/mail-resend"},
+		}, true
+	case "fixture/system/storage-providers":
+		return providerFixtureSpec{
+			slot: "ggg/storage", local: "fixture/system/storage-local", managed: "fixture/system/storage-managed",
+			legacy: []string{"ggg/system/storage-filesystem", "ggg/system/storage-s3"},
+		}, true
+	default:
+		return providerFixtureSpec{}, false
+	}
 }
 
 // exampleClosure is one example module plus the example modules it pulls in.
@@ -299,6 +318,11 @@ func exampleClosures(catalog Catalog) ([]exampleClosure, error) {
 			if m.Kind != kind {
 				continue
 			}
+			if strings.HasPrefix(m.ID, "fixture/") {
+				if _, providerFixture := providerFixtureSpecFor(m.ID); !providerFixture {
+					continue
+				}
+			}
 			ordered, err := exampleClosureOrder(m, byID, nil)
 			if err != nil {
 				return nil, fmt.Errorf("%s: %w", m.ID, err)
@@ -485,6 +509,83 @@ func applyDerivativeOperation(ctx context.Context, derivative string, op Operati
 func exerciseExampleClosure(
 	ctx context.Context, root, template, derivative string, closure exampleClosure, log io.Writer,
 ) (ExampleResult, error) {
+	if spec, ok := providerFixtureSpecFor(closure.root.ID); ok {
+		return exerciseProviderClosure(ctx, root, template, derivative, closure, spec, log)
+	}
+	return exerciseStandardClosure(ctx, root, template, derivative, closure, log)
+}
+
+func providerFixtureChoices(spec providerFixtureSpec) ProviderSelections {
+	return ProviderSelections{
+		Development: ProviderSelection{Adapter: spec.local, Target: "filesystem"},
+		Test:        ProviderSelection{Adapter: spec.local, Target: "filesystem"},
+		Production:  ProviderSelection{Adapter: spec.managed, Target: "managed"},
+	}
+}
+
+func copyProviderSelections(values map[string]ProviderSelections) map[string]ProviderSelections {
+	out := make(map[string]ProviderSelections, len(values))
+	for slot, choices := range values {
+		out[slot] = choices
+	}
+	return out
+}
+
+func providerLegacyChoices(spec providerFixtureSpec) ProviderSelections {
+	choices := ProviderSelections{}
+	switch spec.slot {
+	case "ggg/mail":
+		choices.Development = ProviderSelection{Adapter: "ggg/system/mail-dev", Target: "filesystem"}
+		choices.Test = ProviderSelection{Adapter: "ggg/system/mail-dev", Target: "filesystem"}
+		choices.Production = ProviderSelection{Adapter: "ggg/system/mail-resend", Target: "resend"}
+	case "ggg/storage":
+		choices.Development = ProviderSelection{Adapter: "ggg/system/storage-filesystem", Target: "filesystem"}
+		choices.Test = ProviderSelection{Adapter: "ggg/system/storage-filesystem", Target: "filesystem"}
+		choices.Production = ProviderSelection{Adapter: "ggg/system/storage-s3", Target: "r2"}
+	}
+	return choices
+}
+
+func switchProviderSelections(root, slot string, choices ProviderSelections) error {
+	data, err := os.ReadFile(filepath.Join(root, ProjectFileName))
+	if err != nil {
+		return err
+	}
+	project, err := ParseProject(data)
+	if err != nil {
+		return err
+	}
+	project.Providers = copyProviderSelections(project.Providers)
+	project.Providers[slot] = choices
+	updated, err := MarshalProject(project)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(root, ProjectFileName), updated, 0o644)
+}
+
+func exerciseProviderClosure(
+	ctx context.Context, root, template, derivative string, closure exampleClosure,
+	spec providerFixtureSpec, log io.Writer,
+) (ExampleResult, error) {
+	result, err := exerciseStandardClosure(ctx, root, template, derivative, closure, log)
+	if err != nil {
+		return result, err
+	}
+	result.ProviderSlot = spec.slot
+	result.ProviderSelections = map[string]ProviderSelection{
+		"development": {Adapter: spec.local, Target: "filesystem"},
+		"test":        {Adapter: spec.local, Target: "filesystem"},
+		"production":  {Adapter: spec.managed, Target: "managed"},
+	}
+	result.ProviderSwitched = true
+	return result, nil
+}
+
+func exerciseStandardClosure(
+	ctx context.Context, root, template, derivative string, closure exampleClosure, log io.Writer,
+) (ExampleResult, error) {
+
 	ids := closure.ids()
 	result := ExampleResult{ID: closure.root.ID, Kind: string(closure.root.Kind), Modules: ids}
 	fmt.Fprintf(log, "\n%s\n  closure: %s\n", closure.root.ID, strings.Join(ids, ", "))
@@ -506,6 +607,22 @@ func exerciseExampleClosure(
 	baselineLock, err := readDerivativeLock(derivative)
 	if err != nil {
 		return result, err
+	}
+	var baselineProject []byte
+	if _, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
+		baselineProject, err = os.ReadFile(filepath.Join(derivative, ProjectFileName))
+		if err != nil {
+			return result, err
+		}
+	}
+	if spec, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
+		if err := switchProviderSelections(derivative, spec.slot, providerFixtureChoices(spec)); err != nil {
+			return result, fmt.Errorf("select fixture providers: %w", err)
+		}
+		if _, err := applyDerivativeOperation(ctx, derivative,
+			Operation{Kind: OpRemove, Modules: append([]string{}, spec.legacy...), Offline: true}); err != nil {
+			return result, fmt.Errorf("remove existing %s adapters: %w", spec.slot, err)
+		}
 	}
 
 	if err := publishExamples(root, derivative, closure.modules); err != nil {
@@ -590,6 +707,11 @@ func exerciseExampleClosure(
 			change.Path, change.Kind)
 	}
 
+	if spec, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
+		if err := switchProviderSelections(derivative, spec.slot, providerLegacyChoices(spec)); err != nil {
+			return result, fmt.Errorf("restore provider selections: %w", err)
+		}
+	}
 	if _, err := applyDerivativeOperation(ctx, derivative,
 		Operation{Kind: OpRemove, Modules: ids, Offline: true}); err != nil {
 		return result, fmt.Errorf("remove: %w", err)
@@ -602,6 +724,16 @@ func exerciseExampleClosure(
 	// carry the commit resolved while the example was installed — a
 	// self-hosting artifact rather than anything about the module. Nothing
 	// authored may move here.
+	if spec, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
+		if err := restoreLegacyPayloads(template, derivative, baselineLock, spec.legacy); err != nil {
+			return result, fmt.Errorf("restore %s adapter payloads: %w", spec.slot, err)
+		}
+	}
+	if baselineProject != nil {
+		if err := os.WriteFile(filepath.Join(derivative, ProjectFileName), baselineProject, 0o644); err != nil {
+			return result, fmt.Errorf("restore project selections: %w", err)
+		}
+	}
 	settled, err := syncDerivative(ctx, derivative)
 	if err != nil {
 		return result, fmt.Errorf("settle after removal: %w", err)
@@ -633,6 +765,32 @@ func exerciseExampleClosure(
 		"  removed; %d tree entries restored, %d aggregate(s) differ only in the lock-identity header, %d migration(s) retained\n",
 		result.Compared, len(result.LockIdentityOnly), len(result.Retained))
 	return result, nil
+}
+func restoreLegacyPayloads(template, derivative string, baseline Lock, ids []string) error {
+	wanted := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		wanted[id] = struct{}{}
+	}
+	for _, locked := range baseline.Modules {
+		if _, ok := wanted[locked.ID]; !ok {
+			continue
+		}
+		for _, file := range locked.Manifest.Files {
+			source := filepath.Join(template, filepath.FromSlash(file.Source))
+			target := filepath.Join(derivative, filepath.FromSlash(file.Target))
+			data, err := os.ReadFile(source)
+			if err != nil {
+				return fmt.Errorf("read %s: %w", file.Source, err)
+			}
+			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+				return err
+			}
+			if err := os.WriteFile(target, data, 0o644); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // exampleGeneratedDelta names the registry aggregates the install rewrote. It is
@@ -760,6 +918,13 @@ func unpublishExamples(derivative string, modules []Manifest) error {
 }
 
 func catalogItemPath(m Manifest) (string, error) {
+	_, kind, name, scoped := splitScopedModuleID(m.ID)
+	if scoped {
+		if !validModuleKind(ModuleKind(kind)) {
+			return "", fmt.Errorf("module id %q is invalid", m.ID)
+		}
+		return "registry/modules/" + kind + "/" + name + "/module.json", nil
+	}
 	if err := validateInstallableModuleID(m.ID); err != nil {
 		return "", err
 	}
@@ -935,6 +1100,7 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 	stripped := final
 	stripped.Modules = nil
 	stripped.Order = nil
+	stripped.RuntimeOrders = RuntimeOrders{}
 	found := make(map[string]LockedModule, len(ids))
 	for _, module := range final.Modules {
 		if slices.Contains(ids, module.ID) {
@@ -947,6 +1113,20 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 		if !slices.Contains(ids, id) {
 			stripped.Order = append(stripped.Order, id)
 		}
+	}
+	filterOrder := func(order []string) []string {
+		out := make([]string, 0, len(order))
+		for _, id := range order {
+			if !slices.Contains(ids, id) {
+				out = append(out, id)
+			}
+		}
+		return out
+	}
+	stripped.RuntimeOrders = RuntimeOrders{
+		Development: filterOrder(final.RuntimeOrders.Development),
+		Test:        filterOrder(final.RuntimeOrders.Test),
+		Production:  filterOrder(final.RuntimeOrders.Production),
 	}
 	for _, id := range ids {
 		module, ok := found[id]
@@ -982,6 +1162,9 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 		for i := range stripped.Modules {
 			if stripped.Modules[i].SourceCommit == final.RegistryCommit {
 				stripped.Modules[i].SourceCommit = baseline.RegistryCommit
+			}
+			if stripped.Modules[i].SnapshotSHA256 == final.RegistryCommit {
+				stripped.Modules[i].SnapshotSHA256 = baseline.RegistryCommit
 			}
 		}
 	}

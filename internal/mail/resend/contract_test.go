@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/mail"
+	mailcontract "github.com/gogogadget/gogogadget/internal/mail/contract"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,6 +38,7 @@ func TestResendSenderContract(t *testing.T) {
 	msg := mail.Message{To: "contract@example.com", Subject: "Contract subject", HTML: "<p>Contract body</p>", Text: "Contract body"}
 	require.NoError(t, sender.Send(context.Background(), msg))
 	require.Equal(t, "noreply@example.com", got.From)
+	mailcontract.Run(t, func() mail.Sender { return sender })
 	require.Equal(t, []string{msg.To}, got.To)
 	require.Equal(t, msg.Subject, got.Subject)
 	require.Equal(t, msg.HTML, got.HTML)

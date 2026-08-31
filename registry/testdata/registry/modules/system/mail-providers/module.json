@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "fixture/system/mail-providers",
+    "kind": "system",
+    "name": "mail-providers",
+    "revision": 1,
+    "contract": 1,
+    "title": "Mail provider permutation",
+    "description": "Exercises filesystem and managed mail adapters against the mail seam.",
+    "requires": [
+      {"id":"fixture/system/mail-local","contract":{"min":1,"max":1}},
+      {"id":"fixture/system/mail-managed","contract":{"min":1,"max":1}}
+    ],
+    "dependencies": {"go":[],"tools":[],"containers":[]},
+    "files": [],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

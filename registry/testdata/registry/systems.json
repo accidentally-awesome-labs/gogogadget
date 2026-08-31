@@ -1,6 +1,12 @@
 {
   "items": [
-    "registry/modules/system/example-clock/module.json"
+    "registry/modules/system/example-clock/module.json",
+    "registry/modules/system/mail-local/module.json",
+    "registry/modules/system/mail-managed/module.json",
+    "registry/modules/system/mail-providers/module.json",
+    "registry/modules/system/storage-local/module.json",
+    "registry/modules/system/storage-managed/module.json",
+    "registry/modules/system/storage-providers/module.json"
   ],
   "kind": "system",
   "schema": 2

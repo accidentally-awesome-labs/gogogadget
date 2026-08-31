@@ -55,6 +55,14 @@
     },
     "files": [
       {
+        "source": "internal/storage/s3/contract_test.go",
+        "target": "internal/storage/s3/contract_test.go",
+        "class": "test",
+        "sha256": "9448cb4f5bd46e95fad5dfc7b1c50998dc06aa6d515e7d34e9d888c206281d2b",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/storage/s3/module.go",
         "target": "internal/storage/s3/module.go",
         "class": "go",
@@ -229,7 +237,7 @@
     "docs": [],
     "tests": {
       "go_packages": [
-        "internal/storage"
+        "internal/storage/s3"
       ]
     },
     "data": [],

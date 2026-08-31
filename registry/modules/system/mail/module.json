@@ -44,6 +44,14 @@
     },
     "files": [
       {
+        "source": "internal/mail/contract/contract.go",
+        "target": "internal/mail/contract/contract.go",
+        "class": "go",
+        "sha256": "63cc14219553d140d17de3ca9a5bf0a57c3f06ec684110b95153e53b35e229e8",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/mail/contract_test.go",
         "target": "internal/mail/contract_test.go",
         "class": "test",

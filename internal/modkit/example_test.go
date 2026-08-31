@@ -108,9 +108,52 @@ func TestExampleClosuresCoverEveryKindInDependencyOrder(t *testing.T) {
 			installed = append(installed, module.ID)
 		}
 	}
-	want := []string{"element", "component", "page", "workflow", "system"}
+	want := []string{"element", "component", "page", "workflow", "system", "system", "system"}
 	if !slices.Equal(kinds, want) {
 		t.Fatalf("closure kinds = %v, want exactly %v", kinds, want)
+	}
+}
+
+// Provider fixtures are first-class closure exercises rather than metadata
+// files that happen to sit beside the examples. Each one must carry both
+// candidate adapters and the environment permutation the validator executes.
+func TestProviderExampleClosuresDeclareEnvironmentSelections(t *testing.T) {
+	closures, err := exampleClosures(loadExampleCatalog(t))
+	if err != nil {
+		t.Fatalf("exampleClosures: %v", err)
+	}
+	want := map[string]struct {
+		slot, local, managed string
+	}{
+		"fixture/system/mail-providers": {
+			slot: "ggg/mail", local: "fixture/system/mail-local", managed: "fixture/system/mail-managed",
+		},
+		"fixture/system/storage-providers": {
+			slot: "ggg/storage", local: "fixture/system/storage-local", managed: "fixture/system/storage-managed",
+		},
+	}
+	found := map[string]bool{}
+	for _, closure := range closures {
+		spec, ok := providerFixtureSpecFor(closure.root.ID)
+		if !ok {
+			continue
+		}
+		expected, ok := want[closure.root.ID]
+		if !ok {
+			t.Fatalf("unexpected provider fixture %s", closure.root.ID)
+		}
+		found[closure.root.ID] = true
+		if spec.slot != expected.slot || spec.local != expected.local || spec.managed != expected.managed {
+			t.Fatalf("%s fixture spec = %#v, want %#v", closure.root.ID, spec, expected)
+		}
+		if len(closure.modules) != 3 {
+			t.Fatalf("%s closure modules = %v, want root plus two adapters", closure.root.ID, closure.ids())
+		}
+	}
+	for id := range want {
+		if !found[id] {
+			t.Fatalf("provider fixture closure %s is missing", id)
+		}
 	}
 }
 

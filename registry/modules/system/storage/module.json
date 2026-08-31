@@ -36,10 +36,18 @@
     },
     "files": [
       {
+        "source": "internal/storage/contract/contract.go",
+        "target": "internal/storage/contract/contract.go",
+        "class": "go",
+        "sha256": "66de3c4c5436e22b27837d5bf5e3d18657f6d5c008d1af3854ab562476f8e972",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/storage/contract_test.go",
         "target": "internal/storage/contract_test.go",
         "class": "test",
-        "sha256": "3ee702b93e9e5cd80cf56c949069fa134696a39085db69d542931fc4bdf73ea1",
+        "sha256": "e3d2e8cfd91a737627b03556c78f64bc9eb620c94ed6a07e329ac2f04831bcf1",
         "rewrite_module": true,
         "contract": false
       },
@@ -55,7 +63,7 @@
         "source": "internal/storage/storage_test.go",
         "target": "internal/storage/storage_test.go",
         "class": "test",
-        "sha256": "4d15a191dd1020f4cc112ff698830111acbf9f4bd86a539f4e5bdbea05f541e7",
+        "sha256": "4c8f25ed19c8fa0b307f3b09e05a67310793f86cf6a97f45a62dbe92f87b51a8",
         "rewrite_module": true,
         "contract": false
       }

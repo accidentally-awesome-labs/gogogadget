@@ -9,11 +9,15 @@ import (
 	"testing"
 
 	"github.com/gogogadget/gogogadget/internal/mail"
+	mailcontract "github.com/gogogadget/gogogadget/internal/mail/contract"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDevSenderContract(t *testing.T) {
 	dir := t.TempDir()
+	mailcontract.Run(t, func() mail.Sender {
+		return NewDevSender(slog.New(slog.NewTextHandler(io.Discard, nil)), t.TempDir())
+	})
 	sender := NewDevSender(slog.New(slog.NewTextHandler(io.Discard, nil)), dir)
 	msg := mail.Message{To: "contract@example.com", Subject: "Contract subject", HTML: "<p>Contract body</p>", Text: "Contract body"}
 	require.NoError(t, sender.Send(context.Background(), msg))

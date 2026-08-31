@@ -50,7 +50,7 @@
         "source": "internal/mail/resend/contract_test.go",
         "target": "internal/mail/resend/contract_test.go",
         "class": "test",
-        "sha256": "9680ab7350379ef96a494335150c4e9cf8fa446e012a44d0392e27c6fade9f9c",
+        "sha256": "4c03e01e134ba99ddf062804f131b06e0cac72ef14067098ece9026ed6436c44",
         "rewrite_module": true,
         "contract": false
       },
