@@ -41,7 +41,7 @@
         "source": "internal/analytics/module.go",
         "target": "internal/analytics/module.go",
         "class": "go",
-        "sha256": "415bf207335ec109bef8d37eeeae676391e37f01014da5c56b10eb486d8eb1d9",
+        "sha256": "742cc29556a7b7aad9a241a714238bfe51979c5e48b18d0eb70e9e96e1c22c89",
         "rewrite_module": true,
         "contract": true
       },
@@ -49,7 +49,7 @@
         "source": "internal/analytics/module_test.go",
         "target": "internal/analytics/module_test.go",
         "class": "test",
-        "sha256": "05f780814dccbd9f9ef7acf80c638c674708061132a4361a8a00614bb244eb79",
+        "sha256": "2483f2c2add5f4f927bd4703dc7ed165e6f7855857db92a9b69e10787271348a",
         "rewrite_module": true,
         "contract": false
       }
@@ -79,7 +79,7 @@
           }
         ],
         "start": false,
-        "stop": false
+        "stop": true
       }
     },
     "migrations": [],

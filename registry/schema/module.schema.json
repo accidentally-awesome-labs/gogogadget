@@ -1065,6 +1065,117 @@
         }
       ]
     },
+    "CapabilityContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "capability",
+        "type"
+      ]
+    },
+    "ProviderSlotContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "critical": {
+          "type": "boolean"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CapabilityContribution"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "critical",
+        "capabilities"
+      ]
+    },
+    "AdapterContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "slot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ServiceTarget"
+          }
+        }
+      },
+      "required": [
+        "slot",
+        "targets"
+      ]
+    },
+    "ServiceTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "development",
+            "self-hosted",
+            "managed"
+          ]
+        },
+        "environments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "development",
+              "test",
+              "production"
+            ]
+          },
+          "minItems": 1
+        },
+        "automation": {
+          "type": "string",
+          "enum": [
+            "provision",
+            "configure",
+            "manual"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "mode",
+        "environments",
+        "automation"
+      ]
+    },
     "RuntimeContributions": {
       "type": "object",
       "additionalProperties": false,
@@ -1073,6 +1184,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/AssetContribution"
+          }
+        },
+        "provider_slots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProviderSlotContribution"
           }
         },
         "content_types": {
@@ -1343,6 +1460,9 @@
         },
         "stop": {
           "type": "boolean"
+        },
+        "adapter": {
+          "$ref": "#/$defs/AdapterContribution"
         }
       },
       "required": [

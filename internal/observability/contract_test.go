@@ -1,6 +1,7 @@
 package observability
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
@@ -40,12 +41,9 @@ func runReporterContract(t *testing.T, factory func(t *testing.T) Reporter) {
 func TestNoopReporterContract(t *testing.T) {
 	runReporterContract(t, func(t *testing.T) Reporter { return NoopReporter{} })
 }
+// TestSentryReporterContract runs the contract against a reporter backed by
+// its own client. The reporter must not depend on sentry's process-global hub.
 
-// TestSentryReporterContract runs the contract against the real
-// SentryReporter. SentryReporter reports through the global sentry hub
-// (cmd/server owns sentry.Init in production), so the test initializes the
-// hub with a DSN pointing at an httptest server and asserts the event
-// envelope actually arrives.
 func TestSentryReporterContract(t *testing.T) {
 	var mu sync.Mutex
 	var paths, bodies []string
@@ -63,15 +61,18 @@ func TestSentryReporterContract(t *testing.T) {
 	defer srv.Close()
 
 	dsn := "http://public@" + strings.TrimPrefix(srv.URL, "http://") + "/1"
-	if err := sentry.Init(sentry.ClientOptions{Dsn: dsn, Environment: "test"}); err != nil {
-		t.Fatalf("sentry.Init: %v", err)
+	client, err := sentry.NewClient(sentry.ClientOptions{Dsn: dsn, Environment: "test"})
+	if err != nil {
+		t.Fatalf("sentry.NewClient: %v", err)
 	}
-	t.Cleanup(func() { sentry.CurrentHub().BindClient(nil) })
+	reporter := NewSentryReporter(client)
 
-	runReporterContract(t, func(t *testing.T) Reporter { return NewSentryReporter() })
+	runReporterContract(t, func(t *testing.T) Reporter { return reporter })
 
-	if !sentry.Flush(5*time.Second) {
-		t.Fatal("sentry.Flush timed out waiting for events")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if !client.FlushWithContext(ctx) {
+		t.Fatal("sentry flush timed out waiting for events")
 	}
 
 	mu.Lock()

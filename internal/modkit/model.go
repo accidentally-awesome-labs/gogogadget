@@ -257,7 +257,8 @@ type NamespaceClaims struct {
 // RuntimeContributions is the typed, data-only runtime declaration. Empty
 // contributions encode as {}.
 type RuntimeContributions struct {
-	System       *SystemContribution       `json:"system,omitempty"`
+	System        *SystemContribution        `json:"system,omitempty"`
+	ProviderSlots []ProviderSlotContribution `json:"provider_slots,omitempty"`
 	Routes       []RouteContribution       `json:"routes,omitempty"`
 	Jobs         []JobContribution         `json:"jobs,omitempty"`
 	Janitors     []JanitorContribution     `json:"janitors,omitempty"`
@@ -269,6 +270,39 @@ type RuntimeContributions struct {
 	Assets       []AssetContribution       `json:"assets,omitempty"`
 	Scenarios    []ScenarioContribution    `json:"scenarios,omitempty"`
 	Visual       []VisualContribution      `json:"visual,omitempty"`
+}
+
+// ProviderSlotContribution declares a constructor-free provider seam and the
+// typed capabilities every adapter for the slot must provide.
+type ProviderSlotContribution struct {
+	ID           string                 `json:"id"`
+	Critical     bool                   `json:"critical"`
+	Capabilities []CapabilityContribution `json:"capabilities"`
+}
+
+// CapabilityContribution names one typed value exported by a provider slot.
+type CapabilityContribution struct {
+	Capability string `json:"capability"`
+	Type       string `json:"type"`
+}
+
+// AdapterContribution marks a system module as an implementation of a
+// provider slot and advertises its selectable service targets.
+type AdapterContribution struct {
+	Slot    string         `json:"slot"`
+	Targets []ServiceTarget `json:"targets"`
+}
+
+// ServiceTarget is the provider-facing endpoint choice exposed by an adapter.
+// Detailed target inputs and local orchestration metadata are added by the
+// provider-aware registry cutover; these fields establish the shared vocabulary
+// without changing schema-1 resolution.
+type ServiceTarget struct {
+	ID           string   `json:"id"`
+	Title        string   `json:"title"`
+	Mode         string   `json:"mode"`
+	Environments []string `json:"environments"`
+	Automation   string   `json:"automation"`
 }
 
 // SystemContribution declares a directly compiled runtime constructor.
@@ -287,7 +321,9 @@ type SystemContribution struct {
 	TypeImports []string `json:"type_imports,omitempty"`
 	Start       bool     `json:"start"`
 	Stop        bool     `json:"stop"`
+	Adapter     *AdapterContribution `json:"adapter,omitempty"`
 }
+
 
 // RuntimeNeed is one typed constructor dependency.
 type RuntimeNeed struct {
