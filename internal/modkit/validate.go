@@ -182,7 +182,9 @@ func validateDependencies(deps Dependencies) error {
 		if !validPackagePath(dep.Module) || strings.TrimSpace(dep.Version) == "" {
 			return fmt.Errorf("manifest dependency go entry is invalid")
 		}
-		if _, ok := seenGo[dep.Module]; ok { return fmt.Errorf("duplicate go dependency %q", dep.Module) }
+		if _, ok := seenGo[dep.Module]; ok {
+			return fmt.Errorf("duplicate go dependency %q", dep.Module)
+		}
 		seenGo[dep.Module] = struct{}{}
 	}
 	for _, tool := range deps.Tools {
@@ -191,14 +193,18 @@ func validateDependencies(deps Dependencies) error {
 			!validSafeInstallPath(tool.InstallPath) || !validSafeArchivePath(tool.BinaryPath) {
 			return fmt.Errorf("manifest dependency tool %q is invalid", tool.InstallPath)
 		}
-		if _, ok := seenTools[tool.InstallPath]; ok { return fmt.Errorf("duplicate tool dependency %q", tool.InstallPath) }
+		if _, ok := seenTools[tool.InstallPath]; ok {
+			return fmt.Errorf("duplicate tool dependency %q", tool.InstallPath)
+		}
 		seenTools[tool.InstallPath] = struct{}{}
 	}
 	for _, container := range deps.Containers {
 		if strings.TrimSpace(container.Name) == "" || !strings.Contains(container.Image, "@sha256:") {
 			return fmt.Errorf("manifest container dependency %q must use an immutable digest", container.Name)
 		}
-		if _, ok := seenContainers[container.Name]; ok { return fmt.Errorf("duplicate container dependency %q", container.Name) }
+		if _, ok := seenContainers[container.Name]; ok {
+			return fmt.Errorf("duplicate container dependency %q", container.Name)
+		}
 		seenContainers[container.Name] = struct{}{}
 	}
 	return nil
@@ -280,7 +286,9 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateRuntime(m.Runtime, canonical); err != nil {
 		return err
 	}
-	if err := validateAdapterEnvironment(m.Environment, m.Runtime.System); err != nil { return err }
+	if err := validateAdapterEnvironment(m.Environment, m.Runtime.System); err != nil {
+		return err
+	}
 	if err := validateVendors(m.Vendors, canonical); err != nil {
 		return err
 	}
@@ -354,7 +362,7 @@ func validateManifestMigrations(migrations []ManifestMigration, canonical bool) 
 
 func validateClaims(claims NamespaceClaims, canonical bool) error {
 	sets := []struct {
-		name string
+		name   string
 		values []string
 	}{
 		{"packages", claims.Packages}, {"routes", claims.Routes}, {"jobs", claims.Jobs},
@@ -509,7 +517,9 @@ func validateProviderSlots(slots []ProviderSlotContribution, canonical bool) err
 	}
 	if canonical && len(slots) > 1 {
 		for i := 1; i < len(slots); i++ {
-			if slots[i-1].ID > slots[i].ID { return fmt.Errorf("provider slots must be sorted by id") }
+			if slots[i-1].ID > slots[i].ID {
+				return fmt.Errorf("provider slots must be sorted by id")
+			}
 		}
 	}
 	return nil
@@ -521,14 +531,20 @@ func validScopedSlotID(id string) bool {
 }
 
 func validateAdapter(adapter *AdapterContribution) error {
-	if adapter == nil { return nil }
+	if adapter == nil {
+		return nil
+	}
 	if !validScopedSlotID(adapter.Slot) || adapter.Targets == nil || len(adapter.Targets) == 0 {
 		return fmt.Errorf("adapter slot and targets are required")
 	}
 	seen := map[string]struct{}{}
 	for i, target := range adapter.Targets {
-		if err := validateServiceTarget(target); err != nil { return fmt.Errorf("adapter target %d: %w", i, err) }
-		if _, ok := seen[target.ID]; ok { return fmt.Errorf("duplicate adapter target %q", target.ID) }
+		if err := validateServiceTarget(target); err != nil {
+			return fmt.Errorf("adapter target %d: %w", i, err)
+		}
+		if _, ok := seen[target.ID]; ok {
+			return fmt.Errorf("duplicate adapter target %q", target.ID)
+		}
 		seen[target.ID] = struct{}{}
 	}
 	return nil
@@ -544,14 +560,22 @@ func validateServiceTarget(target ServiceTarget) error {
 	if target.Automation != "provision" && target.Automation != "configure" && target.Automation != "manual" {
 		return fmt.Errorf("target automation is invalid")
 	}
-	if len(target.Environments) == 0 { return fmt.Errorf("target environments are required") }
+	if len(target.Environments) == 0 {
+		return fmt.Errorf("target environments are required")
+	}
 	envSeen := map[string]struct{}{}
 	for _, env := range target.Environments {
-		if env != "development" && env != "test" && env != "production" { return fmt.Errorf("target environment %q is invalid", env) }
-		if _, ok := envSeen[env]; ok { return fmt.Errorf("target environments contain duplicate %q", env) }
+		if env != "development" && env != "test" && env != "production" {
+			return fmt.Errorf("target environment %q is invalid", env)
+		}
+		if _, ok := envSeen[env]; ok {
+			return fmt.Errorf("target environments contain duplicate %q", env)
+		}
 		envSeen[env] = struct{}{}
 	}
-	if target.Inputs == nil { return fmt.Errorf("target inputs array is required") }
+	if target.Inputs == nil {
+		return fmt.Errorf("target inputs array is required")
+	}
 	inputSeen := map[string]struct{}{}
 	for _, input := range target.Inputs {
 		if strings.TrimSpace(input.Key) == "" || strings.TrimSpace(input.Label) == "" {
@@ -559,17 +583,26 @@ func validateServiceTarget(target ServiceTarget) error {
 		}
 		switch input.Type {
 		case "string", "url", "integer", "boolean", "enum":
-		default: return fmt.Errorf("target input %q type is invalid", input.Key)
+		default:
+			return fmt.Errorf("target input %q type is invalid", input.Key)
 		}
-		if input.Type == "enum" && len(input.Enum) == 0 { return fmt.Errorf("target input %q enum is required", input.Key) }
-		if _, ok := inputSeen[input.Key]; ok { return fmt.Errorf("target inputs contain duplicate %q", input.Key) }
+		if input.Type == "enum" && len(input.Enum) == 0 {
+			return fmt.Errorf("target input %q enum is required", input.Key)
+		}
+		if _, ok := inputSeen[input.Key]; ok {
+			return fmt.Errorf("target inputs contain duplicate %q", input.Key)
+		}
 		inputSeen[input.Key] = struct{}{}
 	}
 	if target.LocalService != nil {
-		if err := validateLocalService(*target.LocalService); err != nil { return err }
+		if err := validateLocalService(*target.LocalService); err != nil {
+			return err
+		}
 	}
 	if target.Automation == "provision" || target.Automation == "configure" {
-		if target.Provisioner == "" { return fmt.Errorf("target provisioner is required for %s automation", target.Automation) }
+		if target.Provisioner == "" {
+			return fmt.Errorf("target provisioner is required for %s automation", target.Automation)
+		}
 	}
 	return nil
 }
@@ -578,10 +611,16 @@ func validateLocalService(service LocalService) error {
 	if strings.TrimSpace(service.Container) == "" || service.Ports == nil || service.Environment == nil || service.Volumes == nil {
 		return fmt.Errorf("local service container, ports, environment, and volumes are required")
 	}
-	if service.Health.Kind != "tcp" && service.Health.Kind != "http" { return fmt.Errorf("local service health kind is invalid") }
-	if service.Health.Port <= 0 || (service.Health.Kind == "http" && service.Health.Path == "") { return fmt.Errorf("local service health is invalid") }
+	if service.Health.Kind != "tcp" && service.Health.Kind != "http" {
+		return fmt.Errorf("local service health kind is invalid")
+	}
+	if service.Health.Port <= 0 || (service.Health.Kind == "http" && service.Health.Path == "") {
+		return fmt.Errorf("local service health is invalid")
+	}
 	for _, env := range service.Environment {
-		if (env.Value == "") == (env.FromKey == "") { return fmt.Errorf("local service env %q must set exactly one value or from_key", env.Key) }
+		if (env.Value == "") == (env.FromKey == "") {
+			return fmt.Errorf("local service env %q must set exactly one value or from_key", env.Key)
+		}
 	}
 	return nil
 }
@@ -1010,7 +1049,9 @@ func validateEnvironment(items []EnvironmentVariable, canonical bool) error {
 			if strings.TrimSpace(target) == "" || !strings.Contains(target, "@") {
 				return fmt.Errorf("manifest environment[%d] target %q is invalid", i, target)
 			}
-			if _, ok := targets[target]; ok { return fmt.Errorf("manifest environment[%d] has duplicate target %q", i, target) }
+			if _, ok := targets[target]; ok {
+				return fmt.Errorf("manifest environment[%d] has duplicate target %q", i, target)
+			}
 			targets[target] = struct{}{}
 		}
 		if item.Type == EnvInt && item.Min != nil && item.Max != nil && *item.Min > *item.Max {
@@ -1195,7 +1236,7 @@ func validateLock(lock Lock, canonical bool) error {
 				return fmt.Errorf("lock migrations contain duplicate path %q in %s and %s", migration.Path, owner, module.ID)
 			}
 			migrationPaths[migration.Path] = module.ID
-	}
+		}
 	}
 	return nil
 }
@@ -1902,18 +1943,40 @@ func validSQLIdentifier(value string) bool {
 }
 
 func validateAdapterEnvironment(items []EnvironmentVariable, system *SystemContribution) error {
-	if system == nil || system.Adapter == nil { return nil }
+	if system == nil || system.Adapter == nil {
+		return nil
+	}
 	declared := map[string]EnvironmentVariable{}
-	for _, item := range items { declared[item.Key] = item }
+	for _, item := range items {
+		declared[item.Key] = item
+	}
 	mapped := map[string]string{}
 	for _, target := range system.Adapter.Targets {
 		for _, input := range target.Inputs {
-			if input.EnvKey == "" { continue }
+			if input.EnvKey == "" {
+				continue
+			}
 			item, ok := declared[input.EnvKey]
-			if !ok { return fmt.Errorf("adapter target %s input %q maps unknown env key %q", target.ID, input.Key, input.EnvKey) }
-			if prior, exists := mapped[input.EnvKey]; exists && prior != target.ID { return fmt.Errorf("adapter env key %q maps multiple targets", input.EnvKey) }
+			if !ok {
+				return fmt.Errorf("adapter target %s input %q maps unknown env key %q", target.ID, input.Key, input.EnvKey)
+			}
+			if prior, exists := mapped[input.EnvKey]; exists {
+				return fmt.Errorf("adapter env key %q maps targets %s and %s", input.EnvKey, prior, target.ID)
+			}
 			mapped[input.EnvKey] = target.ID
-			if input.Secret != item.Secret { return fmt.Errorf("adapter env key %q secret mismatch", input.EnvKey) }
+			wantType := EnvString
+			switch input.Type {
+			case "integer":
+				wantType = EnvInt
+			case "boolean":
+				wantType = EnvBool
+			}
+			if wantType != item.Type {
+				return fmt.Errorf("adapter env key %q type mismatch: target %s vs declaration %s", input.EnvKey, wantType, item.Type)
+			}
+			if input.Secret != item.Secret {
+				return fmt.Errorf("adapter env key %q secret mismatch", input.EnvKey)
+			}
 		}
 	}
 	return nil

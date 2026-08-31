@@ -35,7 +35,7 @@
         "source": "internal/modkit/apply.go",
         "target": "internal/modkit/apply.go",
         "class": "go",
-        "sha256": "1f5e0270a8fb84aa47ee38be00c3bcc9569c2665197b2e8954b3046b1ee8eb6b",
+        "sha256": "e3a0aaac52eeb648105eebd2195e77fef4f7543dd443bcf174637d1a05dbedc9",
         "rewrite_module": true,
         "contract": true
       },
@@ -59,7 +59,7 @@
         "source": "internal/modkit/cli.go",
         "target": "internal/modkit/cli.go",
         "class": "go",
-        "sha256": "6203d9eb5f169c4e0f08d02a8aa1a6466988e9fbe7618f466f9bfe5cc9407e99",
+        "sha256": "808010c9f193c00f7bd24f05ffde16f1911d7a1089018372fc8840d09893fcaa",
         "rewrite_module": true,
         "contract": true
       },
@@ -83,7 +83,7 @@
         "source": "internal/modkit/dependencies.go",
         "target": "internal/modkit/dependencies.go",
         "class": "go",
-        "sha256": "00cc8e2753b1d42e39fb54facc09584944dbe9130c6c18012d248c5d8094f9f9",
+        "sha256": "4c6ac3565e5a10cfbc342dbcae1bfb44b68d6ee994c44bd9805192f9a3392c5c",
         "rewrite_module": false,
         "contract": false
       },
@@ -115,7 +115,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "8308a875f79926ab03d422ab5db57bffb4e56dfc8cbe3698e0738cbee104b49b",
+        "sha256": "723474583b9431635ae757910b37c62d6734d7570fd84f820dabfb628e57ca77",
         "rewrite_module": true,
         "contract": false
       },
@@ -211,7 +211,7 @@
         "source": "internal/modkit/namespace.go",
         "target": "internal/modkit/namespace.go",
         "class": "go",
-        "sha256": "294798adf248748d84da4c53fd7a094ce5b94fcdba1ffc3991905c64c981ee63",
+        "sha256": "a240c3d7d9152a1efe4d78d0cf87abbb438b090b119cabaf924df104e3e8c073",
         "rewrite_module": true,
         "contract": false
       },
@@ -235,7 +235,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "0e1d5ed4e0130f500be74a4a575f0647ae833253ad433deedc2255b74f59cd20",
+        "sha256": "7d47b7f67e12e064881e7cf273d755dfd6473910f755f76c36c8942e229064fb",
         "rewrite_module": true,
         "contract": true
       },
@@ -291,7 +291,7 @@
         "source": "internal/modkit/remove.go",
         "target": "internal/modkit/remove.go",
         "class": "go",
-        "sha256": "972e48755ae2688c9cf622ca4661704b8522ba6fa36b145c43579b20b408b833",
+        "sha256": "7212c7b2e23c4a3cf835126e5b749e2f886dcd942ba8763245226ab72cf93035",
         "rewrite_module": true,
         "contract": false
       },
@@ -307,7 +307,7 @@
         "source": "internal/modkit/resolve.go",
         "target": "internal/modkit/resolve.go",
         "class": "go",
-        "sha256": "5cecf7fae5dd398f5b853fc6bf2eb1547a62c126865c3f0448a6b4d577493999",
+        "sha256": "dd0e3e66ac3f067c4c5cd7052e9c72be0077cfba6a463970a0a23ac0e19c7e4f",
         "rewrite_module": true,
         "contract": false
       },
@@ -387,7 +387,7 @@
         "source": "internal/modkit/validate.go",
         "target": "internal/modkit/validate.go",
         "class": "go",
-        "sha256": "0a533c42cd7369ef7ae75e2072b1804e889eb8ac21f0fdd9e6f4104bd8858197",
+        "sha256": "0971db9c921f5bd987fb732c60a2ccc572b04eb9f5955d995bdfc16a39c41eb5",
         "rewrite_module": true,
         "contract": false
       },

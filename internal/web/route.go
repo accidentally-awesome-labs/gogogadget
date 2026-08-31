@@ -107,8 +107,12 @@ func (t scopeTargets) target(scope Scope) (*http.ServeMux, func(http.Handler) ht
 func enabledRoutes(s *Server, registry []Route) []Route {
 	enabled := make([]Route, 0, len(registry))
 	for _, route := range registry {
-		if route.ProviderActive != nil && !route.ProviderActive(s) { continue }
-		if route.Enabled != nil && !route.Enabled(s) { continue }
+		if route.ProviderActive != nil && !route.ProviderActive(s) {
+			continue
+		}
+		if route.Enabled != nil && !route.Enabled(s) {
+			continue
+		}
 		enabled = append(enabled, route)
 	}
 	return enabled

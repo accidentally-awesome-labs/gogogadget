@@ -174,11 +174,17 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			continue
 		}
 		profile, ok := profileByID[id]
-		if !ok { return selectedGraph{}, fmt.Errorf("project selects unknown catalog id %q", id) }
-		if err := validateProfileProviderParity(profile, moduleByID); err != nil { return selectedGraph{}, err }
+		if !ok {
+			return selectedGraph{}, fmt.Errorf("project selects unknown catalog id %q", id)
+		}
+		if err := validateProfileProviderParity(profile, moduleByID); err != nil {
+			return selectedGraph{}, err
+		}
 		for _, member := range profile.Members {
 			module, exists := moduleByID[member]
-			if !exists { return selectedGraph{}, fmt.Errorf("profile %s references missing module %q", profile.ID, member) }
+			if !exists {
+				return selectedGraph{}, fmt.Errorf("profile %s references missing module %q", profile.ID, member)
+			}
 			_, omitted := excluded[member]
 			if omitted && module.RemovalPolicy != RemovalReplacementRequired {
 				continue
@@ -246,49 +252,78 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			adapterByID[id] = module
 		}
 	}
-	envChoices := map[string]ProviderSelection{}
+	slotsList := make([]string, 0, len(slots))
 	for slot := range slots {
+		slotsList = append(slotsList, slot)
+	}
+	sort.Strings(slotsList)
+	for _, slot := range slotsList {
 		choices, ok := project.Providers[slot]
-		if !ok { return selectedGraph{}, fmt.Errorf("provider slot %q has no selections", slot) }
-		envChoices["development"] = choices.Development
-		envChoices["test"] = choices.Test
-		envChoices["production"] = choices.Production
-		for env, choice := range envChoices {
-			adapterID := choice.Adapter
+		if !ok {
+			return selectedGraph{}, fmt.Errorf("provider slot %q has no selections", slot)
+		}
+		for _, selectedChoice := range []struct {
+			env    string
+			choice ProviderSelection
+		}{{"development", choices.Development}, {"test", choices.Test}, {"production", choices.Production}} {
+			adapterID := selectedChoice.choice.Adapter
 			adapter, ok := adapterByID[adapterID]
 			if !ok || adapter.Runtime.System.Adapter.Slot != slot {
-				return selectedGraph{}, fmt.Errorf("provider %s adapter %q does not implement slot %q", env, adapterID, slot)
+				return selectedGraph{}, fmt.Errorf("provider %s adapter %q does not implement slot %q", selectedChoice.env, adapterID, slot)
 			}
 			found := false
 			for _, target := range adapter.Runtime.System.Adapter.Targets {
-				if target.ID != choice.Target { continue }
-				found = true
-				if !containsString(target.Environments, env) {
-					return selectedGraph{}, fmt.Errorf("provider %s target %s@%s is not allowed in %s", slot, adapterID, target.ID, env)
+				if target.ID != selectedChoice.choice.Target {
+					continue
 				}
-				if env == "production" && target.Mode == "development" {
+				found = true
+				if !containsString(target.Environments, selectedChoice.env) {
+					return selectedGraph{}, fmt.Errorf("provider %s target %s@%s is not allowed in %s", slot, adapterID, target.ID, selectedChoice.env)
+				}
+				if selectedChoice.env == "production" && target.Mode == "development" {
 					return selectedGraph{}, fmt.Errorf("development target %s@%s cannot be used in production", adapterID, target.ID)
 				}
 			}
-			if !found { return selectedGraph{}, fmt.Errorf("provider %s target %q is missing from adapter %q", slot, choice.Target, adapterID) }
+			if !found {
+				return selectedGraph{}, fmt.Errorf("provider %s target %q is missing from adapter %q", slot, selectedChoice.choice.Target, adapterID)
+			}
 			if _, exists := selected[adapterID]; !exists {
 				selected[adapterID] = struct{}{}
 				reasons[adapterID] = "provider"
 			}
 		}
-		delete(envChoices, "development"); delete(envChoices, "test"); delete(envChoices, "production")
 	}
 	if project.Deployment != "" {
 		deployment, ok := moduleByID[project.Deployment]
-		if !ok { return selectedGraph{}, fmt.Errorf("deployment module %q is not present", project.Deployment) }
+		if !ok {
+			return selectedGraph{}, fmt.Errorf("deployment module %q is not present", project.Deployment)
+		}
 		if deployment.Kind != ModuleSystem || deployment.Runtime.System == nil || len(deployment.Runtime.Deploy) != 1 {
 			return selectedGraph{}, fmt.Errorf("deployment module %q must provide exactly one deploy target", project.Deployment)
 		}
 		selected[project.Deployment] = struct{}{}
 		reasons[project.Deployment] = "deployment"
 	}
+	deployments := []string{}
 	for id := range selected {
-		if err := expand(id); err != nil { return selectedGraph{}, err }
+		if len(moduleByID[id].Runtime.Deploy) > 0 {
+			deployments = append(deployments, id)
+		}
+	}
+	sort.Strings(deployments)
+	if len(deployments) > 1 {
+		return selectedGraph{}, fmt.Errorf("multiple deployment modules selected: %s", strings.Join(deployments, ", "))
+	}
+	if len(deployments) == 1 && project.Deployment == "" {
+		return selectedGraph{}, fmt.Errorf("deployment module %s requires project deployment selection", deployments[0])
+	}
+	if project.Deployment != "" && len(deployments) == 1 && deployments[0] != project.Deployment {
+		return selectedGraph{}, fmt.Errorf("deployment module %s conflicts with selected deployment %s", deployments[0], project.Deployment)
+	}
+	for id := range selected {
+		if err := expand(id); err != nil {
+			return selectedGraph{}, err
+		}
 	}
 	order, err := stableTopologicalOrder(ctx, selected, moduleByID)
 	if err != nil {
@@ -367,20 +402,28 @@ func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, m
 // constructs one adapter per slot.
 func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) (RuntimeOrders, error) {
 	byID := make(map[string]Manifest, len(modules))
-	for _, module := range modules { byID[module.ID] = module }
+	for _, module := range modules {
+		byID[module.ID] = module
+	}
 	build := func(env string) ([]string, error) {
 		selected := map[string]struct{}{}
 		for id, module := range byID {
-			if module.Runtime.System == nil || module.Runtime.System.Adapter == nil { selected[id] = struct{}{} }
+			if module.Runtime.System != nil && module.Runtime.System.Adapter == nil {
+				selected[id] = struct{}{}
+			}
 		}
 		for slot, choices := range project.Providers {
 			choice := choices.Development
 			switch env {
-			case "test": choice = choices.Test
-			case "production": choice = choices.Production
+			case "test":
+				choice = choices.Test
+			case "production":
+				choice = choices.Production
 			}
 			adapter, ok := byID[choice.Adapter]
-			if !ok { return nil, fmt.Errorf("provider %s adapter %q missing", slot, choice.Adapter) }
+			if !ok {
+				return nil, fmt.Errorf("provider %s adapter %q missing", slot, choice.Adapter)
+			}
 			if adapter.Runtime.System == nil || adapter.Runtime.System.Adapter == nil ||
 				adapter.Runtime.System.Adapter.Slot != slot {
 				return nil, fmt.Errorf("provider %s adapter %q does not implement slot", slot, choice.Adapter)
@@ -392,10 +435,17 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 		indegree := make(map[string]int, len(selected))
 		dependents := make(map[string][]string, len(selected))
 		edges := make(map[string]map[string]struct{}, len(selected))
-		for id := range selected { indegree[id] = 0; edges[id] = map[string]struct{}{} }
+		for id := range selected {
+			indegree[id] = 0
+			edges[id] = map[string]struct{}{}
+		}
 		addEdge := func(provider, consumer string) {
-			if provider == consumer { return }
-			if _, exists := edges[provider][consumer]; exists { return }
+			if provider == consumer {
+				return
+			}
+			if _, exists := edges[provider][consumer]; exists {
+				return
+			}
 			edges[provider][consumer] = struct{}{}
 			indegree[consumer]++
 			dependents[provider] = append(dependents[provider], consumer)
@@ -404,7 +454,7 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 			module := byID[id]
 			for _, requirement := range module.Requires {
 				if _, exists := selected[requirement.ID]; !exists {
-					return nil, fmt.Errorf("runtime module %q requires unselected module %q", id, requirement.ID)
+					continue
 				}
 				addEdge(requirement.ID, id)
 			}
@@ -412,7 +462,9 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 		providers := map[string]string{}
 		for id := range selected {
 			module := byID[id]
-			if module.Runtime.System == nil { continue }
+			if module.Runtime.System == nil {
+				continue
+			}
 			for _, provide := range module.Runtime.System.Provides {
 				if previous, exists := providers[provide.Capability]; exists && previous != id {
 					// Adapter candidates may share capability names, but only
@@ -428,32 +480,53 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 		}
 		for id := range selected {
 			module := byID[id]
-			if module.Runtime.System == nil { continue }
+			if module.Runtime.System == nil {
+				continue
+			}
 			for _, need := range module.Runtime.System.Needs {
 				provider, ok := providers[need.Capability]
 				if !ok {
-					if need.Optional { continue }
+					if need.Optional {
+						continue
+					}
 					return nil, fmt.Errorf("runtime module %q has no provider for capability %q", id, need.Capability)
 				}
 				addEdge(provider, id)
 			}
 		}
-		for id := range dependents { sort.Strings(dependents[id]) }
+		for id := range dependents {
+			sort.Strings(dependents[id])
+		}
 		ready := make([]string, 0)
-		for id, degree := range indegree { if degree == 0 { ready = append(ready, id) } }
+		for id, degree := range indegree {
+			if degree == 0 {
+				ready = append(ready, id)
+			}
+		}
 		sort.Strings(ready)
 		order := make([]string, 0, len(selected))
 		for len(ready) != 0 {
-			if err := ctx.Err(); err != nil { return nil, err }
-			id := ready[0]; ready = ready[1:]; order = append(order, id)
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+			id := ready[0]
+			ready = ready[1:]
+			order = append(order, id)
 			for _, dependent := range dependents[id] {
 				indegree[dependent]--
-				if indegree[dependent] == 0 { ready = append(ready, dependent); sort.Strings(ready) }
+				if indegree[dependent] == 0 {
+					ready = append(ready, dependent)
+					sort.Strings(ready)
+				}
 			}
 		}
 		if len(order) != len(selected) {
 			remaining := make([]string, 0)
-			for id, degree := range indegree { if degree != 0 { remaining = append(remaining, id) } }
+			for id, degree := range indegree {
+				if degree != 0 {
+					remaining = append(remaining, id)
+				}
+			}
 			sort.Strings(remaining)
 			return nil, fmt.Errorf("runtime dependency cycle in %s among %s", env, strings.Join(remaining, ", "))
 		}
@@ -461,9 +534,15 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 	}
 	var orders RuntimeOrders
 	var err error
-	if orders.Development, err = build("development"); err != nil { return RuntimeOrders{}, err }
-	if orders.Test, err = build("test"); err != nil { return RuntimeOrders{}, err }
-	if orders.Production, err = build("production"); err != nil { return RuntimeOrders{}, err }
+	if orders.Development, err = build("development"); err != nil {
+		return RuntimeOrders{}, err
+	}
+	if orders.Test, err = build("test"); err != nil {
+		return RuntimeOrders{}, err
+	}
+	if orders.Production, err = build("production"); err != nil {
+		return RuntimeOrders{}, err
+	}
 	return orders, nil
 }
 func validateProfileProviderParity(profile Profile, modules map[string]Manifest) error {
@@ -471,24 +550,43 @@ func validateProfileProviderParity(profile Profile, modules map[string]Manifest)
 	visited := map[string]bool{}
 	var visit func(string) error
 	visit = func(id string) error {
-		if visited[id] { return nil }
+		if visited[id] {
+			return nil
+		}
 		visited[id] = true
 		module, ok := modules[id]
-		if !ok { return fmt.Errorf("profile %s references missing module %q", profile.ID, id) }
-		for _, slot := range module.Runtime.ProviderSlots { declared[slot.ID] = struct{}{} }
+		if !ok {
+			return fmt.Errorf("profile %s references missing module %q", profile.ID, id)
+		}
+		for _, slot := range module.Runtime.ProviderSlots {
+			declared[slot.ID] = struct{}{}
+		}
 		for _, requirement := range module.Requires {
-			if err := visit(requirement.ID); err != nil { return err }
+			if err := visit(requirement.ID); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
-	for _, member := range profile.Members { if err := visit(member); err != nil { return err } }
-	want := make([]string, 0, len(declared)); for id := range declared { want = append(want, id) }
+	for _, member := range profile.Members {
+		if err := visit(member); err != nil {
+			return err
+		}
+	}
+	want := make([]string, 0, len(declared))
+	for id := range declared {
+		want = append(want, id)
+	}
 	sort.Strings(want)
-	got := append([]string{}, profile.RequiredProviderSlots...); sort.Strings(got)
-	if !slices.Equal(want, got) { return fmt.Errorf("profile %s required_provider_slots %v do not match member closure %v", profile.ID, got, want) }
+	got := append([]string{}, profile.RequiredProviderSlots...)
+	sort.Strings(got)
+	if !slices.Equal(want, got) {
+		return fmt.Errorf("profile %s required_provider_slots %v do not match member closure %v", profile.ID, got, want)
+	}
 	for slot := range profile.ProviderDefaults {
-		if _, ok := declared[slot]; !ok { return fmt.Errorf("profile %s has provider default for undeclared slot %q", profile.ID, slot) }
+		if _, ok := declared[slot]; !ok {
+			return fmt.Errorf("profile %s has provider default for undeclared slot %q", profile.ID, slot)
+		}
 	}
 	return nil
 }
- 

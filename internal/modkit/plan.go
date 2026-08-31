@@ -12,7 +12,6 @@ import (
 
 	"golang.org/x/mod/modfile"
 )
-	
 
 const defaultCanonicalModule = "github.com/gogogadget/gogogadget"
 
@@ -111,18 +110,18 @@ const (
 
 // Plan is the complete read-only result of resolving one operation.
 type Plan struct {
-	Operation      Operation    `json:"operation"`
-	Root           string       `json:"root"`
-	RegistryCommit string       `json:"registry_commit"`
-	ModulePath     string       `json:"module_path"`
-	Project        Project      `json:"project"`
-	Lock           Lock         `json:"lock"`
-	Resolved       []string     `json:"resolved"`
-	Order          []string     `json:"order"`
-	Changes        []Change     `json:"changes"`
-	Diagnostics    []Diagnostic `json:"diagnostics"`
-	Conflicts      []Conflict   `json:"conflicts"`
-	Staged         []StagedFile `json:"staged"`
+	Operation            Operation    `json:"operation"`
+	Root                 string       `json:"root"`
+	RegistryCommit       string       `json:"registry_commit"`
+	ModulePath           string       `json:"module_path"`
+	Project              Project      `json:"project"`
+	Lock                 Lock         `json:"lock"`
+	Resolved             []string     `json:"resolved"`
+	Order                []string     `json:"order"`
+	Changes              []Change     `json:"changes"`
+	Diagnostics          []Diagnostic `json:"diagnostics"`
+	Conflicts            []Conflict   `json:"conflicts"`
+	Staged               []StagedFile `json:"staged"`
 	previousDependencies []LockedDependency
 }
 type plannedAuthoredPayload struct {
@@ -219,16 +218,26 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
-	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}
-	if goMod, readErr := os.ReadFile(filepath.Join(canonicalRoot, "go.mod")); readErr == nil {
-		if parsed, parseErr := modfile.Parse("go.mod", goMod, nil); parseErr == nil {
-			for _, requirement := range parsed.Require { declaredImports = append(declaredImports, GoDependency{Module: requirement.Mod.Path}) }
+	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}, {Module: "golang.org/x/text"}}
+	if op.Kind == OpInit || (op.Kind == OpSync && hasLock) {
+		if goMod, readErr := os.ReadFile(filepath.Join(canonicalRoot, "go.mod")); readErr == nil {
+			if parsed, parseErr := modfile.Parse("go.mod", goMod, nil); parseErr == nil {
+				for _, requirement := range parsed.Require {
+					declaredImports = append(declaredImports, GoDependency{Module: requirement.Mod.Path})
+				}
+			}
 		}
 	}
-	for _, module := range graph.modules { declaredImports = append(declaredImports, module.Dependencies.Go...) }
+	for _, module := range graph.modules {
+		declaredImports = append(declaredImports, module.Dependencies.Go...)
+	}
 	authored := map[string][]byte{}
-	for _, payload := range payloads { authored[payload.file.Source] = payload.content }
-	if err := ValidateDeclaredImports(authored, nil, declaredImports); err != nil { return Plan{}, err }
+	for _, payload := range payloads {
+		authored[payload.file.Source] = payload.content
+	}
+	if err := ValidateDeclaredImports(authored, nil, declaredImports); err != nil {
+		return Plan{}, err
+	}
 	claims, err := normalizedClaims(op.Claims)
 	if err != nil {
 		return Plan{}, err
@@ -236,21 +245,31 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	finalLock, changes, conflicts, staged, diagnostics, err := reconcilePlannedState(
 		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims,
 	)
-	if err != nil { return Plan{}, err }
+	if err != nil {
+		return Plan{}, err
+	}
 	finalLock.RuntimeOrders = runtimeOrders
 	effective, err := EffectiveDependencies(graph.modules)
-	if err != nil { return Plan{}, fmt.Errorf("resolve dependencies: %w", err) }
+	if err != nil {
+		return Plan{}, fmt.Errorf("resolve dependencies: %w", err)
+	}
 	finalLock.Dependencies = plannedDependencies(canonicalRoot, existingLock.Dependencies, graph.modules, effective.Go)
 	if e.generator != nil {
 		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: snapshot.Commit, ModulePath: modulePath,
 			Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...)}
 		generated, renderErr := e.generator.Render(ctx, preview)
-		if renderErr != nil { return Plan{}, fmt.Errorf("render generated imports: %w", renderErr) }
+		if renderErr != nil {
+			return Plan{}, fmt.Errorf("render generated imports: %w", renderErr)
+		}
 		sources := make([]string, 0, len(generated))
 		for _, file := range generated {
-			if strings.HasSuffix(file.Path, ".go") { sources = append(sources, file.Content) }
+			if strings.HasSuffix(file.Path, ".go") {
+				sources = append(sources, file.Content)
+			}
 		}
-		if err := ValidateDeclaredImports(authored, sources, declaredImports); err != nil { return Plan{}, err }
+		if err := ValidateDeclaredImports(authored, sources, declaredImports); err != nil {
+			return Plan{}, err
+		}
 	}
 	if !reflect.DeepEqual(currentProject, desiredProject) {
 		intentContent, err := MarshalProject(desiredProject)
@@ -288,10 +307,11 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}, nil
 }
 
-
 func moduleNamespace(id string) string {
 	namespace, _, _, ok := splitScopedModuleID(id)
-	if ok { return namespace }
+	if ok {
+		return namespace
+	}
 	return ""
 }
 
@@ -324,7 +344,7 @@ func buildPlannedLock(commit string, graph selectedGraph, files map[string][]Loc
 		Schema: 2, RegistryCommit: commit, Registries: []LockedRegistry{},
 		Snapshots: []LockedSnapshot{}, Order: append([]string{}, graph.order...),
 		RuntimeOrders: RuntimeOrders{Development: append([]string{}, graph.order...), Test: append([]string{}, graph.order...), Production: append([]string{}, graph.order...)},
-		Dependencies: []LockedDependency{}, Modules: locked,
+		Dependencies:  []LockedDependency{}, Modules: locked,
 	}
 }
 
@@ -350,15 +370,20 @@ func canonicalProjectRoot(root string) (string, error) {
 	}
 	return canonical, nil
 }
+
 // plannedDependencies records effective owners and preserves the baseline
 // needed to distinguish managed requirements from user-owned requirements.
 func plannedDependencies(root string, previous []LockedDependency, modules []Manifest, effective []GoDependency) []LockedDependency {
 	previousBy := make(map[string]LockedDependency, len(previous))
-	for _, dep := range previous { previousBy[dep.Module] = dep }
+	for _, dep := range previous {
+		previousBy[dep.Module] = dep
+	}
 	current := map[string]string{}
 	if data, err := os.ReadFile(filepath.Join(root, "go.mod")); err == nil {
 		if file, err := modfile.Parse("go.mod", data, nil); err == nil {
-			for _, req := range file.Require { current[req.Mod.Path] = req.Mod.Version }
+			for _, req := range file.Require {
+				current[req.Mod.Path] = req.Mod.Version
+			}
 		}
 	}
 	owners := make(map[string][]string)

@@ -186,8 +186,7 @@ func (c CLI) engine(offline bool) (*Engine, error) {
 	// and no credentials.
 	if _, statErr := os.Stat(filepath.Join(c.root(), "registry.json")); statErr == nil {
 		return New(Options{
-			Source:    DirectorySource{Root: c.root()},
-			Generator: RegistryGenerator{},
+			Source: DirectorySource{Root: c.root()}, Generator: RegistryGenerator{}, ToolRunner: OSCommandRunner{},
 		}), nil
 	} else if !errors.Is(statErr, fs.ErrNotExist) {
 		return nil, runtimeError(statErr)
@@ -202,7 +201,7 @@ func (c CLI) engine(offline bool) (*Engine, error) {
 			CacheDir: filepath.Join(cache, "ggg", "registry"),
 			Offline:  offline,
 		},
-		Generator: RegistryGenerator{},
+		Generator: RegistryGenerator{}, ToolRunner: OSCommandRunner{},
 	}), nil
 }
 

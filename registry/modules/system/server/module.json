@@ -143,7 +143,7 @@
         "source": "internal/web/handlers_public.go",
         "target": "internal/web/handlers_public.go",
         "class": "go",
-        "sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
+        "sha256": "900e68c2a4542d8a532dba32c246eed4ac89b53951e3859b7a1a4eed7dea4848",
         "rewrite_module": true,
         "contract": false
       },
@@ -199,7 +199,7 @@
         "source": "internal/web/route.go",
         "target": "internal/web/route.go",
         "class": "go",
-        "sha256": "5db9b81867c6a4b7ff9089ac824ef726dc3b1c6b5cf971a38dea6c0194511c5b",
+        "sha256": "35666480fa55c32142a1e0d8e71dd4aef2191c18dbfbd1525d968c2675ac57dd",
         "rewrite_module": true,
         "contract": true
       },
@@ -239,7 +239,7 @@
         "source": "internal/web/templates/chrome.go",
         "target": "internal/web/templates/chrome.go",
         "class": "go",
-        "sha256": "dcc75b7418e282f4bcb2d73062bd5691a5aa723c1eb5179d18064b6fc4621cee",
+        "sha256": "ece068ac04289ca13a7730c31724dacb5fc43f25ea36dfead277b07af64d8a99",
         "rewrite_module": true,
         "contract": false
       },

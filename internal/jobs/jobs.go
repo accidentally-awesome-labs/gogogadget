@@ -110,14 +110,13 @@ func EnqueueEmail(ctx context.Context, q *sqlc.Queries, kind string, msg mail.Me
 
 // Worker claims and dispatches jobs until its context is canceled.
 type Worker struct {
-	q      *sqlc.Queries
-	sender mail.Sender
-	log    *slog.Logger
-	poll   time.Duration
-	// definitions is the dispatch table, keyed by kind. Built at construction
-	// from the generated declarations; a kind no installed module declares is
-	// absent, which is what makes a stale queued row dead-letter immediately.
+	Environment string
+	q           *sqlc.Queries
+	sender      mail.Sender
+	log         *slog.Logger
+	poll        time.Duration
 	definitions map[string]Definition
+	// definitions is the dispatch table, keyed by kind.
 	// OnDeadLetter reports exhausted jobs (wired to Sentry when enabled).
 	OnDeadLetter func(kind string, err error)
 	// Webhook delivery policy hooks — strict by default; tests swap these.
@@ -158,7 +157,9 @@ func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
 	// collaborators callers assign after construction are still picked up.
 	w.definitions = make(map[string]Definition, len(workerDefinitions(w)))
 	for _, d := range workerDefinitions(w) {
-		if d.ProviderActive != nil && !d.ProviderActive() { continue }
+		if d.ProviderActive != nil && !d.ProviderActive() {
+			continue
+		}
 		w.definitions[d.Kind] = d
 	}
 	return w
@@ -243,8 +244,8 @@ func (w *Worker) sleep(ctx context.Context, d time.Duration) {
 
 // Janitor is one declared cleanup sweep. Name is what the operator sees in the
 type Janitor struct {
-	Name  string
-	Sweep func(context.Context) error
+	Name           string
+	Sweep          func(context.Context) error
 	ProviderActive func() bool
 }
 
@@ -265,14 +266,18 @@ func (w *Worker) janitorPass(ctx context.Context) {
 
 func (w *Worker) runJanitors(ctx context.Context, janitors []Janitor) {
 	for _, janitor := range janitors {
-		if janitor.ProviderActive != nil && !janitor.ProviderActive() { continue }
+		if janitor.ProviderActive != nil && !janitor.ProviderActive() {
+			continue
+		}
 		func() {
 			defer func() {
 				if recovered := recover(); recovered != nil {
 					w.log.Error("janitor panic", "name", janitor.Name, "panic", recovered)
 				}
 			}()
-			if err := janitor.Sweep(ctx); err != nil { w.log.Error("janitor", "name", janitor.Name, "error", err) }
+			if err := janitor.Sweep(ctx); err != nil {
+				w.log.Error("janitor", "name", janitor.Name, "error", err)
+			}
 		}()
 	}
 }

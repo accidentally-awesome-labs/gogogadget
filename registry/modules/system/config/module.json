@@ -9,7 +9,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.40.0"
+        }
+      ],
       "tools": []
     },
     "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",

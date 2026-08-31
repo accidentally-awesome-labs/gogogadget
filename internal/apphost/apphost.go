@@ -9,9 +9,10 @@ package apphost
 
 import (
 	"context"
-	"sync"
+	"fmt"
 	"log/slog"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -116,11 +117,93 @@ func (h *mapHost) Log() *slog.Logger     { return h.log }
 func (h *mapHost) Now() time.Time        { return h.at }
 func (h *mapHost) Version() string       { return h.version }
 
-
 // HealthCheck is the result of one runtime system or provider check.
-type HealthCheck struct { Module string `json:"module"`; Slot string `json:"slot"`; Adapter string `json:"adapter"`; Target string `json:"target"`; Error string `json:"error"`; Critical bool `json:"critical"`; Healthy bool `json:"healthy"` }
-type HealthReport struct { CheckedAt time.Time `json:"checked_at"`; Checks []HealthCheck `json:"checks"`; Ready bool `json:"ready"` }
-type HealthRegistration struct { Module string; Slot string; Adapter string; Target string; Critical bool; Check HealthChecker }
-func AggregateHealth(ctx context.Context, registrations []HealthRegistration) HealthReport { checked:=time.Now(); checks:=make([]HealthCheck,len(registrations)); var wg sync.WaitGroup; for i,r:=range registrations { wg.Add(1); go func(i int,r HealthRegistration){ defer wg.Done(); c:=HealthCheck{Module:r.Module,Slot:r.Slot,Adapter:r.Adapter,Target:r.Target,Critical:r.Critical}; cc,cancel:=context.WithTimeout(ctx,2*time.Second); defer cancel(); func(){ defer func(){if recover()!=nil {c.Error="health check panicked"}}(); if r.Check==nil {c.Error="health checker is nil"} else if err:=r.Check.Health(cc); err!=nil {c.Error=err.Error()} }(); c.Healthy=c.Error==""; checks[i]=c }(i,r) }; wg.Wait(); ready:=true; for _,c:=range checks {if c.Critical&&!c.Healthy {ready=false}}; return HealthReport{CheckedAt:checked,Checks:checks,Ready:ready} }
-type HealthCache struct { mu sync.Mutex; report HealthReport; at time.Time }
-func (c *HealthCache) Get(ctx context.Context, registrations []HealthRegistration) HealthReport { c.mu.Lock(); defer c.mu.Unlock(); if time.Since(c.at)<10*time.Second&&c.report.Checks!=nil{return c.report}; c.report=AggregateHealth(ctx,registrations); c.at=time.Now(); return c.report }
+type HealthCheck struct {
+	Module   string `json:"module"`
+	Slot     string `json:"slot"`
+	Adapter  string `json:"adapter"`
+	Target   string `json:"target"`
+	Error    string `json:"error"`
+	Critical bool   `json:"critical"`
+	Healthy  bool   `json:"healthy"`
+}
+type HealthReport struct {
+	CheckedAt time.Time     `json:"checked_at"`
+	Checks    []HealthCheck `json:"checks"`
+	Ready     bool          `json:"ready"`
+}
+type HealthRegistration struct {
+	Module   string
+	Slot     string
+	Adapter  string
+	Target   string
+	Critical bool
+	Check    HealthChecker
+}
+
+func AggregateHealth(ctx context.Context, registrations []HealthRegistration) HealthReport {
+	checked := time.Now()
+	checks := make([]HealthCheck, len(registrations))
+	var wg sync.WaitGroup
+	for i, registration := range registrations {
+		wg.Add(1)
+		go func(i int, registration HealthRegistration) {
+			defer wg.Done()
+			check := HealthCheck{Module: registration.Module, Slot: registration.Slot, Adapter: registration.Adapter, Target: registration.Target, Critical: registration.Critical}
+			checkCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+			defer cancel()
+			result := make(chan error, 1)
+			go func() {
+				defer func() {
+					if recovered := recover(); recovered != nil {
+						result <- fmt.Errorf("health check panicked: %v", recovered)
+					}
+				}()
+				if registration.Check == nil {
+					result <- fmt.Errorf("health checker is nil")
+					return
+				}
+				result <- registration.Check.Health(checkCtx)
+			}()
+			select {
+			case err := <-result:
+				if err != nil {
+					check.Error = err.Error()
+				}
+			case <-checkCtx.Done():
+				check.Error = checkCtx.Err().Error()
+			}
+			check.Healthy = check.Error == ""
+			checks[i] = check
+		}(i, registration)
+	}
+	wg.Wait()
+	ready := true
+	for _, check := range checks {
+		if check.Critical && !check.Healthy {
+			ready = false
+		}
+	}
+	return HealthReport{CheckedAt: checked, Checks: checks, Ready: ready}
+}
+
+type HealthCache struct {
+	mu     sync.Mutex
+	report HealthReport
+	at     time.Time
+}
+
+func (c *HealthCache) Get(ctx context.Context, registrations []HealthRegistration) HealthReport {
+	c.mu.Lock()
+	if time.Since(c.at) < 10*time.Second && c.report.Checks != nil {
+		report := c.report
+		c.mu.Unlock()
+		return report
+	}
+	c.mu.Unlock()
+	report := AggregateHealth(ctx, registrations)
+	c.mu.Lock()
+	c.report, c.at = report, time.Now()
+	c.mu.Unlock()
+	return report
+}

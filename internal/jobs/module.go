@@ -55,6 +55,7 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	}
 
 	worker := NewWorker(d.Queries, d.Sender, h.Log())
+	worker.Environment = d.Config.Env
 	worker.Billing = d.Billing
 	worker.Storage = d.Storage
 	worker.AppURL = d.Config.AppURL

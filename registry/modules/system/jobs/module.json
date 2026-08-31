@@ -94,7 +94,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "f4982dceebcc589710a1644203a9237e7408358262032ccf3800f0e067f790e7",
+        "sha256": "5c6a9fa02328bbd85c7b6e5172b9866d8f6838ee173d3fb7a3d1cc470ff6c957",
         "rewrite_module": true,
         "contract": true
       },
@@ -110,7 +110,7 @@
         "source": "internal/jobs/module.go",
         "target": "internal/jobs/module.go",
         "class": "go",
-        "sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
+        "sha256": "f1a823793bcbce3efd141b7a3a1aa00e2037bac0c26511b90a5992de34ef8680",
         "rewrite_module": true,
         "contract": true
       },

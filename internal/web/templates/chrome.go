@@ -2,10 +2,78 @@ package templates
 
 import (
 	"context"
+	"sync/atomic"
 
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 )
+
+var providerEnv atomic.Value
+var providerBase atomic.Value
+
+func init() { providerEnv.Store("development") }
+
+func SetProviderEnvironment(env string) {
+	providerEnv.Store(env)
+	base, _ := providerBase.Load().([]NavSnapshot)
+	if len(base) == 0 {
+		base = []NavSnapshot{{Public: append([]NavItem{}, PublicNav...), App: append([]NavItem{}, AppNav...), Admin: append([]NavItem{}, AdminNav...), Footer: append([]NavColumn{}, FooterColumns...), Settings: append([]SettingsTab{}, SettingsNavigationRegistry...)}}
+		providerBase.Store(base)
+	}
+	s := base[0]
+	PublicNav = activeNav(s.Public, env)
+	AppNav = activeNav(s.App, env)
+	AdminNav = activeNav(s.Admin, env)
+	FooterColumns = activeColumns(s.Footer, env)
+	activeSettings := make([]SettingsTab, 0, len(s.Settings))
+	for _, tab := range s.Settings {
+		if tab.Item.ProviderActive == nil || tab.Item.ProviderActive() {
+			activeSettings = append(activeSettings, tab)
+		}
+	}
+	SettingsNavigationRegistry = activeSettings
+}
+func providerEnvironment() string { value, _ := providerEnv.Load().(string); return value }
+
+// ActiveShellSlots returns only shell contributions active for the configured
+// environment. Callers must use this instead of iterating the raw registry.
+func ActiveShellSlots(slot, env string) []string {
+	items := ShellSlotsRegistry[slot]
+	out := make([]string, 0, len(items))
+	for _, id := range items {
+		if active, ok := ShellSlotActive[id]; !ok || active(env) {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
+type NavSnapshot struct {
+	Public, App, Admin []NavItem
+	Footer             []NavColumn
+	Settings           []SettingsTab
+}
+
+func activeNav(items []NavItem, _ string) []NavItem {
+	out := make([]NavItem, 0, len(items))
+	for _, item := range items {
+		if item.ProviderActive == nil || item.ProviderActive() {
+			out = append(out, item)
+		}
+	}
+	return out
+}
+func activeColumns(cols []NavColumn, env string) []NavColumn {
+	out := make([]NavColumn, 0, len(cols))
+	for _, col := range cols {
+		items := activeNav(col.Items, env)
+		if len(items) > 0 {
+			col.Items = items
+			out = append(out, col)
+		}
+	}
+	return out
+}
 
 // NavItem is one chrome link. LabelKey is an i18n key, not a resolved string:
 // these are package-level values and translation needs the request context.
@@ -19,6 +87,7 @@ type NavItem struct {
 	// adapter is inactive in the current environment.
 	ProviderActive func() bool
 }
+
 // MatchPath is the prefix navCurrent compares the request path against.
 func (n NavItem) MatchPath() string {
 	if n.Match != "" {

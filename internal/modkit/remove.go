@@ -45,6 +45,14 @@ func (e *Engine) planRemove(
 		if _, ok := installed[id]; !ok {
 			return Plan{}, fmt.Errorf("module %s is not installed", id)
 		}
+		for slot, selections := range project.Providers {
+			for env, choice := range []ProviderSelection{selections.Development, selections.Test, selections.Production} {
+				if choice.Adapter == id {
+					return Plan{}, fmt.Errorf("cannot remove selected adapter %s for provider slot %s; replace all environment selections first", id, slot)
+				}
+				_ = env
+			}
+		}
 	}
 
 	for _, id := range requested {
@@ -360,10 +368,10 @@ func (e *Engine) planRemove(
 	finalLock := Lock{
 		Schema: 2, RegistryCommit: currentLock.RegistryCommit,
 		Registries: append([]LockedRegistry{}, currentLock.Registries...),
-		Snapshots: append([]LockedSnapshot{}, currentLock.Snapshots...),
-		Order: order, RuntimeOrders: currentLock.RuntimeOrders,
+		Snapshots:  append([]LockedSnapshot{}, currentLock.Snapshots...),
+		Order:      order, RuntimeOrders: currentLock.RuntimeOrders,
 		Dependencies: append([]LockedDependency{}, currentLock.Dependencies...),
-		Modules: modules,
+		Modules:      modules,
 	}
 
 	if !equalProjects(project, desired) {

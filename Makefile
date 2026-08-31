@@ -44,6 +44,7 @@ dev:
 
 ## check: THE one-command gate — generate + no-drift + vet + test + build
 check: generate
+	test -z "$$(gofmt -l $$(git ls-files '*.go'))"
 	go run ./cmd/ggg sync --check --offline
 	go vet ./...
 	go test ./...

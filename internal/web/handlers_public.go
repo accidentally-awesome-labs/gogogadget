@@ -42,6 +42,10 @@ func (s *Server) serveStatic() http.Handler {
 	fileServer := http.FileServerFS(sub)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := strings.TrimPrefix(r.URL.Path, "/static/")
+		if !staticfs.AssetEnabled("static/"+p, s.cfg.Env) {
+			s.handleNotFound(w, r)
+			return
+		}
 		if strings.HasPrefix(p, "vendor/") || strings.HasPrefix(p, "fonts/") {
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 		} else {
