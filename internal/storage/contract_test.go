@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
 const fakeBucket = "mybucket"
 
 // runStoreContract is the Store seam contract: every implementation must pass

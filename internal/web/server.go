@@ -93,7 +93,7 @@ type Deps struct {
 	Billing         billing.Client
 	Analytics       analytics.Capturer
 	Storage         storage.Store
-	LLM             llm.Completer          // nil when unconfigured → AI routes 503
+	LLM             llm.Completer // nil when unconfigured → AI routes 503
 	Flags           flags.Evaluator
 	Reporter        observability.Reporter
 }
@@ -114,9 +114,9 @@ func NewServer(d Deps) (*Server, error) {
 		analytics:       analytics.NoopCapturer{},
 		store:           d.Storage,
 		llm:             d.LLM,
-		flags:            d.Flags,
+		flags:           d.Flags,
 		reporter:        d.Reporter,
-		mux:              http.NewServeMux(),
+		mux:             http.NewServeMux(),
 	}
 	// A bad content-type declaration is a wiring bug, so it refuses here. There
 	// is deliberately no fallback to the defaults: silently serving a different

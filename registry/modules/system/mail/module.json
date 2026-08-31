@@ -1,1 +1,135 @@
-{"schema":2,"module":{"id":"ggg/system/mail","kind":"system","name":"mail","revision":2,"contract":1,"title":"Transactional mail seam","description":"Provider-neutral Sender port, message renderers, and email jobs.","requires":[{"id":"ggg/system/apphost","contract":{"min":1,"max":1}},{"id":"ggg/system/config","contract":{"min":1,"max":1}}],"dependencies":{"go":[{"module":"github.com/a-h/templ","version":"v0.3.1020"},{"module":"github.com/stretchr/testify","version":"v1.11.1"},{"module":"golang.org/x/text","version":"v0.40.0"}],"tools":[],"containers":[]},"files":[{"source":"internal/mail/contract_test.go","target":"internal/mail/contract_test.go","class":"test","sha256":"812a84c9914c6879a9fc3e1a3d660e4674ef467aea97b9b22c8ffb86611a28dd","rewrite_module":true,"contract":false},{"source":"internal/mail/mail.go","target":"internal/mail/mail.go","class":"go","sha256":"afdde9c124612ae2db056159c18c8fb33e2924a69d48760e30c72791329d7502","rewrite_module":true,"contract":true},{"source":"internal/mail/mail_test.go","target":"internal/mail/mail_test.go","class":"test","sha256":"041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6","rewrite_module":true,"contract":false},{"source":"internal/web/templates/emails.templ","target":"internal/web/templates/emails.templ","class":"templ","sha256":"d21151f6e4358639d581453e033b0567f0cc2b3e4687147001fafeb0b301a9ca","rewrite_module":true,"contract":false}],"claims":{"packages":["internal/mail"],"provider_slots":["ggg/mail"]},"runtime":{"provider_slots":[{"id":"ggg/mail","critical":false,"capabilities":[{"capability":"mail.sender","type":"mail.Sender"}]}],"jobs":[{"kind":"email.welcome","package":"internal/jobs","handler":"defineEmailWelcome"}]},"migrations":[],"environment":[{"key":"EMAIL_FROM","field":"EmailFrom","type":"string","description":"From header on outbound mail","default":"GoGoGadget <hello@example.com>"}],"locales":{"en":{"email.footer":"You are receiving this because you have a GoGoGadget account."},"es":{"email.footer":"Recibes este correo porque tienes una cuenta en GoGoGadget."}},"docs":[],"tests":{"go_packages":["internal/mail"]},"data":[],"removal_policy":"free"}}
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/mail",
+    "kind": "system",
+    "name": "mail",
+    "revision": 2,
+    "contract": 1,
+    "title": "Transactional mail seam",
+    "description": "Provider-neutral Sender port, message renderers, and email jobs.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        },
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.40.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/mail/contract_test.go",
+        "target": "internal/mail/contract_test.go",
+        "class": "test",
+        "sha256": "812a84c9914c6879a9fc3e1a3d660e4674ef467aea97b9b22c8ffb86611a28dd",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/mail/mail.go",
+        "target": "internal/mail/mail.go",
+        "class": "go",
+        "sha256": "5ce16f98b5f6d7882b9cc15b1149d9dc22cecf0a52085ba4649f0065ff68d956",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/mail/mail_test.go",
+        "target": "internal/mail/mail_test.go",
+        "class": "test",
+        "sha256": "041e37a60b8790d4592e3bca2118125632131b5cd6cb595c02b401a3856227a6",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/emails.templ",
+        "target": "internal/web/templates/emails.templ",
+        "class": "templ",
+        "sha256": "d21151f6e4358639d581453e033b0567f0cc2b3e4687147001fafeb0b301a9ca",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/mail"
+      ],
+      "provider_slots": [
+        "ggg/mail"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/mail",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "mail.sender",
+              "type": "mail.Sender"
+            }
+          ]
+        }
+      ],
+      "jobs": [
+        {
+          "kind": "email.welcome",
+          "package": "internal/jobs",
+          "handler": "defineEmailWelcome"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "EMAIL_FROM",
+        "field": "EmailFrom",
+        "type": "string",
+        "description": "From header on outbound mail",
+        "default": "GoGoGadget \u003chello@example.com\u003e"
+      }
+    ],
+    "locales": {
+      "en": {
+        "email.footer": "You are receiving this because you have a GoGoGadget account."
+      },
+      "es": {
+        "email.footer": "Recibes este correo porque tienes una cuenta en GoGoGadget."
+      }
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/mail"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

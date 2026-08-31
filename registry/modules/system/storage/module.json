@@ -1,1 +1,96 @@
-{"schema":2,"module":{"id":"ggg/system/storage","kind":"system","name":"storage","revision":2,"contract":1,"title":"Object storage seam","description":"Provider-neutral Store port and object-key helpers.","requires":[{"id":"ggg/system/apphost","contract":{"min":1,"max":1}},{"id":"ggg/system/config","contract":{"min":1,"max":1}}],"dependencies":{"go":[{"module":"github.com/stretchr/testify","version":"v1.11.1"}],"tools":[],"containers":[]},"files":[{"source":"internal/storage/contract_test.go","target":"internal/storage/contract_test.go","class":"test","sha256":"2978239f9df79fc6d804666b33aeec085f13f9e2b8f9db09ddf034a5f8928744","rewrite_module":true,"contract":false},{"source":"internal/storage/storage.go","target":"internal/storage/storage.go","class":"go","sha256":"5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb","rewrite_module":true,"contract":true},{"source":"internal/storage/storage_test.go","target":"internal/storage/storage_test.go","class":"test","sha256":"4d15a191dd1020f4cc112ff698830111acbf9f4bd86a539f4e5bdbea05f541e7","rewrite_module":true,"contract":false}],"claims":{"packages":["internal/storage"],"provider_slots":["ggg/storage"]},"runtime":{"provider_slots":[{"id":"ggg/storage","critical":false,"capabilities":[{"capability":"storage.store","type":"storage.Store"}]}]},"migrations":[],"environment":[],"docs":[],"tests":{"go_packages":["internal/storage"]},"data":[],"removal_policy":"retain-data"}}
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/storage",
+    "kind": "system",
+    "name": "storage",
+    "revision": 2,
+    "contract": 1,
+    "title": "Object storage seam",
+    "description": "Provider-neutral Store port and object-key helpers.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/storage/contract_test.go",
+        "target": "internal/storage/contract_test.go",
+        "class": "test",
+        "sha256": "3ee702b93e9e5cd80cf56c949069fa134696a39085db69d542931fc4bdf73ea1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/storage/storage.go",
+        "target": "internal/storage/storage.go",
+        "class": "go",
+        "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/storage/storage_test.go",
+        "target": "internal/storage/storage_test.go",
+        "class": "test",
+        "sha256": "4d15a191dd1020f4cc112ff698830111acbf9f4bd86a539f4e5bdbea05f541e7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/storage"
+      ],
+      "provider_slots": [
+        "ggg/storage"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/storage",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "storage.store",
+              "type": "storage.Store"
+            }
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/storage"
+      ]
+    },
+    "data": [],
+    "removal_policy": "retain-data"
+  }
+}

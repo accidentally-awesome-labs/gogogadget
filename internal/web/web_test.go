@@ -14,8 +14,8 @@ import (
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/observability"
-	"github.com/gogogadget/gogogadget/internal/web/templates"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,7 +34,7 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	server, err := NewServer(Deps{
 		Config: &cfg, Log: log, Version: "test",
 		Docs: &content.Docs{}, Storage: storagefs.NewDevStore(t.TempDir()),
-		Flags: flags.NewDBEvaluator(nil, 30*time.Second),
+		Flags:    flags.NewDBEvaluator(nil, 30*time.Second),
 		Reporter: observability.NoopReporter{},
 	})
 	if err != nil {

@@ -34,5 +34,11 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	}
 	return &Module{Store: store}, nil
 }
+func (m *Module) Health(ctx context.Context) error {
+	if checker, ok := m.Store.(apphost.HealthChecker); ok {
+		return checker.Health(ctx)
+	}
+	return fmt.Errorf("storage s3: store does not implement health")
+}
 
 var _ storage.Store = (*R2Store)(nil)

@@ -100,17 +100,17 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 // production adapter set rather than credentials selecting it.
 func TestBootSelectsConfiguredAdapters(t *testing.T) {
 	host := bootHost(t, "boot_configured", map[string]string{
-		"APP_ENV":                 "production",
-		"CLERK_PORTAL_URL":        "https://accounts.example.com",
-		"CLERK_PUBLISHABLE_KEY":   "pk_live_fixture",
-		"CLERK_SECRET_KEY":        "sk_live_fixture",
-		"CLERK_WEBHOOK_SECRET":    "whsec_fixture",
-		"RESEND_API_KEY":          "re_test",
-		"STORAGE_R2_ACCESS_KEY_ID": "ak_fixture",
-		"STORAGE_R2_ACCOUNT_ID":   "acct_fixture",
-		"STORAGE_R2_BUCKET":       "bucket_fixture",
+		"APP_ENV":                      "production",
+		"CLERK_PORTAL_URL":             "https://accounts.example.com",
+		"CLERK_PUBLISHABLE_KEY":        "pk_live_fixture",
+		"CLERK_SECRET_KEY":             "sk_live_fixture",
+		"CLERK_WEBHOOK_SECRET":         "whsec_fixture",
+		"RESEND_API_KEY":               "re_test",
+		"STORAGE_R2_ACCESS_KEY_ID":     "ak_fixture",
+		"STORAGE_R2_ACCOUNT_ID":        "acct_fixture",
+		"STORAGE_R2_BUCKET":            "bucket_fixture",
 		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
-		"EMAIL_FROM":              "hello@example.com",
+		"EMAIL_FROM":                   "hello@example.com",
 	})
 
 	runtime, err := Boot(context.Background(), host, Options{})

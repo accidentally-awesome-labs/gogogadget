@@ -3,6 +3,7 @@ package modkit_test
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,7 +38,7 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 		}
 	}
 	require.NotEmpty(t, owned)
-
+	catalogOwned := registryPayloadTargets(t, root)
 	// Project-owned scaffolding: build, deploy, and tooling files a derivative
 	// edits freely, plus the project's own registry state.
 	projectOwned := map[string]bool{
@@ -47,16 +48,12 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 		"gogogadget.json": true, "gogogadget.lock.json": true,
 		".env.example": true, "registry.json": true,
 		"internal/modkit/task2_followup_test.go": true,
-		// Candidate adapters are manifest-owned but intentionally absent from
-		// the current lock when another adapter is selected for every env.
-		"internal/mail/smtp/smtp.go": true,
-		"internal/mail/smtp/contract_test.go": true,
 	}
 
 	var orphans []string
 	for _, path := range trackedFiles(t, root) {
 		switch {
-		case owned[path], projectOwned[path]:
+		case owned[path], projectOwned[path], catalogOwned[path]:
 			continue
 		case modkit.IsGeneratedOutputPath(path):
 			continue
@@ -70,6 +67,35 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 	}
 	require.Empty(t, orphans,
 		"these source files belong to no module, so they are invisible to install, update, and removal: %v", orphans)
+}
+func registryPayloadTargets(t *testing.T, root string) map[string]bool {
+	t.Helper()
+	owned := map[string]bool{}
+	err := filepath.WalkDir(filepath.Join(root, "registry", "modules"), func(path string, entry os.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || entry.Name() != "module.json" {
+			return err
+		}
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		var doc struct {
+			Module struct {
+				Files []struct {
+					Target string `json:"target"`
+				} `json:"files"`
+			} `json:"module"`
+		}
+		if err := json.Unmarshal(raw, &doc); err != nil {
+			return err
+		}
+		for _, file := range doc.Module.Files {
+			owned[file.Target] = true
+		}
+		return nil
+	})
+	require.NoError(t, err)
+	return owned
 }
 
 func repoRoot(t *testing.T) string {

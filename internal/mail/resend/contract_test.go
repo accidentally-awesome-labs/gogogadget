@@ -13,11 +13,11 @@ import (
 )
 
 type sendEmailRequest struct {
-	From string `json:"from"`
-	To []string `json:"to"`
-	Subject string `json:"subject"`
-	HTML string `json:"html"`
-	Text string `json:"text"`
+	From    string   `json:"from"`
+	To      []string `json:"to"`
+	Subject string   `json:"subject"`
+	HTML    string   `json:"html"`
+	Text    string   `json:"text"`
 }
 
 func TestResendSenderContract(t *testing.T) {

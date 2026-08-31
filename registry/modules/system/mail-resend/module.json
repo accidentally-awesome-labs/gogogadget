@@ -1,1 +1,138 @@
-{"schema":2,"module":{"id":"ggg/system/mail-resend","kind":"system","name":"mail-resend","revision":1,"contract":1,"title":"Resend mail","description":"Managed transactional mail delivery through Resend.","requires":[{"id":"ggg/system/apphost","contract":{"min":1,"max":1}},{"id":"ggg/system/config","contract":{"min":1,"max":1}},{"id":"ggg/system/mail","contract":{"min":1,"max":1}}],"dependencies":{"go":[{"module":"github.com/resendlabs/resend-go","version":"v1.7.0"},{"module":"github.com/stretchr/testify","version":"v1.11.1"}],"tools":[],"containers":[]},"files":[{"source":"internal/mail/resend/contract_test.go","target":"internal/mail/resend/contract_test.go","class":"test","sha256":"8e03624931997d6c8f9106974ca1a68ba144e888b4fa02160c20461ef7cf77ce","rewrite_module":true,"contract":false},{"source":"internal/mail/resend/resend.go","target":"internal/mail/resend/resend.go","class":"go","sha256":"1aa6454684ad79af8e676dcc3724d57567f81341338ac4ef0be56f0cdf67e91b","rewrite_module":true,"contract":true}],"claims":{"packages":["internal/mail/resend"]},"runtime":{"system":{"package":"internal/mail/resend","constructor":"NewModule","needs":[{"field":"Config","capability":"config","type":"*config.Config","optional":false}],"provides":[{"field":"Sender","capability":"mail.sender","type":"mail.Sender"}],"type_imports":["internal/mail"],"start":false,"stop":false,"adapter":{"slot":"ggg/mail","targets":[{"id":"resend","title":"Resend","mode":"managed","environments":["production"],"automation":"manual","docs_url":"https://resend.com/docs","console_url":"https://resend.com/api-keys","inputs":[]}]}}},"migrations":[],"environment":[{"key":"RESEND_API_KEY","field":"ResendAPIKey","type":"string","description":"Resend API key","required":true,"secret":true,"targets":["ggg/system/mail-resend@resend"]}],"docs":[],"tests":{"go_packages":["internal/mail/resend"]},"data":[],"removal_policy":"free"}}
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/mail-resend",
+    "kind": "system",
+    "name": "mail-resend",
+    "revision": 1,
+    "contract": 1,
+    "title": "Resend mail",
+    "description": "Managed transactional mail delivery through Resend.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/mail",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/resendlabs/resend-go",
+          "version": "v1.7.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/mail/resend/contract_test.go",
+        "target": "internal/mail/resend/contract_test.go",
+        "class": "test",
+        "sha256": "9680ab7350379ef96a494335150c4e9cf8fa446e012a44d0392e27c6fade9f9c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/mail/resend/resend.go",
+        "target": "internal/mail/resend/resend.go",
+        "class": "go",
+        "sha256": "4ecd19f9cd8cf39063cd800f095658f950dd95f27107fdf1e8932d82de8e81ec",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/mail/resend"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/mail/resend",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Sender",
+            "capability": "mail.sender",
+            "type": "mail.Sender"
+          }
+        ],
+        "type_imports": [
+          "internal/mail"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/mail",
+          "targets": [
+            {
+              "id": "resend",
+              "title": "Resend",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://resend.com/docs",
+              "console_url": "https://resend.com/api-keys",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "RESEND_API_KEY",
+        "field": "ResendAPIKey",
+        "type": "string",
+        "description": "Resend API key",
+        "required": true,
+        "secret": true,
+        "targets": [
+          "ggg/system/mail-resend@resend"
+        ]
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/mail/resend"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

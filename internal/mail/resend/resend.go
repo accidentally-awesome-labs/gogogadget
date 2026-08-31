@@ -11,13 +11,8 @@ import (
 	resendgo "github.com/resendlabs/resend-go"
 )
 
-type Deps struct {
-	Config *config.Config
-}
-
-type Module struct {
-	Sender mail.Sender
-}
+type Deps struct{ Config *config.Config }
+type Module struct{ Sender mail.Sender }
 
 func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if d.Config == nil {
@@ -31,6 +26,12 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	}
 	return &Module{Sender: NewResendSender(d.Config.ResendAPIKey, d.Config.EmailFrom)}, nil
 }
+func (m *Module) Health(ctx context.Context) error {
+	if sender, ok := m.Sender.(apphost.HealthChecker); ok {
+		return sender.Health(ctx)
+	}
+	return fmt.Errorf("mail resend: sender does not implement health")
+}
 
 type ResendSender struct {
 	client *resendgo.Client
@@ -40,16 +41,19 @@ type ResendSender struct {
 func NewResendSender(apiKey, from string) *ResendSender {
 	return &ResendSender{client: resendgo.NewClient(apiKey), from: from}
 }
-
 func (s *ResendSender) Send(_ context.Context, msg mail.Message) error {
-	_, err := s.client.Emails.Send(&resendgo.SendEmailRequest{
-		From:    s.from,
-		To:      []string{msg.To},
-		Subject: msg.Subject,
-		Html:    msg.HTML,
-		Text:    msg.Text,
-	})
+	_, err := s.client.Emails.Send(&resendgo.SendEmailRequest{From: s.from, To: []string{msg.To}, Subject: msg.Subject, Html: msg.HTML, Text: msg.Text})
 	return err
+}
+func (s *ResendSender) Health(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if s.client == nil {
+		return fmt.Errorf("resend client is nil")
+	}
+	return nil
 }
 
 var _ mail.Sender = (*ResendSender)(nil)
+var _ apphost.HealthChecker = (*ResendSender)(nil)

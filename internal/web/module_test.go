@@ -25,11 +25,11 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 	host := apphost.Map(nil, time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), "v-test")
 
 	module, err := NewModule(context.Background(), host, Deps{
-		Config:  &config.Config{Env: "test", AppURL: "http://localhost:8080"},
-		DB:      pool,
-		Queries: queries,
-		Storage: storagefs.NewDevStore(t.TempDir()),
-		Flags: flags.NewDBEvaluator(queries, 30*time.Second),
+		Config:   &config.Config{Env: "test", AppURL: "http://localhost:8080"},
+		DB:       pool,
+		Queries:  queries,
+		Storage:  storagefs.NewDevStore(t.TempDir()),
+		Flags:    flags.NewDBEvaluator(queries, 30*time.Second),
 		Reporter: observability.NoopReporter{},
 	})
 	if err != nil {

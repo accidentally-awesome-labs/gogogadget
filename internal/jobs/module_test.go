@@ -9,9 +9,9 @@ import (
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	"github.com/gogogadget/gogogadget/internal/mail"
+	maildev "github.com/gogogadget/gogogadget/internal/mail/dev"
 	"github.com/gogogadget/gogogadget/internal/observability"
-	"github.com/gogogadget/gogogadget/internal/storage"
+	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 )
 
 // The worker collaborates with six systems. Wiring it by assigning exported
@@ -20,8 +20,8 @@ import (
 // every one of them lands.
 func TestNewModuleWiresWorkerCollaborators(t *testing.T) {
 	host := apphost.Map(nil, time.Now(), "test")
-	store := storage.NewDevStore(t.TempDir())
-	sender := mail.NewDevSender(host.Log(), t.TempDir())
+	store := storagefs.NewDevStore(t.TempDir())
+	sender := maildev.NewDevSender(host.Log(), t.TempDir())
 
 	module, err := NewModule(context.Background(), host, Deps{
 		Config:   &config.Config{AppURL: "https://example.test", AuditRetentionDays: 42},
@@ -57,8 +57,8 @@ func TestNewModuleAcceptsAbsentBilling(t *testing.T) {
 	module, err := NewModule(context.Background(), host, Deps{
 		Config:  &config.Config{},
 		Queries: &sqlc.Queries{},
-		Sender:  mail.NewDevSender(host.Log(), t.TempDir()),
-		Storage: storage.NewDevStore(t.TempDir()),
+		Sender:  maildev.NewDevSender(host.Log(), t.TempDir()),
+		Storage: storagefs.NewDevStore(t.TempDir()),
 	})
 	if err != nil {
 		t.Fatalf("NewModule(no billing): %v", err)
@@ -73,8 +73,8 @@ func TestNewModuleAcceptsAbsentBilling(t *testing.T) {
 func TestNewModuleRejectsMissingRequiredDependencies(t *testing.T) {
 	host := apphost.Map(nil, time.Now(), "test")
 	cases := map[string]Deps{
-		"no config":  {Queries: &sqlc.Queries{}, Sender: mail.NewDevSender(host.Log(), t.TempDir())},
-		"no queries": {Config: &config.Config{}, Sender: mail.NewDevSender(host.Log(), t.TempDir())},
+		"no config":  {Queries: &sqlc.Queries{}, Sender: maildev.NewDevSender(host.Log(), t.TempDir())},
+		"no queries": {Config: &config.Config{}, Sender: maildev.NewDevSender(host.Log(), t.TempDir())},
 		"no sender":  {Config: &config.Config{}, Queries: &sqlc.Queries{}},
 	}
 	for name, deps := range cases {
@@ -93,7 +93,7 @@ func TestModuleStartReturnsAndStopEndsTheLoop(t *testing.T) {
 	module, err := NewModule(context.Background(), host, Deps{
 		Config:  &config.Config{},
 		Queries: &sqlc.Queries{},
-		Sender:  mail.NewDevSender(host.Log(), t.TempDir()),
+		Sender:  maildev.NewDevSender(host.Log(), t.TempDir()),
 	})
 	if err != nil {
 		t.Fatalf("NewModule: %v", err)

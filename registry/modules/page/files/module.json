@@ -60,7 +60,7 @@
         "source": "internal/web/files_test.go",
         "target": "internal/web/files_test.go",
         "class": "test",
-        "sha256": "7a5d146cfa70686d35eef8d620d0a1a75b087dff5a1e65758ec4910865fabb88",
+        "sha256": "648796153f8f583a3a9e801d0fda90df36bd0f939ac2cf11fdedd05a36874704",
         "rewrite_module": true,
         "contract": false
       },

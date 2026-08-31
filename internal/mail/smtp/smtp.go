@@ -3,16 +3,14 @@ package smtp
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"net"
-	"net/smtp"
-	"os"
-	"strconv"
-	"strings"
-
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"net"
+	"net/smtp"
+	"strconv"
 )
 
 type Deps struct {
@@ -30,17 +28,10 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	host := os.Getenv("SMTP_HOST")
-	if host == "" {
-		host = "localhost"
+	if d.Config.SMTPHost == "" {
+		return nil, fmt.Errorf("mail smtp: SMTP_HOST is required")
 	}
-	port := 1025
-	if raw := os.Getenv("SMTP_PORT"); raw != "" {
-		if parsed, err := strconv.Atoi(raw); err == nil && parsed > 0 {
-			port = parsed
-		}
-	}
-	return &Module{Sender: NewSMTPSender(host, port, os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"), d.Config.EmailFrom)}, nil
+	return &Module{Sender: NewSMTPSender(d.Config.SMTPHost, d.Config.SMTPPort, d.Config.SMTPUsername, d.Config.SMTPPassword, d.Config.EmailFrom)}, nil
 }
 
 type SMTPSender struct {
@@ -57,8 +48,7 @@ func (s *SMTPSender) Send(ctx context.Context, msg mail.Message) error {
 		return err
 	}
 	address := net.JoinHostPort(s.host, strconv.Itoa(s.port))
-	dialer := net.Dialer{}
-	conn, err := dialer.DialContext(ctx, "tcp", address)
+	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", address)
 	if err != nil {
 		return err
 	}
@@ -68,6 +58,11 @@ func (s *SMTPSender) Send(ctx context.Context, msg mail.Message) error {
 		return err
 	}
 	defer client.Close()
+	if ok, _ := client.Extension("STARTTLS"); ok && s.host != "localhost" && s.host != "127.0.0.1" {
+		if err := client.StartTLS(&tls.Config{ServerName: s.host, MinVersion: tls.VersionTLS12}); err != nil {
+			return err
+		}
+	}
 	if s.username != "" {
 		if err := client.Auth(smtp.PlainAuth("", s.username, s.password, s.host)); err != nil {
 			return err
@@ -83,8 +78,16 @@ func (s *SMTPSender) Send(ctx context.Context, msg mail.Message) error {
 	if err != nil {
 		return err
 	}
-	body := "From: " + s.from + "\r\nTo: " + msg.To + "\r\nSubject: " + msg.Subject + "\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" + msg.HTML + "\r\n"
-	if _, err := writer.Write([]byte(strings.ReplaceAll(body, "\n", "\r\n"))); err != nil {
+	boundary := "gogogadget-boundary"
+	body := "From: " + s.from + "\r\n" +
+		"To: " + msg.To + "\r\n" +
+		"Subject: " + msg.Subject + "\r\n" +
+		"MIME-Version: 1.0\r\n" +
+		"Content-Type: multipart/alternative; boundary=\"" + boundary + "\"\r\n\r\n" +
+		"--" + boundary + "\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + msg.Text + "\r\n" +
+		"--" + boundary + "\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n" + msg.HTML + "\r\n" +
+		"--" + boundary + "--\r\n"
+	if _, err := writer.Write([]byte(body)); err != nil {
 		_ = writer.Close()
 		return err
 	}

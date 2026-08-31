@@ -3,7 +3,6 @@
 // packages under internal/mail.
 package mail
 
-
 import (
 	"context"
 	"strings"
@@ -13,7 +12,6 @@ import (
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"golang.org/x/text/language"
 )
-
 
 type Message struct {
 	To, Subject, HTML, Text string

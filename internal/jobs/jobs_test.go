@@ -422,7 +422,7 @@ func TestJanitorRunsBeforeItsFirstTick(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 	log := slog.New(slog.DiscardHandler)
-	go NewWorker(&sqlc.Queries{}, maildev.NewDevSender(log, t.TempDir()), log).Run(ctx)
+	go NewWorker(q, maildev.NewDevSender(log, t.TempDir()), log).Run(ctx)
 
 	deadline := time.Now().Add(10 * time.Second)
 	for countJobs(t, pool) >= before && time.Now().Before(deadline) {
