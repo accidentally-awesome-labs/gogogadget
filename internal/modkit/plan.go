@@ -18,6 +18,7 @@ type Options struct {
 	Source          Source
 	Generator       Generator
 	CanonicalModule string
+	ToolRunner      ToolRunner
 }
 
 // Engine resolves registry state and produces deterministic, read-only plans.
@@ -25,6 +26,7 @@ type Engine struct {
 	source          Source
 	generator       Generator
 	canonicalModule string
+	toolRunner      ToolRunner
 }
 
 // New constructs a registry planning engine.
@@ -33,7 +35,7 @@ func New(opts Options) *Engine {
 	if canonical == "" {
 		canonical = defaultCanonicalModule
 	}
-	return &Engine{source: opts.Source, generator: opts.Generator, canonicalModule: canonical}
+	return &Engine{source: opts.Source, generator: opts.Generator, canonicalModule: canonical, toolRunner: opts.ToolRunner}
 }
 
 // ChangeKind describes how planned bytes compare with the target tree.
@@ -218,6 +220,19 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	)
 	if err != nil {
 		return Plan{}, err
+	}
+	effective, err := EffectiveDependencies(graph.modules)
+	if err != nil { return Plan{}, fmt.Errorf("resolve dependencies: %w", err) }
+	finalLock.Dependencies = make([]LockedDependency, 0, len(effective.Go))
+	for _, dependency := range effective.Go {
+		owners := []string{}
+		for _, module := range graph.modules {
+			for _, declared := range module.Dependencies.Go {
+				if declared.Module == dependency.Module { owners = append(owners, module.ID); break }
+			}
+		}
+		sort.Strings(owners)
+		finalLock.Dependencies = append(finalLock.Dependencies, LockedDependency{Module: dependency.Module, ManagedVersion: dependency.Version, Owners: owners})
 	}
 	if !reflect.DeepEqual(currentProject, desiredProject) {
 		intentContent, err := MarshalProject(desiredProject)

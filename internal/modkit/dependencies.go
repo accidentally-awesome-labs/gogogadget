@@ -9,11 +9,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"go/parser"
+	"go/token"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
@@ -85,5 +88,26 @@ func ExtractTool(data []byte, artifact ToolArtifact, dst string) error {
 	default: return fmt.Errorf("unsupported tool format %q", artifact.Format)
 	}
 	if payload == nil { return fmt.Errorf("declared tool executable %q not found", artifact.BinaryPath) }
+
 	return os.WriteFile(dst, payload, 0o755)
+}
+// ValidateDeclaredImports rejects external imports without a manifest owner.
+func ValidateDeclaredImports(files map[string][]byte, generated []string, declared []GoDependency) error {
+	allowed := map[string]bool{}
+	for _, dep := range declared { allowed[dep.Module] = true }
+	for name, data := range files {
+		if !strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, ".templ") { continue }
+		f, err := parser.ParseFile(token.NewFileSet(), name, data, parser.ImportsOnly)
+		if err != nil { return fmt.Errorf("parse %s: %w", name, err) }
+		for _, imp := range f.Imports {
+			path := strings.Trim(imp.Path.Value, "\"")
+			if strings.Contains(path, ".") && !allowed[path] {
+				found := false
+				for modulePath := range allowed { if strings.HasPrefix(path, modulePath+"/") { found=true; break } }
+				if !found { return fmt.Errorf("undeclared direct dependency %q imported by %s", path, name) }
+			}
+		}
+	}
+	_ = generated
+	return nil
 }

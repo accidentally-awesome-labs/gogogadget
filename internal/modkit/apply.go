@@ -187,6 +187,14 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 			return Result{}, err
 		}
 	}
+	if e.toolRunner != nil && len(plan.Lock.Dependencies) > 0 {
+		if _, err := snapshot("go.mod"); err != nil { return Result{}, err }
+		if _, err := snapshot("go.sum"); err != nil { return Result{}, err }
+		if _, err := UpdateGoMod(ctx, plan.Root, plan.Lock.Dependencies, e.toolRunner); err != nil {
+			_ = rollback()
+			return Result{}, fmt.Errorf("update dependencies: %w", err)
+		}
+	}
 
 	// 2. Stage and atomically apply authored/generated changes (lock excluded;
 	//    it is written last after generation succeeds).
