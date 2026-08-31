@@ -2,9 +2,11 @@ package templates
 
 import (
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/a-h/templ"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,22 +82,51 @@ func TestShellRendersChromeConfig(t *testing.T) {
 	assert.Contains(t, side, `aria-current="page"`)
 	assert.NotContains(t, side, `href="/app/projects"`, "the app nav must come from AppNav alone")
 }
-
 func TestNavRendersOnlyActiveShellSlotsForEnvironment(t *testing.T) {
-	originalRegistry, originalActive := ShellSlotsRegistry, ShellSlotActive
+	originalRegistry, originalActive, originalRenderers := ShellSlotsRegistry, ShellSlotActive, ShellSlotRenderers
 	ShellSlotsRegistry = map[string][]string{"head": {"inactive", "active"}}
 	ShellSlotActive = map[string]func(string) bool{
 		"inactive": func(string) bool { return false },
 		"active":   func(env string) bool { return env == "production" },
 	}
+	ShellSlotRenderers = map[string]any{
+		"inactive": func() templ.Component { return templ.Raw(`<template data-shell-slot="inactive"></template>`) },
+		"active":   func() templ.Component { return templ.Raw(`<template data-shell-slot="active"></template>`) },
+	}
 	t.Cleanup(func() {
-		ShellSlotsRegistry, ShellSlotActive = originalRegistry, originalActive
+		ShellSlotsRegistry, ShellSlotActive, ShellSlotRenderers = originalRegistry, originalActive, originalRenderers
 	})
 	ctx := WithProviderEnvironment(t.Context(), "production")
 	var output strings.Builder
 	require.NoError(t, Nav(Page{Path: "/"}).Render(ctx, &output))
 	assert.NotContains(t, output.String(), `data-shell-slot="inactive"`)
 	assert.Contains(t, output.String(), `data-shell-slot="active"`)
+}
+
+func TestShellSlotEnvironmentIsRequestScopedConcurrently(t *testing.T) {
+	originalRegistry, originalActive := ShellSlotsRegistry, ShellSlotActive
+	ShellSlotsRegistry = map[string][]string{"head": {"development-only", "production-only"}}
+	ShellSlotActive = map[string]func(string) bool{
+		"development-only": func(env string) bool { return env == "development" },
+		"production-only":  func(env string) bool { return env == "production" },
+	}
+	t.Cleanup(func() { ShellSlotsRegistry, ShellSlotActive = originalRegistry, originalActive })
+
+	var wg sync.WaitGroup
+	for range 100 {
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			got := ShellSlotIDs(WithProviderEnvironment(t.Context(), "development"), "head")
+			require.Equal(t, []string{"development-only"}, got)
+		}()
+		go func() {
+			defer wg.Done()
+			got := ShellSlotIDs(WithProviderEnvironment(t.Context(), "production"), "head")
+			require.Equal(t, []string{"production-only"}, got)
+		}()
+	}
+	wg.Wait()
 }
 
 // MatchPath is the prefix navCurrent compares against; an item with no

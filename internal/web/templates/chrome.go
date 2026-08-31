@@ -2,22 +2,11 @@ package templates
 
 import (
 	"context"
-	"sync/atomic"
 
+	"github.com/a-h/templ"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 )
-
-var providerEnv atomic.Value
-
-func init() { providerEnv.Store("development") }
-
-// SetProviderEnvironment updates the default used by non-request callers.
-// It does not rewrite generated slices; each render filters a snapshot, so
-// concurrent servers cannot race over shared navigation state.
-func SetProviderEnvironment(env string) { providerEnv.Store(env) }
-
-func providerEnvironment() string { value, _ := providerEnv.Load().(string); return value }
 
 // WithProviderEnvironment binds an environment to one request/render context.
 func WithProviderEnvironment(ctx context.Context, env string) context.Context {
@@ -30,7 +19,7 @@ func environmentFrom(ctx context.Context) string {
 	if value, ok := ctx.Value(providerEnvironmentKey{}).(string); ok && value != "" {
 		return value
 	}
-	return providerEnvironment()
+	return "development"
 }
 
 // ActiveShellSlots returns only shell contributions active for the requested
@@ -51,6 +40,14 @@ func ActiveShellSlots(slot, env string) []string {
 // request's generated registry.
 func ShellSlotIDs(ctx context.Context, slot string) []string {
 	return ActiveShellSlots(slot, environmentFrom(ctx))
+}
+func renderShellSlot(id string) templ.Component {
+	raw, ok := ShellSlotRenderers[id]
+	renderer, ok := raw.(func() templ.Component)
+	if !ok || renderer == nil {
+		return templ.NopComponent
+	}
+	return renderer()
 }
 
 type NavSnapshot struct {

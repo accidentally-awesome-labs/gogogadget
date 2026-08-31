@@ -509,8 +509,8 @@ type JobContribution struct {
 	Kind        string `json:"kind"`
 	Package     string `json:"package"`
 	Handler     string `json:"handler"`
-	Schedulable bool   `json:"schedulable"`
-	MaxAttempts int    `json:"max_attempts"`
+	Schedulable bool   `json:"schedulable,omitempty"`
+	MaxAttempts int    `json:"max_attempts,omitempty"`
 }
 
 // JanitorContribution declares one recurring cleanup sweep. Each sweep deletes

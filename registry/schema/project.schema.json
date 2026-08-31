@@ -21,7 +21,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system|profile)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
           }
         },
         "exclude": {

@@ -1,7 +1,11 @@
 package modkit
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -78,5 +82,73 @@ func TestMigrateSchema1LockPreservesPayloadDigestsAndEmbeddedMetadata(t *testing
 	runtimeOrders := migrated["runtime_orders"].(map[string]any)
 	if len(runtimeOrders["development"].([]any)) != 1 || runtimeOrders["development"].([]any)[0] != "ggg/system/config" {
 		t.Fatalf("embedded runtime order = %#v", runtimeOrders)
+	}
+}
+
+func TestMigrateSchema1CommandEmitsEnvelopeAndRollsBackAtomically(t *testing.T) {
+	projectBefore := []byte(`{"schema":1,"registry":{"repository":".","path":"registry"},"modules":["profile/full"],"exclude":[]}`)
+	lockBefore := []byte(`{"schema":1,"registry_commit":"commit-a","registry":{"source":"directory","requested_ref":"local","canonical_module":"github.com/gogogadget/gogogadget","key_fingerprint":""},"order":[],"modules":[]}`)
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, ProjectFileName), projectBefore, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, LockFileName), lockBefore, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	cli := CLI{Root: root, Out: &out}
+	if err := cli.Run(context.Background(), []string{"migrate", "schema-1", "--json"}); err != nil {
+		t.Fatalf("migrate command: %v", err)
+	}
+	var envelope Envelope
+	if err := json.Unmarshal(out.Bytes(), &envelope); err != nil {
+		t.Fatalf("envelope: %v\n%s", err, out.String())
+	}
+	if !envelope.OK || envelope.Exit != exitOK || envelope.Command != "migrate" {
+		t.Fatalf("envelope = %#v", envelope)
+	}
+	migratedProject, err := os.ReadFile(filepath.Join(root, ProjectFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	migratedLock, err := os.ReadFile(filepath.Join(root, LockFileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ParseProject(migratedProject); err != nil {
+		t.Fatalf("migrated project did not reparse: %v", err)
+	}
+	if _, err := ParseLock(migratedLock); err != nil {
+		t.Fatalf("migrated lock did not reparse: %v", err)
+	}
+	if string(migratedProject) == string(projectBefore) || string(migratedLock) == string(lockBefore) {
+		t.Fatal("migration did not rewrite schema metadata")
+	}
+
+	root = t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, ProjectFileName), projectBefore, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, LockFileName), lockBefore, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeCalls := 0
+	cli = CLI{Root: root, writeFile: func(name string, data []byte, mode os.FileMode) error {
+		writeCalls++
+		if strings.HasSuffix(name, LockFileName) {
+			return os.ErrPermission
+		}
+		return os.WriteFile(name, data, mode)
+	}}
+	err = cli.Run(context.Background(), []string{"migrate", "schema-1"})
+	if err == nil || exitOf(t, err) != exitRollback {
+		t.Fatalf("rollback error = %v (exit %d)", err, exitOf(t, err))
+	}
+	projectAfter, _ := os.ReadFile(filepath.Join(root, ProjectFileName))
+	if !bytes.Equal(projectBefore, projectAfter) {
+		t.Fatalf("project was not restored after lock write failure")
+	}
+	if writeCalls != 3 {
+		t.Fatalf("write calls = %d, want project, lock, restore", writeCalls)
 	}
 }

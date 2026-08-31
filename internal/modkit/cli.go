@@ -40,6 +40,15 @@ type CLI struct {
 	// Engine overrides the engine the CLI would otherwise build from the
 	// project's registry declaration. Tests inject an offline source here.
 	Engine *Engine
+	// writeFile is injectable solely to exercise migration transaction rollback.
+	writeFile func(string, []byte, os.FileMode) error
+}
+
+func (c CLI) write(path string, data []byte, mode os.FileMode) error {
+	if c.writeFile != nil {
+		return c.writeFile(path, data, mode)
+	}
+	return os.WriteFile(path, data, mode)
 }
 
 // Envelope is the noninteractive result contract. Its key set is fixed: machine
@@ -379,12 +388,12 @@ func (c CLI) runMigrate(ctx context.Context, args []string) error {
 	}
 	// Both files are journalled as one transaction. Never leave a schema-2
 	// intent paired with a schema-1 lock if the second write fails.
-	if err := os.WriteFile(projectPath, migratedProject, 0o644); err != nil {
+	if err := c.write(projectPath, migratedProject, 0o644); err != nil {
 		return runtimeError(err)
 	}
-	if err := os.WriteFile(lockPath, migratedLock, 0o644); err != nil {
-		_ = os.WriteFile(projectPath, project, 0o644)
-		return runtimeError(err)
+	if err := c.write(lockPath, migratedLock, 0o644); err != nil {
+		_ = c.write(projectPath, project, 0o644)
+		return rollbackError(fmt.Errorf("migration rollback: %w", err))
 	}
 	changes := []Change{{Path: ProjectFileName, Kind: ChangeUpdate, Class: DestinationIntent}, {Path: LockFileName, Kind: ChangeUpdate, Class: DestinationLock}}
 	return c.emit("migrate", *asJSON, Envelope{OK: true, Exit: exitOK, Changes: changes})

@@ -173,6 +173,19 @@ func TestAggregateHealthHardDeadlineAndPanicRecovery(t *testing.T) {
 	}
 }
 
+func TestAggregateHealthNonCriticalFailureKeepsReady(t *testing.T) {
+	report := AggregateHealth(t.Context(), []HealthRegistration{{
+		Module: "metrics", Slot: "telemetry", Critical: false,
+		Check: healthFunc(func(context.Context) error { return context.DeadlineExceeded }),
+	}})
+	if report.Ready != true {
+		t.Fatalf("non-critical failure made report unready: %#v", report)
+	}
+	if report.Checks[0].Healthy || report.Checks[0].Error == "" {
+		t.Fatalf("non-critical failed check = %#v", report.Checks[0])
+	}
+}
+
 func TestHealthCacheUsesTenSecondWindow(t *testing.T) {
 	calls := 0
 	check := healthFunc(func(context.Context) error { calls++; return nil })

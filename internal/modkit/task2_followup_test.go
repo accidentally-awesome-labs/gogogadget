@@ -95,6 +95,111 @@ func TestRuntimeOrdersForAddsCapabilityEdges(t *testing.T) {
 	}
 }
 
+func TestAdapterEnvironmentTargetsGateRequiredKeys(t *testing.T) {
+	local := Manifest{
+		ID: "ggg/system/mail-local", Kind: ModuleSystem,
+		Environment: []EnvironmentVariable{{Key: "LOCAL_TOKEN", Field: "LocalToken", Type: EnvString, Required: true}},
+		Runtime: RuntimeContributions{System: &SystemContribution{
+			Adapter: &AdapterContribution{Slot: "ggg/mail", Targets: []ServiceTarget{{ID: "filesystem", Title: "Filesystem", Mode: "development", Environments: []string{"development"}, Automation: "manual", DocsURL: "https://example.test"}}},
+		}},
+	}
+	managed := Manifest{
+		ID: "ggg/system/mail-managed", Kind: ModuleSystem,
+		Environment: []EnvironmentVariable{{Key: "MANAGED_TOKEN", Field: "ManagedToken", Type: EnvString, Required: true}},
+		Runtime: RuntimeContributions{System: &SystemContribution{
+			Adapter: &AdapterContribution{Slot: "ggg/mail", Targets: []ServiceTarget{{ID: "resend", Title: "Resend", Mode: "managed", Environments: []string{"production"}, Automation: "configure", DocsURL: "https://example.test"}}},
+		}},
+	}
+	lock := Lock{Schema: 2, Providers: map[string]ProviderSelections{
+		"ggg/mail": {
+			Development: ProviderSelection{Adapter: local.ID, Target: "filesystem"},
+			Test:        ProviderSelection{Adapter: local.ID, Target: "filesystem"},
+			Production:  ProviderSelection{Adapter: managed.ID, Target: "resend"},
+		},
+	}}
+	declarations, err := declaredEnvironment(lock, []Manifest{local, managed})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := requiredExpression(declarations[0], lock); !strings.Contains(got, `cfg.Env == "development"`) || strings.Contains(got, `cfg.Env == "production"`) {
+		t.Fatalf("local required expression = %q", got)
+	}
+	if got := requiredExpression(declarations[1], lock); !strings.Contains(got, `cfg.Env == "production"`) || strings.Contains(got, `cfg.Env == "development"`) {
+		t.Fatalf("managed required expression = %q", got)
+	}
+	out, err := emitConfigRegistry(context.Background(), "example.com/app", lock, []Manifest{local, managed})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.Content, `if true && cfg.LocalToken`) || strings.Contains(out.Content, `if true && cfg.ManagedToken`) {
+		t.Fatalf("adapter required keys are unconditional:\n%s", out.Content)
+	}
+}
+
+func TestProviderSelectionAndClaimRefusals(t *testing.T) {
+	seam := Manifest{ID: "ggg/system/mail", Kind: ModuleSystem, Runtime: RuntimeContributions{
+		ProviderSlots: []ProviderSlotContribution{{ID: "ggg/mail", Capabilities: []CapabilityContribution{{Capability: "mail.sender", Type: "mail.Sender"}}}},
+	}}
+	adapter := func(id, slot, target, mode string, environments []string) Manifest {
+		return Manifest{ID: id, Kind: ModuleSystem, Runtime: RuntimeContributions{System: &SystemContribution{
+			Adapter:  &AdapterContribution{Slot: slot, Targets: []ServiceTarget{{ID: target, Title: target, Mode: mode, Environments: environments, Automation: "manual", DocsURL: "https://example.test"}}},
+			Provides: []RuntimeProvide{{Field: "Sender", Capability: "mail.sender", Type: "mail.Sender"}},
+		}}}
+	}
+	local := adapter("ggg/system/mail-local", "ggg/mail", "filesystem", "development", []string{"development", "test"})
+	remote := adapter("ggg/system/mail-remote", "ggg/mail", "resend", "managed", []string{"production"})
+	project := Project{Schema: 2, Modules: []string{seam.ID}, Providers: map[string]ProviderSelections{"ggg/mail": {
+		Development: ProviderSelection{Adapter: local.ID, Target: "filesystem"},
+		Test:        ProviderSelection{Adapter: local.ID, Target: "filesystem"},
+		Production:  ProviderSelection{Adapter: remote.ID, Target: "resend"},
+	}}}
+	catalog := Catalog{Modules: []Manifest{seam, local, remote}}
+	if _, err := resolveSelectedGraph(t.Context(), project, catalog); err != nil {
+		t.Fatalf("valid provider fixture refused: %v", err)
+	}
+	for name, mutate := range map[string]func(*Project){
+		"wrong slot": func(p *Project) {
+			choices := p.Providers["ggg/mail"]
+			choices.Development.Adapter = "ggg/system/other"
+			p.Providers["ggg/mail"] = choices
+		},
+		"missing target": func(p *Project) {
+			choices := p.Providers["ggg/mail"]
+			choices.Development.Target = "missing"
+			p.Providers["ggg/mail"] = choices
+		},
+		"development target in production": func(p *Project) {
+			choices := p.Providers["ggg/mail"]
+			choices.Production = ProviderSelection{Adapter: local.ID, Target: "filesystem"}
+			p.Providers["ggg/mail"] = choices
+		},
+		"explicit unused adapter": func(p *Project) { p.Modules = append(p.Modules, "ggg/system/unused") },
+	} {
+		t.Run(name, func(t *testing.T) {
+			copy := project
+			copy.Providers = map[string]ProviderSelections{"ggg/mail": project.Providers["ggg/mail"]}
+			copy.Modules = append([]string{}, project.Modules...)
+			mutate(&copy)
+			if _, err := resolveSelectedGraph(t.Context(), copy, catalog); err == nil {
+				t.Fatalf("refusal %q was accepted", name)
+			}
+		})
+	}
+	duplicate := seam
+	duplicate.ID = "ggg/system/mail-other"
+	duplicate.Runtime.ProviderSlots = append([]ProviderSlotContribution{}, seam.Runtime.ProviderSlots...)
+	if err := preflightNamespaces(t.Context(), []Manifest{seam, duplicate}); err == nil {
+		t.Fatal("duplicate non-adapter provider slot accepted")
+	}
+	claimed := local
+	claimed.Runtime.Provisioners = []ProvisionerContribution{{ID: "mail.provision", Package: "internal/mail", Constructor: "New"}}
+	claimed.Runtime.System.Adapter.Targets[0].Automation = "provision"
+	claimed.Runtime.System.Adapter.Targets[0].Provisioner = "mail.missing"
+	if err := preflightNamespaces(t.Context(), []Manifest{seam, claimed}); err == nil {
+		t.Fatal("unclaimed provisioner accepted")
+	}
+}
+
 func indexOf(items []string, want string) int {
 	for i, item := range items {
 		if item == want {
@@ -138,6 +243,7 @@ func TestGeneratedExecutableContributionsCarryProviderGates(t *testing.T) {
 		Navigation: []NavigationContribution{{ID: "provider.nav", Area: NavAreaPublic, Href: "/provider", LabelKey: "provider"}},
 		Slots:      []SlotContribution{{ID: "provider.slot", Slot: ShellSlotHead, Package: "internal/provider", Renderer: "Render"}},
 		Assets:     []AssetContribution{{ID: "provider.asset", Path: "provider.js", Kind: AssetScript}},
+		Jobs:       []JobContribution{{Kind: "provider.job", Package: "internal/jobs", Handler: "defineProviderJob"}},
 	}}
 	page := Manifest{ID: "ggg/page/provider", Kind: ModulePage}
 	lock := Lock{Schema: 2, Order: []string{adapter.ID, page.ID}, RuntimeOrders: RuntimeOrders{Development: []string{adapter.ID, page.ID}, Test: []string{adapter.ID, page.ID}, Production: []string{adapter.ID}}}
@@ -158,9 +264,21 @@ func TestGeneratedExecutableContributionsCarryProviderGates(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, content := range []string{routes.Content, chrome.Content, slots.Content, assets.Content} {
+	jobs, err := emitJobsRegistry(context.Background(), "example.com/app", lock, graph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, content := range []string{routes.Content, chrome.Content, slots.Content, assets.Content, jobs.Content} {
 		if !strings.Contains(content, "providerActive") {
-			t.Fatalf("executable contribution missing providerActive gate:\\n%s", content)
+			t.Fatalf("executable contribution missing providerActive gate:\n%s", content)
 		}
+	}
+	if !strings.Contains(slots.Content, "ShellSlotRenderers") ||
+		!strings.Contains(slots.Content, "internal/provider") ||
+		!strings.Contains(slots.Content, ".Render") {
+		t.Fatalf("shell slot does not dispatch declared renderer:\n%s", slots.Content)
+	}
+	if !strings.Contains(jobs.Content, "defineProviderJob") {
+		t.Fatalf("adapter-owned job missing from generated worker registry:\n%s", jobs.Content)
 	}
 }

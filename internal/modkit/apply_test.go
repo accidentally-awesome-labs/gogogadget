@@ -54,6 +54,100 @@ func (g *scriptedGenerator) Render(_ context.Context, _ Plan) ([]GeneratedFile, 
 	return files, g.err
 }
 
+type dependencyTestRunner struct {
+	err   error
+	calls int
+}
+
+func (r *dependencyTestRunner) Run(_ context.Context, root string, _ []string) error {
+	r.calls++
+	if r.err != nil {
+		_ = os.WriteFile(filepath.Join(root, "go.sum"), []byte("runner-partial\n"), 0o644)
+	}
+	return r.err
+}
+
+func TestApplyReconcilesManagedDependenciesThroughTransaction(t *testing.T) {
+	t.Run("adds dependency and records ownership", func(t *testing.T) {
+		root, _, plan := installTwoModules(t)
+		plan.Lock.Dependencies = []LockedDependency{{
+			Module: "example.com/provider", ManagedVersion: "v1.2.0",
+			Owners: []string{"ggg/system/provider"},
+		}}
+		runner := &dependencyTestRunner{}
+		engine := New(Options{Generator: &scriptedGenerator{}, ToolRunner: runner})
+		result, err := engine.Apply(context.Background(), plan)
+		if err != nil {
+			t.Fatalf("Apply: %v", err)
+		}
+		if result.Exit != 0 || runner.calls != 1 {
+			t.Fatalf("result=%#v runner calls=%d", result, runner.calls)
+		}
+		mod, err := os.ReadFile(filepath.Join(root, "go.mod"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(mod), "example.com/provider v1.2.0") {
+			t.Fatalf("managed requirement missing: %s", mod)
+		}
+	})
+
+	t.Run("restores unchanged preexisting dependency on final owner removal", func(t *testing.T) {
+		root, _, plan := installTwoModules(t)
+		beforeMod := []byte("module example.com/acme/app\n\ngo 1.26.6\n\nrequire example.com/provider v1.0.0\n")
+		if err := os.WriteFile(filepath.Join(root, "go.mod"), beforeMod, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "go.sum"), []byte("baseline\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		plan.previousDependencies = []LockedDependency{{
+			Module: "example.com/provider", ManagedVersion: "v1.0.0",
+			Owners: []string{"ggg/system/provider"}, Preexisting: true, BaselineVersion: "v0.9.0",
+		}}
+		plan.Lock.Dependencies = nil
+		if _, err := New(Options{Generator: &scriptedGenerator{}, ToolRunner: &dependencyTestRunner{}}).Apply(context.Background(), plan); err != nil {
+			t.Fatalf("Apply: %v", err)
+		}
+		mod, err := os.ReadFile(filepath.Join(root, "go.mod"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(mod), "example.com/provider v0.9.0") {
+			t.Fatalf("preexisting baseline not restored: %s", mod)
+		}
+	})
+
+	t.Run("rolls back go.mod and go.sum when dependency runner fails", func(t *testing.T) {
+		root, _, plan := installTwoModules(t)
+		beforeMod, err := os.ReadFile(filepath.Join(root, "go.mod"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		beforeSum := []byte("sum-before\n")
+		if err := os.WriteFile(filepath.Join(root, "go.sum"), beforeSum, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		plan.Lock.Dependencies = []LockedDependency{{
+			Module: "example.com/provider", ManagedVersion: "v1.2.0",
+			Owners: []string{"ggg/system/provider"},
+		}}
+		runner := &dependencyTestRunner{err: errors.New("download failed")}
+		result, err := New(Options{Generator: &scriptedGenerator{}, ToolRunner: runner}).Apply(context.Background(), plan)
+		if err == nil {
+			t.Fatal("Apply returned nil error")
+		}
+		if result.Exit != 5 || !result.RolledBack {
+			t.Fatalf("result=%#v want rollback exit 5", result)
+		}
+		afterMod, _ := os.ReadFile(filepath.Join(root, "go.mod"))
+		afterSum, _ := os.ReadFile(filepath.Join(root, "go.sum"))
+		if !slices.Equal(beforeMod, afterMod) || !slices.Equal(beforeSum, afterSum) {
+			t.Fatalf("dependency files changed across rollback: mod=%q sum=%q", afterMod, afterSum)
+		}
+	})
+}
+
 func applyEngineWith(gen Generator) *Engine {
 	return New(Options{Generator: gen})
 }

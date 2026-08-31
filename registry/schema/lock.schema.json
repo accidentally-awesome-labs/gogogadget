@@ -246,7 +246,7 @@
         },
         "base_sha256": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^(?:[0-9a-f]{64})?$"
         },
         "local_sha256": {
           "type": "string",
@@ -258,7 +258,8 @@
             "clean",
             "modified",
             "missing",
-            "conflicted"
+            "conflicted",
+            "generated"
           ]
         }
       },
@@ -274,7 +275,10 @@
           "if": {
             "properties": {
               "state": {
-                "const": "missing"
+                "enum": [
+                  "missing",
+                  "generated"
+                ]
               }
             },
             "required": [

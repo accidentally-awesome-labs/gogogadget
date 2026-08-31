@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"io/fs"
 	"os"
+	"path"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 var publishedRegistryIncludes = []string{
@@ -490,29 +495,88 @@ func TestParseLockEnforcesCatalogRequiredFields(t *testing.T) {
 	}
 }
 
-// The schema contract must validate the published instances, not merely have
-// matching property names. LoadCatalog traverses every indexed manifest/profile
-// and applies the same strict shape and value validation used by resolution.
 func TestPublishedSchemaInstancesValidate(t *testing.T) {
 	repo := os.DirFS("../..")
-	if _, err := LoadCatalog(repo); err != nil {
-		t.Fatalf("published registry instances: %v", err)
-	}
-	for _, name := range []string{"gogogadget.json", "gogogadget.lock.json"} {
-		data, err := fs.ReadFile(repo, name)
+	validate := func(schemaPath, instancePath string) {
+		repoRoot, err := filepath.Abs("../..")
 		if err != nil {
-			t.Fatalf("read %s: %v", name, err)
+			t.Fatalf("resolve repository root: %v", err)
 		}
-		switch name {
-		case "gogogadget.json":
-			if _, err := ParseProject(data); err != nil {
-				t.Fatalf("published project instance: %v", err)
+		compiler := jsonschema.NewCompiler()
+		for _, name := range []string{"registry.schema.json", "module.schema.json", "project.schema.json", "lock.schema.json"} {
+			data, err := fs.ReadFile(repo, "registry/schema/"+name)
+			if err != nil {
+				t.Fatalf("read schema %s: %v", name, err)
 			}
-		case "gogogadget.lock.json":
-			if _, err := ParseLock(data); err != nil {
-				t.Fatalf("published lock instance: %v", err)
+			var document any
+			if err := json.Unmarshal(data, &document); err != nil {
+				t.Fatalf("decode schema %s: %v", name, err)
+			}
+			if err := compiler.AddResource(filepath.Join(repoRoot, "registry/schema", name), document); err != nil {
+				t.Fatalf("add schema %s: %v", name, err)
 			}
 		}
+		schemaFile := filepath.Join(repoRoot, schemaPath)
+		compileURL := schemaFile
+		if strings.HasSuffix(schemaPath, "module.schema.json") {
+			compileURL += "#/$defs/ModuleDocument"
+			if strings.HasPrefix(instancePath, "registry/profiles/") {
+				compileURL = schemaFile + "#/$defs/ProfileDocument"
+			}
+		}
+		compiled, err := compiler.Compile(compileURL)
+		if err != nil {
+			t.Fatalf("compile schema %s: %v", schemaPath, err)
+		}
+		instanceData, err := fs.ReadFile(repo, instancePath)
+		if err != nil {
+			t.Fatalf("read instance %s: %v", instancePath, err)
+		}
+		var instance any
+		if err := json.Unmarshal(instanceData, &instance); err != nil {
+			t.Fatalf("decode instance %s: %v", instancePath, err)
+		}
+		if err := compiled.Validate(instance); err != nil {
+			t.Errorf("%s does not validate against %s: %v", instancePath, schemaPath, err)
+		}
+	}
+
+	validate("registry/schema/registry.schema.json", "registry.json")
+	for _, include := range publishedRegistryIncludes {
+		validate("registry/schema/registry.schema.json", include)
+	}
+	validate("registry/schema/project.schema.json", "gogogadget.json")
+	validate("registry/schema/lock.schema.json", "gogogadget.lock.json")
+
+	var instances []string
+	if err := fs.WalkDir(repo, "registry/modules", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.IsDir() && path.Base(name) == "module.json" {
+			instances = append(instances, name)
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("walk module instances: %v", err)
+	}
+	if err := fs.WalkDir(repo, "registry/profiles", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.IsDir() && strings.HasSuffix(name, ".json") {
+			instances = append(instances, name)
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("walk profile instances: %v", err)
+	}
+	sort.Strings(instances)
+	if len(instances) == 0 {
+		t.Fatal("published registry has no module/profile instances")
+	}
+	for _, instance := range instances {
+		validate("registry/schema/module.schema.json", instance)
 	}
 }
 

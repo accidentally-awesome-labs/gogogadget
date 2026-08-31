@@ -160,4 +160,5 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 	modernc.org/sqlite v1.54.0 // indirect
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 )

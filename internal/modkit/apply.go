@@ -171,6 +171,16 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 		return fmt.Errorf("rollback incomplete, do not trust the tree; could not restore %d path(s): %s",
 			len(failures), strings.Join(failures, "; "))
 	}
+	// failed reports the transaction outcome. RolledBack is true only when the
+	// restore actually succeeded, so an operator reading `rolled_back` can act
+	// on it; a partial restore names every path it could not put back.
+	failed := func(cause error) (Result, error) {
+		restoreErr := rollback()
+		if restoreErr == nil {
+			return Result{Exit: 5, RolledBack: true}, cause
+		}
+		return Result{Exit: 5, RolledBack: false}, fmt.Errorf("%w; %w", cause, restoreErr)
+	}
 
 	// 1. Snapshot every touched path plus every generator-owned path before
 	//    any write.
@@ -195,8 +205,7 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 			return Result{}, err
 		}
 		if _, err := ReconcileManagedDependencies(ctx, plan.Root, plan.previousDependencies, plan.Lock.Dependencies, e.toolRunner); err != nil {
-			_ = rollback()
-			return Result{}, fmt.Errorf("update dependencies: %w", err)
+			return failed(fmt.Errorf("update dependencies: %w", err))
 		}
 	}
 
@@ -224,16 +233,6 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 			}
 		}
 		return nil
-	}
-	// failed reports the transaction outcome. RolledBack is true only when the
-	// restore actually succeeded, so an operator reading `rolled_back` can act on
-	// it; a partial restore names every path it could not put back.
-	failed := func(cause error) (Result, error) {
-		restoreErr := rollback()
-		if restoreErr == nil {
-			return Result{Exit: 5, RolledBack: true}, cause
-		}
-		return Result{Exit: 5, RolledBack: false}, fmt.Errorf("%w; %w", cause, restoreErr)
 	}
 
 	if err := apply(); err != nil {

@@ -268,7 +268,7 @@
         "source": "internal/web/templates/chrome.go",
         "target": "internal/web/templates/chrome.go",
         "class": "go",
-        "sha256": "850af5821b76840556f05b19314ca70d4358d039b6bfb2fe84fe3f998eea0886",
+        "sha256": "2c218c60ffc778f1588c861311a70cb3158252a363670e7d46d476740bb486de",
         "rewrite_module": true,
         "contract": false
       },
@@ -276,7 +276,7 @@
         "source": "internal/web/templates/chrome_test.go",
         "target": "internal/web/templates/chrome_test.go",
         "class": "test",
-        "sha256": "9494d4a0879b35ba4a865950c66b821ef43c7eea1f801e276cbd82fb859c0d87",
+        "sha256": "574ece9963662937b5bbfe55a6a5399f83992bfd2ff28e2dfe880cc5597a7bf9",
         "rewrite_module": true,
         "contract": false
       },
@@ -324,7 +324,7 @@
         "source": "internal/web/templates/nav.templ",
         "target": "internal/web/templates/nav.templ",
         "class": "templ",
-        "sha256": "10632148417ddec98cc1064b6b1d9b15e2d3d8438df809117e72c5e20971906b",
+        "sha256": "400bf7e0679062c4151b6d2795e4d56d570e02d7737715c2190e140add3f077d",
         "rewrite_module": true,
         "contract": false
       },

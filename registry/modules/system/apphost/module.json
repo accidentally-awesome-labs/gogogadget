@@ -27,7 +27,7 @@
         "source": "internal/apphost/apphost_test.go",
         "target": "internal/apphost/apphost_test.go",
         "class": "test",
-        "sha256": "8b09aa00243dce9e562aaf90bc257a6630cda2e5d984e62449fbbd9d35c8b441",
+        "sha256": "81834782bcdad5e21abdc1ae0b3ab9889c18f64250fd46c6c84ba2bd1a242ec5",
         "rewrite_module": true,
         "contract": false
       },

@@ -142,6 +142,7 @@ func MigrateSchema1Lock(data []byte) ([]byte, error) {
 			}
 		}
 		root["registries"] = []any{registry}
+		delete(root, "registry")
 	}
 	if _, ok := root["registries"]; !ok {
 		root["registries"] = []any{}

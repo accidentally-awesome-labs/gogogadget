@@ -312,9 +312,7 @@
       "required": [
         "kind",
         "package",
-        "handler",
-        "schedulable",
-        "max_attempts"
+        "handler"
       ]
     },
     "Manifest": {
@@ -521,12 +519,13 @@
             "seed",
             "docs",
             "test",
-            "openapi"
+            "openapi",
+            "generated"
           ]
         },
         "sha256": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^(?:[0-9a-f]{64})?$"
         },
         "rewrite_module": {
           "type": "boolean"
@@ -582,7 +581,7 @@
       "properties": {
         "schema": {
           "type": "integer",
-          "const": 1
+          "const": 2
         },
         "module": {
           "$ref": "#/$defs/Manifest"
@@ -1049,7 +1048,7 @@
         },
         "pattern": {
           "type": "string",
-          "pattern": "^/(?:(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\})(?:/(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\}))*)?$"
+          "pattern": "^/(?:(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\})(?:/(?:\\.{0,2}[A-Za-z0-9_~+@-][A-Za-z0-9._~+@-]*|\\{(?:[A-Za-z_][A-Za-z0-9_]*(?:[.][.][.])?|\\$)\\}))*)?/?$"
         },
         "scope": {
           "type": "string",
@@ -1480,13 +1479,11 @@
             "type": "string",
             "enum": [
               "default",
-              "disabled",
-              "readonly",
-              "busy",
               "loading",
               "empty",
               "error",
               "success",
+              "readonly",
               "overflow"
             ]
           },
@@ -1671,7 +1668,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         },
         "family": {
           "type": "string",
@@ -1818,6 +1815,7 @@
             "type": "string",
             "enum": [
               "desktop",
+              "tablet",
               "mobile"
             ]
           },

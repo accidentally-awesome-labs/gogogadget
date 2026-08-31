@@ -57,7 +57,7 @@ templ navLinks(page Page) {
 
 templ shellSlotMarkers(slot string) {
 	for _, id := range ShellSlotIDs(ctx, slot) {
-		<template data-shell-slot={ id }></template>
+		@renderShellSlot(id)
 	}
 }
 

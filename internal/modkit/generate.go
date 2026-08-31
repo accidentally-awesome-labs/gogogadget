@@ -467,7 +467,18 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		return nil
 	}
 	emitBranch := func(name, env string, order []string) error {
-		fmt.Fprintf(&b, "func (r *Runtime) boot%s(ctx context.Context, h apphost.Host, opts Options) error {\n\tvar err error\n", name)
+		fmt.Fprintf(&b, "func (r *Runtime) boot%s(ctx context.Context, h apphost.Host, opts Options) error {\n", name)
+		hasCalls := false
+		for _, id := range order {
+			module := byID[id]
+			if id != configID && module.Runtime.System != nil && module.Runtime.System.Package != "" && module.Runtime.System.Constructor != "" {
+				hasCalls = true
+				break
+			}
+		}
+		if hasCalls {
+			b.WriteString("\tvar err error\n")
+		}
 		provider := map[string]string{}
 		if configID != "" {
 			configModule := byID[configID]
@@ -1203,22 +1214,40 @@ func orderNavEntries(entries []navEntry) ([]navEntry, error) {
 }
 
 func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	type renderer struct {
+		id, pkg, name string
+	}
+	var renderers []renderer
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package templates\n\n")
+	counter := 0
+	for _, m := range orderedModules(lock, graph) {
+		for _, s := range m.Runtime.Slots {
+			renderers = append(renderers, renderer{id: s.ID, pkg: qualifyPackage(modulePath, s.Package), name: fmt.Sprintf("shellSlot%d", counter)})
+			counter++
+		}
+	}
+	if len(renderers) > 0 {
+		b.WriteString("import (\n")
+		for _, item := range renderers {
+			fmt.Fprintf(&b, "\t%s %q\n", item.name, item.pkg)
+		}
+		b.WriteString(")\n\n")
+	}
 	b.WriteString("var ShellSlotsRegistry = map[string][]string{\n")
 	bySlot := make(map[string][]string)
 	owners := make(map[string]string)
-	slots := make([]string, 0)
 	for _, m := range orderedModules(lock, graph) {
 		for _, s := range m.Runtime.Slots {
 			key := string(s.Slot)
-			if _, seen := bySlot[key]; !seen {
-				slots = append(slots, key)
-			}
 			bySlot[key] = append(bySlot[key], s.ID)
 			owners[s.ID] = m.ID
 		}
+	}
+	slots := make([]string, 0, len(bySlot))
+	for slot := range bySlot {
+		slots = append(slots, slot)
 	}
 	sort.Strings(slots)
 	for _, slot := range slots {
@@ -1227,6 +1256,22 @@ func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, g
 			fmt.Fprintf(&b, "\t\t%s,\n", goString(id))
 		}
 		b.WriteString("\t},\n")
+	}
+	b.WriteString("}\n\nvar ShellSlotRenderers = map[string]any{\n")
+	for _, item := range renderers {
+		if !validIdentifier(item.name) {
+			return nil, fmt.Errorf("shell slot renderer package alias %q is invalid", item.name)
+		}
+		for _, m := range orderedModules(lock, graph) {
+			for _, s := range m.Runtime.Slots {
+				if s.ID == item.id {
+					if !validIdentifier(s.Renderer) {
+						return nil, fmt.Errorf("shell slot %s renderer %q is invalid", s.ID, s.Renderer)
+					}
+					fmt.Fprintf(&b, "\t%s: %s.%s,\n", goString(s.ID), item.name, s.Renderer)
+				}
+			}
+		}
 	}
 	b.WriteString("}\n\nvar ShellSlotActive = map[string]func(string) bool{\n")
 	for _, id := range sortedKeys(owners) {
@@ -2505,6 +2550,12 @@ func declaredEnvironment(lock Lock, graph []Manifest) ([]EnvironmentVariable, er
 		envs := append([]EnvironmentVariable{}, m.Environment...)
 		sort.Slice(envs, func(i, j int) bool { return envs[i].Key < envs[j].Key })
 		for _, e := range envs {
+			if len(e.Targets) == 0 && m.Runtime.System != nil && m.Runtime.System.Adapter != nil {
+				e.Targets = make([]string, 0, len(m.Runtime.System.Adapter.Targets))
+				for _, target := range m.Runtime.System.Adapter.Targets {
+					e.Targets = append(e.Targets, m.ID+"@"+target.ID)
+				}
+			}
 			if previous, clash := keyOwner[e.Key]; clash {
 				return nil, fmt.Errorf("env key %q is declared by both %s and %s", e.Key, previous, m.ID)
 			}
