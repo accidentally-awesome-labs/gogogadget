@@ -413,7 +413,11 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			return fmt.Errorf("module %s: %w", module.ID, err)
 		}
 		pkg := goImportName(resolveTypeImport(modulePath, sys.Package))
-		fmt.Fprintf(&b, "\t%s, err := %s.%s(ctx, h, %s.Deps{\n", target, pkg, sys.Constructor, pkg)
+		if target == "_" {
+			fmt.Fprintf(&b, "\t_, err = %s.%s(ctx, h, %s.Deps{\n", pkg, sys.Constructor, pkg)
+		} else {
+			fmt.Fprintf(&b, "\t%s, err := %s.%s(ctx, h, %s.Deps{\n", target, pkg, sys.Constructor, pkg)
+		}
 		for _, need := range sys.Needs {
 			if !validIdentifier(need.Field) {
 				return fmt.Errorf("module %s: invalid need field %q", module.ID, need.Field)
@@ -460,7 +464,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		return nil
 	}
 	emitBranch := func(name, env string, order []string) error {
-		fmt.Fprintf(&b, "func (r *Runtime) boot%s(ctx context.Context, h apphost.Host, opts Options) error {\n", name)
+		fmt.Fprintf(&b, "func (r *Runtime) boot%s(ctx context.Context, h apphost.Host, opts Options) error {\n\tvar err error\n", name)
 		provider := map[string]string{}
 		if configID != "" {
 			configModule := byID[configID]
