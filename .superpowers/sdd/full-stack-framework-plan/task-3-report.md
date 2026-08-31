@@ -110,9 +110,7 @@ exercised 7 example closure(s):
   info     example_closure_verified system closure fixture/system/storage-local+fixture/system/storage-managed+fixture/system/storage-providers: installed 4 file(s), regenerated 27, compiled, 1600 tree entries restored byte for byte
   info     example_closure_verified system closure ggg/system/example-clock: installed 2 file(s), regenerated 26, compiled, 1600 tree entries restored byte for byte
 
-exercised 7 example closure(s):
 ```
-
 `gofmt -d` over all changed Go files produced no output.
 
 `make fuzz`
