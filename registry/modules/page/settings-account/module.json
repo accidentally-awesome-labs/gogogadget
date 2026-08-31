@@ -1,96 +1,52 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/settings-account",
-    "kind": "page",
-    "name": "settings-account",
-    "revision": 1,
-    "contract": 1,
-    "title": "Account settings",
-    "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
-    "requires": [
-      "system/i18n",
-      "system/identity",
-      "system/security",
-      "system/server",
-      "workflow/auth-session"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_settings_account.go",
-        "target": "internal/web/page_settings_account.go",
-        "class": "go",
-        "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/settings.templ",
-        "target": "internal/web/templates/settings.templ",
-        "class": "templ",
-        "sha256": "9dbb5a38c3039315d7484ffc17ca573b205a3d40cd3b5ca5cf6a365cff986fcc",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "settings-account.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "settings-account.index",
-          "method": "GET",
-          "pattern": "/app/settings/account",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleSettingsAccount"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.app.settings",
-          "area": "app",
-          "route_id": "settings-account.index",
-          "match": "/app/settings",
-          "label_key": "sidebar.settings",
-          "after": [
-            "nav.app.activity"
-          ]
-        },
-        {
-          "id": "nav.settings.account",
-          "area": "settings",
-          "route_id": "settings-account.index",
-          "label_key": "settings.tab_account"
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "Renders the signed-in user's account settings tab, including the hosted Clerk user-portal link and the danger-zone entry point.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "4db8550fae113e37aaa70f56b725d72ee32dbeb34460bd45455c7ea8d06d7e9e",
+        "source": "internal/web/page_settings_account.go",
+        "target": "internal/web/page_settings_account.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "9dbb5a38c3039315d7484ffc17ca573b205a3d40cd3b5ca5cf6a365cff986fcc",
+        "source": "internal/web/templates/settings.templ",
+        "target": "internal/web/templates/settings.templ"
+      }
+    ],
+    "id": "ggg/page/settings-account",
+    "kind": "page",
     "locales": {
       "en": {
         "settings.account_clerk_managed": "Profile, password, social connections, and two-factor authentication are managed by Clerk.",
         "settings.account_deleted": "Your account has been deleted. Goodbye!",
         "settings.account_email": "Email",
-        "settings.account_manage_link": "Manage your account →",
+        "settings.account_manage_link": "Manage your account \u2192",
         "settings.account_member_since": "Member since",
         "settings.account_name": "Name",
         "settings.account_title": "Account settings",
-        "settings.appearance_body": "Saved to your account, so these follow you to every device — and the digest email speaks your language.",
+        "settings.appearance_body": "Saved to your account, so these follow you to every device \u2014 and the digest email speaks your language.",
         "settings.appearance_title": "Appearance",
-        "settings.danger_blocked": "Transfer the admin role in %s first — you're the only admin.",
+        "settings.danger_blocked": "Transfer the admin role in %s first \u2014 you're the only admin.",
         "settings.danger_body": "Permanently delete your account. Organizations where you are the only member are deleted too; audit rows are kept.",
         "settings.danger_confirm_cancel": "Keep my account",
         "settings.danger_confirm_cta": "Yes, delete my account",
@@ -100,9 +56,9 @@
         "settings.danger_delete": "Delete account",
         "settings.danger_mismatch": "That doesn't match your account email.",
         "settings.danger_title": "Danger zone",
-        "settings.data_body": "Download everything we hold about your account as JSON — profile, memberships, notifications, and audit trail.",
+        "settings.data_body": "Download everything we hold about your account as JSON \u2014 profile, memberships, notifications, and audit trail.",
         "settings.data_export": "Export my data (JSON)",
-        "settings.data_title": "Data \u0026 privacy",
+        "settings.data_title": "Data & privacy",
         "settings.language_auto": "Browser default",
         "settings.language_label": "Language",
         "settings.theme_dark": "Dark",
@@ -111,26 +67,26 @@
         "settings.theme_system": "System"
       },
       "es": {
-        "settings.account_clerk_managed": "El perfil, la contraseña, las conexiones sociales y la autenticación de dos factores se gestionan en Clerk.",
-        "settings.account_deleted": "Tu cuenta ha sido eliminada. ¡Hasta pronto!",
-        "settings.account_email": "Correo electrónico",
-        "settings.account_manage_link": "Gestionar tu cuenta →",
+        "settings.account_clerk_managed": "El perfil, la contrase\u00f1a, las conexiones sociales y la autenticaci\u00f3n de dos factores se gestionan en Clerk.",
+        "settings.account_deleted": "Tu cuenta ha sido eliminada. \u00a1Hasta pronto!",
+        "settings.account_email": "Correo electr\u00f3nico",
+        "settings.account_manage_link": "Gestionar tu cuenta \u2192",
         "settings.account_member_since": "Miembro desde",
         "settings.account_name": "Nombre",
-        "settings.account_title": "Configuración de la cuenta",
-        "settings.appearance_body": "Se guarda en tu cuenta, así te acompaña en todos tus dispositivos y el correo de resumen habla tu idioma.",
+        "settings.account_title": "Configuraci\u00f3n de la cuenta",
+        "settings.appearance_body": "Se guarda en tu cuenta, as\u00ed te acompa\u00f1a en todos tus dispositivos y el correo de resumen habla tu idioma.",
         "settings.appearance_title": "Apariencia",
-        "settings.danger_blocked": "Transfiere primero el rol de administrador en %s: eres el único administrador.",
-        "settings.danger_body": "Elimina tu cuenta permanentemente. Las organizaciones en las que eres el único miembro también se eliminan; el registro de auditoría se conserva.",
+        "settings.danger_blocked": "Transfiere primero el rol de administrador en %s: eres el \u00fanico administrador.",
+        "settings.danger_body": "Elimina tu cuenta permanentemente. Las organizaciones en las que eres el \u00fanico miembro tambi\u00e9n se eliminan; el registro de auditor\u00eda se conserva.",
         "settings.danger_confirm_cancel": "Conservar mi cuenta",
-        "settings.danger_confirm_cta": "Sí, eliminar mi cuenta",
-        "settings.danger_confirm_label": "Escribe tu correo electrónico para confirmar",
-        "settings.danger_confirm_prompt": "¿Eliminar esta cuenta permanentemente? No se puede deshacer.",
-        "settings.danger_confirm_title": "¿Eliminar tu cuenta?",
+        "settings.danger_confirm_cta": "S\u00ed, eliminar mi cuenta",
+        "settings.danger_confirm_label": "Escribe tu correo electr\u00f3nico para confirmar",
+        "settings.danger_confirm_prompt": "\u00bfEliminar esta cuenta permanentemente? No se puede deshacer.",
+        "settings.danger_confirm_title": "\u00bfEliminar tu cuenta?",
         "settings.danger_delete": "Eliminar cuenta",
         "settings.danger_mismatch": "No coincide con el correo de tu cuenta.",
         "settings.danger_title": "Zona de peligro",
-        "settings.data_body": "Descarga en JSON todo lo que guardamos sobre tu cuenta: perfil, membresías, notificaciones y registro de actividad.",
+        "settings.data_body": "Descarga en JSON todo lo que guardamos sobre tu cuenta: perfil, membres\u00edas, notificaciones y registro de actividad.",
         "settings.data_export": "Exportar mis datos (JSON)",
         "settings.data_title": "Datos y privacidad",
         "settings.language_auto": "Predeterminado del navegador",
@@ -141,13 +97,92 @@
         "settings.theme_system": "Sistema"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "settings-account",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/auth-session"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "nav.app.activity"
+          ],
+          "area": "app",
+          "id": "nav.app.settings",
+          "label_key": "sidebar.settings",
+          "match": "/app/settings",
+          "route_id": "settings-account.index"
+        },
+        {
+          "area": "settings",
+          "id": "nav.settings.account",
+          "label_key": "settings.tab_account",
+          "route_id": "settings-account.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleSettingsAccount",
+          "id": "settings-account.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/app/settings/account",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Account settings"
+  },
+  "schema": 2
 }

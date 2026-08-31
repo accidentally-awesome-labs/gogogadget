@@ -1,37 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/auth-session",
-    "kind": "workflow",
-    "name": "auth-session",
-    "revision": 1,
-    "contract": 1,
-    "title": "Sign-in, sign-up and sign-out",
-    "description": "Redirects the hosted Clerk Account Portal flows for sign-in, sign-up and sign-out, and owns the session cookie clear plus the account-portal link builder the settings pages use.",
-    "requires": [
-      "system/i18n",
-      "system/identity",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/auth_test.go",
-        "target": "internal/web/auth_test.go",
-        "class": "test",
-        "sha256": "c353e79d33eec7407b3e73479a1b5c142abc586fd0c199b796f879d29062264e",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/workflow_auth_session.go",
-        "target": "internal/web/workflow_auth_session.go",
-        "class": "go",
-        "sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
-        "rewrite_module": true,
-        "contract": true
-      }
-    ],
     "claims": {
       "routes": [
         "auth.login",
@@ -39,70 +7,131 @@
         "auth.signup"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Redirects the hosted Clerk Account Portal flows for sign-in, sign-up and sign-out, and owns the session cookie clear plus the account-portal link builder the settings pages use.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c353e79d33eec7407b3e73479a1b5c142abc586fd0c199b796f879d29062264e",
+        "source": "internal/web/auth_test.go",
+        "target": "internal/web/auth_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
+        "source": "internal/web/workflow_auth_session.go",
+        "target": "internal/web/workflow_auth_session.go"
+      }
+    ],
+    "id": "ggg/workflow/auth-session",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "auth-session",
+    "removal_policy": "replacement-required",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "handler": "handleLogin",
           "id": "auth.login",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/login",
-          "scope": "public",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleLogin"
+          "scope": "public"
         },
         {
+          "handler": "handleLogout",
           "id": "auth.logout",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/logout",
-          "scope": "public",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleLogout"
+          "scope": "public"
         },
         {
+          "handler": "handleSignup",
           "id": "auth.signup",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/signup",
-          "scope": "public",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleSignup"
+          "scope": "public"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "replacement-required"
-  }
+    "title": "Sign-in, sign-up and sign-out"
+  },
+  "schema": 2
 }

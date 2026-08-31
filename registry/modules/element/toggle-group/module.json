@@ -1,58 +1,69 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/toggle-group",
-    "kind": "element",
-    "name": "toggle-group",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ToggleGroup",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ToggleGroup renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/toggle-group.templ",
-        "target": "internal/web/templates/ui/toggle-group.templ",
         "class": "templ",
-        "sha256": "d558f1aec7560ea404d7a8c21926f779ce891c924ab5a834a9338dc585a6aeea",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "d558f1aec7560ea404d7a8c21926f779ce891c924ab5a834a9338dc585a6aeea",
+        "source": "internal/web/templates/ui/toggle-group.templ",
+        "target": "internal/web/templates/ui/toggle-group.templ"
       },
       {
-        "source": "internal/web/templates/ui/toggle-group_test.go",
-        "target": "internal/web/templates/ui/toggle-group_test.go",
         "class": "test",
-        "sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "a66ec80805fe275ffbdd6d1d94d974ab301de1a951c9024631624f8f068e557f",
+        "source": "internal/web/templates/ui/toggle-group_test.go",
+        "target": "internal/web/templates/ui/toggle-group_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/toggle-group",
+    "kind": "element",
+    "migrations": [],
+    "name": "toggle-group",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "toggle-group",
           "family": "actions",
-          "signature": "templ ToggleGroup(o ToggleGroupOpts)",
-          "summary": "Renders exclusive toggles as a labelled group.",
           "guidance": "These are buttons with aria-pressed rather than role=\"radiogroup\": a radio group promises arrow-key navigation between options, and the buttons here are each independently tabbable. Announcing the honest role is better than claiming a keyboard contract that is not implemented.",
+          "name": "toggle-group",
+          "signature": "templ ToggleGroup(o ToggleGroupOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders exclusive toggles as a labelled group."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ToggleGroup"
+  },
+  "schema": 2
 }

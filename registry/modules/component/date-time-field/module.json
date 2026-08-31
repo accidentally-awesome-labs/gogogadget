@@ -1,47 +1,58 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/date-time-field",
-    "kind": "component",
-    "name": "date-time-field",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "DateTimeField",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The DateTimeField renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/date-time-field.templ",
-        "target": "internal/web/templates/ui/date-time-field.templ",
         "class": "templ",
-        "sha256": "b7fbd5e16b4fc940e7c8a529f0df7195a1cc8c29fec877e1a51ce751f289dede",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "b7fbd5e16b4fc940e7c8a529f0df7195a1cc8c29fec877e1a51ce751f289dede",
+        "source": "internal/web/templates/ui/date-time-field.templ",
+        "target": "internal/web/templates/ui/date-time-field.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/date-time-field",
+    "kind": "component",
+    "migrations": [],
+    "name": "date-time-field",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "date-time-field",
           "family": "forms",
-          "signature": "templ DateTimeField(o DateTimeFieldOpts)",
-          "summary": "Renders a native datetime-local input.",
           "guidance": "datetime-local, not datetime: the value carries no timezone, so the server converts using the user's known zone rather than trusting a browser offset that changes when the user travels.",
+          "name": "date-time-field",
+          "signature": "templ DateTimeField(o DateTimeFieldOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a native datetime-local input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "DateTimeField"
+  },
+  "schema": 2
 }

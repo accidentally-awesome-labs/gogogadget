@@ -1,86 +1,48 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/settings-webhooks",
-    "kind": "page",
-    "name": "settings-webhooks",
-    "revision": 1,
-    "contract": 1,
-    "title": "Webhook settings",
-    "description": "The organization's outbound webhook endpoints, their secrets, and recent delivery attempts.",
-    "requires": [
-      "system/security",
-      "system/server",
-      "system/webhooks"
-    ],
-    "files": [
-      {
-        "source": "internal/web/handlers_webhooks_settings.go",
-        "target": "internal/web/handlers_webhooks_settings.go",
-        "class": "go",
-        "sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/webhooks.templ",
-        "target": "internal/web/templates/webhooks.templ",
-        "class": "templ",
-        "sha256": "c786ba418254cadf620690edb014cc0ed886b0e8ffae7264541a2c073995168e",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/webhooks_settings_test.go",
-        "target": "internal/web/webhooks_settings_test.go",
-        "class": "test",
-        "sha256": "12c7928b4664f767a18b29dca18947d36cdaf6543bee07b9010b0022cf08edd2",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "settings-webhooks.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "settings-webhooks.index",
-          "method": "GET",
-          "pattern": "/app/settings/webhooks",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleSettingsWebhooks"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.settings.webhooks",
-          "area": "settings",
-          "route_id": "settings-webhooks.index",
-          "label_key": "settings.tab_webhooks",
-          "after": [
-            "nav.settings.api"
-          ],
-          "flags": [
-            "webhooks"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The organization's outbound webhook endpoints, their secrets, and recent delivery attempts.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "51d04ee18cf56fe0b9a1ca7b03eb912aad11b7ee8328082e69f2260eb4017e60",
+        "source": "internal/web/handlers_webhooks_settings.go",
+        "target": "internal/web/handlers_webhooks_settings.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c786ba418254cadf620690edb014cc0ed886b0e8ffae7264541a2c073995168e",
+        "source": "internal/web/templates/webhooks.templ",
+        "target": "internal/web/templates/webhooks.templ"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "12c7928b4664f767a18b29dca18947d36cdaf6543bee07b9010b0022cf08edd2",
+        "source": "internal/web/webhooks_settings_test.go",
+        "target": "internal/web/webhooks_settings_test.go"
+      }
+    ],
+    "id": "ggg/page/settings-webhooks",
+    "kind": "page",
     "locales": {
       "en": {
         "webhooks.all_events": "all",
@@ -113,11 +75,11 @@
         "webhooks.rotate_confirm": "The current secret keeps verifying for 24 hours, then stops. Update your receiver before that window closes.",
         "webhooks.rotate_cta": "Rotate secret",
         "webhooks.rotate_named": "Rotate secret for %s",
-        "webhooks.rotate_note": "The previous secret keeps verifying for 24 hours — deliveries carry both signatures until then. Update your receiver before the window closes.",
+        "webhooks.rotate_note": "The previous secret keeps verifying for 24 hours \u2014 deliveries carry both signatures until then. Update your receiver before the window closes.",
         "webhooks.rotate_title": "Rotate this signing secret?",
         "webhooks.rotated": "Secret rotated.",
         "webhooks.secret_note": "This is the only time the secret is shown.",
-        "webhooks.secret_title": "Endpoint created — copy the signing secret now",
+        "webhooks.secret_title": "Endpoint created \u2014 copy the signing secret now",
         "webhooks.status_dead": "failed",
         "webhooks.status_pending": "pending",
         "webhooks.status_success": "delivered",
@@ -133,33 +95,33 @@
         "webhooks.col_events": "Eventos",
         "webhooks.col_status": "Estado",
         "webhooks.col_url": "URL",
-        "webhooks.col_when": "Cuándo",
+        "webhooks.col_when": "Cu\u00e1ndo",
         "webhooks.create": "Crear endpoint",
         "webhooks.create_title": "Crear un endpoint",
-        "webhooks.deliveries_caption": "Intentos de entrega recientes, del más nuevo al más antiguo",
-        "webhooks.deliveries_empty": "Aún no hay entregas.",
+        "webhooks.deliveries_caption": "Intentos de entrega recientes, del m\u00e1s nuevo al m\u00e1s antiguo",
+        "webhooks.deliveries_empty": "A\u00fan no hay entregas.",
         "webhooks.deliveries_heading": "Entregas recientes",
-        "webhooks.description_label": "Descripción",
+        "webhooks.description_label": "Descripci\u00f3n",
         "webhooks.description_placeholder": "Listener de staging",
         "webhooks.disable": "Desactivar",
         "webhooks.disabled": "desactivado",
         "webhooks.enable": "Activar",
         "webhooks.enabled": "activo",
-        "webhooks.endpoints_caption": "Endpoints de webhook de esta organización, con sus eventos suscritos y su estado",
-        "webhooks.endpoints_empty": "Aún no hay endpoints.",
+        "webhooks.endpoints_caption": "Endpoints de webhook de esta organizaci\u00f3n, con sus eventos suscritos y su estado",
+        "webhooks.endpoints_empty": "A\u00fan no hay endpoints.",
         "webhooks.endpoints_heading": "Endpoints",
-        "webhooks.events_hint": "Sin selección = todos los eventos.",
+        "webhooks.events_hint": "Sin selecci\u00f3n = todos los eventos.",
         "webhooks.events_label": "Eventos",
         "webhooks.replay": "Reenviar",
         "webhooks.rotate_cancel": "Conservar el secreto actual",
-        "webhooks.rotate_confirm": "El secreto actual seguirá validando durante 24 horas y después dejará de hacerlo. Actualiza tu receptor antes de que se cierre esa ventana.",
+        "webhooks.rotate_confirm": "El secreto actual seguir\u00e1 validando durante 24 horas y despu\u00e9s dejar\u00e1 de hacerlo. Actualiza tu receptor antes de que se cierre esa ventana.",
         "webhooks.rotate_cta": "Rotar secreto",
         "webhooks.rotate_named": "Rotar el secreto de %s",
-        "webhooks.rotate_note": "El secreto anterior seguirá validando 24 horas: las entregas llevan ambas firmas hasta entonces. Actualiza tu receptor antes de que se cierre la ventana.",
-        "webhooks.rotate_title": "¿Rotar este secreto de firma?",
+        "webhooks.rotate_note": "El secreto anterior seguir\u00e1 validando 24 horas: las entregas llevan ambas firmas hasta entonces. Actualiza tu receptor antes de que se cierre la ventana.",
+        "webhooks.rotate_title": "\u00bfRotar este secreto de firma?",
         "webhooks.rotated": "Secreto rotado.",
-        "webhooks.secret_note": "Esta es la única vez que se muestra el secreto.",
-        "webhooks.secret_title": "Endpoint creado — copia el secreto de firma ahora",
+        "webhooks.secret_note": "Esta es la \u00fanica vez que se muestra el secreto.",
+        "webhooks.secret_title": "Endpoint creado \u2014 copia el secreto de firma ahora",
         "webhooks.status_dead": "fallido",
         "webhooks.status_pending": "pendiente",
         "webhooks.status_success": "entregado",
@@ -167,13 +129,74 @@
         "webhooks.url_label": "URL"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "settings-webhooks",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/webhooks"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "nav.settings.api"
+          ],
+          "area": "settings",
+          "flags": [
+            "webhooks"
+          ],
+          "id": "nav.settings.webhooks",
+          "label_key": "settings.tab_webhooks",
+          "route_id": "settings-webhooks.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleSettingsWebhooks",
+          "id": "settings-webhooks.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/app/settings/webhooks",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Webhook settings"
+  },
+  "schema": 2
 }

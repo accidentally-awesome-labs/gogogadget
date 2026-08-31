@@ -1,47 +1,58 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/banner",
-    "kind": "component",
-    "name": "banner",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Banner",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Banner renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/banner.templ",
-        "target": "internal/web/templates/ui/banner.templ",
         "class": "templ",
-        "sha256": "ffb60468c9c8df47986c1005a78b86573f769fae16e41053cb7028c63c92fd70",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "ffb60468c9c8df47986c1005a78b86573f769fae16e41053cb7028c63c92fd70",
+        "source": "internal/web/templates/ui/banner.templ",
+        "target": "internal/web/templates/ui/banner.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/banner",
+    "kind": "component",
+    "migrations": [],
+    "name": "banner",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "banner",
           "family": "feedback",
+          "name": "banner",
           "signature": "templ Banner(o BannerOpts)",
-          "summary": "A full-bleed shell notice (impersonation, billing).",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "A full-bleed shell notice (impersonation, billing)."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Banner"
+  },
+  "schema": 2
 }

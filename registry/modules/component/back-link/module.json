@@ -1,46 +1,63 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/back-link",
-    "kind": "component",
-    "name": "back-link",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "BackLink",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The BackLink renderer and its options.",
-    "requires": [
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/back-link.templ",
-        "target": "internal/web/templates/ui/back-link.templ",
         "class": "templ",
-        "sha256": "dd6eaacb198dffb4c847a20f1c98b45decfcc5a67e1030f04c3077e1a65b4343",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "dd6eaacb198dffb4c847a20f1c98b45decfcc5a67e1030f04c3077e1a65b4343",
+        "source": "internal/web/templates/ui/back-link.templ",
+        "target": "internal/web/templates/ui/back-link.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/back-link",
+    "kind": "component",
+    "migrations": [],
+    "name": "back-link",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "back-link",
           "family": "navigation",
+          "name": "back-link",
           "signature": "templ BackLink(o BackLinkOpts)",
-          "summary": "Renders a link up to the parent view.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a link up to the parent view."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "BackLink"
+  },
+  "schema": 2
 }

@@ -1,47 +1,58 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/terminal-page",
-    "kind": "component",
-    "name": "terminal-page",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TerminalPage",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TerminalPage renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/terminal-page.templ",
-        "target": "internal/web/templates/ui/terminal-page.templ",
         "class": "templ",
-        "sha256": "14a13467c9ecb34e63efbb226f0886e40f9a2bbc29138355c24c71537be92e86",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "14a13467c9ecb34e63efbb226f0886e40f9a2bbc29138355c24c71537be92e86",
+        "source": "internal/web/templates/ui/terminal-page.templ",
+        "target": "internal/web/templates/ui/terminal-page.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/terminal-page",
+    "kind": "component",
+    "migrations": [],
+    "name": "terminal-page",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "terminal-page",
           "family": "navigation",
-          "signature": "templ TerminalPage(o TerminalPageOpts)",
-          "summary": "The one shape every terminal page takes: a big code or title, a sentence, optional detail, optional way home.",
           "guidance": "An empty BackHomeLabel suppresses the link.",
+          "name": "terminal-page",
+          "signature": "templ TerminalPage(o TerminalPageOpts)",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "The one shape every terminal page takes: a big code or title, a sentence, optional detail, optional way home."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TerminalPage"
+  },
+  "schema": 2
 }

@@ -1,85 +1,48 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/files",
-    "kind": "page",
-    "name": "files",
-    "revision": 1,
-    "contract": 1,
-    "title": "Files list",
-    "description": "The organization's uploaded-file list with storage-quota usage and pagination, rendered full-page or as an htmx table fragment.",
-    "requires": [
-      "system/database",
-      "system/i18n",
-      "system/identity",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/files_test.go",
-        "target": "internal/web/files_test.go",
-        "class": "test",
-        "sha256": "7e2560e89bb7fd24199f164bf49f4df2c34a152d46aa5ecbc482b86223bece50",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/page_files.go",
-        "target": "internal/web/page_files.go",
-        "class": "go",
-        "sha256": "de43eb52574c3f51b145f00fa58f0579288a4c3da96c01cf3c32cb10a4b0b726",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/files.templ",
-        "target": "internal/web/templates/files.templ",
-        "class": "templ",
-        "sha256": "49c92f71f7522bf6d36761a554b42011c4f66f46690b8bb16ec9b771e5cdd76f",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "files.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "files.index",
-          "method": "GET",
-          "pattern": "/app/files",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleFiles"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.app.files",
-          "area": "app",
-          "route_id": "files.index",
-          "label_key": "sidebar.files",
-          "after": [
-            "nav.app.projects"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The organization's uploaded-file list with storage-quota usage and pagination, rendered full-page or as an htmx table fragment.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "7e2560e89bb7fd24199f164bf49f4df2c34a152d46aa5ecbc482b86223bece50",
+        "source": "internal/web/files_test.go",
+        "target": "internal/web/files_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "de43eb52574c3f51b145f00fa58f0579288a4c3da96c01cf3c32cb10a4b0b726",
+        "source": "internal/web/page_files.go",
+        "target": "internal/web/page_files.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "49c92f71f7522bf6d36761a554b42011c4f66f46690b8bb16ec9b771e5cdd76f",
+        "source": "internal/web/templates/files.templ",
+        "target": "internal/web/templates/files.templ"
+      }
+    ],
+    "id": "ggg/page/files",
+    "kind": "page",
     "locales": {
       "en": {
         "files.caption": "Files in your organization",
@@ -94,7 +57,7 @@
         "files.dropzone": "Drop a file here, or click to choose one",
         "files.empty_body": "Uploads land here, scoped to your organization.",
         "files.empty_title": "No files yet",
-        "files.limit_hit": "Storage limit reached — the %s MB plan is full.",
+        "files.limit_hit": "Storage limit reached \u2014 the %s MB plan is full.",
         "files.megabytes": "%s MB",
         "files.quota_meter_label": "Storage quota",
         "files.quota_title": "Storage used on %s",
@@ -102,19 +65,19 @@
         "files.upload": "Upload"
       },
       "es": {
-        "files.caption": "Archivos de tu organización",
+        "files.caption": "Archivos de tu organizaci\u00f3n",
         "files.col_name": "Nombre",
-        "files.col_size": "Tamaño",
+        "files.col_size": "Tama\u00f1o",
         "files.col_uploaded": "Subido",
         "files.delete_action": "Eliminar definitivamente",
-        "files.delete_confirm": "¿Eliminar este archivo? Esta acción no se puede deshacer.",
+        "files.delete_confirm": "\u00bfEliminar este archivo? Esta acci\u00f3n no se puede deshacer.",
         "files.delete_row": "Eliminar %s",
         "files.delete_title": "Eliminar archivo",
         "files.download": "Descargar",
-        "files.dropzone": "Suelta un archivo aquí o haz clic para elegir uno",
-        "files.empty_body": "Las subidas aparecen aquí, con alcance de tu organización.",
-        "files.empty_title": "Aún no hay archivos",
-        "files.limit_hit": "Límite de almacenamiento alcanzado — el plan de %s MB está lleno.",
+        "files.dropzone": "Suelta un archivo aqu\u00ed o haz clic para elegir uno",
+        "files.empty_body": "Las subidas aparecen aqu\u00ed, con alcance de tu organizaci\u00f3n.",
+        "files.empty_title": "A\u00fan no hay archivos",
+        "files.limit_hit": "L\u00edmite de almacenamiento alcanzado \u2014 el plan de %s MB est\u00e1 lleno.",
         "files.megabytes": "%s MB",
         "files.quota_meter_label": "Cuota de almacenamiento",
         "files.quota_title": "Almacenamiento usado en el plan %s",
@@ -122,13 +85,85 @@
         "files.upload": "Subir"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "files",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "nav.app.projects"
+          ],
+          "area": "app",
+          "id": "nav.app.files",
+          "label_key": "sidebar.files",
+          "route_id": "files.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleFiles",
+          "id": "files.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/app/files",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Files list"
+  },
+  "schema": 2
 }

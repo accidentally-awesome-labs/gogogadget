@@ -1,54 +1,65 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/list",
-    "kind": "component",
-    "name": "list",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "List",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The List renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/list.templ",
-        "target": "internal/web/templates/ui/list.templ",
         "class": "templ",
-        "sha256": "7325464a607edbfd9e7df0ce2f66cc1f19a14c5ef75cecb11e62c1dd08cf028a",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7325464a607edbfd9e7df0ce2f66cc1f19a14c5ef75cecb11e62c1dd08cf028a",
+        "source": "internal/web/templates/ui/list.templ",
+        "target": "internal/web/templates/ui/list.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/list",
+    "kind": "component",
+    "migrations": [],
+    "name": "list",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "item",
           "family": "data",
+          "name": "item",
           "signature": "templ Item(o ItemOpts)",
-          "summary": "Renders one list entry.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one list entry."
         },
         {
-          "name": "list",
           "family": "data",
+          "name": "list",
           "signature": "templ List(o ListOpts)",
-          "summary": "Renders an unordered list.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an unordered list."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "List"
+  },
+  "schema": 2
 }

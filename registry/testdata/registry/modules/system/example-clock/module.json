@@ -1,35 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/example-clock",
-    "kind": "system",
-    "name": "example-clock",
-    "revision": 1,
-    "contract": 1,
-    "title": "Example clock provider",
-    "description": "The provider-style system of the example closure: a narrow port, a typed Deps built from one production capability, a typed provide, both lifecycle hooks, and one declared environment key that reaches it through the generated configuration struct.",
-    "requires": [
-      "system/apphost",
-      "system/config"
-    ],
-    "files": [
-      {
-        "source": "registry/modules/system/example-clock/clock.go",
-        "target": "internal/example/clock/clock.go",
-        "class": "go",
-        "sha256": "10062d0604c569a2112bd3a0db66d60dcbf272e52fb4a8cb5fb9300d5684c5ef",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "registry/modules/system/example-clock/clock_test.go",
-        "target": "internal/example/clock/clock_test.go",
-        "class": "test",
-        "sha256": "3ca98a9db587ab23d8f720e4eb5cba2848e6bb88663b94030db2bf3f4b6327db",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "environment": [
         "EXAMPLE_CLOCK_SKEW_SECONDS"
@@ -38,22 +8,80 @@
         "internal/example/clock"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The provider-style system of the example closure: a narrow port, a typed Deps built from one production capability, a typed provide, both lifecycle hooks, and one declared environment key that reaches it through the generated configuration struct.",
+    "docs": [],
+    "environment": [
+      {
+        "default": "0",
+        "description": "Seconds added to the host clock by the example clock provider. Exists so the example closure exercises generated configuration parsing.",
+        "field": "ExampleClockSkewSeconds",
+        "key": "EXAMPLE_CLOCK_SKEW_SECONDS",
+        "type": "int"
+      }
+    ],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "10062d0604c569a2112bd3a0db66d60dcbf272e52fb4a8cb5fb9300d5684c5ef",
+        "source": "registry/modules/system/example-clock/clock.go",
+        "target": "internal/example/clock/clock.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "3ca98a9db587ab23d8f720e4eb5cba2848e6bb88663b94030db2bf3f4b6327db",
+        "source": "registry/modules/system/example-clock/clock_test.go",
+        "target": "internal/example/clock/clock_test.go"
+      }
+    ],
+    "id": "ggg/system/example-clock",
+    "kind": "system",
+    "migrations": [],
+    "name": "example-clock",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/config"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "system": {
-        "package": "internal/example/clock",
         "constructor": "New",
         "needs": [
           {
-            "field": "Config",
             "capability": "config",
-            "type": "*config.Config",
-            "optional": false
+            "field": "Config",
+            "optional": false,
+            "type": "*config.Config"
           }
         ],
+        "package": "internal/example/clock",
         "provides": [
           {
-            "field": "Clock",
             "capability": "example.clock",
+            "field": "Clock",
             "type": "clock.Clock"
           }
         ],
@@ -61,23 +89,12 @@
         "stop": true
       }
     },
-    "migrations": [],
-    "environment": [
-      {
-        "key": "EXAMPLE_CLOCK_SKEW_SECONDS",
-        "field": "ExampleClockSkewSeconds",
-        "type": "int",
-        "description": "Seconds added to the host clock by the example clock provider. Exists so the example closure exercises generated configuration parsing.",
-        "default": "0"
-      }
-    ],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/example/clock"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Example clock provider"
+  },
+  "schema": 2
 }

@@ -1,76 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/feature-flags",
-    "kind": "system",
-    "name": "feature-flags",
-    "revision": 1,
-    "contract": 1,
-    "title": "Feature flags",
-    "description": "Database-backed flags with a short in-process cache, deterministic percentage bucketing, and per-organization overrides.",
-    "requires": [
-      "system/apphost",
-      "system/database",
-      "system/organizations"
-    ],
-    "files": [
-      {
-        "source": "internal/db/queries/feature_flags.sql",
-        "target": "internal/db/queries/feature_flags.sql",
-        "class": "query",
-        "sha256": "d7c059bb7f416611935b9a6b13a714657a0724728df4c3b7007cba2fdfaec9a9",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/testdata/seed/dev/flags.sql",
-        "target": "internal/db/testdata/seed/dev/flags.sql",
-        "class": "seed",
-        "sha256": "e74755395db54d64af51004f54ac61841b8bc767436423fc55ac518cfb699371",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/testdata/seed/e2e/flags.sql",
-        "target": "internal/db/testdata/seed/e2e/flags.sql",
-        "class": "seed",
-        "sha256": "d6c1b091cea91e7db7c0211cab25d5907f239f23ffbb2f6644c1fe756203e66d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/flags/flags.go",
-        "target": "internal/flags/flags.go",
-        "class": "go",
-        "sha256": "56054eccc210cb01a39b132cc4332e07c59104a762107f3cbfcca2cc39b5619a",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/flags/flags_test.go",
-        "target": "internal/flags/flags_test.go",
-        "class": "test",
-        "sha256": "2cac146c84f4220ea4464cf95971bf34e8aba19ec2918361f06f89e138537e31",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/flags/module.go",
-        "target": "internal/flags/module.go",
-        "class": "go",
-        "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/flags/module_test.go",
-        "target": "internal/flags/module_test.go",
-        "class": "test",
-        "sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/flags"
@@ -79,31 +8,126 @@
         "feature_flags"
       ]
     },
-    "runtime": {
-      "system": {
-        "package": "internal/flags",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Queries",
-            "capability": "database.queries",
-            "type": "*sqlc.Queries",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Evaluator",
-            "capability": "flags.evaluator",
-            "type": "flags.Evaluator"
-          }
-        ],
-        "type_imports": [
-          "internal/db/sqlc"
-        ],
-        "start": false,
-        "stop": false
+    "contract": 1,
+    "data": [
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "retain",
+        "scope": "platform",
+        "table": "feature_flags"
       },
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "table": "flag_overrides"
+      }
+    ],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Database-backed flags with a short in-process cache, deterministic percentage bucketing, and per-organization overrides.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "d7c059bb7f416611935b9a6b13a714657a0724728df4c3b7007cba2fdfaec9a9",
+        "source": "internal/db/queries/feature_flags.sql",
+        "target": "internal/db/queries/feature_flags.sql"
+      },
+      {
+        "class": "seed",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "e74755395db54d64af51004f54ac61841b8bc767436423fc55ac518cfb699371",
+        "source": "internal/db/testdata/seed/dev/flags.sql",
+        "target": "internal/db/testdata/seed/dev/flags.sql"
+      },
+      {
+        "class": "seed",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "d6c1b091cea91e7db7c0211cab25d5907f239f23ffbb2f6644c1fe756203e66d",
+        "source": "internal/db/testdata/seed/e2e/flags.sql",
+        "target": "internal/db/testdata/seed/e2e/flags.sql"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "56054eccc210cb01a39b132cc4332e07c59104a762107f3cbfcca2cc39b5619a",
+        "source": "internal/flags/flags.go",
+        "target": "internal/flags/flags.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "2cac146c84f4220ea4464cf95971bf34e8aba19ec2918361f06f89e138537e31",
+        "source": "internal/flags/flags_test.go",
+        "target": "internal/flags/flags_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+        "source": "internal/flags/module.go",
+        "target": "internal/flags/module.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
+        "source": "internal/flags/module_test.go",
+        "target": "internal/flags/module_test.go"
+      }
+    ],
+    "id": "ggg/system/feature-flags",
+    "kind": "system",
+    "migrations": [
+      {
+        "id": "0008_feature_flags",
+        "kind": "immutable",
+        "sha256": "0a20a096adddf2ab8abb19f06baaaafa107279c62204505403d96d26a5ad9277",
+        "source": "internal/db/migrations/0008_feature_flags.sql"
+      }
+    ],
+    "name": "feature-flags",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
       "queries": [
         {
           "name": "DeleteFeatureFlag",
@@ -145,39 +169,38 @@
           "name": "UpsertFlagOverride",
           "table": "flag_overrides"
         }
-      ]
-    },
-    "migrations": [
-      {
-        "id": "0008_feature_flags",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0008_feature_flags.sql",
-        "sha256": "0a20a096adddf2ab8abb19f06baaaafa107279c62204505403d96d26a5ad9277"
+      ],
+      "system": {
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "capability": "database.queries",
+            "field": "Queries",
+            "optional": false,
+            "type": "*sqlc.Queries"
+          }
+        ],
+        "package": "internal/flags",
+        "provides": [
+          {
+            "capability": "flags.evaluator",
+            "field": "Evaluator",
+            "type": "flags.Evaluator"
+          }
+        ],
+        "start": false,
+        "stop": false,
+        "type_imports": [
+          "internal/db/sqlc"
+        ]
       }
-    ],
-    "environment": [],
-    "docs": [],
+    },
     "tests": {
       "go_packages": [
         "internal/flags"
       ]
     },
-    "data": [
-      {
-        "table": "feature_flags",
-        "scope": "platform",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "retain"
-      },
-      {
-        "table": "flag_overrides",
-        "scope": "org",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      }
-    ],
-    "removal_policy": "retain-data"
-  }
+    "title": "Feature flags"
+  },
+  "schema": 2
 }

@@ -1,47 +1,64 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/data-table",
-    "kind": "component",
-    "name": "data-table",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "DataTable",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The DataTable renderer and its options.",
-    "requires": [
-      "component/column-header",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/data-table.templ",
-        "target": "internal/web/templates/ui/data-table.templ",
         "class": "templ",
-        "sha256": "fcdd05836d8bfc3ac76c087d62d909b8f1bf33ed93abfce16aa244bbdc3024bc",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "fcdd05836d8bfc3ac76c087d62d909b8f1bf33ed93abfce16aa244bbdc3024bc",
+        "source": "internal/web/templates/ui/data-table.templ",
+        "target": "internal/web/templates/ui/data-table.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/data-table",
+    "kind": "component",
+    "migrations": [],
+    "name": "data-table",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/column-header"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "data-table",
           "family": "data",
+          "name": "data-table",
           "signature": "templ DataTable(o DataTableOpts)",
-          "summary": "Renders the full table surface.",
           "states": [
             "default",
             "empty"
-          ]
+          ],
+          "summary": "Renders the full table surface."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "DataTable"
+  },
+  "schema": 2
 }

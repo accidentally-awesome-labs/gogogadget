@@ -1,92 +1,121 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/dev-session",
-    "kind": "workflow",
-    "name": "dev-session",
-    "revision": 1,
-    "contract": 1,
-    "title": "Zero-account dev session",
-    "description": "Sets and rewrites the synthetic session cookie for the seeded demo user in DEV_AUTH_BYPASS mode, and owns the predicate that gates every dev-only route.",
-    "requires": [
-      "system/identity",
-      "system/organizations",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/workflow_dev_session.go",
-        "target": "internal/web/workflow_dev_session.go",
-        "class": "go",
-        "sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/web/workflow_dev_session_test.go",
-        "target": "internal/web/workflow_dev_session_test.go",
-        "class": "test",
-        "sha256": "c671249018f684fbaf2fad95b8db281deb5a6dcaab0dca8f3f70f6772763fea4",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "dev.login",
         "dev.switch-org"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Sets and rewrites the synthetic session cookie for the seeded demo user in DEV_AUTH_BYPASS mode, and owns the predicate that gates every dev-only route.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "9be6efb29813493d276bc67ce42aa6728ff0473a74cffd8d161cdccde4306a13",
+        "source": "internal/web/workflow_dev_session.go",
+        "target": "internal/web/workflow_dev_session.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c671249018f684fbaf2fad95b8db281deb5a6dcaab0dca8f3f70f6772763fea4",
+        "source": "internal/web/workflow_dev_session_test.go",
+        "target": "internal/web/workflow_dev_session_test.go"
+      }
+    ],
+    "id": "ggg/workflow/dev-session",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "dev-session",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevLogin",
           "id": "dev.login",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/login",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevLogin",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevSwitchOrg",
           "id": "dev.switch-org",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/switch-org",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevSwitchOrg",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Zero-account dev session"
+  },
+  "schema": 2
 }

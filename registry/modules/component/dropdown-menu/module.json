@@ -1,63 +1,74 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/dropdown-menu",
-    "kind": "component",
-    "name": "dropdown-menu",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "DropdownMenu",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The DropdownMenu renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/dropdown-menu.templ",
-        "target": "internal/web/templates/ui/dropdown-menu.templ",
         "class": "templ",
-        "sha256": "2c7d9a258c107a1cd0d4673fab55a55ff7c681517a71ac7bd3367276f11bd2d2",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "2c7d9a258c107a1cd0d4673fab55a55ff7c681517a71ac7bd3367276f11bd2d2",
+        "source": "internal/web/templates/ui/dropdown-menu.templ",
+        "target": "internal/web/templates/ui/dropdown-menu.templ"
       },
       {
-        "source": "internal/web/templates/ui/dropdown-menu_test.go",
-        "target": "internal/web/templates/ui/dropdown-menu_test.go",
         "class": "test",
-        "sha256": "0d5080b4e8e6d0ef1b8f4065136a3a4198c500fd19a0106429076f226bc6cb2e",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "0d5080b4e8e6d0ef1b8f4065136a3a4198c500fd19a0106429076f226bc6cb2e",
+        "source": "internal/web/templates/ui/dropdown-menu_test.go",
+        "target": "internal/web/templates/ui/dropdown-menu_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/dropdown-menu",
+    "kind": "component",
+    "migrations": [],
+    "name": "dropdown-menu",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "dropdown-menu",
-          "family": "overlays",
-          "engine": "alpine",
           "alpine": "uiMenu",
-          "native_fallback": "popover attribute",
-          "signature": "templ DropdownMenu(o DropdownMenuOpts)",
-          "summary": "Renders a button that toggles a panel of links.",
+          "engine": "alpine",
+          "family": "overlays",
           "guidance": "This is a disclosure, not an ARIA menu: it deliberately does not claim role=\"menu\", because that role promises arrow-key navigation between menuitems, and claiming a keyboard contract the widget does not implement is worse for a screen-reader user than presenting an honest expandable button. The panel is a native popover and the trigger opens it declaratively with popovertarget, so the commands disclose, and every link among them works, with no script at all; the platform also supplies light dismiss, Escape and the top layer, so the panel is never clipped by a scrolling table cell. The Alpine component adds focus into the panel on open, focus back to the trigger on close, arrow keys, typeahead, and keeping aria-expanded in step.",
           "keyboard": "Focus moves into the panel on open and back to the trigger on close, Escape closes it, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next command starting with it.",
+          "name": "dropdown-menu",
+          "native_fallback": "popover attribute",
+          "signature": "templ DropdownMenu(o DropdownMenuOpts)",
           "states": [
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "Renders a button that toggles a panel of links."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "DropdownMenu"
+  },
+  "schema": 2
 }

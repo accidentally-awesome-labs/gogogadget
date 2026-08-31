@@ -1,50 +1,61 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/date-range-field",
-    "kind": "component",
-    "name": "date-range-field",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "DateRangeField",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The DateRangeField renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/date-range-field.templ",
-        "target": "internal/web/templates/ui/date-range-field.templ",
         "class": "templ",
-        "sha256": "043b6cda16ba534438ae8f542cc3ac4dce6c67d64d8a8cd1c7b938e98dbb5bfb",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "043b6cda16ba534438ae8f542cc3ac4dce6c67d64d8a8cd1c7b938e98dbb5bfb",
+        "source": "internal/web/templates/ui/date-range-field.templ",
+        "target": "internal/web/templates/ui/date-range-field.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/date-range-field",
+    "kind": "component",
+    "migrations": [],
+    "name": "date-range-field",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "date-range-field",
-          "family": "forms",
-          "engine": "alpine",
           "alpine": "uiDateRange",
+          "engine": "alpine",
+          "family": "forms",
+          "guidance": "The end input's min is bound to the start value by the Alpine behaviour, but the server still validates the ordering: a range that only makes sense because the browser prevented the mistake is not validated at all.",
+          "name": "date-range-field",
           "native_fallback": "native input",
           "signature": "templ DateRangeField(o DateRangeFieldOpts)",
-          "summary": "Renders a start and end date as two native date inputs.",
-          "guidance": "The end input's min is bound to the start value by the Alpine behaviour, but the server still validates the ordering: a range that only makes sense because the browser prevented the mistake is not validated at all.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a start and end date as two native date inputs."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "DateRangeField"
+  },
+  "schema": 2
 }

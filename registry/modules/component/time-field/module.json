@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/time-field",
-    "kind": "component",
-    "name": "time-field",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TimeField",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TimeField renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/time-field.templ",
-        "target": "internal/web/templates/ui/time-field.templ",
         "class": "templ",
-        "sha256": "b4fd58590b241c7a844d6b7340ee882b7da92615ce7fc7622341abc038ac724a",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "b4fd58590b241c7a844d6b7340ee882b7da92615ce7fc7622341abc038ac724a",
+        "source": "internal/web/templates/ui/time-field.templ",
+        "target": "internal/web/templates/ui/time-field.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/time-field",
+    "kind": "component",
+    "migrations": [],
+    "name": "time-field",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "time-field",
           "family": "forms",
+          "name": "time-field",
           "signature": "templ TimeField(o TimeFieldOpts)",
-          "summary": "Renders a native time input.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a native time input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TimeField"
+  },
+  "schema": 2
 }

@@ -1,96 +1,119 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/docs",
-    "kind": "page",
-    "name": "docs",
-    "revision": 1,
-    "contract": 1,
-    "title": "Documentation page",
-    "description": "One rendered documentation page, versioned with the binary.",
-    "requires": [
-      "page/docs-index",
-      "system/content-assets",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/docs_test.go",
-        "target": "internal/web/docs_test.go",
-        "class": "test",
-        "sha256": "04ed5bbd65d024ab1bbb0cf84f85f209ccf391c74d752e0154ca14d19e7cf833",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/docs.templ",
-        "target": "internal/web/templates/docs.templ",
-        "class": "templ",
-        "sha256": "443312e43dbcae9138a4a7b0ea992b0be54e71be39b2abed9435acf4a65a1f93",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "docs.show"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "One rendered documentation page, versioned with the binary.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "04ed5bbd65d024ab1bbb0cf84f85f209ccf391c74d752e0154ca14d19e7cf833",
+        "source": "internal/web/docs_test.go",
+        "target": "internal/web/docs_test.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "443312e43dbcae9138a4a7b0ea992b0be54e71be39b2abed9435acf4a65a1f93",
+        "source": "internal/web/templates/docs.templ",
+        "target": "internal/web/templates/docs.templ"
+      }
+    ],
+    "id": "ggg/page/docs",
+    "kind": "page",
+    "locales": {
+      "en": {
+        "docs.edit_page": "Edit this page \u2192",
+        "docs.pager_aria": "Previous and next page"
+      },
+      "es": {
+        "docs.edit_page": "Editar esta p\u00e1gina \u2192",
+        "docs.pager_aria": "P\u00e1gina anterior y siguiente"
+      }
+    },
+    "migrations": [],
+    "name": "docs",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/page/docs-index"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content-assets"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "handler": "handleDocsPage",
           "id": "docs.show",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/docs/{slug}",
-          "scope": "public",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDocsPage"
+          "scope": "public"
         }
       ],
       "visual": [
         {
           "id": "docs",
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ],
           "path": "/docs/getting-started",
           "viewports": [
             "desktop",
             "tablet",
             "mobile"
-          ],
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
           ]
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "locales": {
-      "en": {
-        "docs.edit_page": "Edit this page →",
-        "docs.pager_aria": "Previous and next page"
-      },
-      "es": {
-        "docs.edit_page": "Editar esta página →",
-        "docs.pager_aria": "Página anterior y siguiente"
-      }
-    },
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Documentation page"
+  },
+  "schema": 2
 }

@@ -1,69 +1,128 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/account-delete",
-    "kind": "workflow",
-    "name": "account-delete",
-    "revision": 1,
-    "contract": 1,
-    "title": "Account deletion",
-    "description": "GDPR self-serve account deletion: email confirmation and sole-admin guard, then provider delete before local delete, with sole-member organizations removed alongside the user.",
-    "requires": [
-      "page/settings-account",
-      "system/audit",
-      "system/i18n",
-      "system/identity",
-      "system/impersonation",
-      "system/organizations",
-      "system/security",
-      "system/server",
-      "workflow/auth-session"
-    ],
-    "files": [
-      {
-        "source": "internal/web/workflow_account_delete.go",
-        "target": "internal/web/workflow_account_delete.go",
-        "class": "go",
-        "sha256": "c14d401aad4a60cb7ae2aa4a67ad027f3ed2b0d40587f546cec87314178b01df",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "account-delete.submit"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "GDPR self-serve account deletion: email confirmation and sole-admin guard, then provider delete before local delete, with sole-member organizations removed alongside the user.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c14d401aad4a60cb7ae2aa4a67ad027f3ed2b0d40587f546cec87314178b01df",
+        "source": "internal/web/workflow_account_delete.go",
+        "target": "internal/web/workflow_account_delete.go"
+      }
+    ],
+    "id": "ggg/workflow/account-delete",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "account-delete",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/page/settings-account"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/impersonation"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/auth-session"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "handler": "handleAccountDelete",
           "id": "account-delete.submit",
           "method": "POST",
+          "package": "internal/web",
           "pattern": "/app/settings/account/delete",
-          "scope": "app",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleAccountDelete"
+          "scope": "app"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Account deletion"
+  },
+  "schema": 2
 }

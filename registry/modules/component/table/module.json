@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/table",
-    "kind": "component",
-    "name": "table",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Table",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Table renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/table.templ",
-        "target": "internal/web/templates/ui/table.templ",
         "class": "templ",
-        "sha256": "5605257a5c6c628a67607884759a877132bfedf91c937e6e83d5a8fb6fe5ad5f",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "5605257a5c6c628a67607884759a877132bfedf91c937e6e83d5a8fb6fe5ad5f",
+        "source": "internal/web/templates/ui/table.templ",
+        "target": "internal/web/templates/ui/table.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/table",
+    "kind": "component",
+    "migrations": [],
+    "name": "table",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "table",
           "family": "data",
+          "name": "table",
           "signature": "templ Table(o TableOpts)",
-          "summary": "Renders a semantic table with a caption and responsive overflow.",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "Renders a semantic table with a caption and responsive overflow."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Table"
+  },
+  "schema": 2
 }

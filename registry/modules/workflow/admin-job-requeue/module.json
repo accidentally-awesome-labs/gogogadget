@@ -1,70 +1,99 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/admin-job-requeue",
-    "kind": "workflow",
-    "name": "admin-job-requeue",
-    "revision": 1,
-    "contract": 1,
-    "title": "Admin job requeue",
-    "description": "Requeues a dead-lettered job for another attempt.",
-    "requires": [
-      "page/admin-jobs",
-      "system/audit",
-      "system/jobs",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/workflow_admin_job_requeue.go",
-        "target": "internal/web/workflow_admin_job_requeue.go",
-        "class": "go",
-        "sha256": "90f14122a3d6acacef974c9d0b8022a87705590a1f0cd495fddc869f5ba0c79e",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "admin.jobs.requeue"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Requeues a dead-lettered job for another attempt.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "90f14122a3d6acacef974c9d0b8022a87705590a1f0cd495fddc869f5ba0c79e",
+        "source": "internal/web/workflow_admin_job_requeue.go",
+        "target": "internal/web/workflow_admin_job_requeue.go"
+      }
+    ],
+    "id": "ggg/workflow/admin-job-requeue",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "admin-job-requeue",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/page/admin-jobs"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/jobs"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "admin.jobs.requeue",
-          "method": "POST",
-          "pattern": "/admin/jobs/{id}/requeue",
-          "scope": "admin",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": true
-          },
-          "package": "internal/web",
-          "handler": "handleAdminJobRequeue"
-        }
-      ],
       "queries": [
         {
           "name": "RequeueDeadJob",
           "table": "jobs"
         }
+      ],
+      "routes": [
+        {
+          "handler": "handleAdminJobRequeue",
+          "id": "admin.jobs.requeue",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/admin/jobs/{id}/requeue",
+          "policy": {
+            "admin_write": true,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "admin"
+        }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Admin job requeue"
+  },
+  "schema": 2
 }

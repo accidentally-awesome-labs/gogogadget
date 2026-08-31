@@ -1,48 +1,65 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/attachment",
-    "kind": "component",
-    "name": "attachment",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Attachment",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Attachment renderer and its options.",
-    "requires": [
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/attachment.templ",
-        "target": "internal/web/templates/ui/attachment.templ",
         "class": "templ",
-        "sha256": "5b5b062ed74f3daa5f3e38f8738f0405a460ec6671985374421c9211eff7bc94",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "5b5b062ed74f3daa5f3e38f8738f0405a460ec6671985374421c9211eff7bc94",
+        "source": "internal/web/templates/ui/attachment.templ",
+        "target": "internal/web/templates/ui/attachment.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/attachment",
+    "kind": "component",
+    "migrations": [],
+    "name": "attachment",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "attachment",
           "family": "data",
-          "signature": "templ Attachment(o AttachmentOpts)",
-          "summary": "Renders one file row.",
           "guidance": "The name is the link text, not \"download\": a screen reader's link list shows link text out of context, and forty links all reading \"download\" are indistinguishable.",
+          "name": "attachment",
+          "signature": "templ Attachment(o AttachmentOpts)",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "Renders one file row."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Attachment"
+  },
+  "schema": 2
 }

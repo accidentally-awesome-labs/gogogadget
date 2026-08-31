@@ -1,28 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/seo-discovery",
-    "kind": "workflow",
-    "name": "seo-discovery",
-    "revision": 1,
-    "contract": 1,
-    "title": "Search discovery surfaces",
-    "description": "robots.txt, the sitemap, and the RSS feed that let crawlers and readers discover content.",
-    "requires": [
-      "system/content",
-      "system/seo",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/seo_test.go",
-        "target": "internal/web/seo_test.go",
-        "class": "test",
-        "sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "seo.robots",
@@ -30,82 +7,128 @@
         "seo.sitemap"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "robots.txt, the sitemap, and the RSS feed that let crawlers and readers discover content.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "df451341039049c924831e74873fdd0f2d5b1a4540cbd2f3e0f7115327d82c21",
+        "source": "internal/web/seo_test.go",
+        "target": "internal/web/seo_test.go"
+      }
+    ],
+    "id": "ggg/workflow/seo-discovery",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "seo-discovery",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/seo"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "seo.robots",
-          "method": "GET",
-          "pattern": "/robots.txt",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "crawler transport with no session and no mutation",
-            "rate_exempt": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleRobots"
-        },
-        {
-          "id": "seo.rss",
-          "method": "GET",
-          "pattern": "/rss.xml",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "feed reader transport with no session and no mutation",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleRSS"
-        },
-        {
-          "id": "seo.sitemap",
-          "method": "GET",
-          "pattern": "/sitemap.xml",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "crawler transport with no session and no mutation",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleSitemap"
-        }
-      ],
       "navigation": [
         {
-          "id": "footer.resources.rss",
-          "area": "footer",
-          "group": "footer.resources",
-          "route_id": "seo.rss",
-          "label_key": "footer.rss",
           "after": [
             "footer.resources.api"
-          ]
+          ],
+          "area": "footer",
+          "group": "footer.resources",
+          "id": "footer.resources.rss",
+          "label_key": "footer.rss",
+          "route_id": "seo.rss"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleRobots",
+          "id": "seo.robots",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/robots.txt",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": true,
+            "csrf_reason": "crawler transport with no session and no mutation",
+            "idempotent": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
+        },
+        {
+          "handler": "handleRSS",
+          "id": "seo.rss",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/rss.xml",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": true,
+            "csrf_reason": "feed reader transport with no session and no mutation",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
+        },
+        {
+          "handler": "handleSitemap",
+          "id": "seo.sitemap",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/sitemap.xml",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": true,
+            "csrf_reason": "crawler transport with no session and no mutation",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Search discovery surfaces"
+  },
+  "schema": 2
 }

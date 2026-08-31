@@ -1,78 +1,89 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/metrics",
-    "kind": "system",
-    "name": "metrics",
-    "revision": 1,
-    "contract": 1,
-    "title": "Runtime metrics endpoint",
-    "description": "The bearer-gated /metrics endpoint. Production refuses to expose it without a token, because Go runtime stats must not be public by default.",
-    "requires": [
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/metrics.go",
-        "target": "internal/web/metrics.go",
-        "class": "go",
-        "sha256": "4cc539f0df540306583f509883e6f2fdd6930d6c25a8ca972da075bb79638353",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/web/metrics_test.go",
-        "target": "internal/web/metrics_test.go",
-        "class": "test",
-        "sha256": "f5c7bf4acfd614203323481de18b9e4fb3155951665afef6b9b6c4fffaeabc2f",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "metrics.scrape"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The bearer-gated /metrics endpoint. Production refuses to expose it without a token, because Go runtime stats must not be public by default.",
+    "docs": [],
+    "environment": [
+      {
+        "description": "Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default",
+        "field": "MetricsToken",
+        "key": "METRICS_TOKEN",
+        "secret": true,
+        "type": "string"
+      }
+    ],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "4cc539f0df540306583f509883e6f2fdd6930d6c25a8ca972da075bb79638353",
+        "source": "internal/web/metrics.go",
+        "target": "internal/web/metrics.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "f5c7bf4acfd614203323481de18b9e4fb3155951665afef6b9b6c4fffaeabc2f",
+        "source": "internal/web/metrics_test.go",
+        "target": "internal/web/metrics_test.go"
+      }
+    ],
+    "id": "ggg/system/metrics",
+    "kind": "system",
+    "migrations": [],
+    "name": "metrics",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "enabled": "metricsEnabled",
+          "handler": "handleMetrics",
           "id": "metrics.scrape",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/metrics",
-          "scope": "probe",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": true,
             "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
-            "rate_exempt": true,
+            "idempotent": false,
             "maintenance_exempt": true,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": true
           },
-          "package": "internal/web",
-          "handler": "handleMetrics",
-          "enabled": "metricsEnabled"
+          "scope": "probe"
         }
       ]
     },
-    "migrations": [],
-    "environment": [
-      {
-        "key": "METRICS_TOKEN",
-        "field": "MetricsToken",
-        "type": "string",
-        "description": "Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default",
-        "secret": true
-      }
-    ],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Runtime metrics endpoint"
+  },
+  "schema": 2
 }

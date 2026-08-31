@@ -1,58 +1,69 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/steps",
-    "kind": "component",
-    "name": "steps",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Steps",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Steps renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/steps.templ",
-        "target": "internal/web/templates/ui/steps.templ",
         "class": "templ",
-        "sha256": "3d7fc5d914f077e6792c74ecaf4e296fd3cbbe2323f8afcfab8d8b326ab732bb",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "3d7fc5d914f077e6792c74ecaf4e296fd3cbbe2323f8afcfab8d8b326ab732bb",
+        "source": "internal/web/templates/ui/steps.templ",
+        "target": "internal/web/templates/ui/steps.templ"
       },
       {
-        "source": "internal/web/templates/ui/steps_test.go",
-        "target": "internal/web/templates/ui/steps_test.go",
         "class": "test",
-        "sha256": "0447435233583d8bc030e0bcd8dfe734e15ecb59a236aefc66559c61f57691a8",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "0447435233583d8bc030e0bcd8dfe734e15ecb59a236aefc66559c61f57691a8",
+        "source": "internal/web/templates/ui/steps_test.go",
+        "target": "internal/web/templates/ui/steps_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/steps",
+    "kind": "component",
+    "migrations": [],
+    "name": "steps",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "steps",
           "family": "navigation",
-          "signature": "templ Steps(o StepsOpts)",
-          "summary": "Renders an ordered progress trail.",
           "guidance": "The position is stated in text (\"Step 2 of 4\") rather than left to the styling: colour and a filled circle are invisible to a screen reader and ambiguous to anyone who cannot distinguish the two shades.",
+          "name": "steps",
+          "signature": "templ Steps(o StepsOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an ordered progress trail."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Steps"
+  },
+  "schema": 2
 }

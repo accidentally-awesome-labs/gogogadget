@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/select",
-    "kind": "component",
-    "name": "select",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Select",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Select renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/select.templ",
-        "target": "internal/web/templates/ui/select.templ",
         "class": "templ",
-        "sha256": "c913e8c911c0f95909ff4a6100cc96ea011de6fb8726dc47b0762d880387c79a",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "c913e8c911c0f95909ff4a6100cc96ea011de6fb8726dc47b0762d880387c79a",
+        "source": "internal/web/templates/ui/select.templ",
+        "target": "internal/web/templates/ui/select.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/select",
+    "kind": "component",
+    "migrations": [],
+    "name": "select",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "select",
           "family": "forms",
+          "name": "select",
           "signature": "templ Select(o SelectOpts)",
-          "summary": "A native select.",
           "states": [
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "A native select."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Select"
+  },
+  "schema": 2
 }

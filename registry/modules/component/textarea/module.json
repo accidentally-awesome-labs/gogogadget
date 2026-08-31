@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/textarea",
-    "kind": "component",
-    "name": "textarea",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Textarea",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Textarea renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/textarea.templ",
-        "target": "internal/web/templates/ui/textarea.templ",
         "class": "templ",
-        "sha256": "7a801913ca36a6a3ffae5e844cad8bdc90c0a6d39f6f60e06ca52828d3266d2d",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7a801913ca36a6a3ffae5e844cad8bdc90c0a6d39f6f60e06ca52828d3266d2d",
+        "source": "internal/web/templates/ui/textarea.templ",
+        "target": "internal/web/templates/ui/textarea.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/textarea",
+    "kind": "component",
+    "migrations": [],
+    "name": "textarea",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "textarea",
           "family": "forms",
+          "name": "textarea",
           "signature": "templ Textarea(o TextareaOpts)",
-          "summary": "A multi-line text input.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "A multi-line text input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Textarea"
+  },
+  "schema": 2
 }

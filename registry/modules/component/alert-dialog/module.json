@@ -1,52 +1,63 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/alert-dialog",
-    "kind": "component",
-    "name": "alert-dialog",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "AlertDialog",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The AlertDialog renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/alert-dialog.templ",
-        "target": "internal/web/templates/ui/alert-dialog.templ",
         "class": "templ",
-        "sha256": "4ae016c4e80dfdfb3fd78d1a4a568e8a6113810c08005a92a94e604163f03025",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "4ae016c4e80dfdfb3fd78d1a4a568e8a6113810c08005a92a94e604163f03025",
+        "source": "internal/web/templates/ui/alert-dialog.templ",
+        "target": "internal/web/templates/ui/alert-dialog.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/alert-dialog",
+    "kind": "component",
+    "migrations": [],
+    "name": "alert-dialog",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "alert-dialog",
-          "family": "overlays",
-          "engine": "alpine",
           "alpine": "uiDialog",
-          "native_fallback": "dialog element",
-          "signature": "templ AlertDialog(o AlertDialogOpts)",
-          "summary": "Renders a modal requiring an explicit confirm or cancel.",
+          "engine": "alpine",
+          "family": "overlays",
           "guidance": "Both buttons submit the enclosing `form method=\"dialog\"` with a value, so the platform closes the dialog and records the choice in `returnValue`. They were once type=\"button\" with no handler, which left a keyboard or pointer user inside a modal with no way out; a destructive confirmation is the last place to depend on JavaScript having loaded. role=\"alertdialog\" with a described message is what makes a screen reader announce the consequence rather than just the title. Cancel is first in the DOM, so the platform's own initial focus lands on the safe choice. A destructive dialog that opens with Delete focused turns a stray Enter - the key the user just pressed to open it - into the deletion.",
           "keyboard": "Escape closes the native dialog, and Cancel is first in the DOM so the platform's initial focus - and a stray Enter - lands on the safe choice.",
+          "name": "alert-dialog",
+          "native_fallback": "dialog element",
+          "signature": "templ AlertDialog(o AlertDialogOpts)",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "Renders a modal requiring an explicit confirm or cancel."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "AlertDialog"
+  },
+  "schema": 2
 }

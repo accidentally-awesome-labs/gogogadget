@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/truncate",
-    "kind": "element",
-    "name": "truncate",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Truncate",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Truncate renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/truncate.templ",
-        "target": "internal/web/templates/ui/truncate.templ",
         "class": "templ",
-        "sha256": "0a53b0e9a32f388e8e7b4f0cb7fef300b040082c2cfd297637c5c015dd84cf32",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "0a53b0e9a32f388e8e7b4f0cb7fef300b040082c2cfd297637c5c015dd84cf32",
+        "source": "internal/web/templates/ui/truncate.templ",
+        "target": "internal/web/templates/ui/truncate.templ"
       },
       {
-        "source": "internal/web/templates/ui/truncate_test.go",
-        "target": "internal/web/templates/ui/truncate_test.go",
         "class": "test",
-        "sha256": "de33aaaf5e1f770b59b866573019ad3a67457527858c1116c7b1e401ace4dfcc",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "de33aaaf5e1f770b59b866573019ad3a67457527858c1116c7b1e401ace4dfcc",
+        "source": "internal/web/templates/ui/truncate_test.go",
+        "target": "internal/web/templates/ui/truncate_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/truncate",
+    "kind": "element",
+    "migrations": [],
+    "name": "truncate",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "truncate",
           "family": "foundations",
-          "signature": "templ Truncate(o TruncateOpts)",
-          "summary": "Clips overflowing text.",
           "guidance": "The full string is always in the DOM and carried in title, so it stays selectable, searchable by the browser's find, and available on hover. Cutting the string server-side would make the rest unreachable, and a screen reader would read the truncated version as if it were the whole value.",
+          "name": "truncate",
+          "signature": "templ Truncate(o TruncateOpts)",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "Clips overflowing text."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Truncate"
+  },
+  "schema": 2
 }

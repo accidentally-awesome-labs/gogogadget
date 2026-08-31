@@ -23,265 +23,265 @@ transitive closure itself.
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `element/avatar` | Avatar | `element/ui-core` | `free` |
-| `element/avatar-group` | AvatarGroup | `element/ui-core` | `free` |
-| `element/button` | Button | `element/ui-core` | `free` |
-| `element/button-group` | ButtonGroup | `element/ui-core` | `free` |
-| `element/button-link` | ButtonLink | `element/ui-core` | `free` |
-| `element/code` | Code | `element/ui-core` | `free` |
-| `element/copy-button` | CopyButton | `element/ui-core` | `free` |
-| `element/heading` | Heading | `element/ui-core` | `free` |
-| `element/icon` | Icon | `element/ui-core` | `free` |
-| `element/icon-button` | IconButton | `element/ui-core` | `free` |
-| `element/kbd` | Kbd | `element/ui-core` | `free` |
-| `element/link` | Link | `element/ui-core` | `free` |
-| `element/prose` | Prose | `element/ui-core` | `free` |
-| `element/separator` | Separator | `element/ui-core` | `free` |
-| `element/spinner` | Spinner | `element/ui-core` | `free` |
-| `element/text` | Text | `element/ui-core` | `free` |
-| `element/toggle-button` | ToggleButton | `element/ui-core` | `free` |
-| `element/toggle-group` | ToggleGroup | `element/ui-core` | `free` |
-| `element/truncate` | Truncate | `element/ui-core` | `free` |
-| `element/ui-core` | UI core | — | `replacement-required` |
-| `element/visually-hidden` | VisuallyHidden | `element/ui-core` | `free` |
+| `ggg/element/avatar` | Avatar | `ggg/element/ui-core` | `free` |
+| `ggg/element/avatar-group` | AvatarGroup | `ggg/element/ui-core` | `free` |
+| `ggg/element/button` | Button | `ggg/element/ui-core` | `free` |
+| `ggg/element/button-group` | ButtonGroup | `ggg/element/ui-core` | `free` |
+| `ggg/element/button-link` | ButtonLink | `ggg/element/ui-core` | `free` |
+| `ggg/element/code` | Code | `ggg/element/ui-core` | `free` |
+| `ggg/element/copy-button` | CopyButton | `ggg/element/ui-core` | `free` |
+| `ggg/element/heading` | Heading | `ggg/element/ui-core` | `free` |
+| `ggg/element/icon` | Icon | `ggg/element/ui-core` | `free` |
+| `ggg/element/icon-button` | IconButton | `ggg/element/ui-core` | `free` |
+| `ggg/element/kbd` | Kbd | `ggg/element/ui-core` | `free` |
+| `ggg/element/link` | Link | `ggg/element/ui-core` | `free` |
+| `ggg/element/prose` | Prose | `ggg/element/ui-core` | `free` |
+| `ggg/element/separator` | Separator | `ggg/element/ui-core` | `free` |
+| `ggg/element/spinner` | Spinner | `ggg/element/ui-core` | `free` |
+| `ggg/element/text` | Text | `ggg/element/ui-core` | `free` |
+| `ggg/element/toggle-button` | ToggleButton | `ggg/element/ui-core` | `free` |
+| `ggg/element/toggle-group` | ToggleGroup | `ggg/element/ui-core` | `free` |
+| `ggg/element/truncate` | Truncate | `ggg/element/ui-core` | `free` |
+| `ggg/element/ui-core` | UI core | — | `replacement-required` |
+| `ggg/element/visually-hidden` | VisuallyHidden | `ggg/element/ui-core` | `free` |
 
 ## Components (124)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `component/accordion` | Accordion | `element/ui-core` | `free` |
-| `component/activity-item` | ActivityItem | `element/icon` `element/ui-core` | `free` |
-| `component/alert-dialog` | AlertDialog | `element/ui-core` | `free` |
-| `component/aspect-ratio` | AspectRatio | `element/ui-core` | `free` |
-| `component/attachment` | Attachment | `element/icon` `element/ui-core` | `free` |
-| `component/back-link` | BackLink | `element/icon` `element/ui-core` | `free` |
-| `component/badge` | Badge | `element/ui-core` | `free` |
-| `component/banner` | Banner | `element/ui-core` | `free` |
-| `component/breadcrumbs` | Breadcrumbs | `element/ui-core` | `free` |
-| `component/calendar` | Calendar and date pickers | `component/date-field` `component/date-range-field` `component/date-time-field` `component/status-dot` `element/icon` `element/ui-core` | `free` |
-| `component/card` | Card | `element/ui-core` | `free` |
-| `component/carousel` | Carousel | `element/ui-core` | `free` |
-| `component/center` | Center | `element/ui-core` | `free` |
-| `component/char-counter` | CharCounter | `element/ui-core` | `free` |
-| `component/chart` | Charts | `element/ui-core` | `free` |
-| `component/chat-log` | ChatLog | `element/ui-core` | `free` |
-| `component/chat-message` | ChatMessage | `element/ui-core` | `free` |
-| `component/checkbox` | Checkbox | `element/ui-core` | `free` |
-| `component/checkbox-group` | CheckboxGroup | `element/ui-core` | `free` |
-| `component/collapsible` | Collapsible | `element/ui-core` | `free` |
-| `component/color-input` | ColorInput | `element/ui-core` | `free` |
-| `component/column-header` | ColumnHeader | `element/icon` `element/ui-core` | `free` |
-| `component/combobox` | Combobox | `element/ui-core` | `free` |
-| `component/command` | Command palette | `element/icon` `element/ui-core` | `free` |
-| `component/comment` | Comment | `element/avatar` `element/ui-core` | `free` |
-| `component/comment-thread` | CommentThread | `element/ui-core` | `free` |
-| `component/composer` | Composer | `component/field-error` `component/form-actions` `component/textarea` `element/button` `element/ui-core` | `free` |
-| `component/confirm-action` | ConfirmAction | `component/alert-dialog` `element/icon` `element/ui-core` | `free` |
-| `component/container` | Container | `element/ui-core` | `free` |
-| `component/context-menu` | ContextMenu | `component/dropdown-menu` `element/icon` `element/ui-core` | `free` |
-| `component/cursor-pagination` | CursorPagination | `element/ui-core` | `free` |
-| `component/data-grid` | Data grid | `component/column-header` `component/pagination` `component/search-input` `element/ui-core` | `free` |
-| `component/data-table` | DataTable | `component/column-header` `element/ui-core` | `free` |
-| `component/date-field` | DateField | `element/ui-core` | `free` |
-| `component/date-range-field` | DateRangeField | `element/ui-core` | `free` |
-| `component/date-time-field` | DateTimeField | `element/ui-core` | `free` |
-| `component/delivery-status` | DeliveryStatus | `component/status-dot` `element/ui-core` | `free` |
-| `component/description-list` | DescriptionList | `element/ui-core` | `free` |
-| `component/dialog` | Dialog | `element/ui-core` | `free` |
-| `component/disclosure` | Disclosure | `element/ui-core` | `free` |
-| `component/drawer` | Drawer | `element/icon` `element/ui-core` | `free` |
-| `component/dropdown-menu` | DropdownMenu | `element/ui-core` | `free` |
-| `component/empty-state` | EmptyState | `element/ui-core` | `free` |
-| `component/error-state` | ErrorState | `element/icon` `element/ui-core` | `free` |
-| `component/field` | Field | `element/ui-core` | `free` |
-| `component/field-error` | FieldError | `element/ui-core` | `free` |
-| `component/fieldset` | Fieldset | `element/ui-core` | `free` |
-| `component/file-dropzone` | FileDropzone | `element/ui-core` | `free` |
-| `component/file-input` | FileInput | `element/ui-core` | `free` |
-| `component/form` | Form | `element/ui-core` | `free` |
-| `component/form-actions` | FormActions | `element/ui-core` | `free` |
-| `component/grid` | Grid | `element/ui-core` | `free` |
-| `component/hint` | Hint | `element/ui-core` | `free` |
-| `component/hover-card` | HoverCard | `element/icon` `element/ui-core` | `free` |
-| `component/inline` | Inline | `element/ui-core` | `free` |
-| `component/input-addon` | InputAddon | `element/ui-core` | `free` |
-| `component/input-group` | InputGroup | `element/ui-core` | `free` |
-| `component/kanban` | Kanban board | `component/badge` `component/dropdown-menu` `component/notice` `element/avatar-group` `element/ui-core` | `free` |
-| `component/key-value` | KeyValue | `element/ui-core` | `free` |
-| `component/label` | Label | `element/ui-core` | `free` |
-| `component/list` | List | `element/ui-core` | `free` |
-| `component/markdown-editor` | Markdown editor | `component/char-counter` `component/field-error` `component/file-dropzone` `element/ui-core` | `free` |
-| `component/member-item` | MemberItem | `component/badge` `element/avatar` `element/ui-core` | `free` |
-| `component/mention-chip` | MentionChip | `element/ui-core` | `free` |
-| `component/menubar` | Menubar | `component/dropdown-menu` `element/ui-core` | `free` |
-| `component/meter` | Meter | `element/ui-core` | `free` |
-| `component/metric` | Metric | `element/ui-core` | `free` |
-| `component/multi-select` | MultiSelect | `element/ui-core` | `free` |
-| `component/nav-tabs` | NavTabs | `element/ui-core` | `free` |
-| `component/navigation-menu` | NavigationMenu | `element/ui-core` | `free` |
-| `component/notice` | Notice | `element/ui-core` | `free` |
-| `component/notification-item` | NotificationItem | `component/status-dot` `element/ui-core` | `free` |
-| `component/number-input` | NumberInput | `element/ui-core` | `free` |
-| `component/onboarding-checklist` | OnboardingChecklist | `component/progress-bar` `element/icon` `element/ui-core` | `free` |
-| `component/otp-input` | OTPInput | `element/ui-core` | `free` |
-| `component/page-header` | PageHeader | `element/ui-core` | `free` |
-| `component/pagination` | Pagination | `element/ui-core` | `free` |
-| `component/panels` | Resizable panels | `element/ui-core` | `free` |
-| `component/password-input` | PasswordInput | `element/ui-core` | `free` |
-| `component/plan-card` | PlanCard | `element/ui-core` | `free` |
-| `component/popover` | Popover | `element/ui-core` | `free` |
-| `component/progress-bar` | ProgressBar | `element/ui-core` | `free` |
-| `component/progress-circle` | ProgressCircle | `element/ui-core` | `free` |
-| `component/questionnaire` | Questionnaire | `component/field` `component/select` `component/steps` `component/text-input` `component/textarea` `element/ui-core` | `free` |
-| `component/radio-group` | RadioGroup | `element/ui-core` | `free` |
-| `component/range-input` | RangeInput | `element/ui-core` | `free` |
-| `component/row-actions` | RowActions | `component/dropdown-menu` `element/ui-core` | `free` |
-| `component/scroll-area` | ScrollArea | `element/ui-core` | `free` |
-| `component/search-input` | SearchInput | `element/button` `element/spinner` `element/ui-core` | `free` |
-| `component/secret-reveal` | SecretReveal | `element/ui-core` | `free` |
-| `component/section` | Section | `element/heading` `element/ui-core` | `free` |
-| `component/section-header` | SectionHeader | `element/ui-core` | `free` |
-| `component/select` | Select | `element/ui-core` | `free` |
-| `component/selection-bar` | SelectionBar | `element/ui-core` | `free` |
-| `component/settings-section` | SettingsSection | `element/ui-core` | `free` |
-| `component/skeleton` | Skeleton | `element/ui-core` | `free` |
-| `component/skip-link` | SkipLink | `element/ui-core` | `free` |
-| `component/slug-input` | SlugInput | `element/ui-core` | `free` |
-| `component/split` | Split | `element/ui-core` | `free` |
-| `component/stack` | Stack | `element/ui-core` | `free` |
-| `component/stat-group` | StatGroup | `element/ui-core` | `free` |
-| `component/status-dot` | StatusDot | `element/ui-core` | `free` |
-| `component/steps` | Steps | `element/ui-core` | `free` |
-| `component/sticky-bar` | StickyBar | `element/ui-core` | `free` |
-| `component/switch` | Switch | `element/ui-core` | `free` |
-| `component/tab-panels` | TabPanels | `element/ui-core` | `free` |
-| `component/table` | Table | `element/ui-core` | `free` |
-| `component/table-card` | TableCard | `element/ui-core` | `free` |
-| `component/table-of-contents` | TableOfContents | `element/ui-core` | `free` |
-| `component/table-toolbar` | TableToolbar | `element/ui-core` | `free` |
-| `component/tags-input` | TagsInput | `element/ui-core` | `free` |
-| `component/terminal-page` | TerminalPage | `element/ui-core` | `free` |
-| `component/text-input` | TextInput | `element/ui-core` | `free` |
-| `component/textarea` | Textarea | `element/ui-core` | `free` |
-| `component/theme-toggle` | Theme toggle | `element/button` `element/icon` `element/ui-core` | `free` |
-| `component/tile` | Tile | `element/icon` `element/ui-core` | `free` |
-| `component/time-field` | TimeField | `element/ui-core` | `free` |
-| `component/timeline` | Timeline | `element/ui-core` | `free` |
-| `component/toast` | Toast | `element/icon` `element/icon-button` `element/ui-core` | `free` |
-| `component/toast-region` | Toast region | `component/toast` `element/ui-core` | `free` |
-| `component/toolbar` | Toolbar | `element/ui-core` | `free` |
-| `component/tooltip` | Tooltip | `element/ui-core` | `free` |
-| `component/tree` | Tree | `element/icon` `element/ui-core` | `free` |
-| `component/usage-card` | UsageCard | `component/meter` `element/ui-core` | `free` |
+| `ggg/component/accordion` | Accordion | `ggg/element/ui-core` | `free` |
+| `ggg/component/activity-item` | ActivityItem | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/alert-dialog` | AlertDialog | `ggg/element/ui-core` | `free` |
+| `ggg/component/aspect-ratio` | AspectRatio | `ggg/element/ui-core` | `free` |
+| `ggg/component/attachment` | Attachment | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/back-link` | BackLink | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/badge` | Badge | `ggg/element/ui-core` | `free` |
+| `ggg/component/banner` | Banner | `ggg/element/ui-core` | `free` |
+| `ggg/component/breadcrumbs` | Breadcrumbs | `ggg/element/ui-core` | `free` |
+| `ggg/component/calendar` | Calendar and date pickers | `ggg/component/date-field` `ggg/component/date-range-field` `ggg/component/date-time-field` `ggg/component/status-dot` `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/card` | Card | `ggg/element/ui-core` | `free` |
+| `ggg/component/carousel` | Carousel | `ggg/element/ui-core` | `free` |
+| `ggg/component/center` | Center | `ggg/element/ui-core` | `free` |
+| `ggg/component/char-counter` | CharCounter | `ggg/element/ui-core` | `free` |
+| `ggg/component/chart` | Charts | `ggg/element/ui-core` | `free` |
+| `ggg/component/chat-log` | ChatLog | `ggg/element/ui-core` | `free` |
+| `ggg/component/chat-message` | ChatMessage | `ggg/element/ui-core` | `free` |
+| `ggg/component/checkbox` | Checkbox | `ggg/element/ui-core` | `free` |
+| `ggg/component/checkbox-group` | CheckboxGroup | `ggg/element/ui-core` | `free` |
+| `ggg/component/collapsible` | Collapsible | `ggg/element/ui-core` | `free` |
+| `ggg/component/color-input` | ColorInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/column-header` | ColumnHeader | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/combobox` | Combobox | `ggg/element/ui-core` | `free` |
+| `ggg/component/command` | Command palette | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/comment` | Comment | `ggg/element/avatar` `ggg/element/ui-core` | `free` |
+| `ggg/component/comment-thread` | CommentThread | `ggg/element/ui-core` | `free` |
+| `ggg/component/composer` | Composer | `ggg/component/field-error` `ggg/component/form-actions` `ggg/component/textarea` `ggg/element/button` `ggg/element/ui-core` | `free` |
+| `ggg/component/confirm-action` | ConfirmAction | `ggg/component/alert-dialog` `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/container` | Container | `ggg/element/ui-core` | `free` |
+| `ggg/component/context-menu` | ContextMenu | `ggg/component/dropdown-menu` `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/cursor-pagination` | CursorPagination | `ggg/element/ui-core` | `free` |
+| `ggg/component/data-grid` | Data grid | `ggg/component/column-header` `ggg/component/pagination` `ggg/component/search-input` `ggg/element/ui-core` | `free` |
+| `ggg/component/data-table` | DataTable | `ggg/component/column-header` `ggg/element/ui-core` | `free` |
+| `ggg/component/date-field` | DateField | `ggg/element/ui-core` | `free` |
+| `ggg/component/date-range-field` | DateRangeField | `ggg/element/ui-core` | `free` |
+| `ggg/component/date-time-field` | DateTimeField | `ggg/element/ui-core` | `free` |
+| `ggg/component/delivery-status` | DeliveryStatus | `ggg/component/status-dot` `ggg/element/ui-core` | `free` |
+| `ggg/component/description-list` | DescriptionList | `ggg/element/ui-core` | `free` |
+| `ggg/component/dialog` | Dialog | `ggg/element/ui-core` | `free` |
+| `ggg/component/disclosure` | Disclosure | `ggg/element/ui-core` | `free` |
+| `ggg/component/drawer` | Drawer | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/dropdown-menu` | DropdownMenu | `ggg/element/ui-core` | `free` |
+| `ggg/component/empty-state` | EmptyState | `ggg/element/ui-core` | `free` |
+| `ggg/component/error-state` | ErrorState | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/field` | Field | `ggg/element/ui-core` | `free` |
+| `ggg/component/field-error` | FieldError | `ggg/element/ui-core` | `free` |
+| `ggg/component/fieldset` | Fieldset | `ggg/element/ui-core` | `free` |
+| `ggg/component/file-dropzone` | FileDropzone | `ggg/element/ui-core` | `free` |
+| `ggg/component/file-input` | FileInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/form` | Form | `ggg/element/ui-core` | `free` |
+| `ggg/component/form-actions` | FormActions | `ggg/element/ui-core` | `free` |
+| `ggg/component/grid` | Grid | `ggg/element/ui-core` | `free` |
+| `ggg/component/hint` | Hint | `ggg/element/ui-core` | `free` |
+| `ggg/component/hover-card` | HoverCard | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/inline` | Inline | `ggg/element/ui-core` | `free` |
+| `ggg/component/input-addon` | InputAddon | `ggg/element/ui-core` | `free` |
+| `ggg/component/input-group` | InputGroup | `ggg/element/ui-core` | `free` |
+| `ggg/component/kanban` | Kanban board | `ggg/component/badge` `ggg/component/dropdown-menu` `ggg/component/notice` `ggg/element/avatar-group` `ggg/element/ui-core` | `free` |
+| `ggg/component/key-value` | KeyValue | `ggg/element/ui-core` | `free` |
+| `ggg/component/label` | Label | `ggg/element/ui-core` | `free` |
+| `ggg/component/list` | List | `ggg/element/ui-core` | `free` |
+| `ggg/component/markdown-editor` | Markdown editor | `ggg/component/char-counter` `ggg/component/field-error` `ggg/component/file-dropzone` `ggg/element/ui-core` | `free` |
+| `ggg/component/member-item` | MemberItem | `ggg/component/badge` `ggg/element/avatar` `ggg/element/ui-core` | `free` |
+| `ggg/component/mention-chip` | MentionChip | `ggg/element/ui-core` | `free` |
+| `ggg/component/menubar` | Menubar | `ggg/component/dropdown-menu` `ggg/element/ui-core` | `free` |
+| `ggg/component/meter` | Meter | `ggg/element/ui-core` | `free` |
+| `ggg/component/metric` | Metric | `ggg/element/ui-core` | `free` |
+| `ggg/component/multi-select` | MultiSelect | `ggg/element/ui-core` | `free` |
+| `ggg/component/nav-tabs` | NavTabs | `ggg/element/ui-core` | `free` |
+| `ggg/component/navigation-menu` | NavigationMenu | `ggg/element/ui-core` | `free` |
+| `ggg/component/notice` | Notice | `ggg/element/ui-core` | `free` |
+| `ggg/component/notification-item` | NotificationItem | `ggg/component/status-dot` `ggg/element/ui-core` | `free` |
+| `ggg/component/number-input` | NumberInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/onboarding-checklist` | OnboardingChecklist | `ggg/component/progress-bar` `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/otp-input` | OTPInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/page-header` | PageHeader | `ggg/element/ui-core` | `free` |
+| `ggg/component/pagination` | Pagination | `ggg/element/ui-core` | `free` |
+| `ggg/component/panels` | Resizable panels | `ggg/element/ui-core` | `free` |
+| `ggg/component/password-input` | PasswordInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/plan-card` | PlanCard | `ggg/element/ui-core` | `free` |
+| `ggg/component/popover` | Popover | `ggg/element/ui-core` | `free` |
+| `ggg/component/progress-bar` | ProgressBar | `ggg/element/ui-core` | `free` |
+| `ggg/component/progress-circle` | ProgressCircle | `ggg/element/ui-core` | `free` |
+| `ggg/component/questionnaire` | Questionnaire | `ggg/component/field` `ggg/component/select` `ggg/component/steps` `ggg/component/text-input` `ggg/component/textarea` `ggg/element/ui-core` | `free` |
+| `ggg/component/radio-group` | RadioGroup | `ggg/element/ui-core` | `free` |
+| `ggg/component/range-input` | RangeInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/row-actions` | RowActions | `ggg/component/dropdown-menu` `ggg/element/ui-core` | `free` |
+| `ggg/component/scroll-area` | ScrollArea | `ggg/element/ui-core` | `free` |
+| `ggg/component/search-input` | SearchInput | `ggg/element/button` `ggg/element/spinner` `ggg/element/ui-core` | `free` |
+| `ggg/component/secret-reveal` | SecretReveal | `ggg/element/ui-core` | `free` |
+| `ggg/component/section` | Section | `ggg/element/heading` `ggg/element/ui-core` | `free` |
+| `ggg/component/section-header` | SectionHeader | `ggg/element/ui-core` | `free` |
+| `ggg/component/select` | Select | `ggg/element/ui-core` | `free` |
+| `ggg/component/selection-bar` | SelectionBar | `ggg/element/ui-core` | `free` |
+| `ggg/component/settings-section` | SettingsSection | `ggg/element/ui-core` | `free` |
+| `ggg/component/skeleton` | Skeleton | `ggg/element/ui-core` | `free` |
+| `ggg/component/skip-link` | SkipLink | `ggg/element/ui-core` | `free` |
+| `ggg/component/slug-input` | SlugInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/split` | Split | `ggg/element/ui-core` | `free` |
+| `ggg/component/stack` | Stack | `ggg/element/ui-core` | `free` |
+| `ggg/component/stat-group` | StatGroup | `ggg/element/ui-core` | `free` |
+| `ggg/component/status-dot` | StatusDot | `ggg/element/ui-core` | `free` |
+| `ggg/component/steps` | Steps | `ggg/element/ui-core` | `free` |
+| `ggg/component/sticky-bar` | StickyBar | `ggg/element/ui-core` | `free` |
+| `ggg/component/switch` | Switch | `ggg/element/ui-core` | `free` |
+| `ggg/component/tab-panels` | TabPanels | `ggg/element/ui-core` | `free` |
+| `ggg/component/table` | Table | `ggg/element/ui-core` | `free` |
+| `ggg/component/table-card` | TableCard | `ggg/element/ui-core` | `free` |
+| `ggg/component/table-of-contents` | TableOfContents | `ggg/element/ui-core` | `free` |
+| `ggg/component/table-toolbar` | TableToolbar | `ggg/element/ui-core` | `free` |
+| `ggg/component/tags-input` | TagsInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/terminal-page` | TerminalPage | `ggg/element/ui-core` | `free` |
+| `ggg/component/text-input` | TextInput | `ggg/element/ui-core` | `free` |
+| `ggg/component/textarea` | Textarea | `ggg/element/ui-core` | `free` |
+| `ggg/component/theme-toggle` | Theme toggle | `ggg/element/button` `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/tile` | Tile | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/time-field` | TimeField | `ggg/element/ui-core` | `free` |
+| `ggg/component/timeline` | Timeline | `ggg/element/ui-core` | `free` |
+| `ggg/component/toast` | Toast | `ggg/element/icon` `ggg/element/icon-button` `ggg/element/ui-core` | `free` |
+| `ggg/component/toast-region` | Toast region | `ggg/component/toast` `ggg/element/ui-core` | `free` |
+| `ggg/component/toolbar` | Toolbar | `ggg/element/ui-core` | `free` |
+| `ggg/component/tooltip` | Tooltip | `ggg/element/ui-core` | `free` |
+| `ggg/component/tree` | Tree | `ggg/element/icon` `ggg/element/ui-core` | `free` |
+| `ggg/component/usage-card` | UsageCard | `ggg/component/meter` `ggg/element/ui-core` | `free` |
 
 ## Pages (36)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `page/activity` | Activity feed | `system/audit` `system/i18n` `system/security` `system/server` | `free` |
-| `page/admin-announcements` | Admin announcements list | `system/announcements` `system/i18n` `system/security` `system/server` | `free` |
-| `page/admin-audit` | Admin audit log | `system/audit` `system/i18n` `system/security` `system/server` | `free` |
-| `page/admin-content` | Admin content list | `system/content` `system/i18n` `system/security` `system/server` | `free` |
-| `page/admin-content-editor` | Admin content editor | `system/content` `system/i18n` `system/security` `system/server` `workflow/admin-content` | `free` |
-| `page/admin-content-preview` | Admin content preview | `system/content` `system/security` `system/server` `workflow/admin-content` | `free` |
-| `page/admin-flag-detail` | Admin feature flag detail | `system/feature-flags` `system/i18n` `system/organizations` `system/security` `system/server` | `free` |
-| `page/admin-flags` | Admin feature flags list | `system/feature-flags` `system/i18n` `system/security` `system/server` | `free` |
-| `page/admin-jobs` | Admin job queue | `system/jobs` `system/security` `system/server` | `free` |
-| `page/admin-media` | Admin media library | `system/content` `system/i18n` `system/security` `system/server` | `free` |
-| `page/admin-organizations` | Admin organizations list | `system/i18n` `system/organizations` `system/security` `system/server` | `free` |
-| `page/admin-overview` | Admin overview | `system/billing` `system/i18n` `system/identity` `system/organizations` `system/security` `system/server` | `free` |
-| `page/admin-schedules` | Admin schedules list | `system/i18n` `system/jobs` `system/organizations` `system/schedules` `system/security` `system/server` | `free` |
-| `page/admin-users` | Admin users list | `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `page/blog` | Blog | `system/content` `system/content-assets` `system/i18n` `system/server` | `retain-data` |
-| `page/changelog` | Changelog | `system/content` `system/content-assets` `system/i18n` `system/server` | `retain-data` |
-| `page/dashboard` | App dashboard | `system/audit` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `page/dev-gallery` | Component gallery | `system/billing` `system/i18n` `system/security` `system/server` `workflow/dev-session` | `free` |
-| `page/docs` | Documentation page | `page/docs-index` `system/content-assets` `system/server` | `free` |
-| `page/docs-index` | Documentation index | `system/content-assets` `system/i18n` `system/server` | `free` |
-| `page/docs-search` | Documentation search | `page/docs-index` `system/content-assets` `system/server` | `free` |
-| `page/files` | Files list | `system/database` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `page/home` | Home page | `system/i18n` `system/server` | `free` |
-| `page/notifications` | Notifications list | `system/i18n` `system/identity` `system/notifications` `system/security` `system/server` | `free` |
-| `page/pricing` | Pricing page | `system/i18n` `system/server` | `free` |
-| `page/privacy` | Privacy policy | `system/i18n` `system/server` | `free` |
-| `page/project-edit` | Edit project form | `system/i18n` `system/identity` `system/security` `system/server` `workflow/projects` | `free` |
-| `page/project-new` | New project form | `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `page/projects` | Projects list | `system/database` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `page/settings-account` | Account settings | `system/i18n` `system/identity` `system/security` `system/server` `workflow/auth-session` | `free` |
-| `page/settings-api-tokens` | API token settings | `system/api` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `page/settings-billing` | Billing settings | `system/billing` `system/i18n` `system/identity` `system/security` `system/server` `system/usage` | `free` |
-| `page/settings-notifications` | Notification settings | `system/i18n` `system/identity` `system/notifications` `system/security` `system/server` | `free` |
-| `page/settings-organization` | Organization settings | `system/i18n` `system/identity` `system/organizations` `system/security` `system/server` `workflow/auth-session` `workflow/organization-export` | `free` |
-| `page/settings-webhooks` | Webhook settings | `system/security` `system/server` `system/webhooks` | `free` |
-| `page/terms` | Terms of service | `system/i18n` `system/server` | `free` |
+| `ggg/page/activity` | Activity feed | `ggg/system/audit` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-announcements` | Admin announcements list | `ggg/system/announcements` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-audit` | Admin audit log | `ggg/system/audit` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-content` | Admin content list | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-content-editor` | Admin content editor | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` `ggg/workflow/admin-content` | `free` |
+| `ggg/page/admin-content-preview` | Admin content preview | `ggg/system/content` `ggg/system/security` `ggg/system/server` `ggg/workflow/admin-content` | `free` |
+| `ggg/page/admin-flag-detail` | Admin feature flag detail | `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-flags` | Admin feature flags list | `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-jobs` | Admin job queue | `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-media` | Admin media library | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-organizations` | Admin organizations list | `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-overview` | Admin overview | `ggg/system/billing` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-schedules` | Admin schedules list | `ggg/system/i18n` `ggg/system/jobs` `ggg/system/organizations` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/admin-users` | Admin users list | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/blog` | Blog | `ggg/system/content` `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `retain-data` |
+| `ggg/page/changelog` | Changelog | `ggg/system/content` `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `retain-data` |
+| `ggg/page/dashboard` | App dashboard | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/dev-gallery` | Component gallery | `ggg/system/billing` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` `ggg/workflow/dev-session` | `free` |
+| `ggg/page/docs` | Documentation page | `ggg/page/docs-index` `ggg/system/content-assets` `ggg/system/server` | `free` |
+| `ggg/page/docs-index` | Documentation index | `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `free` |
+| `ggg/page/docs-search` | Documentation search | `ggg/page/docs-index` `ggg/system/content-assets` `ggg/system/server` | `free` |
+| `ggg/page/files` | Files list | `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/home` | Home page | `ggg/system/i18n` `ggg/system/server` | `free` |
+| `ggg/page/notifications` | Notifications list | `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/pricing` | Pricing page | `ggg/system/i18n` `ggg/system/server` | `free` |
+| `ggg/page/privacy` | Privacy policy | `ggg/system/i18n` `ggg/system/server` | `free` |
+| `ggg/page/project-edit` | Edit project form | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/workflow/projects` | `free` |
+| `ggg/page/project-new` | New project form | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/projects` | Projects list | `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/settings-account` | Account settings | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` | `free` |
+| `ggg/page/settings-api-tokens` | API token settings | `ggg/system/api` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/settings-billing` | Billing settings | `ggg/system/billing` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/usage` | `free` |
+| `ggg/page/settings-notifications` | Notification settings | `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/page/settings-organization` | Organization settings | `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` `ggg/workflow/organization-export` | `free` |
+| `ggg/page/settings-webhooks` | Webhook settings | `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
+| `ggg/page/terms` | Terms of service | `ggg/system/i18n` `ggg/system/server` | `free` |
 
 ## Workflows (28)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `workflow/account-delete` | Account deletion | `page/settings-account` `system/audit` `system/i18n` `system/identity` `system/impersonation` `system/organizations` `system/security` `system/server` `workflow/auth-session` | `free` |
-| `workflow/account-export` | Personal data export | `system/audit` `system/identity` `system/notifications` `system/organizations` `system/security` `system/server` | `free` |
-| `workflow/admin-announcements` | Admin announcement mutations | `page/admin-announcements` `system/announcements` `system/i18n` `system/security` `system/server` | `free` |
-| `workflow/admin-content` | Admin content mutations | `system/audit` `system/content` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `workflow/admin-flags` | Admin feature flag mutations | `page/admin-flags` `system/audit` `system/feature-flags` `system/i18n` `system/organizations` `system/security` `system/server` | `free` |
-| `workflow/admin-job-requeue` | Admin job requeue | `page/admin-jobs` `system/audit` `system/jobs` `system/server` | `free` |
-| `workflow/admin-media` | Admin media mutations | `page/admin-media` `system/audit` `system/content` `system/i18n` `system/identity` `system/security` `system/server` `system/storage` `workflow/admin-content` | `free` |
-| `workflow/admin-schedules` | Admin schedule mutations | `page/admin-schedules` `system/audit` `system/i18n` `system/jobs` `system/schedules` `system/security` `system/server` | `free` |
-| `workflow/admin-user-governance` | Admin user governance | `system/audit` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `workflow/api-ai-chat` | AI chat API | `system/api` `system/llm` `system/server` `workflow/openapi-contract` | `free` |
-| `workflow/api-projects` | Projects API | `system/api` `system/server` `workflow/openapi-contract` | `free` |
-| `workflow/api-token-lifecycle` | API token creation and revocation | `page/settings-api-tokens` `system/api` `system/i18n` `system/identity` `system/security` `system/server` | `retain-data` |
-| `workflow/appearance` | Theme preference | `system/i18n` `system/identity` `system/security` `system/server` | `replacement-required` |
-| `workflow/auth-session` | Sign-in, sign-up and sign-out | `system/i18n` `system/identity` `system/security` `system/server` | `replacement-required` |
-| `workflow/billing-checkout` | Checkout and billing portal | `page/settings-billing` `system/billing` `system/i18n` `system/identity` `system/security` `system/server` | `free` |
-| `workflow/billing-webhook` | Billing provider webhook | `system/billing` `system/database` `system/organizations` `system/server` | `major-version-only` |
-| `workflow/dev-session` | Zero-account dev session | `system/identity` `system/organizations` `system/security` `system/server` | `free` |
-| `workflow/files` | File upload, download and delete | `page/files` `system/audit` `system/database` `system/i18n` `system/identity` `system/security` `system/server` `system/storage` | `free` |
-| `workflow/identity-webhook-sync` | Identity provider sync | `system/identity` `system/organizations` `system/server` | `free` |
-| `workflow/impersonation` | Administrator impersonation | `system/audit` `system/i18n` `system/identity` `system/impersonation` `system/organizations` `system/security` `system/server` | `free` |
-| `workflow/notification-inbox` | Notification inbox read state | `page/notifications` `system/i18n` `system/identity` `system/notifications` `system/security` `system/server` | `free` |
-| `workflow/notification-preferences` | Notification preference saving | `page/settings-notifications` `system/i18n` `system/identity` `system/notifications` `system/security` `system/server` | `retain-data` |
-| `workflow/openapi-contract` | OpenAPI description | `system/api` `system/server` | `free` |
-| `workflow/organization-export` | Organization data export | `system/audit` `system/i18n` `system/identity` `system/jobs` `system/organizations` `system/security` `system/server` | `free` |
-| `workflow/outbound-webhooks` | Outbound webhook management | `page/settings-webhooks` `system/audit` `system/security` `system/server` `system/webhooks` | `retain-data` |
-| `workflow/project-export` | Project CSV export | `system/audit` `system/i18n` `system/identity` `system/jobs` `system/security` `system/server` | `free` |
-| `workflow/projects` | Project create, update, archive and delete | `system/analytics` `system/api` `system/audit` `system/database` `system/i18n` `system/identity` `system/organizations` `system/security` `system/server` `system/webhooks` | `free` |
-| `workflow/seo-discovery` | Search discovery surfaces | `system/content` `system/seo` `system/server` | `free` |
+| `ggg/workflow/account-delete` | Account deletion | `ggg/page/settings-account` `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` | `free` |
+| `ggg/workflow/account-export` | Personal data export | `ggg/system/audit` `ggg/system/identity` `ggg/system/notifications` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-announcements` | Admin announcement mutations | `ggg/page/admin-announcements` `ggg/system/announcements` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-content` | Admin content mutations | `ggg/system/audit` `ggg/system/content` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-flags` | Admin feature flag mutations | `ggg/page/admin-flags` `ggg/system/audit` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-job-requeue` | Admin job requeue | `ggg/page/admin-jobs` `ggg/system/audit` `ggg/system/jobs` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-media` | Admin media mutations | `ggg/page/admin-media` `ggg/system/audit` `ggg/system/content` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` `ggg/workflow/admin-content` | `free` |
+| `ggg/workflow/admin-schedules` | Admin schedule mutations | `ggg/page/admin-schedules` `ggg/system/audit` `ggg/system/i18n` `ggg/system/jobs` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/admin-user-governance` | Admin user governance | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/api-ai-chat` | AI chat API | `ggg/system/api` `ggg/system/llm` `ggg/system/server` `ggg/workflow/openapi-contract` | `free` |
+| `ggg/workflow/api-projects` | Projects API | `ggg/system/api` `ggg/system/server` `ggg/workflow/openapi-contract` | `free` |
+| `ggg/workflow/api-token-lifecycle` | API token creation and revocation | `ggg/page/settings-api-tokens` `ggg/system/api` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `retain-data` |
+| `ggg/workflow/appearance` | Theme preference | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
+| `ggg/workflow/auth-session` | Sign-in, sign-up and sign-out | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
+| `ggg/workflow/billing-checkout` | Checkout and billing portal | `ggg/page/settings-billing` `ggg/system/billing` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/billing-webhook` | Billing provider webhook | `ggg/system/billing` `ggg/system/database` `ggg/system/organizations` `ggg/system/server` | `major-version-only` |
+| `ggg/workflow/dev-session` | Zero-account dev session | `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/files` | File upload, download and delete | `ggg/page/files` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` | `free` |
+| `ggg/workflow/identity-webhook-sync` | Identity provider sync | `ggg/system/identity` `ggg/system/organizations` `ggg/system/server` | `free` |
+| `ggg/workflow/impersonation` | Administrator impersonation | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/notification-inbox` | Notification inbox read state | `ggg/page/notifications` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/notification-preferences` | Notification preference saving | `ggg/page/settings-notifications` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `retain-data` |
+| `ggg/workflow/openapi-contract` | OpenAPI description | `ggg/system/api` `ggg/system/server` | `free` |
+| `ggg/workflow/organization-export` | Organization data export | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/outbound-webhooks` | Outbound webhook management | `ggg/page/settings-webhooks` `ggg/system/audit` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `retain-data` |
+| `ggg/workflow/project-export` | Project CSV export | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
+| `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
+| `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
 ## Systems (33)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
-| `system/analytics` | Product analytics | `system/apphost` `system/config` | `free` |
-| `system/announcements` | Product announcements | `system/database` | `retain-data` |
-| `system/api` | JSON API | `system/database` `system/organizations` `system/rate-limit` | `major-version-only` |
-| `system/apphost` | Application host seam | — | `replacement-required` |
-| `system/audit` | Audit log | `system/database` `system/organizations` | `retain-data` |
-| `system/billing` | Billing | `system/apphost` `system/config` `system/organizations` | `major-version-only` |
-| `system/config` | Configuration | `system/apphost` | `replacement-required` |
-| `system/content` | Content and CMS | `system/database` `system/organizations` | `retain-data` |
-| `system/content-assets` | Embedded content corpus | `system/content` | `free` |
-| `system/database` | Database | `system/apphost` `system/config` | `replacement-required` |
-| `system/feature-flags` | Feature flags | `system/apphost` `system/database` `system/organizations` | `retain-data` |
-| `system/i18n` | Localization | `system/apphost` | `replacement-required` |
-| `system/identity` | Identity | `system/apphost` `system/config` | `major-version-only` |
-| `system/impersonation` | Support impersonation | `system/database` `system/organizations` | `retain-data` |
-| `system/jobs` | Background job queue | `system/apphost` `system/config` `system/database` `system/mail` `system/observability` `system/storage` | `drain-required` |
-| `system/llm` | Language model | `system/apphost` `system/config` | `free` |
-| `system/mail` | Transactional mail | `system/apphost` `system/config` | `free` |
-| `system/metrics` | Runtime metrics endpoint | `system/server` | `free` |
-| `system/modkit` | Module registry engine | — | `replacement-required` |
-| `system/notifications` | In-app notifications | `system/database` `system/organizations` | `retain-data` |
-| `system/observability` | Error reporting | `system/apphost` `system/config` | `free` |
-| `system/organizations` | Users, organizations, and membership | `system/database` | `replacement-required` |
-| `system/rate-limit` | Request rate limiting | `system/apphost` `system/config` | `major-version-only` |
-| `system/schedules` | Recurring work | `system/database` | `retain-data` |
-| `system/security` | Middleware and request security | `system/identity` `system/organizations` `system/rate-limit` `system/server` | `replacement-required` |
-| `system/seed` | Fixture loader | `system/database` | `free` |
-| `system/seo` | Discovery surfaces | `system/server` | `free` |
-| `system/server` | HTTP server core | `system/analytics` `system/apphost` `system/billing` `system/config` `system/content` `system/content-assets` `system/database` `system/feature-flags` `system/i18n` `system/identity` `system/llm` `system/observability` `system/storage` | `replacement-required` |
-| `system/static` | Static asset serving | `system/server` | `replacement-required` |
-| `system/storage` | Object storage | `system/apphost` `system/config` | `retain-data` |
-| `system/testdb` | Per-package test databases | `system/database` | `free` |
-| `system/usage` | Usage metering | `system/database` `system/organizations` | `retain-data` |
-| `system/webhooks` | Outbound webhooks | `system/database` `system/organizations` | `retain-data` |
+| `ggg/system/analytics` | Product analytics | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/announcements` | Product announcements | `ggg/system/database` | `retain-data` |
+| `ggg/system/api` | JSON API | `ggg/system/database` `ggg/system/organizations` `ggg/system/rate-limit` | `major-version-only` |
+| `ggg/system/apphost` | Application host seam | — | `replacement-required` |
+| `ggg/system/audit` | Audit log | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/billing` | Billing | `ggg/system/apphost` `ggg/system/config` `ggg/system/organizations` | `major-version-only` |
+| `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
+| `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |
+| `ggg/system/database` | Database | `ggg/system/apphost` `ggg/system/config` | `replacement-required` |
+| `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |
+| `ggg/system/identity` | Identity | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
+| `ggg/system/impersonation` | Support impersonation | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/jobs` | Background job queue | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/mail` `ggg/system/observability` `ggg/system/storage` | `drain-required` |
+| `ggg/system/llm` | Language model | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/mail` | Transactional mail | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/metrics` | Runtime metrics endpoint | `ggg/system/server` | `free` |
+| `ggg/system/modkit` | Module registry engine | — | `replacement-required` |
+| `ggg/system/notifications` | In-app notifications | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/observability` | Error reporting | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/organizations` | Users, organizations, and membership | `ggg/system/database` | `replacement-required` |
+| `ggg/system/rate-limit` | Request rate limiting | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
+| `ggg/system/schedules` | Recurring work | `ggg/system/database` | `retain-data` |
+| `ggg/system/security` | Middleware and request security | `ggg/system/identity` `ggg/system/organizations` `ggg/system/rate-limit` `ggg/system/server` | `replacement-required` |
+| `ggg/system/seed` | Fixture loader | `ggg/system/database` | `free` |
+| `ggg/system/seo` | Discovery surfaces | `ggg/system/server` | `free` |
+| `ggg/system/server` | HTTP server core | `ggg/system/analytics` `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` `ggg/system/content` `ggg/system/content-assets` `ggg/system/database` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/identity` `ggg/system/llm` `ggg/system/observability` `ggg/system/storage` | `replacement-required` |
+| `ggg/system/static` | Static asset serving | `ggg/system/server` | `replacement-required` |
+| `ggg/system/storage` | Object storage | `ggg/system/apphost` `ggg/system/config` | `retain-data` |
+| `ggg/system/testdb` | Per-package test databases | `ggg/system/database` | `free` |
+| `ggg/system/usage` | Usage metering | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/webhooks` | Outbound webhooks | `ggg/system/database` `ggg/system/organizations` | `retain-data` |

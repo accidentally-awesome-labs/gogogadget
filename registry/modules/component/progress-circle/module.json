@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/progress-circle",
-    "kind": "component",
-    "name": "progress-circle",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ProgressCircle",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ProgressCircle renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/progress-circle.templ",
-        "target": "internal/web/templates/ui/progress-circle.templ",
         "class": "templ",
-        "sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "735d870db02e3ee6c88744c93ecfd7beda71c1f9593bc4ea00401fc06b3d347f",
+        "source": "internal/web/templates/ui/progress-circle.templ",
+        "target": "internal/web/templates/ui/progress-circle.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/progress-circle",
+    "kind": "component",
+    "migrations": [],
+    "name": "progress-circle",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "progress-circle",
           "family": "feedback",
-          "signature": "templ ProgressCircle(o ProgressCircleOpts)",
-          "summary": "Renders progress as a ring.",
           "guidance": "The ring is drawn with an SVG stroke offset and is aria-hidden; the semantics live on the wrapper, so assistive technology gets a progressbar with a value rather than a description of two circles.",
+          "name": "progress-circle",
+          "signature": "templ ProgressCircle(o ProgressCircleOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders progress as a ring."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ProgressCircle"
+  },
+  "schema": 2
 }

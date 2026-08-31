@@ -1,48 +1,59 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/text-input",
-    "kind": "component",
-    "name": "text-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TextInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TextInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/text-input.templ",
-        "target": "internal/web/templates/ui/text-input.templ",
         "class": "templ",
-        "sha256": "228b9c7aac6db9e6c7fdce0fdab6113d070a4a12a995f722728431b13ace4cd0",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "228b9c7aac6db9e6c7fdce0fdab6113d070a4a12a995f722728431b13ace4cd0",
+        "source": "internal/web/templates/ui/text-input.templ",
+        "target": "internal/web/templates/ui/text-input.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/text-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "text-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "text-input",
           "family": "forms",
+          "name": "text-input",
           "signature": "templ TextInput(o TextInputOpts)",
-          "summary": "A single-line text input.",
           "states": [
             "default",
             "disabled",
             "error",
             "readonly"
-          ]
+          ],
+          "summary": "A single-line text input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TextInput"
+  },
+  "schema": 2
 }

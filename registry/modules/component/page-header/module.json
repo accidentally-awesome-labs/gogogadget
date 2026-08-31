@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/page-header",
-    "kind": "component",
-    "name": "page-header",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "PageHeader",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The PageHeader renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/page-header.templ",
-        "target": "internal/web/templates/ui/page-header.templ",
         "class": "templ",
-        "sha256": "3e8ee26dc2bd4c25b28ed03c58c9438b706f8049056b8b16ab23ca6565a08edd",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "3e8ee26dc2bd4c25b28ed03c58c9438b706f8049056b8b16ab23ca6565a08edd",
+        "source": "internal/web/templates/ui/page-header.templ",
+        "target": "internal/web/templates/ui/page-header.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/page-header",
+    "kind": "component",
+    "migrations": [],
+    "name": "page-header",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "page-header",
           "family": "layout",
+          "name": "page-header",
           "signature": "templ PageHeader(o PageHeaderOpts)",
-          "summary": "The title row every page opens with; children are the right-hand actions.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "The title row every page opens with; children are the right-hand actions."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "PageHeader"
+  },
+  "schema": 2
 }

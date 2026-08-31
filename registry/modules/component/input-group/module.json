@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/input-group",
-    "kind": "component",
-    "name": "input-group",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "InputGroup",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The InputGroup renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/input-group.templ",
-        "target": "internal/web/templates/ui/input-group.templ",
         "class": "templ",
-        "sha256": "6412b0afd81d554fc037ec37c876cc2e6300314b190d48e324cdee4868c4f39a",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "6412b0afd81d554fc037ec37c876cc2e6300314b190d48e324cdee4868c4f39a",
+        "source": "internal/web/templates/ui/input-group.templ",
+        "target": "internal/web/templates/ui/input-group.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/input-group",
+    "kind": "component",
+    "migrations": [],
+    "name": "input-group",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "input-group",
           "family": "forms",
-          "signature": "templ InputGroup(o InputGroupOpts)",
-          "summary": "Joins addons and a control into one visual field.",
           "guidance": "The addons are separate elements rather than placeholder text, because placeholder text disappears the moment the user types and was never a label to begin with.",
+          "name": "input-group",
+          "signature": "templ InputGroup(o InputGroupOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Joins addons and a control into one visual field."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "InputGroup"
+  },
+  "schema": 2
 }

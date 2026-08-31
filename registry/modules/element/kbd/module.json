@@ -1,58 +1,69 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/kbd",
-    "kind": "element",
-    "name": "kbd",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Kbd",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Kbd renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/kbd.templ",
-        "target": "internal/web/templates/ui/kbd.templ",
         "class": "templ",
-        "sha256": "14ad7af9b0b0f7e7db751316a039c236616c7911c7c84af33ae83e3908606e74",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "14ad7af9b0b0f7e7db751316a039c236616c7911c7c84af33ae83e3908606e74",
+        "source": "internal/web/templates/ui/kbd.templ",
+        "target": "internal/web/templates/ui/kbd.templ"
       },
       {
-        "source": "internal/web/templates/ui/kbd_test.go",
-        "target": "internal/web/templates/ui/kbd_test.go",
         "class": "test",
-        "sha256": "02715e47aa22dd531667fe3d9820e72ac22fad90629e517a784e4ed216595ccf",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "02715e47aa22dd531667fe3d9820e72ac22fad90629e517a784e4ed216595ccf",
+        "source": "internal/web/templates/ui/kbd_test.go",
+        "target": "internal/web/templates/ui/kbd_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/kbd",
+    "kind": "element",
+    "migrations": [],
+    "name": "kbd",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "kbd",
           "family": "foundations",
-          "signature": "templ Kbd(o KbdOpts)",
-          "summary": "Renders one or more keyboard keys.",
           "guidance": "<kbd> is the element that says \"press this\", which matters when documentation is read aloud.",
+          "name": "kbd",
+          "signature": "templ Kbd(o KbdOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one or more keyboard keys."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Kbd"
+  },
+  "schema": 2
 }

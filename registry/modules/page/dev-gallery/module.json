@@ -1,326 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/dev-gallery",
-    "kind": "page",
-    "name": "dev-gallery",
-    "revision": 1,
-    "contract": 1,
-    "title": "Component gallery",
-    "description": "The dev-only reference page that renders every design token and component variant on one URL, doubling as the visual baseline for the component layer.",
-    "requires": [
-      "system/billing",
-      "system/i18n",
-      "system/security",
-      "system/server",
-      "workflow/dev-session"
-    ],
-    "files": [
-      {
-        "source": "internal/web/dev_fragments_test.go",
-        "target": "internal/web/dev_fragments_test.go",
-        "class": "test",
-        "sha256": "e9e54579129f18dd945edf24647c61f6de2d56b05ea5465737acc129d94785e9",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/dev_routes_test.go",
-        "target": "internal/web/dev_routes_test.go",
-        "class": "test",
-        "sha256": "74f4a92489bc55d94a938acd05312740a30a514788f00761c9436807574f56af",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/gallery_reference_test.go",
-        "target": "internal/web/gallery_reference_test.go",
-        "class": "test",
-        "sha256": "97154588b44be8a7aac747c3e70e40df7e051b3fd4e33e79596600a8cc4d6d8f",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/page_dev_catalog.go",
-        "target": "internal/web/page_dev_catalog.go",
-        "class": "go",
-        "sha256": "39e2e256dd4efa1622b306dfd50b8392611a3825308722b927dbc222833f80f1",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/page_dev_fragments.go",
-        "target": "internal/web/page_dev_fragments.go",
-        "class": "go",
-        "sha256": "785542230e11bdacccf8b3c275111c0c58550bc2932d1a1f2b0f7f843d751044",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/page_dev_gallery.go",
-        "target": "internal/web/page_dev_gallery.go",
-        "class": "go",
-        "sha256": "ac415b3d32d617c53b321b563cd0a3f38c8c8286a47aa27185a6cae5a9cc1d43",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/page_dev_gallery_move.go",
-        "target": "internal/web/page_dev_gallery_move.go",
-        "class": "go",
-        "sha256": "6fb973366fcb60717f3c843e86287ccbcdf661d5487aa2cd9b20bf98f4d2b29a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_calendar.templ",
-        "target": "internal/web/templates/dev_fragment_calendar.templ",
-        "class": "templ",
-        "sha256": "ef2bb616a98c3f472cad9b04b154db86a267b7fe2d0449390a2f594a58cd263b",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_copy.templ",
-        "target": "internal/web/templates/dev_fragment_copy.templ",
-        "class": "templ",
-        "sha256": "da56bd57e9281d06904fd0c01f9ebadcfa7e220ca7c70a5a30dade4a0203105e",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_editor.templ",
-        "target": "internal/web/templates/dev_fragment_editor.templ",
-        "class": "templ",
-        "sha256": "01c84340fd370d1d15d970802efe0fb42945c8892cfea696fad0010e1e0eb816",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_form.templ",
-        "target": "internal/web/templates/dev_fragment_form.templ",
-        "class": "templ",
-        "sha256": "39eac97252ec602b3ce1ca4d79b03b8b050aab7ff9571e0cab1b0baa075c8231",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_overlay.templ",
-        "target": "internal/web/templates/dev_fragment_overlay.templ",
-        "class": "templ",
-        "sha256": "0c6d0a26b5f3785629c566531c2381b33496df327ad55b8920697d16d8450ee7",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_table.templ",
-        "target": "internal/web/templates/dev_fragment_table.templ",
-        "class": "templ",
-        "sha256": "90f83e9beee120cabe9e63e3894f24d613b5d554464d4fc690e8e7b330c53cd6",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_toast.templ",
-        "target": "internal/web/templates/dev_fragment_toast.templ",
-        "class": "templ",
-        "sha256": "90fa21bb1d0afd59059e81f433e6fcf590ba80cbc1079ab0a023a418512afc16",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dev_fragment_upload.templ",
-        "target": "internal/web/templates/dev_fragment_upload.templ",
-        "class": "templ",
-        "sha256": "ef0cf65e9a045c179dccae4dddd6edcc2357f21a3af6be8abdfdec3fc9f4d667",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery.templ",
-        "target": "internal/web/templates/gallery.templ",
-        "class": "templ",
-        "sha256": "b232da58d4228240566100a26c6f11f58f54f3c664fc018743c55d3bf4495712",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_board.templ",
-        "target": "internal/web/templates/gallery_board.templ",
-        "class": "templ",
-        "sha256": "c2a55df36cbf99dc037a5001967ca9cfd59dde1290dbd51e68db9b33512e5354",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_board_test.go",
-        "target": "internal/web/templates/gallery_board_test.go",
-        "class": "test",
-        "sha256": "c84ec12ef8fd5ea33c1564a51d334d55ecfb0e78ed35efec0bd9f35dab54f92a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_family.templ",
-        "target": "internal/web/templates/gallery_family.templ",
-        "class": "templ",
-        "sha256": "77774198ba92ccced50def0ce7eb0b31c3dec925001abe11de26836d5c821d89",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_fixtures.go",
-        "target": "internal/web/templates/gallery_fixtures.go",
-        "class": "go",
-        "sha256": "e6f71d86fd48b396ad8bf3cb7b4c456c189e6dba0ed0255e739e131022f7d67c",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_pager.templ",
-        "target": "internal/web/templates/gallery_pager.templ",
-        "class": "templ",
-        "sha256": "b1ce0e3ea4746fb24ce15583a20e3941d41d0e9ff6d8990821891ca8301e9ef4",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_reference.go",
-        "target": "internal/web/templates/gallery_reference.go",
-        "class": "go",
-        "sha256": "e629f57053f5a0b5fac5ef2e422c8b8d27a2d2dfc4c0b4f28e5a912a9e876905",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/gallery_reference.templ",
-        "target": "internal/web/templates/gallery_reference.templ",
-        "class": "templ",
-        "sha256": "8b299879d244894e8b2593ddd341eaaa0a545bb3984b8a31c44489015d38f4f3",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_analytics.templ",
-        "target": "internal/web/templates/scenario_analytics.templ",
-        "class": "templ",
-        "sha256": "3903a0cf3ba229cc8f011b943361545ef6aa7d4a6a075ff9f0624e2e447a94b3",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_billing.templ",
-        "target": "internal/web/templates/scenario_billing.templ",
-        "class": "templ",
-        "sha256": "77f0ff4db4f81fb00262f10002797f7c80fdcc0f1cd18bfb8bdd2e062e0cb73d",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_communication.templ",
-        "target": "internal/web/templates/scenario_communication.templ",
-        "class": "templ",
-        "sha256": "3b64333621bb06349f1335a40b6ee92fcf7fd0d5ea3a3c25b3e4880cd0196869",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_content.templ",
-        "target": "internal/web/templates/scenario_content.templ",
-        "class": "templ",
-        "sha256": "8ec8864c844b5075305ece0fb5bac66c88a2b62fcdff3b8536e838425d7a79d4",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_context.go",
-        "target": "internal/web/templates/scenario_context.go",
-        "class": "go",
-        "sha256": "fb00e9a9f7b145501d890424fc65c6b047870651e458f9d7d2908ceede5d0e46",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_dashboard.templ",
-        "target": "internal/web/templates/scenario_dashboard.templ",
-        "class": "templ",
-        "sha256": "1e19c8fec4629eccfae5fa4c512cc3827a36b499141ac973871de962f9b0555d",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_developer.templ",
-        "target": "internal/web/templates/scenario_developer.templ",
-        "class": "templ",
-        "sha256": "79df7966fee556a41e26b01846161607b6aafb91036fea9477ccfc82b7e68aeb",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_operations.templ",
-        "target": "internal/web/templates/scenario_operations.templ",
-        "class": "templ",
-        "sha256": "03a5e87b641d014d5f10dfa0cb67eb71fb32c2b7ed1877a1f0916811d40c8b62",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_page.templ",
-        "target": "internal/web/templates/scenario_page.templ",
-        "class": "templ",
-        "sha256": "6c8bc91522e2596b4a5b1ac9f224cef4331a77a4410924446fd5dfa40c1135b8",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_planning.templ",
-        "target": "internal/web/templates/scenario_planning.templ",
-        "class": "templ",
-        "sha256": "6c085c57a7086054f68ec1de525788175d4feb822df02a60773925e872cd001b",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_resource_list.templ",
-        "target": "internal/web/templates/scenario_resource_list.templ",
-        "class": "templ",
-        "sha256": "b343577ccde577560e17c64f24d25185b1c530273a20b2d769782cb5e875cc18",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_settings.templ",
-        "target": "internal/web/templates/scenario_settings.templ",
-        "class": "templ",
-        "sha256": "27b06e21b9014a4d5ad9996cc4aa070848ec3d038e22a03b60671614513fc099",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_system_states.templ",
-        "target": "internal/web/templates/scenario_system_states.templ",
-        "class": "templ",
-        "sha256": "a2d33a5e18a9b99b8996547a16fd7efb5c163ef602793a5b931f3e722a388765",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenario_team.templ",
-        "target": "internal/web/templates/scenario_team.templ",
-        "class": "templ",
-        "sha256": "03c611dbb2316b705f1e637fa4f22b42f5e6a8df4e5c190ac61d1fa2e2cd70e6",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/scenarios.go",
-        "target": "internal/web/templates/scenarios.go",
-        "class": "go",
-        "sha256": "f28f4f9a83b061974bf65e25285dc4313259fc87cc1f34521a8decf7e3eda9cc",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "dev-gallery.component",
@@ -332,141 +11,504 @@
         "dev-gallery.ui_action_post"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The dev-only reference page that renders every design token and component variant on one URL, doubling as the visual baseline for the component layer.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "e9e54579129f18dd945edf24647c61f6de2d56b05ea5465737acc129d94785e9",
+        "source": "internal/web/dev_fragments_test.go",
+        "target": "internal/web/dev_fragments_test.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "74f4a92489bc55d94a938acd05312740a30a514788f00761c9436807574f56af",
+        "source": "internal/web/dev_routes_test.go",
+        "target": "internal/web/dev_routes_test.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "97154588b44be8a7aac747c3e70e40df7e051b3fd4e33e79596600a8cc4d6d8f",
+        "source": "internal/web/gallery_reference_test.go",
+        "target": "internal/web/gallery_reference_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "39e2e256dd4efa1622b306dfd50b8392611a3825308722b927dbc222833f80f1",
+        "source": "internal/web/page_dev_catalog.go",
+        "target": "internal/web/page_dev_catalog.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "785542230e11bdacccf8b3c275111c0c58550bc2932d1a1f2b0f7f843d751044",
+        "source": "internal/web/page_dev_fragments.go",
+        "target": "internal/web/page_dev_fragments.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "ac415b3d32d617c53b321b563cd0a3f38c8c8286a47aa27185a6cae5a9cc1d43",
+        "source": "internal/web/page_dev_gallery.go",
+        "target": "internal/web/page_dev_gallery.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "6fb973366fcb60717f3c843e86287ccbcdf661d5487aa2cd9b20bf98f4d2b29a",
+        "source": "internal/web/page_dev_gallery_move.go",
+        "target": "internal/web/page_dev_gallery_move.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "ef2bb616a98c3f472cad9b04b154db86a267b7fe2d0449390a2f594a58cd263b",
+        "source": "internal/web/templates/dev_fragment_calendar.templ",
+        "target": "internal/web/templates/dev_fragment_calendar.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "da56bd57e9281d06904fd0c01f9ebadcfa7e220ca7c70a5a30dade4a0203105e",
+        "source": "internal/web/templates/dev_fragment_copy.templ",
+        "target": "internal/web/templates/dev_fragment_copy.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "01c84340fd370d1d15d970802efe0fb42945c8892cfea696fad0010e1e0eb816",
+        "source": "internal/web/templates/dev_fragment_editor.templ",
+        "target": "internal/web/templates/dev_fragment_editor.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "39eac97252ec602b3ce1ca4d79b03b8b050aab7ff9571e0cab1b0baa075c8231",
+        "source": "internal/web/templates/dev_fragment_form.templ",
+        "target": "internal/web/templates/dev_fragment_form.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "0c6d0a26b5f3785629c566531c2381b33496df327ad55b8920697d16d8450ee7",
+        "source": "internal/web/templates/dev_fragment_overlay.templ",
+        "target": "internal/web/templates/dev_fragment_overlay.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "90f83e9beee120cabe9e63e3894f24d613b5d554464d4fc690e8e7b330c53cd6",
+        "source": "internal/web/templates/dev_fragment_table.templ",
+        "target": "internal/web/templates/dev_fragment_table.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "90fa21bb1d0afd59059e81f433e6fcf590ba80cbc1079ab0a023a418512afc16",
+        "source": "internal/web/templates/dev_fragment_toast.templ",
+        "target": "internal/web/templates/dev_fragment_toast.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "ef0cf65e9a045c179dccae4dddd6edcc2357f21a3af6be8abdfdec3fc9f4d667",
+        "source": "internal/web/templates/dev_fragment_upload.templ",
+        "target": "internal/web/templates/dev_fragment_upload.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "b232da58d4228240566100a26c6f11f58f54f3c664fc018743c55d3bf4495712",
+        "source": "internal/web/templates/gallery.templ",
+        "target": "internal/web/templates/gallery.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c2a55df36cbf99dc037a5001967ca9cfd59dde1290dbd51e68db9b33512e5354",
+        "source": "internal/web/templates/gallery_board.templ",
+        "target": "internal/web/templates/gallery_board.templ"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c84ec12ef8fd5ea33c1564a51d334d55ecfb0e78ed35efec0bd9f35dab54f92a",
+        "source": "internal/web/templates/gallery_board_test.go",
+        "target": "internal/web/templates/gallery_board_test.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "77774198ba92ccced50def0ce7eb0b31c3dec925001abe11de26836d5c821d89",
+        "source": "internal/web/templates/gallery_family.templ",
+        "target": "internal/web/templates/gallery_family.templ"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "e6f71d86fd48b396ad8bf3cb7b4c456c189e6dba0ed0255e739e131022f7d67c",
+        "source": "internal/web/templates/gallery_fixtures.go",
+        "target": "internal/web/templates/gallery_fixtures.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "b1ce0e3ea4746fb24ce15583a20e3941d41d0e9ff6d8990821891ca8301e9ef4",
+        "source": "internal/web/templates/gallery_pager.templ",
+        "target": "internal/web/templates/gallery_pager.templ"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "e629f57053f5a0b5fac5ef2e422c8b8d27a2d2dfc4c0b4f28e5a912a9e876905",
+        "source": "internal/web/templates/gallery_reference.go",
+        "target": "internal/web/templates/gallery_reference.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "8b299879d244894e8b2593ddd341eaaa0a545bb3984b8a31c44489015d38f4f3",
+        "source": "internal/web/templates/gallery_reference.templ",
+        "target": "internal/web/templates/gallery_reference.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "3903a0cf3ba229cc8f011b943361545ef6aa7d4a6a075ff9f0624e2e447a94b3",
+        "source": "internal/web/templates/scenario_analytics.templ",
+        "target": "internal/web/templates/scenario_analytics.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "77f0ff4db4f81fb00262f10002797f7c80fdcc0f1cd18bfb8bdd2e062e0cb73d",
+        "source": "internal/web/templates/scenario_billing.templ",
+        "target": "internal/web/templates/scenario_billing.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "3b64333621bb06349f1335a40b6ee92fcf7fd0d5ea3a3c25b3e4880cd0196869",
+        "source": "internal/web/templates/scenario_communication.templ",
+        "target": "internal/web/templates/scenario_communication.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "8ec8864c844b5075305ece0fb5bac66c88a2b62fcdff3b8536e838425d7a79d4",
+        "source": "internal/web/templates/scenario_content.templ",
+        "target": "internal/web/templates/scenario_content.templ"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "fb00e9a9f7b145501d890424fc65c6b047870651e458f9d7d2908ceede5d0e46",
+        "source": "internal/web/templates/scenario_context.go",
+        "target": "internal/web/templates/scenario_context.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "1e19c8fec4629eccfae5fa4c512cc3827a36b499141ac973871de962f9b0555d",
+        "source": "internal/web/templates/scenario_dashboard.templ",
+        "target": "internal/web/templates/scenario_dashboard.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "79df7966fee556a41e26b01846161607b6aafb91036fea9477ccfc82b7e68aeb",
+        "source": "internal/web/templates/scenario_developer.templ",
+        "target": "internal/web/templates/scenario_developer.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "03a5e87b641d014d5f10dfa0cb67eb71fb32c2b7ed1877a1f0916811d40c8b62",
+        "source": "internal/web/templates/scenario_operations.templ",
+        "target": "internal/web/templates/scenario_operations.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "6c8bc91522e2596b4a5b1ac9f224cef4331a77a4410924446fd5dfa40c1135b8",
+        "source": "internal/web/templates/scenario_page.templ",
+        "target": "internal/web/templates/scenario_page.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "6c085c57a7086054f68ec1de525788175d4feb822df02a60773925e872cd001b",
+        "source": "internal/web/templates/scenario_planning.templ",
+        "target": "internal/web/templates/scenario_planning.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "b343577ccde577560e17c64f24d25185b1c530273a20b2d769782cb5e875cc18",
+        "source": "internal/web/templates/scenario_resource_list.templ",
+        "target": "internal/web/templates/scenario_resource_list.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "27b06e21b9014a4d5ad9996cc4aa070848ec3d038e22a03b60671614513fc099",
+        "source": "internal/web/templates/scenario_settings.templ",
+        "target": "internal/web/templates/scenario_settings.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "a2d33a5e18a9b99b8996547a16fd7efb5c163ef602793a5b931f3e722a388765",
+        "source": "internal/web/templates/scenario_system_states.templ",
+        "target": "internal/web/templates/scenario_system_states.templ"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "03c611dbb2316b705f1e637fa4f22b42f5e6a8df4e5c190ac61d1fa2e2cd70e6",
+        "source": "internal/web/templates/scenario_team.templ",
+        "target": "internal/web/templates/scenario_team.templ"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "f28f4f9a83b061974bf65e25285dc4313259fc87cc1f34521a8decf7e3eda9cc",
+        "source": "internal/web/templates/scenarios.go",
+        "target": "internal/web/templates/scenarios.go"
+      }
+    ],
+    "id": "ggg/page/dev-gallery",
+    "kind": "page",
+    "migrations": [],
+    "name": "dev-gallery",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/billing"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/dev-session"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevGalleryComponent",
           "id": "dev-gallery.component",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/gallery/{family}/{component}",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevGalleryComponent",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevGalleryFamily",
           "id": "dev-gallery.family",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/gallery/{family}",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevGalleryFamily",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevGallery",
           "id": "dev-gallery.index",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/gallery",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevGallery",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevScenario",
           "id": "dev-gallery.scenario",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/scenarios/{scenario}",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevScenario",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevUIAction",
           "id": "dev-gallery.ui_action_delete",
           "method": "DELETE",
+          "package": "internal/web",
           "pattern": "/dev/ui/{component}/{action}",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevUIAction",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevUIAction",
           "id": "dev-gallery.ui_action_get",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/dev/ui/{component}/{action}",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevUIAction",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         },
         {
+          "enabled": "devAuthBypass",
+          "handler": "handleDevUIAction",
           "id": "dev-gallery.ui_action_post",
           "method": "POST",
+          "package": "internal/web",
           "pattern": "/dev/ui/{component}/{action}",
-          "scope": "dev",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleDevUIAction",
-          "enabled": "devAuthBypass"
+          "scope": "dev"
         }
       ],
       "scenarios": [
         {
-          "slug": "analytics",
-          "title": "Analytics",
-          "summary": "Chart families with date filters, a data grid and the accessible summaries beside them.",
           "layout": "app",
+          "slug": "analytics",
+          "states": [
+            "default",
+            "empty",
+            "loading"
+          ],
+          "summary": "Chart families with date filters, a data grid and the accessible summaries beside them.",
           "surfaces": [
             "bar-chart",
             "line-chart",
@@ -477,17 +519,18 @@
             "date-range-picker",
             "data-grid"
           ],
-          "states": [
-            "default",
-            "empty",
-            "loading"
-          ]
+          "title": "Analytics"
         },
         {
-          "slug": "billing",
-          "title": "Billing",
-          "summary": "Plans, quotas, invoices, dunning notices and processing states.",
           "layout": "app",
+          "slug": "billing",
+          "states": [
+            "default",
+            "loading",
+            "error",
+            "success"
+          ],
+          "summary": "Plans, quotas, invoices, dunning notices and processing states.",
           "surfaces": [
             "plan-card",
             "usage-card",
@@ -497,18 +540,17 @@
             "banner",
             "data-table"
           ],
-          "states": [
-            "default",
-            "loading",
-            "error",
-            "success"
-          ]
+          "title": "Billing"
         },
         {
-          "slug": "communication",
-          "title": "Communication",
-          "summary": "Notifications, comment threads, a chat log, a composer and attachments.",
           "layout": "app",
+          "slug": "communication",
+          "states": [
+            "default",
+            "empty",
+            "loading"
+          ],
+          "summary": "Notifications, comment threads, a chat log, a composer and attachments.",
           "surfaces": [
             "notification-item",
             "comment",
@@ -518,17 +560,17 @@
             "composer",
             "attachment"
           ],
-          "states": [
-            "default",
-            "empty",
-            "loading"
-          ]
+          "title": "Communication"
         },
         {
-          "slug": "content",
-          "title": "Content",
-          "summary": "The Markdown editor with media, revisions, server-rendered preview and attachments.",
           "layout": "admin",
+          "slug": "content",
+          "states": [
+            "default",
+            "error",
+            "success"
+          ],
+          "summary": "The Markdown editor with media, revisions, server-rendered preview and attachments.",
           "surfaces": [
             "markdown-editor",
             "editor-toolbar",
@@ -537,17 +579,17 @@
             "attachment",
             "panel-group"
           ],
-          "states": [
-            "default",
-            "error",
-            "success"
-          ]
+          "title": "Content"
         },
         {
-          "slug": "dashboard",
-          "title": "Dashboard",
-          "summary": "First-run onboarding, headline metrics, a command trigger and recent activity.",
           "layout": "app",
+          "slug": "dashboard",
+          "states": [
+            "default",
+            "empty",
+            "loading"
+          ],
+          "summary": "First-run onboarding, headline metrics, a command trigger and recent activity.",
           "surfaces": [
             "onboarding-checklist",
             "stat-group",
@@ -555,17 +597,17 @@
             "command-palette",
             "activity-item"
           ],
+          "title": "Dashboard"
+        },
+        {
+          "layout": "app",
+          "slug": "developer",
           "states": [
             "default",
             "empty",
-            "loading"
-          ]
-        },
-        {
-          "slug": "developer",
-          "title": "Developer",
+            "error"
+          ],
           "summary": "API keys, secret reveal, webhook endpoints, code samples and delivery states.",
-          "layout": "app",
           "surfaces": [
             "secret-reveal",
             "code",
@@ -574,17 +616,17 @@
             "delivery-status",
             "status-dot"
           ],
+          "title": "Developer"
+        },
+        {
+          "layout": "admin",
+          "slug": "operations",
           "states": [
             "default",
             "empty",
-            "error"
-          ]
-        },
-        {
-          "slug": "operations",
-          "title": "Operations",
+            "readonly"
+          ],
           "summary": "Jobs, schedules, feature flags and audit rows behind admin-role gating.",
-          "layout": "admin",
           "surfaces": [
             "data-table",
             "badge",
@@ -593,17 +635,16 @@
             "toolbar",
             "pagination"
           ],
-          "states": [
-            "default",
-            "empty",
-            "readonly"
-          ]
+          "title": "Operations"
         },
         {
-          "slug": "planning",
-          "title": "Planning",
-          "summary": "Calendar and scheduler, a board, a hierarchy and resizable panels together.",
           "layout": "app",
+          "slug": "planning",
+          "states": [
+            "default",
+            "empty"
+          ],
+          "summary": "Calendar and scheduler, a board, a hierarchy and resizable panels together.",
           "surfaces": [
             "date-picker",
             "scheduler",
@@ -612,16 +653,18 @@
             "tree-grid",
             "panel-group"
           ],
-          "states": [
-            "default",
-            "empty"
-          ]
+          "title": "Planning"
         },
         {
-          "slug": "resource-list",
-          "title": "Resource list",
-          "summary": "A table with search, filter, sort, selection, bulk actions and pagination.",
           "layout": "app",
+          "slug": "resource-list",
+          "states": [
+            "default",
+            "empty",
+            "loading",
+            "error"
+          ],
+          "summary": "A table with search, filter, sort, selection, bulk actions and pagination.",
           "surfaces": [
             "data-table",
             "search-input",
@@ -631,18 +674,18 @@
             "pagination",
             "empty-state"
           ],
-          "states": [
-            "default",
-            "empty",
-            "loading",
-            "error"
-          ]
+          "title": "Resource list"
         },
         {
-          "slug": "settings",
-          "title": "Settings",
-          "summary": "Account, organisation and security forms with validation, saving feedback and a danger zone.",
           "layout": "app",
+          "slug": "settings",
+          "states": [
+            "default",
+            "error",
+            "success",
+            "readonly"
+          ],
+          "summary": "Account, organisation and security forms with validation, saving feedback and a danger zone.",
           "surfaces": [
             "nav-tabs",
             "settings-section",
@@ -651,18 +694,17 @@
             "text-input",
             "alert-dialog"
           ],
-          "states": [
-            "default",
-            "error",
-            "success",
-            "readonly"
-          ]
+          "title": "Settings"
         },
         {
-          "slug": "system-states",
-          "title": "System states",
-          "summary": "Skeletons, progress, empty and error states, and every terminal page from 403 to 503.",
           "layout": "public",
+          "slug": "system-states",
+          "states": [
+            "default",
+            "loading",
+            "error"
+          ],
+          "summary": "Skeletons, progress, empty and error states, and every terminal page from 403 to 503.",
           "surfaces": [
             "skeleton",
             "progress-bar",
@@ -672,17 +714,17 @@
             "terminal-page",
             "banner"
           ],
-          "states": [
-            "default",
-            "loading",
-            "error"
-          ]
+          "title": "System states"
         },
         {
-          "slug": "team",
-          "title": "Team",
-          "summary": "Members, invitations and roles, including the read-only view a non-admin sees.",
           "layout": "app",
+          "slug": "team",
+          "states": [
+            "default",
+            "empty",
+            "readonly"
+          ],
+          "summary": "Members, invitations and roles, including the read-only view a non-admin sees.",
           "surfaces": [
             "avatar",
             "avatar-group",
@@ -691,11 +733,7 @@
             "badge",
             "dropdown-menu"
           ],
-          "states": [
-            "default",
-            "empty",
-            "readonly"
-          ]
+          "title": "Team"
         }
       ],
       "visual": [
@@ -710,15 +748,12 @@
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Component gallery"
+  },
+  "schema": 2
 }

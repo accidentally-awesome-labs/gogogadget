@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/range-input",
-    "kind": "component",
-    "name": "range-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "RangeInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The RangeInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/range-input.templ",
-        "target": "internal/web/templates/ui/range-input.templ",
         "class": "templ",
-        "sha256": "f798c7804ee21e4d3721a7149a08aaee164f9355f5b6b940ff881a1601d63e9a",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "f798c7804ee21e4d3721a7149a08aaee164f9355f5b6b940ff881a1601d63e9a",
+        "source": "internal/web/templates/ui/range-input.templ",
+        "target": "internal/web/templates/ui/range-input.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/range-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "range-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "range-input",
           "family": "forms",
+          "name": "range-input",
           "signature": "templ RangeInput(o RangeInputOpts)",
-          "summary": "Renders a native slider with a text readout.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a native slider with a text readout."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "RangeInput"
+  },
+  "schema": 2
 }

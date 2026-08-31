@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/code",
-    "kind": "element",
-    "name": "code",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Code",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Code renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/code.templ",
-        "target": "internal/web/templates/ui/code.templ",
         "class": "templ",
-        "sha256": "de84f3abc01506e3ad6b7b16202ca8a7482696d8cda79c0852e865db7d4cc68f",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "de84f3abc01506e3ad6b7b16202ca8a7482696d8cda79c0852e865db7d4cc68f",
+        "source": "internal/web/templates/ui/code.templ",
+        "target": "internal/web/templates/ui/code.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/code",
+    "kind": "element",
+    "migrations": [],
+    "name": "code",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "code",
           "family": "foundations",
-          "signature": "templ Code(o CodeOpts)",
-          "summary": "Renders an inline code span.",
           "guidance": "The value is text content, never raw markup: user-controlled content in a code span is still user-controlled content, and templ escaping is the only reason this is safe.",
+          "name": "code",
+          "signature": "templ Code(o CodeOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an inline code span."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Code"
+  },
+  "schema": 2
 }

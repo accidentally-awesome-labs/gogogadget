@@ -1,48 +1,65 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/toast-region",
-    "kind": "component",
-    "name": "toast-region",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Toast region",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ToastRegion renderer and its options.",
-    "requires": [
-      "component/toast",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/toast-region.templ",
-        "target": "internal/web/templates/ui/toast-region.templ",
         "class": "templ",
-        "sha256": "addd3973adac7dc3310bc07c60191ff8830c8d9a1b44aad22c728885f7c76433",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "addd3973adac7dc3310bc07c60191ff8830c8d9a1b44aad22c728885f7c76433",
+        "source": "internal/web/templates/ui/toast-region.templ",
+        "target": "internal/web/templates/ui/toast-region.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/toast-region",
+    "kind": "component",
+    "migrations": [],
+    "name": "toast-region",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/toast"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "toast-region",
-          "family": "feedback",
           "engine": "alpine",
-          "signature": "templ ToastRegion(o ToastRegionOpts)",
-          "summary": "Renders the shell's live toast stack.",
+          "family": "feedback",
           "guidance": "One per document, rendered in the shell and outside #content: navigation swaps only #content, so a region inside it would be destroyed mid-swap and lose both its queued toasts and its document listener. The live-region semantics sit on the container rather than on each toast, because a live region has to exist before its message arrives or nothing is announced. Its Alpine controller (toastRoot) is registered by the shell in static/app.js: the shell owns the HX-Trigger listener and the flash handoff across a redirect.",
+          "name": "toast-region",
+          "signature": "templ ToastRegion(o ToastRegionOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders the shell's live toast stack."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Toast region"
+  },
+  "schema": 2
 }

@@ -1,55 +1,60 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/apphost",
-    "kind": "system",
-    "name": "apphost",
-    "revision": 1,
-    "contract": 1,
-    "title": "Application host seam",
-    "description": "Leaf ambient-environment seam (configuration lookup, logging, clock, version) that every runtime module is constructed against.",
-    "requires": [],
-    "files": [
-      {
-        "source": "internal/apphost/apphost.go",
-        "target": "internal/apphost/apphost.go",
-        "class": "go",
-        "sha256": "fea155f6ee5b35ee0cb48ff0c382439b78807fafed45fdd86f7b2df72010f922",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/apphost/apphost_test.go",
-        "target": "internal/apphost/apphost_test.go",
-        "class": "test",
-        "sha256": "9b17becf61ebc418a66906eb92ca8ea0090d80d33d9d43c945a6968a26ec383d",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/modules/boot_test.go",
-        "target": "internal/modules/boot_test.go",
-        "class": "test",
-        "sha256": "499b159cccc040804ec661c6e92d37375c47544fda95101eac646bb4ff18e540",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/apphost"
       ]
     },
-    "runtime": {},
-    "migrations": [],
-    "environment": [],
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Leaf ambient-environment seam (configuration lookup, logging, clock, version) that every runtime module is constructed against.",
     "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "fea155f6ee5b35ee0cb48ff0c382439b78807fafed45fdd86f7b2df72010f922",
+        "source": "internal/apphost/apphost.go",
+        "target": "internal/apphost/apphost.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "9b17becf61ebc418a66906eb92ca8ea0090d80d33d9d43c945a6968a26ec383d",
+        "source": "internal/apphost/apphost_test.go",
+        "target": "internal/apphost/apphost_test.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "499b159cccc040804ec661c6e92d37375c47544fda95101eac646bb4ff18e540",
+        "source": "internal/modules/boot_test.go",
+        "target": "internal/modules/boot_test.go"
+      }
+    ],
+    "id": "ggg/system/apphost",
+    "kind": "system",
+    "migrations": [],
+    "name": "apphost",
+    "removal_policy": "replacement-required",
+    "requires": [],
+    "revision": 1,
+    "runtime": {},
     "tests": {
       "go_packages": [
         "internal/apphost"
       ]
     },
-    "data": [],
-    "removal_policy": "replacement-required"
-  }
+    "title": "Application host seam"
+  },
+  "schema": 2
 }

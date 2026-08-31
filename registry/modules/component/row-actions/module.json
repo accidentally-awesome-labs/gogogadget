@@ -1,47 +1,64 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/row-actions",
-    "kind": "component",
-    "name": "row-actions",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "RowActions",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The RowActions renderer and its options.",
-    "requires": [
-      "component/dropdown-menu",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/row-actions.templ",
-        "target": "internal/web/templates/ui/row-actions.templ",
         "class": "templ",
-        "sha256": "b40b25b97b7fae04c9a2973c8c0c2c5479146430225ae683865498cbd4569d68",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "b40b25b97b7fae04c9a2973c8c0c2c5479146430225ae683865498cbd4569d68",
+        "source": "internal/web/templates/ui/row-actions.templ",
+        "target": "internal/web/templates/ui/row-actions.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/row-actions",
+    "kind": "component",
+    "migrations": [],
+    "name": "row-actions",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/dropdown-menu"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "row-actions",
           "family": "data",
+          "name": "row-actions",
           "signature": "templ RowActions(o RowActionsOpts)",
-          "summary": "Renders a row's commands as a menu.",
           "states": [
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "Renders a row's commands as a menu."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "RowActions"
+  },
+  "schema": 2
 }

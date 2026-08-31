@@ -1,58 +1,69 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/skip-link",
-    "kind": "component",
-    "name": "skip-link",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SkipLink",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SkipLink renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/skip-link.templ",
-        "target": "internal/web/templates/ui/skip-link.templ",
         "class": "templ",
-        "sha256": "cd7113590bf6eb3fa91752955efe3695b9fbc97ea3bb28a33b9695ddf6a2407b",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "cd7113590bf6eb3fa91752955efe3695b9fbc97ea3bb28a33b9695ddf6a2407b",
+        "source": "internal/web/templates/ui/skip-link.templ",
+        "target": "internal/web/templates/ui/skip-link.templ"
       },
       {
-        "source": "internal/web/templates/ui/skip-link_test.go",
-        "target": "internal/web/templates/ui/skip-link_test.go",
         "class": "test",
-        "sha256": "b4c1950bad46ab1ccb2e5835fb85a24cb181a4fff974affe4155a301a6729fbd",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "b4c1950bad46ab1ccb2e5835fb85a24cb181a4fff974affe4155a301a6729fbd",
+        "source": "internal/web/templates/ui/skip-link_test.go",
+        "target": "internal/web/templates/ui/skip-link_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/skip-link",
+    "kind": "component",
+    "migrations": [],
+    "name": "skip-link",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "skip-link",
           "family": "navigation",
-          "signature": "templ SkipLink(o SkipLinkOpts)",
-          "summary": "Renders the first focusable control on the page.",
           "guidance": "It is visually hidden until focused, not display:none - a hidden element is not focusable, so a display:none skip link is exactly as useless as none at all. It must be the first control in the document, otherwise a keyboard user tabs through the whole navigation before reaching the way to bypass it.",
+          "name": "skip-link",
+          "signature": "templ SkipLink(o SkipLinkOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders the first focusable control on the page."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SkipLink"
+  },
+  "schema": 2
 }

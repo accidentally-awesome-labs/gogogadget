@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/nav-tabs",
-    "kind": "component",
-    "name": "nav-tabs",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "NavTabs",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The NavTabs renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/nav-tabs.templ",
-        "target": "internal/web/templates/ui/nav-tabs.templ",
         "class": "templ",
-        "sha256": "e3fe443fabfd9df8a848a7ff5502e4950993b749a0a85079d05bf7d4be23583c",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "e3fe443fabfd9df8a848a7ff5502e4950993b749a0a85079d05bf7d4be23583c",
+        "source": "internal/web/templates/ui/nav-tabs.templ",
+        "target": "internal/web/templates/ui/nav-tabs.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/nav-tabs",
+    "kind": "component",
+    "migrations": [],
+    "name": "nav-tabs",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "nav-tabs",
           "family": "navigation",
-          "signature": "templ NavTabs(o NavTabsOpts)",
-          "summary": "The boosted sub-navigation inside a page (settings).",
           "guidance": "ActivePath is the current request path.",
+          "name": "nav-tabs",
+          "signature": "templ NavTabs(o NavTabsOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "The boosted sub-navigation inside a page (settings)."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "NavTabs"
+  },
+  "schema": 2
 }

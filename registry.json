@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "canonical_module": "github.com/gogogadget/gogogadget",
   "includes": [
     "registry/elements.json",
     "registry/components.json",
@@ -7,5 +7,7 @@
     "registry/workflows.json",
     "registry/systems.json",
     "registry/profiles.json"
-  ]
+  ],
+  "namespace": "ggg",
+  "schema": 2
 }

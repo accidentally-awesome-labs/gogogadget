@@ -1,397 +1,408 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/content-assets",
-    "kind": "system",
-    "name": "content-assets",
-    "revision": 1,
-    "contract": 1,
-    "title": "Embedded content corpus",
-    "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
-    "requires": [
-      "system/content"
-    ],
-    "files": [
-      {
-        "source": "content/blog/hello-world.md",
-        "target": "content/blog/hello-world.md",
-        "class": "content",
-        "sha256": "c4c0cb370348ccbc34e9b8b6804089aedd9e349eadb093528be0782525f15bda",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/blog/value-stack.md",
-        "target": "content/blog/value-stack.md",
-        "class": "content",
-        "sha256": "67bc24bd43b76e8923020dc3f6cd64fb22e8399d73e78adbf4aaa162a57bfeb6",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/blog/why-htmx.md",
-        "target": "content/blog/why-htmx.md",
-        "class": "content",
-        "sha256": "c2bd6ae522f05c83ccfe6f9074dab047da1e087d9af561849553b88d1913e681",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-02.md",
-        "target": "content/changelog/2026-08-02.md",
-        "class": "content",
-        "sha256": "7bb590f7705558d336f0990ea03989004a318b5ed29ab93f9205082a69ba999d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-05.md",
-        "target": "content/changelog/2026-08-05.md",
-        "class": "content",
-        "sha256": "7fca188246a43e34e47f05d2ae90998186ece878bddc57fce769c86f0fd83e85",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-17.md",
-        "target": "content/changelog/2026-08-17.md",
-        "class": "content",
-        "sha256": "21686dad615da3d103a3ce90a075afe0954ef343580d9602aa95bf9c771b7008",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-18.md",
-        "target": "content/changelog/2026-08-18.md",
-        "class": "content",
-        "sha256": "86b12313bb4bd21aa71435aeaa48fc2d391d3b57939386adf13aae0a28d669ab",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-19.md",
-        "target": "content/changelog/2026-08-19.md",
-        "class": "content",
-        "sha256": "7713e8bb19d70ea51f603af985af30c2db2d34739f786a4af128c544e82f2270",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-20.md",
-        "target": "content/changelog/2026-08-20.md",
-        "class": "content",
-        "sha256": "408866e94e50ac42bea7f696c8bf02b30253487380d6125633d65646601528e3",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-21.md",
-        "target": "content/changelog/2026-08-21.md",
-        "class": "content",
-        "sha256": "39146e7d62a83936f9c74b0eb009d288c762e4288a595b49dc0d810496b992f7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/changelog/2026-08-22.md",
-        "target": "content/changelog/2026-08-22.md",
-        "class": "content",
-        "sha256": "2302e2309393a50324760f1c791f24a6d6f50fb646c64d1f5d06454fab0358b0",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/admin.md",
-        "target": "content/docs/admin.md",
-        "class": "content",
-        "sha256": "dfc9f6c30e67622f1f6426286d43c440a626a68f6e0a3efb688173eaddb70756",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/ai.md",
-        "target": "content/docs/ai.md",
-        "class": "content",
-        "sha256": "3fab97686e5752edf49c62b597ab7da2093efc5ea8819d2cbd0d2b770e94ac3c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/api.md",
-        "target": "content/docs/api.md",
-        "class": "content",
-        "sha256": "bf2ebbed7bc53577c4c2b1b82b515bc9cbd0d8bd112375a8273036c5e1e568c8",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/architecture.md",
-        "target": "content/docs/architecture.md",
-        "class": "content",
-        "sha256": "59578c4a53882dd33ab210839f2b006c920e6f1932f14b1895fb28ee72fd8a1c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/authentication.md",
-        "target": "content/docs/authentication.md",
-        "class": "content",
-        "sha256": "6bad392782849a49bec8292e20bf92cccde23396a03a9e9bd693edda0019a0c4",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/background-jobs.md",
-        "target": "content/docs/background-jobs.md",
-        "class": "content",
-        "sha256": "392df02098fe07e103327d1989c4df0e1edec113fa86f9015007bc7b68386f9b",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/billing.md",
-        "target": "content/docs/billing.md",
-        "class": "content",
-        "sha256": "21ef82e6c6966dbaf60d04af31e95ac16b993edfe6484ba772bfe59e8ebd0155",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/cli.md",
-        "target": "content/docs/cli.md",
-        "class": "content",
-        "sha256": "349a9511d44d91a9ac1d8b95f7b1a8391015aade65106c762f1ef49af70cb284",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/components.md",
-        "target": "content/docs/components.md",
-        "class": "content",
-        "sha256": "bd5e4c76424c09112fccd16b921f35820dbac900257fd0707c0632ed76140208",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/configuration.md",
-        "target": "content/docs/configuration.md",
-        "class": "content",
-        "sha256": "546e3ed7e5a2f59c8a5fe3bf2602e66e5a0592fcec3c45c49123b5ea412c927c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/content.md",
-        "target": "content/docs/content.md",
-        "class": "content",
-        "sha256": "538623c5d5bc14d0368ac24666f7f0ddb7714efd73c79bfa23adec97f89a0c68",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/database.md",
-        "target": "content/docs/database.md",
-        "class": "content",
-        "sha256": "b6c66bdfea7ebd155a76cedd4ebf39dd6e7e55ab48eff7d3c33899dc4e399a9d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/deployment.md",
-        "target": "content/docs/deployment.md",
-        "class": "content",
-        "sha256": "f99c6b3a67929990bee04a834677413a72d0c940d4fee52613239104b02f9b99",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/email.md",
-        "target": "content/docs/email.md",
-        "class": "content",
-        "sha256": "ba11743027da5a1f735020f77a989bbdb0c9aba60236d3662b6da58053bbb5d9",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/extending.md",
-        "target": "content/docs/extending.md",
-        "class": "content",
-        "sha256": "4cc004fdfa5020aa242e10659316978a6f7863f6d210371dd3308b92129d07b6",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/feature-flags.md",
-        "target": "content/docs/feature-flags.md",
-        "class": "content",
-        "sha256": "19d5a6813b17bf74bee78a955397bee925c36f308d5d3c35430b7d92fa37489d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/frontend.md",
-        "target": "content/docs/frontend.md",
-        "class": "content",
-        "sha256": "cb91ad856b1292f7171c907ee9d2a64471f12cc548525c6853d375a806264a8f",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/gallery.md",
-        "target": "content/docs/gallery.md",
-        "class": "content",
-        "sha256": "91cdf44a9d32f2bccca04ecccd59b9e4e6c47e00575204460fa69153d531ee46",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/getting-started.md",
-        "target": "content/docs/getting-started.md",
-        "class": "content",
-        "sha256": "e0e53def844cb95884f8eda6640a90e954fb33d29c587298394b56432fe19ce0",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/i18n.md",
-        "target": "content/docs/i18n.md",
-        "class": "content",
-        "sha256": "221bd475bfd4be509e2c3d7f161acc5c260fdfa2763715aa047f20a948052f77",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/index.md",
-        "target": "content/docs/index.md",
-        "class": "content",
-        "sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/module-removal.md",
-        "target": "content/docs/module-removal.md",
-        "class": "content",
-        "sha256": "93edf2051603b695d2131fad235d4cfcf1c26cef4e7aff7aaf4fdae2f2095be9",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/modules.md",
-        "target": "content/docs/modules.md",
-        "class": "content",
-        "sha256": "8ae77541cb058736f96d4a25b338df5e49801e01b0b2efa187bbb0d4f133af27",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/notifications.md",
-        "target": "content/docs/notifications.md",
-        "class": "content",
-        "sha256": "eb511f5d3f04b28c8d7fa0030302906512da7c7d44b9e3a04ebf69cffd55c9cc",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/observability.md",
-        "target": "content/docs/observability.md",
-        "class": "content",
-        "sha256": "f869a1249895eec1f29349d9dabc06e9cbb07642db96f8a8e369c227fa5f09cf",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/organizations.md",
-        "target": "content/docs/organizations.md",
-        "class": "content",
-        "sha256": "bb25d79b587ca6692fba23ff0e674ca23e69d7acc74248a98345675c15121a0d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/roadmap.md",
-        "target": "content/docs/roadmap.md",
-        "class": "content",
-        "sha256": "0e3b4ae5ae3a88a197853acbe812ebd4643e9861ed31ea21fba138e37376e737",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/security.md",
-        "target": "content/docs/security.md",
-        "class": "content",
-        "sha256": "04a4c9b8a8f3db94971c0ab555b6e597ecefdf80c41c05b68ab0986307c8bdb6",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/seo.md",
-        "target": "content/docs/seo.md",
-        "class": "content",
-        "sha256": "c803f55cfc57f855b8afbe59aaf7c529f2f207dd6f9b9b07652d0e96e0bd97d2",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/storage.md",
-        "target": "content/docs/storage.md",
-        "class": "content",
-        "sha256": "83f6a7a702cc8b50614058899e8402d37bf780b6a270f85f64f489ca71348dcf",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/testing.md",
-        "target": "content/docs/testing.md",
-        "class": "content",
-        "sha256": "c4b5c0561dcaa4131e1e6f21fad6ae0c7113ebe4bfb2a54890bcb38c934cd1ed",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/troubleshooting.md",
-        "target": "content/docs/troubleshooting.md",
-        "class": "content",
-        "sha256": "5c2796679ce8d40188297c090744609dd142a5eeca9bb0e8e20c67cc16b00fab",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/ui-foundations.md",
-        "target": "content/docs/ui-foundations.md",
-        "class": "content",
-        "sha256": "5b49ed37c1f52a96b55fa1b0d100deca3ba3f35abe8acd57f2f427c3293186bb",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/docs/webhooks.md",
-        "target": "content/docs/webhooks.md",
-        "class": "content",
-        "sha256": "9ee1c90d55234b80da86d86de154e9e78103afb096468f063e09e9dd5046a895",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "content/embed.go",
-        "target": "content/embed.go",
-        "class": "go",
-        "sha256": "3780436d0f8ab466a85954c291e227ddaa87d58ba31a7a8635bca96d07f9e708",
-        "rewrite_module": true,
-        "contract": true
-      }
-    ],
     "claims": {
       "packages": [
         "content"
       ]
     },
-    "runtime": {},
-    "migrations": [],
-    "environment": [],
-    "docs": [],
-    "tests": {},
+    "contract": 1,
     "data": [],
-    "removal_policy": "free"
-  }
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The markdown corpus shipped inside the binary: documentation, blog posts, and the changelog, so a fresh clone has real content with no database.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c4c0cb370348ccbc34e9b8b6804089aedd9e349eadb093528be0782525f15bda",
+        "source": "content/blog/hello-world.md",
+        "target": "content/blog/hello-world.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "67bc24bd43b76e8923020dc3f6cd64fb22e8399d73e78adbf4aaa162a57bfeb6",
+        "source": "content/blog/value-stack.md",
+        "target": "content/blog/value-stack.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c2bd6ae522f05c83ccfe6f9074dab047da1e087d9af561849553b88d1913e681",
+        "source": "content/blog/why-htmx.md",
+        "target": "content/blog/why-htmx.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7bb590f7705558d336f0990ea03989004a318b5ed29ab93f9205082a69ba999d",
+        "source": "content/changelog/2026-08-02.md",
+        "target": "content/changelog/2026-08-02.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7fca188246a43e34e47f05d2ae90998186ece878bddc57fce769c86f0fd83e85",
+        "source": "content/changelog/2026-08-05.md",
+        "target": "content/changelog/2026-08-05.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "21686dad615da3d103a3ce90a075afe0954ef343580d9602aa95bf9c771b7008",
+        "source": "content/changelog/2026-08-17.md",
+        "target": "content/changelog/2026-08-17.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "86b12313bb4bd21aa71435aeaa48fc2d391d3b57939386adf13aae0a28d669ab",
+        "source": "content/changelog/2026-08-18.md",
+        "target": "content/changelog/2026-08-18.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7713e8bb19d70ea51f603af985af30c2db2d34739f786a4af128c544e82f2270",
+        "source": "content/changelog/2026-08-19.md",
+        "target": "content/changelog/2026-08-19.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "408866e94e50ac42bea7f696c8bf02b30253487380d6125633d65646601528e3",
+        "source": "content/changelog/2026-08-20.md",
+        "target": "content/changelog/2026-08-20.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "39146e7d62a83936f9c74b0eb009d288c762e4288a595b49dc0d810496b992f7",
+        "source": "content/changelog/2026-08-21.md",
+        "target": "content/changelog/2026-08-21.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "2302e2309393a50324760f1c791f24a6d6f50fb646c64d1f5d06454fab0358b0",
+        "source": "content/changelog/2026-08-22.md",
+        "target": "content/changelog/2026-08-22.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "dfc9f6c30e67622f1f6426286d43c440a626a68f6e0a3efb688173eaddb70756",
+        "source": "content/docs/admin.md",
+        "target": "content/docs/admin.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "3fab97686e5752edf49c62b597ab7da2093efc5ea8819d2cbd0d2b770e94ac3c",
+        "source": "content/docs/ai.md",
+        "target": "content/docs/ai.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "bf2ebbed7bc53577c4c2b1b82b515bc9cbd0d8bd112375a8273036c5e1e568c8",
+        "source": "content/docs/api.md",
+        "target": "content/docs/api.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "59578c4a53882dd33ab210839f2b006c920e6f1932f14b1895fb28ee72fd8a1c",
+        "source": "content/docs/architecture.md",
+        "target": "content/docs/architecture.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "6bad392782849a49bec8292e20bf92cccde23396a03a9e9bd693edda0019a0c4",
+        "source": "content/docs/authentication.md",
+        "target": "content/docs/authentication.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "392df02098fe07e103327d1989c4df0e1edec113fa86f9015007bc7b68386f9b",
+        "source": "content/docs/background-jobs.md",
+        "target": "content/docs/background-jobs.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "21ef82e6c6966dbaf60d04af31e95ac16b993edfe6484ba772bfe59e8ebd0155",
+        "source": "content/docs/billing.md",
+        "target": "content/docs/billing.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "349a9511d44d91a9ac1d8b95f7b1a8391015aade65106c762f1ef49af70cb284",
+        "source": "content/docs/cli.md",
+        "target": "content/docs/cli.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "bd5e4c76424c09112fccd16b921f35820dbac900257fd0707c0632ed76140208",
+        "source": "content/docs/components.md",
+        "target": "content/docs/components.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "546e3ed7e5a2f59c8a5fe3bf2602e66e5a0592fcec3c45c49123b5ea412c927c",
+        "source": "content/docs/configuration.md",
+        "target": "content/docs/configuration.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "538623c5d5bc14d0368ac24666f7f0ddb7714efd73c79bfa23adec97f89a0c68",
+        "source": "content/docs/content.md",
+        "target": "content/docs/content.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "b6c66bdfea7ebd155a76cedd4ebf39dd6e7e55ab48eff7d3c33899dc4e399a9d",
+        "source": "content/docs/database.md",
+        "target": "content/docs/database.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "f99c6b3a67929990bee04a834677413a72d0c940d4fee52613239104b02f9b99",
+        "source": "content/docs/deployment.md",
+        "target": "content/docs/deployment.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "ba11743027da5a1f735020f77a989bbdb0c9aba60236d3662b6da58053bbb5d9",
+        "source": "content/docs/email.md",
+        "target": "content/docs/email.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "4cc004fdfa5020aa242e10659316978a6f7863f6d210371dd3308b92129d07b6",
+        "source": "content/docs/extending.md",
+        "target": "content/docs/extending.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "19d5a6813b17bf74bee78a955397bee925c36f308d5d3c35430b7d92fa37489d",
+        "source": "content/docs/feature-flags.md",
+        "target": "content/docs/feature-flags.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "cb91ad856b1292f7171c907ee9d2a64471f12cc548525c6853d375a806264a8f",
+        "source": "content/docs/frontend.md",
+        "target": "content/docs/frontend.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "91cdf44a9d32f2bccca04ecccd59b9e4e6c47e00575204460fa69153d531ee46",
+        "source": "content/docs/gallery.md",
+        "target": "content/docs/gallery.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "e0e53def844cb95884f8eda6640a90e954fb33d29c587298394b56432fe19ce0",
+        "source": "content/docs/getting-started.md",
+        "target": "content/docs/getting-started.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "221bd475bfd4be509e2c3d7f161acc5c260fdfa2763715aa047f20a948052f77",
+        "source": "content/docs/i18n.md",
+        "target": "content/docs/i18n.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "0ab1694aee672a9dbdb76d4fe923d00de44762b9ff44afb7410f82ec8b4e2fb9",
+        "source": "content/docs/index.md",
+        "target": "content/docs/index.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "93edf2051603b695d2131fad235d4cfcf1c26cef4e7aff7aaf4fdae2f2095be9",
+        "source": "content/docs/module-removal.md",
+        "target": "content/docs/module-removal.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "8ae77541cb058736f96d4a25b338df5e49801e01b0b2efa187bbb0d4f133af27",
+        "source": "content/docs/modules.md",
+        "target": "content/docs/modules.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "eb511f5d3f04b28c8d7fa0030302906512da7c7d44b9e3a04ebf69cffd55c9cc",
+        "source": "content/docs/notifications.md",
+        "target": "content/docs/notifications.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "f869a1249895eec1f29349d9dabc06e9cbb07642db96f8a8e369c227fa5f09cf",
+        "source": "content/docs/observability.md",
+        "target": "content/docs/observability.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "bb25d79b587ca6692fba23ff0e674ca23e69d7acc74248a98345675c15121a0d",
+        "source": "content/docs/organizations.md",
+        "target": "content/docs/organizations.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "0e3b4ae5ae3a88a197853acbe812ebd4643e9861ed31ea21fba138e37376e737",
+        "source": "content/docs/roadmap.md",
+        "target": "content/docs/roadmap.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "04a4c9b8a8f3db94971c0ab555b6e597ecefdf80c41c05b68ab0986307c8bdb6",
+        "source": "content/docs/security.md",
+        "target": "content/docs/security.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c803f55cfc57f855b8afbe59aaf7c529f2f207dd6f9b9b07652d0e96e0bd97d2",
+        "source": "content/docs/seo.md",
+        "target": "content/docs/seo.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "83f6a7a702cc8b50614058899e8402d37bf780b6a270f85f64f489ca71348dcf",
+        "source": "content/docs/storage.md",
+        "target": "content/docs/storage.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c4b5c0561dcaa4131e1e6f21fad6ae0c7113ebe4bfb2a54890bcb38c934cd1ed",
+        "source": "content/docs/testing.md",
+        "target": "content/docs/testing.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "5c2796679ce8d40188297c090744609dd142a5eeca9bb0e8e20c67cc16b00fab",
+        "source": "content/docs/troubleshooting.md",
+        "target": "content/docs/troubleshooting.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "5b49ed37c1f52a96b55fa1b0d100deca3ba3f35abe8acd57f2f427c3293186bb",
+        "source": "content/docs/ui-foundations.md",
+        "target": "content/docs/ui-foundations.md"
+      },
+      {
+        "class": "content",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "9ee1c90d55234b80da86d86de154e9e78103afb096468f063e09e9dd5046a895",
+        "source": "content/docs/webhooks.md",
+        "target": "content/docs/webhooks.md"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "3780436d0f8ab466a85954c291e227ddaa87d58ba31a7a8635bca96d07f9e708",
+        "source": "content/embed.go",
+        "target": "content/embed.go"
+      }
+    ],
+    "id": "ggg/system/content-assets",
+    "kind": "system",
+    "migrations": [],
+    "name": "content-assets",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content"
+      }
+    ],
+    "revision": 1,
+    "runtime": {},
+    "tests": {},
+    "title": "Embedded content corpus"
+  },
+  "schema": 2
 }

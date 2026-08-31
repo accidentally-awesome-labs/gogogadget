@@ -54,8 +54,8 @@ func (e *Engine) planRemove(
 			if _, alsoRemoved := requestSet[other.ID]; alsoRemoved {
 				continue
 			}
-			for _, dependency := range other.Manifest.Requires {
-				if dependency == id {
+			for _, requirement := range other.Manifest.Requires {
+				if requirement.ID == id {
 					return Plan{}, fmt.Errorf("module %s is required by %s; remove the dependent first", id, other.ID)
 				}
 			}
@@ -154,10 +154,10 @@ func (e *Engine) planRemove(
 		if op.Offline {
 			return Plan{}, fmt.Errorf("drain-required removal needs the registry at commit %s; offline removal cannot materialize it", currentLock.RegistryCommit)
 		}
-		snapshot, err := e.source.Resolve(ctx, project.Registry.Repository, currentLock.RegistryCommit)
+		snapshot, err := e.source.Resolve(ctx, project.Registries[0].Repository, currentLock.RegistryCommit)
 		if err != nil {
 			return Plan{}, fmt.Errorf("resolve registry %s at %s for drain migrations: %w",
-				project.Registry.Repository, currentLock.RegistryCommit, err)
+				project.Registries[0].Repository, currentLock.RegistryCommit, err)
 		}
 		if snapshot.Commit != currentLock.RegistryCommit {
 			return Plan{}, fmt.Errorf("drain registry resolved commit %s, want lock commit %s",
@@ -306,8 +306,8 @@ func (e *Engine) planRemove(
 		if _, removed := requestSet[module.ID]; removed || module.Reason == removalTombstoneReason {
 			continue
 		}
-		for _, dependency := range module.Manifest.Requires {
-			requiredBy[dependency] = append(requiredBy[dependency], module.ID)
+		for _, requirement := range module.Manifest.Requires {
+			requiredBy[requirement.ID] = append(requiredBy[requirement.ID], module.ID)
 		}
 	}
 	for id := range requiredBy {
@@ -323,7 +323,7 @@ func (e *Engine) planRemove(
 			// that could claim namespaces or regenerate wiring for source
 			// files that no longer exist.
 			tombstone.Manifest.Files = []ManifestFile{}
-			tombstone.Manifest.Requires = []string{}
+			tombstone.Manifest.Requires = []Requirement{}
 			tombstone.Manifest.Runtime = RuntimeContributions{}
 			tombstone.Manifest.Claims = NamespaceClaims{}
 			tombstone.Manifest.Environment = []EnvironmentVariable{}
@@ -357,7 +357,7 @@ func (e *Engine) planRemove(
 	}
 	sort.Slice(modules, func(i, j int) bool { return modules[i].ID < modules[j].ID })
 	finalLock := Lock{
-		Schema: 1, RegistryCommit: currentLock.RegistryCommit,
+		Schema: 2, RegistryCommit: currentLock.RegistryCommit,
 		Order: order, Modules: modules,
 	}
 
@@ -440,7 +440,8 @@ func equalProjects(left, right Project) bool {
 	return strings.Join(left.Modules, "\x00") == strings.Join(right.Modules, "\x00") &&
 		strings.Join(left.Exclude, "\x00") == strings.Join(right.Exclude, "\x00") &&
 		left.Schema == right.Schema &&
-		left.Registry == right.Registry
+		slices.Equal(left.Registries, right.Registries) &&
+		left.Deployment == right.Deployment
 }
 
 // generatedSiblings names the build output derived from each deleted source.

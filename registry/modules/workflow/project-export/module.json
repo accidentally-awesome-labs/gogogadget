@@ -1,91 +1,132 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/project-export",
-    "kind": "workflow",
-    "name": "project-export",
-    "revision": 1,
-    "contract": 1,
-    "title": "Project CSV export",
-    "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
-    "requires": [
-      "system/audit",
-      "system/i18n",
-      "system/identity",
-      "system/jobs",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/jobs/export_csv.go",
-        "target": "internal/jobs/export_csv.go",
-        "class": "go",
-        "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/export_csv_test.go",
-        "target": "internal/jobs/export_csv_test.go",
-        "class": "test",
-        "sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/workflow_project_export.go",
-        "target": "internal/web/workflow_project_export.go",
-        "class": "go",
-        "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "projects.export"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Enqueues the background projects-CSV export job and audits the request; the resulting notification carries the download link.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
+        "source": "internal/jobs/export_csv.go",
+        "target": "internal/jobs/export_csv.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "06928de166678df7c5fd26121d716538eb55befab9f5fb6951113874e535950a",
+        "source": "internal/jobs/export_csv_test.go",
+        "target": "internal/jobs/export_csv_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+        "source": "internal/web/workflow_project_export.go",
+        "target": "internal/web/workflow_project_export.go"
+      }
+    ],
+    "id": "ggg/workflow/project-export",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "project-export",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/jobs"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "projects.export",
-          "method": "POST",
-          "pattern": "/app/projects/export",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleProjectsExport"
-        }
-      ],
       "jobs": [
         {
-          "kind": "export.projects_csv",
-          "package": "internal/jobs",
           "handler": "defineExportProjectsCSV",
-          "schedulable": false,
-          "max_attempts": 0
+          "kind": "export.projects_csv",
+          "max_attempts": 0,
+          "package": "internal/jobs",
+          "schedulable": false
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleProjectsExport",
+          "id": "projects.export",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/app/projects/export",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Project CSV export"
+  },
+  "schema": 2
 }

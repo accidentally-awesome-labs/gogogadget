@@ -1,75 +1,40 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/privacy",
-    "kind": "page",
-    "name": "privacy",
-    "revision": 1,
-    "contract": 1,
-    "title": "Privacy policy",
-    "description": "The privacy policy document.",
-    "requires": [
-      "system/i18n",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_privacy.go",
-        "target": "internal/web/page_privacy.go",
-        "class": "go",
-        "sha256": "90adebe01339a5c0769e6713788044101987b5296398182ab06dba758b7ce5a1",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/privacy.templ",
-        "target": "internal/web/templates/privacy.templ",
-        "class": "templ",
-        "sha256": "c2a9f5987230f169404ff266f01197796060416f490134a5de09dc444bc4c2ad",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "privacy.show"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "privacy.show",
-          "method": "GET",
-          "pattern": "/privacy",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handlePrivacy"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "footer.legal.privacy",
-          "area": "footer",
-          "route_id": "privacy.show",
-          "label_key": "footer.privacy",
-          "group": "footer.legal",
-          "after": [
-            "footer.legal.terms"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The privacy policy document.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "90adebe01339a5c0769e6713788044101987b5296398182ab06dba758b7ce5a1",
+        "source": "internal/web/page_privacy.go",
+        "target": "internal/web/page_privacy.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c2a9f5987230f169404ff266f01197796060416f490134a5de09dc444bc4c2ad",
+        "source": "internal/web/templates/privacy.templ",
+        "target": "internal/web/templates/privacy.templ"
+      }
+    ],
+    "id": "ggg/page/privacy",
+    "kind": "page",
     "locales": {
       "en": {
         "legal.privacy.body": "Account data is stored with Clerk; payment data with Polar (merchant of record); analytics, when enabled, with PostHog behind an explicit consent gate.",
@@ -77,18 +42,70 @@
         "legal.privacy.title": "Privacy Policy"
       },
       "es": {
-        "legal.privacy.body": "Los datos de cuenta se guardan en Clerk; los datos de pago en Polar (registrante comercial); las analíticas, si están activadas, en PostHog tras un consentimiento explícito.",
-        "legal.privacy.placeholder": "Política de privacidad provisional. Sustitúyela por un texto revisado por un abogado antes del lanzamiento.",
-        "legal.privacy.title": "Política de privacidad"
+        "legal.privacy.body": "Los datos de cuenta se guardan en Clerk; los datos de pago en Polar (registrante comercial); las anal\u00edticas, si est\u00e1n activadas, en PostHog tras un consentimiento expl\u00edcito.",
+        "legal.privacy.placeholder": "Pol\u00edtica de privacidad provisional. Sustit\u00fayela por un texto revisado por un abogado antes del lanzamiento.",
+        "legal.privacy.title": "Pol\u00edtica de privacidad"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "privacy",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "footer.legal.terms"
+          ],
+          "area": "footer",
+          "group": "footer.legal",
+          "id": "footer.legal.privacy",
+          "label_key": "footer.privacy",
+          "route_id": "privacy.show"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handlePrivacy",
+          "id": "privacy.show",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/privacy",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Privacy policy"
+  },
+  "schema": 2
 }

@@ -1,126 +1,155 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/blog",
-    "kind": "page",
-    "name": "blog",
-    "revision": 1,
-    "contract": 1,
-    "title": "Blog",
-    "description": "The blog index and post pages, backed by the content type declaration.",
-    "requires": [
-      "system/content",
-      "system/content-assets",
-      "system/i18n",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/handlers_content.go",
-        "target": "internal/web/handlers_content.go",
-        "class": "go",
-        "sha256": "c07401e37041f2e095ed06886550d4e83f5057bda90132020f54d547b3554f77",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/web/templates/blog.templ",
-        "target": "internal/web/templates/blog.templ",
-        "class": "templ",
-        "sha256": "5223787f9c758b0b9ecb9e38b23d0ddbe7068af8da717705e6e1b77124fc8d90",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "content_types": [
         "post"
       ]
     },
-    "runtime": {
-      "content_types": [
-        {
-          "id": "post",
-          "mode": "pages",
-          "paths": [
-            "/blog"
-          ],
-          "package": "internal/web",
-          "handler": "handleContent"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "footer.company.blog",
-          "area": "footer",
-          "route_id": "content.post.index",
-          "label_key": "footer.blog",
-          "group": "footer.company",
-          "before": [
-            "footer.company.about"
-          ],
-          "after": [
-            "footer.product.docs"
-          ]
-        },
-        {
-          "id": "nav.public.blog",
-          "area": "public",
-          "route_id": "content.post.index",
-          "label_key": "nav.blog",
-          "after": [
-            "nav.public.pricing"
-          ]
-        }
-      ],
-      "visual": [
-        {
-          "id": "blog",
-          "path": "/blog",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ]
-        },
-        {
-          "id": "blog-post",
-          "path": "/blog/hello-world",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The blog index and post pages, backed by the content type declaration.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "c07401e37041f2e095ed06886550d4e83f5057bda90132020f54d547b3554f77",
+        "source": "internal/web/handlers_content.go",
+        "target": "internal/web/handlers_content.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "5223787f9c758b0b9ecb9e38b23d0ddbe7068af8da717705e6e1b77124fc8d90",
+        "source": "internal/web/templates/blog.templ",
+        "target": "internal/web/templates/blog.templ"
+      }
+    ],
+    "id": "ggg/page/blog",
+    "kind": "page",
     "locales": {
       "en": {
         "blog.empty": "No posts yet.",
         "blog.title": "Blog"
       },
       "es": {
-        "blog.empty": "Aún no hay publicaciones.",
+        "blog.empty": "A\u00fan no hay publicaciones.",
         "blog.title": "Blog"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "blog",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content-assets"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "content_types": [
+        {
+          "handler": "handleContent",
+          "id": "post",
+          "mode": "pages",
+          "package": "internal/web",
+          "paths": [
+            "/blog"
+          ]
+        }
+      ],
+      "navigation": [
+        {
+          "after": [
+            "footer.product.docs"
+          ],
+          "area": "footer",
+          "before": [
+            "footer.company.about"
+          ],
+          "group": "footer.company",
+          "id": "footer.company.blog",
+          "label_key": "footer.blog",
+          "route_id": "content.post.index"
+        },
+        {
+          "after": [
+            "nav.public.pricing"
+          ],
+          "area": "public",
+          "id": "nav.public.blog",
+          "label_key": "nav.blog",
+          "route_id": "content.post.index"
+        }
+      ],
+      "visual": [
+        {
+          "id": "blog",
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/blog",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        },
+        {
+          "id": "blog-post",
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/blog/hello-world",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "retain-data"
-  }
+    "title": "Blog"
+  },
+  "schema": 2
 }

@@ -1,57 +1,68 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/accordion",
-    "kind": "component",
-    "name": "accordion",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Accordion",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Accordion renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/accordion.templ",
-        "target": "internal/web/templates/ui/accordion.templ",
         "class": "templ",
-        "sha256": "1767fe4bb73266917db042f5579ecc333c18887c8444c0bf09bee5c41cd22c61",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "1767fe4bb73266917db042f5579ecc333c18887c8444c0bf09bee5c41cd22c61",
+        "source": "internal/web/templates/ui/accordion.templ",
+        "target": "internal/web/templates/ui/accordion.templ"
       },
       {
-        "source": "internal/web/templates/ui/accordion_test.go",
-        "target": "internal/web/templates/ui/accordion_test.go",
         "class": "test",
-        "sha256": "dbae9db34fd26ca467778dcbfeb3e44fd594763f9e509b703d7b046e0cb48b27",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "dbae9db34fd26ca467778dcbfeb3e44fd594763f9e509b703d7b046e0cb48b27",
+        "source": "internal/web/templates/ui/accordion_test.go",
+        "target": "internal/web/templates/ui/accordion_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/accordion",
+    "kind": "component",
+    "migrations": [],
+    "name": "accordion",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "accordion",
           "family": "navigation",
+          "name": "accordion",
           "signature": "templ Accordion(o AccordionOpts)",
-          "summary": "Renders sections as native details elements.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders sections as native details elements."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Accordion"
+  },
+  "schema": 2
 }

@@ -82,7 +82,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	}
 
 	pending := currentLock.Modules[moduleIndex].Pending
-	snapshot, err := e.source.Resolve(ctx, project.Registry.Repository, pending.RegistryCommit)
+	snapshot, err := e.source.Resolve(ctx, project.Registries[0].Repository, pending.RegistryCommit)
 	if err != nil {
 		return Plan{}, fmt.Errorf("resolve pending registry commit %s: %w", pending.RegistryCommit, err)
 	}
@@ -372,8 +372,8 @@ func recomputeLockGraph(ctx context.Context, lock *Lock) error {
 		requiredBy[module.ID] = []string{}
 	}
 	for _, module := range lock.Modules {
-		for _, dependency := range module.Manifest.Requires {
-			requiredBy[dependency] = append(requiredBy[dependency], module.ID)
+		for _, requirement := range module.Manifest.Requires {
+			requiredBy[requirement.ID] = append(requiredBy[requirement.ID], module.ID)
 		}
 	}
 	for i := range lock.Modules {

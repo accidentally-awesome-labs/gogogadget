@@ -267,8 +267,10 @@ func canonicalizeLock(lock *Lock) {
 }
 
 func canonicalizeManifest(manifest *Manifest) {
-	sort.Strings(manifest.Requires)
-	sort.Slice(manifest.Files, func(i, j int) bool { return manifest.Files[i].Target < manifest.Files[j].Target })
+	sort.Slice(manifest.Requires, func(i, j int) bool { return manifest.Requires[i].ID < manifest.Requires[j].ID })
+	sort.Slice(manifest.Dependencies.Go, func(i, j int) bool { return manifest.Dependencies.Go[i].Module < manifest.Dependencies.Go[j].Module })
+	sort.Slice(manifest.Dependencies.Tools, func(i, j int) bool { return manifest.Dependencies.Tools[i].InstallPath < manifest.Dependencies.Tools[j].InstallPath })
+	sort.Slice(manifest.Dependencies.Containers, func(i, j int) bool { return manifest.Dependencies.Containers[i].Name < manifest.Dependencies.Containers[j].Name })
 	sort.Slice(manifest.Migrations, func(i, j int) bool { return manifest.Migrations[i].ID < manifest.Migrations[j].ID })
 	sort.Slice(manifest.Environment, func(i, j int) bool { return manifest.Environment[i].Key < manifest.Environment[j].Key })
 	sort.Slice(manifest.Docs, func(i, j int) bool { return manifest.Docs[i].Path < manifest.Docs[j].Path })
@@ -285,11 +287,11 @@ func canonicalizeManifest(manifest *Manifest) {
 		sort.Strings(manifest.Data[i].PersistedJobs)
 	}
 }
-
 func canonicalizeClaims(claims *NamespaceClaims) {
 	sets := []*[]string{
 		&claims.Packages, &claims.Routes, &claims.Jobs, &claims.Environment, &claims.I18n,
 		&claims.Queries, &claims.OpenAPI, &claims.ContentTypes, &claims.UI, &claims.Assets, &claims.Data,
+		&claims.ProviderSlots, &claims.Provisioners, &claims.DatabaseOps, &claims.CLI, &claims.Deploy,
 	}
 	for _, set := range sets {
 		sort.Strings(*set)

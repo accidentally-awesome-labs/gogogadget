@@ -1,50 +1,61 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/slug-input",
-    "kind": "component",
-    "name": "slug-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SlugInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SlugInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/slug-input.templ",
-        "target": "internal/web/templates/ui/slug-input.templ",
         "class": "templ",
-        "sha256": "8f18375fca64372b8f27eb2204f03635cc3ec10a33a8c021eacf6631bf05f9b1",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "8f18375fca64372b8f27eb2204f03635cc3ec10a33a8c021eacf6631bf05f9b1",
+        "source": "internal/web/templates/ui/slug-input.templ",
+        "target": "internal/web/templates/ui/slug-input.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/slug-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "slug-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "slug-input",
-          "family": "forms",
-          "engine": "alpine",
           "alpine": "uiSlug",
+          "engine": "alpine",
+          "family": "forms",
+          "guidance": "It is a plain text input first: with no JavaScript the user types the slug themselves and the form works. The Alpine behaviour only stops mirroring once the user edits the slug directly, because silently overwriting what someone typed is worse than not helping at all.",
+          "name": "slug-input",
           "native_fallback": "native input",
           "signature": "templ SlugInput(o SlugInputOpts)",
-          "summary": "Renders a text input that mirrors another field until edited.",
-          "guidance": "It is a plain text input first: with no JavaScript the user types the slug themselves and the form works. The Alpine behaviour only stops mirroring once the user edits the slug directly, because silently overwriting what someone typed is worse than not helping at all.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a text input that mirrors another field until edited."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SlugInput"
+  },
+  "schema": 2
 }

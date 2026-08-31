@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/field-error",
-    "kind": "component",
-    "name": "field-error",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "FieldError",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The FieldError renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/field-error.templ",
-        "target": "internal/web/templates/ui/field-error.templ",
         "class": "templ",
-        "sha256": "1761de9c2b1b69add9bf33cd3e0b9b3b242d80d0a23652161295244c2b295a2c",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "1761de9c2b1b69add9bf33cd3e0b9b3b242d80d0a23652161295244c2b295a2c",
+        "source": "internal/web/templates/ui/field-error.templ",
+        "target": "internal/web/templates/ui/field-error.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/field-error",
+    "kind": "component",
+    "migrations": [],
+    "name": "field-error",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "field-error",
           "family": "forms",
+          "name": "field-error",
           "signature": "templ FieldError(o FieldErrorOpts)",
-          "summary": "The per-field validation message under an input.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "The per-field validation message under an input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "FieldError"
+  },
+  "schema": 2
 }

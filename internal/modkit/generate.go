@@ -386,6 +386,8 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("type Runtime struct {\n")
 	b.WriteString("\tstart []func(context.Context) error\n")
 	b.WriteString("\tstop  []apphost.Stop\n")
+	b.WriteString("\thealth []apphost.HealthRegistration\n")
+	b.WriteString("\thealthCache apphost.HealthCache\n")
 	provided := make([]string, 0)
 	for _, m := range modules {
 		if m.Runtime.System == nil {
@@ -469,10 +471,16 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			fmt.Fprintf(&b, "\tr.stop = append(r.stop, %s.Stop)\n", varName)
 			stoppers = append(stoppers, varName)
 		}
+		if sys.Health {
+			fmt.Fprintf(&b, "\tvar _ apphost.HealthChecker = %s\n", varName)
+			fmt.Fprintf(&b, "\tr.health = append(r.health, apphost.HealthRegistration{Module: %s, Critical: false, Check: %s})\n", goString(m.ID), varName)
+		}
 	}
 	b.WriteString("\treturn r, nil\n")
 	b.WriteString("}\n\n")
 
+	b.WriteString("// Health returns cached provider and system health.\n")
+	b.WriteString("func (r *Runtime) Health(ctx context.Context) apphost.HealthReport { return r.healthCache.Get(ctx, r.health) }\n\n")
 	b.WriteString("// Handler returns the composed HTTP handler.\n")
 	if handlerField == "" {
 		b.WriteString("// The selected graph provides none, so there is nothing to serve.\n")
@@ -1768,28 +1776,15 @@ func emitQueriesRegistry(ctx context.Context, modulePath string, lock Lock, grap
 	methodTable := make(map[string]string)
 	for _, m := range orderedModules(lock, graph) {
 		dependencies := make(map[string]bool, len(m.Requires))
-		for _, id := range m.Requires {
-			dependencies[id] = true
-		}
+		for _, requirement := range m.Requires { dependencies[requirement.ID] = true }
 		for _, q := range m.Runtime.Queries {
-			if previous, clash := methodOwner[q.Name]; clash {
-				return nil, fmt.Errorf("sqlc method %q is declared by both %s and %s", q.Name, previous, m.ID)
-			}
+			if previous, clash := methodOwner[q.Name]; clash { return nil, fmt.Errorf("sqlc method %q is declared by both %s and %s", q.Name, previous, m.ID) }
 			owner, known := tableOwner[q.Table]
-			if !known {
-				return nil, fmt.Errorf("query %s reads table %q, which no module declares", q.Name, q.Table)
-			}
-			// Reading someone else's table is legal, but it has to be declared:
-			// otherwise the query breaks silently when that module is removed.
-			if owner != m.ID && !dependencies[owner] {
-				return nil, fmt.Errorf("query %s (%s) reads table %q owned by %s without depending on it",
-					q.Name, m.ID, q.Table, owner)
-			}
-			methodOwner[q.Name] = m.ID
-			methodTable[q.Name] = q.Table
+			if !known { return nil, fmt.Errorf("query %s reads table %q, which no module declares", q.Name, q.Table) }
+			if owner != m.ID && !dependencies[owner] { return nil, fmt.Errorf("query %s (%s) reads table %q owned by %s without depending on it", q.Name, m.ID, q.Table, owner) }
+			methodOwner[q.Name] = m.ID; methodTable[q.Name] = q.Table
 		}
 	}
-
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package db\n\n")
@@ -2869,7 +2864,7 @@ func emitModuleReference(ctx context.Context, modulePath string, lock Lock, grap
 			if len(m.Requires) > 0 {
 				quoted := make([]string, 0, len(m.Requires))
 				for _, id := range m.Requires {
-					quoted = append(quoted, "`"+id+"`")
+					quoted = append(quoted, "`" + id.ID + "`")
 				}
 				requires = strings.Join(quoted, " ")
 			}

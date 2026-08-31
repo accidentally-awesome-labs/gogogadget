@@ -1,24 +1,35 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/divider",
-    "kind": "element",
-    "name": "divider",
-    "revision": 2,
-    "contract": 1,
-    "title": "Divider",
-    "description": "Superseded by element/separator.",
-    "requires": [
-      "element/ui-core"
-    ],
-    "files": [],
     "claims": {},
-    "runtime": {},
-    "migrations": [],
-    "environment": [],
-    "docs": [],
-    "tests": {},
+    "contract": 1,
     "data": [],
-    "removal_policy": "free"
-  }
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Superseded by element/separator.",
+    "docs": [],
+    "environment": [],
+    "files": [],
+    "id": "ggg/element/divider",
+    "kind": "element",
+    "migrations": [],
+    "name": "divider",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 2,
+    "runtime": {},
+    "tests": {},
+    "title": "Divider"
+  },
+  "schema": 2
 }

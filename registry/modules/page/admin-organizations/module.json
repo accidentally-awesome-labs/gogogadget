@@ -1,76 +1,32 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/admin-organizations",
-    "kind": "page",
-    "name": "admin-organizations",
-    "revision": 1,
-    "contract": 1,
-    "title": "Admin organizations list",
-    "description": "The platform organization table with member counts and plan badges.",
-    "requires": [
-      "system/i18n",
-      "system/organizations",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_admin_organizations.go",
-        "target": "internal/web/page_admin_organizations.go",
-        "class": "go",
-        "sha256": "2a55d98938962ec0cd41d6eb38baeb126f6eb8d0c8927f1ec76ef0cd0addb143",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "admin.organizations.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "admin.organizations.index",
-          "method": "GET",
-          "pattern": "/admin/orgs",
-          "scope": "admin",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAdminOrgs"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.admin.orgs",
-          "area": "admin",
-          "route_id": "admin.organizations.index",
-          "label_key": "sidebar.admin_orgs",
-          "after": [
-            "nav.admin.users"
-          ]
-        }
-      ]
-    },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
-    "tests": {
-      "go_packages": [
-        "internal/web"
-      ]
-    },
+    "contract": 1,
     "data": [],
-    "removal_policy": "free",
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The platform organization table with member counts and plan badges.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "2a55d98938962ec0cd41d6eb38baeb126f6eb8d0c8927f1ec76ef0cd0addb143",
+        "source": "internal/web/page_admin_organizations.go",
+        "target": "internal/web/page_admin_organizations.go"
+      }
+    ],
+    "id": "ggg/page/admin-organizations",
+    "kind": "page",
     "locales": {
       "en": {
         "admin.orgs.col_created": "Created",
@@ -87,9 +43,82 @@
         "admin.orgs.col_name": "Nombre",
         "admin.orgs.col_plan": "Plan",
         "admin.orgs.col_slug": "Slug",
-        "admin.orgs.empty": "Aún no hay organizaciones.",
+        "admin.orgs.empty": "A\u00fan no hay organizaciones.",
         "admin.orgs.title": "Organizaciones"
       }
-    }
-  }
+    },
+    "migrations": [],
+    "name": "admin-organizations",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "nav.admin.users"
+          ],
+          "area": "admin",
+          "id": "nav.admin.orgs",
+          "label_key": "sidebar.admin_orgs",
+          "route_id": "admin.organizations.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleAdminOrgs",
+          "id": "admin.organizations.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/admin/orgs",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "admin"
+        }
+      ]
+    },
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "title": "Admin organizations list"
+  },
+  "schema": 2
 }

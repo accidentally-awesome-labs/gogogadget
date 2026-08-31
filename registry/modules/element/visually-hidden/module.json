@@ -1,58 +1,69 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/visually-hidden",
-    "kind": "element",
-    "name": "visually-hidden",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "VisuallyHidden",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The VisuallyHidden renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/visually-hidden.templ",
-        "target": "internal/web/templates/ui/visually-hidden.templ",
         "class": "templ",
-        "sha256": "d1740fdd0da5761405b896dab06bf72af74a5052aa6e54baf91ec2b1a72a23d0",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "d1740fdd0da5761405b896dab06bf72af74a5052aa6e54baf91ec2b1a72a23d0",
+        "source": "internal/web/templates/ui/visually-hidden.templ",
+        "target": "internal/web/templates/ui/visually-hidden.templ"
       },
       {
-        "source": "internal/web/templates/ui/visually-hidden_test.go",
-        "target": "internal/web/templates/ui/visually-hidden_test.go",
         "class": "test",
-        "sha256": "fb2042c5c382bb3f346c9ff4e178c9ef3eb175130c14d92aa4fd3c871ad01568",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "fb2042c5c382bb3f346c9ff4e178c9ef3eb175130c14d92aa4fd3c871ad01568",
+        "source": "internal/web/templates/ui/visually-hidden_test.go",
+        "target": "internal/web/templates/ui/visually-hidden_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/visually-hidden",
+    "kind": "element",
+    "migrations": [],
+    "name": "visually-hidden",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "visually-hidden",
           "family": "foundations",
-          "signature": "templ VisuallyHidden(o VisuallyHiddenOpts)",
-          "summary": "Hides content visually while keeping it in the accessibility tree.",
           "guidance": "This is not display:none and not hidden - both remove the content from the tree entirely, which is the opposite of the intent. It exists so a control can carry a name that the visual design does not have room for.",
+          "name": "visually-hidden",
+          "signature": "templ VisuallyHidden(o VisuallyHiddenOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Hides content visually while keeping it in the accessibility tree."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "VisuallyHidden"
+  },
+  "schema": 2
 }

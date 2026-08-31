@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/label",
-    "kind": "component",
-    "name": "label",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Label",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Label renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/label.templ",
-        "target": "internal/web/templates/ui/label.templ",
         "class": "templ",
-        "sha256": "9a4e3c25e53181718a104bc53c42c677a28e2fca70730baefdea32c1f12889ea",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "9a4e3c25e53181718a104bc53c42c677a28e2fca70730baefdea32c1f12889ea",
+        "source": "internal/web/templates/ui/label.templ",
+        "target": "internal/web/templates/ui/label.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/label",
+    "kind": "component",
+    "migrations": [],
+    "name": "label",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "label",
           "family": "forms",
-          "signature": "templ Label(o LabelOpts)",
-          "summary": "Renders a control label.",
           "guidance": "Field renders its own; this exists for a custom control that needs the same label semantics.",
+          "name": "label",
+          "signature": "templ Label(o LabelOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a control label."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Label"
+  },
+  "schema": 2
 }

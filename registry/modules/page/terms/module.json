@@ -1,75 +1,40 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/terms",
-    "kind": "page",
-    "name": "terms",
-    "revision": 1,
-    "contract": 1,
-    "title": "Terms of service",
-    "description": "The terms of service document.",
-    "requires": [
-      "system/i18n",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_terms.go",
-        "target": "internal/web/page_terms.go",
-        "class": "go",
-        "sha256": "d81b392000fe1a2e60a67622a5abb469769480d03224796affa36ca7f3bbcc69",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/terms.templ",
-        "target": "internal/web/templates/terms.templ",
-        "class": "templ",
-        "sha256": "92f6f73b43e8ca60042c7596e0b7ece59c8f7afb3a21b9304308e5598d077ba4",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "terms.show"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "terms.show",
-          "method": "GET",
-          "pattern": "/terms",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleTerms"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "footer.legal.terms",
-          "area": "footer",
-          "route_id": "terms.show",
-          "label_key": "footer.terms",
-          "group": "footer.legal",
-          "after": [
-            "footer.resources.rss"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The terms of service document.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "d81b392000fe1a2e60a67622a5abb469769480d03224796affa36ca7f3bbcc69",
+        "source": "internal/web/page_terms.go",
+        "target": "internal/web/page_terms.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "92f6f73b43e8ca60042c7596e0b7ece59c8f7afb3a21b9304308e5598d077ba4",
+        "source": "internal/web/templates/terms.templ",
+        "target": "internal/web/templates/terms.templ"
+      }
+    ],
+    "id": "ggg/page/terms",
+    "kind": "page",
     "locales": {
       "en": {
         "legal.terms.body": "GoGoGadget is provided \"as is\", without warranty of any kind. By using the service you agree to use it lawfully and not abuse the platform.",
@@ -77,18 +42,70 @@
         "legal.terms.title": "Terms of Service"
       },
       "es": {
-        "legal.terms.body": "GoGoGadget se ofrece \"tal cual\", sin garantía de ningún tipo. Al usar el servicio aceptas usarlo de manera lícita y no abusar de la plataforma.",
-        "legal.terms.placeholder": "Términos provisionales. Sustitúyelos por un texto revisado por un abogado antes del lanzamiento.",
-        "legal.terms.title": "Términos del servicio"
+        "legal.terms.body": "GoGoGadget se ofrece \"tal cual\", sin garant\u00eda de ning\u00fan tipo. Al usar el servicio aceptas usarlo de manera l\u00edcita y no abusar de la plataforma.",
+        "legal.terms.placeholder": "T\u00e9rminos provisionales. Sustit\u00fayelos por un texto revisado por un abogado antes del lanzamiento.",
+        "legal.terms.title": "T\u00e9rminos del servicio"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "terms",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "footer.resources.rss"
+          ],
+          "area": "footer",
+          "group": "footer.legal",
+          "id": "footer.legal.terms",
+          "label_key": "footer.terms",
+          "route_id": "terms.show"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleTerms",
+          "id": "terms.show",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/terms",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Terms of service"
+  },
+  "schema": 2
 }

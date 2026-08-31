@@ -1,47 +1,58 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/badge",
-    "kind": "component",
-    "name": "badge",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Badge",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Badge renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/badge.templ",
-        "target": "internal/web/templates/ui/badge.templ",
         "class": "templ",
-        "sha256": "7ff7cbe39a4c8bf59915174f1dc981e08362cc3078e6de3298fca75db4637b69",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7ff7cbe39a4c8bf59915174f1dc981e08362cc3078e6de3298fca75db4637b69",
+        "source": "internal/web/templates/ui/badge.templ",
+        "target": "internal/web/templates/ui/badge.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/badge",
+    "kind": "component",
+    "migrations": [],
+    "name": "badge",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "badge",
           "family": "feedback",
+          "name": "badge",
           "signature": "templ Badge(o BadgeOpts)",
-          "summary": "A small state pill: Kind picks the semantic colour.",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "A small state pill: Kind picks the semantic colour."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Badge"
+  },
+  "schema": 2
 }

@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/metric",
-    "kind": "component",
-    "name": "metric",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Metric",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Metric renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/metric.templ",
-        "target": "internal/web/templates/ui/metric.templ",
         "class": "templ",
-        "sha256": "eac32b64d66924695035753734197787929aeeb25ca275765042843048cc0f33",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "eac32b64d66924695035753734197787929aeeb25ca275765042843048cc0f33",
+        "source": "internal/web/templates/ui/metric.templ",
+        "target": "internal/web/templates/ui/metric.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/metric",
+    "kind": "component",
+    "migrations": [],
+    "name": "metric",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "metric",
           "family": "data",
+          "name": "metric",
           "signature": "templ Metric(o MetricOpts)",
-          "summary": "One number on a dashboard.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "One number on a dashboard."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Metric"
+  },
+  "schema": 2
 }

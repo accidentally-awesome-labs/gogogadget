@@ -1,112 +1,141 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/markdown-editor",
-    "kind": "component",
-    "name": "markdown-editor",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Markdown editor",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "A textarea with Markdown affordances. No WYSIWYG engine and no client-side renderer: the stored value stays Markdown and the preview comes from the server's own goldmark pipeline.",
-    "requires": [
-      "component/char-counter",
-      "component/field-error",
-      "component/file-dropzone",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/markdown-editor.templ",
-        "target": "internal/web/templates/ui/markdown-editor.templ",
         "class": "templ",
+        "contract": true,
+        "rewrite_module": true,
         "sha256": "3aade5e33782bbf31ddf0faf6d3095a70f5993e1267a634f0c4f0f8ff839438a",
-        "rewrite_module": true,
-        "contract": true
+        "source": "internal/web/templates/ui/markdown-editor.templ",
+        "target": "internal/web/templates/ui/markdown-editor.templ"
       },
       {
-        "source": "internal/web/templates/ui/markdown-editor_test.go",
-        "target": "internal/web/templates/ui/markdown-editor_test.go",
         "class": "test",
-        "sha256": "70d12a30efb967747479a28b152b7d1a58ad8b5af069cc74310940a0ef857f61",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "70d12a30efb967747479a28b152b7d1a58ad8b5af069cc74310940a0ef857f61",
+        "source": "internal/web/templates/ui/markdown-editor_test.go",
+        "target": "internal/web/templates/ui/markdown-editor_test.go"
       },
       {
-        "source": "static/ui/markdown-editor.js",
-        "target": "static/ui/markdown-editor.js",
         "class": "asset",
-        "sha256": "448b69641cad7a56e8738cfe8a4bd2f99e2598a9dc3ddc589007da431351c737",
+        "contract": false,
         "rewrite_module": false,
-        "contract": false
+        "sha256": "448b69641cad7a56e8738cfe8a4bd2f99e2598a9dc3ddc589007da431351c737",
+        "source": "static/ui/markdown-editor.js",
+        "target": "static/ui/markdown-editor.js"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/markdown-editor",
+    "kind": "component",
+    "migrations": [],
+    "name": "markdown-editor",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/char-counter"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/field-error"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/file-dropzone"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
+      "assets": [
+        {
+          "id": "ui-markdown-editor",
+          "kind": "script",
+          "path": "static/ui/markdown-editor.js"
+        }
+      ],
       "ui": [
         {
-          "name": "editor-preview",
           "family": "advanced",
-          "signature": "templ EditorPreview(o EditorPreviewOpts)",
-          "summary": "Renders the server-rendered preview region.",
           "guidance": "It is a polite live region: the preview updates as the author types, and an assertive one would interrupt them mid-sentence. The content arrives from the server's own Markdown pipeline - this component never renders Markdown itself, because a second renderer is a second set of escaping rules.",
+          "name": "editor-preview",
+          "signature": "templ EditorPreview(o EditorPreviewOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders the server-rendered preview region."
         },
         {
-          "name": "editor-toolbar",
           "family": "advanced",
-          "signature": "templ EditorToolbar(o EditorToolbarOpts)",
-          "summary": "Renders the formatting controls.",
           "guidance": "Each button carries the Markdown syntax it applies as data, so the controller needs no per-button logic and adding a control is a markup change. The buttons are real buttons with accessible names, not icon-only glyphs: \"B\" is meaningless read aloud.",
+          "name": "editor-toolbar",
+          "signature": "templ EditorToolbar(o EditorToolbarOpts)",
           "states": [
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "Renders the formatting controls."
         },
         {
-          "name": "markdown-editor",
-          "family": "advanced",
-          "engine": "alpine",
           "alpine": "uiMarkdownEditor",
-          "native_fallback": "plain textarea",
-          "signature": "templ MarkdownEditor(o MarkdownEditorOpts)",
-          "summary": "Renders a textarea with Markdown affordances.",
+          "engine": "alpine",
+          "family": "advanced",
           "guidance": "The textarea is the form value, always. Every toolbar button and shortcut edits that text in place, so with no JavaScript the author types Markdown into a plain textarea and the form submits unchanged - the toolbar is the part that is optional, not the editing. The toolbar and the media panel are hidden until the controller reveals them: every toolbar control and every media insert writes at the caret, which nothing but the controller can do, and the panel's upload does work without script but would navigate away and abandon whatever the author has typed. A MediaPicker rendered outside an editor stays visible and fully usable; it is this slot that hides, not the picker.",
           "keyboard": "Cmd/Ctrl+B, Cmd/Ctrl+I and Cmd/Ctrl+K wrap the selection in bold, italic and link syntax; every other key stays the textarea's own.",
+          "name": "markdown-editor",
+          "native_fallback": "plain textarea",
+          "signature": "templ MarkdownEditor(o MarkdownEditorOpts)",
           "states": [
             "default",
             "disabled",
             "error",
             "readonly"
-          ]
+          ],
+          "summary": "Renders a textarea with Markdown affordances."
         },
         {
-          "name": "media-picker",
           "family": "advanced",
-          "signature": "templ MediaPicker(o MediaPickerOpts)",
-          "summary": "Renders existing media plus an upload control.",
           "guidance": "Every item inserts a Markdown image with its alt text already filled in. Alt text is part of the item rather than something the author is prompted for later, because a prompt that can be dismissed produces images with no description. The insert buttons need a controller - they write at the caret - but the upload does not: it is a real file input and a real submit, both owned by the caller's upload form, so choosing a file and sending it works with no script at all.",
+          "name": "media-picker",
+          "signature": "templ MediaPicker(o MediaPickerOpts)",
           "states": [
             "default",
             "empty",
             "overflow"
-          ]
-        }
-      ],
-      "assets": [
-        {
-          "id": "ui-markdown-editor",
-          "path": "static/ui/markdown-editor.js",
-          "kind": "script"
+          ],
+          "summary": "Renders existing media plus an upload control."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Markdown editor"
+  },
+  "schema": 2
 }

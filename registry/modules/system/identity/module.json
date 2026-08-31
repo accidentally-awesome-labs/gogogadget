@@ -1,570 +1,708 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/identity",
-    "kind": "system",
-    "name": "identity",
-    "revision": 1,
-    "contract": 1,
-    "title": "Identity",
-    "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
-    "requires": [
-      "system/apphost",
-      "system/config"
-    ],
-    "files": [
-      {
-        "source": "internal/identity/context.go",
-        "target": "internal/identity/context.go",
-        "class": "go",
-        "sha256": "724bb4282c7555412baa887c9529a2da5fcb4364954c3e22e5b46564bf53d3f0",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/contract_test.go",
-        "target": "internal/identity/contract_test.go",
-        "class": "test",
-        "sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/identity/deleter.go",
-        "target": "internal/identity/deleter.go",
-        "class": "go",
-        "sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/fetcher.go",
-        "target": "internal/identity/fetcher.go",
-        "class": "go",
-        "sha256": "698b68b71e891e53b09f4d2503fa827c6d22bdf13232a9f72b1657cb9e6a3fb8",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/fuzz_test.go",
-        "target": "internal/identity/fuzz_test.go",
-        "class": "test",
-        "sha256": "40235d31f108366bda781fefafc3036809f086e29eb699c27a7e0d18470cbff2",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/identity/module.go",
-        "target": "internal/identity/module.go",
-        "class": "go",
-        "sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/module_test.go",
-        "target": "internal/identity/module_test.go",
-        "class": "test",
-        "sha256": "f0d86d2ed64c827f229ee0d7be208bc491818f34175c4d5388c4156a03553622",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/identity/sync.go",
-        "target": "internal/identity/sync.go",
-        "class": "go",
-        "sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/identity/verifier.go",
-        "target": "internal/identity/verifier.go",
-        "class": "go",
-        "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/identity/verifier_test.go",
-        "target": "internal/identity/verifier_test.go",
-        "class": "test",
-        "sha256": "b100610390baf7283297912e6b5625bda891ca0b6ceda25035262d10fecc1e54",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "916f930ffb94a362e9591e3af48b8be3ebb5ea1e1b717c0fd0da022f3b3c3aaa",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "dddb4af77af0aecc80e4ad518f0c7028e9bee93018c37da93b2de779266b71b8",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "4f0432108c1271e73913cb10f5d8e8e8ebf007894a1a83482db090b0f1cf8bd5",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "2baee3cb8ccebfbff51f72322b2f8064b5082178c6a7fe3fbfb740fc89b2fab2",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "646f981c51c2b3a814848b3e27d351746cbbb536678d1aed02f3224f49709eda",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "3ed67ee1c2c544a5e395c2806b8c770220dad0241521b4c0e64347b2c7f7f295",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "7c32c090568bdb930f938de88aef618b89672d86ecae5b43ba7fbffab2640f9c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "1d744d8e1597a940d957975e5e6ef24a9ff0242f946546f57dece5e0dd84eec0",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "465ccb422630060b6769b076acc53c644d6c896e1eb93201e221732d40ed0157",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "324e0adc9e21caefd908bbfc1690058ee1be5acb3852de4ed929fc8528bcdf93",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/clerk.browser.js",
-        "target": "static/vendor/clerk.browser.js",
-        "class": "asset",
-        "sha256": "d92e69c91eeb10ec1558b79376a35520ead6e358811319366c6c28a4fb88d5a0",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "3c7ea5aa2a7deef9ff116efacafcf6c3dd629cce6bb7d919452cc2dfeef53bdc",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "c86561760035abbebeb3014bcdb7fa3fd825083697a8bc0993bef488d5ec593e",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "e3dc6ef912779925c4962f87a93305e7d3c27f12c4f67820253d7a6488a2659a",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "14e20e9911465ecb728f124c36a4ee904338d90470e2743e87534426f943ea55",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "f4cef545f77a3cb6bce8466ff70ab699d7631f4f388398f60206394776a13cf7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "2836ab217b40db69b67ced179d04727fbd1f099e48608b15da409439a41ad7df",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "cd91602f0eb261cdd596c9b255ca8d40b4760b6f7f3eb1599cd17af59bee36e7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "eff117abda6ca0b8cc40c95607b8334af246643951633f0e17af219e7c57affc",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "a7b9f5ac327dc085665b65414e2dbc38a8832f0a22090e95bd694599d8407059",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "6a8451042b82e36fcf4f789796aac6c8f9b50e9370c42aef4151694631172869",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "8f38532d9cb4af9694682c6811dc463bff860cc001cb5734604a4fd1913406e5",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "91b762eade20badc1e57b1410c336c2038ddbe0c1cef3085b094733db683e17a",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "ab8fe46367e6e93982a05381d890b04be8ac0b9175fbd14b63bf4e71bd74bb7a",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "54e91ecbc784313ea9eabdc77032a8ef09464464901e69dea299047a67e27990",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "cea5cf371afd6f2e2b8e14d8b542c5542fa9781443c9c53ec052f0e522fb56ec",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "b3d0a2d4e3e3c3b903511cdb914b88b784f37bc95e35919c61cca418a77be821",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "e5abf101e93d624f96e9397a068d57341c5170e29ef7bea0dadfdc373a20e14b",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "14053cf5a433b75d7c49f956486a111b1337e5fa3a525c8ff13a9400f0666d83",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "618d9788a5c8ea990ea7f452386698258273aed4582e39e823ea3ac5b3679332",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "f3819cc8a3eb3666444d1dea353255a7a137bb4a6adf1fd04a9e43f541ff164f",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "ab2980ce8264feffe67e37b002cd3679ca6822cdadd1b2f1ca3e330f3b5b7781",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "96b717bde9f29d99397a7607dc7534b2ef01a27ad5a66f1edcbf4cee5ea57d07",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "a347342ff63c3a1322494ae037f98b527cb249ba7f25c78def8fe4eaecb207fb",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "e0d6d26d6687c6472290045316637e300dc5d73b917f5a62f7ca7d623eb78d49",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "e0eff5cb69e6f5810e26779868ef67d821b349b55f7b43c25f612bf7be3ceebb",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "c978b6ba6d3d955425f879e9687ca378225395328e38fb9b860e911edba4ce9f",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "40f0fb24138029634cca3ec5afee64d4f379ac1b3fd7d2ffc6bcc7e90f604199",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "bde9daae14c6daca721c33351876beb0298c8f2a2ddfe8af8ddca31c64d7f8ae",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "7930426f21930a239334a5021628eecdbe5a7ba771aa5690208e239c8e818572",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "93a875eeb8becfe468e94e0dda69e4e27bd009c169caf1360fd7375c1dc38e81",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "96f722d38b4963bafc8fe96fde550a77c1f56175b3d97e2e2004de82be53c597",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "5f3aa62f390a95e0305c4fb6ed6b11bdb09a69da8ba334db3437c42e48a91997",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "7bf78a12d6b97d235b272389e1ed03890a32bc20de45fb8e80785187f188b6d7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "3962faa07beddb56ce813e62f694bd3a63973a11f5dae7c4d7d3ebb18ce9075d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "5b6f9f6a6def6aeae904899e2d7edc22b1e25b8b26bec916f9ca32bb72fb1e8c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "2295f1b77fd26b01266781f83d1511c9a0b0b6702078a7a64ad41597f9b5b221",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "0329692a0a36859ad4d4e1a583fd81acfbb333b52342995152e2df72de088bf1",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "b1e426d5667943764ce739a231ac1de6192ac5cbbb50643519480f58ace0c44f",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "5c7a9558b60e1950a7b3c09c5a0ca3e222d3efaa964596df2dd55ad78992d9ee",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "7815e1a4287c67528b9ebd966b22499041e637158573b52476d6d801f2572cf7",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "3352ddf2516675fe6a3a8f3d03f08f59951a478ebcd2364fed08b97daf3d8302",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "5527aa95afb32b902504f5bdd67098ed738655c95a706218a1eb809421a4fa47",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "9ee042f6cf8bcb1cbcdf5b9ad1131ad1e3ba6940bb045014df2a32dfa85271f0",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
-        "target": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
-        "class": "asset",
-        "sha256": "06ec41cbc1c41d9db68b33704b67a1e8e247e98709d52186aa4df9630ee5ad9d",
-        "rewrite_module": false,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/identity"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
+    "docs": [],
+    "environment": [
+      {
+        "description": "First sign-in with this address is granted the full admin role. Empty means nobody is staff",
+        "field": "AdminEmail",
+        "key": "ADMIN_EMAIL",
+        "type": "string"
+      },
+      {
+        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise",
+        "field": "ClerkFrontendAPIURL",
+        "key": "CLERK_FRONTEND_API_URL",
+        "type": "string"
+      },
+      {
+        "description": "Hosted Account Portal base, e.g. `https://accounts.your-app.com`",
+        "field": "ClerkPortalURL",
+        "key": "CLERK_PORTAL_URL",
+        "production_required": true,
+        "trim_slash": true,
+        "type": "string"
+      },
+      {
+        "description": "Drives the vendored clerk-js that keeps the `__session` JWT fresh",
+        "field": "ClerkPublishableKey",
+        "key": "CLERK_PUBLISHABLE_KEY",
+        "production_required": true,
+        "type": "string"
+      },
+      {
+        "description": "Clerk API secret. Empty means auth is not configured and `/app` renders 503 (unless the dev bypass is on)",
+        "field": "ClerkSecretKey",
+        "key": "CLERK_SECRET_KEY",
+        "production_required": true,
+        "secret": true,
+        "type": "string"
+      },
+      {
+        "description": "Verifies `svix-*` signatures on `/webhooks/clerk`",
+        "field": "ClerkWebhookSecret",
+        "key": "CLERK_WEBHOOK_SECRET",
+        "production_required": true,
+        "secret": true,
+        "type": "string"
+      },
+      {
+        "default": "false",
+        "description": "Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error",
+        "example": "true",
+        "field": "DevAuthBypass",
+        "key": "DEV_AUTH_BYPASS",
+        "type": "bool"
+      }
+    ],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "724bb4282c7555412baa887c9529a2da5fcb4364954c3e22e5b46564bf53d3f0",
+        "source": "internal/identity/context.go",
+        "target": "internal/identity/context.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
+        "source": "internal/identity/contract_test.go",
+        "target": "internal/identity/contract_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "e5d540cd0016b9ae957f1121b53dc6fdb449de4e97df4f9a02df8e9fac7f781b",
+        "source": "internal/identity/deleter.go",
+        "target": "internal/identity/deleter.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "698b68b71e891e53b09f4d2503fa827c6d22bdf13232a9f72b1657cb9e6a3fb8",
+        "source": "internal/identity/fetcher.go",
+        "target": "internal/identity/fetcher.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "40235d31f108366bda781fefafc3036809f086e29eb699c27a7e0d18470cbff2",
+        "source": "internal/identity/fuzz_test.go",
+        "target": "internal/identity/fuzz_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "3840e5642cee377a7344d72954a0f58a5b86ee12b88b3f5db2b86e0bcca8d1a7",
+        "source": "internal/identity/module.go",
+        "target": "internal/identity/module.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "f0d86d2ed64c827f229ee0d7be208bc491818f34175c4d5388c4156a03553622",
+        "source": "internal/identity/module_test.go",
+        "target": "internal/identity/module_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "b3f9a4ef83c18a1c1eeb3a10f590ba08bc3ce50ba0d38a503da06ebf0f62ae6a",
+        "source": "internal/identity/sync.go",
+        "target": "internal/identity/sync.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "b47f36f7be74806cf7b6e61a1cf660f08a04507b781d14a8ff37893a5d7e3e7c",
+        "source": "internal/identity/verifier.go",
+        "target": "internal/identity/verifier.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "b100610390baf7283297912e6b5625bda891ca0b6ceda25035262d10fecc1e54",
+        "source": "internal/identity/verifier_test.go",
+        "target": "internal/identity/verifier_test.go"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "916f930ffb94a362e9591e3af48b8be3ebb5ea1e1b717c0fd0da022f3b3c3aaa",
+        "source": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "dddb4af77af0aecc80e4ad518f0c7028e9bee93018c37da93b2de779266b71b8",
+        "source": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "4f0432108c1271e73913cb10f5d8e8e8ebf007894a1a83482db090b0f1cf8bd5",
+        "source": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "2baee3cb8ccebfbff51f72322b2f8064b5082178c6a7fe3fbfb740fc89b2fab2",
+        "source": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "646f981c51c2b3a814848b3e27d351746cbbb536678d1aed02f3224f49709eda",
+        "source": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "3ed67ee1c2c544a5e395c2806b8c770220dad0241521b4c0e64347b2c7f7f295",
+        "source": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7c32c090568bdb930f938de88aef618b89672d86ecae5b43ba7fbffab2640f9c",
+        "source": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "1d744d8e1597a940d957975e5e6ef24a9ff0242f946546f57dece5e0dd84eec0",
+        "source": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "465ccb422630060b6769b076acc53c644d6c896e1eb93201e221732d40ed0157",
+        "source": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "324e0adc9e21caefd908bbfc1690058ee1be5acb3852de4ed929fc8528bcdf93",
+        "source": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "d92e69c91eeb10ec1558b79376a35520ead6e358811319366c6c28a4fb88d5a0",
+        "source": "static/vendor/clerk.browser.js",
+        "target": "static/vendor/clerk.browser.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "3c7ea5aa2a7deef9ff116efacafcf6c3dd629cce6bb7d919452cc2dfeef53bdc",
+        "source": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c86561760035abbebeb3014bcdb7fa3fd825083697a8bc0993bef488d5ec593e",
+        "source": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "e3dc6ef912779925c4962f87a93305e7d3c27f12c4f67820253d7a6488a2659a",
+        "source": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "14e20e9911465ecb728f124c36a4ee904338d90470e2743e87534426f943ea55",
+        "source": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "f4cef545f77a3cb6bce8466ff70ab699d7631f4f388398f60206394776a13cf7",
+        "source": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "2836ab217b40db69b67ced179d04727fbd1f099e48608b15da409439a41ad7df",
+        "source": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "cd91602f0eb261cdd596c9b255ca8d40b4760b6f7f3eb1599cd17af59bee36e7",
+        "source": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "eff117abda6ca0b8cc40c95607b8334af246643951633f0e17af219e7c57affc",
+        "source": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "a7b9f5ac327dc085665b65414e2dbc38a8832f0a22090e95bd694599d8407059",
+        "source": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "6a8451042b82e36fcf4f789796aac6c8f9b50e9370c42aef4151694631172869",
+        "source": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "8f38532d9cb4af9694682c6811dc463bff860cc001cb5734604a4fd1913406e5",
+        "source": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "91b762eade20badc1e57b1410c336c2038ddbe0c1cef3085b094733db683e17a",
+        "source": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "ab8fe46367e6e93982a05381d890b04be8ac0b9175fbd14b63bf4e71bd74bb7a",
+        "source": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "54e91ecbc784313ea9eabdc77032a8ef09464464901e69dea299047a67e27990",
+        "source": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "cea5cf371afd6f2e2b8e14d8b542c5542fa9781443c9c53ec052f0e522fb56ec",
+        "source": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "b3d0a2d4e3e3c3b903511cdb914b88b784f37bc95e35919c61cca418a77be821",
+        "source": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "e5abf101e93d624f96e9397a068d57341c5170e29ef7bea0dadfdc373a20e14b",
+        "source": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "14053cf5a433b75d7c49f956486a111b1337e5fa3a525c8ff13a9400f0666d83",
+        "source": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "618d9788a5c8ea990ea7f452386698258273aed4582e39e823ea3ac5b3679332",
+        "source": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "f3819cc8a3eb3666444d1dea353255a7a137bb4a6adf1fd04a9e43f541ff164f",
+        "source": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "ab2980ce8264feffe67e37b002cd3679ca6822cdadd1b2f1ca3e330f3b5b7781",
+        "source": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "96b717bde9f29d99397a7607dc7534b2ef01a27ad5a66f1edcbf4cee5ea57d07",
+        "source": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "a347342ff63c3a1322494ae037f98b527cb249ba7f25c78def8fe4eaecb207fb",
+        "source": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "e0d6d26d6687c6472290045316637e300dc5d73b917f5a62f7ca7d623eb78d49",
+        "source": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "e0eff5cb69e6f5810e26779868ef67d821b349b55f7b43c25f612bf7be3ceebb",
+        "source": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c978b6ba6d3d955425f879e9687ca378225395328e38fb9b860e911edba4ce9f",
+        "source": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "40f0fb24138029634cca3ec5afee64d4f379ac1b3fd7d2ffc6bcc7e90f604199",
+        "source": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "bde9daae14c6daca721c33351876beb0298c8f2a2ddfe8af8ddca31c64d7f8ae",
+        "source": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7930426f21930a239334a5021628eecdbe5a7ba771aa5690208e239c8e818572",
+        "source": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "93a875eeb8becfe468e94e0dda69e4e27bd009c169caf1360fd7375c1dc38e81",
+        "source": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "96f722d38b4963bafc8fe96fde550a77c1f56175b3d97e2e2004de82be53c597",
+        "source": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "5f3aa62f390a95e0305c4fb6ed6b11bdb09a69da8ba334db3437c42e48a91997",
+        "source": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7bf78a12d6b97d235b272389e1ed03890a32bc20de45fb8e80785187f188b6d7",
+        "source": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "3962faa07beddb56ce813e62f694bd3a63973a11f5dae7c4d7d3ebb18ce9075d",
+        "source": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "5b6f9f6a6def6aeae904899e2d7edc22b1e25b8b26bec916f9ca32bb72fb1e8c",
+        "source": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "2295f1b77fd26b01266781f83d1511c9a0b0b6702078a7a64ad41597f9b5b221",
+        "source": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "0329692a0a36859ad4d4e1a583fd81acfbb333b52342995152e2df72de088bf1",
+        "source": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "b1e426d5667943764ce739a231ac1de6192ac5cbbb50643519480f58ace0c44f",
+        "source": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "5c7a9558b60e1950a7b3c09c5a0ca3e222d3efaa964596df2dd55ad78992d9ee",
+        "source": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "7815e1a4287c67528b9ebd966b22499041e637158573b52476d6d801f2572cf7",
+        "source": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "3352ddf2516675fe6a3a8f3d03f08f59951a478ebcd2364fed08b97daf3d8302",
+        "source": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "5527aa95afb32b902504f5bdd67098ed738655c95a706218a1eb809421a4fa47",
+        "source": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "9ee042f6cf8bcb1cbcdf5b9ad1131ad1e3ba6940bb045014df2a32dfa85271f0",
+        "source": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "06ec41cbc1c41d9db68b33704b67a1e8e247e98709d52186aa4df9630ee5ad9d",
+        "source": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
+        "target": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js"
+      }
+    ],
+    "id": "ggg/system/identity",
+    "kind": "system",
+    "locales": {
+      "en": {
+        "settings.disabled_body": "Your account has been disabled by an administrator. Contact your organization admin if you believe this is a mistake.",
+        "settings.disabled_title": "Account disabled"
+      },
+      "es": {
+        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organizaci\u00f3n si crees que esto es un error.",
+        "settings.disabled_title": "Cuenta deshabilitada"
+      }
+    },
+    "migrations": [],
+    "name": "identity",
+    "personas": [
+      {
+        "id": "free",
+        "org": "org_free",
+        "role": "org:member",
+        "user": "user_free"
+      },
+      {
+        "id": "pro",
+        "org": "org_pro",
+        "role": "org:admin",
+        "user": "user_pro"
+      },
+      {
+        "id": "admin",
+        "org": "org_free",
+        "role": "org:admin",
+        "user": "user_admin"
+      },
+      {
+        "id": "support",
+        "org": "org_free",
+        "role": "org:admin",
+        "user": "user_support"
+      },
+      {
+        "id": "disabled",
+        "org": "org_free",
+        "role": "org:member",
+        "user": "user_disabled"
+      },
+      {
+        "id": "noorg",
+        "org": "",
+        "role": "",
+        "user": "user_noorg"
+      },
+      {
+        "id": "noactive",
+        "org": "",
+        "role": "",
+        "user": "user_noactive"
+      },
+      {
+        "id": "toggle",
+        "org": "org_free",
+        "role": "org:member",
+        "user": "user_toggle"
+      },
+      {
+        "id": "deleteme",
+        "org": "org_deleteme",
+        "role": "org:admin",
+        "user": "user_deleteme"
+      }
+    ],
+    "removal_policy": "major-version-only",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/config"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "system": {
-        "package": "internal/identity",
         "constructor": "NewModule",
         "needs": [
           {
-            "field": "Config",
             "capability": "config",
-            "type": "*config.Config",
-            "optional": false
+            "field": "Config",
+            "optional": false,
+            "type": "*config.Config"
           }
         ],
+        "package": "internal/identity",
         "provides": [
           {
-            "field": "Deleter",
             "capability": "identity.deleter",
+            "field": "Deleter",
             "type": "identity.Deleter"
           },
           {
-            "field": "Fetcher",
             "capability": "identity.fetcher",
+            "field": "Fetcher",
             "type": "identity.UserFetcher"
           },
           {
-            "field": "Verifier",
             "capability": "identity.verifier",
+            "field": "Verifier",
             "type": "identity.Verifier"
           }
         ],
@@ -572,204 +710,78 @@
         "stop": false
       }
     },
-    "migrations": [],
-    "environment": [
-      {
-        "key": "ADMIN_EMAIL",
-        "field": "AdminEmail",
-        "type": "string",
-        "description": "First sign-in with this address is granted the full admin role. Empty means nobody is staff"
-      },
-      {
-        "key": "CLERK_FRONTEND_API_URL",
-        "field": "ClerkFrontendAPIURL",
-        "type": "string",
-        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise"
-      },
-      {
-        "key": "CLERK_PORTAL_URL",
-        "field": "ClerkPortalURL",
-        "type": "string",
-        "description": "Hosted Account Portal base, e.g. `https://accounts.your-app.com`",
-        "trim_slash": true,
-        "production_required": true
-      },
-      {
-        "key": "CLERK_PUBLISHABLE_KEY",
-        "field": "ClerkPublishableKey",
-        "type": "string",
-        "description": "Drives the vendored clerk-js that keeps the `__session` JWT fresh",
-        "production_required": true
-      },
-      {
-        "key": "CLERK_SECRET_KEY",
-        "field": "ClerkSecretKey",
-        "type": "string",
-        "description": "Clerk API secret. Empty means auth is not configured and `/app` renders 503 (unless the dev bypass is on)",
-        "production_required": true,
-        "secret": true
-      },
-      {
-        "key": "CLERK_WEBHOOK_SECRET",
-        "field": "ClerkWebhookSecret",
-        "type": "string",
-        "description": "Verifies `svix-*` signatures on `/webhooks/clerk`",
-        "production_required": true,
-        "secret": true
-      },
-      {
-        "key": "DEV_AUTH_BYPASS",
-        "field": "DevAuthBypass",
-        "type": "bool",
-        "description": "Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error",
-        "default": "false",
-        "example": "true"
-      }
-    ],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/identity"
       ]
     },
-    "data": [],
-    "removal_policy": "major-version-only",
-    "locales": {
-      "en": {
-        "settings.disabled_body": "Your account has been disabled by an administrator. Contact your organization admin if you believe this is a mistake.",
-        "settings.disabled_title": "Account disabled"
-      },
-      "es": {
-        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
-        "settings.disabled_title": "Cuenta deshabilitada"
-      }
-    },
-    "personas": [
-      {
-        "id": "free",
-        "user": "user_free",
-        "org": "org_free",
-        "role": "org:member"
-      },
-      {
-        "id": "pro",
-        "user": "user_pro",
-        "org": "org_pro",
-        "role": "org:admin"
-      },
-      {
-        "id": "admin",
-        "user": "user_admin",
-        "org": "org_free",
-        "role": "org:admin"
-      },
-      {
-        "id": "support",
-        "user": "user_support",
-        "org": "org_free",
-        "role": "org:admin"
-      },
-      {
-        "id": "disabled",
-        "user": "user_disabled",
-        "org": "org_free",
-        "role": "org:member"
-      },
-      {
-        "id": "noorg",
-        "user": "user_noorg",
-        "org": "",
-        "role": ""
-      },
-      {
-        "id": "noactive",
-        "user": "user_noactive",
-        "org": "",
-        "role": ""
-      },
-      {
-        "id": "toggle",
-        "user": "user_toggle",
-        "org": "org_free",
-        "role": "org:member"
-      },
-      {
-        "id": "deleteme",
-        "user": "user_deleteme",
-        "org": "org_deleteme",
-        "role": "org:admin"
-      }
-    ],
+    "title": "Identity",
     "vendors": [
       {
-        "path": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/2172_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 8174,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/2172_clerk.browser_9854dd_5.127.1.js",
         "sha256": "916f930ffb94a362e9591e3af48b8be3ebb5ea1e1b717c0fd0da022f3b3c3aaa",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/2172_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/4170_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 17477,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/4170_clerk.browser_9854dd_5.127.1.js",
         "sha256": "dddb4af77af0aecc80e4ad518f0c7028e9bee93018c37da93b2de779266b71b8",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/4170_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/5192_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 9114,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/5192_clerk.browser_9854dd_5.127.1.js",
         "sha256": "4f0432108c1271e73913cb10f5d8e8e8ebf007894a1a83482db090b0f1cf8bd5",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/5192_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/5645_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 11867,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/5645_clerk.browser_9854dd_5.127.1.js",
         "sha256": "2baee3cb8ccebfbff51f72322b2f8064b5082178c6a7fe3fbfb740fc89b2fab2",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/5645_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/7067_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 12799,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/7067_clerk.browser_9854dd_5.127.1.js",
         "sha256": "646f981c51c2b3a814848b3e27d351746cbbb536678d1aed02f3224f49709eda",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/7067_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/7502_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 22122,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/7502_clerk.browser_9854dd_5.127.1.js",
         "sha256": "3ed67ee1c2c544a5e395c2806b8c770220dad0241521b4c0e64347b2c7f7f295",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/7502_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/apiKeys_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 9900,
-        "sha256": "7c32c090568bdb930f938de88aef618b89672d86ecae5b43ba7fbffab2640f9c",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/apiKeys_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "7c32c090568bdb930f938de88aef618b89672d86ecae5b43ba7fbffab2640f9c",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/apiKeys_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 561164,
-        "sha256": "1d744d8e1597a940d957975e5e6ef24a9ff0242f946546f57dece5e0dd84eec0",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
@@ -790,32 +802,32 @@
           "oxlib.sh",
           "rpc.wallet.coinbase.com",
           "viem.sh"
-        ]
+        ],
+        "path": "static/vendor/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "1d744d8e1597a940d957975e5e6ef24a9ff0242f946546f57dece5e0dd84eec0",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/base-account-sdk_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 851,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
         "sha256": "465ccb422630060b6769b076acc53c644d6c896e1eb93201e221732d40ed0157",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/blankcaptcha_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/checkout_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 31722,
-        "sha256": "324e0adc9e21caefd908bbfc1690058ee1be5acb3852de4ed929fc8528bcdf93",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/checkout_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "324e0adc9e21caefd908bbfc1690058ee1be5acb3852de4ed929fc8528bcdf93",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/checkout_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/clerk.browser.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/clerk.browser.js",
-        "version": "5.127.1",
         "bytes": 321927,
-        "sha256": "d92e69c91eeb10ec1558b79376a35520ead6e358811319366c6c28a4fb88d5a0",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
@@ -827,14 +839,14 @@
           "img.clerk.com",
           "react-native-fake-base-url",
           "www.npmjs.com"
-        ]
+        ],
+        "path": "static/vendor/clerk.browser.js",
+        "sha256": "d92e69c91eeb10ec1558b79376a35520ead6e358811319366c6c28a4fb88d5a0",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/clerk.browser.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 105547,
-        "sha256": "3c7ea5aa2a7deef9ff116efacafcf6c3dd629cce6bb7d919452cc2dfeef53bdc",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
@@ -844,297 +856,297 @@
           "rpc.wallet.coinbase.com",
           "www.smartwallet.dev",
           "www.walletlink.org"
-        ]
+        ],
+        "path": "static/vendor/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "3c7ea5aa2a7deef9ff116efacafcf6c3dd629cce6bb7d919452cc2dfeef53bdc",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/coinbase-wallet-sdk_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 135,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
         "sha256": "c86561760035abbebeb3014bcdb7fa3fd825083697a8bc0993bef488d5ec593e",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/cookieSuffix_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 1918,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
         "sha256": "e3dc6ef912779925c4962f87a93305e7d3c27f12c4f67820253d7a6488a2659a",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/copy-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/createorganization_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 5253,
-        "sha256": "14e20e9911465ecb728f124c36a4ee904338d90470e2743e87534426f943ea55",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/createorganization_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "14e20e9911465ecb728f124c36a4ee904338d90470e2743e87534426f943ea55",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/createorganization_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 18477,
-        "sha256": "f4cef545f77a3cb6bce8466ff70ab699d7631f4f388398f60206394776a13cf7",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
           "clerk.com",
           "dashboard.clerk.com"
-        ]
+        ],
+        "path": "static/vendor/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "f4cef545f77a3cb6bce8466ff70ab699d7631f4f388398f60206394776a13cf7",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/enableOrganizationsPrompt_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/framework_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 132893,
-        "sha256": "2836ab217b40db69b67ced179d04727fbd1f099e48608b15da409439a41ad7df",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
           "reactjs.org"
-        ]
+        ],
+        "path": "static/vendor/framework_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "2836ab217b40db69b67ced179d04727fbd1f099e48608b15da409439a41ad7df",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/framework_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/impersonationfab_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 3944,
-        "sha256": "cd91602f0eb261cdd596c9b255ca8d40b4760b6f7f3eb1599cd17af59bee36e7",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/impersonationfab_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "cd91602f0eb261cdd596c9b255ca8d40b4760b6f7f3eb1599cd17af59bee36e7",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/impersonationfab_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 16214,
-        "sha256": "eff117abda6ca0b8cc40c95607b8334af246643951633f0e17af219e7c57affc",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
           "dashboard.clerk.com"
-        ]
+        ],
+        "path": "static/vendor/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "eff117abda6ca0b8cc40c95607b8334af246643951633f0e17af219e7c57affc",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/keylessPrompt_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/oauthConsent_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 5988,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/oauthConsent_clerk.browser_9854dd_5.127.1.js",
         "sha256": "a7b9f5ac327dc085665b65414e2dbc38a8832f0a22090e95bd694599d8407059",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/oauthConsent_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/onetap_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 1524,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/onetap_clerk.browser_9854dd_5.127.1.js",
         "sha256": "6a8451042b82e36fcf4f789796aac6c8f9b50e9370c42aef4151694631172869",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/onetap_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 729,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "8f38532d9cb4af9694682c6811dc463bff860cc001cb5734604a4fd1913406e5",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/op-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/op-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 2356,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/op-billing-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "91b762eade20badc1e57b1410c336c2038ddbe0c1cef3085b094733db683e17a",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/op-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/op-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 1283,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/op-plans-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "ab8fe46367e6e93982a05381d890b04be8ac0b9175fbd14b63bf4e71bd74bb7a",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/op-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/organizationlist_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 10647,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/organizationlist_clerk.browser_9854dd_5.127.1.js",
         "sha256": "54e91ecbc784313ea9eabdc77032a8ef09464464901e69dea299047a67e27990",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/organizationlist_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/organizationprofile_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 41188,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/organizationprofile_clerk.browser_9854dd_5.127.1.js",
         "sha256": "cea5cf371afd6f2e2b8e14d8b542c5542fa9781443c9c53ec052f0e522fb56ec",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/organizationprofile_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 13933,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
         "sha256": "b3d0a2d4e3e3c3b903511cdb914b88b784f37bc95e35919c61cca418a77be821",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/organizationswitcher_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 7289,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "e5abf101e93d624f96e9397a068d57341c5170e29ef7bea0dadfdc373a20e14b",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/payment-attempt-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/planDetails_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 4983,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/planDetails_clerk.browser_9854dd_5.127.1.js",
         "sha256": "14053cf5a433b75d7c49f956486a111b1337e5fa3a525c8ff13a9400f0666d83",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/planDetails_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 669,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
         "sha256": "618d9788a5c8ea990ea7f452386698258273aed4582e39e823ea3ac5b3679332",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/prefetchorganizationlist_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/pricingTable_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 191,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/pricingTable_clerk.browser_9854dd_5.127.1.js",
         "sha256": "f3819cc8a3eb3666444d1dea353255a7a137bb4a6adf1fd04a9e43f541ff164f",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/pricingTable_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 23366,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
         "sha256": "ab2980ce8264feffe67e37b002cd3679ca6822cdadd1b2f1ca3e330f3b5b7781",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/query-core-vendors_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 2036,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
         "sha256": "96b717bde9f29d99397a7607dc7534b2ef01a27ad5a66f1edcbf4cee5ea57d07",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/revoke-api-key-modal_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/sessionTasks_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 5762,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/sessionTasks_clerk.browser_9854dd_5.127.1.js",
         "sha256": "a347342ff63c3a1322494ae037f98b527cb249ba7f25c78def8fe4eaecb207fb",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/sessionTasks_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/signin_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 68230,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/signin_clerk.browser_9854dd_5.127.1.js",
         "sha256": "e0d6d26d6687c6472290045316637e300dc5d73b917f5a62f7ca7d623eb78d49",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/signin_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/signup_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 35825,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/signup_clerk.browser_9854dd_5.127.1.js",
         "sha256": "e0eff5cb69e6f5810e26779868ef67d821b349b55f7b43c25f612bf7be3ceebb",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/signup_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/statement-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 338,
-        "sha256": "c978b6ba6d3d955425f879e9687ca378225395328e38fb9b860e911edba4ce9f",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/statement-page_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "c978b6ba6d3d955425f879e9687ca378225395328e38fb9b860e911edba4ce9f",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/statement-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 1853,
-        "sha256": "40f0fb24138029634cca3ec5afee64d4f379ac1b3fd7d2ffc6bcc7e90f604199",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
           "js.stripe.com"
-        ]
+        ],
+        "path": "static/vendor/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "40f0fb24138029634cca3ec5afee64d4f379ac1b3fd7d2ffc6bcc7e90f604199",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/stripe-vendors_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 10284,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
         "sha256": "bde9daae14c6daca721c33351876beb0298c8f2a2ddfe8af8ddca31c64d7f8ae",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/subscriptionDetails_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 1241,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
         "sha256": "7930426f21930a239334a5021628eecdbe5a7ba771aa5690208e239c8e818572",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/taskChooseOrganization_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 4773,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
         "sha256": "93a875eeb8becfe468e94e0dda69e4e27bd009c169caf1360fd7375c1dc38e81",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/taskResetPassword_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 19139,
-        "sha256": "96f722d38b4963bafc8fe96fde550a77c1f56175b3d97e2e2004de82be53c597",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "96f722d38b4963bafc8fe96fde550a77c1f56175b3d97e2e2004de82be53c597",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/taskSetupMFA_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/ui-common_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 442248,
-        "sha256": "5f3aa62f390a95e0305c4fb6ed6b11bdb09a69da8ba334db3437c42e48a91997",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
@@ -1146,98 +1158,98 @@
           "img.lclclerk.com",
           "solana.com",
           "stripe.com"
-        ]
+        ],
+        "path": "static/vendor/ui-common_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "5f3aa62f390a95e0305c4fb6ed6b11bdb09a69da8ba334db3437c42e48a91997",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/ui-common_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 730,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "7bf78a12d6b97d235b272389e1ed03890a32bc20de45fb8e80785187f188b6d7",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/up-api-keys-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/up-billing-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 2184,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/up-billing-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "3962faa07beddb56ce813e62f694bd3a63973a11f5dae7c4d7d3ebb18ce9075d",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/up-billing-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/up-plans-page_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 954,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/up-plans-page_clerk.browser_9854dd_5.127.1.js",
         "sha256": "5b6f9f6a6def6aeae904899e2d7edc22b1e25b8b26bec916f9ca32bb72fb1e8c",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/up-plans-page_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/useravatar_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 580,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/useravatar_clerk.browser_9854dd_5.127.1.js",
         "sha256": "2295f1b77fd26b01266781f83d1511c9a0b0b6702078a7a64ad41597f9b5b221",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/useravatar_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/userbutton_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 12580,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/userbutton_clerk.browser_9854dd_5.127.1.js",
         "sha256": "0329692a0a36859ad4d4e1a583fd81acfbb333b52342995152e2df72de088bf1",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/userbutton_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/userprofile_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 69847,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/userprofile_clerk.browser_9854dd_5.127.1.js",
         "sha256": "b1e426d5667943764ce739a231ac1de6192ac5cbbb50643519480f58ace0c44f",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/userprofile_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/userverification_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 19663,
-        "sha256": "5c7a9558b60e1950a7b3c09c5a0ca3e222d3efaa964596df2dd55ad78992d9ee",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/userverification_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "5c7a9558b60e1950a7b3c09c5a0ca3e222d3efaa964596df2dd55ad78992d9ee",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/userverification_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/vendors_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 135958,
-        "sha256": "7815e1a4287c67528b9ebd966b22499041e637158573b52476d6d801f2572cf7",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
           "github.com"
-        ]
+        ],
+        "path": "static/vendor/vendors_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "7815e1a4287c67528b9ebd966b22499041e637158573b52476d6d801f2572cf7",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/vendors_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/waitlist_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 3426,
-        "sha256": "3352ddf2516675fe6a3a8f3d03f08f59951a478ebcd2364fed08b97daf3d8302",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/waitlist_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "3352ddf2516675fe6a3a8f3d03f08f59951a478ebcd2364fed08b97daf3d8302",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/waitlist_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 307047,
-        "sha256": "5527aa95afb32b902504f5bdd67098ed738655c95a706218a1eb809421a4fa47",
         "license": "MIT",
         "license_at": "VENDOR-LICENSES.md",
         "origins": [
@@ -1246,26 +1258,31 @@
           "fonts.gstatic.com",
           "github.com",
           "solanamobile.com"
-        ]
+        ],
+        "path": "static/vendor/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "5527aa95afb32b902504f5bdd67098ed738655c95a706218a1eb809421a4fa47",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/web3-solana-wallet-buttons_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 465480,
-        "sha256": "9ee042f6cf8bcb1cbcdf5b9ad1131ad1e3ba6940bb045014df2a32dfa85271f0",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "9ee042f6cf8bcb1cbcdf5b9ad1131ad1e3ba6940bb045014df2a32dfa85271f0",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/zxcvbn-common_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       },
       {
-        "path": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
-        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
-        "version": "5.127.1",
         "bytes": 25065,
-        "sha256": "06ec41cbc1c41d9db68b33704b67a1e8e247e98709d52186aa4df9630ee5ad9d",
         "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
+        "sha256": "06ec41cbc1c41d9db68b33704b67a1e8e247e98709d52186aa4df9630ee5ad9d",
+        "source": "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5.127.1/dist/zxcvbn-ts-core_clerk.browser_9854dd_5.127.1.js",
+        "version": "5.127.1"
       }
     ]
-  }
+  },
+  "schema": 2
 }

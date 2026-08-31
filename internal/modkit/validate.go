@@ -6,14 +6,21 @@ import (
 )
 
 func validateProject(p Project, canonical bool) error {
-	if p.Schema != 1 {
-		return fmt.Errorf("project schema must be 1")
+	if p.Schema != 2 {
+		return fmt.Errorf("project schema must be 2; migrate schema 1 explicitly")
 	}
-	if err := validateRepository(p.Registry.Repository); err != nil {
-		return fmt.Errorf("project registry repository: %w", err)
+	if p.Registries == nil {
+		return fmt.Errorf("project registries array is required")
 	}
-	if strings.TrimSpace(p.Registry.Ref) == "" || p.Registry.Ref != strings.TrimSpace(p.Registry.Ref) {
-		return fmt.Errorf("project registry ref must be non-empty and trimmed")
+	seenNamespaces := map[string]struct{}{}
+	for i, registry := range p.Registries {
+		if err := validateProjectRegistry(registry); err != nil {
+			return fmt.Errorf("project registries[%d]: %w", i, err)
+		}
+		if _, exists := seenNamespaces[registry.Namespace]; exists {
+			return fmt.Errorf("project registries contain duplicate namespace %q", registry.Namespace)
+		}
+		seenNamespaces[registry.Namespace] = struct{}{}
 	}
 	if p.Modules == nil {
 		return fmt.Errorf("project modules array is required")
@@ -21,22 +28,27 @@ func validateProject(p Project, canonical bool) error {
 	if p.Exclude == nil {
 		return fmt.Errorf("project exclude array is required")
 	}
-	if err := validateStringSet("project modules", p.Modules, canonical, validateProjectModuleID); err != nil {
+	if p.Providers == nil {
+		return fmt.Errorf("project providers object is required")
+	}
+	if p.Deployment != "" && strings.TrimSpace(p.Deployment) != p.Deployment {
+		return fmt.Errorf("project deployment must be trimmed")
+	}
+	if err := validateStringSet("project modules", p.Modules, canonical, validateScopedProjectModuleID); err != nil {
 		return err
 	}
-	if err := validateStringSet("project exclude", p.Exclude, canonical, validateProjectModuleID); err != nil {
+	if err := validateStringSet("project exclude", p.Exclude, canonical, validateScopedProjectModuleID); err != nil {
 		return err
 	}
-
 	selected := make(map[string]struct{}, len(p.Modules))
 	hasProfile := false
 	for _, id := range p.Modules {
 		selected[id] = struct{}{}
-		kind, _, _ := splitModuleID(id)
+		_, kind, _, _ := splitScopedModuleID(id)
 		hasProfile = hasProfile || kind == "profile"
 	}
 	for _, id := range p.Exclude {
-		kind, _, _ := splitModuleID(id)
+		_, kind, _, _ := splitScopedModuleID(id)
 		if kind == "profile" {
 			return fmt.Errorf("project exclude cannot contain profile %q", id)
 		}
@@ -47,13 +59,163 @@ func validateProject(p Project, canonical bool) error {
 	if len(p.Exclude) != 0 && !hasProfile {
 		return fmt.Errorf("project exclude requires a selected profile")
 	}
+	for slot, selections := range p.Providers {
+		if err := validateProviderSelections(slot, selections); err != nil {
+			return err
+		}
+	}
+	if p.Deployment != "" {
+		if err := validateScopedProjectModuleID(p.Deployment); err != nil {
+			return fmt.Errorf("project deployment: %w", err)
+		}
+	}
 	return nil
 }
 
+func validateProjectRegistry(registry ProjectRegistry) error {
+	if !validNamespace(registry.Namespace) {
+		return fmt.Errorf("namespace %q is invalid", registry.Namespace)
+	}
+	switch registry.Source {
+	case "github":
+		if err := validateRepository(registry.Repository); err != nil {
+			return fmt.Errorf("repository: %w", err)
+		}
+		if strings.TrimSpace(registry.Ref) == "" || registry.Ref != strings.TrimSpace(registry.Ref) {
+			return fmt.Errorf("ref must be non-empty and trimmed")
+		}
+		if strings.TrimSpace(registry.PublicKey) == "" {
+			return fmt.Errorf("public_key is required")
+		}
+		if registry.Path != "" {
+			return fmt.Errorf("path is forbidden for github source")
+		}
+	case "directory":
+		if strings.TrimSpace(registry.Path) == "" || registry.Path != strings.TrimSpace(registry.Path) ||
+			strings.HasPrefix(registry.Path, "/") || strings.Contains(registry.Path, "..") {
+			return fmt.Errorf("path must be project-contained")
+		}
+		if registry.Repository != "" || registry.Ref != "" || registry.PublicKey != "" {
+			return fmt.Errorf("repository, ref, and public_key are forbidden for directory source")
+		}
+	default:
+		return fmt.Errorf("source must be github or directory")
+	}
+	return nil
+}
+func validNamespace(value string) bool {
+	if value == "" || !validKebab(value) {
+		return false
+	}
+	return true
+}
+
+func splitScopedModuleID(id string) (namespace, kind, name string, ok bool) {
+	if strings.Count(id, "/") != 2 {
+		return "", "", "", false
+	}
+	parts := strings.Split(id, "/")
+	if !validNamespace(parts[0]) || !validKebab(parts[1]) || !validKebab(parts[2]) {
+		return "", "", "", false
+	}
+	return parts[0], parts[1], parts[2], true
+}
+
+func validateScopedProjectModuleID(id string) error {
+	namespace, kind, _, ok := splitScopedModuleID(id)
+	if !ok || !validNamespace(namespace) {
+		return fmt.Errorf("module id %q is invalid", id)
+	}
+	if kind != "element" && kind != "component" && kind != "page" && kind != "workflow" && kind != "system" && kind != "profile" {
+		return fmt.Errorf("module kind %q is invalid", kind)
+	}
+	return nil
+}
+
+func validateProviderSelections(slot string, choices ProviderSelections) error {
+	if strings.TrimSpace(slot) == "" {
+		return fmt.Errorf("provider slot id must be non-empty")
+	}
+	for env, choice := range map[string]ProviderSelection{
+		"development": choices.Development, "test": choices.Test, "production": choices.Production,
+	} {
+		if strings.TrimSpace(choice.Adapter) == "" || strings.TrimSpace(choice.Target) == "" {
+			return fmt.Errorf("provider %s selection for %s must name adapter and target", slot, env)
+		}
+	}
+	return nil
+}
+func validateRequirements(owner string, reqs []Requirement, canonical bool) error {
+	seen := map[string]struct{}{}
+	last := ""
+	for i, req := range reqs {
+		if err := validateScopedProjectModuleID(req.ID); err != nil {
+			return fmt.Errorf("manifest requires[%d] id: %w", i, err)
+		}
+		if strings.HasSuffix(req.ID, "/profile") {
+			return fmt.Errorf("manifest requires[%d] cannot require a profile", i)
+		}
+		if req.ID == owner {
+			return fmt.Errorf("manifest requires cannot contain its own id")
+		}
+		if req.Contract.Min <= 0 || req.Contract.Max <= 0 || req.Contract.Min > req.Contract.Max {
+			return fmt.Errorf("manifest requires[%d] contract bounds are invalid", i)
+		}
+		if _, exists := seen[req.ID]; exists {
+			return fmt.Errorf("manifest requires contain duplicate id %q", req.ID)
+		}
+		seen[req.ID] = struct{}{}
+		if canonical && i > 0 && last > req.ID {
+			return fmt.Errorf("manifest requires must be sorted by id")
+		}
+		last = req.ID
+	}
+	return nil
+}
+
+func validateDependencies(deps Dependencies) error {
+	if deps.Go == nil || deps.Tools == nil || deps.Containers == nil {
+		return fmt.Errorf("manifest dependencies go, tools, and containers arrays are required")
+	}
+	seenGo, seenTools, seenContainers := map[string]struct{}{}, map[string]struct{}{}, map[string]struct{}{}
+	for _, dep := range deps.Go {
+		if !validPackagePath(dep.Module) || strings.TrimSpace(dep.Version) == "" {
+			return fmt.Errorf("manifest dependency go entry is invalid")
+		}
+		if _, ok := seenGo[dep.Module]; ok { return fmt.Errorf("duplicate go dependency %q", dep.Module) }
+		seenGo[dep.Module] = struct{}{}
+	}
+	for _, tool := range deps.Tools {
+		if tool.OS == "" || tool.Arch == "" || tool.URL == "" || !strings.HasPrefix(tool.URL, "https://") ||
+			!validSHA256(tool.SHA256) || (tool.Format != "raw" && tool.Format != "zip" && tool.Format != "tar.gz") ||
+			!validSafeInstallPath(tool.InstallPath) || !validSafeArchivePath(tool.BinaryPath) {
+			return fmt.Errorf("manifest dependency tool %q is invalid", tool.InstallPath)
+		}
+		if _, ok := seenTools[tool.InstallPath]; ok { return fmt.Errorf("duplicate tool dependency %q", tool.InstallPath) }
+		seenTools[tool.InstallPath] = struct{}{}
+	}
+	for _, container := range deps.Containers {
+		if strings.TrimSpace(container.Name) == "" || !strings.Contains(container.Image, "@sha256:") {
+			return fmt.Errorf("manifest container dependency %q must use an immutable digest", container.Name)
+		}
+		if _, ok := seenContainers[container.Name]; ok { return fmt.Errorf("duplicate container dependency %q", container.Name) }
+		seenContainers[container.Name] = struct{}{}
+	}
+	return nil
+}
+
+func validSafeInstallPath(value string) bool {
+	return strings.HasPrefix(value, "bin/") && validateSafePath(value) == nil
+}
+
+func validSafeArchivePath(value string) bool {
+	return value != "" && validateSafePath(value) == nil
+}
+
 func validateManifest(m Manifest, canonical bool) error {
-	kind, name, ok := splitModuleID(m.ID)
-	if !ok || !validModuleKind(ModuleKind(kind)) {
-		return fmt.Errorf("manifest id %q is not a valid module id", m.ID)
+	namespace, kind, name, ok := splitScopedModuleID(m.ID)
+	if !ok || !validModuleKind(ModuleKind(kind)) || !validNamespace(namespace) {
+		return fmt.Errorf("manifest id %q is not a valid scoped module id", m.ID)
 	}
 	if !validModuleKind(m.Kind) {
 		return fmt.Errorf("manifest kind %q is invalid", m.Kind)
@@ -61,20 +223,14 @@ func validateManifest(m Manifest, canonical bool) error {
 	if m.Name == "" || !validKebab(m.Name) {
 		return fmt.Errorf("manifest name %q is invalid", m.Name)
 	}
-	if kind != string(m.Kind) || name != m.Name || m.ID != string(m.Kind)+"/"+m.Name {
+	if name != m.Name || kind != string(m.Kind) {
 		return fmt.Errorf("manifest identity does not match id, kind, and name")
 	}
-	if m.Revision <= 0 {
-		return fmt.Errorf("manifest revision must be positive")
+	if m.Revision <= 0 || m.Contract <= 0 {
+		return fmt.Errorf("manifest revision and contract must be positive")
 	}
-	if m.Contract <= 0 {
-		return fmt.Errorf("manifest contract must be positive")
-	}
-	if strings.TrimSpace(m.Title) == "" {
-		return fmt.Errorf("manifest title must be non-empty")
-	}
-	if strings.TrimSpace(m.Description) == "" {
-		return fmt.Errorf("manifest description must be non-empty")
+	if strings.TrimSpace(m.Title) == "" || strings.TrimSpace(m.Description) == "" {
+		return fmt.Errorf("manifest title and description must be non-empty")
 	}
 	if !validRemovalPolicy(m.RemovalPolicy) {
 		return fmt.Errorf("manifest removal_policy %q is invalid", m.RemovalPolicy)
@@ -82,13 +238,11 @@ func validateManifest(m Manifest, canonical bool) error {
 	if m.Requires == nil {
 		return fmt.Errorf("manifest requires array is required")
 	}
-	if err := validateStringSet("manifest requires", m.Requires, canonical, validateInstallableModuleID); err != nil {
+	if err := validateRequirements(m.ID, m.Requires, canonical); err != nil {
 		return err
 	}
-	for _, required := range m.Requires {
-		if required == m.ID {
-			return fmt.Errorf("manifest requires cannot contain its own id")
-		}
+	if err := validateDependencies(m.Dependencies); err != nil {
+		return err
 	}
 	if m.Files == nil {
 		return fmt.Errorf("manifest files array is required")
@@ -199,13 +353,15 @@ func validateManifestMigrations(migrations []ManifestMigration, canonical bool) 
 
 func validateClaims(claims NamespaceClaims, canonical bool) error {
 	sets := []struct {
-		name   string
+		name string
 		values []string
 	}{
 		{"packages", claims.Packages}, {"routes", claims.Routes}, {"jobs", claims.Jobs},
 		{"environment", claims.Environment}, {"i18n", claims.I18n}, {"queries", claims.Queries},
 		{"openapi", claims.OpenAPI}, {"content_types", claims.ContentTypes}, {"ui", claims.UI},
-		{"assets", claims.Assets}, {"data", claims.Data},
+		{"assets", claims.Assets}, {"data", claims.Data}, {"provider_slots", claims.ProviderSlots},
+		{"provisioners", claims.Provisioners}, {"database_ops", claims.DatabaseOps},
+		{"cli", claims.CLI}, {"deploy", claims.Deploy},
 	}
 	for _, set := range sets {
 		if err := validateOptionalStringSet("manifest claims "+set.name, set.values, canonical); err != nil {
@@ -274,6 +430,29 @@ func validateRuntime(runtime RuntimeContributions, canonical bool) error {
 		}
 	}
 
+	if err := validateProviderSlots(runtime.ProviderSlots, canonical); err != nil {
+		return err
+	}
+	if runtime.System != nil {
+		if err := validateAdapter(runtime.System.Adapter); err != nil {
+			return fmt.Errorf("runtime adapter: %w", err)
+		}
+	}
+	for _, contribution := range runtime.Provisioners {
+		if !validIdentifier(contribution.ID) || !validPackagePath(contribution.Package) || !validIdentifier(contribution.Constructor) {
+			return fmt.Errorf("runtime provisioner %q is invalid", contribution.ID)
+		}
+	}
+	for _, contribution := range runtime.DatabaseOps {
+		if !validIdentifier(contribution.ID) || !validPackagePath(contribution.Package) || !validIdentifier(contribution.Constructor) {
+			return fmt.Errorf("runtime database operator %q is invalid", contribution.ID)
+		}
+	}
+	for _, contribution := range runtime.Deploy {
+		if !validIdentifier(contribution.ID) || !validPackagePath(contribution.Package) || !validIdentifier(contribution.Constructor) {
+			return fmt.Errorf("runtime deployer %q is invalid", contribution.ID)
+		}
+	}
 	if err := validateRoutes(runtime.Routes, canonical); err != nil {
 		return err
 	}
@@ -300,6 +479,108 @@ func validateRuntime(runtime RuntimeContributions, canonical bool) error {
 	}
 	if err := validateVisual(runtime.Visual, canonical); err != nil {
 		return err
+	}
+	return nil
+}
+func validateProviderSlots(slots []ProviderSlotContribution, canonical bool) error {
+	seen := map[string]struct{}{}
+	for i, slot := range slots {
+		if !validScopedSlotID(slot.ID) {
+			return fmt.Errorf("provider slot %d id %q is invalid", i, slot.ID)
+		}
+		if _, ok := seen[slot.ID]; ok {
+			return fmt.Errorf("duplicate provider slot %q", slot.ID)
+		}
+		seen[slot.ID] = struct{}{}
+		if slot.Capabilities == nil || len(slot.Capabilities) == 0 {
+			return fmt.Errorf("provider slot %q capabilities are required", slot.ID)
+		}
+		capSeen := map[string]struct{}{}
+		for _, capability := range slot.Capabilities {
+			if strings.TrimSpace(capability.Capability) == "" || !validGoTypeRef(capability.Type) {
+				return fmt.Errorf("provider slot %q capability is invalid", slot.ID)
+			}
+			if _, ok := capSeen[capability.Capability]; ok {
+				return fmt.Errorf("provider slot %q duplicate capability %q", slot.ID, capability.Capability)
+			}
+			capSeen[capability.Capability] = struct{}{}
+		}
+	}
+	if canonical && len(slots) > 1 {
+		for i := 1; i < len(slots); i++ {
+			if slots[i-1].ID > slots[i].ID { return fmt.Errorf("provider slots must be sorted by id") }
+		}
+	}
+	return nil
+}
+
+func validScopedSlotID(id string) bool {
+	parts := strings.Split(id, "/")
+	return len(parts) == 2 && validNamespace(parts[0]) && validKebab(parts[1])
+}
+
+func validateAdapter(adapter *AdapterContribution) error {
+	if adapter == nil { return nil }
+	if !validScopedSlotID(adapter.Slot) || adapter.Targets == nil || len(adapter.Targets) == 0 {
+		return fmt.Errorf("adapter slot and targets are required")
+	}
+	seen := map[string]struct{}{}
+	for i, target := range adapter.Targets {
+		if err := validateServiceTarget(target); err != nil { return fmt.Errorf("adapter target %d: %w", i, err) }
+		if _, ok := seen[target.ID]; ok { return fmt.Errorf("duplicate adapter target %q", target.ID) }
+		seen[target.ID] = struct{}{}
+	}
+	return nil
+}
+
+func validateServiceTarget(target ServiceTarget) error {
+	if !validKebab(target.ID) || strings.TrimSpace(target.Title) == "" || target.DocsURL == "" {
+		return fmt.Errorf("target id, title, and docs_url are required")
+	}
+	if target.Mode != "development" && target.Mode != "self-hosted" && target.Mode != "managed" {
+		return fmt.Errorf("target mode is invalid")
+	}
+	if target.Automation != "provision" && target.Automation != "configure" && target.Automation != "manual" {
+		return fmt.Errorf("target automation is invalid")
+	}
+	if len(target.Environments) == 0 { return fmt.Errorf("target environments are required") }
+	envSeen := map[string]struct{}{}
+	for _, env := range target.Environments {
+		if env != "development" && env != "test" && env != "production" { return fmt.Errorf("target environment %q is invalid", env) }
+		if _, ok := envSeen[env]; ok { return fmt.Errorf("target environments contain duplicate %q", env) }
+		envSeen[env] = struct{}{}
+	}
+	if target.Inputs == nil { return fmt.Errorf("target inputs array is required") }
+	inputSeen := map[string]struct{}{}
+	for _, input := range target.Inputs {
+		if strings.TrimSpace(input.Key) == "" || strings.TrimSpace(input.Label) == "" {
+			return fmt.Errorf("target input key and label are required")
+		}
+		switch input.Type {
+		case "string", "url", "integer", "boolean", "enum":
+		default: return fmt.Errorf("target input %q type is invalid", input.Key)
+		}
+		if input.Type == "enum" && len(input.Enum) == 0 { return fmt.Errorf("target input %q enum is required", input.Key) }
+		if _, ok := inputSeen[input.Key]; ok { return fmt.Errorf("target inputs contain duplicate %q", input.Key) }
+		inputSeen[input.Key] = struct{}{}
+	}
+	if target.LocalService != nil {
+		if err := validateLocalService(*target.LocalService); err != nil { return err }
+	}
+	if target.Automation == "provision" || target.Automation == "configure" {
+		if target.Provisioner == "" { return fmt.Errorf("target provisioner is required for %s automation", target.Automation) }
+	}
+	return nil
+}
+
+func validateLocalService(service LocalService) error {
+	if strings.TrimSpace(service.Container) == "" || service.Ports == nil || service.Environment == nil || service.Volumes == nil {
+		return fmt.Errorf("local service container, ports, environment, and volumes are required")
+	}
+	if service.Health.Kind != "tcp" && service.Health.Kind != "http" { return fmt.Errorf("local service health kind is invalid") }
+	if service.Health.Port <= 0 || (service.Health.Kind == "http" && service.Health.Path == "") { return fmt.Errorf("local service health is invalid") }
+	for _, env := range service.Environment {
+		if (env.Value == "") == (env.FromKey == "") { return fmt.Errorf("local service env %q must set exactly one value or from_key", env.Key) }
 	}
 	return nil
 }
@@ -713,6 +994,9 @@ func validateEnvironment(items []EnvironmentVariable, canonical bool) error {
 		if !validIdentifier(item.Field) {
 			return fmt.Errorf("manifest environment[%d] field is invalid", i)
 		}
+		if !item.Type.Valid() {
+			return fmt.Errorf("manifest environment[%d] type is invalid", i)
+		}
 		if strings.TrimSpace(item.Description) == "" {
 			return fmt.Errorf("manifest environment[%d] description is empty", i)
 		}
@@ -720,6 +1004,17 @@ func validateEnvironment(items []EnvironmentVariable, canonical bool) error {
 			return fmt.Errorf("manifest environment contains duplicate key %q", item.Key)
 		}
 		seen[item.Key] = struct{}{}
+		targets := map[string]struct{}{}
+		for _, target := range item.Targets {
+			if strings.TrimSpace(target) == "" || !strings.Contains(target, "@") {
+				return fmt.Errorf("manifest environment[%d] target %q is invalid", i, target)
+			}
+			if _, ok := targets[target]; ok { return fmt.Errorf("manifest environment[%d] has duplicate target %q", i, target) }
+			targets[target] = struct{}{}
+		}
+		if item.Type == EnvInt && item.Min != nil && item.Max != nil && *item.Min > *item.Max {
+			return fmt.Errorf("manifest environment[%d] min exceeds max", i)
+		}
 		if canonical && i > 0 && last > item.Key {
 			return fmt.Errorf("manifest environment must be sorted by key")
 		}
@@ -810,19 +1105,17 @@ func validateData(items []DataDeclaration, canonical bool) error {
 }
 
 func validateLock(lock Lock, canonical bool) error {
-	if lock.Schema != 1 {
-		return fmt.Errorf("lock schema must be 1")
+	if lock.Schema != 2 {
+		return fmt.Errorf("lock schema must be 2; migrate schema 1 explicitly")
 	}
 	if strings.TrimSpace(lock.RegistryCommit) == "" {
 		return fmt.Errorf("lock registry_commit must be non-empty")
 	}
-	if lock.Order == nil {
-		return fmt.Errorf("lock order array is required")
+	if lock.Registries == nil || lock.Snapshots == nil || lock.Order == nil || lock.RuntimeOrders.Development == nil ||
+		lock.RuntimeOrders.Test == nil || lock.RuntimeOrders.Production == nil || lock.Dependencies == nil || lock.Modules == nil {
+		return fmt.Errorf("lock registries, snapshots, order, runtime_orders, dependencies, and modules are required")
 	}
-	if lock.Modules == nil {
-		return fmt.Errorf("lock modules array is required")
-	}
-	if err := validateStringSet("lock order", lock.Order, false, validateInstallableModuleID); err != nil {
+	if err := validateStringSet("lock order", lock.Order, false, validateScopedProjectModuleID); err != nil {
 		return err
 	}
 
@@ -863,14 +1156,14 @@ func validateLock(lock Lock, canonical bool) error {
 			return fmt.Errorf("lock order does not contain module %q", module.ID)
 		}
 		for _, required := range module.Manifest.Requires {
-			requiredPosition, ok := position[required]
+			requiredPosition, ok := position[required.ID]
 			if !ok {
-				return fmt.Errorf("lock order omits required module %q", required)
+				return fmt.Errorf("lock order omits required module %q", required.ID)
 			}
 			if requiredPosition >= modulePosition {
-				return fmt.Errorf("lock order places dependency %q after %q", required, module.ID)
+				return fmt.Errorf("lock order places dependency %q after %q", required.ID, module.ID)
 			}
-			expectedRequiredBy[required] = append(expectedRequiredBy[required], module.ID)
+			expectedRequiredBy[required.ID] = append(expectedRequiredBy[required.ID], module.ID)
 		}
 	}
 	for i := range lock.Modules {
@@ -901,13 +1194,13 @@ func validateLock(lock Lock, canonical bool) error {
 				return fmt.Errorf("lock migrations contain duplicate path %q in %s and %s", migration.Path, owner, module.ID)
 			}
 			migrationPaths[migration.Path] = module.ID
-		}
+	}
 	}
 	return nil
 }
 
 func validateLockedModule(module *LockedModule, canonical bool) error {
-	if err := validateInstallableModuleID(module.ID); err != nil {
+	if err := validateScopedProjectModuleID(module.ID); err != nil {
 		return fmt.Errorf("id: %w", err)
 	}
 	if module.Revision <= 0 {
@@ -925,7 +1218,7 @@ func validateLockedModule(module *LockedModule, canonical bool) error {
 	if module.RequiredBy == nil {
 		return fmt.Errorf("required_by array is required")
 	}
-	if err := validateStringSet("required_by", module.RequiredBy, canonical, validateInstallableModuleID); err != nil {
+	if err := validateStringSet("required_by", module.RequiredBy, canonical, validateScopedProjectModuleID); err != nil {
 		return err
 	}
 	if err := validateManifest(module.Manifest, canonical); err != nil {

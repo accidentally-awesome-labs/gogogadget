@@ -1,176 +1,217 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/calendar",
-    "kind": "component",
-    "name": "calendar",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Calendar and date pickers",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "Native date, datetime-local and two-input range fields stay authoritative; Cally adds a calendar in a first-party popover. Also a static month grid, an agenda scheduler and a checkbox availability grid.",
-    "requires": [
-      "component/date-field",
-      "component/date-range-field",
-      "component/date-time-field",
-      "component/status-dot",
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/calendar.templ",
-        "target": "internal/web/templates/ui/calendar.templ",
         "class": "templ",
+        "contract": true,
+        "rewrite_module": true,
         "sha256": "d16ba5a8ac83f33f89fc7981ffec9781326a8c92b366a6ced79d97ff14f7d12f",
-        "rewrite_module": true,
-        "contract": true
+        "source": "internal/web/templates/ui/calendar.templ",
+        "target": "internal/web/templates/ui/calendar.templ"
       },
       {
-        "source": "internal/web/templates/ui/calendar_test.go",
-        "target": "internal/web/templates/ui/calendar_test.go",
         "class": "test",
-        "sha256": "b06c95af9e388eed26dcdd5055e8d2f05c8be20d32627affc9569d19eeda9717",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "b06c95af9e388eed26dcdd5055e8d2f05c8be20d32627affc9569d19eeda9717",
+        "source": "internal/web/templates/ui/calendar_test.go",
+        "target": "internal/web/templates/ui/calendar_test.go"
       },
       {
-        "source": "static/ui/calendar.js",
-        "target": "static/ui/calendar.js",
         "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
         "sha256": "a802bd28020478203d016d2735a8839f7bbdbff0c8ce6f9444cdeb066bbf2953",
-        "rewrite_module": false,
-        "contract": false
+        "source": "static/ui/calendar.js",
+        "target": "static/ui/calendar.js"
       },
       {
-        "source": "static/vendor/cally-0.9.2.js",
-        "target": "static/vendor/cally-0.9.2.js",
         "class": "asset",
-        "sha256": "4dcba6a3b8ec63b66ff2fbfc6cf47b7dee1eb4896eac89fe7487d82e28e15870",
+        "contract": false,
         "rewrite_module": false,
-        "contract": false
+        "sha256": "4dcba6a3b8ec63b66ff2fbfc6cf47b7dee1eb4896eac89fe7487d82e28e15870",
+        "source": "static/vendor/cally-0.9.2.js",
+        "target": "static/vendor/cally-0.9.2.js"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/calendar",
+    "kind": "component",
+    "migrations": [],
+    "name": "calendar",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/date-field"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/date-range-field"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/date-time-field"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/status-dot"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "ui": [
-        {
-          "name": "availability-grid",
-          "family": "advanced",
-          "signature": "templ AvailabilityGrid(o AvailabilityGridOpts)",
-          "summary": "Renders slots as real checkboxes.",
-          "guidance": "Checkboxes inside a fieldset, not clickable divs: the selection submits with no JavaScript, every slot is reachable by keyboard, and the legend associates the question with the answers. A grid of divs with click handlers has none of those properties and looks the same.",
-          "states": [
-            "default",
-            "disabled"
-          ]
-        },
-        {
-          "name": "date-picker",
-          "family": "advanced",
-          "engine": "cally",
-          "alpine": "uiCalendar",
-          "vendor": "cally@0.9.2",
-          "native_fallback": "native date input",
-          "signature": "templ DatePicker(o DatePickerOpts)",
-          "summary": "Renders a native date input plus an optional calendar.",
-          "guidance": "The input is the control. With no JavaScript the user types a date and the form submits; the platform supplies the format, the keyboard entry and the mobile date wheel. Cally adds a calendar in a first-party popover, and it writes into the same input rather than replacing it - which is why the value cannot diverge from what the server receives.",
-          "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
-          "states": [
-            "default",
-            "error"
-          ]
-        },
-        {
-          "name": "date-range-picker",
-          "family": "advanced",
-          "engine": "cally",
-          "alpine": "uiCalendar",
-          "vendor": "cally@0.9.2",
-          "native_fallback": "native date input",
-          "signature": "templ DateRangePicker(o DateRangePickerOpts)",
-          "summary": "Renders two native date inputs plus a range calendar.",
-          "guidance": "Two inputs rather than one string: a range submitted as one value has to be parsed and re-validated, and a partially filled range cannot be represented at all. The server owns start\u003c=end regardless of what the calendar allowed.",
-          "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
-          "states": [
-            "default",
-            "error"
-          ]
-        },
-        {
-          "name": "date-time-picker",
-          "family": "advanced",
-          "engine": "cally",
-          "alpine": "uiCalendar",
-          "vendor": "cally@0.9.2",
-          "native_fallback": "native date input",
-          "signature": "templ DateTimePicker(o DateTimePickerOpts)",
-          "summary": "Renders a native datetime-local input plus a calendar.",
-          "guidance": "The calendar contributes only the date half. It writes nothing until a time exists too, because a datetime with a guessed midnight is a wrong answer that looks like a right one - and the user never chose it.",
-          "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
-          "states": [
-            "default",
-            "error"
-          ]
-        },
-        {
-          "name": "month-grid",
-          "family": "advanced",
-          "signature": "templ MonthGrid(o MonthGridOpts)",
-          "summary": "Renders a month as a table.",
-          "guidance": "A calendar is tabular data - days across, weeks down - so it is a \u003ctable\u003e with real column headers. A grid of divs looks identical and tells a screen reader nothing about which weekday a date falls on, which is the one thing a calendar exists to convey.",
-          "states": [
-            "default",
-            "disabled"
-          ]
-        },
-        {
-          "name": "scheduler",
-          "family": "advanced",
-          "signature": "templ Scheduler(o SchedulerOpts)",
-          "summary": "Renders a day-grouped agenda.",
-          "guidance": "An agenda list, not a pixel grid: a time grid positions entries by offset, which conveys duration visually and nothing at all to a screen reader, and collapses badly on a phone. The list states each entry's times as text.",
-          "states": [
-            "default",
-            "empty"
-          ]
-        }
-      ],
       "assets": [
         {
-          "id": "cally",
-          "path": "static/vendor/cally-0.9.2.js",
-          "kind": "script",
           "engine": "cally",
+          "esm": true,
+          "id": "cally",
           "integrity": "sha256-Tcumo7jsY7Zv8vv8bPR7fe4etIlurIn+dIfYLijhWHA=",
-          "esm": true
+          "kind": "script",
+          "path": "static/vendor/cally-0.9.2.js"
         },
         {
           "id": "ui-calendar",
-          "path": "static/ui/calendar.js",
-          "kind": "script"
+          "kind": "script",
+          "path": "static/ui/calendar.js"
+        }
+      ],
+      "ui": [
+        {
+          "family": "advanced",
+          "guidance": "Checkboxes inside a fieldset, not clickable divs: the selection submits with no JavaScript, every slot is reachable by keyboard, and the legend associates the question with the answers. A grid of divs with click handlers has none of those properties and looks the same.",
+          "name": "availability-grid",
+          "signature": "templ AvailabilityGrid(o AvailabilityGridOpts)",
+          "states": [
+            "default",
+            "disabled"
+          ],
+          "summary": "Renders slots as real checkboxes."
+        },
+        {
+          "alpine": "uiCalendar",
+          "engine": "cally",
+          "family": "advanced",
+          "guidance": "The input is the control. With no JavaScript the user types a date and the form submits; the platform supplies the format, the keyboard entry and the mobile date wheel. Cally adds a calendar in a first-party popover, and it writes into the same input rather than replacing it - which is why the value cannot diverge from what the server receives.",
+          "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
+          "name": "date-picker",
+          "native_fallback": "native date input",
+          "signature": "templ DatePicker(o DatePickerOpts)",
+          "states": [
+            "default",
+            "error"
+          ],
+          "summary": "Renders a native date input plus an optional calendar.",
+          "vendor": "cally@0.9.2"
+        },
+        {
+          "alpine": "uiCalendar",
+          "engine": "cally",
+          "family": "advanced",
+          "guidance": "Two inputs rather than one string: a range submitted as one value has to be parsed and re-validated, and a partially filled range cannot be represented at all. The server owns start<=end regardless of what the calendar allowed.",
+          "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
+          "name": "date-range-picker",
+          "native_fallback": "native date input",
+          "signature": "templ DateRangePicker(o DateRangePickerOpts)",
+          "states": [
+            "default",
+            "error"
+          ],
+          "summary": "Renders two native date inputs plus a range calendar.",
+          "vendor": "cally@0.9.2"
+        },
+        {
+          "alpine": "uiCalendar",
+          "engine": "cally",
+          "family": "advanced",
+          "guidance": "The calendar contributes only the date half. It writes nothing until a time exists too, because a datetime with a guessed midnight is a wrong answer that looks like a right one - and the user never chose it.",
+          "keyboard": "The native input keeps the platform's own keyboard entry, and Escape closes the calendar popover and returns focus to the trigger.",
+          "name": "date-time-picker",
+          "native_fallback": "native date input",
+          "signature": "templ DateTimePicker(o DateTimePickerOpts)",
+          "states": [
+            "default",
+            "error"
+          ],
+          "summary": "Renders a native datetime-local input plus a calendar.",
+          "vendor": "cally@0.9.2"
+        },
+        {
+          "family": "advanced",
+          "guidance": "A calendar is tabular data - days across, weeks down - so it is a <table> with real column headers. A grid of divs looks identical and tells a screen reader nothing about which weekday a date falls on, which is the one thing a calendar exists to convey.",
+          "name": "month-grid",
+          "signature": "templ MonthGrid(o MonthGridOpts)",
+          "states": [
+            "default",
+            "disabled"
+          ],
+          "summary": "Renders a month as a table."
+        },
+        {
+          "family": "advanced",
+          "guidance": "An agenda list, not a pixel grid: a time grid positions entries by offset, which conveys duration visually and nothing at all to a screen reader, and collapses badly on a phone. The list states each entry's times as text.",
+          "name": "scheduler",
+          "signature": "templ Scheduler(o SchedulerOpts)",
+          "states": [
+            "default",
+            "empty"
+          ],
+          "summary": "Renders a day-grouped agenda."
         }
       ]
     },
-    "vendors": [
-      {
-        "path": "static/vendor/cally-0.9.2.js",
-        "source": "https://cdn.jsdelivr.net/npm/cally@0.9.2/dist/cally.js",
-        "version": "0.9.2",
-        "bytes": 38355,
-        "sha256": "4dcba6a3b8ec63b66ff2fbfc6cf47b7dee1eb4896eac89fe7487d82e28e15870",
-        "license": "MIT",
-        "license_at": "VENDOR-LICENSES.md"
-      }
-    ],
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Calendar and date pickers",
+    "vendors": [
+      {
+        "bytes": 38355,
+        "license": "MIT",
+        "license_at": "VENDOR-LICENSES.md",
+        "path": "static/vendor/cally-0.9.2.js",
+        "sha256": "4dcba6a3b8ec63b66ff2fbfc6cf47b7dee1eb4896eac89fe7487d82e28e15870",
+        "source": "https://cdn.jsdelivr.net/npm/cally@0.9.2/dist/cally.js",
+        "version": "0.9.2"
+      }
+    ]
+  },
+  "schema": 2
 }

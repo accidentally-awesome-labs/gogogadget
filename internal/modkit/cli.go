@@ -363,12 +363,7 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 		return runtimeError(err)
 	}
 
-	project := Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: *repository, Ref: *ref},
-		Modules:  []string{},
-		Exclude:  []string{},
-	}
+	project := Project{Schema: 2, Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: *repository, Ref: *ref, PublicKey: "core"}}, Modules: []string{}, Exclude: []string{}, Providers: map[string]ProviderSelections{}, Deployment: ""}
 	data, err := MarshalProject(project)
 	if err != nil {
 		return usageError(err.Error())
@@ -729,7 +724,9 @@ func (c CLI) runInfo(ctx context.Context, args []string) error {
 	fmt.Fprintf(out, "revision       %d (contract %d)\n", found.Revision, found.Contract)
 	fmt.Fprintf(out, "removal_policy %s\n", found.RemovalPolicy)
 	if len(found.Requires) > 0 {
-		fmt.Fprintf(out, "requires       %s\n", strings.Join(found.Requires, ", "))
+		requires := make([]string, 0, len(found.Requires))
+		for _, requirement := range found.Requires { requires = append(requires, requirement.ID) }
+		fmt.Fprintf(out, "requires       %s\n", strings.Join(requires, ", "))
 	}
 	for _, file := range found.Files {
 		fmt.Fprintf(out, "  file %s\n", file.Target)
@@ -781,11 +778,7 @@ func (c CLI) readCatalog(ctx context.Context, latest bool) (Catalog, string, Loc
 		if !errors.As(err, &coder) || coder.ExitCode() != exitRefusal {
 			return Catalog{}, "", Lock{}, err
 		}
-		project = Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: DefaultRegistryRepository, Ref: "main"},
-			Modules:  []string{}, Exclude: []string{},
-		}
+		project = Project{Schema: 2, Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: DefaultRegistryRepository, Ref: "main", PublicKey: "core"}}, Modules: []string{}, Exclude: []string{}, Providers: map[string]ProviderSelections{}, Deployment: ""}
 	}
 	engine, err := c.engine(false)
 	if err != nil {
@@ -799,11 +792,15 @@ func (c CLI) readCatalog(ctx context.Context, latest bool) (Catalog, string, Loc
 		}
 	}
 
-	ref := project.Registry.Ref
+	if len(project.Registries) == 0 {
+		return Catalog{}, "", Lock{}, runtimeError(fmt.Errorf("project has no registries"))
+	}
+	registry := project.Registries[0]
+	ref := registry.Ref
 	if hasLock && !latest && lock.RegistryCommit != "" {
 		ref = lock.RegistryCommit
 	}
-	catalog, commit, err := engine.Catalog(ctx, project.Registry.Repository, ref)
+	catalog, commit, err := engine.Catalog(ctx, registry.Repository, ref)
 	if err != nil {
 		return Catalog{}, "", Lock{}, runtimeError(err)
 	}
@@ -1313,7 +1310,7 @@ func buildRegistryIndexes(root string) (written []string, discovered []string, e
 		}
 		sort.Strings(items)
 		data, marshalErr := json.MarshalIndent(CatalogIndex{
-			Schema: 1, Kind: include.kind, Items: items,
+			Schema: 2, Kind: include.kind, Items: items,
 		}, "", "  ")
 		if marshalErr != nil {
 			return nil, nil, marshalErr

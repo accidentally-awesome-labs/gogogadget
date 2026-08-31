@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/table-of-contents",
-    "kind": "component",
-    "name": "table-of-contents",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TableOfContents",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TableOfContents renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/table-of-contents.templ",
-        "target": "internal/web/templates/ui/table-of-contents.templ",
         "class": "templ",
-        "sha256": "dce41b158b679c9406b8f33d48dbb94a58ae51ca8b712f263d543fa51f3da3d5",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "dce41b158b679c9406b8f33d48dbb94a58ae51ca8b712f263d543fa51f3da3d5",
+        "source": "internal/web/templates/ui/table-of-contents.templ",
+        "target": "internal/web/templates/ui/table-of-contents.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/table-of-contents",
+    "kind": "component",
+    "migrations": [],
+    "name": "table-of-contents",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "table-of-contents",
           "family": "navigation",
-          "signature": "templ TableOfContents(o TableOfContentsOpts)",
-          "summary": "Renders an in-page index.",
           "guidance": "The links are deliberately not boosted. Boosting an anchor link repaints the content box at the top before scrolling, so the browser lands on the wrong section - the native fragment jump is both correct and faster.",
+          "name": "table-of-contents",
+          "signature": "templ TableOfContents(o TableOfContentsOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an in-page index."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TableOfContents"
+  },
+  "schema": 2
 }

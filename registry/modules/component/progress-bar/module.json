@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/progress-bar",
-    "kind": "component",
-    "name": "progress-bar",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ProgressBar",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ProgressBar renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/progress-bar.templ",
-        "target": "internal/web/templates/ui/progress-bar.templ",
         "class": "templ",
-        "sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "0573c74c60b20afa240f38a6e87946cc8d923bbe7fa5dffc665e93484b3fe69c",
+        "source": "internal/web/templates/ui/progress-bar.templ",
+        "target": "internal/web/templates/ui/progress-bar.templ"
       },
       {
-        "source": "internal/web/templates/ui/progress-bar_test.go",
-        "target": "internal/web/templates/ui/progress-bar_test.go",
         "class": "test",
-        "sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "c962cce2213860f891e528be2cf21dbc97455d81c28d4644266d45341a00bd75",
+        "source": "internal/web/templates/ui/progress-bar_test.go",
+        "target": "internal/web/templates/ui/progress-bar_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/progress-bar",
+    "kind": "component",
+    "migrations": [],
+    "name": "progress-bar",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "progress-bar",
           "family": "feedback",
-          "signature": "templ ProgressBar(o ProgressBarOpts)",
-          "summary": "Renders task progress with progressbar semantics.",
           "guidance": "progressbar, not meter: a progress bar describes a task advancing towards completion, while a meter describes a measurement within a range. Screen readers announce them differently, and using meter for a running task tells the user a quota is filling up.",
+          "name": "progress-bar",
+          "signature": "templ ProgressBar(o ProgressBarOpts)",
           "states": [
             "default",
             "loading"
-          ]
+          ],
+          "summary": "Renders task progress with progressbar semantics."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ProgressBar"
+  },
+  "schema": 2
 }

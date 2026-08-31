@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/center",
-    "kind": "component",
-    "name": "center",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Center",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Center renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/center.templ",
-        "target": "internal/web/templates/ui/center.templ",
         "class": "templ",
-        "sha256": "3c226c14d84319a58739ab3d66b7f437db342cded1c4dba652920288b89458e7",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "3c226c14d84319a58739ab3d66b7f437db342cded1c4dba652920288b89458e7",
+        "source": "internal/web/templates/ui/center.templ",
+        "target": "internal/web/templates/ui/center.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/center",
+    "kind": "component",
+    "migrations": [],
+    "name": "center",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "center",
           "family": "layout",
-          "signature": "templ Center(o CenterOpts)",
-          "summary": "Centres its content horizontally within a constrained measure.",
           "guidance": "It does not centre text. Centred body copy forces the eye to find a new left edge on every line, which is why this only centres the block.",
+          "name": "center",
+          "signature": "templ Center(o CenterOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Centres its content horizontally within a constrained measure."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Center"
+  },
+  "schema": 2
 }

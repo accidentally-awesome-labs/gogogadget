@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/plan-card",
-    "kind": "component",
-    "name": "plan-card",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "PlanCard",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The PlanCard renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/plan-card.templ",
-        "target": "internal/web/templates/ui/plan-card.templ",
         "class": "templ",
-        "sha256": "773c46d37ff9ad438a75233800f490315597faf0984dc06fbd687078514cb5e8",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "773c46d37ff9ad438a75233800f490315597faf0984dc06fbd687078514cb5e8",
+        "source": "internal/web/templates/ui/plan-card.templ",
+        "target": "internal/web/templates/ui/plan-card.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/plan-card",
+    "kind": "component",
+    "migrations": [],
+    "name": "plan-card",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "plan-card",
           "family": "communication",
-          "signature": "templ PlanCard(o PlanCardOpts)",
-          "summary": "Renders one plan on the pricing page or in an upgrade CTA.",
           "guidance": "Price is pre-formatted by the caller: currency and period formatting is a billing concern, and ui does not import billing.",
+          "name": "plan-card",
+          "signature": "templ PlanCard(o PlanCardOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one plan on the pricing page or in an upgrade CTA."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "PlanCard"
+  },
+  "schema": 2
 }

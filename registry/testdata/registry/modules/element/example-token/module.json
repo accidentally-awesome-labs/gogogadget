@@ -1,51 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/example-token",
-    "kind": "element",
-    "name": "example-token",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Example tone token",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The leaf element of the example closure: a closed tone enum, its normalizer, the class each tone contributes, and the CSS fragment that defines those classes. Imports nothing at all, which is the layering rule a leaf element exists to demonstrate.",
-    "requires": [],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "registry/modules/element/example-token/example_token.css",
-        "target": "internal/web/styles/example_token.css",
         "class": "style",
-        "sha256": "7316a73eb2a6d7b707582071dff46f93f0347b5d49167dddaeb164854e8418b0",
+        "contract": false,
         "rewrite_module": false,
-        "contract": false
+        "sha256": "7316a73eb2a6d7b707582071dff46f93f0347b5d49167dddaeb164854e8418b0",
+        "source": "registry/modules/element/example-token/example_token.css",
+        "target": "internal/web/styles/example_token.css"
       },
       {
-        "source": "registry/modules/element/example-token/example_token.go",
-        "target": "internal/web/templates/ui/example_token.go",
         "class": "go",
-        "sha256": "408bbeabf79aa0c5ce83e233b8871411becb2197035a8b9fae24ac65562ec757",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "408bbeabf79aa0c5ce83e233b8871411becb2197035a8b9fae24ac65562ec757",
+        "source": "registry/modules/element/example-token/example_token.go",
+        "target": "internal/web/templates/ui/example_token.go"
       },
       {
-        "source": "registry/modules/element/example-token/example_token_test.go",
-        "target": "internal/web/templates/ui/example_token_test.go",
         "class": "test",
-        "sha256": "e0537ba8e7548314bbba458b7b13361b87092e239080235f453632a66167042a",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "e0537ba8e7548314bbba458b7b13361b87092e239080235f453632a66167042a",
+        "source": "registry/modules/element/example-token/example_token_test.go",
+        "target": "internal/web/templates/ui/example_token_test.go"
       }
     ],
-    "claims": {},
-    "runtime": {},
+    "id": "ggg/element/example-token",
+    "kind": "element",
     "migrations": [],
-    "environment": [],
-    "docs": [],
+    "name": "example-token",
+    "removal_policy": "free",
+    "requires": [],
+    "revision": 1,
+    "runtime": {},
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Example tone token"
+  },
+  "schema": 2
 }

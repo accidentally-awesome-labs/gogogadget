@@ -1,61 +1,72 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/char-counter",
-    "kind": "component",
-    "name": "char-counter",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "CharCounter",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The CharCounter renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/char-counter.templ",
-        "target": "internal/web/templates/ui/char-counter.templ",
         "class": "templ",
-        "sha256": "0d9c52a039a3364d557544022177a78bf12e33c59dcf37756c192b5acad00c68",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "0d9c52a039a3364d557544022177a78bf12e33c59dcf37756c192b5acad00c68",
+        "source": "internal/web/templates/ui/char-counter.templ",
+        "target": "internal/web/templates/ui/char-counter.templ"
       },
       {
-        "source": "internal/web/templates/ui/char-counter_test.go",
-        "target": "internal/web/templates/ui/char-counter_test.go",
         "class": "test",
-        "sha256": "84352ccd6ab63e4819546416b4c8941f53ab7c11f3e035f9b61e3687da0cbb4a",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "84352ccd6ab63e4819546416b4c8941f53ab7c11f3e035f9b61e3687da0cbb4a",
+        "source": "internal/web/templates/ui/char-counter_test.go",
+        "target": "internal/web/templates/ui/char-counter_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/char-counter",
+    "kind": "component",
+    "migrations": [],
+    "name": "char-counter",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "char-counter",
-          "family": "forms",
-          "engine": "alpine",
           "alpine": "uiCharCounter",
+          "engine": "alpine",
+          "family": "forms",
+          "guidance": "The native maxlength on the control is what actually enforces the limit, and the server enforces it again. This is only the readout, so a user who has JavaScript disabled still cannot exceed the limit - they simply do not see the running total. aria-live is polite and the region announces only the count, so a screen reader is not interrupted on every keystroke.",
+          "name": "char-counter",
           "native_fallback": "native input",
           "signature": "templ CharCounter(o CharCounterOpts)",
-          "summary": "Renders a live character count for a length-limited control.",
-          "guidance": "The native maxlength on the control is what actually enforces the limit, and the server enforces it again. This is only the readout, so a user who has JavaScript disabled still cannot exceed the limit - they simply do not see the running total. aria-live is polite and the region announces only the count, so a screen reader is not interrupted on every keystroke.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a live character count for a length-limited control."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "CharCounter"
+  },
+  "schema": 2
 }

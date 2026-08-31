@@ -1,96 +1,150 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/storage",
-    "kind": "system",
-    "name": "storage",
-    "revision": 1,
-    "contract": 1,
-    "title": "Object storage",
-    "description": "Store port with an R2/S3-compatible adapter and a development store rooted in tmp/uploads.",
-    "requires": [
-      "system/apphost",
-      "system/config"
-    ],
-    "files": [
-      {
-        "source": "internal/storage/contract_test.go",
-        "target": "internal/storage/contract_test.go",
-        "class": "test",
-        "sha256": "1e83906feeeeeb7ad95c67fa562887cc52c527919778ab1b49b9491e6feb2efe",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/storage/dev.go",
-        "target": "internal/storage/dev.go",
-        "class": "go",
-        "sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/storage/module.go",
-        "target": "internal/storage/module.go",
-        "class": "go",
-        "sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/storage/module_test.go",
-        "target": "internal/storage/module_test.go",
-        "class": "test",
-        "sha256": "f62ac33b5b26f6ebcc730a3426cf04d3458df037fe4e4fc109543a9ed7ddb76a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/storage/r2.go",
-        "target": "internal/storage/r2.go",
-        "class": "go",
-        "sha256": "c4c10fdd2f04b40254c59aa04a2a4ced8cf84569a7a9b58f62f4fb672175478f",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/storage/storage.go",
-        "target": "internal/storage/storage.go",
-        "class": "go",
-        "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/storage/storage_test.go",
-        "target": "internal/storage/storage_test.go",
-        "class": "test",
-        "sha256": "49bf3efe6ec2eb1e3500d22fa951be7cf92941241dd543f1d777768fd5be1b32",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/storage"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Store port with an R2/S3-compatible adapter and a development store rooted in tmp/uploads.",
+    "docs": [],
+    "environment": [
+      {
+        "description": "R2 API token with Object Read & Write",
+        "field": "StorageR2AccessKeyID",
+        "key": "STORAGE_R2_ACCESS_KEY_ID",
+        "secret": true,
+        "type": "string"
+      },
+      {
+        "description": "Cloudflare account id. With the three keys below this enables R2 storage; any one missing selects DevStore (`tmp/uploads/`)",
+        "field": "StorageR2AccountID",
+        "key": "STORAGE_R2_ACCOUNT_ID",
+        "type": "string"
+      },
+      {
+        "description": "Bucket name",
+        "field": "StorageR2Bucket",
+        "key": "STORAGE_R2_BUCKET",
+        "type": "string"
+      },
+      {
+        "description": "Override for AWS S3 or MinIO compatibility; empty uses the R2 endpoint for the account",
+        "field": "StorageR2Endpoint",
+        "key": "STORAGE_R2_ENDPOINT",
+        "trim_slash": true,
+        "type": "string"
+      },
+      {
+        "description": "Secret half of the R2 API token",
+        "field": "StorageR2SecretAccessKey",
+        "key": "STORAGE_R2_SECRET_ACCESS_KEY",
+        "secret": true,
+        "type": "string"
+      }
+    ],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "1e83906feeeeeb7ad95c67fa562887cc52c527919778ab1b49b9491e6feb2efe",
+        "source": "internal/storage/contract_test.go",
+        "target": "internal/storage/contract_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "39ae6c73b165d3a412a16a6dd01d1ede774b52e5684b733fb75e55d0fa98fb67",
+        "source": "internal/storage/dev.go",
+        "target": "internal/storage/dev.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "538c82c8c13a5ebfebff264d02794a020211e4e0448aec006d17b906afacdea4",
+        "source": "internal/storage/module.go",
+        "target": "internal/storage/module.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "f62ac33b5b26f6ebcc730a3426cf04d3458df037fe4e4fc109543a9ed7ddb76a",
+        "source": "internal/storage/module_test.go",
+        "target": "internal/storage/module_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c4c10fdd2f04b40254c59aa04a2a4ced8cf84569a7a9b58f62f4fb672175478f",
+        "source": "internal/storage/r2.go",
+        "target": "internal/storage/r2.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "5f8665352c7871ab48d79ccc429e258cbd28bef819ce22f1e7a80b24f81d77bb",
+        "source": "internal/storage/storage.go",
+        "target": "internal/storage/storage.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "49bf3efe6ec2eb1e3500d22fa951be7cf92941241dd543f1d777768fd5be1b32",
+        "source": "internal/storage/storage_test.go",
+        "target": "internal/storage/storage_test.go"
+      }
+    ],
+    "id": "ggg/system/storage",
+    "kind": "system",
+    "migrations": [],
+    "name": "storage",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/config"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "system": {
-        "package": "internal/storage",
         "constructor": "NewModule",
         "needs": [
           {
-            "field": "Config",
             "capability": "config",
-            "type": "*config.Config",
-            "optional": false
+            "field": "Config",
+            "optional": false,
+            "type": "*config.Config"
           }
         ],
+        "package": "internal/storage",
         "provides": [
           {
-            "field": "Store",
             "capability": "storage.store",
+            "field": "Store",
             "type": "storage.Store"
           }
         ],
@@ -98,49 +152,12 @@
         "stop": false
       }
     },
-    "migrations": [],
-    "environment": [
-      {
-        "key": "STORAGE_R2_ACCESS_KEY_ID",
-        "field": "StorageR2AccessKeyID",
-        "type": "string",
-        "description": "R2 API token with Object Read & Write",
-        "secret": true
-      },
-      {
-        "key": "STORAGE_R2_ACCOUNT_ID",
-        "field": "StorageR2AccountID",
-        "type": "string",
-        "description": "Cloudflare account id. With the three keys below this enables R2 storage; any one missing selects DevStore (`tmp/uploads/`)"
-      },
-      {
-        "key": "STORAGE_R2_BUCKET",
-        "field": "StorageR2Bucket",
-        "type": "string",
-        "description": "Bucket name"
-      },
-      {
-        "key": "STORAGE_R2_ENDPOINT",
-        "field": "StorageR2Endpoint",
-        "type": "string",
-        "description": "Override for AWS S3 or MinIO compatibility; empty uses the R2 endpoint for the account",
-        "trim_slash": true
-      },
-      {
-        "key": "STORAGE_R2_SECRET_ACCESS_KEY",
-        "field": "StorageR2SecretAccessKey",
-        "type": "string",
-        "description": "Secret half of the R2 API token",
-        "secret": true
-      }
-    ],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/storage"
       ]
     },
-    "data": [],
-    "removal_policy": "retain-data"
-  }
+    "title": "Object storage"
+  },
+  "schema": 2
 }

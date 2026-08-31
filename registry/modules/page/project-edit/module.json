@@ -1,65 +1,100 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/project-edit",
-    "kind": "page",
-    "name": "project-edit",
-    "revision": 1,
-    "contract": 1,
-    "title": "Edit project form",
-    "description": "The edit form for a single project, scoped to the current organization so cross-org ids 404 rather than leaking existence.",
-    "requires": [
-      "system/i18n",
-      "system/identity",
-      "system/security",
-      "system/server",
-      "workflow/projects"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_project_edit.go",
-        "target": "internal/web/page_project_edit.go",
-        "class": "go",
-        "sha256": "12a2f8ce82a2919d76c4c52636e3d2998fb2c0c76a876334cbffc84254f249af",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "projects.edit"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The edit form for a single project, scoped to the current organization so cross-org ids 404 rather than leaking existence.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "12a2f8ce82a2919d76c4c52636e3d2998fb2c0c76a876334cbffc84254f249af",
+        "source": "internal/web/page_project_edit.go",
+        "target": "internal/web/page_project_edit.go"
+      }
+    ],
+    "id": "ggg/page/project-edit",
+    "kind": "page",
+    "migrations": [],
+    "name": "project-edit",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/projects"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "handler": "handleProjectEdit",
           "id": "projects.edit",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/app/projects/{id}/edit",
-          "scope": "app",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleProjectEdit"
+          "scope": "app"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Edit project form"
+  },
+  "schema": 2
 }

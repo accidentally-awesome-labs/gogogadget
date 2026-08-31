@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/split",
-    "kind": "component",
-    "name": "split",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Split",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Split renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/split.templ",
-        "target": "internal/web/templates/ui/split.templ",
         "class": "templ",
-        "sha256": "12e3ff7ce1eafcc699b7387eb60a971e8ee1d315e84c4403b3ae15f4877231b8",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "12e3ff7ce1eafcc699b7387eb60a971e8ee1d315e84c4403b3ae15f4877231b8",
+        "source": "internal/web/templates/ui/split.templ",
+        "target": "internal/web/templates/ui/split.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/split",
+    "kind": "component",
+    "migrations": [],
+    "name": "split",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "split",
           "family": "layout",
-          "signature": "templ Split(o SplitOpts)",
-          "summary": "Renders two panes side by side, stacking on small screens.",
           "guidance": "Stacking is not optional: two panes side by side on a phone gives each about twenty characters per line, which is unreadable.",
+          "name": "split",
+          "signature": "templ Split(o SplitOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders two panes side by side, stacking on small screens."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Split"
+  },
+  "schema": 2
 }

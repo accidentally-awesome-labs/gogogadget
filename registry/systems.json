@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "kind": "system",
   "items": [
     "registry/modules/system/analytics/module.json",

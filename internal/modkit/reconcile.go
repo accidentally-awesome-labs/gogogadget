@@ -540,8 +540,8 @@ func heldModules(conflicts []detectedConflict, modules []Manifest, old map[strin
 	hold := make(map[string]struct{})
 	reverse := make(map[string][]string)
 	for _, module := range modules {
-		for _, dependency := range module.Requires {
-			reverse[dependency] = append(reverse[dependency], module.ID)
+		for _, requirement := range module.Requires {
+			reverse[requirement.ID] = append(reverse[requirement.ID], module.ID)
 		}
 	}
 	queue := make([]string, 0)
@@ -568,7 +568,8 @@ func heldModules(conflicts []detectedConflict, modules []Manifest, old map[strin
 		if !oldOK || !newOK || oldManifest.Contract == newManifest.Contract {
 			continue
 		}
-		for _, dependency := range newManifest.Requires {
+		for _, requirement := range newManifest.Requires {
+			dependency := requirement.ID
 			oldDependency, oldOK := old[dependency]
 			newDependency, newOK := current[dependency]
 			if oldOK && newOK && oldDependency.Contract != newDependency.Contract {
@@ -680,8 +681,8 @@ func buildReconciledLock(commit string, graph selectedGraph, states map[string]r
 		requiredBy[module.ID] = []string{}
 	}
 	for _, module := range graph.modules {
-		for _, dependency := range module.Requires {
-			requiredBy[dependency] = append(requiredBy[dependency], module.ID)
+		for _, requirement := range module.Requires {
+			requiredBy[requirement.ID] = append(requiredBy[requirement.ID], module.ID)
 		}
 	}
 	for id := range requiredBy {
@@ -694,13 +695,17 @@ func buildReconciledLock(commit string, graph selectedGraph, states map[string]r
 		state := states[module.ID]
 		locked = append(locked, LockedModule{
 			ID: module.ID, Revision: state.manifest.Revision, Contract: state.manifest.Contract,
-			SourceCommit: state.sourceCommit, Reason: graph.reasons[module.ID],
+			RegistryNamespace: moduleNamespace(module.ID), SourceCommit: state.sourceCommit,
+			SnapshotSHA256: commit, Reason: graph.reasons[module.ID],
 			RequiredBy: append([]string{}, requiredBy[module.ID]...), Manifest: state.manifest,
 			Files: append([]LockedFile{}, state.files...), Migrations: append([]LockedMigration{}, migrations[module.ID]...),
 			Pending: state.pending,
 		})
 	}
-	return Lock{Schema: 1, RegistryCommit: commit, Order: append([]string{}, graph.order...), Modules: locked}
+	return Lock{Schema: 2, RegistryCommit: commit, Registries: []LockedRegistry{}, Snapshots: []LockedSnapshot{},
+		Order: append([]string{}, graph.order...), RuntimeOrders: RuntimeOrders{
+			Development: append([]string{}, graph.order...), Test: append([]string{}, graph.order...), Production: append([]string{}, graph.order...),
+		}, Dependencies: []LockedDependency{}, Modules: locked}
 }
 
 func sortPlanOutputs(changes []Change, conflicts []Conflict, staged []StagedFile) {

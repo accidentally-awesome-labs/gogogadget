@@ -1,7 +1,7 @@
 {
-  "schema": 1,
-  "kind": "page",
   "items": [
     "registry/modules/page/example-status/module.json"
-  ]
+  ],
+  "kind": "page",
+  "schema": 2
 }

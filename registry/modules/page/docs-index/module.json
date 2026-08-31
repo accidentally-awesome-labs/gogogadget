@@ -1,104 +1,127 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/docs-index",
-    "kind": "page",
-    "name": "docs-index",
-    "revision": 1,
-    "contract": 1,
-    "title": "Documentation index",
-    "description": "The documentation landing page listing every section.",
-    "requires": [
-      "system/content-assets",
-      "system/i18n",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/handlers_docs.go",
-        "target": "internal/web/handlers_docs.go",
-        "class": "go",
-        "sha256": "30a31e2cd3b2f96c7db4fb841484d3f62816cce2751940f6aff54891f689ec3f",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "docs.index"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The documentation landing page listing every section.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "30a31e2cd3b2f96c7db4fb841484d3f62816cce2751940f6aff54891f689ec3f",
+        "source": "internal/web/handlers_docs.go",
+        "target": "internal/web/handlers_docs.go"
+      }
+    ],
+    "id": "ggg/page/docs-index",
+    "kind": "page",
+    "migrations": [],
+    "name": "docs-index",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content-assets"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "docs.index",
-          "method": "GET",
-          "pattern": "/docs",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleDocsIndex"
-        }
-      ],
       "navigation": [
         {
-          "id": "footer.product.docs",
-          "area": "footer",
-          "group": "footer.product",
-          "route_id": "docs.index",
-          "label_key": "footer.docs",
           "after": [
             "footer.product.pricing"
-          ]
+          ],
+          "area": "footer",
+          "group": "footer.product",
+          "id": "footer.product.docs",
+          "label_key": "footer.docs",
+          "route_id": "docs.index"
         },
         {
-          "id": "footer.resources.api",
+          "after": [
+            "footer.resources.getting_started"
+          ],
           "area": "footer",
           "group": "footer.resources",
           "href": "/docs/api",
-          "label_key": "footer.api",
-          "after": [
-            "footer.resources.getting_started"
-          ]
+          "id": "footer.resources.api",
+          "label_key": "footer.api"
         },
         {
-          "id": "footer.resources.getting_started",
+          "after": [
+            "footer.company.about"
+          ],
           "area": "footer",
           "group": "footer.resources",
           "href": "/docs/getting-started",
-          "label_key": "footer.getting_started",
-          "after": [
-            "footer.company.about"
-          ]
+          "id": "footer.resources.getting_started",
+          "label_key": "footer.getting_started"
         },
         {
-          "id": "nav.public.docs",
-          "area": "public",
-          "route_id": "docs.index",
-          "label_key": "nav.docs",
           "after": [
             "nav.public.blog"
-          ]
+          ],
+          "area": "public",
+          "id": "nav.public.docs",
+          "label_key": "nav.docs",
+          "route_id": "docs.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleDocsIndex",
+          "id": "docs.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/docs",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Documentation index"
+  },
+  "schema": 2
 }

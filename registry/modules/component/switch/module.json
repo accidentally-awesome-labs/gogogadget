@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/switch",
-    "kind": "component",
-    "name": "switch",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Switch",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Switch renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/switch.templ",
-        "target": "internal/web/templates/ui/switch.templ",
         "class": "templ",
-        "sha256": "70183904fd0443ba72240f72875be2fda04f2c83831348981c08f9c040f67b73",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "70183904fd0443ba72240f72875be2fda04f2c83831348981c08f9c040f67b73",
+        "source": "internal/web/templates/ui/switch.templ",
+        "target": "internal/web/templates/ui/switch.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/switch",
+    "kind": "component",
+    "migrations": [],
+    "name": "switch",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "switch",
           "family": "forms",
+          "name": "switch",
           "signature": "templ Switch(o SwitchOpts)",
-          "summary": "A labelled toggle.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "A labelled toggle."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Switch"
+  },
+  "schema": 2
 }

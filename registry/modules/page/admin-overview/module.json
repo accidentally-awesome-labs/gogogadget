@@ -1,111 +1,48 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/admin-overview",
-    "kind": "page",
-    "name": "admin-overview",
-    "revision": 1,
-    "contract": 1,
-    "title": "Admin overview",
-    "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
-    "requires": [
-      "system/billing",
-      "system/i18n",
-      "system/identity",
-      "system/organizations",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/admin_test.go",
-        "target": "internal/web/admin_test.go",
-        "class": "test",
-        "sha256": "331f565a0038ca51859915ec9b260d2fe9206b3f43ef481218e9f9dc2714582f",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/page_admin_overview.go",
-        "target": "internal/web/page_admin_overview.go",
-        "class": "go",
-        "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/admin.templ",
-        "target": "internal/web/templates/admin.templ",
-        "class": "templ",
-        "sha256": "2438bfcd99708a363fb38a70b8cfd93a427d45cee59a7c1b3e8914f948d2aa33",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "admin.overview.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "admin.overview.index",
-          "method": "GET",
-          "pattern": "/admin",
-          "scope": "admin",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAdminHome"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.admin.overview",
-          "area": "admin",
-          "route_id": "admin.overview.index",
-          "label_key": "sidebar.admin_overview"
-        }
-      ],
-      "visual": [
-        {
-          "id": "admin",
-          "path": "/admin",
-          "persona": "admin",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "img[alt*=\"avatar\" i]"
-          ]
-        },
-        {
-          "id": "forbidden",
-          "path": "/admin",
-          "persona": "pro",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "img[alt*=\"avatar\" i]"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The admin landing dashboard: user, organization, subscription and MRR totals plus the newest signups.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "331f565a0038ca51859915ec9b260d2fe9206b3f43ef481218e9f9dc2714582f",
+        "source": "internal/web/admin_test.go",
+        "target": "internal/web/admin_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+        "source": "internal/web/page_admin_overview.go",
+        "target": "internal/web/page_admin_overview.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "2438bfcd99708a363fb38a70b8cfd93a427d45cee59a7c1b3e8914f948d2aa33",
+        "source": "internal/web/templates/admin.templ",
+        "target": "internal/web/templates/admin.templ"
+      }
+    ],
+    "id": "ggg/page/admin-overview",
+    "kind": "page",
     "locales": {
       "en": {
         "admin.cancel": "Cancel",
@@ -132,27 +69,131 @@
         "admin.confirm_continue": "Confirmar",
         "admin.read_only": "Solo lectura",
         "admin.signups.col_email": "Correo",
-        "admin.signups.col_joined": "Se unió",
+        "admin.signups.col_joined": "Se uni\u00f3",
         "admin.signups.col_name": "Nombre",
         "admin.signups_caption": "Registros recientes",
-        "admin.signups_empty": "Aún no hay registros.",
-        "admin.signups_heading": "Registros, últimos 30 días",
+        "admin.signups_empty": "A\u00fan no hay registros.",
+        "admin.signups_heading": "Registros, \u00faltimos 30 d\u00edas",
         "admin.stats.active_subs": "Suscripciones activas",
         "admin.stats.mrr": "MRR",
         "admin.stats.mrr_hint": "incluye active + trialing + past_due",
         "admin.stats.total_orgs": "Total de organizaciones",
         "admin.stats.total_users": "Total de usuarios",
-        "admin.stats_aria": "Estadísticas de la plataforma",
-        "admin.title": "Administración"
+        "admin.stats_aria": "Estad\u00edsticas de la plataforma",
+        "admin.title": "Administraci\u00f3n"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "admin-overview",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/billing"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "area": "admin",
+          "id": "nav.admin.overview",
+          "label_key": "sidebar.admin_overview",
+          "route_id": "admin.overview.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleAdminHome",
+          "id": "admin.overview.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/admin",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "admin"
+        }
+      ],
+      "visual": [
+        {
+          "id": "admin",
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/admin",
+          "persona": "admin",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        },
+        {
+          "id": "forbidden",
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/admin",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Admin overview"
+  },
+  "schema": 2
 }

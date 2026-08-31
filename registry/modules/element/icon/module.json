@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/icon",
-    "kind": "element",
-    "name": "icon",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Icon",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Icon renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/icon.templ",
-        "target": "internal/web/templates/ui/icon.templ",
         "class": "templ",
-        "sha256": "b877eb5561048c358540be0c76a43c29446b68296b0d871270e570d25d1fd59e",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "b877eb5561048c358540be0c76a43c29446b68296b0d871270e570d25d1fd59e",
+        "source": "internal/web/templates/ui/icon.templ",
+        "target": "internal/web/templates/ui/icon.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/icon",
+    "kind": "element",
+    "migrations": [],
+    "name": "icon",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "icon",
           "family": "foundations",
-          "signature": "templ Icon(o IconOpts)",
-          "summary": "Renders one named glyph from the typed icon registry.",
           "guidance": "Label names the icon for assistive technology. Empty is the common case and means decorative: the control around the icon already carries the name, so announcing the glyph as well is noise. A non-empty label is for an icon that is the only content of its control, where nothing else names it. An unregistered name renders nothing: the mistake stays visible where it was made, without an outage.",
+          "name": "icon",
+          "signature": "templ Icon(o IconOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one named glyph from the typed icon registry."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Icon"
+  },
+  "schema": 2
 }

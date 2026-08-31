@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/comment-thread",
-    "kind": "component",
-    "name": "comment-thread",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "CommentThread",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The CommentThread renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/comment-thread.templ",
-        "target": "internal/web/templates/ui/comment-thread.templ",
         "class": "templ",
-        "sha256": "4dc287b6c3d53b591e5610e956c1efd2db9a875cb3ad11225bd514168849514d",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "4dc287b6c3d53b591e5610e956c1efd2db9a875cb3ad11225bd514168849514d",
+        "source": "internal/web/templates/ui/comment-thread.templ",
+        "target": "internal/web/templates/ui/comment-thread.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/comment-thread",
+    "kind": "component",
+    "migrations": [],
+    "name": "comment-thread",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "comment-thread",
           "family": "communication",
-          "signature": "templ CommentThread(o CommentThreadOpts)",
-          "summary": "Groups comments into a named region.",
           "guidance": "It is not a live region: a thread rendered with the page has nothing new to announce. ChatLog is the live counterpart, for messages arriving after load.",
+          "name": "comment-thread",
+          "signature": "templ CommentThread(o CommentThreadOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Groups comments into a named region."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "CommentThread"
+  },
+  "schema": 2
 }

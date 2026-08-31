@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/skeleton",
-    "kind": "component",
-    "name": "skeleton",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Skeleton",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Skeleton renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/skeleton.templ",
-        "target": "internal/web/templates/ui/skeleton.templ",
         "class": "templ",
-        "sha256": "9d0ea0d18eb06731610497d81388560c474117efb44359847f00eabb4231dfd6",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "9d0ea0d18eb06731610497d81388560c474117efb44359847f00eabb4231dfd6",
+        "source": "internal/web/templates/ui/skeleton.templ",
+        "target": "internal/web/templates/ui/skeleton.templ"
       },
       {
-        "source": "internal/web/templates/ui/skeleton_test.go",
-        "target": "internal/web/templates/ui/skeleton_test.go",
         "class": "test",
-        "sha256": "d3a60e244d088f3c73109d7b5ec47aa26b5191a889263fb72e1fa59155a08e4b",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "d3a60e244d088f3c73109d7b5ec47aa26b5191a889263fb72e1fa59155a08e4b",
+        "source": "internal/web/templates/ui/skeleton_test.go",
+        "target": "internal/web/templates/ui/skeleton_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/skeleton",
+    "kind": "component",
+    "migrations": [],
+    "name": "skeleton",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "skeleton",
           "family": "feedback",
-          "signature": "templ Skeleton(o SkeletonOpts)",
-          "summary": "Renders a loading placeholder.",
           "guidance": "Always aria-hidden, with no exception: a screen reader announcing \"loading, loading, loading\" for a stack of grey boxes is worse than silence, and the region's own live announcement is what should report arrival. It is only for an *initially empty* region - drawing skeletons over content that is already on screen replaces real information with fake information.",
+          "name": "skeleton",
+          "signature": "templ Skeleton(o SkeletonOpts)",
           "states": [
             "default",
             "loading"
-          ]
+          ],
+          "summary": "Renders a loading placeholder."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Skeleton"
+  },
+  "schema": 2
 }

@@ -247,6 +247,12 @@
             "bool",
             "time"
           ]
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
@@ -352,7 +358,7 @@
         },
         "id": {
           "type": "string",
-          "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         },
         "kind": {
           "type": "string",
@@ -408,10 +414,37 @@
         "requires": {
           "type": "array",
           "items": {
-            "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-          },
-          "uniqueItems": true
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+              },
+              "contract": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "min": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "max": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "min",
+                  "max"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "contract"
+            ]
+          }
         },
         "revision": {
           "type": "integer",
@@ -435,6 +468,9 @@
           "items": {
             "$ref": "#/$defs/VendorArtifact"
           }
+        },
+        "dependencies": {
+          "$ref": "#/$defs/Dependencies"
         }
       },
       "required": [
@@ -446,7 +482,7 @@
         "title",
         "description",
         "requires",
-        "files",
+        "dependencies",
         "claims",
         "runtime",
         "migrations",
@@ -645,6 +681,41 @@
           "items": {
             "type": "string",
             "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "provider_slots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "provisioners": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "database_ops": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "cli": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "deploy": {
+          "type": "array",
+          "items": {
+            "type": "string"
           },
           "uniqueItems": true
         }
@@ -1166,6 +1237,27 @@
             "configure",
             "manual"
           ]
+        },
+        "provisioner": {
+          "type": "string"
+        },
+        "database_operator": {
+          "type": "string"
+        },
+        "docs_url": {
+          "type": "string"
+        },
+        "console_url": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TargetInput"
+          }
+        },
+        "local_service": {
+          "$ref": "#/$defs/LocalService"
         }
       },
       "required": [
@@ -1173,7 +1265,9 @@
         "title",
         "mode",
         "environments",
-        "automation"
+        "automation",
+        "docs_url",
+        "inputs"
       ]
     },
     "RuntimeContributions": {
@@ -1253,6 +1347,24 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/VisualContribution"
+          }
+        },
+        "provisioners": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProvisionerContribution"
+          }
+        },
+        "database_ops": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DatabaseOpsContribution"
+          }
+        },
+        "deploy": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DeployContribution"
           }
         }
       },
@@ -1703,6 +1815,227 @@
         "id",
         "path",
         "viewports"
+      ]
+    },
+    "TargetInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "env_key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "url",
+            "integer",
+            "boolean",
+            "enum"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "secret": {
+          "type": "boolean"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "type",
+        "required",
+        "secret"
+      ]
+    },
+    "LocalService": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "container": {
+          "type": "string"
+        },
+        "ports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalServicePort"
+          }
+        },
+        "environment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalServiceEnv"
+          }
+        },
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalServiceVolume"
+          }
+        },
+        "health": {
+          "$ref": "#/$defs/LocalServiceHealth"
+        }
+      },
+      "required": [
+        "container",
+        "ports",
+        "environment",
+        "volumes",
+        "health"
+      ]
+    },
+    "LocalServicePort": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "container": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "default_host": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "name",
+        "container",
+        "default_host"
+      ]
+    },
+    "LocalServiceEnv": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "from_key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    },
+    "LocalServiceVolume": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "target"
+      ]
+    },
+    "LocalServiceHealth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "tcp",
+            "http"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "port"
+      ]
+    },
+    "ProvisionerContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "package": {
+          "type": "string"
+        },
+        "constructor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "package",
+        "constructor"
+      ]
+    },
+    "DatabaseOpsContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "package": {
+          "type": "string"
+        },
+        "constructor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "package",
+        "constructor"
+      ]
+    },
+    "DeployContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "package": {
+          "type": "string"
+        },
+        "constructor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "package",
+        "constructor"
       ]
     }
   }

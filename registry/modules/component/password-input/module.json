@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/password-input",
-    "kind": "component",
-    "name": "password-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "PasswordInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The PasswordInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/password-input.templ",
-        "target": "internal/web/templates/ui/password-input.templ",
         "class": "templ",
-        "sha256": "17cccad4e4c858376510b1c68ec7b22fd2165fcc6d236831567f2abd2fb5820d",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "17cccad4e4c858376510b1c68ec7b22fd2165fcc6d236831567f2abd2fb5820d",
+        "source": "internal/web/templates/ui/password-input.templ",
+        "target": "internal/web/templates/ui/password-input.templ"
       },
       {
-        "source": "internal/web/templates/ui/password-input_test.go",
-        "target": "internal/web/templates/ui/password-input_test.go",
         "class": "test",
-        "sha256": "a47c1c229c4e7ace27f14b4cf9ebfafa7a03b015d1cc6165a514532378fadac7",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "a47c1c229c4e7ace27f14b4cf9ebfafa7a03b015d1cc6165a514532378fadac7",
+        "source": "internal/web/templates/ui/password-input_test.go",
+        "target": "internal/web/templates/ui/password-input_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/password-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "password-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "password-input",
           "family": "forms",
-          "signature": "templ PasswordInput(o PasswordInputOpts)",
-          "summary": "Renders a native password field.",
           "guidance": "There is no reveal toggle here on purpose: it belongs to a module that owns the Alpine behaviour, and a half-built toggle that leaves the value in the DOM as plain text is worse than none.",
+          "name": "password-input",
+          "signature": "templ PasswordInput(o PasswordInputOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a native password field."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "PasswordInput"
+  },
+  "schema": 2
 }

@@ -1,47 +1,58 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/date-field",
-    "kind": "component",
-    "name": "date-field",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "DateField",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The DateField renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/date-field.templ",
-        "target": "internal/web/templates/ui/date-field.templ",
         "class": "templ",
-        "sha256": "e7618ecbbd9ff858da32ff79cd30b4c248b157248fd0e357777968d41cf39df4",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "e7618ecbbd9ff858da32ff79cd30b4c248b157248fd0e357777968d41cf39df4",
+        "source": "internal/web/templates/ui/date-field.templ",
+        "target": "internal/web/templates/ui/date-field.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/date-field",
+    "kind": "component",
+    "migrations": [],
+    "name": "date-field",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "date-field",
           "family": "forms",
-          "signature": "templ DateField(o DateFieldOpts)",
-          "summary": "Renders a native date input.",
           "guidance": "The platform picker already handles locale format, keyboard entry, and the mobile date wheel; a custom calendar has to re-earn all three and usually loses the keyboard.",
+          "name": "date-field",
+          "signature": "templ DateField(o DateFieldOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a native date input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "DateField"
+  },
+  "schema": 2
 }

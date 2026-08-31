@@ -1,58 +1,69 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/input-addon",
-    "kind": "component",
-    "name": "input-addon",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "InputAddon",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The InputAddon renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/input-addon.templ",
-        "target": "internal/web/templates/ui/input-addon.templ",
         "class": "templ",
-        "sha256": "f0cb999c7032ec0a8ddb0667c56508fbc3b84fdb297fa020f4fc5a57a9bb9561",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "f0cb999c7032ec0a8ddb0667c56508fbc3b84fdb297fa020f4fc5a57a9bb9561",
+        "source": "internal/web/templates/ui/input-addon.templ",
+        "target": "internal/web/templates/ui/input-addon.templ"
       },
       {
-        "source": "internal/web/templates/ui/input-addon_test.go",
-        "target": "internal/web/templates/ui/input-addon_test.go",
         "class": "test",
-        "sha256": "e9fa884221ac71dbee5f4513e56418aa0e415b1203494f36dca6f353861841d6",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "e9fa884221ac71dbee5f4513e56418aa0e415b1203494f36dca6f353861841d6",
+        "source": "internal/web/templates/ui/input-addon_test.go",
+        "target": "internal/web/templates/ui/input-addon_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/input-addon",
+    "kind": "component",
+    "migrations": [],
+    "name": "input-addon",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "input-addon",
           "family": "forms",
-          "signature": "templ InputAddon(o InputAddonOpts)",
-          "summary": "Renders a non-editable affix such as a currency symbol or domain suffix.",
           "guidance": "It is aria-hidden: the text is a visual hint about the field's format and the field's own label already states what it is, so announcing \"dollars\" between the label and the value would interrupt the reading.",
+          "name": "input-addon",
+          "signature": "templ InputAddon(o InputAddonOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a non-editable affix such as a currency symbol or domain suffix."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "InputAddon"
+  },
+  "schema": 2
 }

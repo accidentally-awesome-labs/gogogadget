@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/icon-button",
-    "kind": "element",
-    "name": "icon-button",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "IconButton",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The IconButton renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/icon-button.templ",
-        "target": "internal/web/templates/ui/icon-button.templ",
         "class": "templ",
-        "sha256": "1982d2a264a0f92034475133041bcaf4cbd88fa32176c3b15bae2d33b55a213d",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "1982d2a264a0f92034475133041bcaf4cbd88fa32176c3b15bae2d33b55a213d",
+        "source": "internal/web/templates/ui/icon-button.templ",
+        "target": "internal/web/templates/ui/icon-button.templ"
       },
       {
-        "source": "internal/web/templates/ui/icon-button_test.go",
-        "target": "internal/web/templates/ui/icon-button_test.go",
         "class": "test",
-        "sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "c8bec9fb90599b7de581b2d16eb611ece713a470cbf205ad9b4632a9bf4ac95e",
+        "source": "internal/web/templates/ui/icon-button_test.go",
+        "target": "internal/web/templates/ui/icon-button_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/icon-button",
+    "kind": "element",
+    "migrations": [],
+    "name": "icon-button",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "icon-button",
           "family": "actions",
+          "name": "icon-button",
           "signature": "templ IconButton(o IconButtonOpts)",
-          "summary": "Renders an icon-only control with an accessible name.",
           "states": [
             "busy",
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "Renders an icon-only control with an accessible name."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "IconButton"
+  },
+  "schema": 2
 }

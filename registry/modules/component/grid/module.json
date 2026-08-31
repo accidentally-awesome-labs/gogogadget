@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/grid",
-    "kind": "component",
-    "name": "grid",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Grid",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Grid renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/grid.templ",
-        "target": "internal/web/templates/ui/grid.templ",
         "class": "templ",
-        "sha256": "d7cc82003fc53e00691ef21ca723ab4371d81b52c717519c40058da66289a79e",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "d7cc82003fc53e00691ef21ca723ab4371d81b52c717519c40058da66289a79e",
+        "source": "internal/web/templates/ui/grid.templ",
+        "target": "internal/web/templates/ui/grid.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/grid",
+    "kind": "component",
+    "migrations": [],
+    "name": "grid",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "grid",
           "family": "layout",
+          "name": "grid",
           "signature": "templ Grid(o GridOpts)",
-          "summary": "Renders children in a responsive grid.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders children in a responsive grid."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Grid"
+  },
+  "schema": 2
 }

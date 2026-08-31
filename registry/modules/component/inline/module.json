@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/inline",
-    "kind": "component",
-    "name": "inline",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Inline",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Inline renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/inline.templ",
-        "target": "internal/web/templates/ui/inline.templ",
         "class": "templ",
-        "sha256": "7c398275990e91b8d424d6f72ccf36562139987429f1cf6761766fd46c49173b",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7c398275990e91b8d424d6f72ccf36562139987429f1cf6761766fd46c49173b",
+        "source": "internal/web/templates/ui/inline.templ",
+        "target": "internal/web/templates/ui/inline.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/inline",
+    "kind": "component",
+    "migrations": [],
+    "name": "inline",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "inline",
           "family": "layout",
+          "name": "inline",
           "signature": "templ Inline(o InlineOpts)",
-          "summary": "Renders children in a horizontal row.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders children in a horizontal row."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Inline"
+  },
+  "schema": 2
 }

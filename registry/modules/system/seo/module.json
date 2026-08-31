@@ -1,37 +1,48 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/seo",
-    "kind": "system",
-    "name": "seo",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Discovery surfaces",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "robots.txt, the sitemap, and the canonical and alternate link metadata search engines read.",
-    "requires": [
-      "system/server"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/seo.go",
-        "target": "internal/web/seo.go",
         "class": "go",
-        "sha256": "4d80c0611b53c4e01296ae6c285e918bc1f05465351b86c2cb97488a631d1320",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "4d80c0611b53c4e01296ae6c285e918bc1f05465351b86c2cb97488a631d1320",
+        "source": "internal/web/seo.go",
+        "target": "internal/web/seo.go"
       }
     ],
-    "claims": {},
-    "runtime": {},
+    "id": "ggg/system/seo",
+    "kind": "system",
     "migrations": [],
-    "environment": [],
-    "docs": [],
+    "name": "seo",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {},
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Discovery surfaces"
+  },
+  "schema": 2
 }

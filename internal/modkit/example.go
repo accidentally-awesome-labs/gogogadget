@@ -319,8 +319,8 @@ func exampleClosureOrder(m Manifest, byID map[string]Manifest, seen []string) ([
 	}
 	seen = append(seen, m.ID)
 	var out []Manifest
-	for _, required := range m.Requires {
-		dependency, isExample := byID[required]
+	for _, requirement := range m.Requires {
+		dependency, isExample := byID[requirement.ID]
 		if !isExample {
 			continue
 		}

@@ -1,57 +1,80 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/search-input",
-    "kind": "component",
-    "name": "search-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SearchInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SearchInput renderer and its options. The field lives inside its own GET form, so the query can be sent with no scripting at all.",
-    "requires": [
-      "element/button",
-      "element/spinner",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/search-input.templ",
-        "target": "internal/web/templates/ui/search-input.templ",
         "class": "templ",
-        "sha256": "a1c20db613e8fc42e09283253a1f4fc31cff10dcd6d467db484253994d362403",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "a1c20db613e8fc42e09283253a1f4fc31cff10dcd6d467db484253994d362403",
+        "source": "internal/web/templates/ui/search-input.templ",
+        "target": "internal/web/templates/ui/search-input.templ"
       },
       {
-        "source": "internal/web/templates/ui/search-input_test.go",
-        "target": "internal/web/templates/ui/search-input_test.go",
         "class": "test",
-        "sha256": "ebade3742785dc878d0d1ec87cf28ef78457f4ebfde3b483948a179691df0f24",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "ebade3742785dc878d0d1ec87cf28ef78457f4ebfde3b483948a179691df0f24",
+        "source": "internal/web/templates/ui/search-input_test.go",
+        "target": "internal/web/templates/ui/search-input_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/search-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "search-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/button"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/spinner"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "search-input",
           "family": "forms",
-          "signature": "templ SearchInput(o SearchInputOpts)",
-          "summary": "The debounced table search, inside its own GET form.",
           "guidance": "It morphs Target and pushes the URL, so a search is shareable and the Back button works. The form is not decoration: a bare input has no submit path whatsoever, so with no scripting the query the user typed cannot leave the page. The form gives the browser the same job htmx does - send Name to GetURL - and any parameters GetURL already carries travel as hidden fields, because a native GET submit replaces the query string rather than adding to it. The submit control is visually hidden until focused: a permanently visible button beside a field that filters as you type says the live filtering does not work, and a button that only exists in JavaScript is one a keyboard or no-script user cannot reach.",
+          "name": "search-input",
+          "signature": "templ SearchInput(o SearchInputOpts)",
           "states": [
             "default",
             "loading"
-          ]
+          ],
+          "summary": "The debounced table search, inside its own GET form."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SearchInput"
+  },
+  "schema": 2
 }

@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/field",
-    "kind": "component",
-    "name": "field",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Field",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Field renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/field.templ",
-        "target": "internal/web/templates/ui/field.templ",
         "class": "templ",
-        "sha256": "6b849d6c88990bff4987a093ee0c55de4b73a47a3461ee24cc1663de33137ebc",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "6b849d6c88990bff4987a093ee0c55de4b73a47a3461ee24cc1663de33137ebc",
+        "source": "internal/web/templates/ui/field.templ",
+        "target": "internal/web/templates/ui/field.templ"
       },
       {
-        "source": "internal/web/templates/ui/field_test.go",
-        "target": "internal/web/templates/ui/field_test.go",
         "class": "test",
-        "sha256": "97802f10c78757b65b6df9283bcbe79cdb6c7d94fb4d50fe6ea51776a273fc55",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "97802f10c78757b65b6df9283bcbe79cdb6c7d94fb4d50fe6ea51776a273fc55",
+        "source": "internal/web/templates/ui/field_test.go",
+        "target": "internal/web/templates/ui/field_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/field",
+    "kind": "component",
+    "migrations": [],
+    "name": "field",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "field",
           "family": "forms",
-          "signature": "templ Field(o FieldOpts)",
-          "summary": "Renders label + control + field-level error.",
           "guidance": "The control arrives as children so any input type composes, and the hint/error ids come from FieldIDs so a custom control can wire the same aria-describedby.",
+          "name": "field",
+          "signature": "templ Field(o FieldOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders label + control + field-level error."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Field"
+  },
+  "schema": 2
 }

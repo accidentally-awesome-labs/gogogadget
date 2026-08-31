@@ -1,54 +1,65 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/text",
-    "kind": "element",
-    "name": "text",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Text",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Text renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/text.templ",
-        "target": "internal/web/templates/ui/text.templ",
         "class": "templ",
-        "sha256": "2397b4e5ff90e6d49e75b247d9247b9ab3c786ca23479dfad0068b4e2fb7f1a5",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "2397b4e5ff90e6d49e75b247d9247b9ab3c786ca23479dfad0068b4e2fb7f1a5",
+        "source": "internal/web/templates/ui/text.templ",
+        "target": "internal/web/templates/ui/text.templ"
       },
       {
-        "source": "internal/web/templates/ui/text_test.go",
-        "target": "internal/web/templates/ui/text_test.go",
         "class": "test",
-        "sha256": "abdf59f4da6e69a1c2a4662e3b8d25c815a98ae9710d25f38f0abafabcaa6039",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "abdf59f4da6e69a1c2a4662e3b8d25c815a98ae9710d25f38f0abafabcaa6039",
+        "source": "internal/web/templates/ui/text_test.go",
+        "target": "internal/web/templates/ui/text_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/text",
+    "kind": "element",
+    "migrations": [],
+    "name": "text",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "text",
           "family": "foundations",
-          "signature": "templ Text(o TextOpts)",
-          "summary": "Renders body copy.",
           "guidance": "It is a <p>, not a <div>: paragraph structure is what lets a screen reader user move through prose a paragraph at a time.",
+          "name": "text",
+          "signature": "templ Text(o TextOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders body copy."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Text"
+  },
+  "schema": 2
 }

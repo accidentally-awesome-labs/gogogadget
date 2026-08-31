@@ -1,59 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/projects",
-    "kind": "workflow",
-    "name": "projects",
-    "revision": 1,
-    "contract": 1,
-    "title": "Project create, update, archive and delete",
-    "description": "Project mutations for the app UI: validated create with plan-limit enforcement, rename, archive, and delete, each emitting audit, webhook, and analytics effects.",
-    "requires": [
-      "system/analytics",
-      "system/api",
-      "system/audit",
-      "system/database",
-      "system/i18n",
-      "system/identity",
-      "system/organizations",
-      "system/security",
-      "system/server",
-      "system/webhooks"
-    ],
-    "files": [
-      {
-        "source": "internal/db/queries/projects.sql",
-        "target": "internal/db/queries/projects.sql",
-        "class": "query",
-        "sha256": "71e6ce903ef3f6fc0c37c617270cb165c3e6fbe1aeac1f383b111674e24db86a",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/testdata/seed/dev/projects.sql",
-        "target": "internal/db/testdata/seed/dev/projects.sql",
-        "class": "seed",
-        "sha256": "cb7beec9d2632c8fa4a323a6341ee819dca15716f2c01a69708c919d77c6efbd",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/testdata/seed/e2e/projects.sql",
-        "target": "internal/db/testdata/seed/e2e/projects.sql",
-        "class": "seed",
-        "sha256": "c4e2e645560b0b1c959a1519fa62717d372fc26b8ba95f3c4cf05b766b5774df",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/web/workflow_projects.go",
-        "target": "internal/web/workflow_projects.go",
-        "class": "go",
-        "sha256": "5fc72bac7f3dcacae307a2c49bd36259cd21e01fbb462808aebb517620d0fe57",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "projects.archive",
@@ -62,77 +8,144 @@
         "projects.update"
       ]
     },
+    "contract": 1,
+    "data": [
+      {
+        "account_delete": "cascade",
+        "export": true,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "table": "projects"
+      }
+    ],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Project mutations for the app UI: validated create with plan-limit enforcement, rename, archive, and delete, each emitting audit, webhook, and analytics effects.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "71e6ce903ef3f6fc0c37c617270cb165c3e6fbe1aeac1f383b111674e24db86a",
+        "source": "internal/db/queries/projects.sql",
+        "target": "internal/db/queries/projects.sql"
+      },
+      {
+        "class": "seed",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "cb7beec9d2632c8fa4a323a6341ee819dca15716f2c01a69708c919d77c6efbd",
+        "source": "internal/db/testdata/seed/dev/projects.sql",
+        "target": "internal/db/testdata/seed/dev/projects.sql"
+      },
+      {
+        "class": "seed",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "c4e2e645560b0b1c959a1519fa62717d372fc26b8ba95f3c4cf05b766b5774df",
+        "source": "internal/db/testdata/seed/e2e/projects.sql",
+        "target": "internal/db/testdata/seed/e2e/projects.sql"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "5fc72bac7f3dcacae307a2c49bd36259cd21e01fbb462808aebb517620d0fe57",
+        "source": "internal/web/workflow_projects.go",
+        "target": "internal/web/workflow_projects.go"
+      }
+    ],
+    "id": "ggg/workflow/projects",
+    "kind": "workflow",
+    "migrations": [
+      {
+        "id": "0010_projects_search",
+        "kind": "immutable",
+        "sha256": "c1a90a9308dcac278d49c2215ee402c1d5207fbdf369c48517f025ad8296c15c",
+        "source": "internal/db/migrations/0010_projects_search.sql"
+      }
+    ],
+    "name": "projects",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/analytics"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/api"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/webhooks"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "projects.archive",
-          "method": "POST",
-          "pattern": "/app/projects/{id}/archive",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleProjectArchive"
-        },
-        {
-          "id": "projects.create",
-          "method": "POST",
-          "pattern": "/app/projects",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleProjectCreate"
-        },
-        {
-          "id": "projects.delete",
-          "method": "DELETE",
-          "pattern": "/app/projects/{id}",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleProjectDelete"
-        },
-        {
-          "id": "projects.update",
-          "method": "POST",
-          "pattern": "/app/projects/{id}",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleProjectUpdate"
-        }
-      ],
       "queries": [
         {
           "name": "ArchiveProject",
@@ -174,32 +187,84 @@
           "name": "UpdateProject",
           "table": "projects"
         }
+      ],
+      "routes": [
+        {
+          "handler": "handleProjectArchive",
+          "id": "projects.archive",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/app/projects/{id}/archive",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        },
+        {
+          "handler": "handleProjectCreate",
+          "id": "projects.create",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/app/projects",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        },
+        {
+          "handler": "handleProjectDelete",
+          "id": "projects.delete",
+          "method": "DELETE",
+          "package": "internal/web",
+          "pattern": "/app/projects/{id}",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        },
+        {
+          "handler": "handleProjectUpdate",
+          "id": "projects.update",
+          "method": "POST",
+          "package": "internal/web",
+          "pattern": "/app/projects/{id}",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        }
       ]
     },
-    "migrations": [
-      {
-        "id": "0010_projects_search",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0010_projects_search.sql",
-        "sha256": "c1a90a9308dcac278d49c2215ee402c1d5207fbdf369c48517f025ad8296c15c"
-      }
-    ],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [
-      {
-        "table": "projects",
-        "scope": "org",
-        "export": true,
-        "account_delete": "cascade",
-        "organization_delete": "cascade"
-      }
-    ],
-    "removal_policy": "free"
-  }
+    "title": "Project create, update, archive and delete"
+  },
+  "schema": 2
 }

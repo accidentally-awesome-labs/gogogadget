@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/spinner",
-    "kind": "element",
-    "name": "spinner",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Spinner",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Spinner renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/spinner.templ",
-        "target": "internal/web/templates/ui/spinner.templ",
         "class": "templ",
-        "sha256": "45aa8890fc2ea10ea662dfb7a5307659487d9dcb00f27722b5f18ba088055a00",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "45aa8890fc2ea10ea662dfb7a5307659487d9dcb00f27722b5f18ba088055a00",
+        "source": "internal/web/templates/ui/spinner.templ",
+        "target": "internal/web/templates/ui/spinner.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/spinner",
+    "kind": "element",
+    "migrations": [],
+    "name": "spinner",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "spinner",
           "family": "foundations",
+          "name": "spinner",
           "signature": "templ Spinner(o SpinnerOpts)",
-          "summary": "Renders the spinner glyph as an HTMX request indicator.",
           "states": [
             "default",
             "loading"
-          ]
+          ],
+          "summary": "Renders the spinner glyph as an HTMX request indicator."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Spinner"
+  },
+  "schema": 2
 }

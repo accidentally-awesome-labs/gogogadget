@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/settings-section",
-    "kind": "component",
-    "name": "settings-section",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SettingsSection",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SettingsSection renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/settings-section.templ",
-        "target": "internal/web/templates/ui/settings-section.templ",
         "class": "templ",
-        "sha256": "e369cfebf72c7a4713a77abaa81458e01466ead8627043be3d889791e7b783c4",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "e369cfebf72c7a4713a77abaa81458e01466ead8627043be3d889791e7b783c4",
+        "source": "internal/web/templates/ui/settings-section.templ",
+        "target": "internal/web/templates/ui/settings-section.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/settings-section",
+    "kind": "component",
+    "migrations": [],
+    "name": "settings-section",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "settings-section",
           "family": "communication",
+          "guidance": "The heading and the control live in one <section> with an accessible name, so a screen-reader user can jump between settings blocks instead of tabbing through every control to find the next one.",
+          "name": "settings-section",
           "signature": "templ SettingsSection(o SettingsSectionOpts)",
-          "summary": "Renders a titled settings block.",
-          "guidance": "The heading and the control live in one \u003csection\u003e with an accessible name, so a screen-reader user can jump between settings blocks instead of tabbing through every control to find the next one.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a titled settings block."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SettingsSection"
+  },
+  "schema": 2
 }

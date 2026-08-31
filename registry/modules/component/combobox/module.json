@@ -1,60 +1,71 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/combobox",
-    "kind": "component",
-    "name": "combobox",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Combobox",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Combobox renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/combobox.templ",
-        "target": "internal/web/templates/ui/combobox.templ",
         "class": "templ",
-        "sha256": "78cee7fa92263ebfe82d62720bffab7368bad712e44cd524801e56e6b23a35a5",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "78cee7fa92263ebfe82d62720bffab7368bad712e44cd524801e56e6b23a35a5",
+        "source": "internal/web/templates/ui/combobox.templ",
+        "target": "internal/web/templates/ui/combobox.templ"
       },
       {
-        "source": "internal/web/templates/ui/combobox_test.go",
-        "target": "internal/web/templates/ui/combobox_test.go",
         "class": "test",
-        "sha256": "dbff2970aa6e66c7e1c8abc34cca2dcd51ca89d13719912926a69033c4fda90a",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "dbff2970aa6e66c7e1c8abc34cca2dcd51ca89d13719912926a69033c4fda90a",
+        "source": "internal/web/templates/ui/combobox_test.go",
+        "target": "internal/web/templates/ui/combobox_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/combobox",
+    "kind": "component",
+    "migrations": [],
+    "name": "combobox",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "combobox",
           "family": "forms",
-          "signature": "templ Combobox(o ComboboxOpts)",
-          "summary": "Renders a text input backed by a native datalist.",
           "guidance": "datalist is the engine-free choice: the browser supplies the filtering, the popup, keyboard navigation and mobile behaviour, and the field still submits a value with JavaScript disabled. A hand-built listbox has to reimplement all of that and usually ships without the keyboard half.",
+          "name": "combobox",
+          "signature": "templ Combobox(o ComboboxOpts)",
           "states": [
             "default",
             "disabled",
             "error"
-          ]
+          ],
+          "summary": "Renders a text input backed by a native datalist."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Combobox"
+  },
+  "schema": 2
 }

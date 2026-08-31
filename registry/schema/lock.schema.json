@@ -9,7 +9,7 @@
       "properties": {
         "schema": {
           "type": "integer",
-          "const": 1
+          "const": 2
         },
         "registry_commit": {
           "type": "string",
@@ -28,12 +28,137 @@
           "items": {
             "$ref": "#/$defs/LockedModule"
           }
+        },
+        "registries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "namespace": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "requested_ref": {
+                "type": "string"
+              },
+              "canonical_module": {
+                "type": "string"
+              },
+              "key_fingerprint": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "namespace",
+              "source",
+              "requested_ref",
+              "canonical_module",
+              "key_fingerprint"
+            ]
+          }
+        },
+        "snapshots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "namespace": {
+                "type": "string"
+              },
+              "commit": {
+                "type": "string"
+              },
+              "snapshot_sha256": {
+                "type": "string"
+              },
+              "cache_key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "namespace",
+              "commit",
+              "snapshot_sha256",
+              "cache_key"
+            ]
+          }
+        },
+        "runtime_orders": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "development": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "test": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "production": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "development",
+            "test",
+            "production"
+          ]
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "module": {
+                "type": "string"
+              },
+              "managed_version": {
+                "type": "string"
+              },
+              "owners": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "preexisting": {
+                "type": "boolean"
+              },
+              "baseline_version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "module",
+              "managed_version",
+              "owners",
+              "preexisting",
+              "baseline_version"
+            ]
+          }
         }
       },
       "required": [
         "schema",
         "registry_commit",
+        "registries",
+        "snapshots",
         "order",
+        "runtime_orders",
+        "dependencies",
         "modules"
       ]
     },
@@ -86,6 +211,12 @@
         },
         "pending": {
           "$ref": "#/$defs/PendingUpdate"
+        },
+        "registry_namespace": {
+          "type": "string"
+        },
+        "snapshot_sha256": {
+          "type": "string"
         }
       },
       "required": [
@@ -97,7 +228,9 @@
         "required_by",
         "manifest",
         "files",
-        "migrations"
+        "migrations",
+        "registry_namespace",
+        "snapshot_sha256"
       ]
     },
     "LockedFile": {

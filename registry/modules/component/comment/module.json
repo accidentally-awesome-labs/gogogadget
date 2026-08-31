@@ -1,46 +1,63 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/comment",
-    "kind": "component",
-    "name": "comment",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Comment",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Comment renderer and its options.",
-    "requires": [
-      "element/avatar",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/comment.templ",
-        "target": "internal/web/templates/ui/comment.templ",
         "class": "templ",
-        "sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "3d0ff4d040e8d1850b19f0954faa07894254f63d94b6d4a0e2b1da4c2b75be17",
+        "source": "internal/web/templates/ui/comment.templ",
+        "target": "internal/web/templates/ui/comment.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/comment",
+    "kind": "component",
+    "migrations": [],
+    "name": "comment",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/avatar"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "comment",
           "family": "communication",
+          "name": "comment",
           "signature": "templ Comment(o CommentOpts)",
-          "summary": "Renders one comment.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one comment."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Comment"
+  },
+  "schema": 2
 }

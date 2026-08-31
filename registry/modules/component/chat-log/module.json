@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/chat-log",
-    "kind": "component",
-    "name": "chat-log",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ChatLog",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ChatLog renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/chat-log.templ",
-        "target": "internal/web/templates/ui/chat-log.templ",
         "class": "templ",
-        "sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "92144c3c41d243f51b5b4c94612f913d827ce634d8f17017648452bb3a0b1d75",
+        "source": "internal/web/templates/ui/chat-log.templ",
+        "target": "internal/web/templates/ui/chat-log.templ"
       },
       {
-        "source": "internal/web/templates/ui/chat-log_test.go",
-        "target": "internal/web/templates/ui/chat-log_test.go",
         "class": "test",
-        "sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "334028ceb914da720c9d9a8fcd342665e5fe830f24907b85ef378a03559eeec4",
+        "source": "internal/web/templates/ui/chat-log_test.go",
+        "target": "internal/web/templates/ui/chat-log_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/chat-log",
+    "kind": "component",
+    "migrations": [],
+    "name": "chat-log",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "chat-log",
           "family": "communication",
-          "signature": "templ ChatLog(o ChatLogOpts)",
-          "summary": "Renders the transcript as a polite live region.",
           "guidance": "Polite, never assertive: an assertive log interrupts the screen reader on every token of a streaming response, which makes the page unusable. role=log is the specific one for an append-only transcript - it tells assistive technology that only additions matter, so earlier messages are not re-read.",
+          "name": "chat-log",
+          "signature": "templ ChatLog(o ChatLogOpts)",
           "states": [
             "busy",
             "default"
-          ]
+          ],
+          "summary": "Renders the transcript as a polite live region."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ChatLog"
+  },
+  "schema": 2
 }

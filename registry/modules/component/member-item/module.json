@@ -1,48 +1,71 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/member-item",
-    "kind": "component",
-    "name": "member-item",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "MemberItem",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The MemberItem renderer and its options.",
-    "requires": [
-      "component/badge",
-      "element/avatar",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/member-item.templ",
-        "target": "internal/web/templates/ui/member-item.templ",
         "class": "templ",
-        "sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "3a11983fc9537ae557d6d2229ba2fce62d0f00a3eb93253da5743338ad0ee19b",
+        "source": "internal/web/templates/ui/member-item.templ",
+        "target": "internal/web/templates/ui/member-item.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/member-item",
+    "kind": "component",
+    "migrations": [],
+    "name": "member-item",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/badge"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/avatar"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "member-item",
           "family": "communication",
+          "name": "member-item",
           "signature": "templ MemberItem(o MemberItemOpts)",
-          "summary": "Renders one member row.",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "Renders one member row."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "MemberItem"
+  },
+  "schema": 2
 }

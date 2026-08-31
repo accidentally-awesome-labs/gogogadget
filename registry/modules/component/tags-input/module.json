@@ -1,51 +1,62 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/tags-input",
-    "kind": "component",
-    "name": "tags-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TagsInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TagsInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/tags-input.templ",
-        "target": "internal/web/templates/ui/tags-input.templ",
         "class": "templ",
-        "sha256": "6fbf61c1c9fdcfb7bb62ef5a71f09dd98dc4c28afdf4aa49bb2a661db394f8ed",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "6fbf61c1c9fdcfb7bb62ef5a71f09dd98dc4c28afdf4aa49bb2a661db394f8ed",
+        "source": "internal/web/templates/ui/tags-input.templ",
+        "target": "internal/web/templates/ui/tags-input.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/tags-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "tags-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "tags-input",
-          "family": "forms",
-          "engine": "alpine",
           "alpine": "uiTags",
+          "engine": "alpine",
+          "family": "forms",
+          "guidance": "The value is one text field, so it submits and round-trips with no JavaScript, and the server parses the separator. A chip widget that keeps its real value in hidden inputs loses everything the moment the script fails to load, and cannot be edited with a keyboard without a custom keymap.",
+          "name": "tags-input",
           "native_fallback": "native input",
           "signature": "templ TagsInput(o TagsInputOpts)",
-          "summary": "Renders a comma-separated text field with suggestions.",
-          "guidance": "The value is one text field, so it submits and round-trips with no JavaScript, and the server parses the separator. A chip widget that keeps its real value in hidden inputs loses everything the moment the script fails to load, and cannot be edited with a keyboard without a custom keymap.",
           "states": [
             "default",
             "disabled",
             "error"
-          ]
+          ],
+          "summary": "Renders a comma-separated text field with suggestions."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TagsInput"
+  },
+  "schema": 2
 }

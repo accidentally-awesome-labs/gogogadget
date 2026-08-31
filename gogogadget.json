@@ -1,14 +1,19 @@
 {
-  "schema": 1,
-  "registry": {
-    "repository": "gogogadget/gogogadget",
-    "ref": "main"
-  },
+  "schema": 2,
+  "registries": [
+    {
+      "namespace": "ggg",
+      "source": "directory",
+      "path": "registry"
+    }
+  ],
   "modules": [
-    "profile/full"
+    "ggg/profile/full"
   ],
   "exclude": [
-    "component/table-empty",
-    "element/divider"
-  ]
+    "ggg/component/table-empty",
+    "ggg/element/divider"
+  ],
+  "providers": {},
+  "deployment": ""
 }

@@ -1,66 +1,89 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/confirm-action",
-    "kind": "component",
-    "name": "confirm-action",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ConfirmAction",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ConfirmAction renderer and its options.",
-    "requires": [
-      "component/alert-dialog",
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/confirm-action.templ",
-        "target": "internal/web/templates/ui/confirm-action.templ",
         "class": "templ",
-        "sha256": "a23045ccdca77f72ca2fa85a0234130eec5f4de9769a422aa9c0ae027855ed98",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "a23045ccdca77f72ca2fa85a0234130eec5f4de9769a422aa9c0ae027855ed98",
+        "source": "internal/web/templates/ui/confirm-action.templ",
+        "target": "internal/web/templates/ui/confirm-action.templ"
       },
       {
-        "source": "internal/web/templates/ui/confirm-action_test.go",
-        "target": "internal/web/templates/ui/confirm-action_test.go",
         "class": "test",
-        "sha256": "fd0cb9eb2301f2dc5e538dbf28a73927d0fdf65f9d57e8fd786972d32ea05cdf",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "fd0cb9eb2301f2dc5e538dbf28a73927d0fdf65f9d57e8fd786972d32ea05cdf",
+        "source": "internal/web/templates/ui/confirm-action_test.go",
+        "target": "internal/web/templates/ui/confirm-action_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/confirm-action",
+    "kind": "component",
+    "migrations": [],
+    "name": "confirm-action",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/alert-dialog"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "confirm-action",
-          "family": "overlays",
-          "engine": "alpine",
           "alpine": "uiDialog",
-          "native_fallback": "dialog element",
-          "signature": "templ ConfirmAction(o ConfirmActionOpts)",
-          "summary": "Renders a trigger plus the dialog that gates its request.",
+          "engine": "alpine",
+          "family": "overlays",
           "guidance": "This replaces hx-confirm, which calls window.confirm: an OS dialog that cannot be translated, cannot be styled, cannot be tested through the DOM, and on some platforms offers a \"prevent further dialogs\" checkbox that silently disables every subsequent confirmation on the page.",
           "keyboard": "Escape closes the confirmation dialog, and initial focus lands on Cancel so a stray Enter cannot confirm.",
+          "name": "confirm-action",
+          "native_fallback": "dialog element",
+          "signature": "templ ConfirmAction(o ConfirmActionOpts)",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "Renders a trigger plus the dialog that gates its request."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ConfirmAction"
+  },
+  "schema": 2
 }

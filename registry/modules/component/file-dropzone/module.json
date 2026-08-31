@@ -1,62 +1,73 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/file-dropzone",
-    "kind": "component",
-    "name": "file-dropzone",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "FileDropzone",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The FileDropzone renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/file-dropzone.templ",
-        "target": "internal/web/templates/ui/file-dropzone.templ",
         "class": "templ",
-        "sha256": "748a895eaee35eac585913c52647bd525a1e9ce5d11f3c9747d32e72ebcb0ed8",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "748a895eaee35eac585913c52647bd525a1e9ce5d11f3c9747d32e72ebcb0ed8",
+        "source": "internal/web/templates/ui/file-dropzone.templ",
+        "target": "internal/web/templates/ui/file-dropzone.templ"
       },
       {
-        "source": "internal/web/templates/ui/file-dropzone_test.go",
-        "target": "internal/web/templates/ui/file-dropzone_test.go",
         "class": "test",
-        "sha256": "9e81018fae7cee2faef6d5ca71e39245d85d7effac54bc0dbf38b9c8344af9b1",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "9e81018fae7cee2faef6d5ca71e39245d85d7effac54bc0dbf38b9c8344af9b1",
+        "source": "internal/web/templates/ui/file-dropzone_test.go",
+        "target": "internal/web/templates/ui/file-dropzone_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/file-dropzone",
+    "kind": "component",
+    "migrations": [],
+    "name": "file-dropzone",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "file-dropzone",
-          "family": "forms",
-          "engine": "alpine",
           "alpine": "uiDropzone",
+          "engine": "alpine",
+          "family": "forms",
+          "guidance": "The input is a genuine <input type=\"file\"> inside a <label>, so clicking the zone opens the picker and the keyboard reaches the control with no script at all. Drag-and-drop is added on top by the Alpine behaviour: a drop target that is *only* droppable excludes every keyboard user.",
+          "name": "file-dropzone",
           "native_fallback": "native input",
           "signature": "templ FileDropzone(o FileDropzoneOpts)",
-          "summary": "Renders a labelled drop target around a real file input.",
-          "guidance": "The input is a genuine \u003cinput type=\"file\"\u003e inside a \u003clabel\u003e, so clicking the zone opens the picker and the keyboard reaches the control with no script at all. Drag-and-drop is added on top by the Alpine behaviour: a drop target that is *only* droppable excludes every keyboard user.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a labelled drop target around a real file input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "FileDropzone"
+  },
+  "schema": 2
 }

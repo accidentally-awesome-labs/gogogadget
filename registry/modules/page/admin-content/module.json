@@ -1,91 +1,40 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/admin-content",
-    "kind": "page",
-    "name": "admin-content",
-    "revision": 1,
-    "contract": 1,
-    "title": "Admin content list",
-    "description": "The admin table of every content entry across all registered types, with kind filter, search, and pagination.",
-    "requires": [
-      "system/content",
-      "system/i18n",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_admin_content.go",
-        "target": "internal/web/page_admin_content.go",
-        "class": "go",
-        "sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/admin_content.templ",
-        "target": "internal/web/templates/admin_content.templ",
-        "class": "templ",
-        "sha256": "292461de4eab1aa3e57097f9be90055a875a2e8723b05f87406df8493436b250",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "admin.content.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "admin.content.index",
-          "method": "GET",
-          "pattern": "/admin/content",
-          "scope": "admin",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAdminContent"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.admin.content",
-          "area": "admin",
-          "route_id": "admin.content.index",
-          "label_key": "sidebar.admin_content",
-          "after": [
-            "nav.admin.announcements"
-          ]
-        }
-      ],
-      "visual": [
-        {
-          "id": "admin-content",
-          "path": "/admin/content",
-          "persona": "admin",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "img[alt*=\"avatar\" i]"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The admin table of every content entry across all registered types, with kind filter, search, and pagination.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "e8be026154964f253aa9d0700bf1ef370f0028003e48c58be2a070e5f03475eb",
+        "source": "internal/web/page_admin_content.go",
+        "target": "internal/web/page_admin_content.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "292461de4eab1aa3e57097f9be90055a875a2e8723b05f87406df8493436b250",
+        "source": "internal/web/templates/admin_content.templ",
+        "target": "internal/web/templates/admin_content.templ"
+      }
+    ],
+    "id": "ggg/page/admin-content",
+    "kind": "page",
     "locales": {
       "en": {
         "admin.content.actions_aria": "Content actions",
@@ -112,7 +61,7 @@
         "admin.content.invalid_locale": "Choose a supported language.",
         "admin.content.invalid_slug": "Use lowercase letters, numbers and hyphens.",
         "admin.content.invalid_slug_taken": "That slug is already used by another entry in this language.",
-        "admin.content.invalid_title": "A title of 1–200 characters is required.",
+        "admin.content.invalid_title": "A title of 1\u2013200 characters is required.",
         "admin.content.locale_all": "All languages",
         "admin.content.locale_hint": "A language variant replaces the all-languages entry for readers in that language.",
         "admin.content.locale_label": "Language",
@@ -138,7 +87,7 @@
         "admin.content.save": "Save",
         "admin.content.save_draft": "Save draft",
         "admin.content.search_aria": "Search content",
-        "admin.content.search_placeholder": "Filter by title…",
+        "admin.content.search_placeholder": "Filter by title\u2026",
         "admin.content.slug_hint": "Lowercase letters, numbers and hyphens.",
         "admin.content.slug_label": "Slug",
         "admin.content.status_draft": "Draft",
@@ -163,24 +112,24 @@
         "admin.content.col_locale": "Idioma",
         "admin.content.col_published": "Publicado",
         "admin.content.col_status": "Estado",
-        "admin.content.col_title": "Título",
+        "admin.content.col_title": "T\u00edtulo",
         "admin.content.col_type": "Tipo",
         "admin.content.created": "Entrada creada.",
         "admin.content.delete": "Eliminar",
-        "admin.content.delete_confirm": "¿Eliminar esta entrada? Esta acción no se puede deshacer.",
+        "admin.content.delete_confirm": "\u00bfEliminar esta entrada? Esta acci\u00f3n no se puede deshacer.",
         "admin.content.delete_row": "Eliminar %s",
-        "admin.content.delete_title": "¿Eliminar esta entrada?",
+        "admin.content.delete_title": "\u00bfEliminar esta entrada?",
         "admin.content.deleted": "Entrada eliminada.",
         "admin.content.edit": "Editar",
-        "admin.content.empty": "Ningún contenido coincide.",
+        "admin.content.empty": "Ning\u00fan contenido coincide.",
         "admin.content.filter_aria": "Filtrar por tipo",
-        "admin.content.invalid_body": "El contenido no puede estar vacío.",
-        "admin.content.invalid_expiry": "La caducidad debe ser posterior a la fecha de publicación.",
+        "admin.content.invalid_body": "El contenido no puede estar vac\u00edo.",
+        "admin.content.invalid_expiry": "La caducidad debe ser posterior a la fecha de publicaci\u00f3n.",
         "admin.content.invalid_field": "Revisa este campo.",
         "admin.content.invalid_locale": "Elige un idioma admitido.",
-        "admin.content.invalid_slug": "Usa letras minúsculas, números y guiones.",
-        "admin.content.invalid_slug_taken": "Ese slug ya está en uso por otra entrada en este idioma.",
-        "admin.content.invalid_title": "Se requiere un título de 1 a 200 caracteres.",
+        "admin.content.invalid_slug": "Usa letras min\u00fasculas, n\u00fameros y guiones.",
+        "admin.content.invalid_slug_taken": "Ese slug ya est\u00e1 en uso por otra entrada en este idioma.",
+        "admin.content.invalid_title": "Se requiere un t\u00edtulo de 1 a 200 caracteres.",
         "admin.content.locale_all": "Todos los idiomas",
         "admin.content.locale_hint": "Una variante de idioma sustituye a la entrada para todos los idiomas en los lectores de ese idioma.",
         "admin.content.locale_label": "Idioma",
@@ -188,26 +137,26 @@
         "admin.content.media_heading": "Medios recientes",
         "admin.content.new": "Nuevo",
         "admin.content.preview": "Previsualizar",
-        "admin.content.preview_heading": "Previsualización",
+        "admin.content.preview_heading": "Previsualizaci\u00f3n",
         "admin.content.publish": "Publicar",
         "admin.content.published": "Entrada publicada.",
-        "admin.content.published_at_calendar": "Abrir el calendario de publicación",
+        "admin.content.published_at_calendar": "Abrir el calendario de publicaci\u00f3n",
         "admin.content.published_at_hint": "Opcional. Una hora futura programa la entrada.",
-        "admin.content.published_at_label": "Fecha de publicación",
+        "admin.content.published_at_label": "Fecha de publicaci\u00f3n",
         "admin.content.restore": "Restaurar",
-        "admin.content.restore_confirm": "¿Restaurar esta revisión? Primero se guarda una copia de la versión actual.",
+        "admin.content.restore_confirm": "\u00bfRestaurar esta revisi\u00f3n? Primero se guarda una copia de la versi\u00f3n actual.",
         "admin.content.restore_row": "Restaurar %s",
-        "admin.content.restore_title": "¿Restaurar esta revisión?",
+        "admin.content.restore_title": "\u00bfRestaurar esta revisi\u00f3n?",
         "admin.content.restored": "Entrada restaurada.",
         "admin.content.revision_current": "actual",
-        "admin.content.revisions_empty": "Todavía no hay revisiones.",
+        "admin.content.revisions_empty": "Todav\u00eda no hay revisiones.",
         "admin.content.revisions_heading": "Revisiones",
         "admin.content.row_actions_aria": "Acciones para %s",
         "admin.content.save": "Guardar",
         "admin.content.save_draft": "Guardar borrador",
         "admin.content.search_aria": "Buscar contenido",
-        "admin.content.search_placeholder": "Filtrar por título…",
-        "admin.content.slug_hint": "Letras minúsculas, números y guiones.",
+        "admin.content.search_placeholder": "Filtrar por t\u00edtulo\u2026",
+        "admin.content.slug_hint": "Letras min\u00fasculas, n\u00fameros y guiones.",
         "admin.content.slug_label": "Slug",
         "admin.content.status_draft": "Borrador",
         "admin.content.status_expired": "Caducado",
@@ -215,7 +164,7 @@
         "admin.content.status_scheduled": "Programado",
         "admin.content.summary_label": "Resumen",
         "admin.content.title": "Contenido",
-        "admin.content.title_label": "Título",
+        "admin.content.title_label": "T\u00edtulo",
         "admin.content.unpublish": "Despublicar",
         "admin.content.unpublish_at_calendar": "Abrir el calendario de retirada",
         "admin.content.unpublish_at_hint": "Opcional. La entrada desaparece del sitio a esta hora.",
@@ -224,13 +173,93 @@
         "admin.content.updated": "Entrada actualizada."
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "admin-content",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "after": [
+            "nav.admin.announcements"
+          ],
+          "area": "admin",
+          "id": "nav.admin.content",
+          "label_key": "sidebar.admin_content",
+          "route_id": "admin.content.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleAdminContent",
+          "id": "admin.content.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/admin/content",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "admin"
+        }
+      ],
+      "visual": [
+        {
+          "id": "admin-content",
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/admin/content",
+          "persona": "admin",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Admin content list"
+  },
+  "schema": 2
 }

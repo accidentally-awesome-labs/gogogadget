@@ -1,64 +1,93 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/admin-content-preview",
-    "kind": "page",
-    "name": "admin-content-preview",
-    "revision": 1,
-    "contract": 1,
-    "title": "Admin content preview",
-    "description": "Renders one content entry through its own public view regardless of status or publication dates, so an editor previews exactly what readers get.",
-    "requires": [
-      "system/content",
-      "system/security",
-      "system/server",
-      "workflow/admin-content"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_admin_content_preview.go",
-        "target": "internal/web/page_admin_content_preview.go",
-        "class": "go",
-        "sha256": "a790f36f8f91cab18e187868024fe3104162bc4c69ccc4d8cc910f28efe50908",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "admin.content.preview"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Renders one content entry through its own public view regardless of status or publication dates, so an editor previews exactly what readers get.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "a790f36f8f91cab18e187868024fe3104162bc4c69ccc4d8cc910f28efe50908",
+        "source": "internal/web/page_admin_content_preview.go",
+        "target": "internal/web/page_admin_content_preview.go"
+      }
+    ],
+    "id": "ggg/page/admin-content-preview",
+    "kind": "page",
+    "migrations": [],
+    "name": "admin-content-preview",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/workflow/admin-content"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "handler": "handleAdminContentPreviewPage",
           "id": "admin.content.preview",
           "method": "GET",
+          "package": "internal/web",
           "pattern": "/admin/content/{id}/preview",
-          "scope": "admin",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleAdminContentPreviewPage"
+          "scope": "admin"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Admin content preview"
+  },
+  "schema": 2
 }

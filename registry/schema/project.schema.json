@@ -9,51 +9,138 @@
       "properties": {
         "schema": {
           "type": "integer",
-          "const": 1
+          "const": 2
         },
-        "registry": {
-          "$ref": "#/$defs/ProjectRegistry"
+        "registries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProjectRegistry"
+          }
         },
         "modules": {
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system|profile)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-          },
-          "uniqueItems": true
+            "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          }
         },
         "exclude": {
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-          },
-          "uniqueItems": true
+            "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          }
+        },
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ProviderSelections"
+          }
+        },
+        "deployment": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         }
       },
       "required": [
         "schema",
-        "registry",
+        "registries",
         "modules",
-        "exclude"
+        "exclude",
+        "providers",
+        "deployment"
       ]
     },
     "ProjectRegistry": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "repository": {
+        "namespace": {
           "type": "string",
-          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "github",
+            "directory"
+          ]
+        },
+        "repository": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
         },
         "ref": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
+        },
+        "public_key": {
+          "type": "string"
         }
       },
       "required": [
-        "repository",
-        "ref"
+        "namespace",
+        "source"
+      ]
+    },
+    "ProviderSelections": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "development": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "adapter": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "adapter",
+            "target"
+          ]
+        },
+        "test": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "adapter": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "adapter",
+            "target"
+          ]
+        },
+        "production": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "adapter": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "adapter",
+            "target"
+          ]
+        }
+      },
+      "required": [
+        "development",
+        "test",
+        "production"
       ]
     }
   }

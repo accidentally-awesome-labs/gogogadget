@@ -1,57 +1,68 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/avatar",
-    "kind": "element",
-    "name": "avatar",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Avatar",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Avatar renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/avatar.templ",
-        "target": "internal/web/templates/ui/avatar.templ",
         "class": "templ",
-        "sha256": "3fe8b6b3773669ac9b2b22dc11cd6bb7b88c92f3ed554530398c6cde6e6ba682",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "3fe8b6b3773669ac9b2b22dc11cd6bb7b88c92f3ed554530398c6cde6e6ba682",
+        "source": "internal/web/templates/ui/avatar.templ",
+        "target": "internal/web/templates/ui/avatar.templ"
       },
       {
-        "source": "internal/web/templates/ui/avatar_test.go",
-        "target": "internal/web/templates/ui/avatar_test.go",
         "class": "test",
-        "sha256": "591a23c502f4bfa27708d2e6a18d11de6f2592a56958005460106b0279db7d66",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "591a23c502f4bfa27708d2e6a18d11de6f2592a56958005460106b0279db7d66",
+        "source": "internal/web/templates/ui/avatar_test.go",
+        "target": "internal/web/templates/ui/avatar_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/avatar",
+    "kind": "element",
+    "migrations": [],
+    "name": "avatar",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "avatar",
           "family": "foundations",
+          "name": "avatar",
           "signature": "templ Avatar(o AvatarOpts)",
-          "summary": "Renders an image with an initials fallback.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an image with an initials fallback."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Avatar"
+  },
+  "schema": 2
 }

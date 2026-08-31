@@ -1,48 +1,59 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/notice",
-    "kind": "component",
-    "name": "notice",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Notice",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Notice renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/notice.templ",
-        "target": "internal/web/templates/ui/notice.templ",
         "class": "templ",
-        "sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "38a33d87b290b3a8ffb7f0e587df073b19751afcb55e5e5ff0c904d3760c96ee",
+        "source": "internal/web/templates/ui/notice.templ",
+        "target": "internal/web/templates/ui/notice.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/notice",
+    "kind": "component",
+    "migrations": [],
+    "name": "notice",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "notice",
           "family": "feedback",
-          "signature": "templ Notice(o NoticeOpts)",
-          "summary": "An in-page notice inside a form or card.",
           "guidance": "Live decides how the message is announced, and the component owns the mapping so a caller cannot silently downgrade an actionable failure to a status. The default is LiveOff: a notice rendered as part of the page on first paint has nothing to announce, and marking it live makes a screen reader read it again on every unrelated update.",
+          "name": "notice",
+          "signature": "templ Notice(o NoticeOpts)",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "An in-page notice inside a form or card."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Notice"
+  },
+  "schema": 2
 }

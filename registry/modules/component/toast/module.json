@@ -1,61 +1,84 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/toast",
-    "kind": "component",
-    "name": "toast",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Toast",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Toast renderer and its options.",
-    "requires": [
-      "element/icon",
-      "element/icon-button",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/toast.templ",
-        "target": "internal/web/templates/ui/toast.templ",
         "class": "templ",
-        "sha256": "28571370896c6d75591915632675009a7356a90a2a290da13526244a6b37c1dc",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "28571370896c6d75591915632675009a7356a90a2a290da13526244a6b37c1dc",
+        "source": "internal/web/templates/ui/toast.templ",
+        "target": "internal/web/templates/ui/toast.templ"
       },
       {
-        "source": "internal/web/templates/ui/toast_test.go",
-        "target": "internal/web/templates/ui/toast_test.go",
         "class": "test",
-        "sha256": "caeba7117e69e21f28a1c77e142f17d86ae00ea611960583b573010a0635592d",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "caeba7117e69e21f28a1c77e142f17d86ae00ea611960583b573010a0635592d",
+        "source": "internal/web/templates/ui/toast_test.go",
+        "target": "internal/web/templates/ui/toast_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/toast",
+    "kind": "component",
+    "migrations": [],
+    "name": "toast",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon-button"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "toast",
           "family": "feedback",
+          "name": "toast",
           "signature": "templ Toast(o ToastOpts)",
-          "summary": "Renders a transient message.",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "Renders a transient message."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Toast"
+  },
+  "schema": 2
 }

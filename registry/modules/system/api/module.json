@@ -1,116 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/api",
-    "kind": "system",
-    "name": "api",
-    "revision": 1,
-    "contract": 1,
-    "title": "JSON API",
-    "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
-    "requires": [
-      "system/database",
-      "system/organizations",
-      "system/rate-limit"
-    ],
-    "files": [
-      {
-        "source": "internal/api/ai.go",
-        "target": "internal/api/ai.go",
-        "class": "go",
-        "sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/api/cursor.go",
-        "target": "internal/api/cursor.go",
-        "class": "go",
-        "sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/api/cursor_test.go",
-        "target": "internal/api/cursor_test.go",
-        "class": "go",
-        "sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/api/idempotency.go",
-        "target": "internal/api/idempotency.go",
-        "class": "go",
-        "sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/api/openapi.go",
-        "target": "internal/api/openapi.go",
-        "class": "go",
-        "sha256": "5ef8579194aed2eda52a7d439edafee044a560bd396e291524c1d61aca84c059",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/api/projects.go",
-        "target": "internal/api/projects.go",
-        "class": "go",
-        "sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/api/tokens.go",
-        "target": "internal/api/tokens.go",
-        "class": "go",
-        "sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/api/tokens_test.go",
-        "target": "internal/api/tokens_test.go",
-        "class": "go",
-        "sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/db/queries/api_tokens.sql",
-        "target": "internal/db/queries/api_tokens.sql",
-        "class": "query",
-        "sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/queries/idempotency_keys.sql",
-        "target": "internal/db/queries/idempotency_keys.sql",
-        "class": "query",
-        "sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/janitor_api.go",
-        "target": "internal/jobs/janitor_api.go",
-        "class": "go",
-        "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/idempotency_test.go",
-        "target": "internal/web/idempotency_test.go",
-        "class": "test",
-        "sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/api"
@@ -120,12 +9,301 @@
         "idempotency_keys"
       ]
     },
+    "contract": 1,
+    "data": [
+      {
+        "account_delete": "retain",
+        "export": true,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "secret_redaction_owner": "system/api",
+        "table": "api_tokens"
+      },
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "table": "idempotency_keys"
+      }
+    ],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
+    "docs": [],
+    "environment": [
+      {
+        "default": "60",
+        "description": "Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated",
+        "field": "APIRateLimitPerMinute",
+        "key": "API_RATE_LIMIT_RPM",
+        "min": 1,
+        "type": "int"
+      }
+    ],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
+        "source": "internal/api/ai.go",
+        "target": "internal/api/ai.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
+        "source": "internal/api/cursor.go",
+        "target": "internal/api/cursor.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
+        "source": "internal/api/cursor_test.go",
+        "target": "internal/api/cursor_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
+        "source": "internal/api/idempotency.go",
+        "target": "internal/api/idempotency.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "5ef8579194aed2eda52a7d439edafee044a560bd396e291524c1d61aca84c059",
+        "source": "internal/api/openapi.go",
+        "target": "internal/api/openapi.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
+        "source": "internal/api/projects.go",
+        "target": "internal/api/projects.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
+        "source": "internal/api/tokens.go",
+        "target": "internal/api/tokens.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
+        "source": "internal/api/tokens_test.go",
+        "target": "internal/api/tokens_test.go"
+      },
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
+        "source": "internal/db/queries/api_tokens.sql",
+        "target": "internal/db/queries/api_tokens.sql"
+      },
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
+        "source": "internal/db/queries/idempotency_keys.sql",
+        "target": "internal/db/queries/idempotency_keys.sql"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
+        "source": "internal/jobs/janitor_api.go",
+        "target": "internal/jobs/janitor_api.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
+        "source": "internal/web/idempotency_test.go",
+        "target": "internal/web/idempotency_test.go"
+      }
+    ],
+    "id": "ggg/system/api",
+    "kind": "system",
+    "migrations": [
+      {
+        "id": "0015_idempotency_keys",
+        "kind": "immutable",
+        "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4",
+        "source": "internal/db/migrations/0015_idempotency_keys.sql"
+      }
+    ],
+    "name": "api",
+    "openapi": {
+      "components": {
+        "responses": {
+          "Forbidden": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "The token's scope cannot perform this operation (`forbidden`)."
+          },
+          "IdempotencyConflict": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "The key was already used for a different request (`idempotency_conflict`),\nor an earlier request with this key is still running\n(`idempotency_in_progress`). Neither case executes the operation.\n"
+          },
+          "InternalError": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Something failed server-side (`internal_error`)."
+          },
+          "InvalidJSON": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "The body is not valid JSON for this endpoint (`invalid_json`)."
+          },
+          "PlanLimit": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "The organization's plan limit or meter cap was reached (`plan_limit`)."
+          },
+          "RateLimited": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "The token exceeded its per-token request budget (`rate_limited`).\nBudgets are per API token, not per IP, so one token cannot spend\nanother's allowance. Honour `Retry-After`.\n",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "Unauthorized": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing, malformed, unknown, revoked, or expired token (`unauthorized`)."
+          },
+          "ValidationError": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "The request parsed but failed validation (`validation_error`)."
+          }
+        },
+        "schemas": {
+          "Error": {
+            "properties": {
+              "error": {
+                "properties": {
+                  "code": {
+                    "description": "Stable machine-readable code; the message is for humans and may change.",
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "error"
+            ],
+            "type": "object"
+          }
+        }
+      }
+    },
+    "removal_policy": "major-version-only",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/rate-limit"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "janitors": [
         {
+          "handler": "janitorIdempotencyKeys",
           "name": "idempotency_keys",
-          "package": "internal/jobs",
-          "handler": "janitorIdempotencyKeys"
+          "package": "internal/jobs"
         }
       ],
       "queries": [
@@ -171,167 +349,12 @@
         }
       ]
     },
-    "migrations": [
-      {
-        "id": "0015_idempotency_keys",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0015_idempotency_keys.sql",
-        "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4"
-      }
-    ],
-    "environment": [
-      {
-        "key": "API_RATE_LIMIT_RPM",
-        "field": "APIRateLimitPerMinute",
-        "type": "int",
-        "description": "Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated",
-        "default": "60",
-        "min": 1
-      }
-    ],
-    "openapi": {
-      "components": {
-        "responses": {
-          "Forbidden": {
-            "description": "The token's scope cannot perform this operation (`forbidden`).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "IdempotencyConflict": {
-            "description": "The key was already used for a different request (`idempotency_conflict`),\nor an earlier request with this key is still running\n(`idempotency_in_progress`). Neither case executes the operation.\n",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "InternalError": {
-            "description": "Something failed server-side (`internal_error`).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "InvalidJSON": {
-            "description": "The body is not valid JSON for this endpoint (`invalid_json`).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "PlanLimit": {
-            "description": "The organization's plan limit or meter cap was reached (`plan_limit`).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "RateLimited": {
-            "description": "The token exceeded its per-token request budget (`rate_limited`).\nBudgets are per API token, not per IP, so one token cannot spend\nanother's allowance. Honour `Retry-After`.\n",
-            "headers": {
-              "Retry-After": {
-                "description": "Seconds to wait before retrying.",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "Unauthorized": {
-            "description": "Missing, malformed, unknown, revoked, or expired token (`unauthorized`).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "ValidationError": {
-            "description": "The request parsed but failed validation (`validation_error`).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        },
-        "schemas": {
-          "Error": {
-            "type": "object",
-            "required": [
-              "error"
-            ],
-            "properties": {
-              "error": {
-                "type": "object",
-                "required": [
-                  "code",
-                  "message"
-                ],
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "description": "Stable machine-readable code; the message is for humans and may change."
-                  },
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/api"
       ]
     },
-    "data": [
-      {
-        "table": "api_tokens",
-        "scope": "org",
-        "export": true,
-        "secret_redaction_owner": "system/api",
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      },
-      {
-        "table": "idempotency_keys",
-        "scope": "org",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      }
-    ],
-    "removal_policy": "major-version-only"
-  }
+    "title": "JSON API"
+  },
+  "schema": 2
 }

@@ -1,106 +1,123 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/pricing",
-    "kind": "page",
-    "name": "pricing",
-    "revision": 1,
-    "contract": 1,
-    "title": "Pricing page",
-    "description": "Plan comparison with the signed-in organization's current plan highlighted.",
-    "requires": [
-      "system/i18n",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_pricing.go",
-        "target": "internal/web/page_pricing.go",
-        "class": "go",
-        "sha256": "3b4ccebff03d89ce3b2e4d9cc7c2377a4a3d4f9d5e6861c8ca0838611e14c7a4",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/pricing.templ",
-        "target": "internal/web/templates/pricing.templ",
-        "class": "templ",
-        "sha256": "4277b97bf8bc765fc33c401754412076282821b3d75fc9aed6899f04150935ed",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "pricing.show"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Plan comparison with the signed-in organization's current plan highlighted.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "3b4ccebff03d89ce3b2e4d9cc7c2377a4a3d4f9d5e6861c8ca0838611e14c7a4",
+        "source": "internal/web/page_pricing.go",
+        "target": "internal/web/page_pricing.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "4277b97bf8bc765fc33c401754412076282821b3d75fc9aed6899f04150935ed",
+        "source": "internal/web/templates/pricing.templ",
+        "target": "internal/web/templates/pricing.templ"
+      }
+    ],
+    "id": "ggg/page/pricing",
+    "kind": "page",
+    "migrations": [],
+    "name": "pricing",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "pricing.show",
-          "method": "GET",
-          "pattern": "/pricing",
-          "scope": "public",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handlePricing"
-        }
-      ],
       "navigation": [
         {
-          "id": "footer.product.pricing",
-          "area": "footer",
-          "route_id": "pricing.show",
-          "label_key": "footer.pricing",
-          "group": "footer.product",
           "after": [
             "footer.product.features"
-          ]
+          ],
+          "area": "footer",
+          "group": "footer.product",
+          "id": "footer.product.pricing",
+          "label_key": "footer.pricing",
+          "route_id": "pricing.show"
         },
         {
-          "id": "nav.public.pricing",
-          "area": "public",
-          "route_id": "pricing.show",
-          "label_key": "nav.pricing",
           "after": [
             "nav.public.features"
-          ]
+          ],
+          "area": "public",
+          "id": "nav.public.pricing",
+          "label_key": "nav.pricing",
+          "route_id": "pricing.show"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handlePricing",
+          "id": "pricing.show",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/pricing",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "public"
         }
       ],
       "visual": [
         {
           "id": "pricing",
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ],
           "path": "/pricing",
           "viewports": [
             "desktop",
             "tablet",
             "mobile"
-          ],
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
           ]
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Pricing page"
+  },
+  "schema": 2
 }

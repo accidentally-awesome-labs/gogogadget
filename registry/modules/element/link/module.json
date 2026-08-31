@@ -1,53 +1,64 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/link",
-    "kind": "element",
-    "name": "link",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Link",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Link renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/link.templ",
-        "target": "internal/web/templates/ui/link.templ",
         "class": "templ",
-        "sha256": "33cb793e0e51c8f200de2e0e9040fa523784d113304f081b5792dea08b3ac398",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "33cb793e0e51c8f200de2e0e9040fa523784d113304f081b5792dea08b3ac398",
+        "source": "internal/web/templates/ui/link.templ",
+        "target": "internal/web/templates/ui/link.templ"
       },
       {
-        "source": "internal/web/templates/ui/link_test.go",
-        "target": "internal/web/templates/ui/link_test.go",
         "class": "test",
-        "sha256": "86f51de7f67f77c55edc2f42dae2d8529e6daf69b7f112ef1de73e2b77212e28",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "86f51de7f67f77c55edc2f42dae2d8529e6daf69b7f112ef1de73e2b77212e28",
+        "source": "internal/web/templates/ui/link_test.go",
+        "target": "internal/web/templates/ui/link_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/link",
+    "kind": "element",
+    "migrations": [],
+    "name": "link",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "link",
           "family": "actions",
+          "name": "link",
           "signature": "templ Link(o LinkOpts)",
-          "summary": "Renders a text link.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a text link."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Link"
+  },
+  "schema": 2
 }

@@ -1,53 +1,76 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/context-menu",
-    "kind": "component",
-    "name": "context-menu",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ContextMenu",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ContextMenu renderer and its options.",
-    "requires": [
-      "component/dropdown-menu",
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/context-menu.templ",
-        "target": "internal/web/templates/ui/context-menu.templ",
         "class": "templ",
-        "sha256": "7d977c8638ddd530b510a9133728f309ba0a485d5355dc97efada3efacac4a48",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7d977c8638ddd530b510a9133728f309ba0a485d5355dc97efada3efacac4a48",
+        "source": "internal/web/templates/ui/context-menu.templ",
+        "target": "internal/web/templates/ui/context-menu.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/context-menu",
+    "kind": "component",
+    "migrations": [],
+    "name": "context-menu",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/dropdown-menu"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "context-menu",
-          "family": "overlays",
-          "engine": "alpine",
           "alpine": "uiContextMenu",
-          "native_fallback": "visible trigger",
-          "signature": "templ ContextMenu(o ContextMenuOpts)",
-          "summary": "Renders a region whose commands are reachable by right-click and by an explicit trigger.",
+          "engine": "alpine",
+          "family": "overlays",
           "guidance": "The trigger is a real DropdownMenu, so the keyboard path is the same well-tested one every other menu uses; right-click is the addition, not the mechanism.",
           "keyboard": "Right-click opens the menu, and its trigger carries the standard menu keys: Escape closes, ArrowUp/ArrowDown and Home/End move between commands, and a printable character jumps to the next matching one.",
+          "name": "context-menu",
+          "native_fallback": "visible trigger",
+          "signature": "templ ContextMenu(o ContextMenuOpts)",
           "states": [
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "Renders a region whose commands are reachable by right-click and by an explicit trigger."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ContextMenu"
+  },
+  "schema": 2
 }

@@ -1,60 +1,71 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/scroll-area",
-    "kind": "component",
-    "name": "scroll-area",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ScrollArea",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ScrollArea renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/scroll-area.templ",
-        "target": "internal/web/templates/ui/scroll-area.templ",
         "class": "templ",
-        "sha256": "c6fec8edd97837a51ced206dd7b6f890505d371aa2f8db4d425b5a2ab760b053",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "c6fec8edd97837a51ced206dd7b6f890505d371aa2f8db4d425b5a2ab760b053",
+        "source": "internal/web/templates/ui/scroll-area.templ",
+        "target": "internal/web/templates/ui/scroll-area.templ"
       },
       {
-        "source": "internal/web/templates/ui/scroll-area_test.go",
-        "target": "internal/web/templates/ui/scroll-area_test.go",
         "class": "test",
-        "sha256": "dee13230549093a2125895831f61e9aa1ef280007454486340a5eb80012e175e",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "dee13230549093a2125895831f61e9aa1ef280007454486340a5eb80012e175e",
+        "source": "internal/web/templates/ui/scroll-area_test.go",
+        "target": "internal/web/templates/ui/scroll-area_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/scroll-area",
+    "kind": "component",
+    "migrations": [],
+    "name": "scroll-area",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "scroll-area",
           "family": "layout",
-          "signature": "templ ScrollArea(o ScrollAreaOpts)",
-          "summary": "Renders a bounded, keyboard-scrollable region.",
           "guidance": "tabindex=\"0\" plus role=\"region\" is the pairing that matters. A scrollable div with neither is reachable only by pointer, so its content is unreadable to a keyboard user once it overflows.",
           "keyboard": "The region is focusable, so arrow keys and Page Up/Down scroll its content for a keyboard user.",
+          "name": "scroll-area",
+          "signature": "templ ScrollArea(o ScrollAreaOpts)",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "Renders a bounded, keyboard-scrollable region."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ScrollArea"
+  },
+  "schema": 2
 }

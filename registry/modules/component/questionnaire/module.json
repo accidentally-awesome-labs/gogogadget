@@ -1,82 +1,123 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/questionnaire",
-    "kind": "component",
-    "name": "questionnaire",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Questionnaire",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "Native fields and a server-owned step. Each step posts its answer and the server decides what comes next, so a reload resumes rather than restarts.",
-    "requires": [
-      "component/field",
-      "component/select",
-      "component/steps",
-      "component/text-input",
-      "component/textarea",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/questionnaire.templ",
-        "target": "internal/web/templates/ui/questionnaire.templ",
         "class": "templ",
-        "sha256": "9953bfb14d5cb2659e2059790b466f4f5627f4fe6f16b525e7378deed17d36ee",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "9953bfb14d5cb2659e2059790b466f4f5627f4fe6f16b525e7378deed17d36ee",
+        "source": "internal/web/templates/ui/questionnaire.templ",
+        "target": "internal/web/templates/ui/questionnaire.templ"
       },
       {
-        "source": "internal/web/templates/ui/questionnaire_test.go",
-        "target": "internal/web/templates/ui/questionnaire_test.go",
         "class": "test",
-        "sha256": "d77d5ae304083fd310f05d80e8e80f0d39cc7d5c55a31accdf170f2e190c260e",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "d77d5ae304083fd310f05d80e8e80f0d39cc7d5c55a31accdf170f2e190c260e",
+        "source": "internal/web/templates/ui/questionnaire_test.go",
+        "target": "internal/web/templates/ui/questionnaire_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/questionnaire",
+    "kind": "component",
+    "migrations": [],
+    "name": "questionnaire",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/field"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/select"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/steps"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/text-input"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/component/textarea"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "question",
           "family": "advanced",
-          "signature": "templ Question(o QuestionOpts)",
-          "summary": "Renders one question's native control.",
           "guidance": "Radio and checkbox sets are a fieldset with a legend, because the question is the group's label: without it a screen reader reads the options with no idea what is being asked.",
+          "name": "question",
+          "signature": "templ Question(o QuestionOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders one question's native control."
         },
         {
-          "name": "questionnaire",
           "family": "advanced",
-          "signature": "templ Questionnaire(o QuestionnaireOpts)",
-          "summary": "Renders one step of a questionnaire.",
           "guidance": "State lives on the server. A wizard that keeps answers in the browser loses them on reload, cannot be resumed on another device, and cannot be validated - so each step posts its answer and the server decides what comes next.",
+          "name": "questionnaire",
+          "signature": "templ Questionnaire(o QuestionnaireOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders one step of a questionnaire."
         },
         {
-          "name": "wizard-actions",
           "family": "advanced",
-          "signature": "templ WizardActions(o WizardActionsOpts)",
-          "summary": "Renders Back, Skip and Next/Submit.",
           "guidance": "The naming stays consistent across every step: the forward control is \"Next\" until the final step, where it is the submit verb. Changing the wording mid-flow makes the user re-read the button on every step to check what it now does.",
+          "name": "wizard-actions",
+          "signature": "templ WizardActions(o WizardActionsOpts)",
           "states": [
             "default",
             "loading"
-          ]
+          ],
+          "summary": "Renders Back, Skip and Next/Submit."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Questionnaire"
+  },
+  "schema": 2
 }

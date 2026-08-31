@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/button",
-    "kind": "element",
-    "name": "button",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Button",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Button renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/button.templ",
-        "target": "internal/web/templates/ui/button.templ",
         "class": "templ",
-        "sha256": "5baa5f15b22df4407e6d5055eb309c4fdd000eaa3fe699a6b27282ccbecbe3cd",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "5baa5f15b22df4407e6d5055eb309c4fdd000eaa3fe699a6b27282ccbecbe3cd",
+        "source": "internal/web/templates/ui/button.templ",
+        "target": "internal/web/templates/ui/button.templ"
       },
       {
-        "source": "internal/web/templates/ui/button_test.go",
-        "target": "internal/web/templates/ui/button_test.go",
         "class": "test",
-        "sha256": "8c885650e1b9a202d547e41f02b8dd365e8f753c7a962d220e9ff714b33dbe53",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "8c885650e1b9a202d547e41f02b8dd365e8f753c7a962d220e9ff714b33dbe53",
+        "source": "internal/web/templates/ui/button_test.go",
+        "target": "internal/web/templates/ui/button_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/button",
+    "kind": "element",
+    "migrations": [],
+    "name": "button",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "button",
           "family": "actions",
+          "name": "button",
           "signature": "templ Button(o ButtonOpts)",
-          "summary": "Renders a control that acts.",
           "states": [
             "busy",
             "default",
             "disabled"
-          ]
+          ],
+          "summary": "Renders a control that acts."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Button"
+  },
+  "schema": 2
 }

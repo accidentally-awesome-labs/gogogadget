@@ -1,74 +1,85 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/i18n",
-    "kind": "system",
-    "name": "i18n",
-    "revision": 1,
-    "contract": 1,
-    "title": "Localization",
-    "description": "Locale detection middleware, catalog lookup, and the English and Spanish catalogs. UI strings resolve through T(ctx, key).",
-    "requires": [
-      "system/apphost"
-    ],
-    "files": [
-      {
-        "source": "internal/i18n/i18n.go",
-        "target": "internal/i18n/i18n.go",
-        "class": "go",
-        "sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/i18n/i18n_test.go",
-        "target": "internal/i18n/i18n_test.go",
-        "class": "test",
-        "sha256": "72622aa75b20d82ee154ab49f883b582de5a3bb16d4776406c9c8b13a26f7925",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/locale.templ",
-        "target": "internal/web/templates/locale.templ",
-        "class": "templ",
-        "sha256": "9ec9b3f7783cf775eb0f529bdf7ae5bb0838c0623a31923748ea906114d3dd25",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
-      "packages": [
-        "internal/i18n"
-      ],
       "i18n": [
         "en",
         "es"
+      ],
+      "packages": [
+        "internal/i18n"
       ]
     },
-    "runtime": {},
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Locale detection middleware, catalog lookup, and the English and Spanish catalogs. UI strings resolve through T(ctx, key).",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "95a8395e8a48ca5f8c586c57db2e9a49fe5fd3de902a34ac95e7a31f532f27d7",
+        "source": "internal/i18n/i18n.go",
+        "target": "internal/i18n/i18n.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "72622aa75b20d82ee154ab49f883b582de5a3bb16d4776406c9c8b13a26f7925",
+        "source": "internal/i18n/i18n_test.go",
+        "target": "internal/i18n/i18n_test.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "9ec9b3f7783cf775eb0f529bdf7ae5bb0838c0623a31923748ea906114d3dd25",
+        "source": "internal/web/templates/locale.templ",
+        "target": "internal/web/templates/locale.templ"
+      }
+    ],
+    "id": "ggg/system/i18n",
+    "kind": "system",
     "migrations": [
       {
         "id": "0002_users_locale",
         "kind": "immutable",
-        "source": "internal/db/migrations/0002_users_locale.sql",
-        "sha256": "8f6491a09e511c0a843066501877f5ba973e6de8c030980f8648f5b00a83369a"
+        "sha256": "8f6491a09e511c0a843066501877f5ba973e6de8c030980f8648f5b00a83369a",
+        "source": "internal/db/migrations/0002_users_locale.sql"
       },
       {
         "id": "0017_user_appearance",
         "kind": "immutable",
-        "source": "internal/db/migrations/0017_user_appearance.sql",
-        "sha256": "848ac56ad533e226f27a1a506bf9de5298b71d934b6c4e255a77d92f5e3b9531"
+        "sha256": "848ac56ad533e226f27a1a506bf9de5298b71d934b6c4e255a77d92f5e3b9531",
+        "source": "internal/db/migrations/0017_user_appearance.sql"
       }
     ],
-    "environment": [],
-    "docs": [],
+    "name": "i18n",
+    "removal_policy": "replacement-required",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      }
+    ],
+    "revision": 1,
+    "runtime": {},
     "tests": {
       "go_packages": [
         "internal/i18n"
       ]
     },
-    "data": [],
-    "removal_policy": "replacement-required"
-  }
+    "title": "Localization"
+  },
+  "schema": 2
 }

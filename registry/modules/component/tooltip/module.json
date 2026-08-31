@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/tooltip",
-    "kind": "component",
-    "name": "tooltip",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Tooltip",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Tooltip renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/tooltip.templ",
-        "target": "internal/web/templates/ui/tooltip.templ",
         "class": "templ",
-        "sha256": "0530a3692dc822e7aca4cdc99eca34f1ef75e79707d30ece9d1e37fd1fcba4dc",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "0530a3692dc822e7aca4cdc99eca34f1ef75e79707d30ece9d1e37fd1fcba4dc",
+        "source": "internal/web/templates/ui/tooltip.templ",
+        "target": "internal/web/templates/ui/tooltip.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/tooltip",
+    "kind": "component",
+    "migrations": [],
+    "name": "tooltip",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "tooltip",
           "family": "overlays",
-          "signature": "templ Tooltip(o TooltipOpts)",
-          "summary": "Renders an inline tooltip on hover/focus.",
           "guidance": "The trigger is the caller's own element (children), so this renderer cannot put aria-describedby on it; the text is exposed with role=\"tooltip\" and the association belongs to the trigger-owning API in the component catalog.",
+          "name": "tooltip",
+          "signature": "templ Tooltip(o TooltipOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an inline tooltip on hover/focus."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Tooltip"
+  },
+  "schema": 2
 }

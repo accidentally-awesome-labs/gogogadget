@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/file-input",
-    "kind": "component",
-    "name": "file-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "FileInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The FileInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/file-input.templ",
-        "target": "internal/web/templates/ui/file-input.templ",
         "class": "templ",
-        "sha256": "47cb00394611277d0563f26ce37193824f032ef1f7fd01243950de32338c1c24",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "47cb00394611277d0563f26ce37193824f032ef1f7fd01243950de32338c1c24",
+        "source": "internal/web/templates/ui/file-input.templ",
+        "target": "internal/web/templates/ui/file-input.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/file-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "file-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "file-input",
           "family": "forms",
+          "name": "file-input",
           "signature": "templ FileInput(o FileInputOpts)",
-          "summary": "Renders a native file input.",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a native file input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "FileInput"
+  },
+  "schema": 2
 }

@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/stat-group",
-    "kind": "component",
-    "name": "stat-group",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "StatGroup",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The StatGroup renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/stat-group.templ",
-        "target": "internal/web/templates/ui/stat-group.templ",
         "class": "templ",
-        "sha256": "c5c34e7a224e47c1f70a57a4ecf94120a508b933c2bf3ee37c0c5c6834b0fcf4",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "c5c34e7a224e47c1f70a57a4ecf94120a508b933c2bf3ee37c0c5c6834b0fcf4",
+        "source": "internal/web/templates/ui/stat-group.templ",
+        "target": "internal/web/templates/ui/stat-group.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/stat-group",
+    "kind": "component",
+    "migrations": [],
+    "name": "stat-group",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "stat-group",
           "family": "data",
+          "name": "stat-group",
           "signature": "templ StatGroup(o StatGroupOpts)",
-          "summary": "Renders metrics as a labelled group.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders metrics as a labelled group."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "StatGroup"
+  },
+  "schema": 2
 }

@@ -1,7 +1,7 @@
 {
-  "schema": 1,
-  "kind": "system",
   "items": [
     "registry/modules/system/example-clock/module.json"
-  ]
+  ],
+  "kind": "system",
+  "schema": 2
 }

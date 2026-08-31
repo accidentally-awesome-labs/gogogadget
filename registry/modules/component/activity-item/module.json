@@ -1,46 +1,63 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/activity-item",
-    "kind": "component",
-    "name": "activity-item",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ActivityItem",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ActivityItem renderer and its options.",
-    "requires": [
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/activity-item.templ",
-        "target": "internal/web/templates/ui/activity-item.templ",
         "class": "templ",
-        "sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "27556c8325037ab46a2077973fb7ef8543343fe6108d5a75d287c288cd1c6c02",
+        "source": "internal/web/templates/ui/activity-item.templ",
+        "target": "internal/web/templates/ui/activity-item.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/activity-item",
+    "kind": "component",
+    "migrations": [],
+    "name": "activity-item",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "activity-item",
           "family": "communication",
+          "name": "activity-item",
           "signature": "templ ActivityItem(o ActivityItemOpts)",
-          "summary": "Renders one activity entry.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one activity entry."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ActivityItem"
+  },
+  "schema": 2
 }

@@ -1,46 +1,63 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/tile",
-    "kind": "component",
-    "name": "tile",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Tile",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Tile renderer and its options.",
-    "requires": [
-      "element/icon",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/tile.templ",
-        "target": "internal/web/templates/ui/tile.templ",
         "class": "templ",
-        "sha256": "55a6f98d82c462dc3e60f39f5a6adfab97e840cc57526da36ebb909016411cef",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "55a6f98d82c462dc3e60f39f5a6adfab97e840cc57526da36ebb909016411cef",
+        "source": "internal/web/templates/ui/tile.templ",
+        "target": "internal/web/templates/ui/tile.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/tile",
+    "kind": "component",
+    "migrations": [],
+    "name": "tile",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/icon"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "tile",
           "family": "data",
+          "name": "tile",
           "signature": "templ Tile(o TileOpts)",
-          "summary": "Renders a compact summary, optionally as a link.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a compact summary, optionally as a link."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Tile"
+  },
+  "schema": 2
 }

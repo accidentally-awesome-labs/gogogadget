@@ -1,48 +1,59 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/multi-select",
-    "kind": "component",
-    "name": "multi-select",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "MultiSelect",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The MultiSelect renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/multi-select.templ",
-        "target": "internal/web/templates/ui/multi-select.templ",
         "class": "templ",
-        "sha256": "701c55ccfd23d09bb67c6752b045f39d43cf268ff4738fd7fc8b3c9aad4fea81",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "701c55ccfd23d09bb67c6752b045f39d43cf268ff4738fd7fc8b3c9aad4fea81",
+        "source": "internal/web/templates/ui/multi-select.templ",
+        "target": "internal/web/templates/ui/multi-select.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/multi-select",
+    "kind": "component",
+    "migrations": [],
+    "name": "multi-select",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "multi-select",
           "family": "forms",
-          "signature": "templ MultiSelect(o MultiSelectOpts)",
-          "summary": "Renders a native multiple select.",
           "guidance": "Native multiple selection is unloved but it works everywhere, submits without JavaScript, and is understood by every screen reader. The size attribute is set so the list is visible rather than a one-line box the user must discover they can expand.",
+          "name": "multi-select",
+          "signature": "templ MultiSelect(o MultiSelectOpts)",
           "states": [
             "default",
             "disabled",
             "error"
-          ]
+          ],
+          "summary": "Renders a native multiple select."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "MultiSelect"
+  },
+  "schema": 2
 }

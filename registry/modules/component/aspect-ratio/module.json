@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/aspect-ratio",
-    "kind": "component",
-    "name": "aspect-ratio",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "AspectRatio",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The AspectRatio renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/aspect-ratio.templ",
-        "target": "internal/web/templates/ui/aspect-ratio.templ",
         "class": "templ",
-        "sha256": "5505aecec37d80ec4e2cc80ab60c2e61a62db518345f5fe79569e42ced5fb100",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "5505aecec37d80ec4e2cc80ab60c2e61a62db518345f5fe79569e42ced5fb100",
+        "source": "internal/web/templates/ui/aspect-ratio.templ",
+        "target": "internal/web/templates/ui/aspect-ratio.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/aspect-ratio",
+    "kind": "component",
+    "migrations": [],
+    "name": "aspect-ratio",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "aspect-ratio",
           "family": "layout",
-          "signature": "templ AspectRatio(o AspectRatioOpts)",
-          "summary": "Reserves the box a medium will occupy.",
           "guidance": "This exists to stop layout shift: without a reserved box the page reflows the moment an image or embed arrives, moving whatever the user was about to click. RatioAuto is the honest name for declining to reserve, rather than a default that hides the cost.",
+          "name": "aspect-ratio",
+          "signature": "templ AspectRatio(o AspectRatioOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Reserves the box a medium will occupy."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "AspectRatio"
+  },
+  "schema": 2
 }

@@ -1,62 +1,73 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/tab-panels",
-    "kind": "component",
-    "name": "tab-panels",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TabPanels",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TabPanels renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/tab-panels.templ",
-        "target": "internal/web/templates/ui/tab-panels.templ",
         "class": "templ",
-        "sha256": "b2dcb81261ca1844f4fa59990e5b5779a2450b96bd137ce19c234b9550f306a6",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "b2dcb81261ca1844f4fa59990e5b5779a2450b96bd137ce19c234b9550f306a6",
+        "source": "internal/web/templates/ui/tab-panels.templ",
+        "target": "internal/web/templates/ui/tab-panels.templ"
       },
       {
-        "source": "internal/web/templates/ui/tab-panels_test.go",
-        "target": "internal/web/templates/ui/tab-panels_test.go",
         "class": "test",
-        "sha256": "714210a05c00d3a8f1a52078b8b56fd94b1ad1f327a29be6cbc8276698dbbb11",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "714210a05c00d3a8f1a52078b8b56fd94b1ad1f327a29be6cbc8276698dbbb11",
+        "source": "internal/web/templates/ui/tab-panels_test.go",
+        "target": "internal/web/templates/ui/tab-panels_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/tab-panels",
+    "kind": "component",
+    "migrations": [],
+    "name": "tab-panels",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "tab-panels",
-          "family": "navigation",
-          "engine": "alpine",
           "alpine": "uiTabs",
-          "native_fallback": "sequential panels",
-          "signature": "templ TabPanels(o TabPanelsOpts)",
-          "summary": "Renders the ARIA tab widget.",
+          "engine": "alpine",
+          "family": "navigation",
           "guidance": "This is the one navigation component that genuinely needs script, and it claims role=\"tablist\" only because it implements the whole contract: a single tab stop for the set (roving tabindex), Left/Right to move between tabs, Home/End to jump to the ends, and aria-selected plus aria-controls wiring the tab to its panel. NavTabs is the alternative for navigation between URLs - tabs that are really links should stay links. The server renders the fallback rather than the enhanced state: every panel open, in order, with the tab bar hidden. Collapsing to one panel before the controller exists would lose every panel but the first, and offering tabs only a controller can operate would be a row of dead buttons; uiTabs reveals the bar and collapses to the selected panel on init.",
           "keyboard": "A roving tabindex gives the set one tab stop; Left/Right move and activate the adjacent tab, and Home/End jump to the first or last.",
+          "name": "tab-panels",
+          "native_fallback": "sequential panels",
+          "signature": "templ TabPanels(o TabPanelsOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders the ARIA tab widget."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TabPanels"
+  },
+  "schema": 2
 }

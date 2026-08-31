@@ -1,114 +1,143 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/admin-audit",
-    "kind": "page",
-    "name": "admin-audit",
-    "revision": 1,
-    "contract": 1,
-    "title": "Admin audit log",
-    "description": "The platform-wide audit log with actor, action, and target filters.",
-    "requires": [
-      "system/audit",
-      "system/i18n",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/handlers_admin_audit.go",
-        "target": "internal/web/handlers_admin_audit.go",
-        "class": "go",
-        "sha256": "a2e2f1705e69c93faf14825152050e848014ef22d4bf25436e362822237cd568",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/admin_audit.templ",
-        "target": "internal/web/templates/admin_audit.templ",
-        "class": "templ",
-        "sha256": "87cc726404aef87df739752d41cc8b6ef2e8d8029015c10acc16c62530911b11",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "admin.audit.index"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The platform-wide audit log with actor, action, and target filters.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "a2e2f1705e69c93faf14825152050e848014ef22d4bf25436e362822237cd568",
+        "source": "internal/web/handlers_admin_audit.go",
+        "target": "internal/web/handlers_admin_audit.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "87cc726404aef87df739752d41cc8b6ef2e8d8029015c10acc16c62530911b11",
+        "source": "internal/web/templates/admin_audit.templ",
+        "target": "internal/web/templates/admin_audit.templ"
+      }
+    ],
+    "id": "ggg/page/admin-audit",
+    "kind": "page",
+    "locales": {
+      "en": {
+        "admin.audit.col_org": "Org",
+        "admin.audit.empty": "No audit rows match.",
+        "admin.audit.search_aria": "Search audit log",
+        "admin.audit.search_placeholder": "Filter by action or org\u2026",
+        "admin.audit.title": "Audit log"
+      },
+      "es": {
+        "admin.audit.col_org": "Organizaci\u00f3n",
+        "admin.audit.empty": "No hay registros que coincidan.",
+        "admin.audit.search_aria": "Buscar en la auditor\u00eda",
+        "admin.audit.search_placeholder": "Filtrar por acci\u00f3n u organizaci\u00f3n\u2026",
+        "admin.audit.title": "Auditor\u00eda"
+      }
+    },
+    "migrations": [],
+    "name": "admin-audit",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
-      "routes": [
-        {
-          "id": "admin.audit.index",
-          "method": "GET",
-          "pattern": "/admin/audit",
-          "scope": "admin",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleAdminAudit"
-        }
-      ],
       "navigation": [
         {
-          "id": "nav.admin.audit",
-          "area": "admin",
-          "route_id": "admin.audit.index",
-          "label_key": "sidebar.admin_audit",
           "after": [
             "nav.admin.flags"
-          ]
+          ],
+          "area": "admin",
+          "id": "nav.admin.audit",
+          "label_key": "sidebar.admin_audit",
+          "route_id": "admin.audit.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleAdminAudit",
+          "id": "admin.audit.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/admin/audit",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "admin"
         }
       ],
       "visual": [
         {
           "id": "admin-audit",
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ],
           "path": "/admin/audit",
           "persona": "admin",
           "viewports": [
             "desktop",
             "tablet",
             "mobile"
-          ],
-          "masks": [
-            "img[alt*=\"avatar\" i]"
           ]
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "locales": {
-      "en": {
-        "admin.audit.col_org": "Org",
-        "admin.audit.empty": "No audit rows match.",
-        "admin.audit.search_aria": "Search audit log",
-        "admin.audit.search_placeholder": "Filter by action or org…",
-        "admin.audit.title": "Audit log"
-      },
-      "es": {
-        "admin.audit.col_org": "Organización",
-        "admin.audit.empty": "No hay registros que coincidan.",
-        "admin.audit.search_aria": "Buscar en la auditoría",
-        "admin.audit.search_placeholder": "Filtrar por acción u organización…",
-        "admin.audit.title": "Auditoría"
-      }
-    },
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Admin audit log"
+  },
+  "schema": 2
 }

@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/mention-chip",
-    "kind": "component",
-    "name": "mention-chip",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "MentionChip",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The MentionChip renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/mention-chip.templ",
-        "target": "internal/web/templates/ui/mention-chip.templ",
         "class": "templ",
-        "sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "aa6660f7fd8d9f14535e780ea5617e80e45d2846c9a3b6a7f549dca4dbb9de98",
+        "source": "internal/web/templates/ui/mention-chip.templ",
+        "target": "internal/web/templates/ui/mention-chip.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/mention-chip",
+    "kind": "component",
+    "migrations": [],
+    "name": "mention-chip",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "mention-chip",
           "family": "communication",
-          "signature": "templ MentionChip(o MentionChipOpts)",
-          "summary": "Renders an inline mention.",
           "guidance": "The @ is decorative and hidden: a screen reader reading \"at Ada Lovelace\" inside a sentence is confusing, and the visual marker is what distinguishes a mention from ordinary text for sighted readers.",
+          "name": "mention-chip",
+          "signature": "templ MentionChip(o MentionChipOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders an inline mention."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "MentionChip"
+  },
+  "schema": 2
 }

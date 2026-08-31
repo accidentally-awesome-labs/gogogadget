@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/otp-input",
-    "kind": "component",
-    "name": "otp-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "OTPInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The OTPInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/otp-input.templ",
-        "target": "internal/web/templates/ui/otp-input.templ",
         "class": "templ",
-        "sha256": "a7a68dcf995f42d2e2ac42b2c488776c902992450b2bb71bd4b81e8e5a6c33df",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "a7a68dcf995f42d2e2ac42b2c488776c902992450b2bb71bd4b81e8e5a6c33df",
+        "source": "internal/web/templates/ui/otp-input.templ",
+        "target": "internal/web/templates/ui/otp-input.templ"
       },
       {
-        "source": "internal/web/templates/ui/otp-input_test.go",
-        "target": "internal/web/templates/ui/otp-input_test.go",
         "class": "test",
-        "sha256": "c6f465eea24657834dddd0890fd9c43639943d764aa945197ee087d62eb7ee08",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "c6f465eea24657834dddd0890fd9c43639943d764aa945197ee087d62eb7ee08",
+        "source": "internal/web/templates/ui/otp-input_test.go",
+        "target": "internal/web/templates/ui/otp-input_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/otp-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "otp-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "otp-input",
           "family": "forms",
-          "signature": "templ OTPInput(o OTPInputOpts)",
-          "summary": "Renders a single one-time-code input.",
           "guidance": "One input, not one box per digit. A box-per-digit widget breaks paste, breaks password-manager and SMS autofill, and gives a screen reader six unlabelled fields instead of one. autocomplete=\"one-time-code\" is what lets the platform offer the code from a message, and inputmode numeric brings up the keypad.",
+          "name": "otp-input",
+          "signature": "templ OTPInput(o OTPInputOpts)",
           "states": [
             "default",
             "error"
-          ]
+          ],
+          "summary": "Renders a single one-time-code input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "OTPInput"
+  },
+  "schema": 2
 }

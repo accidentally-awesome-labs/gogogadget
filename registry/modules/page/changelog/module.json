@@ -1,105 +1,134 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/changelog",
-    "kind": "page",
-    "name": "changelog",
-    "revision": 1,
-    "contract": 1,
-    "title": "Changelog",
-    "description": "The changelog, rendered as every release on one anchored page.",
-    "requires": [
-      "system/content",
-      "system/content-assets",
-      "system/i18n",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/templates/changelog.templ",
-        "target": "internal/web/templates/changelog.templ",
-        "class": "templ",
-        "sha256": "419b3d6dc1f0df1b73871c95232566ad9cce287b0d9e21b701449386cc6d058b",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "content_types": [
         "release"
       ]
     },
-    "runtime": {
-      "content_types": [
-        {
-          "id": "release",
-          "mode": "single",
-          "paths": [
-            "/changelog"
-          ],
-          "package": "internal/web",
-          "handler": "handleContent"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "footer.company.changelog",
-          "area": "footer",
-          "route_id": "content.release.index",
-          "label_key": "footer.changelog",
-          "group": "footer.company",
-          "before": [
-            "footer.company.about"
-          ],
-          "after": [
-            "footer.company.blog"
-          ]
-        },
-        {
-          "id": "nav.public.changelog",
-          "area": "public",
-          "route_id": "content.release.index",
-          "label_key": "nav.changelog",
-          "after": [
-            "nav.public.docs"
-          ]
-        }
-      ],
-      "visual": [
-        {
-          "id": "changelog",
-          "path": "/changelog",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The changelog, rendered as every release on one anchored page.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "419b3d6dc1f0df1b73871c95232566ad9cce287b0d9e21b701449386cc6d058b",
+        "source": "internal/web/templates/changelog.templ",
+        "target": "internal/web/templates/changelog.templ"
+      }
+    ],
+    "id": "ggg/page/changelog",
+    "kind": "page",
     "locales": {
       "en": {
         "changelog.intro": "Everything that shipped, newest first. Each release links to itself, so you can point someone at the exact one.",
         "changelog.title": "Changelog"
       },
       "es": {
-        "changelog.intro": "Todo lo que se ha lanzado, lo más reciente primero. Cada versión enlaza a sí misma, para que puedas señalar exactamente cuál.",
+        "changelog.intro": "Todo lo que se ha lanzado, lo m\u00e1s reciente primero. Cada versi\u00f3n enlaza a s\u00ed misma, para que puedas se\u00f1alar exactamente cu\u00e1l.",
         "changelog.title": "Novedades"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "changelog",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/content-assets"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "content_types": [
+        {
+          "handler": "handleContent",
+          "id": "release",
+          "mode": "single",
+          "package": "internal/web",
+          "paths": [
+            "/changelog"
+          ]
+        }
+      ],
+      "navigation": [
+        {
+          "after": [
+            "footer.company.blog"
+          ],
+          "area": "footer",
+          "before": [
+            "footer.company.about"
+          ],
+          "group": "footer.company",
+          "id": "footer.company.changelog",
+          "label_key": "footer.changelog",
+          "route_id": "content.release.index"
+        },
+        {
+          "after": [
+            "nav.public.docs"
+          ],
+          "area": "public",
+          "id": "nav.public.changelog",
+          "label_key": "nav.changelog",
+          "route_id": "content.release.index"
+        }
+      ],
+      "visual": [
+        {
+          "id": "changelog",
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/changelog",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "retain-data"
-  }
+    "title": "Changelog"
+  },
+  "schema": 2
 }

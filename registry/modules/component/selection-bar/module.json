@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/selection-bar",
-    "kind": "component",
-    "name": "selection-bar",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SelectionBar",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SelectionBar renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/selection-bar.templ",
-        "target": "internal/web/templates/ui/selection-bar.templ",
         "class": "templ",
-        "sha256": "7316a14a7ecec8229e8ed2f8158f323672a452544f94580818c235c60afb7bd9",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7316a14a7ecec8229e8ed2f8158f323672a452544f94580818c235c60afb7bd9",
+        "source": "internal/web/templates/ui/selection-bar.templ",
+        "target": "internal/web/templates/ui/selection-bar.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/selection-bar",
+    "kind": "component",
+    "migrations": [],
+    "name": "selection-bar",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "selection-bar",
           "family": "data",
-          "signature": "templ SelectionBar(o SelectionBarOpts)",
-          "summary": "Renders bulk actions for a selection.",
           "guidance": "role=\"status\" with a polite live region: the count changes as the user selects, and an unannounced count means a screen-reader user cannot tell how many rows a bulk delete is about to affect.",
+          "name": "selection-bar",
+          "signature": "templ SelectionBar(o SelectionBarOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders bulk actions for a selection."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SelectionBar"
+  },
+  "schema": 2
 }

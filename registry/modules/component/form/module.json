@@ -1,54 +1,65 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/form",
-    "kind": "component",
-    "name": "form",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Form",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Form renderer and its options. Renders the hidden CSRF field for every unsafe method, so a form submitted without JavaScript is accepted rather than refused with 403.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/form.templ",
-        "target": "internal/web/templates/ui/form.templ",
         "class": "templ",
-        "sha256": "97d2502dc0eb7f3edaf8a6cac729ebc2abfca295f676983e92e63c4f972a2c76",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "97d2502dc0eb7f3edaf8a6cac729ebc2abfca295f676983e92e63c4f972a2c76",
+        "source": "internal/web/templates/ui/form.templ",
+        "target": "internal/web/templates/ui/form.templ"
       },
       {
-        "source": "internal/web/templates/ui/form_test.go",
-        "target": "internal/web/templates/ui/form_test.go",
         "class": "test",
-        "sha256": "135efb4c4b6626361e9b040a6410f2388f4f227484284c77fcdb814d97ff8673",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "135efb4c4b6626361e9b040a6410f2388f4f227484284c77fcdb814d97ff8673",
+        "source": "internal/web/templates/ui/form_test.go",
+        "target": "internal/web/templates/ui/form_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/form",
+    "kind": "component",
+    "migrations": [],
+    "name": "form",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "form",
           "family": "forms",
-          "signature": "templ Form(o FormOpts)",
-          "summary": "Renders a form wrapper; children are the fields.",
           "guidance": "novalidate is always set: server validation is authoritative, and letting the browser block submission first means the server's rules never run. The hidden CSRF field is rendered here, not by callers, for every method the check applies to: the token htmx sends as an inherited request header is unreachable when htmx never loaded, and a form the server then refuses is a worse fallback than no form at all. GET and HEAD forms carry no field - a token in a GET is a token in the URL bar, the history and every access log.",
+          "name": "form",
+          "signature": "templ Form(o FormOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a form wrapper; children are the fields."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Form"
+  },
+  "schema": 2
 }

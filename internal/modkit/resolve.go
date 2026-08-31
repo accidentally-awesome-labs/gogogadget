@@ -189,7 +189,6 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 		}
 	}
 
-	roots := sortedKeys(selected)
 	visiting := make(map[string]bool)
 	visited := make(map[string]bool)
 	var expand func(string) error
@@ -208,7 +207,15 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			return fmt.Errorf("required module %q is not present in the catalog", id)
 		}
 		visiting[id] = true
-		for _, dependency := range module.Requires {
+		for _, requirement := range module.Requires {
+			dependency := requirement.ID
+			dependencyModule, ok := moduleByID[dependency]
+			if !ok {
+				return fmt.Errorf("module %q requires missing dependency %q", id, dependency)
+			}
+			if dependencyModule.Contract < requirement.Contract.Min || dependencyModule.Contract > requirement.Contract.Max {
+				return fmt.Errorf("module %q requires %s contract %d in inclusive range %d..%d", id, dependency, dependencyModule.Contract, requirement.Contract.Min, requirement.Contract.Max)
+			}
 			if _, exists := selected[dependency]; !exists {
 				selected[dependency] = struct{}{}
 				reasons[dependency] = "dependency"
@@ -221,12 +228,67 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 		visited[id] = true
 		return nil
 	}
-	for _, id := range roots {
-		if err := expand(id); err != nil {
-			return selectedGraph{}, err
+	// Provider choices are resolved only after the explicit/profile closure is
+	// known. This prevents adapters from silently introducing optional seams.
+	slots := map[string]struct{}{}
+	for id := range selected {
+		for _, slot := range moduleByID[id].Runtime.ProviderSlots {
+			slots[slot.ID] = struct{}{}
 		}
 	}
-
+	if len(slots) != len(project.Providers) {
+		return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots")
+	}
+	adapterByID := map[string]Manifest{}
+	for id, module := range moduleByID {
+		if module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
+			adapterByID[id] = module
+		}
+	}
+	envChoices := map[string]ProviderSelection{}
+	for slot := range slots {
+		choices, ok := project.Providers[slot]
+		if !ok { return selectedGraph{}, fmt.Errorf("provider slot %q has no selections", slot) }
+		envChoices["development"] = choices.Development
+		envChoices["test"] = choices.Test
+		envChoices["production"] = choices.Production
+		for env, choice := range envChoices {
+			adapterID := choice.Adapter
+			adapter, ok := adapterByID[adapterID]
+			if !ok || adapter.Runtime.System.Adapter.Slot != slot {
+				return selectedGraph{}, fmt.Errorf("provider %s adapter %q does not implement slot %q", env, adapterID, slot)
+			}
+			found := false
+			for _, target := range adapter.Runtime.System.Adapter.Targets {
+				if target.ID != choice.Target { continue }
+				found = true
+				if !containsString(target.Environments, env) {
+					return selectedGraph{}, fmt.Errorf("provider %s target %s@%s is not allowed in %s", slot, adapterID, target.ID, env)
+				}
+				if env == "production" && target.Mode == "development" {
+					return selectedGraph{}, fmt.Errorf("development target %s@%s cannot be used in production", adapterID, target.ID)
+				}
+			}
+			if !found { return selectedGraph{}, fmt.Errorf("provider %s target %q is missing from adapter %q", slot, choice.Target, adapterID) }
+			if _, exists := selected[adapterID]; !exists {
+				selected[adapterID] = struct{}{}
+				reasons[adapterID] = "provider"
+			}
+		}
+		delete(envChoices, "development"); delete(envChoices, "test"); delete(envChoices, "production")
+	}
+	if project.Deployment != "" {
+		deployment, ok := moduleByID[project.Deployment]
+		if !ok { return selectedGraph{}, fmt.Errorf("deployment module %q is not present", project.Deployment) }
+		if deployment.Kind != ModuleSystem || deployment.Runtime.System == nil || len(deployment.Runtime.Deploy) != 1 {
+			return selectedGraph{}, fmt.Errorf("deployment module %q must provide exactly one deploy target", project.Deployment)
+		}
+		selected[project.Deployment] = struct{}{}
+		reasons[project.Deployment] = "deployment"
+	}
+	for id := range selected {
+		if err := expand(id); err != nil { return selectedGraph{}, err }
+	}
 	order, err := stableTopologicalOrder(ctx, selected, moduleByID)
 	if err != nil {
 		return selectedGraph{}, err
@@ -248,7 +310,8 @@ func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, m
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		for _, dependency := range modules[id].Requires {
+		for _, requirement := range modules[id].Requires {
+			dependency := requirement.ID
 			if _, ok := selected[dependency]; !ok {
 				return nil, fmt.Errorf("module %q requires unselected module %q", id, dependency)
 			}

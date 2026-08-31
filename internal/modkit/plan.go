@@ -168,7 +168,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 			if strings.TrimSpace(op.RegistryRef) == "" || op.RegistryRef != strings.TrimSpace(op.RegistryRef) {
 				return Plan{}, fmt.Errorf("operation registry ref must be non-empty and trimmed")
 			}
-			desiredProject.Registry.Ref = op.RegistryRef
+			desiredProject.Registries[0].Ref = op.RegistryRef
 		}
 	} else if op.RegistryRef != "" {
 		return Plan{}, fmt.Errorf("operation %q does not accept a registry ref", op.Kind)
@@ -177,9 +177,9 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err := ctx.Err(); err != nil {
 		return Plan{}, err
 	}
-	snapshot, err := e.source.Resolve(ctx, desiredProject.Registry.Repository, desiredProject.Registry.Ref)
+	snapshot, err := e.source.Resolve(ctx, desiredProject.Registries[0].Repository, desiredProject.Registries[0].Ref)
 	if err != nil {
-		return Plan{}, fmt.Errorf("resolve registry %s at %s: %w", desiredProject.Registry.Repository, desiredProject.Registry.Ref, err)
+		return Plan{}, fmt.Errorf("resolve registry %s at %s: %w", desiredProject.Registries[0].Repository, desiredProject.Registries[0].Ref, err)
 	}
 	if strings.TrimSpace(snapshot.Commit) == "" || snapshot.FS == nil {
 		return Plan{}, fmt.Errorf("resolved registry snapshot is incomplete")
@@ -251,14 +251,20 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}, nil
 }
 
+func moduleNamespace(id string) string {
+	namespace, _, _, ok := splitScopedModuleID(id)
+	if ok { return namespace }
+	return ""
+}
+
 func buildPlannedLock(commit string, graph selectedGraph, files map[string][]LockedFile, migrations map[string][]LockedMigration) Lock {
 	requiredBy := make(map[string][]string, len(graph.modules))
 	for _, module := range graph.modules {
 		requiredBy[module.ID] = []string{}
 	}
 	for _, module := range graph.modules {
-		for _, dependency := range module.Requires {
-			requiredBy[dependency] = append(requiredBy[dependency], module.ID)
+		for _, requirement := range module.Requires {
+			requiredBy[requirement.ID] = append(requiredBy[requirement.ID], module.ID)
 		}
 	}
 	for id := range requiredBy {
@@ -270,13 +276,18 @@ func buildPlannedLock(commit string, graph selectedGraph, files map[string][]Loc
 	locked := make([]LockedModule, 0, len(modules))
 	for _, module := range modules {
 		locked = append(locked, LockedModule{
-			ID: module.ID, Revision: module.Revision, Contract: module.Contract, SourceCommit: commit,
-			Reason: graph.reasons[module.ID], RequiredBy: append([]string{}, requiredBy[module.ID]...),
+			ID: module.ID, Revision: module.Revision, Contract: module.Contract, RegistryNamespace: moduleNamespace(module.ID), SourceCommit: commit,
+			SnapshotSHA256: commit, Reason: graph.reasons[module.ID], RequiredBy: append([]string{}, requiredBy[module.ID]...),
 			Manifest: module, Files: append([]LockedFile{}, files[module.ID]...),
 			Migrations: append([]LockedMigration{}, migrations[module.ID]...),
 		})
 	}
-	return Lock{Schema: 1, RegistryCommit: commit, Order: append([]string{}, graph.order...), Modules: locked}
+	return Lock{
+		Schema: 2, RegistryCommit: commit, Registries: []LockedRegistry{},
+		Snapshots: []LockedSnapshot{}, Order: append([]string{}, graph.order...),
+		RuntimeOrders: RuntimeOrders{Development: append([]string{}, graph.order...), Test: append([]string{}, graph.order...), Production: append([]string{}, graph.order...)},
+		Dependencies: []LockedDependency{}, Modules: locked,
+	}
 }
 
 func canonicalProjectRoot(root string) (string, error) {

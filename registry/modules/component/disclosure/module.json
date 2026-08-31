@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/disclosure",
-    "kind": "component",
-    "name": "disclosure",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Disclosure",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Disclosure renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/disclosure.templ",
-        "target": "internal/web/templates/ui/disclosure.templ",
         "class": "templ",
-        "sha256": "257f297170eba695dab169ae6058bc6022fb571daec0b3cb34f0be3747052140",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "257f297170eba695dab169ae6058bc6022fb571daec0b3cb34f0be3747052140",
+        "source": "internal/web/templates/ui/disclosure.templ",
+        "target": "internal/web/templates/ui/disclosure.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/disclosure",
+    "kind": "component",
+    "migrations": [],
+    "name": "disclosure",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "disclosure",
           "family": "navigation",
-          "signature": "templ Disclosure(o DisclosureOpts)",
-          "summary": "Renders a native details/summary.",
           "guidance": "No JavaScript at all: the platform supplies the toggle, the button semantics, keyboard activation, and the correct announcement of expanded state. It also means the content is present for in-page search and prints expanded when the browser asks it to.",
+          "name": "disclosure",
+          "signature": "templ Disclosure(o DisclosureOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a native details/summary."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Disclosure"
+  },
+  "schema": 2
 }

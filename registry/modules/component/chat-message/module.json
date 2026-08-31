@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/chat-message",
-    "kind": "component",
-    "name": "chat-message",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "ChatMessage",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The ChatMessage renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/chat-message.templ",
-        "target": "internal/web/templates/ui/chat-message.templ",
         "class": "templ",
-        "sha256": "a741379471d649d609eeb57a228c506ff2e0a244067f8e5b52a80412ec2332f2",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "a741379471d649d609eeb57a228c506ff2e0a244067f8e5b52a80412ec2332f2",
+        "source": "internal/web/templates/ui/chat-message.templ",
+        "target": "internal/web/templates/ui/chat-message.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/chat-message",
+    "kind": "component",
+    "migrations": [],
+    "name": "chat-message",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "chat-message",
           "family": "communication",
+          "name": "chat-message",
           "signature": "templ ChatMessage(o ChatMessageOpts)",
-          "summary": "Renders one message.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one message."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "ChatMessage"
+  },
+  "schema": 2
 }

@@ -1,57 +1,68 @@
 {
-  "schema": 1,
   "module": {
-    "id": "element/separator",
-    "kind": "element",
-    "name": "separator",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Separator",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Separator renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/separator.templ",
-        "target": "internal/web/templates/ui/separator.templ",
         "class": "templ",
-        "sha256": "4cd71c3d19b80c28be510568bdc1fb56228ecdd1615250973aa1e826937a9985",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "4cd71c3d19b80c28be510568bdc1fb56228ecdd1615250973aa1e826937a9985",
+        "source": "internal/web/templates/ui/separator.templ",
+        "target": "internal/web/templates/ui/separator.templ"
       },
       {
-        "source": "internal/web/templates/ui/separator_test.go",
-        "target": "internal/web/templates/ui/separator_test.go",
         "class": "test",
-        "sha256": "e63c08a8f0d54b1451215c17e601a7522def03869934168f3b1a1127c3dafca1",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "e63c08a8f0d54b1451215c17e601a7522def03869934168f3b1a1127c3dafca1",
+        "source": "internal/web/templates/ui/separator_test.go",
+        "target": "internal/web/templates/ui/separator_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/element/separator",
+    "kind": "element",
+    "migrations": [],
+    "name": "separator",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "separator",
           "family": "foundations",
+          "name": "separator",
           "signature": "templ Separator(o SeparatorOpts)",
-          "summary": "Renders a horizontal or vertical rule.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a horizontal or vertical rule."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Separator"
+  },
+  "schema": 2
 }

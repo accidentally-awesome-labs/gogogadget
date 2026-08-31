@@ -23,8 +23,10 @@ const (
 
 // RegistryRoot names every catalog index in canonical load order.
 type RegistryRoot struct {
-	Schema   int      `json:"schema"`
-	Includes []string `json:"includes"`
+	Schema          int      `json:"schema"`
+	Namespace       string   `json:"namespace"`
+	CanonicalModule string   `json:"canonical_module"`
+	Includes        []string `json:"includes"`
 }
 
 // CatalogIndex explicitly lists every document belonging to one kind.
@@ -39,17 +41,18 @@ type ModuleDocument struct {
 	Schema int      `json:"schema"`
 	Module Manifest `json:"module"`
 }
-
-// Profile is an ordered intent expansion over installable module IDs.
 type Profile struct {
-	ID          string      `json:"id"`
-	Kind        CatalogKind `json:"kind"`
-	Name        string      `json:"name"`
-	Revision    int         `json:"revision"`
-	Contract    int         `json:"contract"`
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	Members     []string    `json:"members"`
+	ID                    string                    `json:"id"`
+	Kind                  CatalogKind               `json:"kind"`
+	Name                  string                    `json:"name"`
+	Revision              int                       `json:"revision"`
+	Contract              int                       `json:"contract"`
+	Title                 string                    `json:"title"`
+	Description           string                    `json:"description"`
+	Members               []string                  `json:"members"`
+	RequiredProviderSlots []string                  `json:"required_provider_slots"`
+	ProviderDefaults      map[string]ProviderSelections `json:"provider_defaults"`
+	DefaultDeployment     string                    `json:"default_deployment"`
 }
 
 // ProfileDocument is the published envelope for one profile.
@@ -85,8 +88,11 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 	if err := readCatalogJSON(fsys, "registry.json", &root); err != nil {
 		return catalog, err
 	}
-	if root.Schema != 1 {
-		return catalog, fmt.Errorf("registry.json schema must be 1")
+	if root.Schema != 2 {
+		return catalog, fmt.Errorf("registry.json schema must be 2")
+	}
+	if !validNamespace(root.Namespace) || strings.TrimSpace(root.CanonicalModule) == "" {
+		return catalog, fmt.Errorf("registry.json namespace and canonical_module are required")
 	}
 	if root.Includes == nil {
 		return catalog, fmt.Errorf("registry.json includes array is required")
@@ -107,8 +113,8 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 		if err := readCatalogJSON(fsys, include.path, &index); err != nil {
 			return Catalog{}, err
 		}
-		if index.Schema != 1 {
-			return Catalog{}, fmt.Errorf("%s schema must be 1", include.path)
+		if index.Schema != 2 {
+			return Catalog{}, fmt.Errorf("%s schema must be 2", include.path)
 		}
 		if index.Kind != include.kind {
 			return Catalog{}, fmt.Errorf("%s kind must be %q", include.path, include.kind)
@@ -128,8 +134,8 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 				if err := readCatalogJSON(fsys, item, &document); err != nil {
 					return Catalog{}, err
 				}
-				if document.Schema != 1 {
-					return Catalog{}, fmt.Errorf("%s schema must be 1", item)
+				if document.Schema != 2 {
+					return Catalog{}, fmt.Errorf("%s schema must be 2", item)
 				}
 				if err := validateProfile(document.Profile); err != nil {
 					return Catalog{}, fmt.Errorf("%s: %w", item, err)
@@ -146,8 +152,8 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 			if err := readCatalogJSON(fsys, item, &document); err != nil {
 				return Catalog{}, err
 			}
-			if document.Schema != 1 {
-				return Catalog{}, fmt.Errorf("%s schema must be 1", item)
+			if document.Schema != 2 {
+				return Catalog{}, fmt.Errorf("%s schema must be 2", item)
 			}
 			if err := validateManifest(document.Module, true); err != nil {
 				return Catalog{}, fmt.Errorf("%s: %w", item, err)
@@ -215,33 +221,32 @@ func validateCatalogItemPath(kind CatalogKind, item string) error {
 }
 
 func validateProfile(profile Profile) error {
-	kind, name, ok := splitModuleID(profile.ID)
-	if !ok || kind != string(CatalogProfile) {
+	namespace, kind, name, ok := splitScopedModuleID(profile.ID)
+	if !ok || kind != string(CatalogProfile) || !validNamespace(namespace) {
 		return fmt.Errorf("profile id %q is invalid", profile.ID)
 	}
 	if profile.Kind != CatalogProfile {
 		return fmt.Errorf("profile kind must be %q", CatalogProfile)
 	}
-	if !validKebab(profile.Name) || name != profile.Name || profile.ID != string(CatalogProfile)+"/"+profile.Name {
+	if name != profile.Name {
 		return fmt.Errorf("profile identity does not match id, kind, and name")
 	}
-	if profile.Revision <= 0 {
-		return fmt.Errorf("profile revision must be positive")
+	if profile.Revision <= 0 || profile.Contract <= 0 {
+		return fmt.Errorf("profile revision and contract must be positive")
 	}
-	if profile.Contract <= 0 {
-		return fmt.Errorf("profile contract must be positive")
+	if strings.TrimSpace(profile.Title) == "" || strings.TrimSpace(profile.Description) == "" {
+		return fmt.Errorf("profile title and description must be non-empty")
 	}
-	if strings.TrimSpace(profile.Title) == "" {
-		return fmt.Errorf("profile title must be non-empty")
+	if profile.Members == nil || profile.RequiredProviderSlots == nil || profile.ProviderDefaults == nil {
+		return fmt.Errorf("profile members, required_provider_slots, and provider_defaults are required")
 	}
-	if strings.TrimSpace(profile.Description) == "" {
-		return fmt.Errorf("profile description must be non-empty")
-	}
-	if profile.Members == nil {
-		return fmt.Errorf("profile members array is required")
-	}
-	if err := validateStringSet("profile members", profile.Members, true, validateInstallableModuleID); err != nil {
-		return err
+	if err := validateStringSet("profile members", profile.Members, true, validateScopedProjectModuleID); err != nil { return err }
+	if err := validateStringSet("profile required_provider_slots", profile.RequiredProviderSlots, true, func(id string) error {
+		if !validScopedSlotID(id) { return fmt.Errorf("provider slot id %q is invalid", id) }
+		return nil
+	}); err != nil { return err }
+	for slot, choices := range profile.ProviderDefaults {
+		if err := validateProviderSelections(slot, choices); err != nil { return err }
 	}
 	return nil
 }

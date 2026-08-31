@@ -1,87 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/jobs",
-    "kind": "system",
-    "name": "jobs",
-    "revision": 1,
-    "contract": 1,
-    "title": "Background job queue",
-    "description": "The Postgres-backed worker: SKIP LOCKED claiming, a visibility timeout, exponential backoff, dead-lettering, the scheduler pass, and the janitors.",
-    "requires": [
-      "system/apphost",
-      "system/config",
-      "system/database",
-      "system/mail",
-      "system/observability",
-      "system/storage"
-    ],
-    "files": [
-      {
-        "source": "internal/db/queries/jobs.sql",
-        "target": "internal/db/queries/jobs.sql",
-        "class": "query",
-        "sha256": "78ce2a214540207da708bae3c77dd0cd2a8cdddbbcdf8ebfa9f384fde2ae7010",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/define.go",
-        "target": "internal/jobs/define.go",
-        "class": "go",
-        "sha256": "c7b1de8f9843f76b5a58d6940b6a438c6741182f753604270f6a950dbfa06cae",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/definitions.go",
-        "target": "internal/jobs/definitions.go",
-        "class": "go",
-        "sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/dispatch_test.go",
-        "target": "internal/jobs/dispatch_test.go",
-        "class": "test",
-        "sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/jobs.go",
-        "target": "internal/jobs/jobs.go",
-        "class": "go",
-        "sha256": "d3dcbd9ef6583ba9ee753389cbf3817ad901fedd4a519257f189e933f4d9e9cf",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/jobs/jobs_test.go",
-        "target": "internal/jobs/jobs_test.go",
-        "class": "test",
-        "sha256": "ba553989ff9316dca7f1bc361cf244f92755dae39ec59f40074d05185214dce0",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/module.go",
-        "target": "internal/jobs/module.go",
-        "class": "go",
-        "sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/jobs/module_test.go",
-        "target": "internal/jobs/module_test.go",
-        "class": "test",
-        "sha256": "3fdb95cdfe80fece4522b7055c4d270d9ea719d4eb6c77f49d9726c97e25f41e",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/jobs"
@@ -90,63 +8,149 @@
         "jobs"
       ]
     },
-    "runtime": {
-      "system": {
-        "package": "internal/jobs",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Billing",
-            "capability": "billing.client",
-            "type": "billing.Client",
-            "optional": true
-          },
-          {
-            "field": "Config",
-            "capability": "config",
-            "type": "*config.Config",
-            "optional": false
-          },
-          {
-            "field": "Queries",
-            "capability": "database.queries",
-            "type": "*sqlc.Queries",
-            "optional": false
-          },
-          {
-            "field": "Reporter",
-            "capability": "observability.reporter",
-            "type": "observability.Reporter",
-            "optional": true
-          },
-          {
-            "field": "Sender",
-            "capability": "mail.sender",
-            "type": "mail.Sender",
-            "optional": false
-          },
-          {
-            "field": "Storage",
-            "capability": "storage.store",
-            "type": "storage.Store",
-            "optional": true
-          }
+    "contract": 1,
+    "data": [
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "retain",
+        "persisted_jobs": [
+          "all"
         ],
-        "provides": [
-          {
-            "field": "Worker",
-            "capability": "jobs.worker",
-            "type": "*jobs.Worker"
-          }
-        ],
-        "start": true,
-        "stop": true
+        "scope": "platform",
+        "table": "jobs"
+      }
+    ],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "The Postgres-backed worker: SKIP LOCKED claiming, a visibility timeout, exponential backoff, dead-lettering, the scheduler pass, and the janitors.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "78ce2a214540207da708bae3c77dd0cd2a8cdddbbcdf8ebfa9f384fde2ae7010",
+        "source": "internal/db/queries/jobs.sql",
+        "target": "internal/db/queries/jobs.sql"
       },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "c7b1de8f9843f76b5a58d6940b6a438c6741182f753604270f6a950dbfa06cae",
+        "source": "internal/jobs/define.go",
+        "target": "internal/jobs/define.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "382e241854367362eb0bd9c8bb896ecde07c76f4686d604dae8be0fdf9cb77b9",
+        "source": "internal/jobs/definitions.go",
+        "target": "internal/jobs/definitions.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "bc22d2ba0eabd980b94375539d10bb5e9942f3ae9aa27cc1fa4ee275b91f8c89",
+        "source": "internal/jobs/dispatch_test.go",
+        "target": "internal/jobs/dispatch_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "d3dcbd9ef6583ba9ee753389cbf3817ad901fedd4a519257f189e933f4d9e9cf",
+        "source": "internal/jobs/jobs.go",
+        "target": "internal/jobs/jobs.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "ba553989ff9316dca7f1bc361cf244f92755dae39ec59f40074d05185214dce0",
+        "source": "internal/jobs/jobs_test.go",
+        "target": "internal/jobs/jobs_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "0b55535323acb91522bda6889cd47830eab893fe216370220a1ad95c67863f68",
+        "source": "internal/jobs/module.go",
+        "target": "internal/jobs/module.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "3fdb95cdfe80fece4522b7055c4d270d9ea719d4eb6c77f49d9726c97e25f41e",
+        "source": "internal/jobs/module_test.go",
+        "target": "internal/jobs/module_test.go"
+      }
+    ],
+    "id": "ggg/system/jobs",
+    "kind": "system",
+    "migrations": [],
+    "name": "jobs",
+    "removal_policy": "drain-required",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/config"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/mail"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/observability"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/storage"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
       "janitors": [
         {
+          "handler": "janitorOldJobs",
           "name": "old_jobs",
-          "package": "internal/jobs",
-          "handler": "janitorOldJobs"
+          "package": "internal/jobs"
         }
       ],
       "queries": [
@@ -182,28 +186,65 @@
           "name": "ListJobs",
           "table": "jobs"
         }
-      ]
+      ],
+      "system": {
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "capability": "billing.client",
+            "field": "Billing",
+            "optional": true,
+            "type": "billing.Client"
+          },
+          {
+            "capability": "config",
+            "field": "Config",
+            "optional": false,
+            "type": "*config.Config"
+          },
+          {
+            "capability": "database.queries",
+            "field": "Queries",
+            "optional": false,
+            "type": "*sqlc.Queries"
+          },
+          {
+            "capability": "observability.reporter",
+            "field": "Reporter",
+            "optional": true,
+            "type": "observability.Reporter"
+          },
+          {
+            "capability": "mail.sender",
+            "field": "Sender",
+            "optional": false,
+            "type": "mail.Sender"
+          },
+          {
+            "capability": "storage.store",
+            "field": "Storage",
+            "optional": true,
+            "type": "storage.Store"
+          }
+        ],
+        "package": "internal/jobs",
+        "provides": [
+          {
+            "capability": "jobs.worker",
+            "field": "Worker",
+            "type": "*jobs.Worker"
+          }
+        ],
+        "start": true,
+        "stop": true
+      }
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/jobs"
       ]
     },
-    "data": [
-      {
-        "table": "jobs",
-        "scope": "platform",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "retain",
-        "persisted_jobs": [
-          "all"
-        ]
-      }
-    ],
-    "removal_policy": "drain-required"
-  }
+    "title": "Background job queue"
+  },
+  "schema": 2
 }

@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/key-value",
-    "kind": "component",
-    "name": "key-value",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "KeyValue",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The KeyValue renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/key-value.templ",
-        "target": "internal/web/templates/ui/key-value.templ",
         "class": "templ",
-        "sha256": "9892dff353f00ddc80e24b63e9175028ddbe468db28e1a1aa6ded87302746f8c",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "9892dff353f00ddc80e24b63e9175028ddbe468db28e1a1aa6ded87302746f8c",
+        "source": "internal/web/templates/ui/key-value.templ",
+        "target": "internal/web/templates/ui/key-value.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/key-value",
+    "kind": "component",
+    "migrations": [],
+    "name": "key-value",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "key-value",
           "family": "data",
+          "name": "key-value",
           "signature": "templ KeyValue(o KeyValueOpts)",
-          "summary": "Renders one definition row.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders one definition row."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "KeyValue"
+  },
+  "schema": 2
 }

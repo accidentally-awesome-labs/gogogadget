@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/container",
-    "kind": "component",
-    "name": "container",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Container",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Container renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/container.templ",
-        "target": "internal/web/templates/ui/container.templ",
         "class": "templ",
-        "sha256": "7d3d8e9ccf225b96728a8b52a245641b4999a07a961d0554188169255b77daf1",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7d3d8e9ccf225b96728a8b52a245641b4999a07a961d0554188169255b77daf1",
+        "source": "internal/web/templates/ui/container.templ",
+        "target": "internal/web/templates/ui/container.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/container",
+    "kind": "component",
+    "migrations": [],
+    "name": "container",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "container",
           "family": "layout",
+          "name": "container",
           "signature": "templ Container(o ContainerOpts)",
-          "summary": "Renders a width-constrained wrapper.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a width-constrained wrapper."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Container"
+  },
+  "schema": 2
 }

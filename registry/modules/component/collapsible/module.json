@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/collapsible",
-    "kind": "component",
-    "name": "collapsible",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Collapsible",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Collapsible renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/collapsible.templ",
-        "target": "internal/web/templates/ui/collapsible.templ",
         "class": "templ",
-        "sha256": "a9c0f81d0fd19a5f9aff4b9ed1d31f2c9652f38170ddc1e5c85c0939908d6d82",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "a9c0f81d0fd19a5f9aff4b9ed1d31f2c9652f38170ddc1e5c85c0939908d6d82",
+        "source": "internal/web/templates/ui/collapsible.templ",
+        "target": "internal/web/templates/ui/collapsible.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/collapsible",
+    "kind": "component",
+    "migrations": [],
+    "name": "collapsible",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "collapsible",
           "family": "navigation",
-          "signature": "templ Collapsible(o CollapsibleOpts)",
-          "summary": "Renders a native details/summary around a region.",
           "guidance": "It is the same platform primitive as Disclosure, differing only in that the summary is dressed as a button and the region carries a caller-supplied id. No JavaScript at all: the platform supplies the toggle, the button semantics, keyboard activation and the expanded-state announcement, which is why this component declares no engine and needs no native fallback.",
+          "name": "collapsible",
+          "signature": "templ Collapsible(o CollapsibleOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a native details/summary around a region."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Collapsible"
+  },
+  "schema": 2
 }

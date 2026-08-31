@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/table-card",
-    "kind": "component",
-    "name": "table-card",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TableCard",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TableCard renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/table-card.templ",
-        "target": "internal/web/templates/ui/table-card.templ",
         "class": "templ",
-        "sha256": "7f3c35a5dbec9409643ec5e240103fdb64abb336c0863d2a6ec8394c0626bb1c",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "7f3c35a5dbec9409643ec5e240103fdb64abb336c0863d2a6ec8394c0626bb1c",
+        "source": "internal/web/templates/ui/table-card.templ",
+        "target": "internal/web/templates/ui/table-card.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/table-card",
+    "kind": "component",
+    "migrations": [],
+    "name": "table-card",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "table-card",
           "family": "data",
+          "name": "table-card",
           "signature": "templ TableCard(o TableCardOpts)",
-          "summary": "The bordered, clipped box every table sits in.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "The bordered, clipped box every table sits in."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TableCard"
+  },
+  "schema": 2
 }

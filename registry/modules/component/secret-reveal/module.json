@@ -1,47 +1,58 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/secret-reveal",
-    "kind": "component",
-    "name": "secret-reveal",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SecretReveal",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SecretReveal renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/secret-reveal.templ",
-        "target": "internal/web/templates/ui/secret-reveal.templ",
         "class": "templ",
-        "sha256": "596e49043640350459ce642aa9fb64bf042eeb91ab365dc76093fa51195e1ec0",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "596e49043640350459ce642aa9fb64bf042eeb91ab365dc76093fa51195e1ec0",
+        "source": "internal/web/templates/ui/secret-reveal.templ",
+        "target": "internal/web/templates/ui/secret-reveal.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/secret-reveal",
+    "kind": "component",
+    "migrations": [],
+    "name": "secret-reveal",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "secret-reveal",
           "family": "feedback",
-          "signature": "templ SecretReveal(o SecretRevealOpts)",
-          "summary": "The reveal-once secret pattern: the value in a code box and a copy button carrying it on data-copy.",
           "guidance": "The value never reaches an Alpine expression, so a secret containing quotes cannot break out of one.",
+          "name": "secret-reveal",
+          "signature": "templ SecretReveal(o SecretRevealOpts)",
           "states": [
             "default",
             "overflow"
-          ]
+          ],
+          "summary": "The reveal-once secret pattern: the value in a code box and a copy button carrying it on data-copy."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SecretReveal"
+  },
+  "schema": 2
 }

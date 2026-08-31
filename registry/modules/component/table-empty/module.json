@@ -1,24 +1,35 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/table-empty",
-    "kind": "component",
-    "name": "table-empty",
-    "revision": 2,
-    "contract": 1,
-    "title": "TableEmpty",
-    "description": "Superseded by component/empty-state's inline variant.",
-    "requires": [
-      "element/ui-core"
-    ],
-    "files": [],
     "claims": {},
-    "runtime": {},
-    "migrations": [],
-    "environment": [],
-    "docs": [],
-    "tests": {},
+    "contract": 1,
     "data": [],
-    "removal_policy": "free"
-  }
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Superseded by component/empty-state's inline variant.",
+    "docs": [],
+    "environment": [],
+    "files": [],
+    "id": "ggg/component/table-empty",
+    "kind": "component",
+    "migrations": [],
+    "name": "table-empty",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 2,
+    "runtime": {},
+    "tests": {},
+    "title": "TableEmpty"
+  },
+  "schema": 2
 }

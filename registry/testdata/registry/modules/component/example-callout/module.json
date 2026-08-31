@@ -1,76 +1,93 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/example-callout",
-    "kind": "component",
-    "name": "example-callout",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Example callout",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The composed component of the example closure: a titled notice rendered in one of the tones element/example-token declares. Owns its renderer, its options struct, its contract test and its own CSS fragment.",
-    "requires": [
-      "element/example-token",
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "registry/modules/component/example-callout/example_callout.css",
-        "target": "internal/web/styles/example_callout.css",
         "class": "style",
-        "sha256": "ea81eb3072b8c7dd9363581de4c6280e58dca48f7ace01b89ac573ea05bb2132",
+        "contract": false,
         "rewrite_module": false,
-        "contract": false
+        "sha256": "ea81eb3072b8c7dd9363581de4c6280e58dca48f7ace01b89ac573ea05bb2132",
+        "source": "registry/modules/component/example-callout/example_callout.css",
+        "target": "internal/web/styles/example_callout.css"
       },
       {
-        "source": "registry/modules/component/example-callout/example-callout.templ",
-        "target": "internal/web/templates/ui/example-callout.templ",
         "class": "templ",
+        "contract": true,
+        "rewrite_module": true,
         "sha256": "3bffc332ea6e2ffbf947ab06651faf09a05764afb5f07410a6e590cde3b592db",
-        "rewrite_module": true,
-        "contract": true
+        "source": "registry/modules/component/example-callout/example-callout.templ",
+        "target": "internal/web/templates/ui/example-callout.templ"
       },
       {
-        "source": "registry/modules/component/example-callout/example_callout.go",
-        "target": "internal/web/templates/ui/example_callout.go",
         "class": "go",
-        "sha256": "4eeabadbd423ddeed823e78088f66bcf73ec92034f311b8e34e4549af0a536e0",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "4eeabadbd423ddeed823e78088f66bcf73ec92034f311b8e34e4549af0a536e0",
+        "source": "registry/modules/component/example-callout/example_callout.go",
+        "target": "internal/web/templates/ui/example_callout.go"
       },
       {
-        "source": "registry/modules/component/example-callout/example_callout_test.go",
-        "target": "internal/web/templates/ui/example_callout_test.go",
         "class": "test",
-        "sha256": "ea157cd7c0f39f7e9927367a651cfc37cfae10bc88992a6689858c0d40c3e4fa",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "ea157cd7c0f39f7e9927367a651cfc37cfae10bc88992a6689858c0d40c3e4fa",
+        "source": "registry/modules/component/example-callout/example_callout_test.go",
+        "target": "internal/web/templates/ui/example_callout_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/example-callout",
+    "kind": "component",
+    "migrations": [],
+    "name": "example-callout",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/example-token"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "example-callout",
           "family": "feedback",
-          "signature": "templ ExampleCallout(o ExampleCalloutOpts)",
-          "summary": "A short titled notice in one of the declared tones.",
           "guidance": "Use it for a standing condition a reader should notice on arrival. It is not a live region: a message that arrives after load belongs in a component that announces itself, and borrowing this one would leave the announcement silent.",
+          "name": "example-callout",
+          "signature": "templ ExampleCallout(o ExampleCalloutOpts)",
           "states": [
             "default",
             "empty"
-          ]
+          ],
+          "summary": "A short titled notice in one of the declared tones."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Example callout"
+  },
+  "schema": 2
 }

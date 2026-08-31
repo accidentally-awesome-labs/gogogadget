@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/table-toolbar",
-    "kind": "component",
-    "name": "table-toolbar",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "TableToolbar",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The TableToolbar renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/table-toolbar.templ",
-        "target": "internal/web/templates/ui/table-toolbar.templ",
         "class": "templ",
-        "sha256": "55bd7ea11f11ae0d474d08548680afbcf077fed8669b6c05651ce2e6ae90fc1e",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "55bd7ea11f11ae0d474d08548680afbcf077fed8669b6c05651ce2e6ae90fc1e",
+        "source": "internal/web/templates/ui/table-toolbar.templ",
+        "target": "internal/web/templates/ui/table-toolbar.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/table-toolbar",
+    "kind": "component",
+    "migrations": [],
+    "name": "table-toolbar",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "table-toolbar",
           "family": "data",
+          "name": "table-toolbar",
           "signature": "templ TableToolbar(o TableToolbarOpts)",
-          "summary": "Renders the control row above a table.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders the control row above a table."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "TableToolbar"
+  },
+  "schema": 2
 }

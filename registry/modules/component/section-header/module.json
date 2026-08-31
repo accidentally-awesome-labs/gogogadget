@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/section-header",
-    "kind": "component",
-    "name": "section-header",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "SectionHeader",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The SectionHeader renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/section-header.templ",
-        "target": "internal/web/templates/ui/section-header.templ",
         "class": "templ",
-        "sha256": "47a2bd376f9ccc295c9c891d39df1eddef5d87dec6f051ded3654c9c8c88958f",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "47a2bd376f9ccc295c9c891d39df1eddef5d87dec6f051ded3654c9c8c88958f",
+        "source": "internal/web/templates/ui/section-header.templ",
+        "target": "internal/web/templates/ui/section-header.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/section-header",
+    "kind": "component",
+    "migrations": [],
+    "name": "section-header",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "section-header",
           "family": "layout",
+          "name": "section-header",
           "signature": "templ SectionHeader(o SectionHeaderOpts)",
-          "summary": "A sub-heading inside a page.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "A sub-heading inside a page."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "SectionHeader"
+  },
+  "schema": 2
 }

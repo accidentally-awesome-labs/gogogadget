@@ -1,67 +1,5 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/webhooks",
-    "kind": "system",
-    "name": "webhooks",
-    "revision": 1,
-    "contract": 1,
-    "title": "Outbound webhooks",
-    "description": "Customer-facing webhook endpoints, signed emission, and secret rotation. Delivery attempts run as jobs.",
-    "requires": [
-      "system/database",
-      "system/organizations"
-    ],
-    "files": [
-      {
-        "source": "internal/db/queries/webhook_deliveries.sql",
-        "target": "internal/db/queries/webhook_deliveries.sql",
-        "class": "query",
-        "sha256": "61758010bc052de797b0873b369cb290c059cd93963f8ef44bec85af319abf9c",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/queries/webhook_endpoints.sql",
-        "target": "internal/db/queries/webhook_endpoints.sql",
-        "class": "query",
-        "sha256": "0f8f9e25f799d77e4cda3a3b5578d575bfc910f7973d3af002c4a40d02de1a57",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/db/queries/webhook_events.sql",
-        "target": "internal/db/queries/webhook_events.sql",
-        "class": "query",
-        "sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
-        "source": "internal/jobs/janitor_webhooks.go",
-        "target": "internal/jobs/janitor_webhooks.go",
-        "class": "go",
-        "sha256": "590c93b8533a4a52718f9bf52cad5a65af5a677045e75c4c6fbfc5101ee17e35",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/webhooks/webhooks.go",
-        "target": "internal/webhooks/webhooks.go",
-        "class": "go",
-        "sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/webhooks/webhooks_test.go",
-        "target": "internal/webhooks/webhooks_test.go",
-        "class": "test",
-        "sha256": "fab2cc64cc37f2740e929e035501139da8dc839135170896b114b37401231a42",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/webhooks"
@@ -72,17 +10,135 @@
         "webhook_events"
       ]
     },
+    "contract": 1,
+    "data": [
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "table": "webhook_deliveries"
+      },
+      {
+        "account_delete": "retain",
+        "export": true,
+        "organization_delete": "cascade",
+        "scope": "org",
+        "secret_redaction_owner": "system/webhooks",
+        "table": "webhook_endpoints"
+      },
+      {
+        "account_delete": "retain",
+        "export": false,
+        "organization_delete": "retain",
+        "scope": "platform",
+        "table": "webhook_events"
+      }
+    ],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Customer-facing webhook endpoints, signed emission, and secret rotation. Delivery attempts run as jobs.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "61758010bc052de797b0873b369cb290c059cd93963f8ef44bec85af319abf9c",
+        "source": "internal/db/queries/webhook_deliveries.sql",
+        "target": "internal/db/queries/webhook_deliveries.sql"
+      },
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "0f8f9e25f799d77e4cda3a3b5578d575bfc910f7973d3af002c4a40d02de1a57",
+        "source": "internal/db/queries/webhook_endpoints.sql",
+        "target": "internal/db/queries/webhook_endpoints.sql"
+      },
+      {
+        "class": "query",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "f8456c2e1d660a3fd59b572d539dcf37695bd425190f346416f1a5557ca041ac",
+        "source": "internal/db/queries/webhook_events.sql",
+        "target": "internal/db/queries/webhook_events.sql"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "590c93b8533a4a52718f9bf52cad5a65af5a677045e75c4c6fbfc5101ee17e35",
+        "source": "internal/jobs/janitor_webhooks.go",
+        "target": "internal/jobs/janitor_webhooks.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "a1669c0a98efe1849735036b7f1cfdb16d951bff8ab41b564594be1149ddc8be",
+        "source": "internal/webhooks/webhooks.go",
+        "target": "internal/webhooks/webhooks.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "fab2cc64cc37f2740e929e035501139da8dc839135170896b114b37401231a42",
+        "source": "internal/webhooks/webhooks_test.go",
+        "target": "internal/webhooks/webhooks_test.go"
+      }
+    ],
+    "id": "ggg/system/webhooks",
+    "kind": "system",
+    "migrations": [
+      {
+        "id": "0006_webhooks_out",
+        "kind": "immutable",
+        "sha256": "4b14202f8933b0280361ff184b83aeeb15725e237a126f2f6e9b8f7c2e7f8a8b",
+        "source": "internal/db/migrations/0006_webhooks_out.sql"
+      },
+      {
+        "id": "0013_webhook_secret_rotation",
+        "kind": "immutable",
+        "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4",
+        "source": "internal/db/migrations/0013_webhook_secret_rotation.sql"
+      }
+    ],
+    "name": "webhooks",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/database"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/organizations"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "janitors": [
         {
+          "handler": "janitorWebhookEvents",
           "name": "webhook_events",
-          "package": "internal/jobs",
-          "handler": "janitorWebhookEvents"
+          "package": "internal/jobs"
         },
         {
+          "handler": "janitorWebhookSecrets",
           "name": "webhook_secrets",
-          "package": "internal/jobs",
-          "handler": "janitorWebhookSecrets"
+          "package": "internal/jobs"
         }
       ],
       "queries": [
@@ -152,51 +208,12 @@
         }
       ]
     },
-    "migrations": [
-      {
-        "id": "0006_webhooks_out",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0006_webhooks_out.sql",
-        "sha256": "4b14202f8933b0280361ff184b83aeeb15725e237a126f2f6e9b8f7c2e7f8a8b"
-      },
-      {
-        "id": "0013_webhook_secret_rotation",
-        "kind": "immutable",
-        "source": "internal/db/migrations/0013_webhook_secret_rotation.sql",
-        "sha256": "38c233fa2eed46bba4580ce4c27da5bd170073d445a60a1ed90a592dc2f973c4"
-      }
-    ],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/webhooks"
       ]
     },
-    "data": [
-      {
-        "table": "webhook_deliveries",
-        "scope": "org",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      },
-      {
-        "table": "webhook_endpoints",
-        "scope": "org",
-        "export": true,
-        "secret_redaction_owner": "system/webhooks",
-        "account_delete": "retain",
-        "organization_delete": "cascade"
-      },
-      {
-        "table": "webhook_events",
-        "scope": "platform",
-        "export": false,
-        "account_delete": "retain",
-        "organization_delete": "retain"
-      }
-    ],
-    "removal_policy": "retain-data"
-  }
+    "title": "Outbound webhooks"
+  },
+  "schema": 2
 }

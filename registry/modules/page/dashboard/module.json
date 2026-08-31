@@ -1,89 +1,40 @@
 {
-  "schema": 1,
   "module": {
-    "id": "page/dashboard",
-    "kind": "page",
-    "name": "dashboard",
-    "revision": 1,
-    "contract": 1,
-    "title": "App dashboard",
-    "description": "The signed-in landing page: active-project and member stat cards, recent organization activity, and the getting-started checklist.",
-    "requires": [
-      "system/audit",
-      "system/i18n",
-      "system/identity",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/page_dashboard.go",
-        "target": "internal/web/page_dashboard.go",
-        "class": "go",
-        "sha256": "680b5fea10377b443d9f5fafb2e2c60d097325e5c09b88e8c828cdf98b3543ff",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/templates/dashboard.templ",
-        "target": "internal/web/templates/dashboard.templ",
-        "class": "templ",
-        "sha256": "6ea0352bab81d865dec78263a0ab249208219f34c2f1d2ca48a0b597b6fc9509",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "dashboard.index"
       ]
     },
-    "runtime": {
-      "routes": [
-        {
-          "id": "dashboard.index",
-          "method": "GET",
-          "pattern": "/app",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleDashboard"
-        }
-      ],
-      "navigation": [
-        {
-          "id": "nav.app.dashboard",
-          "area": "app",
-          "route_id": "dashboard.index",
-          "label_key": "sidebar.dashboard"
-        }
-      ],
-      "visual": [
-        {
-          "id": "dashboard",
-          "path": "/app",
-          "persona": "pro",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ],
-          "masks": [
-            "img[alt*=\"avatar\" i]"
-          ]
-        }
-      ]
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
     },
-    "migrations": [],
+    "description": "The signed-in landing page: active-project and member stat cards, recent organization activity, and the getting-started checklist.",
+    "docs": [],
     "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "680b5fea10377b443d9f5fafb2e2c60d097325e5c09b88e8c828cdf98b3543ff",
+        "source": "internal/web/page_dashboard.go",
+        "target": "internal/web/page_dashboard.go"
+      },
+      {
+        "class": "templ",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "6ea0352bab81d865dec78263a0ab249208219f34c2f1d2ca48a0b597b6fc9509",
+        "source": "internal/web/templates/dashboard.templ",
+        "target": "internal/web/templates/dashboard.templ"
+      }
+    ],
+    "id": "ggg/page/dashboard",
+    "kind": "page",
     "locales": {
       "en": {
         "dashboard.checklist.create_project": "Create your first project",
@@ -100,7 +51,7 @@
         "dashboard.getting_started": "Getting started",
         "dashboard.recent_activity": "Recent activity",
         "dashboard.recent_caption": "Recent activity in your organization",
-        "dashboard.recent_empty": "Nothing yet — create a project to see activity here.",
+        "dashboard.recent_empty": "Nothing yet \u2014 create a project to see activity here.",
         "dashboard.stats.active_projects": "Active projects",
         "dashboard.stats.current_plan": "Current plan",
         "dashboard.stats.team_members": "Team members",
@@ -112,31 +63,115 @@
         "dashboard.checklist.dismiss": "Descartar la lista de primeros pasos",
         "dashboard.checklist.done": "hecho",
         "dashboard.checklist.invite_team": "Invita a tu equipo",
-        "dashboard.checklist.invite_team_note": "(desde el perfil de la organización de Clerk)",
-        "dashboard.checklist.progress": "Progreso de configuración",
+        "dashboard.checklist.invite_team_note": "(desde el perfil de la organizaci\u00f3n de Clerk)",
+        "dashboard.checklist.progress": "Progreso de configuraci\u00f3n",
         "dashboard.checklist.review_plans": "Revisa los planes",
         "dashboard.checklist.review_plans_note": "cuando superes el plan gratuito",
-        "dashboard.col_action": "Acción",
+        "dashboard.col_action": "Acci\u00f3n",
         "dashboard.col_actor": "Actor",
-        "dashboard.col_when": "Cuándo",
+        "dashboard.col_when": "Cu\u00e1ndo",
         "dashboard.getting_started": "Primeros pasos",
         "dashboard.recent_activity": "Actividad reciente",
-        "dashboard.recent_caption": "Actividad reciente en tu organización",
-        "dashboard.recent_empty": "Aún no hay nada — crea un proyecto para ver la actividad aquí.",
+        "dashboard.recent_caption": "Actividad reciente en tu organizaci\u00f3n",
+        "dashboard.recent_empty": "A\u00fan no hay nada \u2014 crea un proyecto para ver la actividad aqu\u00ed.",
         "dashboard.stats.active_projects": "Proyectos activos",
         "dashboard.stats.current_plan": "Plan actual",
         "dashboard.stats.team_members": "Miembros del equipo",
-        "dashboard.stats_label": "Resumen de la organización",
+        "dashboard.stats_label": "Resumen de la organizaci\u00f3n",
         "dashboard.title": "Panel"
       }
     },
-    "docs": [],
+    "migrations": [],
+    "name": "dashboard",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/audit"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
+    "runtime": {
+      "navigation": [
+        {
+          "area": "app",
+          "id": "nav.app.dashboard",
+          "label_key": "sidebar.dashboard",
+          "route_id": "dashboard.index"
+        }
+      ],
+      "routes": [
+        {
+          "handler": "handleDashboard",
+          "id": "dashboard.index",
+          "method": "GET",
+          "package": "internal/web",
+          "pattern": "/app",
+          "policy": {
+            "admin_write": false,
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "idempotent": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "rate_exempt": false
+          },
+          "scope": "app"
+        }
+      ],
+      "visual": [
+        {
+          "id": "dashboard",
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ],
+          "path": "/app",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ]
+        }
+      ]
+    },
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "App dashboard"
+  },
+  "schema": 2
 }

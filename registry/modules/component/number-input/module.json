@@ -1,60 +1,71 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/number-input",
-    "kind": "component",
-    "name": "number-input",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "NumberInput",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The NumberInput renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/number-input.templ",
-        "target": "internal/web/templates/ui/number-input.templ",
         "class": "templ",
-        "sha256": "bea66c09b7072e8d99707fa85751e1994b18edfce34fb18402cfab2c5507d66f",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "bea66c09b7072e8d99707fa85751e1994b18edfce34fb18402cfab2c5507d66f",
+        "source": "internal/web/templates/ui/number-input.templ",
+        "target": "internal/web/templates/ui/number-input.templ"
       },
       {
-        "source": "internal/web/templates/ui/number-input_test.go",
-        "target": "internal/web/templates/ui/number-input_test.go",
         "class": "test",
-        "sha256": "cbd4f14ecbeffce2191f997668df8957d18eb544feb2b438268f2559e1dfa911",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "cbd4f14ecbeffce2191f997668df8957d18eb544feb2b438268f2559e1dfa911",
+        "source": "internal/web/templates/ui/number-input_test.go",
+        "target": "internal/web/templates/ui/number-input_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/number-input",
+    "kind": "component",
+    "migrations": [],
+    "name": "number-input",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "number-input",
           "family": "forms",
-          "signature": "templ NumberInput(o NumberInputOpts)",
-          "summary": "Renders a native number input.",
           "guidance": "type=number gives the numeric keypad on mobile and the browser's own step controls; reimplementing either in JavaScript would be strictly worse.",
+          "name": "number-input",
+          "signature": "templ NumberInput(o NumberInputOpts)",
           "states": [
             "default",
             "disabled",
             "error"
-          ]
+          ],
+          "summary": "Renders a native number input."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "NumberInput"
+  },
+  "schema": 2
 }

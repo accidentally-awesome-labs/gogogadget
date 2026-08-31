@@ -1,84 +1,125 @@
 {
-  "schema": 1,
   "module": {
-    "id": "workflow/api-token-lifecycle",
-    "kind": "workflow",
-    "name": "api-token-lifecycle",
-    "revision": 1,
-    "contract": 1,
-    "title": "API token creation and revocation",
-    "description": "Creates org API tokens, revealing the plaintext exactly once, and revokes them with a row swap.",
-    "requires": [
-      "page/settings-api-tokens",
-      "system/api",
-      "system/i18n",
-      "system/identity",
-      "system/security",
-      "system/server"
-    ],
-    "files": [
-      {
-        "source": "internal/web/workflow_api_token_lifecycle.go",
-        "target": "internal/web/workflow_api_token_lifecycle.go",
-        "class": "go",
-        "sha256": "f25adbadab67e51760e014eb9a34d8df2da4ebfe1ae0880179b83d5318057cb8",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "routes": [
         "api-token-lifecycle.create",
         "api-token-lifecycle.revoke"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Creates org API tokens, revealing the plaintext exactly once, and revokes them with a row swap.",
+    "docs": [],
+    "environment": [],
+    "files": [
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "f25adbadab67e51760e014eb9a34d8df2da4ebfe1ae0880179b83d5318057cb8",
+        "source": "internal/web/workflow_api_token_lifecycle.go",
+        "target": "internal/web/workflow_api_token_lifecycle.go"
+      }
+    ],
+    "id": "ggg/workflow/api-token-lifecycle",
+    "kind": "workflow",
+    "migrations": [],
+    "name": "api-token-lifecycle",
+    "removal_policy": "retain-data",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/page/settings-api-tokens"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/api"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/i18n"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/identity"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/security"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/server"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "routes": [
         {
+          "handler": "handleAPITokenCreate",
           "id": "api-token-lifecycle.create",
           "method": "POST",
+          "package": "internal/web",
           "pattern": "/app/settings/api/tokens",
-          "scope": "app",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleAPITokenCreate"
+          "scope": "app"
         },
         {
+          "handler": "handleAPITokenRevoke",
           "id": "api-token-lifecycle.revoke",
           "method": "DELETE",
+          "package": "internal/web",
           "pattern": "/app/settings/api/tokens/{id}",
-          "scope": "app",
           "policy": {
+            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "rate_exempt": false,
+            "idempotent": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "idempotent": false,
-            "admin_write": false
+            "rate_exempt": false
           },
-          "package": "internal/web",
-          "handler": "handleAPITokenRevoke"
+          "scope": "app"
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "data": [],
-    "removal_policy": "retain-data"
-  }
+    "title": "API token creation and revocation"
+  },
+  "schema": 2
 }

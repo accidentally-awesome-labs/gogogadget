@@ -1,96 +1,124 @@
 {
-  "schema": 1,
   "module": {
-    "id": "system/observability",
-    "kind": "system",
-    "name": "observability",
-    "revision": 1,
-    "contract": 1,
-    "title": "Error reporting",
-    "description": "Reporter port with a Sentry adapter and a no-op default so call sites never nil-check.",
-    "requires": [
-      "system/apphost",
-      "system/config"
-    ],
-    "files": [
-      {
-        "source": "internal/observability/contract_test.go",
-        "target": "internal/observability/contract_test.go",
-        "class": "test",
-        "sha256": "0e494fd00030f46e503b7461c48db473825b7f19f7a7179fd7b154c8a7941044",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/observability/module.go",
-        "target": "internal/observability/module.go",
-        "class": "go",
-        "sha256": "c6fd2f8837c6fcebaeaa37ccbe5738d6ff39e17a165dfbe8835c7b90a6b289e5",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/observability/module_test.go",
-        "target": "internal/observability/module_test.go",
-        "class": "test",
-        "sha256": "a3cf466c4f71efae447055d59faeae47c0e4ee7be7bfc7f377072d6d65f31209",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/observability/observability.go",
-        "target": "internal/observability/observability.go",
-        "class": "go",
-        "sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/observability/observability_test.go",
-        "target": "internal/observability/observability_test.go",
-        "class": "test",
-        "sha256": "da50a28bccad99d31b68c31439addfc1b49112a54af6f46508fc7da12902b59b",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/observability/sentry.go",
-        "target": "internal/observability/sentry.go",
-        "class": "go",
-        "sha256": "509412e2fc5b2b12a5adf864716b3d6c1a5523ecd4127b2cc7015d82781a2bad",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/web/observability_test.go",
-        "target": "internal/web/observability_test.go",
-        "class": "test",
-        "sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
-        "rewrite_module": true,
-        "contract": false
-      }
-    ],
     "claims": {
       "packages": [
         "internal/observability"
       ]
     },
+    "contract": 1,
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
+    "description": "Reporter port with a Sentry adapter and a no-op default so call sites never nil-check.",
+    "docs": [],
+    "environment": [
+      {
+        "description": "Sentry DSN. Empty selects the no-op reporter",
+        "field": "SentryDSN",
+        "key": "SENTRY_DSN",
+        "secret": true,
+        "type": "string"
+      }
+    ],
+    "files": [
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "0e494fd00030f46e503b7461c48db473825b7f19f7a7179fd7b154c8a7941044",
+        "source": "internal/observability/contract_test.go",
+        "target": "internal/observability/contract_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "c6fd2f8837c6fcebaeaa37ccbe5738d6ff39e17a165dfbe8835c7b90a6b289e5",
+        "source": "internal/observability/module.go",
+        "target": "internal/observability/module.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "a3cf466c4f71efae447055d59faeae47c0e4ee7be7bfc7f377072d6d65f31209",
+        "source": "internal/observability/module_test.go",
+        "target": "internal/observability/module_test.go"
+      },
+      {
+        "class": "go",
+        "contract": true,
+        "rewrite_module": true,
+        "sha256": "febf8617865d33e2b73d37eca6cf477c55a2cb266301593f2bf73843672a2bb7",
+        "source": "internal/observability/observability.go",
+        "target": "internal/observability/observability.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "da50a28bccad99d31b68c31439addfc1b49112a54af6f46508fc7da12902b59b",
+        "source": "internal/observability/observability_test.go",
+        "target": "internal/observability/observability_test.go"
+      },
+      {
+        "class": "go",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "509412e2fc5b2b12a5adf864716b3d6c1a5523ecd4127b2cc7015d82781a2bad",
+        "source": "internal/observability/sentry.go",
+        "target": "internal/observability/sentry.go"
+      },
+      {
+        "class": "test",
+        "contract": false,
+        "rewrite_module": true,
+        "sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
+        "source": "internal/web/observability_test.go",
+        "target": "internal/web/observability_test.go"
+      }
+    ],
+    "id": "ggg/system/observability",
+    "kind": "system",
+    "migrations": [],
+    "name": "observability",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/apphost"
+      },
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/system/config"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "system": {
-        "package": "internal/observability",
         "constructor": "NewModule",
         "needs": [
           {
-            "field": "Config",
             "capability": "config",
-            "type": "*config.Config",
-            "optional": false
+            "field": "Config",
+            "optional": false,
+            "type": "*config.Config"
           }
         ],
+        "package": "internal/observability",
         "provides": [
           {
-            "field": "Reporter",
             "capability": "observability.reporter",
+            "field": "Reporter",
             "type": "observability.Reporter"
           }
         ],
@@ -98,23 +126,12 @@
         "stop": true
       }
     },
-    "migrations": [],
-    "environment": [
-      {
-        "key": "SENTRY_DSN",
-        "field": "SentryDSN",
-        "type": "string",
-        "description": "Sentry DSN. Empty selects the no-op reporter",
-        "secret": true
-      }
-    ],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/observability"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Error reporting"
+  },
+  "schema": 2
 }

@@ -1,45 +1,56 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/fieldset",
-    "kind": "component",
-    "name": "fieldset",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Fieldset",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Fieldset renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/fieldset.templ",
-        "target": "internal/web/templates/ui/fieldset.templ",
         "class": "templ",
-        "sha256": "2d4d0e8f6f937d4394c4b9cffe229a053082f63bd175afb57293c322136d8bc0",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "2d4d0e8f6f937d4394c4b9cffe229a053082f63bd175afb57293c322136d8bc0",
+        "source": "internal/web/templates/ui/fieldset.templ",
+        "target": "internal/web/templates/ui/fieldset.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/fieldset",
+    "kind": "component",
+    "migrations": [],
+    "name": "fieldset",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "fieldset",
           "family": "forms",
+          "name": "fieldset",
           "signature": "templ Fieldset(o FieldsetOpts)",
-          "summary": "Groups related fields under a legend.",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Groups related fields under a legend."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Fieldset"
+  },
+  "schema": 2
 }

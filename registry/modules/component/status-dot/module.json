@@ -1,59 +1,70 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/status-dot",
-    "kind": "component",
-    "name": "status-dot",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "StatusDot",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The StatusDot renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/status-dot.templ",
-        "target": "internal/web/templates/ui/status-dot.templ",
         "class": "templ",
-        "sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "13ca5948e2343b9d5f82c8eb6e1968503c6004ccda3f14883263819b2005dc07",
+        "source": "internal/web/templates/ui/status-dot.templ",
+        "target": "internal/web/templates/ui/status-dot.templ"
       },
       {
-        "source": "internal/web/templates/ui/status-dot_test.go",
-        "target": "internal/web/templates/ui/status-dot_test.go",
         "class": "test",
-        "sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+        "contract": false,
         "rewrite_module": true,
-        "contract": false
+        "sha256": "6626fb460e71d7963d9b84b88f3093ccf04aa572905057ca216d049cb6c060ed",
+        "source": "internal/web/templates/ui/status-dot_test.go",
+        "target": "internal/web/templates/ui/status-dot_test.go"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/status-dot",
+    "kind": "component",
+    "migrations": [],
+    "name": "status-dot",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "status-dot",
           "family": "feedback",
+          "name": "status-dot",
           "signature": "templ StatusDot(o StatusDotOpts)",
-          "summary": "Renders a state dot with its label.",
           "states": [
             "default",
             "error",
             "success"
-          ]
+          ],
+          "summary": "Renders a state dot with its label."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web/templates/ui"
       ]
     },
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "StatusDot"
+  },
+  "schema": 2
 }

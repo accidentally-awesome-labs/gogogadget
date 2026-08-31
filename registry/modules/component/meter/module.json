@@ -1,46 +1,57 @@
 {
-  "schema": 1,
   "module": {
-    "id": "component/meter",
-    "kind": "component",
-    "name": "meter",
-    "revision": 1,
+    "claims": {},
     "contract": 1,
-    "title": "Meter",
+    "data": [],
+    "dependencies": {
+      "containers": [],
+      "go": [],
+      "tools": []
+    },
     "description": "The Meter renderer and its options.",
-    "requires": [
-      "element/ui-core"
-    ],
+    "docs": [],
+    "environment": [],
     "files": [
       {
-        "source": "internal/web/templates/ui/meter.templ",
-        "target": "internal/web/templates/ui/meter.templ",
         "class": "templ",
-        "sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
+        "contract": true,
         "rewrite_module": true,
-        "contract": true
+        "sha256": "f4956372d6ff381972a6f5c7621d41ab68e814a7de5659f542094f856504d796",
+        "source": "internal/web/templates/ui/meter.templ",
+        "target": "internal/web/templates/ui/meter.templ"
       }
     ],
-    "claims": {},
+    "id": "ggg/component/meter",
+    "kind": "component",
+    "migrations": [],
+    "name": "meter",
+    "removal_policy": "free",
+    "requires": [
+      {
+        "contract": {
+          "max": 1,
+          "min": 1
+        },
+        "id": "ggg/element/ui-core"
+      }
+    ],
+    "revision": 1,
     "runtime": {
       "ui": [
         {
-          "name": "meter",
           "family": "feedback",
-          "signature": "templ Meter(o MeterOpts)",
-          "summary": "Renders a quota bar with meter semantics.",
           "guidance": "role=\"meter\" rather than the native <meter> element: the native element's rendering is controlled by vendor pseudo-elements that differ per browser, so styling it from the token layer is not possible without per-engine hacks. The role gives the same semantics with full control over presentation. It is deliberately not a progressbar. A meter is a measurement inside a range - disk used, seats filled - while a progress bar is a task advancing towards completion. Screen readers announce them differently, and calling a quota a progress bar implies it will finish.",
+          "name": "meter",
+          "signature": "templ Meter(o MeterOpts)",
           "states": [
             "default"
-          ]
+          ],
+          "summary": "Renders a quota bar with meter semantics."
         }
       ]
     },
-    "migrations": [],
-    "environment": [],
-    "docs": [],
     "tests": {},
-    "data": [],
-    "removal_policy": "free"
-  }
+    "title": "Meter"
+  },
+  "schema": 2
 }
