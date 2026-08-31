@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -97,17 +98,61 @@ func ValidateDeclaredImports(files map[string][]byte, generated []string, declar
 	for _, dep := range declared { allowed[dep.Module] = true }
 	for name, data := range files {
 		if !strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, ".templ") { continue }
-		f, err := parser.ParseFile(token.NewFileSet(), name, data, parser.ImportsOnly)
-		if err != nil { return fmt.Errorf("parse %s: %w", name, err) }
-		for _, imp := range f.Imports {
-			path := strings.Trim(imp.Path.Value, "\"")
-			if strings.Contains(path, ".") && !allowed[path] {
-				found := false
-				for modulePath := range allowed { if strings.HasPrefix(path, modulePath+"/") { found=true; break } }
-				if !found { return fmt.Errorf("undeclared direct dependency %q imported by %s", path, name) }
+		paths := []string{}
+		if strings.HasSuffix(name, ".templ") {
+			for _, match := range regexp.MustCompile(`(?m)\bimport\s+"([^"]+)"`).FindAllStringSubmatch(string(data), -1) {
+				if len(match) > 1 { paths = append(paths, match[1]) }
+			}
+		} else {
+			f, err := parser.ParseFile(token.NewFileSet(), name, data, parser.ImportsOnly)
+			if err != nil { return fmt.Errorf("parse %s: %w", name, err) }
+			for _, imp := range f.Imports { paths = append(paths, strings.Trim(imp.Path.Value, "\"")) }
+		}
+		for _, path := range paths {
+			if strings.Contains(path, ".") && !hasDependencyPrefix(path, allowed) {
+				return fmt.Errorf("undeclared direct dependency %q imported by %s", path, name)
 			}
 		}
 	}
 	_ = generated
 	return nil
+}
+func hasDependencyPrefix(path string, allowed map[string]bool) bool {
+	for modulePath := range allowed { if path == modulePath || strings.HasPrefix(path, modulePath+"/") { return true } }
+	return false
+}
+
+
+// ReconcileManagedDependencies applies owner-removal rules to go.mod. A
+// requirement changed after the previous sync is user-owned and is never
+// lowered or removed by module removal.
+func ReconcileManagedDependencies(ctx context.Context, root string, previous, desired []LockedDependency, runner ToolRunner) ([]LockedDependency, error) {
+	modPath := filepath.Join(root, "go.mod")
+	sumPath := filepath.Join(root, "go.sum")
+	oldMod, err := os.ReadFile(modPath); if err != nil { return nil, err }
+	oldSum, _ := os.ReadFile(sumPath)
+	file, err := modfile.Parse(modPath, oldMod, nil); if err != nil { return nil, err }
+	next := append([]LockedDependency{}, desired...)
+	desiredBy := map[string]bool{}; for _, dep := range desired { desiredBy[dep.Module] = true }
+	for _, dep := range previous {
+		if desiredBy[dep.Module] { continue }
+		var current *modfile.Require
+		for _, req := range file.Require { if req.Mod.Path == dep.Module { current = req; break } }
+		if current == nil { continue }
+		if current.Mod.Version != dep.ManagedVersion { continue }
+		if dep.Preexisting {
+			if dep.BaselineVersion != "" { if err := file.AddRequire(dep.Module, dep.BaselineVersion); err != nil { return nil, err } }
+		} else {
+			file.DropRequire(dep.Module)
+		}
+	}
+	formatted, err := file.Format(); if err != nil { return nil, err }
+	if err := os.WriteFile(modPath, formatted, 0o644); err != nil { return nil, err }
+	if runner != nil {
+		if err := runner.Run(ctx, root, []string{"go", "mod", "download"}); err != nil {
+			_ = os.WriteFile(modPath, oldMod, 0o644); _ = os.WriteFile(sumPath, oldSum, 0o644)
+			return nil, err
+		}
+	}
+	return next, nil
 }

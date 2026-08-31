@@ -9,7 +9,10 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+
+	"golang.org/x/mod/modfile"
 )
+	
 
 const defaultCanonicalModule = "github.com/gogogadget/gogogadget"
 
@@ -211,6 +214,16 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
+	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}
+	if goMod, readErr := os.ReadFile(filepath.Join(canonicalRoot, "go.mod")); readErr == nil {
+		if parsed, parseErr := modfile.Parse("go.mod", goMod, nil); parseErr == nil {
+			for _, requirement := range parsed.Require { declaredImports = append(declaredImports, GoDependency{Module: requirement.Mod.Path}) }
+		}
+	}
+	for _, module := range graph.modules { declaredImports = append(declaredImports, module.Dependencies.Go...) }
+	authored := map[string][]byte{}
+	for _, payload := range payloads { authored[payload.file.Source] = payload.content }
+	if err := ValidateDeclaredImports(authored, nil, declaredImports); err != nil { return Plan{}, err }
 	claims, err := normalizedClaims(op.Claims)
 	if err != nil {
 		return Plan{}, err
