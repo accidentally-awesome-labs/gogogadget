@@ -461,6 +461,9 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			}
 			field := capabilityField(provide.Capability)
 			fmt.Fprintf(&b, "\tr.%s = %s.%s\n", field, varName, provide.Field)
+			if provide.Capability == "config" {
+				b.WriteString("\tswitch r.Config.Env {\n\tcase \"development\", \"test\", \"production\":\n\tdefault:\n\t\treturn nil, fmt.Errorf(\"unknown APP_ENV %q\", r.Config.Env)\n\t}\n")
+			}
 			provider[provide.Capability] = "r." + field
 		}
 		if sys.Start {
