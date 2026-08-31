@@ -187,10 +187,10 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 			return Result{}, err
 		}
 	}
-	if e.toolRunner != nil && len(plan.Lock.Dependencies) > 0 {
+	if e.toolRunner != nil && (len(plan.Lock.Dependencies) > 0 || len(plan.previousDependencies) > 0) {
 		if _, err := snapshot("go.mod"); err != nil { return Result{}, err }
 		if _, err := snapshot("go.sum"); err != nil { return Result{}, err }
-		if _, err := UpdateGoMod(ctx, plan.Root, plan.Lock.Dependencies, e.toolRunner); err != nil {
+		if _, err := ReconcileManagedDependencies(ctx, plan.Root, plan.previousDependencies, plan.Lock.Dependencies, e.toolRunner); err != nil {
 			_ = rollback()
 			return Result{}, fmt.Errorf("update dependencies: %w", err)
 		}

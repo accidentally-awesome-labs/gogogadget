@@ -35,7 +35,7 @@
         "source": "internal/modkit/apply.go",
         "target": "internal/modkit/apply.go",
         "class": "go",
-        "sha256": "acae5cd39e350a903b53e3de309501e1dcbc2fa42e4dd29e17a2dddf7f61aae5",
+        "sha256": "1f5e0270a8fb84aa47ee38be00c3bcc9569c2665197b2e8954b3046b1ee8eb6b",
         "rewrite_module": true,
         "contract": true
       },
@@ -83,7 +83,7 @@
         "source": "internal/modkit/dependencies.go",
         "target": "internal/modkit/dependencies.go",
         "class": "go",
-        "sha256": "8ddb5c6722fecd7625a07ebca8e27f31d653c5d9df140ec8a4908f52334790db",
+        "sha256": "00cc8e2753b1d42e39fb54facc09584944dbe9130c6c18012d248c5d8094f9f9",
         "rewrite_module": false,
         "contract": false
       },
@@ -115,7 +115,7 @@
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "d56a7cd22c904b1a904a9575b4543d06b7944a0f91b339ae0d4538b97393936d",
+        "sha256": "8308a875f79926ab03d422ab5db57bffb4e56dfc8cbe3698e0738cbee104b49b",
         "rewrite_module": true,
         "contract": false
       },
@@ -211,7 +211,7 @@
         "source": "internal/modkit/namespace.go",
         "target": "internal/modkit/namespace.go",
         "class": "go",
-        "sha256": "119d54c9e2aa253ee8e7454ac0940c78e53025315c6b666614b6a995f00eccaf",
+        "sha256": "294798adf248748d84da4c53fd7a094ce5b94fcdba1ffc3991905c64c981ee63",
         "rewrite_module": true,
         "contract": false
       },
@@ -227,7 +227,7 @@
         "source": "internal/modkit/ownership_test.go",
         "target": "internal/modkit/ownership_test.go",
         "class": "test",
-        "sha256": "5e80898d5d9db9096234756555a024a327ab246c50e91df271872e4b27c48b23",
+        "sha256": "7544007bf6360171e7a5e4a776fd0ba5688909401eac3e89e1a48a3fb4d521c9",
         "rewrite_module": true,
         "contract": false
       },
@@ -235,7 +235,7 @@
         "source": "internal/modkit/plan.go",
         "target": "internal/modkit/plan.go",
         "class": "go",
-        "sha256": "cac60da4c49807478736540393eb435ed9f8f8200a7aea661bbf2d2ed0d6808d",
+        "sha256": "0e1d5ed4e0130f500be74a4a575f0647ae833253ad433deedc2255b74f59cd20",
         "rewrite_module": true,
         "contract": true
       },
@@ -307,7 +307,7 @@
         "source": "internal/modkit/resolve.go",
         "target": "internal/modkit/resolve.go",
         "class": "go",
-        "sha256": "63ef9475e65071563cf29f00438f0d85f6b3218221e7abf63729d3cdcd8597b3",
+        "sha256": "5cecf7fae5dd398f5b853fc6bf2eb1547a62c126865c3f0448a6b4d577493999",
         "rewrite_module": true,
         "contract": false
       },

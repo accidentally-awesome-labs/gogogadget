@@ -1,5 +1,369 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/system/server",
+    "kind": "system",
+    "name": "server",
+    "revision": 1,
+    "contract": 1,
+    "title": "HTTP server core",
+    "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
+    "requires": [
+      {
+        "id": "ggg/system/analytics",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/billing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/content",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/content-assets",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/feature-flags",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/llm",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/observability",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/storage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "cmd/server/main.go",
+        "target": "cmd/server/main.go",
+        "class": "go",
+        "sha256": "2aabbbfd390ab8a9f5da594ae09068f8ee01013aca2a9ce0e3c5e798e78c8431",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/admin_shared.go",
+        "target": "internal/web/admin_shared.go",
+        "class": "go",
+        "sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/email_sink.go",
+        "target": "internal/web/email_sink.go",
+        "class": "go",
+        "sha256": "fabc7fafab0e720b1970f58b4e4ffb8e01f60566818c4efd67bc66fd8b8aaee1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/form.go",
+        "target": "internal/web/form.go",
+        "class": "go",
+        "sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/handlers_public.go",
+        "target": "internal/web/handlers_public.go",
+        "class": "go",
+        "sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/htmx.go",
+        "target": "internal/web/htmx.go",
+        "class": "go",
+        "sha256": "360921293b3d63c5d1a1e28cd9d41e344b0de0123f1c3f3dfdb7b1ef5825f1e7",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/i18n_test.go",
+        "target": "internal/web/i18n_test.go",
+        "class": "test",
+        "sha256": "7ec64107bba9af5d75ab22737d7932e89cf036c8a1aca752f8ddabe763664076",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/module.go",
+        "target": "internal/web/module.go",
+        "class": "go",
+        "sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/module_test.go",
+        "target": "internal/web/module_test.go",
+        "class": "test",
+        "sha256": "333b1b7e15615f2d89685ccfb576a8e333a78b04d1bded79db9f27cb262a0a20",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/params.go",
+        "target": "internal/web/params.go",
+        "class": "go",
+        "sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/public_routes_test.go",
+        "target": "internal/web/public_routes_test.go",
+        "class": "test",
+        "sha256": "9a00d8d61801b95b966494101e30961e29773993107aa7cc2f8a1a878061aa92",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/route.go",
+        "target": "internal/web/route.go",
+        "class": "go",
+        "sha256": "5db9b81867c6a4b7ff9089ac824ef726dc3b1c6b5cf971a38dea6c0194511c5b",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/route_adapters.go",
+        "target": "internal/web/route_adapters.go",
+        "class": "go",
+        "sha256": "daddd2185cd2de8a503ba59a45fce9af071922e569d90e7a0f8612d4f468c2aa",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/route_test.go",
+        "target": "internal/web/route_test.go",
+        "class": "test",
+        "sha256": "6b82ab161994341151e59a9855aafe6e3d82fa31a90d90d2df4047aafff77745",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/routes.go",
+        "target": "internal/web/routes.go",
+        "class": "go",
+        "sha256": "706df7a3c142fd9aa56767d50b3dfe8f1c7fbc7d98fb7b4ba5f3774650d5f50f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/server.go",
+        "target": "internal/web/server.go",
+        "class": "go",
+        "sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/templates/chrome.go",
+        "target": "internal/web/templates/chrome.go",
+        "class": "go",
+        "sha256": "dcc75b7418e282f4bcb2d73062bd5691a5aa723c1eb5179d18064b6fc4621cee",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/chrome_test.go",
+        "target": "internal/web/templates/chrome_test.go",
+        "class": "test",
+        "sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/data.go",
+        "target": "internal/web/templates/data.go",
+        "class": "go",
+        "sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/designsystem_test.go",
+        "target": "internal/web/templates/designsystem_test.go",
+        "class": "test",
+        "sha256": "4a24de5722b263b5297e74523693f16c467f71aa51d74754a76c1a055fd9f630",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/errors.templ",
+        "target": "internal/web/templates/errors.templ",
+        "class": "templ",
+        "sha256": "33fd5d4069fbbd7fd9c54ae08883d9ae22186b0265dcdc43b0c1c3d88e55667c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/icons.templ",
+        "target": "internal/web/templates/icons.templ",
+        "class": "templ",
+        "sha256": "4f88232ea6ae4cace270c917185ef8fb9e51a1e2a6e46f0b624a11c811577bba",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/layouts.templ",
+        "target": "internal/web/templates/layouts.templ",
+        "class": "templ",
+        "sha256": "ed7232f59d6f41fa2dc2eb8448e086e77310865590b634978b0c7ba5570c3ae3",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/nav.templ",
+        "target": "internal/web/templates/nav.templ",
+        "class": "templ",
+        "sha256": "94caabf435f5f58811058df51b64b9fd4a5802af5994c28395ddd3c447571eae",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/page.go",
+        "target": "internal/web/templates/page.go",
+        "class": "go",
+        "sha256": "d5954a163ce60cc8559dab4c20050c6a847c9d5f74220cc6fe06fa99857262b9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/sidebar.templ",
+        "target": "internal/web/templates/sidebar.templ",
+        "class": "templ",
+        "sha256": "03b0c578b39736abebfa9cfde0dae88e9189740931eaa35b7399979bc9935b2a",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/theme.go",
+        "target": "internal/web/templates/theme.go",
+        "class": "go",
+        "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/theme_test.go",
+        "target": "internal/web/templates/theme_test.go",
+        "class": "test",
+        "sha256": "c4a47be453f851b0a4ab6c68db0265f346f0a20bd1dd25f95720d4fe9f05117f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/ui_adapters.go",
+        "target": "internal/web/templates/ui_adapters.go",
+        "class": "go",
+        "sha256": "ad5e4406179608443121a5fb4a98630f2c48de1b406c218a934883feb4a739ee",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/testhelpers_test.go",
+        "target": "internal/web/testhelpers_test.go",
+        "class": "test",
+        "sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/testonly_content_guide.go",
+        "target": "internal/web/testonly_content_guide.go",
+        "class": "go",
+        "sha256": "a33983f45ead47abef66e76641a72dd208ad733bdff43bb1261aca8773080ea9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/web_test.go",
+        "target": "internal/web/web_test.go",
+        "class": "test",
+        "sha256": "064a39b2209a40b0dda949eba514cf4a176feb23e4334f4c439f145f86df08b6",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "packages": [
         "internal/web"
@@ -14,286 +378,253 @@
         "probe.readyz"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
+    "runtime": {
+      "system": {
+        "package": "internal/web",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Analytics",
+            "capability": "analytics.capturer",
+            "type": "analytics.Capturer",
+            "optional": true
+          },
+          {
+            "field": "Billing",
+            "capability": "billing.client",
+            "type": "billing.Client",
+            "optional": true
+          },
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          },
+          {
+            "field": "DB",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          },
+          {
+            "field": "Fetcher",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher",
+            "optional": true
+          },
+          {
+            "field": "Flags",
+            "capability": "flags.evaluator",
+            "type": "flags.Evaluator",
+            "optional": true
+          },
+          {
+            "field": "IdentityDeleter",
+            "capability": "identity.deleter",
+            "type": "identity.Deleter",
+            "optional": true
+          },
+          {
+            "field": "LLM",
+            "capability": "llm.completer",
+            "type": "llm.Completer",
+            "optional": true
+          },
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries",
+            "optional": false
+          },
+          {
+            "field": "Reporter",
+            "capability": "observability.reporter",
+            "type": "observability.Reporter",
+            "optional": true
+          },
+          {
+            "field": "Storage",
+            "capability": "storage.store",
+            "type": "storage.Store",
+            "optional": true
+          },
+          {
+            "field": "Verifier",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier",
+            "optional": true
+          }
+        ],
+        "provides": [
+          {
+            "field": "Handler",
+            "capability": "http.handler",
+            "type": "http.Handler"
+          }
+        ],
+        "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
+          "internal/db/sqlc",
+          "net/http"
+        ],
+        "start": false,
+        "stop": false
+      },
+      "routes": [
+        {
+          "id": "debug.pprof.cmdline",
+          "method": "GET",
+          "pattern": "/debug/pprof/cmdline",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "developer profiling surface, never registered in production",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePprofCmdline",
+          "enabled": "debugProfilingEnabled"
+        },
+        {
+          "id": "debug.pprof.index",
+          "method": "GET",
+          "pattern": "/debug/pprof/",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "developer profiling surface, never registered in production",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePprofIndex",
+          "enabled": "debugProfilingEnabled"
+        },
+        {
+          "id": "debug.pprof.profile",
+          "method": "GET",
+          "pattern": "/debug/pprof/profile",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "developer profiling surface, never registered in production",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePprofProfile",
+          "enabled": "debugProfilingEnabled"
+        },
+        {
+          "id": "debug.pprof.symbol",
+          "method": "GET",
+          "pattern": "/debug/pprof/symbol",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "developer profiling surface, never registered in production",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePprofSymbol",
+          "enabled": "debugProfilingEnabled"
+        },
+        {
+          "id": "debug.pprof.trace",
+          "method": "GET",
+          "pattern": "/debug/pprof/trace",
+          "scope": "dev",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "developer profiling surface, never registered in production",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handlePprofTrace",
+          "enabled": "debugProfilingEnabled"
+        },
+        {
+          "id": "probe.healthz",
+          "method": "GET",
+          "pattern": "/healthz",
+          "scope": "probe",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleHealthz"
+        },
+        {
+          "id": "probe.readyz",
+          "method": "GET",
+          "pattern": "/readyz",
+          "scope": "probe",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
+            "rate_exempt": true,
+            "maintenance_exempt": true,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleReadyz"
+        }
+      ],
+      "visual": [
+        {
+          "id": "not-found",
+          "path": "/nope",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
     },
-    "description": "The HTTP surface: the server struct and dependency seam, the route table, the HTMX fragment rules, and shared request parameter helpers.",
-    "docs": [],
+    "migrations": [],
     "environment": [
       {
-        "default": "8080",
-        "description": "HTTP listen port",
-        "field": "Port",
         "key": "PORT",
-        "max": 65535,
+        "field": "Port",
+        "type": "int",
+        "description": "HTTP listen port",
+        "default": "8080",
         "min": 1,
-        "type": "int"
+        "max": 65535
       }
     ],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "2aabbbfd390ab8a9f5da594ae09068f8ee01013aca2a9ce0e3c5e798e78c8431",
-        "source": "cmd/server/main.go",
-        "target": "cmd/server/main.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "f43f2b4f0e11ca02c3693f475070a1a20d3046e0a6a0947589e710d59d99a24d",
-        "source": "internal/web/admin_shared.go",
-        "target": "internal/web/admin_shared.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "fabc7fafab0e720b1970f58b4e4ffb8e01f60566818c4efd67bc66fd8b8aaee1",
-        "source": "internal/web/email_sink.go",
-        "target": "internal/web/email_sink.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "f495b69453aff1e73cd9b7c2313bcdbe8b28239063f2b3924a8e9ea042f92075",
-        "source": "internal/web/form.go",
-        "target": "internal/web/form.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "fdf56405b438ada38167250ea62584ab7e327ac24afcfbf1a57e23266a5b9fc4",
-        "source": "internal/web/handlers_public.go",
-        "target": "internal/web/handlers_public.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "360921293b3d63c5d1a1e28cd9d41e344b0de0123f1c3f3dfdb7b1ef5825f1e7",
-        "source": "internal/web/htmx.go",
-        "target": "internal/web/htmx.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "7ec64107bba9af5d75ab22737d7932e89cf036c8a1aca752f8ddabe763664076",
-        "source": "internal/web/i18n_test.go",
-        "target": "internal/web/i18n_test.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "71e95034d60ebd5bfab2d43ab66cbd75ae786127c4d351884255cf3e3fb209bc",
-        "source": "internal/web/module.go",
-        "target": "internal/web/module.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "333b1b7e15615f2d89685ccfb576a8e333a78b04d1bded79db9f27cb262a0a20",
-        "source": "internal/web/module_test.go",
-        "target": "internal/web/module_test.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "0059784601b093dc6ba7ff4312d270a6269b54845efca95bec6f68b43500224d",
-        "source": "internal/web/params.go",
-        "target": "internal/web/params.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "9a00d8d61801b95b966494101e30961e29773993107aa7cc2f8a1a878061aa92",
-        "source": "internal/web/public_routes_test.go",
-        "target": "internal/web/public_routes_test.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "6db952423dd271e7c554214b6ae61e099d25fc60331b16872bcdb586e11ba9ee",
-        "source": "internal/web/route.go",
-        "target": "internal/web/route.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "daddd2185cd2de8a503ba59a45fce9af071922e569d90e7a0f8612d4f468c2aa",
-        "source": "internal/web/route_adapters.go",
-        "target": "internal/web/route_adapters.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "6b82ab161994341151e59a9855aafe6e3d82fa31a90d90d2df4047aafff77745",
-        "source": "internal/web/route_test.go",
-        "target": "internal/web/route_test.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "706df7a3c142fd9aa56767d50b3dfe8f1c7fbc7d98fb7b4ba5f3774650d5f50f",
-        "source": "internal/web/routes.go",
-        "target": "internal/web/routes.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
-        "source": "internal/web/server.go",
-        "target": "internal/web/server.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "a00dcbdb2eeb4f26d6e15135e3f0602cdb4f951e45f1ee2d346f310919b6492e",
-        "source": "internal/web/templates/chrome.go",
-        "target": "internal/web/templates/chrome.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
-        "source": "internal/web/templates/chrome_test.go",
-        "target": "internal/web/templates/chrome_test.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "6754429da2f50734393e2b37b5ac36fc1b0214c30a0883edc9c0f4be4b080b0d",
-        "source": "internal/web/templates/data.go",
-        "target": "internal/web/templates/data.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "4a24de5722b263b5297e74523693f16c467f71aa51d74754a76c1a055fd9f630",
-        "source": "internal/web/templates/designsystem_test.go",
-        "target": "internal/web/templates/designsystem_test.go"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "33fd5d4069fbbd7fd9c54ae08883d9ae22186b0265dcdc43b0c1c3d88e55667c",
-        "source": "internal/web/templates/errors.templ",
-        "target": "internal/web/templates/errors.templ"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "4f88232ea6ae4cace270c917185ef8fb9e51a1e2a6e46f0b624a11c811577bba",
-        "source": "internal/web/templates/icons.templ",
-        "target": "internal/web/templates/icons.templ"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "ed7232f59d6f41fa2dc2eb8448e086e77310865590b634978b0c7ba5570c3ae3",
-        "source": "internal/web/templates/layouts.templ",
-        "target": "internal/web/templates/layouts.templ"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "94caabf435f5f58811058df51b64b9fd4a5802af5994c28395ddd3c447571eae",
-        "source": "internal/web/templates/nav.templ",
-        "target": "internal/web/templates/nav.templ"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "d5954a163ce60cc8559dab4c20050c6a847c9d5f74220cc6fe06fa99857262b9",
-        "source": "internal/web/templates/page.go",
-        "target": "internal/web/templates/page.go"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "03b0c578b39736abebfa9cfde0dae88e9189740931eaa35b7399979bc9935b2a",
-        "source": "internal/web/templates/sidebar.templ",
-        "target": "internal/web/templates/sidebar.templ"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "3cb396331e68288c9df72d97e2c40e22be0792d439b8f54adb902127243c1cb7",
-        "source": "internal/web/templates/theme.go",
-        "target": "internal/web/templates/theme.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "c4a47be453f851b0a4ab6c68db0265f346f0a20bd1dd25f95720d4fe9f05117f",
-        "source": "internal/web/templates/theme_test.go",
-        "target": "internal/web/templates/theme_test.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "ad5e4406179608443121a5fb4a98630f2c48de1b406c218a934883feb4a739ee",
-        "source": "internal/web/templates/ui_adapters.go",
-        "target": "internal/web/templates/ui_adapters.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "feee8f1931c65f534f4d68975a10d9f93ef90abbc01d2b8984faf203e49fe902",
-        "source": "internal/web/testhelpers_test.go",
-        "target": "internal/web/testhelpers_test.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "a33983f45ead47abef66e76641a72dd208ad733bdff43bb1261aca8773080ea9",
-        "source": "internal/web/testonly_content_guide.go",
-        "target": "internal/web/testonly_content_guide.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "064a39b2209a40b0dda949eba514cf4a176feb23e4334f4c439f145f86df08b6",
-        "source": "internal/web/web_test.go",
-        "target": "internal/web/web_test.go"
-      }
-    ],
-    "id": "ggg/system/server",
-    "kind": "system",
     "locales": {
       "en": {
         "a11y.analytics_consent": "Analytics consent",
@@ -316,7 +647,7 @@
         "footer.blog": "Blog",
         "footer.changelog": "Changelog",
         "footer.company": "Company",
-        "footer.copyright": "\u00a9 %s %s. MIT licensed.",
+        "footer.copyright": "© %s %s. MIT licensed.",
         "footer.docs": "Docs",
         "footer.features": "Features",
         "footer.getting_started": "Getting started",
@@ -334,7 +665,7 @@
         "layout.banner_ending_link": "manage billing",
         "layout.banner_ending_prefix": "Your plan ends on",
         "layout.banner_past_due_link": "update your card",
-        "layout.banner_past_due_prefix": "Your payment is failing \u2014",
+        "layout.banner_past_due_prefix": "Your payment is failing —",
         "layout.banner_past_due_suffix": "to keep your plan.",
         "layout.skip_content": "Skip to content",
         "nav.blog": "Blog",
@@ -369,28 +700,28 @@
         "sidebar.settings": "Settings"
       },
       "es": {
-        "a11y.analytics_consent": "Consentimiento de anal\u00edtica",
-        "a11y.documentation": "Documentaci\u00f3n",
-        "a11y.menu": "Abrir men\u00fa",
+        "a11y.analytics_consent": "Consentimiento de analítica",
+        "a11y.documentation": "Documentación",
+        "a11y.menu": "Abrir menú",
         "a11y.theme": "Cambiar a modo oscuro",
         "common.current_plan": "Plan actual",
-        "docs.nav_toggle": "Men\u00fa de documentaci\u00f3n",
+        "docs.nav_toggle": "Menú de documentación",
         "errors.back_home": "Volver al inicio",
         "errors.code_403": "403",
         "errors.code_404": "404",
         "errors.code_500": "500",
         "errors.code_503": "503",
-        "errors.forbidden": "No tienes acceso a esa p\u00e1gina.",
+        "errors.forbidden": "No tienes acceso a esa página.",
         "errors.maintenance": "Estamos en mantenimiento programado. Volvemos enseguida.",
-        "errors.not_found": "Esa p\u00e1gina no existe.",
-        "errors.server_error": "Algo sali\u00f3 mal de nuestra parte.",
+        "errors.not_found": "Esa página no existe.",
+        "errors.server_error": "Algo salió mal de nuestra parte.",
         "footer.about": "Acerca de",
         "footer.api": "API",
         "footer.blog": "Blog",
         "footer.changelog": "Novedades",
         "footer.company": "Empresa",
-        "footer.copyright": "\u00a9 %s %s. Licencia MIT.",
-        "footer.docs": "Documentaci\u00f3n",
+        "footer.copyright": "© %s %s. Licencia MIT.",
+        "footer.docs": "Documentación",
         "footer.features": "Funciones",
         "footer.getting_started": "Primeros pasos",
         "footer.legal": "Legal",
@@ -399,34 +730,34 @@
         "footer.product": "Producto",
         "footer.resources": "Recursos",
         "footer.rss": "RSS",
-        "footer.terms": "T\u00e9rminos",
+        "footer.terms": "Términos",
         "i18n.language": "Idioma",
         "layout.analytics_accept": "Aceptar",
-        "layout.analytics_consent_body": "Usamos anal\u00edtica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
+        "layout.analytics_consent_body": "Usamos analítica de producto que respeta tu privacidad (PostHog con proxy propio) para mejorar GoGoGadget.",
         "layout.analytics_decline": "Rechazar",
-        "layout.banner_ending_link": "gestionar la facturaci\u00f3n",
+        "layout.banner_ending_link": "gestionar la facturación",
         "layout.banner_ending_prefix": "Tu plan termina el",
         "layout.banner_past_due_link": "actualiza tu tarjeta",
-        "layout.banner_past_due_prefix": "Tu pago est\u00e1 fallando \u2014",
+        "layout.banner_past_due_prefix": "Tu pago está fallando —",
         "layout.banner_past_due_suffix": "para mantener tu plan.",
         "layout.skip_content": "Saltar al contenido",
         "nav.blog": "Blog",
         "nav.changelog": "Novedades",
-        "nav.docs": "Documentaci\u00f3n",
+        "nav.docs": "Documentación",
         "nav.features": "Funciones",
         "nav.get_started": "Comenzar",
         "nav.pricing": "Precios",
-        "nav.sign_in": "Iniciar sesi\u00f3n",
+        "nav.sign_in": "Iniciar sesión",
         "settings.tab_account": "Cuenta",
         "settings.tab_api": "API",
-        "settings.tab_billing": "Facturaci\u00f3n",
+        "settings.tab_billing": "Facturación",
         "settings.tab_notifications": "Notificaciones",
-        "settings.tab_org": "Organizaci\u00f3n",
+        "settings.tab_org": "Organización",
         "settings.tab_webhooks": "Webhooks",
         "sidebar.activity": "Actividad",
-        "sidebar.admin": "Administraci\u00f3n",
+        "sidebar.admin": "Administración",
         "sidebar.admin_announcements": "Anuncios",
-        "sidebar.admin_audit": "Auditor\u00eda",
+        "sidebar.admin_audit": "Auditoría",
         "sidebar.admin_content": "Contenido",
         "sidebar.admin_flags": "Banderas de funciones",
         "sidebar.admin_jobs": "Trabajos",
@@ -439,347 +770,16 @@
         "sidebar.files": "Archivos",
         "sidebar.notifications": "Notificaciones",
         "sidebar.projects": "Proyectos",
-        "sidebar.settings": "Configuraci\u00f3n"
+        "sidebar.settings": "Configuración"
       }
     },
-    "migrations": [],
-    "name": "server",
-    "removal_policy": "replacement-required",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/analytics"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/apphost"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/billing"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/config"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/content"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/content-assets"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/feature-flags"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/llm"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/observability"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/storage"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "routes": [
-        {
-          "enabled": "debugProfilingEnabled",
-          "handler": "handlePprofCmdline",
-          "id": "debug.pprof.cmdline",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/debug/pprof/cmdline",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "developer profiling surface, never registered in production",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "dev"
-        },
-        {
-          "enabled": "debugProfilingEnabled",
-          "handler": "handlePprofIndex",
-          "id": "debug.pprof.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/debug/pprof/",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "developer profiling surface, never registered in production",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "dev"
-        },
-        {
-          "enabled": "debugProfilingEnabled",
-          "handler": "handlePprofProfile",
-          "id": "debug.pprof.profile",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/debug/pprof/profile",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "developer profiling surface, never registered in production",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "dev"
-        },
-        {
-          "enabled": "debugProfilingEnabled",
-          "handler": "handlePprofSymbol",
-          "id": "debug.pprof.symbol",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/debug/pprof/symbol",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "developer profiling surface, never registered in production",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "dev"
-        },
-        {
-          "enabled": "debugProfilingEnabled",
-          "handler": "handlePprofTrace",
-          "id": "debug.pprof.trace",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/debug/pprof/trace",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "developer profiling surface, never registered in production",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "dev"
-        },
-        {
-          "handler": "handleHealthz",
-          "id": "probe.healthz",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/healthz",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "probe"
-        },
-        {
-          "handler": "handleReadyz",
-          "id": "probe.readyz",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/readyz",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "unauthenticated liveness probe with no session and no side effects",
-            "idempotent": false,
-            "maintenance_exempt": true,
-            "max_body_bytes": 0,
-            "rate_exempt": true
-          },
-          "scope": "probe"
-        }
-      ],
-      "system": {
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "capability": "analytics.capturer",
-            "field": "Analytics",
-            "optional": true,
-            "type": "analytics.Capturer"
-          },
-          {
-            "capability": "billing.client",
-            "field": "Billing",
-            "optional": true,
-            "type": "billing.Client"
-          },
-          {
-            "capability": "config",
-            "field": "Config",
-            "optional": false,
-            "type": "*config.Config"
-          },
-          {
-            "capability": "database.pool",
-            "field": "DB",
-            "optional": false,
-            "type": "*pgxpool.Pool"
-          },
-          {
-            "capability": "identity.fetcher",
-            "field": "Fetcher",
-            "optional": true,
-            "type": "identity.UserFetcher"
-          },
-          {
-            "capability": "flags.evaluator",
-            "field": "Flags",
-            "optional": true,
-            "type": "flags.Evaluator"
-          },
-          {
-            "capability": "identity.deleter",
-            "field": "IdentityDeleter",
-            "optional": true,
-            "type": "identity.Deleter"
-          },
-          {
-            "capability": "llm.completer",
-            "field": "LLM",
-            "optional": true,
-            "type": "llm.Completer"
-          },
-          {
-            "capability": "database.queries",
-            "field": "Queries",
-            "optional": false,
-            "type": "*sqlc.Queries"
-          },
-          {
-            "capability": "observability.reporter",
-            "field": "Reporter",
-            "optional": true,
-            "type": "observability.Reporter"
-          },
-          {
-            "capability": "storage.store",
-            "field": "Storage",
-            "optional": true,
-            "type": "storage.Store"
-          },
-          {
-            "capability": "identity.verifier",
-            "field": "Verifier",
-            "optional": true,
-            "type": "identity.Verifier"
-          }
-        ],
-        "package": "internal/web",
-        "provides": [
-          {
-            "capability": "http.handler",
-            "field": "Handler",
-            "type": "http.Handler"
-          }
-        ],
-        "start": false,
-        "stop": false,
-        "type_imports": [
-          "github.com/jackc/pgx/v5/pgxpool",
-          "internal/db/sqlc",
-          "net/http"
-        ]
-      },
-      "visual": [
-        {
-          "id": "not-found",
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/nope",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "HTTP server core"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
 }

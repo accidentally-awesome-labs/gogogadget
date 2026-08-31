@@ -255,14 +255,14 @@ func goString(s string) string {
 // orderedModules returns the graph modules in lock topological order.
 func orderedModules(lock Lock, graph []Manifest) []Manifest {
 	byID := make(map[string]Manifest, len(graph))
-	for _, m := range graph {
-		byID[m.ID] = m
-	}
+	for _, m := range graph { byID[m.ID] = m }
 	ordered := make([]Manifest, 0, len(lock.Order))
 	for _, id := range lock.Order {
-		if m, ok := byID[id]; ok {
-			ordered = append(ordered, m)
-		}
+		if m, ok := byID[id]; ok { ordered = append(ordered, m) }
+	}
+	if len(ordered) == 0 {
+		ordered = append(ordered, graph...)
+		sort.SliceStable(ordered, func(i, j int) bool { return ordered[i].ID < ordered[j].ID })
 	}
 	return ordered
 }
@@ -311,221 +311,195 @@ func isRootCapability(rootNeeds []RuntimeNeed, need RuntimeNeed) bool {
 func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	modules := orderedModules(lock, graph)
 	rootNeeds := collectRootNeeds(lock, graph)
+	byID := make(map[string]Manifest, len(graph))
+	for _, module := range graph { byID[module.ID] = module }
+	configID := ""
+	handlerField := ""
+	providedTypes := map[string]string{}
+	for _, module := range modules {
+		if module.Runtime.System == nil { continue }
+		for _, provide := range module.Runtime.System.Provides {
+			if provide.Capability == "config" && module.Runtime.System.Adapter == nil { configID = module.ID }
+			if provide.Capability == httpHandlerCapability { handlerField = capabilityField(provide.Capability) }
+			if old, exists := providedTypes[provide.Capability]; exists && old != provide.Type {
+				return nil, fmt.Errorf("capability %q has conflicting types %q and %q", provide.Capability, old, provide.Type)
+			}
+			providedTypes[provide.Capability] = provide.Type
+		}
+	}
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package modules\n\n")
-	needsErrors := false
-	for _, m := range modules {
-		if m.Runtime.System != nil && m.Runtime.System.Stop {
-			needsErrors = true
-		}
-	}
-	b.WriteString("import (\n")
-	b.WriteString("\t\"context\"\n")
-	if needsErrors {
-		b.WriteString("\t\"errors\"\n")
-	}
-	b.WriteString("\t\"fmt\"\n")
-	b.WriteString("\t\"net/http\"\n")
-	b.WriteString("\n")
+	b.WriteString("import (\n\t\"context\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n")
 	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n"}
-	seenImports := make(map[string]struct{})
-	for _, m := range modules {
-		if m.Runtime.System == nil || m.Runtime.System.Package == "" {
-			continue
+	seenImports := map[string]struct{}{}
+	for _, module := range modules {
+		sys := module.Runtime.System
+		if sys == nil || sys.Package == "" { continue }
+		addImport := func(path string) {
+			raw := strings.Trim(path, "/")
+			if _, fixed := bootstrapFixedImports[raw]; fixed { return }
+			path = resolveTypeImport(modulePath, path)
+			if _, exists := seenImports[path]; exists { return }
+			seenImports[path] = struct{}{}
+			imports = append(imports, "\t"+goImportName(path)+" \""+path+"\"\n")
 		}
-		qualified := qualifyPackage(modulePath, m.Runtime.System.Package)
-		if _, ok := seenImports[qualified]; !ok {
-			seenImports[qualified] = struct{}{}
-			imports = append(imports, "\t"+goImportName(qualified)+" \""+qualified+"\"\n")
-		}
-		for _, extra := range m.Runtime.System.TypeImports {
-			if _, fixed := bootstrapFixedImports[strings.Trim(extra, "/")]; fixed {
-				// Already imported unconditionally below; resolving it would also
-				// mistake a dotless stdlib path for a module-relative one.
-				continue
-			}
-			resolved := resolveTypeImport(modulePath, extra)
-			if _, ok := seenImports[resolved]; ok {
-				continue
-			}
-			seenImports[resolved] = struct{}{}
-			imports = append(imports, "\t"+goImportName(resolved)+" \""+resolved+"\"\n")
-		}
+		addImport(sys.Package)
+		for _, extra := range sys.TypeImports { addImport(extra) }
 	}
 	sort.Strings(imports)
-	for _, line := range imports {
-		b.WriteString(line)
-	}
+	for _, line := range imports { b.WriteString(line) }
 	b.WriteString(")\n\n")
-
-	b.WriteString("// Options carries the ambient values the selected closure boots with.\n")
+	b.WriteString("// Options carries ambient values supplied by the host.\n")
 	b.WriteString("type Options struct {\n")
-	for _, need := range rootNeeds {
-		fmt.Fprintf(&b, "\t%s %s\n", need.Field, need.Type)
-	}
+	for _, need := range rootNeeds { fmt.Fprintf(&b, "\t%s %s\n", need.Field, need.Type) }
 	b.WriteString("}\n\n")
-	b.WriteString("// Runtime is the booted module closure. Every capability the selected\n")
-	b.WriteString("// graph provides is reachable here, so consumers take typed values rather\n")
-	b.WriteString("// than reconstructing providers.\n")
-	// One capability is structural: whichever module provides http.handler is
-	// what Handler() returns, so the runtime composes a servable handler instead
-	// of carrying a field nothing ever assigns.
-	handlerField := ""
-	for _, m := range modules {
-		if m.Runtime.System == nil {
-			continue
-		}
-		for _, provide := range m.Runtime.System.Provides {
-			if provide.Capability == httpHandlerCapability {
-				handlerField = capabilityField(provide.Capability)
-			}
-		}
+	b.WriteString("type Runtime struct {\n\tstart []func(context.Context) error\n\tstop []apphost.Stop\n\thealth []apphost.HealthRegistration\n\thealthCache apphost.HealthCache\n")
+	fields := make([]string, 0, len(providedTypes))
+	for capability, typ := range providedTypes {
+		field := capabilityField(capability)
+		if !validIdentifier(field) { return nil, fmt.Errorf("capability %q does not yield a Go field", capability) }
+		fields = append(fields, fmt.Sprintf("\t%s %s\n", field, typ))
 	}
-
-	b.WriteString("type Runtime struct {\n")
-	b.WriteString("\tstart []func(context.Context) error\n")
-	b.WriteString("\tstop  []apphost.Stop\n")
-	b.WriteString("\thealth []apphost.HealthRegistration\n")
-	b.WriteString("\thealthCache apphost.HealthCache\n")
-	provided := make([]string, 0)
-	for _, m := range modules {
-		if m.Runtime.System == nil {
-			continue
-		}
-		for _, provide := range m.Runtime.System.Provides {
-			field := capabilityField(provide.Capability)
-			if !validIdentifier(field) {
-				return nil, fmt.Errorf("module %s: capability %q does not yield a Go field", m.ID, provide.Capability)
-			}
-			provided = append(provided, fmt.Sprintf("\t%s %s\n", field, provide.Type))
-		}
-	}
-	sort.Strings(provided)
-	if len(provided) > 0 {
-		b.WriteString("\n")
-		for _, line := range provided {
-			b.WriteString(line)
-		}
-	}
+	sort.Strings(fields)
+	for _, field := range fields { b.WriteString(field) }
 	b.WriteString("}\n\n")
-
-	b.WriteString("// Boot validates the selected closure and constructs typed dependencies in\n")
-	b.WriteString("// stable topological order, then starts long-lived services.\n")
-	b.WriteString("func Boot(ctx context.Context, h apphost.Host, opts Options) (*Runtime, error) {\n")
-	b.WriteString("\tr := &Runtime{}\n")
-	b.WriteString("\t_ = h\n")
-	provider := make(map[string]string)
-	stoppers := make([]string, 0)
-	starters := make([]string, 0)
-	for _, m := range modules {
-		sys := m.Runtime.System
-		if sys == nil || sys.Package == "" || sys.Constructor == "" {
-			continue
-		}
-		if err := validateIdentifiers(sys); err != nil {
-			return nil, fmt.Errorf("module %s: %w", m.ID, err)
-		}
-		pkg := goImportName(qualifyPackage(modulePath, sys.Package))
-		varName := goVar(m.ID)
-		target := varName
-		if len(sys.Provides) == 0 && !sys.Stop && !sys.Start {
-			// Nothing consumes the result, so binding it would not compile.
-			target = "_"
-		}
+	returnsRuntime := true
+	emitCall := func(module Manifest, provider map[string]string, target string) error {
+		sys := module.Runtime.System
+		if sys == nil || sys.Package == "" || sys.Constructor == "" { return nil }
+		if err := validateIdentifiers(sys); err != nil { return fmt.Errorf("module %s: %w", module.ID, err) }
+		pkg := goImportName(resolveTypeImport(modulePath, sys.Package))
 		fmt.Fprintf(&b, "\t%s, err := %s.%s(ctx, h, %s.Deps{\n", target, pkg, sys.Constructor, pkg)
 		for _, need := range sys.Needs {
-			if !validIdentifier(need.Field) {
-				return nil, fmt.Errorf("module %s: invalid need field %q", m.ID, need.Field)
-			}
+			if !validIdentifier(need.Field) { return fmt.Errorf("module %s: invalid need field %q", module.ID, need.Field) }
 			if expr, ok := provider[need.Capability]; ok {
 				fmt.Fprintf(&b, "\t\t%s: %s,\n", need.Field, expr)
-				continue
-			}
-			if isRootCapability(rootNeeds, need) {
+			} else if isRootCapability(rootNeeds, need) {
 				fmt.Fprintf(&b, "\t\t%s: opts.%s,\n", need.Field, need.Field)
-				continue
+			} else if !need.Optional {
+				return fmt.Errorf("module %s: no module provides capability %q for need %s", module.ID, need.Capability, need.Field)
 			}
-			if need.Optional {
-				continue
-			}
-			return nil, fmt.Errorf("module %s: no module provides capability %q for need %s", m.ID, need.Capability, need.Field)
 		}
-		b.WriteString("\t})\n")
-		b.WriteString("\tif err != nil {\n")
-		fmt.Fprintf(&b, "\t\treturn nil, fmt.Errorf(\"boot %s: %%w\", err)\n", goString(m.ID)[1:len(goString(m.ID))-1])
-		b.WriteString("\t}\n")
+		b.WriteString("\t})\n\tif err != nil {\n")
+		if returnsRuntime {
+			fmt.Fprintf(&b, "\t\treturn nil, fmt.Errorf(\"boot %s: %%w\", err)\n\t}\n", strings.ReplaceAll(module.ID, "\"", "\\\""))
+		} else {
+			fmt.Fprintf(&b, "\t\treturn fmt.Errorf(\"boot %s: %%w\", err)\n\t}\n", strings.ReplaceAll(module.ID, "\"", "\\\""))
+		}
 		for _, provide := range sys.Provides {
-			if !validIdentifier(provide.Field) {
-				return nil, fmt.Errorf("module %s: invalid provide field %q", m.ID, provide.Field)
-			}
+			if !validIdentifier(provide.Field) { return fmt.Errorf("module %s: invalid provide field %q", module.ID, provide.Field) }
 			field := capabilityField(provide.Capability)
-			fmt.Fprintf(&b, "\tr.%s = %s.%s\n", field, varName, provide.Field)
-			if provide.Capability == "config" {
-				b.WriteString("\tswitch r.Config.Env {\n\tcase \"development\", \"test\", \"production\":\n\tdefault:\n\t\treturn nil, fmt.Errorf(\"unknown APP_ENV %q\", r.Config.Env)\n\t}\n")
-			}
+			fmt.Fprintf(&b, "\tr.%s = %s.%s\n", field, target, provide.Field)
 			provider[provide.Capability] = "r." + field
 		}
-		if sys.Start {
-			fmt.Fprintf(&b, "\tr.start = append(r.start, %s.Start)\n", varName)
-			starters = append(starters, varName)
-		}
-		if sys.Stop {
-			fmt.Fprintf(&b, "\tr.stop = append(r.stop, %s.Stop)\n", varName)
-			stoppers = append(stoppers, varName)
-		}
+		if sys.Start { fmt.Fprintf(&b, "\tr.start = append(r.start, %s.Start)\n", target) }
+		if sys.Stop { fmt.Fprintf(&b, "\tr.stop = append(r.stop, %s.Stop)\n", target) }
 		if sys.Health {
-			fmt.Fprintf(&b, "\tvar _ apphost.HealthChecker = %s\n", varName)
-			fmt.Fprintf(&b, "\tr.health = append(r.health, apphost.HealthRegistration{Module: %s, Critical: false, Check: %s})\n", goString(m.ID), varName)
+			slot, adapter := "", ""
+			critical := false
+			if sys.Adapter != nil {
+				slot, adapter = sys.Adapter.Slot, module.ID
+				critical = providerSlotCritical(graph, slot)
+			}
+			fmt.Fprintf(&b, "\tvar _ apphost.HealthChecker = %s\n", target)
+			fmt.Fprintf(&b, "\tr.health = append(r.health, apphost.HealthRegistration{Module: %s, Slot: %s, Adapter: %s, Target: %s, Critical: %t, Check: %s})\n",
+				goString(module.ID), goString(slot), goString(adapter), goString(firstTargetFor(module, "development")), critical, target)
+		}
+		return nil
+	}
+	emitBranch := func(name, env string, order []string) error {
+		fmt.Fprintf(&b, "func (r *Runtime) boot%s(ctx context.Context, h apphost.Host, opts Options) error {\n", name)
+		provider := map[string]string{}
+		if configID != "" {
+			configModule := byID[configID]
+			for _, provide := range configModule.Runtime.System.Provides {
+				provider[provide.Capability] = "r." + capabilityField(provide.Capability)
+			}
+		}
+		for _, id := range order {
+			if id == configID { continue }
+			module, ok := byID[id]; if !ok || module.Runtime.System == nil { continue }
+			target := goVar(module.ID)
+			if len(module.Runtime.System.Provides) == 0 && !module.Runtime.System.Start && !module.Runtime.System.Stop && !module.Runtime.System.Health { target = "_" }
+			if err := emitCall(module, provider, target); err != nil { return err }
+		}
+		b.WriteString("\treturn nil\n}\n\n")
+		_ = env
+		return nil
+	}
+	orders := map[string][]string{"development": lock.RuntimeOrders.Development, "test": lock.RuntimeOrders.Test, "production": lock.RuntimeOrders.Production}
+	for _, env := range []string{"development", "test", "production"} { if len(orders[env]) == 0 { orders[env] = append([]string{}, lock.Order...) } }
+	b.WriteString("func Boot(ctx context.Context, h apphost.Host, opts Options) (*Runtime, error) {\n\tr := &Runtime{}\n")
+	if configID != "" {
+		config := byID[configID]; target := goVar(config.ID)
+		if err := emitCall(config, map[string]string{}, target); err != nil { return nil, err }
+		returnsRuntime = false
+		b.WriteString("\tswitch r.Config.Env {\n\tcase \"development\":\n\t\tif err := r.bootDevelopment(ctx, h, opts); err != nil { return nil, err }\n\tcase \"test\":\n\t\tif err := r.bootTest(ctx, h, opts); err != nil { return nil, err }\n\tcase \"production\":\n\t\tif err := r.bootProduction(ctx, h, opts); err != nil { return nil, err }\n\tdefault:\n\t\treturn nil, fmt.Errorf(\"unknown APP_ENV %q\", r.Config.Env)\n\t}\n")
+	} else {
+		b.WriteString("\tswitch opts.Env {\n\tdefault:\n\t\treturn nil, fmt.Errorf(\"config capability is required\")\n\t}\n")
+	}
+	b.WriteString("\treturn r, nil\n}\n\n")
+	if err := emitBranch("Development", "development", orders["development"]); err != nil { return nil, err }
+	if err := emitBranch("Test", "test", orders["test"]); err != nil { return nil, err }
+	if err := emitBranch("Production", "production", orders["production"]); err != nil { return nil, err }
+	b.WriteString("func providerActive(env, slot, adapter string) bool {\n\tswitch env {\n")
+	for _, env := range []string{"development", "test", "production"} {
+		fmt.Fprintf(&b, "\tcase %q:\n", env)
+		for _, id := range orders[env] {
+			module := byID[id]
+			if module.Runtime.System == nil || module.Runtime.System.Adapter == nil { continue }
+			fmt.Fprintf(&b, "\t\tif slot == %q && adapter == %q { return true }\n", module.Runtime.System.Adapter.Slot, id)
 		}
 	}
-	b.WriteString("\treturn r, nil\n")
-	b.WriteString("}\n\n")
-
-	b.WriteString("// Health returns cached provider and system health.\n")
+	b.WriteString("\t}\n\treturn false\n}\n\n")
 	b.WriteString("func (r *Runtime) Health(ctx context.Context) apphost.HealthReport { return r.healthCache.Get(ctx, r.health) }\n\n")
-	b.WriteString("// Handler returns the composed HTTP handler.\n")
-	if handlerField == "" {
-		b.WriteString("// The selected graph provides none, so there is nothing to serve.\n")
-		b.WriteString("func (r *Runtime) Handler() http.Handler { return nil }\n\n")
-	} else {
-		fmt.Fprintf(&b, "func (r *Runtime) Handler() http.Handler { return r.%s }\n\n", handlerField)
-	}
-	b.WriteString("// Run starts every long-lived service in dependency order. Each Start must\n")
-	b.WriteString("// return promptly — a module owns its own goroutine — so Run hands control back\n")
-	b.WriteString("// to the caller that serves traffic.\n")
-	if len(starters) == 0 {
-		b.WriteString("func (r *Runtime) Run(ctx context.Context) error { return nil }\n\n")
-	} else {
-		b.WriteString("func (r *Runtime) Run(ctx context.Context) error {\n")
-		b.WriteString("\tfor _, start := range r.start {\n")
-		b.WriteString("\t\tif err := start(ctx); err != nil {\n")
-		b.WriteString("\t\t\treturn err\n")
-		b.WriteString("\t\t}\n")
-		b.WriteString("\t}\n")
-		b.WriteString("\treturn nil\n")
-		b.WriteString("}\n\n")
-	}
-	b.WriteString("// Close stops services in reverse dependency order. Every stop hook runs\n")
-	b.WriteString("// even if an earlier one fails, so one stuck service cannot strand the rest;\n")
-	b.WriteString("// the joined error reports all of them.\n")
-	b.WriteString("func (r *Runtime) Close(ctx context.Context) error {\n")
-	if len(stoppers) == 0 {
-		b.WriteString("\treturn nil\n")
-		b.WriteString("}\n")
-	} else {
-		b.WriteString("\tvar errs []error\n")
-		b.WriteString("\tfor i := len(r.stop) - 1; i >= 0; i-- {\n")
-		b.WriteString("\t\tif err := r.stop[i](ctx); err != nil {\n")
-		b.WriteString("\t\t\terrs = append(errs, err)\n")
-		b.WriteString("\t\t}\n")
-		b.WriteString("\t}\n")
-		b.WriteString("\treturn errors.Join(errs...)\n")
-		b.WriteString("}\n")
-	}
-
+	if handlerField == "" { b.WriteString("func (r *Runtime) Handler() http.Handler { return nil }\n\n") } else { fmt.Fprintf(&b, "func (r *Runtime) Handler() http.Handler { return r.%s }\n\n", handlerField) }
+	b.WriteString("func (r *Runtime) Run(ctx context.Context) error {\n\tfor _, start := range r.start { if err := start(ctx); err != nil { return err } }\n\treturn nil\n}\n\n")
+	b.WriteString("func (r *Runtime) Close(ctx context.Context) error {\n\tvar errs []error\n\tfor i := len(r.stop)-1; i >= 0; i-- { if err := r.stop[i](ctx); err != nil { errs = append(errs, err) } }\n\treturn errors.Join(errs...)\n}\n")
 	_ = ctx
 	return &GeneratedFile{Path: "internal/modules/bootstrap_registry_gen.go", Content: b.String()}, nil
+}
+
+func providerSlotCritical(graph []Manifest, slot string) bool {
+	for _, module := range graph {
+		for _, declaration := range module.Runtime.ProviderSlots {
+			if declaration.ID == slot { return declaration.Critical }
+		}
+	}
+	return false
+}
+
+func firstTargetFor(module Manifest, env string) string {
+	if module.Runtime.System == nil || module.Runtime.System.Adapter == nil { return "" }
+	for _, target := range module.Runtime.System.Adapter.Targets {
+		if containsString(target.Environments, env) { return target.ID }
+	}
+	if len(module.Runtime.System.Adapter.Targets) > 0 { return module.Runtime.System.Adapter.Targets[0].ID }
+	return ""
+}
+func adapterForModule(graph []Manifest, id string) (string, string, bool) {
+	for _, module := range graph {
+		if module.ID == id && module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
+			return module.Runtime.System.Adapter.Slot, module.ID, true
+		}
+	}
+	return "", "", false
+}
+
+func emitProviderActiveFunction(b *strings.Builder, lock Lock, graph []Manifest) {
+	b.WriteString("\nfunc providerActive(env, slot, adapter string) bool {\n\tswitch env {\n")
+	orders := []struct{ env string; order []string }{{"development", lock.RuntimeOrders.Development}, {"test", lock.RuntimeOrders.Test}, {"production", lock.RuntimeOrders.Production}}
+	for _, item := range orders {
+		order := item.order
+		if len(order) == 0 { order = lock.Order }
+		fmt.Fprintf(b, "\tcase %q:\n", item.env)
+		for _, id := range order {
+			slotID, adapterID, ok := adapterForModule(graph, id)
+			if ok { fmt.Fprintf(b, "\t\tif slot == %q && adapter == %q { return true }\n", slotID, adapterID) }
+		}
+	}
+	b.WriteString("\t}\n\treturn false\n}\n")
 }
 
 func validateIdentifiers(sys *SystemContribution) error {
@@ -536,6 +510,11 @@ func validateIdentifiers(sys *SystemContribution) error {
 		return fmt.Errorf("invalid system constructor %q", sys.Constructor)
 	}
 	return nil
+}
+func providerGateLiteral(moduleID string, graph []Manifest, envExpr string) string {
+	slot, adapter, ok := adapterForModule(graph, moduleID)
+	if !ok { return "nil" }
+	return fmt.Sprintf("func() bool { return providerActive(%s, %q, %q) }", envExpr, slot, adapter)
 }
 
 // emitTestHostRegistry renders internal/modules/testhost_registry_gen.go. It
@@ -624,109 +603,47 @@ func selectedRoutes(lock Lock, graph []Manifest) []route {
 func emitRoutesRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	routes := selectedRoutes(lock, graph)
 	sort.Slice(routes, func(i, j int) bool {
-		if routes[i].contrib.Pattern != routes[j].contrib.Pattern {
-			return routes[i].contrib.Pattern < routes[j].contrib.Pattern
-		}
-		if routes[i].contrib.Method != routes[j].contrib.Method {
-			return routes[i].contrib.Method < routes[j].contrib.Method
-		}
+		if routes[i].contrib.Pattern != routes[j].contrib.Pattern { return routes[i].contrib.Pattern < routes[j].contrib.Pattern }
+		if routes[i].contrib.Method != routes[j].contrib.Method { return routes[i].contrib.Method < routes[j].contrib.Method }
 		return routes[i].contrib.ID < routes[j].contrib.ID
 	})
-	if len(routes) == 0 {
-		// Nothing contributes a route, so the project has no reason to define the
-		// route type this table would reference.
-		return nil, nil
-	}
-
-	// Every exemption must carry a reason. A bare bool in a diff is a security
-	// decision nobody can review.
+	if len(routes) == 0 { return nil, nil }
 	for _, r := range routes {
-		if r.contrib.Policy.CSRFExempt && strings.TrimSpace(r.contrib.Policy.CSRFReason) == "" {
-			return nil, fmt.Errorf(
-				"route %s (%s): csrf_exempt requires csrf_reason", r.contrib.ID, r.moduleID)
-		}
+		if r.contrib.Policy.CSRFExempt && strings.TrimSpace(r.contrib.Policy.CSRFReason) == "" { return nil, fmt.Errorf("route %s (%s): csrf_exempt requires csrf_reason", r.contrib.ID, r.moduleID) }
 	}
-
-	// Validate against a real ServeMux. A conflicting or malformed pattern would
-	// otherwise panic on the first matching request, long after this generated
-	// file was committed and shipped.
 	patterns := make([]routePattern, 0, len(routes))
-	for _, r := range routes {
-		patterns = append(patterns, routePattern{
-			id: r.contrib.ID, module: r.moduleID,
-			method: r.contrib.Method, pattern: r.contrib.Pattern,
-		})
-	}
-	if err := validateRoutePatterns(patterns); err != nil {
-		return nil, err
-	}
-
+	for _, r := range routes { patterns = append(patterns, routePattern{id: r.contrib.ID, module: r.moduleID, method: r.contrib.Method, pattern: r.contrib.Pattern}) }
+	if err := validateRoutePatterns(patterns); err != nil { return nil, err }
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
-	b.WriteString("package web\n\n")
-	b.WriteString("import \"net/http\"\n\n")
-	b.WriteString("// RouteRegistry is the complete set of selected routes. Every pattern is a\n")
-	b.WriteString("// concrete string known before boot, so the reserved-prefix, sitemap, policy,\n")
-	b.WriteString("// and catch-all decisions are all derived from this one table.\n")
+	b.WriteString("package web\n\nimport \"net/http\"\n\n")
 	b.WriteString("var RouteRegistry = []Route{\n")
 	for _, r := range routes {
 		c := r.contrib
-		if !validIdentifier(c.Handler) {
-			return nil, fmt.Errorf("route %s: handler %q is not a Go identifier", c.ID, c.Handler)
-		}
-		if c.Enabled != "" && !validIdentifier(c.Enabled) {
-			return nil, fmt.Errorf("route %s: enabled %q is not a Go identifier", c.ID, c.Enabled)
-		}
-		scope, ok := routeScopeConstant(c.Scope)
-		if !ok {
-			return nil, fmt.Errorf("route %s: scope %q is not a known scope", c.ID, c.Scope)
-		}
-		fmt.Fprintf(&b, "\t{\n\t\tID: %s, Method: %s, Pattern: %s,\n",
-			goString(c.ID), goString(c.Method), goString(c.Pattern))
-		fmt.Fprintf(&b, "\t\tScope: %s,\n", scope)
-		fmt.Fprintf(&b, "\t\tPolicy: %s,\n", routePolicyLiteral(c.Policy))
-		if r.contentType != "" {
-			fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return s.%s(%s) },\n",
-				c.Handler, goString(r.contentType))
-		} else {
-			fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return http.HandlerFunc(s.%s) },\n", c.Handler)
-		}
-		if c.Enabled != "" {
-			fmt.Fprintf(&b, "\t\tEnabled: func(s *Server) bool { return s.%s() },\n", c.Enabled)
-		}
+		if !validIdentifier(c.Handler) { return nil, fmt.Errorf("route %s: handler %q is not a Go identifier", c.ID, c.Handler) }
+		if c.Enabled != "" && !validIdentifier(c.Enabled) { return nil, fmt.Errorf("route %s: enabled %q is not a Go identifier", c.ID, c.Enabled) }
+		scope, ok := routeScopeConstant(c.Scope); if !ok { return nil, fmt.Errorf("route %s: scope %q is not a known scope", c.ID, c.Scope) }
+		fmt.Fprintf(&b, "\t{ID: %s, Method: %s, Pattern: %s, Scope: %s, Policy: %s,\n", goString(c.ID), goString(c.Method), goString(c.Pattern), scope, routePolicyLiteral(c.Policy))
+		if r.contentType != "" { fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return s.%s(%s) },\n", c.Handler, goString(r.contentType)) } else { fmt.Fprintf(&b, "\t\tHandler: func(s *Server) http.Handler { return http.HandlerFunc(s.%s) },\n", c.Handler) }
+		if c.Enabled != "" { fmt.Fprintf(&b, "\t\tEnabled: func(s *Server) bool { return s.%s() },\n", c.Enabled) }
+		if slot, adapter, ok := adapterForModule(graph, r.moduleID); ok { fmt.Fprintf(&b, "\t\tProviderActive: func(s *Server) bool { return providerActive(s.cfg.Env, %q, %q) },\n", slot, adapter) }
 		b.WriteString("\t},\n")
 	}
 	b.WriteString("}\n")
+	emitProviderActiveFunction(&b, lock, graph)
 	_ = ctx
 	return &GeneratedFile{Path: "internal/web/routes_registry_gen.go", Content: b.String()}, nil
 }
 
-// routePolicyLiteral renders only the fields that differ from the zero policy,
-// so a reader sees the decisions a route actually made.
 func routePolicyLiteral(policy RoutePolicy) string {
 	parts := make([]string, 0, 7)
-	if policy.CSRFExempt {
-		parts = append(parts, "CSRFExempt: true")
-		parts = append(parts, "CSRFReason: "+goString(policy.CSRFReason))
-	}
-	if policy.RateExempt {
-		parts = append(parts, "RateExempt: true")
-	}
-	if policy.MaintenanceExempt {
-		parts = append(parts, "MaintenanceExempt: true")
-	}
-	if policy.MaxBodyBytes != 0 {
-		parts = append(parts, fmt.Sprintf("MaxBodyBytes: %d", policy.MaxBodyBytes))
-	}
-	if policy.Idempotent {
-		parts = append(parts, "Idempotent: true")
-	}
-	if policy.AdminWrite {
-		parts = append(parts, "AdminWrite: true")
-	}
-	if len(parts) == 0 {
-		return "RoutePolicy{}"
-	}
+	if policy.CSRFExempt { parts = append(parts, "CSRFExempt: true", "CSRFReason: "+goString(policy.CSRFReason)) }
+	if policy.RateExempt { parts = append(parts, "RateExempt: true") }
+	if policy.MaintenanceExempt { parts = append(parts, "MaintenanceExempt: true") }
+	if policy.MaxBodyBytes != 0 { parts = append(parts, fmt.Sprintf("MaxBodyBytes: %d", policy.MaxBodyBytes)) }
+	if policy.Idempotent { parts = append(parts, "Idempotent: true") }
+	if policy.AdminWrite { parts = append(parts, "AdminWrite: true") }
+	if len(parts) == 0 { return "RoutePolicy{}" }
 	return "RoutePolicy{" + strings.Join(parts, ", ") + "}"
 }
 
@@ -850,54 +767,32 @@ func emitSmokeCases(ctx context.Context, modulePath string, lock Lock, graph []M
 // module carries its own sidebar entry rather than editing a central list.
 func emitChromeRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	nav, err := resolveNavigation(lock, graph)
-	if err != nil {
-		return nil, err
-	}
-
+	if err != nil { return nil, err }
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
+	hasProvider := false
+	for _, entries := range nav { for _, entry := range entries { if _, _, ok := adapterForModule(graph, entry.module); ok { hasProvider = true } } }
 	b.WriteString("package templates\n\n")
-
-	for _, area := range []struct {
-		area NavArea
-		name string
-		note string
-	}{
-		{NavAreaPublic, "PublicNav", "the marketing header"},
-		{NavAreaApp, "AppNav", "the application sidebar"},
-		{NavAreaAdmin, "AdminNav", "the admin sidebar"},
+	if hasProvider { b.WriteString("import \"os\"\n\n") }
+	for _, area := range []struct{ area NavArea; name, note string }{
+		{NavAreaPublic, "PublicNav", "the marketing header"}, {NavAreaApp, "AppNav", "the application sidebar"}, {NavAreaAdmin, "AdminNav", "the admin sidebar"},
 	} {
-		fmt.Fprintf(&b, "// %s is %s, in declared order.\n", area.name, area.note)
-		fmt.Fprintf(&b, "var %s = []NavItem{\n", area.name)
-		for _, entry := range nav[area.area] {
-			b.WriteString("\t" + navItemLiteral(entry) + ",\n")
-		}
+		fmt.Fprintf(&b, "// %s is %s, in declared order.\nvar %s = []NavItem{\n", area.name, area.note, area.name)
+		for _, entry := range nav[area.area] { b.WriteString("\t" + navItemLiteralWithProvider(entry, graph, lock) + ",\n") }
 		b.WriteString("}\n\n")
 	}
-
-	// Footer columns keep their declared grouping; a column exists because a
-	// module put an entry in it.
-	b.WriteString("// FooterColumns are the footer link columns, in declared order.\n")
 	b.WriteString("var FooterColumns = []NavColumn{\n")
 	for _, group := range footerGroups(nav[NavAreaFooter]) {
 		fmt.Fprintf(&b, "\t{TitleKey: %s, Items: []NavItem{\n", goString(group.title))
-		for _, entry := range group.entries {
-			b.WriteString("\t\t" + navItemLiteral(entry) + ",\n")
-		}
+		for _, entry := range group.entries { b.WriteString("\t\t" + navItemLiteralWithProvider(entry, graph, lock) + ",\n") }
 		b.WriteString("\t}},\n")
 	}
-	b.WriteString("}\n\n")
-
-	b.WriteString("// ChromeRegistry is every navigation entry ID in declared order, which is\n")
-	b.WriteString("// what a completeness check compares against.\n")
-	b.WriteString("var ChromeRegistry = []string{\n")
+	b.WriteString("}\n\nvar ChromeRegistry = []string{\n")
 	for _, area := range []NavArea{NavAreaPublic, NavAreaApp, NavAreaAdmin, NavAreaFooter, NavAreaSettings} {
-		for _, entry := range nav[area] {
-			fmt.Fprintf(&b, "\t%s,\n", goString(entry.contrib.ID))
-		}
+		for _, entry := range nav[area] { fmt.Fprintf(&b, "\t%s,\n", goString(entry.contrib.ID)) }
 	}
 	b.WriteString("}\n")
-
+	emitProviderActiveFunction(&b, lock, graph)
 	_ = ctx
 	return &GeneratedFile{Path: "internal/web/templates/chrome_registry_gen.go", Content: b.String()}, nil
 }
@@ -913,15 +808,17 @@ func emitSettingsNavigationRegistry(ctx context.Context, modulePath string, lock
 
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
+	hasProvider := false
+	for _, entry := range nav[NavAreaSettings] { if _, _, ok := adapterForModule(graph, entry.module); ok { hasProvider = true } }
 	b.WriteString("package templates\n\n")
+	if hasProvider { b.WriteString("import \"os\"\n\n") }
 	b.WriteString("// SettingsTab is one settings tab and the conditions under which it is shown.\n")
 	b.WriteString("type SettingsTab struct {\n\tItem  NavItem\n\tRoles []string\n\tFlags []string\n}\n\n")
 	b.WriteString("// SettingsNavigationRegistry is the declared settings tabs in order. Use\n")
 	b.WriteString("// settingsTabs(ctx) to get the subset the current viewer may see.\n")
 	b.WriteString("var SettingsNavigationRegistry = []SettingsTab{\n")
 	for _, entry := range nav[NavAreaSettings] {
-		fmt.Fprintf(&b, "\t{Item: NavItem%s, Roles: %s, Flags: %s},\n",
-			navItemLiteral(entry), goStringSlice(entry.contrib.Roles), goStringSlice(entry.contrib.Flags))
+			fmt.Fprintf(&b, "\t{Item: NavItem%s, Roles: %s, Flags: %s},\n", navItemLiteralWithProvider(entry, graph, lock), goStringSlice(entry.contrib.Roles), goStringSlice(entry.contrib.Flags))
 	}
 	b.WriteString("}\n")
 	_ = ctx
@@ -938,25 +835,25 @@ type navEntry struct {
 
 func navItemLiteral(e navEntry) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "{ID: %s, LabelKey: %s, Href: %s",
-		goString(e.contrib.ID), goString(e.contrib.LabelKey), goString(e.href))
-	// Match is omitted when it equals the href, which is the common leaf case;
-	// the accessor already falls back to Href.
-	if e.contrib.Match != "" && e.contrib.Match != e.href {
-		fmt.Fprintf(&b, ", Match: %s", goString(e.contrib.Match))
-	}
+	fmt.Fprintf(&b, "{ID: %s, LabelKey: %s, Href: %s", goString(e.contrib.ID), goString(e.contrib.LabelKey), goString(e.href))
+	if e.contrib.Match != "" && e.contrib.Match != e.href { fmt.Fprintf(&b, ", Match: %s", goString(e.contrib.Match)) }
 	b.WriteString("}")
 	return b.String()
 }
 
+func navItemLiteralWithProvider(e navEntry, graph []Manifest, lock Lock) string {
+	literal := navItemLiteral(e)
+	if slot, adapter, ok := adapterForModule(graph, e.module); ok {
+		literal = strings.TrimSuffix(literal, "}") + fmt.Sprintf(", ProviderActive: func() bool { return providerActive(os.Getenv(\"APP_ENV\"), %q, %q) }}", slot, adapter)
+	}
+	_ = lock
+	return literal
+}
+
 func goStringSlice(values []string) string {
-	if len(values) == 0 {
-		return "nil"
-	}
+	if len(values) == 0 { return "nil" }
 	parts := make([]string, 0, len(values))
-	for _, v := range values {
-		parts = append(parts, goString(v))
-	}
+	for _, v := range values { parts = append(parts, goString(v)) }
 	return "[]string{" + strings.Join(parts, ", ") + "}"
 }
 
@@ -1149,26 +1046,27 @@ func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, g
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package templates\n\n")
-	b.WriteString("// ShellSlotsRegistry lists shell slot contributions by slot name.\n")
 	b.WriteString("var ShellSlotsRegistry = map[string][]string{\n")
 	bySlot := make(map[string][]string)
+	owners := make(map[string]string)
 	slots := make([]string, 0)
 	for _, m := range orderedModules(lock, graph) {
 		for _, s := range m.Runtime.Slots {
 			key := string(s.Slot)
-			if _, seen := bySlot[key]; !seen {
-				slots = append(slots, key)
-			}
+			if _, seen := bySlot[key]; !seen { slots = append(slots, key) }
 			bySlot[key] = append(bySlot[key], s.ID)
+			owners[s.ID] = m.ID
 		}
 	}
 	sort.Strings(slots)
 	for _, slot := range slots {
 		fmt.Fprintf(&b, "\t%s: []string{\n", goString(slot))
-		for _, id := range bySlot[slot] {
-			fmt.Fprintf(&b, "\t\t%s,\n", goString(id))
-		}
+		for _, id := range bySlot[slot] { fmt.Fprintf(&b, "\t\t%s,\n", goString(id)) }
 		b.WriteString("\t},\n")
+	}
+	b.WriteString("}\n\nvar ShellSlotActive = map[string]func(string) bool{\n")
+	for id, owner := range owners {
+		if slot, adapter, ok := adapterForModule(graph, owner); ok { fmt.Fprintf(&b, "\t%s: func(env string) bool { return providerActive(env, %q, %q) },\n", goString(id), slot, adapter) }
 	}
 	b.WriteString("}\n")
 	_ = ctx
@@ -1889,13 +1787,18 @@ func emitStaticRegistry(ctx context.Context, modulePath string, lock Lock, graph
 		fmt.Fprintf(&b, "\t%s: %s,\n", goString("static/"+a.path), goString(a.module))
 	}
 	b.WriteString("}\n\n")
-
 	b.WriteString("// StaticRegistry lists module-owned static assets in load order.\n")
 	b.WriteString("var StaticRegistry = []string{\n")
+	for _, a := range assets { fmt.Fprintf(&b, "\t%s,\n", goString("static/"+a.path)) }
+	b.WriteString("}\n\n")
+	b.WriteString("var AssetActive = map[string]func(string) bool{\n")
 	for _, a := range assets {
-		fmt.Fprintf(&b, "\t%s,\n", goString("static/"+a.path))
+		if slot, adapter, ok := adapterForModule(graph, a.module); ok {
+			fmt.Fprintf(&b, "\t%s: func(env string) bool { return providerActive(env, %q, %q) },\n", goString("static/"+a.path), slot, adapter)
+		}
 	}
 	b.WriteString("}\n")
+	emitProviderActiveFunction(&b, lock, graph)
 
 	_ = ctx
 	return &GeneratedFile{Path: "static/embed_registry_gen.go", Content: b.String()}, nil
@@ -3061,20 +2964,22 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 	}
 
 	var b strings.Builder
-	b.WriteString(genHeader(modulePath, lock))
-	b.WriteString("package jobs\n\n")
-
-	b.WriteString("// workerDefinitions assembles every selected job declaration. The table names\n")
-	b.WriteString("// declaration constructors and never knows a payload type, so a module's\n")
-	b.WriteString("// handler stays typed while dispatch stays data.\n")
-	b.WriteString("func workerDefinitions(w *Worker) []Definition {\n")
-	b.WriteString("\treturn []Definition{\n")
-	for _, j := range jobs {
-		if !validIdentifier(j.contrib.Handler) {
-			return nil, fmt.Errorf("job %s: handler %q is not a Go identifier", j.contrib.Kind, j.contrib.Handler)
-		}
-		fmt.Fprintf(&b, "\t\tw.%s(),\n", j.contrib.Handler)
+	hasProvider := false
+	for _, module := range graph {
+		if _, _, ok := adapterForModule(graph, module.ID); ok && (len(module.Runtime.Jobs) > 0 || len(module.Runtime.Janitors) > 0) { hasProvider = true }
 	}
+	b.WriteString("package jobs\n\n")
+	if hasProvider { b.WriteString("import \"os\"\n\n") }
+
+	b.WriteString("func workerDefinitions(w *Worker) []Definition {\n")
+	for i, j := range jobs {
+		if !validIdentifier(j.contrib.Handler) { return nil, fmt.Errorf("job %s: handler %q is not a Go identifier", j.contrib.Kind, j.contrib.Handler) }
+		fmt.Fprintf(&b, "\td%d := w.%s()\n", i, j.contrib.Handler)
+		gate := providerGateLiteral(j.moduleID, graph, "os.Getenv(\"APP_ENV\")")
+		if gate != "nil" { fmt.Fprintf(&b, "\td%d.ProviderActive = %s\n", i, gate) }
+	}
+	b.WriteString("\treturn []Definition{\n")
+	for i := range jobs { fmt.Fprintf(&b, "\t\td%d,\n", i) }
 	b.WriteString("\t}\n}\n\n")
 
 	b.WriteString("// SchedulableKinds are the kinds a schedule row may reference. Derived from\n")
@@ -3107,30 +3012,23 @@ func emitJobsRegistry(ctx context.Context, modulePath string, lock Lock, graph [
 	}
 	sort.Slice(janitors, func(i, j int) bool { return janitors[i].contrib.Name < janitors[j].contrib.Name })
 
-	b.WriteString("// workerJanitors is every declared cleanup sweep. The pass runs all of them\n")
-	b.WriteString("// and logs per sweep, so one failing sweep cannot strand the rest.\n")
+	b.WriteString("// workerJanitors is every declared cleanup sweep.\n")
 	b.WriteString("func workerJanitors(w *Worker) []Janitor {\n")
 	b.WriteString("\treturn []Janitor{\n")
 	for _, jn := range janitors {
-		if !validIdentifier(jn.contrib.Handler) {
-			return nil, fmt.Errorf("janitor %s: handler %q is not a Go identifier", jn.contrib.Name, jn.contrib.Handler)
-		}
-		fmt.Fprintf(&b, "\t\t{Name: %s, Sweep: w.%s},\n", goString(jn.contrib.Name), jn.contrib.Handler)
+		if !validIdentifier(jn.contrib.Handler) { return nil, fmt.Errorf("janitor %s: handler %q is not a Go identifier", jn.contrib.Name, jn.contrib.Handler) }
+		gate := providerGateLiteral(jn.moduleID, graph, "os.Getenv(\"APP_ENV\")")
+		if gate == "nil" { fmt.Fprintf(&b, "\t\t{Name: %s, Sweep: w.%s},\n", goString(jn.contrib.Name), jn.contrib.Handler) } else { fmt.Fprintf(&b, "\t\t{Name: %s, Sweep: w.%s, ProviderActive: %s},\n", goString(jn.contrib.Name), jn.contrib.Handler, gate) }
 	}
 	b.WriteString("\t}\n}\n\n")
-
-	b.WriteString("// declaredAttempts is the budget each kind declares. Enqueue helpers write it\n")
-	b.WriteString("// onto the row, and the row is dispatch truth from then on.\n")
 	b.WriteString("var declaredAttempts = map[string]int{\n")
 	for _, j := range jobs {
 		attempts := j.contrib.MaxAttempts
-		if attempts == 0 {
-			attempts = DefaultJobAttempts
-		}
+		if attempts == 0 { attempts = DefaultJobAttempts }
 		fmt.Fprintf(&b, "\t%s: %d,\n", goString(j.contrib.Kind), attempts)
 	}
 	b.WriteString("}\n")
-
+	emitProviderActiveFunction(&b, lock, graph)
 	_ = ctx
 	return &GeneratedFile{Path: "internal/jobs/jobs_registry_gen.go", Content: b.String()}, nil
 }

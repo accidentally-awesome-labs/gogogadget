@@ -60,6 +60,9 @@ type Route struct {
 	// Enabled gates registration. Nil means always registered; a route that is
 	// disabled is never registered at all rather than answering 404 at runtime.
 	Enabled func(*Server) bool
+	// ProviderActive gates routes owned by an adapter. It is evaluated with the
+	// configured environment before the route enters the mux and policy index.
+	ProviderActive func(*Server) bool
 }
 
 // scopeTargets names the mux that carries each scope's guards. A scope is a
@@ -101,15 +104,11 @@ func (t scopeTargets) target(scope Scope) (*http.ServeMux, func(http.Handler) ht
 
 // enabledRoutes returns the routes whose Enabled gate passes. It exists so the
 // policy matcher and the mux are fed the same slice: indexing a route that was
-// never registered makes its declared exemptions resolve for a path that answers
-// 404, which in production left /metrics and the five /debug/pprof/* patterns
-// rate-exempt and maintenance-exempt while being unreachable.
 func enabledRoutes(s *Server, registry []Route) []Route {
 	enabled := make([]Route, 0, len(registry))
 	for _, route := range registry {
-		if route.Enabled != nil && !route.Enabled(s) {
-			continue
-		}
+		if route.ProviderActive != nil && !route.ProviderActive(s) { continue }
+		if route.Enabled != nil && !route.Enabled(s) { continue }
 		enabled = append(enabled, route)
 	}
 	return enabled

@@ -42,6 +42,9 @@ type Definition struct {
 	Schedulable bool
 	MaxAttempts int
 	Handle      func(context.Context, json.RawMessage, Attempt) error
+	// ProviderActive is nil for ordinary jobs and false when an adapter-owned
+	// job is not selected for the current environment.
+	ProviderActive func() bool
 }
 
 // Define declares a job kind with a typed payload. The handler receives its own

@@ -149,6 +149,35 @@ func preflightNamespaces(ctx context.Context, modules []Manifest) error {
 			}
 		}
 	}
+	if err := validateProviderInventory(modules); err != nil { return err }
+	return nil
+}
+
+func validateProviderInventory(modules []Manifest) error {
+	slots := map[string]ProviderSlotContribution{}
+	for _, module := range modules {
+		for _, slot := range module.Runtime.ProviderSlots {
+			if _, exists := slots[slot.ID]; exists { return fmt.Errorf("provider slot %q declared by multiple modules", slot.ID) }
+			slots[slot.ID] = slot
+		}
+	}
+	for _, module := range modules {
+		sys := module.Runtime.System
+		if sys == nil || sys.Adapter == nil { continue }
+		slot, ok := slots[sys.Adapter.Slot]
+		if !ok { return fmt.Errorf("adapter %s references undeclared provider slot %q", module.ID, sys.Adapter.Slot) }
+		want := map[string]string{}
+		for _, capability := range slot.Capabilities { want[capability.Capability] = capability.Type }
+		got := map[string]string{}
+		for _, provide := range sys.Provides {
+			if _, already := got[provide.Capability]; already { return fmt.Errorf("adapter %s provides capability %q more than once", module.ID, provide.Capability) }
+			got[provide.Capability] = provide.Type
+		}
+		if len(want) != len(got) { return fmt.Errorf("adapter %s capability set does not exactly match provider slot %s", module.ID, sys.Adapter.Slot) }
+		for capability, typ := range want {
+			if got[capability] != typ { return fmt.Errorf("adapter %s capability %q type %q does not match slot type %q", module.ID, capability, got[capability], typ) }
+		}
+	}
 	return nil
 }
 

@@ -158,6 +158,7 @@ func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
 	// collaborators callers assign after construction are still picked up.
 	w.definitions = make(map[string]Definition, len(workerDefinitions(w)))
 	for _, d := range workerDefinitions(w) {
+		if d.ProviderActive != nil && !d.ProviderActive() { continue }
 		w.definitions[d.Kind] = d
 	}
 	return w
@@ -241,10 +242,10 @@ func (w *Worker) sleep(ctx context.Context, d time.Duration) {
 }
 
 // Janitor is one declared cleanup sweep. Name is what the operator sees in the
-// log when it fails.
 type Janitor struct {
 	Name  string
 	Sweep func(context.Context) error
+	ProviderActive func() bool
 }
 
 // janitorPass runs every declared sweep. Each is logged independently and a
@@ -264,13 +265,17 @@ func (w *Worker) janitorPass(ctx context.Context) {
 
 func (w *Worker) runJanitors(ctx context.Context, janitors []Janitor) {
 	for _, janitor := range janitors {
-		if err := janitor.Sweep(ctx); err != nil {
-			w.log.Error("janitor", "sweep", janitor.Name, "error", err)
-		}
+		if janitor.ProviderActive != nil && !janitor.ProviderActive() { continue }
+		func() {
+			defer func() {
+				if recovered := recover(); recovered != nil {
+					w.log.Error("janitor panic", "name", janitor.Name, "panic", recovered)
+				}
+			}()
+			if err := janitor.Sweep(ctx); err != nil { w.log.Error("janitor", "name", janitor.Name, "error", err) }
+		}()
 	}
 }
-
-// janitorOldJobs drops finished rows after a week. Owned by system/jobs.
 func (w *Worker) janitorOldJobs(ctx context.Context) error {
 	return w.q.DeleteOldJobs(ctx)
 }

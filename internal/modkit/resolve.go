@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -173,11 +174,11 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			continue
 		}
 		profile, ok := profileByID[id]
-		if !ok {
-			return selectedGraph{}, fmt.Errorf("project selects unknown catalog id %q", id)
-		}
+		if !ok { return selectedGraph{}, fmt.Errorf("project selects unknown catalog id %q", id) }
+		if err := validateProfileProviderParity(profile, moduleByID); err != nil { return selectedGraph{}, err }
 		for _, member := range profile.Members {
-			module := moduleByID[member]
+			module, exists := moduleByID[member]
+			if !exists { return selectedGraph{}, fmt.Errorf("profile %s references missing module %q", profile.ID, member) }
 			_, omitted := excluded[member]
 			if omitted && module.RemovalPolicy != RemovalReplacementRequired {
 				continue
@@ -299,8 +300,8 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 	}
 	return selectedGraph{modules: modules, order: order, reasons: reasons}, nil
 }
-
 func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, modules map[string]Manifest) ([]string, error) {
+
 	indegree := make(map[string]int, len(selected))
 	dependents := make(map[string][]string, len(selected))
 	for id := range selected {
@@ -360,6 +361,10 @@ func stableTopologicalOrder(ctx context.Context, selected map[string]struct{}, m
 
 // RuntimeOrdersFor computes independent runtime DAGs for each environment.
 // Mutually exclusive adapters are intentionally never topologically unioned.
+// In addition to manifest requires, runtime needs create provider-before-
+// consumer edges. This is deliberately separate from the install order:
+// install order contains the complete union while each process branch only
+// constructs one adapter per slot.
 func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) (RuntimeOrders, error) {
 	byID := make(map[string]Manifest, len(modules))
 	for _, module := range modules { byID[module.ID] = module }
@@ -370,17 +375,120 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 		}
 		for slot, choices := range project.Providers {
 			choice := choices.Development
-			if env == "test" { choice = choices.Test }
-			if env == "production" { choice = choices.Production }
-			if _, ok := byID[choice.Adapter]; !ok { return nil, fmt.Errorf("provider %s adapter %q missing", slot, choice.Adapter) }
+			switch env {
+			case "test": choice = choices.Test
+			case "production": choice = choices.Production
+			}
+			adapter, ok := byID[choice.Adapter]
+			if !ok { return nil, fmt.Errorf("provider %s adapter %q missing", slot, choice.Adapter) }
+			if adapter.Runtime.System == nil || adapter.Runtime.System.Adapter == nil ||
+				adapter.Runtime.System.Adapter.Slot != slot {
+				return nil, fmt.Errorf("provider %s adapter %q does not implement slot", slot, choice.Adapter)
+			}
 			selected[choice.Adapter] = struct{}{}
 		}
-		return stableTopologicalOrder(ctx, selected, byID)
+		// Build the standard dependency graph first, then add synthetic edges
+		// from each selected provider to a consumer of its capability.
+		indegree := make(map[string]int, len(selected))
+		dependents := make(map[string][]string, len(selected))
+		edges := make(map[string]map[string]struct{}, len(selected))
+		for id := range selected { indegree[id] = 0; edges[id] = map[string]struct{}{} }
+		addEdge := func(provider, consumer string) {
+			if provider == consumer { return }
+			if _, exists := edges[provider][consumer]; exists { return }
+			edges[provider][consumer] = struct{}{}
+			indegree[consumer]++
+			dependents[provider] = append(dependents[provider], consumer)
+		}
+		for id := range selected {
+			module := byID[id]
+			for _, requirement := range module.Requires {
+				if _, exists := selected[requirement.ID]; !exists {
+					return nil, fmt.Errorf("runtime module %q requires unselected module %q", id, requirement.ID)
+				}
+				addEdge(requirement.ID, id)
+			}
+		}
+		providers := map[string]string{}
+		for id := range selected {
+			module := byID[id]
+			if module.Runtime.System == nil { continue }
+			for _, provide := range module.Runtime.System.Provides {
+				if previous, exists := providers[provide.Capability]; exists && previous != id {
+					// Adapter candidates may share capability names, but only
+					// one is selected in this environment.
+					prev := byID[previous]
+					if prev.Runtime.System == nil || prev.Runtime.System.Adapter == nil {
+						return nil, fmt.Errorf("runtime capability %q has multiple providers", provide.Capability)
+					}
+					continue
+				}
+				providers[provide.Capability] = id
+			}
+		}
+		for id := range selected {
+			module := byID[id]
+			if module.Runtime.System == nil { continue }
+			for _, need := range module.Runtime.System.Needs {
+				provider, ok := providers[need.Capability]
+				if !ok {
+					if need.Optional { continue }
+					return nil, fmt.Errorf("runtime module %q has no provider for capability %q", id, need.Capability)
+				}
+				addEdge(provider, id)
+			}
+		}
+		for id := range dependents { sort.Strings(dependents[id]) }
+		ready := make([]string, 0)
+		for id, degree := range indegree { if degree == 0 { ready = append(ready, id) } }
+		sort.Strings(ready)
+		order := make([]string, 0, len(selected))
+		for len(ready) != 0 {
+			if err := ctx.Err(); err != nil { return nil, err }
+			id := ready[0]; ready = ready[1:]; order = append(order, id)
+			for _, dependent := range dependents[id] {
+				indegree[dependent]--
+				if indegree[dependent] == 0 { ready = append(ready, dependent); sort.Strings(ready) }
+			}
+		}
+		if len(order) != len(selected) {
+			remaining := make([]string, 0)
+			for id, degree := range indegree { if degree != 0 { remaining = append(remaining, id) } }
+			sort.Strings(remaining)
+			return nil, fmt.Errorf("runtime dependency cycle in %s among %s", env, strings.Join(remaining, ", "))
+		}
+		return order, nil
 	}
-	var err error
 	var orders RuntimeOrders
+	var err error
 	if orders.Development, err = build("development"); err != nil { return RuntimeOrders{}, err }
 	if orders.Test, err = build("test"); err != nil { return RuntimeOrders{}, err }
 	if orders.Production, err = build("production"); err != nil { return RuntimeOrders{}, err }
 	return orders, nil
 }
+func validateProfileProviderParity(profile Profile, modules map[string]Manifest) error {
+	declared := map[string]struct{}{}
+	visited := map[string]bool{}
+	var visit func(string) error
+	visit = func(id string) error {
+		if visited[id] { return nil }
+		visited[id] = true
+		module, ok := modules[id]
+		if !ok { return fmt.Errorf("profile %s references missing module %q", profile.ID, id) }
+		for _, slot := range module.Runtime.ProviderSlots { declared[slot.ID] = struct{}{} }
+		for _, requirement := range module.Requires {
+			if err := visit(requirement.ID); err != nil { return err }
+		}
+		return nil
+	}
+	for _, member := range profile.Members { if err := visit(member); err != nil { return err } }
+	want := make([]string, 0, len(declared)); for id := range declared { want = append(want, id) }
+	sort.Strings(want)
+	got := append([]string{}, profile.RequiredProviderSlots...); sort.Strings(got)
+	if !slices.Equal(want, got) { return fmt.Errorf("profile %s required_provider_slots %v do not match member closure %v", profile.ID, got, want) }
+	for slot := range profile.ProviderDefaults {
+		if _, ok := declared[slot]; !ok { return fmt.Errorf("profile %s has provider default for undeclared slot %q", profile.ID, slot) }
+	}
+	return nil
+}
+ 

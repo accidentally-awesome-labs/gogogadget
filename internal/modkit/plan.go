@@ -123,6 +123,7 @@ type Plan struct {
 	Diagnostics    []Diagnostic `json:"diagnostics"`
 	Conflicts      []Conflict   `json:"conflicts"`
 	Staged         []StagedFile `json:"staged"`
+	previousDependencies []LockedDependency
 }
 type plannedAuthoredPayload struct {
 	module  string
@@ -209,6 +210,10 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err := preflightNamespaces(ctx, graph.modules); err != nil {
 		return Plan{}, err
 	}
+	runtimeOrders, err := RuntimeOrdersFor(ctx, graph.modules, desiredProject)
+	if err != nil {
+		return Plan{}, err
+	}
 
 	payloads, err := readPlannedPayloads(ctx, snapshot.FS, graph.modules, e.canonicalModule, modulePath)
 	if err != nil {
@@ -231,21 +236,21 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	finalLock, changes, conflicts, staged, diagnostics, err := reconcilePlannedState(
 		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims,
 	)
-	if err != nil {
-		return Plan{}, err
-	}
+	if err != nil { return Plan{}, err }
+	finalLock.RuntimeOrders = runtimeOrders
 	effective, err := EffectiveDependencies(graph.modules)
 	if err != nil { return Plan{}, fmt.Errorf("resolve dependencies: %w", err) }
-	finalLock.Dependencies = make([]LockedDependency, 0, len(effective.Go))
-	for _, dependency := range effective.Go {
-		owners := []string{}
-		for _, module := range graph.modules {
-			for _, declared := range module.Dependencies.Go {
-				if declared.Module == dependency.Module { owners = append(owners, module.ID); break }
-			}
+	finalLock.Dependencies = plannedDependencies(canonicalRoot, existingLock.Dependencies, graph.modules, effective.Go)
+	if e.generator != nil {
+		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: snapshot.Commit, ModulePath: modulePath,
+			Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...)}
+		generated, renderErr := e.generator.Render(ctx, preview)
+		if renderErr != nil { return Plan{}, fmt.Errorf("render generated imports: %w", renderErr) }
+		sources := make([]string, 0, len(generated))
+		for _, file := range generated {
+			if strings.HasSuffix(file.Path, ".go") { sources = append(sources, file.Content) }
 		}
-		sort.Strings(owners)
-		finalLock.Dependencies = append(finalLock.Dependencies, LockedDependency{Module: dependency.Module, ManagedVersion: dependency.Version, Owners: owners})
+		if err := ValidateDeclaredImports(authored, sources, declaredImports); err != nil { return Plan{}, err }
 	}
 	if !reflect.DeepEqual(currentProject, desiredProject) {
 		intentContent, err := MarshalProject(desiredProject)
@@ -279,8 +284,10 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		Operation: operation, Root: canonicalRoot, RegistryCommit: snapshot.Commit, ModulePath: modulePath,
 		Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...), Order: order,
 		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: staged,
+		previousDependencies: append([]LockedDependency{}, existingLock.Dependencies...),
 	}, nil
 }
+
 
 func moduleNamespace(id string) string {
 	namespace, _, _, ok := splitScopedModuleID(id)
@@ -342,6 +349,36 @@ func canonicalProjectRoot(root string) (string, error) {
 		return "", fmt.Errorf("project root is not a directory")
 	}
 	return canonical, nil
+}
+// plannedDependencies records effective owners and preserves the baseline
+// needed to distinguish managed requirements from user-owned requirements.
+func plannedDependencies(root string, previous []LockedDependency, modules []Manifest, effective []GoDependency) []LockedDependency {
+	previousBy := make(map[string]LockedDependency, len(previous))
+	for _, dep := range previous { previousBy[dep.Module] = dep }
+	current := map[string]string{}
+	if data, err := os.ReadFile(filepath.Join(root, "go.mod")); err == nil {
+		if file, err := modfile.Parse("go.mod", data, nil); err == nil {
+			for _, req := range file.Require { current[req.Mod.Path] = req.Mod.Version }
+		}
+	}
+	owners := make(map[string][]string)
+	for _, module := range modules {
+		for _, dependency := range module.Dependencies.Go {
+			owners[dependency.Module] = append(owners[dependency.Module], module.ID)
+		}
+	}
+	out := make([]LockedDependency, 0, len(effective))
+	for _, dependency := range effective {
+		sort.Strings(owners[dependency.Module])
+		locked := LockedDependency{Module: dependency.Module, ManagedVersion: dependency.Version, Owners: append([]string{}, owners[dependency.Module]...)}
+		if prior, ok := previousBy[dependency.Module]; ok {
+			locked.Preexisting, locked.BaselineVersion = prior.Preexisting, prior.BaselineVersion
+		} else if version, ok := current[dependency.Module]; ok {
+			locked.Preexisting, locked.BaselineVersion = true, version
+		}
+		out = append(out, locked)
+	}
+	return out
 }
 
 // normalizedClaims validates and de-duplicates the claimed paths. A claim names

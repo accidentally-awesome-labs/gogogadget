@@ -15,8 +15,10 @@ type NavItem struct {
 	// itself against.
 	ID                    string
 	LabelKey, Href, Match string
+	// ProviderActive is nil for ordinary contributions and false when an
+	// adapter is inactive in the current environment.
+	ProviderActive func() bool
 }
-
 // MatchPath is the prefix navCurrent compares the request path against.
 func (n NavItem) MatchPath() string {
 	if n.Match != "" {
