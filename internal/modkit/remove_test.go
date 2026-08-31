@@ -17,7 +17,7 @@ func removalRegistries(t *testing.T) (fstest.MapFS, fstest.MapFS) {
 	t.Helper()
 	first := plannerRegistry(t)
 	optionalV1 := []byte("package optional\n\nconst Version = 1\n")
-	optional := testLockedModule("page/optional", sha256Hex(optionalV1)).Manifest
+	optional := testLockedModule("ggg/page/optional", sha256Hex(optionalV1)).Manifest
 	optional.Files = []ManifestFile{{
 		Source: "registry/modules/page/optional/optional.go", Target: "internal/modules/optional.go",
 		Class: FileClassGo, SHA256: sha256Hex(optionalV1), Contract: true,
@@ -34,9 +34,9 @@ func installedRemovalProject(t *testing.T) (string, *Engine, fstest.MapFS) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -54,18 +54,18 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 		if err != nil {
 			t.Fatalf("read optional: %v", err)
 		}
-		plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+		plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 		if err != nil {
 			t.Fatalf("Plan(remove): %v", err)
 		}
 		change := plannedChange(t, plan, "internal/modules/optional.go")
-		if change.Kind != ChangeDelete || change.Class != DestinationAuthored || change.Module != "page/optional" {
+		if change.Kind != ChangeDelete || change.Class != DestinationAuthored || change.Module != "ggg/page/optional" {
 			t.Fatalf("removal change = %#v", change)
 		}
 		if change.SHA256 != sha256Hex(before) {
 			t.Fatalf("removal digest = %q, want pristine digest", change.SHA256)
 		}
-		if slices.Contains(plan.Project.Modules, "page/optional") || len(plan.Project.Exclude) != 0 {
+		if slices.Contains(plan.Project.Modules, "ggg/page/optional") || len(plan.Project.Exclude) != 0 {
 			t.Fatalf("removal intent = modules %v exclude %v", plan.Project.Modules, plan.Project.Exclude)
 		}
 		intent := plannedChange(t, plan, "gogogadget.json")
@@ -74,7 +74,7 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 		}
 		var tombstone *LockedModule
 		for i := range plan.Lock.Modules {
-			if plan.Lock.Modules[i].ID == "page/optional" {
+			if plan.Lock.Modules[i].ID == "ggg/page/optional" {
 				tombstone = &plan.Lock.Modules[i]
 			}
 		}
@@ -84,18 +84,18 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 		if len(tombstone.Files) != 0 || tombstone.Pending != nil {
 			t.Fatalf("tombstone = %#v", tombstone)
 		}
-		if !slices.Contains(plan.Lock.Order, "page/optional") {
+		if !slices.Contains(plan.Lock.Order, "ggg/page/optional") {
 			t.Fatalf("lock order omits tombstone: %v", plan.Lock.Order)
 		}
 		for _, module := range plan.Lock.Modules {
-			if module.ID == "component/card" && module.SourceCommit != testCommitA {
+			if module.ID == "ggg/component/card" && module.SourceCommit != testCommitA {
 				t.Fatalf("remaining module advanced: %#v", module)
 			}
 		}
 		if _, err := os.Stat(filepath.Join(root, "internal/modules/optional.go")); err != nil {
 			t.Fatalf("Plan deleted files from disk: %v", err)
 		}
-		if slices.Contains(plan.Resolved, "page/optional") || !slices.Contains(plan.Order, "page/optional") {
+		if slices.Contains(plan.Resolved, "ggg/page/optional") || !slices.Contains(plan.Order, "ggg/page/optional") {
 			t.Fatalf("removal resolved/order = %v / %v", plan.Resolved, plan.Order)
 		}
 	})
@@ -103,11 +103,11 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 	t.Run("profile-supplied member moves to exclude", func(t *testing.T) {
 		first, _ := removalRegistries(t)
 		putJSON(t, first, "registry/profiles/full.json", ProfileDocument{
-			Schema: 1,
+			Schema: 2,
 			Profile: Profile{
-				ID: "profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
+				ID: "ggg/profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
 				Title: "Full", Description: "Full catalog.",
-				Members: []string{"component/card", "element/button", "page/optional"},
+				Members: []string{"ggg/component/card", "ggg/element/button", "ggg/page/optional"},
 			},
 		})
 		source := refSource{snapshots: map[string]Snapshot{
@@ -115,9 +115,9 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"profile/full"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/profile/full"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -125,14 +125,14 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 			t.Fatalf("Plan(initial): %v", err)
 		}
 		materializeConflictPlan(t, root, initial)
-		plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+		plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 		if err != nil {
 			t.Fatalf("Plan(remove): %v", err)
 		}
-		if !slices.Equal(plan.Project.Modules, []string{"profile/full"}) {
+		if !slices.Equal(plan.Project.Modules, []string{"ggg/profile/full"}) {
 			t.Fatalf("modules mutated: %v", plan.Project.Modules)
 		}
-		if !slices.Equal(plan.Project.Exclude, []string{"page/optional"}) {
+		if !slices.Equal(plan.Project.Exclude, []string{"ggg/page/optional"}) {
 			t.Fatalf("exclude = %v, want [page/optional]", plan.Project.Exclude)
 		}
 	})
@@ -141,7 +141,7 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 	t.Run("reverse dependency", func(t *testing.T) {
 		root, engine, _ := installedRemovalProject(t)
-		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"element/button"}})
+		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/element/button"}})
 		if err == nil || !strings.Contains(err.Error(), "required by") {
 			t.Fatalf("Plan error = %v, want reverse-dependency refusal", err)
 		}
@@ -150,7 +150,7 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 	t.Run("modified owned file", func(t *testing.T) {
 		root, engine, _ := installedRemovalProject(t)
 		writeTestFile(t, root, "internal/modules/optional.go", []byte("local edit"))
-		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 		if err == nil || !strings.Contains(err.Error(), "ggg diff page/optional") {
 			t.Fatalf("Plan error = %v, want modified-file refusal naming ggg diff", err)
 		}
@@ -161,7 +161,7 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 		if err := os.Remove(filepath.Join(root, "internal/modules/optional.go")); err != nil {
 			t.Fatalf("remove optional: %v", err)
 		}
-		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 		if err == nil || !strings.Contains(err.Error(), "missing") {
 			t.Fatalf("Plan error = %v, want missing-file refusal", err)
 		}
@@ -172,7 +172,7 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove}); err == nil || !strings.Contains(err.Error(), "at least one") {
 			t.Fatalf("Plan(remove none) error = %v", err)
 		}
-		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/missing"}}); err == nil || !strings.Contains(err.Error(), "not installed") {
+		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/missing"}}); err == nil || !strings.Contains(err.Error(), "not installed") {
 			t.Fatalf("Plan(remove unknown) error = %v", err)
 		}
 	})
@@ -189,10 +189,10 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 			t.Fatalf("ParseLock: %v", err)
 		}
 		for i := range lock.Modules {
-			if lock.Modules[i].ID == "element/button" {
+			if lock.Modules[i].ID == "ggg/element/button" {
 				lock.Modules[i].Manifest.RemovalPolicy = RemovalReplacementRequired
 			}
-			if lock.Modules[i].ID == "page/optional" {
+			if lock.Modules[i].ID == "ggg/page/optional" {
 				lock.Modules[i].Manifest.RemovalPolicy = RemovalMajorVersionOnly
 			}
 		}
@@ -201,25 +201,25 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 			t.Fatalf("MarshalLock: %v", err)
 		}
 		writeTestFile(t, root, "gogogadget.lock.json", mutated)
-		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}}); err == nil || !strings.Contains(err.Error(), "major") {
+		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}}); err == nil || !strings.Contains(err.Error(), "major") {
 			t.Fatalf("Plan(major-only) error = %v", err)
 		}
-		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"component/card", "element/button"}}); err == nil || !strings.Contains(err.Error(), "replacement") {
+		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/component/card", "ggg/element/button"}}); err == nil || !strings.Contains(err.Error(), "replacement") {
 			t.Fatalf("Plan(replacement) error = %v", err)
 		}
 	})
 
 	t.Run("registry ref and missing lock refusals", func(t *testing.T) {
 		root, engine, _ := installedRemovalProject(t)
-		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}, RegistryRef: "v2"}); err == nil || !strings.Contains(err.Error(), "registry ref") {
+		if _, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}, RegistryRef: "v2"}); err == nil || !strings.Contains(err.Error(), "registry ref") {
 			t.Fatalf("Plan(remove with ref) error = %v", err)
 		}
 		bare := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"component/card"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 		})
-		if _, err := engine.Plan(context.Background(), bare, Operation{Kind: OpRemove, Modules: []string{"component/card"}}); err == nil || !strings.Contains(err.Error(), "existing gogogadget.lock.json") {
+		if _, err := engine.Plan(context.Background(), bare, Operation{Kind: OpRemove, Modules: []string{"ggg/component/card"}}); err == nil || !strings.Contains(err.Error(), "existing gogogadget.lock.json") {
 			t.Fatalf("Plan(remove without lock) error = %v", err)
 		}
 	})
@@ -230,7 +230,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	migrationContent := []byte("-- optional forward\nSELECT 1;\n")
 	migrationSource := "registry/modules/page/optional/migrations/optional-forward.sql"
 	first[migrationSource] = &fstest.MapFile{Data: migrationContent}
-	mutatePlannerModule(t, first, "page/optional", func(module *Manifest) {
+	mutatePlannerModule(t, first, "ggg/page/optional", func(module *Manifest) {
 		module.Migrations = []ManifestMigration{{
 			ID: "optional-forward", Kind: MigrationImmutable, Source: migrationSource, SHA256: sha256Hex(migrationContent),
 		}}
@@ -240,9 +240,9 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -255,7 +255,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 		t.Fatalf("initial migration missing: %v", err)
 	}
 
-	remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+	remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(remove): %v", err)
 	}
@@ -266,7 +266,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	}
 	var tombstone *LockedModule
 	for i := range remove.Lock.Modules {
-		if remove.Lock.Modules[i].ID == "page/optional" {
+		if remove.Lock.Modules[i].ID == "ggg/page/optional" {
 			tombstone = &remove.Lock.Modules[i]
 		}
 	}
@@ -282,7 +282,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	}
 	var syncedTombstone *LockedModule
 	for i := range synced.Lock.Modules {
-		if synced.Lock.Modules[i].ID == "page/optional" {
+		if synced.Lock.Modules[i].ID == "ggg/page/optional" {
 			syncedTombstone = &synced.Lock.Modules[i]
 		}
 	}
@@ -290,11 +290,11 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 		len(syncedTombstone.Migrations) != 1 || syncedTombstone.Migrations[0].Number != 1 {
 		t.Fatalf("sync dropped or damaged the tombstone: %#v", syncedTombstone)
 	}
-	if slices.Contains(synced.Resolved, "page/optional") || !slices.Contains(synced.Lock.Order, "page/optional") {
+	if slices.Contains(synced.Resolved, "ggg/page/optional") || !slices.Contains(synced.Lock.Order, "ggg/page/optional") {
 		t.Fatalf("post-removal sync resolved/order = %v / %v", synced.Resolved, synced.Lock.Order)
 	}
 	materializeConflictPlan(t, root, synced)
-	readd, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"page/optional"}})
+	readd, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(re-add): %v", err)
 	}
@@ -303,7 +303,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 		t.Fatalf("re-added migration change = %#v, want unchanged at the retained number", ledger)
 	}
 	for _, module := range readd.Lock.Modules {
-		if module.ID == "page/optional" && (len(module.Migrations) != 1 || module.Migrations[0].Number != 1) {
+		if module.ID == "ggg/page/optional" && (len(module.Migrations) != 1 || module.Migrations[0].Number != 1) {
 			t.Fatalf("re-added migrations = %#v", module.Migrations)
 		}
 	}
@@ -314,7 +314,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		t.Helper()
 		first, _ := removalRegistries(t)
 		drainV1 := []byte("package drain\n")
-		drain := testLockedModule("workflow/drain", sha256Hex(drainV1)).Manifest
+		drain := testLockedModule("ggg/workflow/drain", sha256Hex(drainV1)).Manifest
 		drain.RemovalPolicy = RemovalDrainRequired
 		drain.Files = []ManifestFile{{
 			Source: "registry/modules/workflow/drain/drain.go", Target: "internal/modules/drain.go",
@@ -347,9 +347,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"component/card", "workflow/drain"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -357,7 +357,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			t.Fatalf("Plan(initial): %v", err)
 		}
 		materializeConflictPlan(t, root, initial)
-		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"workflow/drain"}})
+		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err == nil || !strings.Contains(err.Error(), "drain-required") {
 			t.Fatalf("Plan error = %v, want drain-required refusal naming neutralization", err)
 		}
@@ -370,9 +370,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"component/card", "workflow/drain"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -381,7 +381,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}
 		materializeConflictPlan(t, root, initial)
 
-		remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"workflow/drain"}})
+		remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(remove drain): %v", err)
 		}
@@ -399,7 +399,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}
 		var tombstone *LockedModule
 		for i := range remove.Lock.Modules {
-			if remove.Lock.Modules[i].ID == "workflow/drain" {
+			if remove.Lock.Modules[i].ID == "ggg/workflow/drain" {
 				tombstone = &remove.Lock.Modules[i]
 			}
 		}
@@ -408,7 +408,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}
 		materializeConflictPlan(t, root, remove)
 
-		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"workflow/drain"}})
+		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err == nil || !strings.Contains(err.Error(), "not installed") {
 			t.Fatalf("Plan(remove twice) error = %v, want already-removed refusal", err)
 		}
@@ -421,9 +421,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"component/card", "workflow/drain"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -431,7 +431,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			t.Fatalf("Plan(initial): %v", err)
 		}
 		materializeConflictPlan(t, root, initial)
-		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"workflow/drain"}, Offline: true})
+		_, err = engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}, Offline: true})
 		if err == nil || !strings.Contains(err.Error(), "offline") {
 			t.Fatalf("Plan(offline drain) error = %v, want offline refusal", err)
 		}
@@ -444,9 +444,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"component/card", "workflow/drain"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -455,7 +455,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}
 		materializeConflictPlan(t, root, initial)
 		remove, err := engine.Plan(context.Background(), root, Operation{
-			Kind: OpRemove, Modules: []string{"workflow/drain"}, PurgeData: true,
+			Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}, PurgeData: true,
 		})
 		if err != nil {
 			t.Fatalf("Plan(remove purge): %v", err)
@@ -470,7 +470,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}
 		var tombstone *LockedModule
 		for i := range remove.Lock.Modules {
-			if remove.Lock.Modules[i].ID == "workflow/drain" {
+			if remove.Lock.Modules[i].ID == "ggg/workflow/drain" {
 				tombstone = &remove.Lock.Modules[i]
 			}
 		}
@@ -487,9 +487,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-			Modules:  []string{"component/card", "workflow/drain"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -497,23 +497,23 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			t.Fatalf("Plan(initial): %v", err)
 		}
 		materializeConflictPlan(t, root, initial)
-		removePlan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"workflow/drain"}})
+		removePlan, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(remove): %v", err)
 		}
 		materializeConflictPlan(t, root, removePlan)
-		readd, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"workflow/drain"}})
+		readd, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(re-add): %v", err)
 		}
 		materializeConflictPlan(t, root, readd)
-		second, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"workflow/drain"}})
+		second, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/workflow/drain"}})
 		if err != nil {
 			t.Fatalf("Plan(remove again): %v", err)
 		}
 		var tombstone *LockedModule
 		for i := range second.Lock.Modules {
-			if second.Lock.Modules[i].ID == "workflow/drain" {
+			if second.Lock.Modules[i].ID == "ggg/workflow/drain" {
 				tombstone = &second.Lock.Modules[i]
 			}
 		}
@@ -535,9 +535,9 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 		testCommitB: {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "element/button", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/element/button", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -546,7 +546,7 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 	}
 	materializeConflictPlan(t, root, initial)
 
-	remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+	remove, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(remove): %v", err)
 	}
@@ -564,23 +564,23 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 	materializeConflictPlan(t, root, update)
 
 	// Resolving one of two conflicts keeps the clone-lock branch.
-	partial, err := engine.ResolveConflict(context.Background(), root, "element/button", "internal/modules/button.go", ResolutionAcceptUpstream)
+	partial, err := engine.ResolveConflict(context.Background(), root, "ggg/element/button", "internal/modules/button.go", ResolutionAcceptUpstream)
 	if err != nil {
 		t.Fatalf("ResolveConflict(partial): %v", err)
 	}
-	if slices.Contains(partial.Resolved, "page/optional") || !slices.Contains(partial.Order, "page/optional") {
+	if slices.Contains(partial.Resolved, "ggg/page/optional") || !slices.Contains(partial.Order, "ggg/page/optional") {
 		t.Fatalf("partial resolved/order = %v / %v", partial.Resolved, partial.Order)
 	}
 
 	// Resolving the final conflict runs the recomputed-graph branch.
-	final, err := engine.ResolveConflict(context.Background(), root, "element/button", "internal/modules/button_helper.go", ResolutionAcceptUpstream)
+	final, err := engine.ResolveConflict(context.Background(), root, "ggg/element/button", "internal/modules/button_helper.go", ResolutionAcceptUpstream)
 	if err != nil {
 		t.Fatalf("ResolveConflict(final): %v", err)
 	}
-	if slices.Contains(final.Resolved, "page/optional") || !slices.Contains(final.Order, "page/optional") {
+	if slices.Contains(final.Resolved, "ggg/page/optional") || !slices.Contains(final.Order, "ggg/page/optional") {
 		t.Fatalf("final resolved/order = %v / %v", final.Resolved, final.Order)
 	}
-	if slices.Contains(final.Lock.Order, "page/optional") == false {
+	if slices.Contains(final.Lock.Order, "ggg/page/optional") == false {
 		t.Fatalf("final lock order omits tombstone: %v", final.Lock.Order)
 	}
 }

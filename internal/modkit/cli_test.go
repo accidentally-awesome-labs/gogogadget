@@ -53,11 +53,11 @@ func TestCLIRejectsUnknownAndMalformedCommands(t *testing.T) {
 		{"unknown command", []string{"frobnicate"}},
 		{"version takes no args", []string{"version", "extra"}},
 		{"info needs an id", []string{"info"}},
-		{"info takes one id", []string{"info", "element/button", "element/card"}},
+		{"info takes one id", []string{"info", "ggg/element/button", "ggg/element/card"}},
 		{"add needs ids", []string{"add"}},
 		{"remove needs ids", []string{"remove"}},
-		{"resolve needs a mode", []string{"resolve", "element/button", "--path", "x.go"}},
-		{"resolve rejects two modes", []string{"resolve", "element/button", "--path", "x.go", "--keep-local", "--accept-upstream"}},
+		{"resolve needs a mode", []string{"resolve", "ggg/element/button", "--path", "x.go"}},
+		{"resolve rejects two modes", []string{"resolve", "ggg/element/button", "--path", "x.go", "--keep-local", "--accept-upstream"}},
 		{"registry needs a subcommand", []string{"registry"}},
 		{"registry rejects unknown subcommand", []string{"registry", "demolish"}},
 		{"unknown flag", []string{"sync", "--nope"}},
@@ -179,7 +179,7 @@ func TestCLIDryRunLeavesIntentUntouched(t *testing.T) {
 		t.Fatalf("read intent: %v", err)
 	}
 
-	_ = cli.Run(context.Background(), []string{"add", "page/optional", "--dry-run"})
+	_ = cli.Run(context.Background(), []string{"add", "ggg/page/optional", "--dry-run"})
 
 	after, err := os.ReadFile(intentPath)
 	if err != nil {
@@ -214,10 +214,10 @@ func TestCLICatalogListsRegistry(t *testing.T) {
 	if err := cli.Run(context.Background(), []string{"catalog", "--kind", "component", "--json"}); err != nil {
 		t.Fatalf("catalog: %v", err)
 	}
-	if !strings.Contains(out.String(), "component/") {
+	if !strings.Contains(out.String(), "ggg/component/") {
 		t.Fatalf("catalog --kind component listed nothing: %s", out.String())
 	}
-	if strings.Contains(out.String(), "\"element/") {
+	if strings.Contains(out.String(), "\"ggg/element/") {
 		t.Fatalf("catalog --kind component leaked other kinds: %s", out.String())
 	}
 }
@@ -227,10 +227,10 @@ func TestCLIInfoReportsModuleContract(t *testing.T) {
 	root, engine := cliProject(t)
 	var out bytes.Buffer
 	cli := CLI{Out: &out, Root: root, Engine: engine}
-	if err := cli.Run(context.Background(), []string{"info", "component/card", "--json"}); err != nil {
+	if err := cli.Run(context.Background(), []string{"info", "ggg/component/card", "--json"}); err != nil {
 		t.Fatalf("info: %v", err)
 	}
-	for _, want := range []string{"component/card", "requires", "files", "removal_policy"} {
+	for _, want := range []string{"ggg/component/card", "requires", "files", "removal_policy"} {
 		if !strings.Contains(out.String(), want) {
 			t.Fatalf("info output missing %q: %s", want, out.String())
 		}
@@ -249,19 +249,19 @@ func mustCLIEngine(t *testing.T) *Engine {
 func TestCLIRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":1,"includes":[`+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[`+
 		`"registry/elements.json","registry/components.json","registry/pages.json",`+
 		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
 	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
 		singular := strings.TrimSuffix(kind, "s")
 		writeTestFile(t, root, "registry/"+kind+".json",
-			[]byte(`{"schema":1,"kind":"`+singular+`","items":[]}`))
+			[]byte(`{"schema":2,"kind":"`+singular+`","items":[]}`))
 	}
-	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":1,"kind":"profile","items":[]}`))
+	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":2,"kind":"profile","items":[]}`))
 
 	// A module document that no index mentions yet.
-	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1,"module":{
-		"id":"system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":2,"module":{
+		"id":"ggg/system/widget","kind":"system","name":"widget","revision":1,"contract":1,
 		"title":"Widget","description":"A widget system.","requires":[],"files":[],
 		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
 		"data":[],"removal_policy":"free"}}`))
@@ -292,16 +292,16 @@ func TestCLIRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
 func TestCLIResolvesSelfHostedRegistryFromTree(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":1,"includes":[`+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[`+
 		`"registry/elements.json","registry/components.json","registry/pages.json",`+
 		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
 	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
 		writeTestFile(t, root, "registry/"+kind+".json",
-			[]byte(`{"schema":1,"kind":"`+strings.TrimSuffix(kind, "s")+`","items":[]}`))
+			[]byte(`{"schema":2,"kind":"`+strings.TrimSuffix(kind, "s")+`","items":[]}`))
 	}
-	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":1,"kind":"profile","items":[]}`))
-	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1,"module":{
-		"id":"system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":2,"kind":"profile","items":[]}`))
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":2,"module":{
+		"id":"ggg/system/widget","kind":"system","name":"widget","revision":1,"contract":1,
 		"title":"Widget","description":"A widget system.","requires":[],"files":[],
 		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
 		"data":[],"removal_policy":"free"}}`))
@@ -376,9 +376,9 @@ func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
 func TestCLISyncClaimsDivergentFileDuringAdoption(t *testing.T) {
 	root, engine := cliProject(t)
 	intent, err := MarshalProject(Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/page/optional"}, Exclude: []string{},
 	})
 	if err != nil {
 		t.Fatalf("MarshalProject: %v", err)
@@ -453,19 +453,19 @@ func TestCLISyncClaimsDivergentFileDuringAdoption(t *testing.T) {
 func TestCLIRegistryBuildRefreshesPayloadDigests(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":1,"includes":[`+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[`+
 		`"registry/elements.json","registry/components.json","registry/pages.json",`+
 		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
 	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
 		writeTestFile(t, root, "registry/"+kind+".json",
-			[]byte(`{"schema":1,"kind":"`+strings.TrimSuffix(kind, "s")+`","items":[]}`))
+			[]byte(`{"schema":2,"kind":"`+strings.TrimSuffix(kind, "s")+`","items":[]}`))
 	}
-	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":1,"kind":"profile","items":[]}`))
+	writeTestFile(t, root, "registry/profiles.json", []byte(`{"schema":2,"kind":"profile","items":[]}`))
 
 	payload := []byte("package widget\n\nconst Version = 1\n")
 	writeTestFile(t, root, "internal/widget/widget.go", payload)
-	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1,"module":{
-		"id":"system/widget","kind":"system","name":"widget","revision":1,"contract":1,
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":2,"module":{
+		"id":"ggg/system/widget","kind":"system","name":"widget","revision":1,"contract":1,
 		"title":"Widget","description":"A widget system.","requires":[],
 		"files":[{"source":"internal/widget/widget.go","target":"internal/widget/widget.go",
 		          "class":"go","sha256":"`+sha256Hex(payload)+`","rewrite_module":true,"contract":true}],
@@ -510,7 +510,7 @@ func TestCLIRegistryBuildRefreshesPayloadDigests(t *testing.T) {
 // drift from the routes that serve them.
 func TestSurfaceLinksAndVerificationCommandsAreDerived(t *testing.T) {
 	m := Manifest{
-		ID: "component/confirm-action",
+		ID: "ggg/component/confirm-action",
 		Runtime: RuntimeContributions{
 			UI:        []UIContribution{{Name: "confirm-action", Family: "overlays"}},
 			Scenarios: []ScenarioContribution{{Slug: "billing"}},
@@ -544,10 +544,10 @@ func TestSurfaceLinksAndVerificationCommandsAreDerived(t *testing.T) {
 // than absent keys, so a consumer can distinguish "no surface" from "field not
 // implemented".
 func TestSurfaceLinksAreEmptyNotMissing(t *testing.T) {
-	links := surfaceLinks(Manifest{ID: "system/observability"})
+	links := surfaceLinks(Manifest{ID: "ggg/system/observability"})
 	assert.NotNil(t, links)
 	assert.Empty(t, links)
-	assert.Empty(t, verificationCommands(Manifest{ID: "system/observability"}))
+	assert.Empty(t, verificationCommands(Manifest{ID: "ggg/system/observability"}))
 }
 
 // The CLI must actually carry both, or the derivation is unreachable.
@@ -555,7 +555,7 @@ func TestCLIInfoCarriesLinksAndVerify(t *testing.T) {
 	root, engine := cliProject(t)
 	var out bytes.Buffer
 	cli := CLI{Out: &out, Root: root, Engine: engine}
-	if err := cli.Run(context.Background(), []string{"info", "component/card", "--json"}); err != nil {
+	if err := cli.Run(context.Background(), []string{"info", "ggg/component/card", "--json"}); err != nil {
 		t.Fatalf("info: %v", err)
 	}
 	var payload map[string]json.RawMessage
@@ -577,7 +577,7 @@ func TestCLIInfoCarriesLinksAndVerify(t *testing.T) {
 func TestDiffIgnoresGeneratedTargets(t *testing.T) {
 	entries := []DiffEntry{}
 	lock := Lock{Modules: []LockedModule{{
-		ID: "system/static",
+		ID: "ggg/system/static",
 		Files: []LockedFile{
 			{Path: "static/app.css", State: FileGenerated, BaseSHA256: ""},
 			{Path: "internal/thing.go", State: FileClean, BaseSHA256: "abc"},
@@ -618,7 +618,7 @@ func TestRegistryBuildRecordsNoDigestForGeneratedPayloads(t *testing.T) {
 		assert.Emptyf(t, file.SHA256,
 			"%s is generated, so its digest is never verified; recording one is churn that rewrites this manifest on every build", file.Target)
 	}
-	require.Positive(t, generated, "system/static declares no generated payload, so this proves nothing")
+	require.Positive(t, generated, "ggg/system/static declares no generated payload, so this proves nothing")
 }
 
 func repoRootFromTest(t *testing.T) string {

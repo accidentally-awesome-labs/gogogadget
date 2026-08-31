@@ -35,12 +35,12 @@ const CanonicalPath = "github.com/gogogadget/gogogadget/not-an-import"
 
 var _ = modkit.OpSync
 `)
-	button := testLockedModule("element/button", sha256Hex(buttonContent)).Manifest
+	button := testLockedModule("ggg/element/button", sha256Hex(buttonContent)).Manifest
 	button.Files = []ManifestFile{{
 		Source: "registry/modules/element/button/button.go", Target: "internal/modules/button.go",
 		Class: FileClassGo, SHA256: sha256Hex(buttonContent), RewriteModule: true, Contract: true,
 	}}
-	putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: button})
+	putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: button})
 	files[button.Files[0].Source] = &fstest.MapFile{Data: buttonContent}
 
 	cardContent := []byte(`package ui
@@ -53,23 +53,25 @@ templ Card() {
 	<div data-source="github.com/gogogadget/gogogadget/not-an-import">Card</div>
 }
 `)
-	card := testLockedModule("component/card", sha256Hex(cardContent)).Manifest
-	card.Requires = []string{"element/button"}
+	card := testLockedModule("ggg/component/card", sha256Hex(cardContent)).Manifest
+	card.Requires = []Requirement{{ID: "ggg/element/button", Contract: ContractBounds{Min: 1, Max: 1}},}
 	card.Files = []ManifestFile{{
 		Source: "registry/modules/component/card/card.templ", Target: "internal/web/templates/ui/card.templ",
 		Class: FileClassTempl, SHA256: sha256Hex(cardContent), RewriteModule: true, Contract: true,
 	}}
-	putJSON(t, files, "registry/modules/component/card/module.json", ModuleDocument{Schema: 1, Module: card})
+	putJSON(t, files, "registry/modules/component/card/module.json", ModuleDocument{Schema: 2, Module: card})
 	files[card.Files[0].Source] = &fstest.MapFile{Data: cardContent}
 	putJSON(t, files, "registry/components.json", CatalogIndex{
-		Schema: 1, Kind: CatalogComponent, Items: []string{"registry/modules/component/card/module.json"},
+		Schema: 2, Kind: CatalogComponent, Items: []string{"registry/modules/component/card/module.json"},
 	})
 	return files
 }
 
 func mutatePlannerModule(t *testing.T, files fstest.MapFS, id string, mutate func(*Manifest)) {
 	t.Helper()
-	kind, name, ok := strings.Cut(id, "/")
+	parts := strings.Split(id, "/")
+	if len(parts) != 3 { t.Fatalf("invalid module id %q", id) }
+	kind, name, ok := parts[1], parts[2], true
 	if !ok {
 		t.Fatalf("invalid module id %q", id)
 	}
@@ -116,7 +118,7 @@ func addPlannerModule(t *testing.T, files fstest.MapFS, manifest Manifest, conte
 	}
 	kind := string(manifest.Kind)
 	itemPath := "registry/modules/" + kind + "/" + manifest.Name + "/module.json"
-	putJSON(t, files, itemPath, ModuleDocument{Schema: 1, Module: manifest})
+	putJSON(t, files, itemPath, ModuleDocument{Schema: 2, Module: manifest})
 	files[manifest.Files[0].Source] = &fstest.MapFile{Data: content}
 
 	indexPath := "registry/" + kind + "s.json"
@@ -148,12 +150,9 @@ func materializePlanFixture(t *testing.T, root string, plan Plan) {
 func TestEnginePlanResolvesClosureAndRewritesImportsWithoutWriting(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 1,
-		Registry: ProjectRegistry{
-			Repository: "local/registry",
-			Ref:        "main",
-		},
-		Modules: []string{"component/card"},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/component/card"},
 		Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
@@ -168,7 +167,7 @@ func TestEnginePlanResolvesClosureAndRewritesImportsWithoutWriting(t *testing.T)
 	if got, want := first.ModulePath, "example.com/acme/app"; got != want {
 		t.Fatalf("module path = %q, want %q", got, want)
 	}
-	wantOrder := []string{"element/button", "component/card"}
+	wantOrder := []string{"ggg/element/button", "ggg/component/card"}
 	if !slices.Equal(first.Order, wantOrder) || !slices.Equal(first.Resolved, wantOrder) {
 		t.Fatalf("order/resolved = %v/%v, want %v", first.Order, first.Resolved, wantOrder)
 	}
@@ -204,7 +203,7 @@ func TestEnginePlanResolvesClosureAndRewritesImportsWithoutWriting(t *testing.T)
 	}
 	var lockedButton LockedModule
 	for _, module := range lock.Modules {
-		if module.ID == "element/button" {
+		if module.ID == "ggg/element/button" {
 			lockedButton = module
 		}
 	}
@@ -239,8 +238,8 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 		{
 			name: "dependency cycle",
 			mutate: func(t *testing.T, files fstest.MapFS) {
-				mutatePlannerModule(t, files, "element/button", func(module *Manifest) {
-					module.Requires = []string{"component/card"}
+				mutatePlannerModule(t, files, "ggg/element/button", func(module *Manifest) {
+					module.Requires = []Requirement{{ID: "ggg/component/card", Contract: ContractBounds{Min: 1, Max: 1}},}
 				})
 			},
 			want: "cycle",
@@ -255,7 +254,7 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 		{
 			name: "owned target collision",
 			mutate: func(t *testing.T, files fstest.MapFS) {
-				mutatePlannerModule(t, files, "component/card", func(module *Manifest) {
+				mutatePlannerModule(t, files, "ggg/component/card", func(module *Manifest) {
 					module.Files[0].Target = "internal/modules/button.go"
 				})
 			},
@@ -264,13 +263,13 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 		{
 			name: "GET HEAD wildcard route collision",
 			mutate: func(t *testing.T, files fstest.MapFS) {
-				mutatePlannerModule(t, files, "element/button", func(module *Manifest) {
+				mutatePlannerModule(t, files, "ggg/element/button", func(module *Manifest) {
 					module.Runtime.Routes = []RouteContribution{{
 						ID: "button.show", Method: "GET", Pattern: "/items/{id}", Scope: RoutePublic,
 						Policy: RoutePolicy{}, Package: "example.com/acme/web", Handler: "Button",
 					}}
 				})
-				mutatePlannerModule(t, files, "component/card", func(module *Manifest) {
+				mutatePlannerModule(t, files, "ggg/component/card", func(module *Manifest) {
 					module.Runtime.Routes = []RouteContribution{{
 						ID: "card.show", Method: "HEAD", Pattern: "/items/{slug}", Scope: RoutePublic,
 						Policy: RoutePolicy{}, Package: "example.com/acme/web", Handler: "Card",
@@ -282,7 +281,7 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 		{
 			name: "environment claim collision",
 			mutate: func(t *testing.T, files fstest.MapFS) {
-				for _, id := range []string{"element/button", "component/card"} {
+				for _, id := range []string{"ggg/element/button", "ggg/component/card"} {
 					mutatePlannerModule(t, files, id, func(module *Manifest) {
 						module.Claims.Environment = []string{"SHARED_ENV"}
 					})
@@ -293,13 +292,13 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 		{
 			name: "content route collision",
 			mutate: func(t *testing.T, files fstest.MapFS) {
-				mutatePlannerModule(t, files, "element/button", func(module *Manifest) {
+				mutatePlannerModule(t, files, "ggg/element/button", func(module *Manifest) {
 					module.Runtime.Routes = []RouteContribution{{
 						ID: "blog.route", Method: "GET", Pattern: "/blog", Scope: RoutePublic,
 						Policy: RoutePolicy{}, Package: "example.com/acme/web", Handler: "Blog",
 					}}
 				})
-				mutatePlannerModule(t, files, "component/card", func(module *Manifest) {
+				mutatePlannerModule(t, files, "ggg/component/card", func(module *Manifest) {
 					module.Runtime.ContentTypes = []ContentTypeContribution{{
 						ID: "blog", Mode: ContentModePages, Paths: []string{"/blog"},
 						Package: "example.com/acme/content", Handler: "Blog",
@@ -315,9 +314,9 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 			registry := plannerRegistry(t)
 			tt.mutate(t, registry)
 			root := writeTargetProject(t, "example.com/acme/app", Project{
-				Schema:   1,
-				Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-				Modules:  []string{"component/card"}, Exclude: []string{},
+				Schema: 2,
+				Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+				Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 			})
 			engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
 			_, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -333,15 +332,15 @@ func TestEnginePlanAllocatesMigrationNumbers(t *testing.T) {
 	migrationContent := []byte("-- forward-only\nSELECT 1;\n")
 	migrationSource := "registry/modules/component/card/migrations/card-forward.sql"
 	registry[migrationSource] = &fstest.MapFile{Data: migrationContent}
-	mutatePlannerModule(t, registry, "component/card", func(module *Manifest) {
+	mutatePlannerModule(t, registry, "ggg/component/card", func(module *Manifest) {
 		module.Migrations = []ManifestMigration{{
 			ID: "card-forward", Kind: MigrationImmutable, Source: migrationSource, SHA256: sha256Hex(migrationContent),
 		}}
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	writeTestFile(t, root, "internal/db/migrations/0007_existing.sql", []byte("-- existing\n"))
 	if err := os.MkdirAll(filepath.Join(root, "internal/db/migrations/0099_scratch.sql"), 0o755); err != nil {
@@ -354,7 +353,7 @@ func TestEnginePlanAllocatesMigrationNumbers(t *testing.T) {
 		t.Fatalf("Plan: %v", err)
 	}
 	migration := plannedChange(t, plan, "internal/db/migrations/0008_card_forward.sql")
-	if migration.Class != DestinationMigration || migration.Module != "component/card" {
+	if migration.Class != DestinationMigration || migration.Module != "ggg/component/card" {
 		t.Fatalf("migration change = class %q module %q", migration.Class, migration.Module)
 	}
 	if !slices.Equal(migration.Content, migrationContent) {
@@ -377,7 +376,7 @@ func TestEnginePlanProfileExclusionsAndReasons(t *testing.T) {
 	registry := plannerRegistry(t)
 
 	optionalContent := []byte("package optional\n")
-	optional := testLockedModule("page/optional", sha256Hex(optionalContent)).Manifest
+	optional := testLockedModule("ggg/page/optional", sha256Hex(optionalContent)).Manifest
 	optional.Files = []ManifestFile{{
 		Source: "registry/modules/page/optional/optional.go", Target: "internal/modules/optional.go",
 		Class: FileClassGo, SHA256: sha256Hex(optionalContent),
@@ -385,7 +384,7 @@ func TestEnginePlanProfileExclusionsAndReasons(t *testing.T) {
 	addPlannerModule(t, registry, optional, optionalContent)
 
 	coreContent := []byte("package core\n")
-	core := testLockedModule("system/core", sha256Hex(coreContent)).Manifest
+	core := testLockedModule("ggg/system/core", sha256Hex(coreContent)).Manifest
 	core.RemovalPolicy = RemovalReplacementRequired
 	core.Files = []ManifestFile{{
 		Source: "registry/modules/system/core/core.go", Target: "internal/modules/core.go",
@@ -394,28 +393,28 @@ func TestEnginePlanProfileExclusionsAndReasons(t *testing.T) {
 	addPlannerModule(t, registry, core, coreContent)
 
 	putJSON(t, registry, "registry/profiles/full.json", ProfileDocument{
-		Schema: 1,
+		Schema: 2,
 		Profile: Profile{
-			ID: "profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
+			ID: "ggg/profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
 			Title: "Full", Description: "Every module.",
-			Members: []string{"component/card", "element/button", "page/optional", "system/core"},
+			Members: []string{"ggg/component/card", "ggg/element/button", "ggg/page/optional", "ggg/system/core"},
 		},
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"profile/full"},
-		Exclude:  []string{"element/button", "page/optional", "system/core"},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/profile/full"},
+		Exclude:  []string{"ggg/element/button", "ggg/page/optional", "ggg/system/core"},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
 	plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
 	if err != nil {
 		t.Fatalf("Plan: %v", err)
 	}
-	if slices.Contains(plan.Resolved, "page/optional") {
+	if slices.Contains(plan.Resolved, "ggg/page/optional") {
 		t.Fatalf("excluded free module remains resolved: %v", plan.Resolved)
 	}
-	for _, id := range []string{"component/card", "element/button", "system/core"} {
+	for _, id := range []string{"ggg/component/card", "ggg/element/button", "ggg/system/core"} {
 		if !slices.Contains(plan.Resolved, id) {
 			t.Fatalf("resolved modules %v omit %s", plan.Resolved, id)
 		}
@@ -424,22 +423,22 @@ func TestEnginePlanProfileExclusionsAndReasons(t *testing.T) {
 	for _, module := range plan.Lock.Modules {
 		reasons[module.ID] = module.Reason
 	}
-	if got, want := reasons["component/card"], "profile"; got != want {
+	if got, want := reasons["ggg/component/card"], "profile"; got != want {
 		t.Fatalf("card reason = %q, want %q", got, want)
 	}
-	if got, want := reasons["element/button"], "dependency"; got != want {
+	if got, want := reasons["ggg/element/button"], "dependency"; got != want {
 		t.Fatalf("button reason = %q, want %q", got, want)
 	}
-	if got, want := reasons["system/core"], "profile"; got != want {
+	if got, want := reasons["ggg/system/core"], "profile"; got != want {
 		t.Fatalf("core reason = %q, want %q", got, want)
 	}
 }
 
 func TestEnginePlanClassifiesDestinationStates(t *testing.T) {
 	project := Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 	}
 
 	t.Run("unchanged and upstream update", func(t *testing.T) {
@@ -464,7 +463,7 @@ func TestEnginePlanClassifiesDestinationStates(t *testing.T) {
 		updated := plannerRegistry(t)
 		updatedContent := []byte("package button\n\nconst Updated = true\n")
 		updated["registry/modules/element/button/button.go"].Data = updatedContent
-		mutatePlannerModule(t, updated, "element/button", func(module *Manifest) {
+		mutatePlannerModule(t, updated, "ggg/element/button", func(module *Manifest) {
 			module.Files[0].SHA256 = sha256Hex(updatedContent)
 			module.Files[0].RewriteModule = false
 		})
@@ -514,7 +513,7 @@ func TestEnginePlanClassifiesDestinationStates(t *testing.T) {
 			}
 		}
 		for _, module := range second.Lock.Modules {
-			if module.ID == "element/button" && module.Files[0].State != FileModified {
+			if module.ID == "ggg/element/button" && module.Files[0].State != FileModified {
 				t.Fatalf("local edit state = %q, want modified", module.Files[0].State)
 			}
 		}
@@ -542,15 +541,15 @@ func TestEnginePlanPreservesImmutableMigrationMapping(t *testing.T) {
 	migrationSource := "registry/modules/component/card/migrations/card-forward.sql"
 	original := []byte("-- immutable\nSELECT 1;\n")
 	registry[migrationSource] = &fstest.MapFile{Data: original}
-	mutatePlannerModule(t, registry, "component/card", func(module *Manifest) {
+	mutatePlannerModule(t, registry, "ggg/component/card", func(module *Manifest) {
 		module.Migrations = []ManifestMigration{{
 			ID: "card-forward", Kind: MigrationImmutable, Source: migrationSource, SHA256: sha256Hex(original),
 		}}
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	writeTestFile(t, root, "internal/db/migrations/0007_existing.sql", []byte("-- existing\n"))
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
@@ -571,7 +570,7 @@ func TestEnginePlanPreservesImmutableMigrationMapping(t *testing.T) {
 	changed := plannerRegistry(t)
 	changedContent := []byte("-- changed\nSELECT 2;\n")
 	changed[migrationSource] = &fstest.MapFile{Data: changedContent}
-	mutatePlannerModule(t, changed, "component/card", func(module *Manifest) {
+	mutatePlannerModule(t, changed, "ggg/component/card", func(module *Manifest) {
 		module.Migrations = []ManifestMigration{{
 			ID: "card-forward", Kind: MigrationImmutable, Source: migrationSource, SHA256: sha256Hex(changedContent),
 		}}
@@ -586,9 +585,9 @@ func TestEnginePlanPreservesImmutableMigrationMapping(t *testing.T) {
 func TestEnginePlanRejectsRetainedMigrationTargetCollision(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
 	first, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -598,7 +597,7 @@ func TestEnginePlanRejectsRetainedMigrationTargetCollision(t *testing.T) {
 	materializePlanFixture(t, root, first)
 	lock := first.Lock
 	for i := range lock.Modules {
-		if lock.Modules[i].ID == "element/button" {
+		if lock.Modules[i].ID == "ggg/element/button" {
 			lock.Modules[i].Migrations = []LockedMigration{{
 				ID: "retained", Number: 3, Path: "internal/web/templates/ui/card.templ", SHA256: testDigestA,
 			}}
@@ -618,9 +617,9 @@ func TestEnginePlanRejectsRetainedMigrationTargetCollision(t *testing.T) {
 func TestEnginePlanRejectsRetainedMigrationReservedTarget(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
 	first, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})

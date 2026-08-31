@@ -60,8 +60,8 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 			t.Fatalf("healthy report = ok %t findings %#v", report.Ok, report.Findings)
 		}
 		wantFindings := []HealthFinding{
-			{Code: "module_pinned", Severity: "warn", Module: "component/card"},
-			{Code: "conflict_pending", Severity: "warn", Module: "element/button", Path: "internal/modules/button.go"},
+			{Code: "module_pinned", Severity: "warn", Module: "ggg/component/card"},
+			{Code: "conflict_pending", Severity: "warn", Module: "ggg/element/button", Path: "internal/modules/button.go"},
 		}
 		if len(report.Findings) != len(wantFindings) {
 			t.Fatalf("healthy findings = %#v, want %#v", report.Findings, wantFindings)
@@ -105,7 +105,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 			t.Fatalf("missing-candidate report = ok %t findings %#v", report.Ok, report.Findings)
 		}
 		finding := findFinding(t, report, "candidate_missing")
-		if finding.Module != "element/button" || finding.Path != conflict.CandidatePath {
+		if finding.Module != "ggg/element/button" || finding.Path != conflict.CandidatePath {
 			t.Fatalf("finding = %#v", finding)
 		}
 		if !strings.Contains(finding.Message, testCommitB) {
@@ -125,7 +125,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		if report.Ok {
 			t.Fatalf("tampered-candidate report = ok %t findings %#v", report.Ok, report.Findings)
 		}
-		if finding := findFinding(t, report, "candidate_mismatch"); finding.Module != "element/button" {
+		if finding := findFinding(t, report, "candidate_mismatch"); finding.Module != "ggg/element/button" {
 			t.Fatalf("finding = %#v", finding)
 		}
 	})
@@ -183,9 +183,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 			"v2": {Commit: testCommitB, FS: secondRegistry},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-			Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -243,7 +243,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		if !report.Ok {
 			t.Fatalf("stale target should stay a warning: %#v", report.Findings)
 		}
-		if finding := findFinding(t, report, "conflict_stale"); finding.Module != "element/button" {
+		if finding := findFinding(t, report, "conflict_stale"); finding.Module != "ggg/element/button" {
 			t.Fatalf("finding = %#v", finding)
 		}
 	})
@@ -251,9 +251,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("missing lock", func(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-			Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
 		report, err := engine.Health(context.Background(), root)
@@ -268,11 +268,11 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("invalid lock", func(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-			Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
-		writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":1,`))
+		writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":2,`))
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
 		report, err := engine.Health(context.Background(), root)
 		if err != nil {
@@ -298,9 +298,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("clean lock without pending state", func(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-			Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -334,7 +334,7 @@ func TestUpdateRematerializesMissingCandidates(t *testing.T) {
 
 	pendingCommit := ""
 	for _, module := range fixture.plan.Lock.Modules {
-		if module.ID == "element/button" && module.Pending != nil {
+		if module.ID == "ggg/element/button" && module.Pending != nil {
 			pendingCommit = module.Pending.RegistryCommit
 		}
 	}

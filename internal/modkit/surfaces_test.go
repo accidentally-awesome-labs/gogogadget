@@ -17,7 +17,7 @@ import (
 func surfaceFixture() (Lock, []Manifest) {
 	mods := []Manifest{
 		{
-			ID: "page/dev-gallery", Kind: ModulePage, Name: "dev-gallery", Revision: 1, Contract: 1,
+			ID: "ggg/page/dev-gallery", Kind: ModulePage, Name: "dev-gallery", Revision: 1, Contract: 1,
 			Runtime: RuntimeContributions{
 				Scenarios: []ScenarioContribution{
 					{
@@ -35,7 +35,7 @@ func surfaceFixture() (Lock, []Manifest) {
 			},
 		},
 		{
-			ID: "page/projects", Kind: ModulePage, Name: "projects", Revision: 1, Contract: 1,
+			ID: "ggg/page/projects", Kind: ModulePage, Name: "projects", Revision: 1, Contract: 1,
 			Personas: []PersonaContribution{{ID: "pro", User: "user_pro", Org: "org_pro", Role: "org:admin"}},
 			Runtime: RuntimeContributions{
 				Visual: []VisualContribution{
@@ -48,8 +48,8 @@ func surfaceFixture() (Lock, []Manifest) {
 		},
 	}
 	lock := Lock{
-		Order:   []string{"page/dev-gallery", "page/projects"},
-		Modules: []LockedModule{{ID: "page/dev-gallery"}, {ID: "page/projects"}},
+		Order:   []string{"ggg/page/dev-gallery", "ggg/page/projects"},
+		Modules: []LockedModule{{ID: "ggg/page/dev-gallery"}, {ID: "ggg/page/projects"}},
 	}
 	return lock, mods
 }

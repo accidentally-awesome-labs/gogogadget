@@ -97,12 +97,12 @@ func TestExampleClosuresCoverEveryKindInDependencyOrder(t *testing.T) {
 		installed := make([]string, 0, len(closure.modules))
 		for _, module := range closure.modules {
 			for _, required := range module.Requires {
-				if _, isExample := exampleIDs(closures)[required]; !isExample {
+				if _, isExample := exampleIDs(closures)[required.ID]; !isExample {
 					continue
 				}
-				if !slices.Contains(installed, required) {
+				if !slices.Contains(installed, required.ID) {
 					t.Fatalf("closure %s installs %s before its dependency %s",
-						closure.root.ID, module.ID, required)
+						closure.root.ID, module.ID, required.ID)
 				}
 			}
 			installed = append(installed, module.ID)
@@ -137,16 +137,16 @@ func exampleIDs(closures []exampleClosure) map[string]struct{} {
 // the wrong reason.
 func TestExampleWithMissingDependencyIsRefused(t *testing.T) {
 	registry := copyExampleRegistry(t)
-	mutateExampleManifest(t, registry, "element/example-token", func(m *Manifest) {
-		m.Requires = append(m.Requires, "element/example-missing")
-		slices.Sort(m.Requires)
+	mutateExampleManifest(t, registry, "ggg/element/example-token", func(m *Manifest) {
+		m.Requires = append(m.Requires, Requirement{ID: "ggg/element/example-missing", Contract: ContractBounds{Min: 1, Max: 1}})
+		slices.SortFunc(m.Requires, func(a, b Requirement) int { return strings.Compare(a.ID, b.ID) })
 	})
 
-	_, err := planAgainstExampleRegistry(t, registry, "element/example-token")
+	_, err := planAgainstExampleRegistry(t, registry, "ggg/element/example-token")
 	if err == nil {
 		t.Fatal("planning a closure with an undeclared dependency succeeded")
 	}
-	const want = `required module "element/example-missing" is not present in the catalog`
+	const want = `required module "ggg/element/example-missing" is not present in the catalog`
 	if !strings.Contains(err.Error(), want) {
 		t.Fatalf("error = %q, want it to contain %q", err, want)
 	}
@@ -154,7 +154,7 @@ func TestExampleWithMissingDependencyIsRefused(t *testing.T) {
 
 func TestExampleClaimingGeneratedOutputIsRefused(t *testing.T) {
 	registry := copyExampleRegistry(t)
-	mutateExampleManifest(t, registry, "element/example-token", func(m *Manifest) {
+	mutateExampleManifest(t, registry, "ggg/element/example-token", func(m *Manifest) {
 		for i := range m.Files {
 			if m.Files[i].Class == FileClassGo {
 				m.Files[i].Target = "internal/web/templates/ui/example_token_templ.go"
@@ -162,7 +162,7 @@ func TestExampleClaimingGeneratedOutputIsRefused(t *testing.T) {
 		}
 	})
 
-	_, err := planAgainstExampleRegistry(t, registry, "element/example-token")
+	_, err := planAgainstExampleRegistry(t, registry, "ggg/element/example-token")
 	if err == nil {
 		t.Fatal("planning a module that authors a generated output succeeded")
 	}
@@ -205,7 +205,9 @@ func copyExampleRegistry(t *testing.T) string {
 
 func mutateExampleManifest(t *testing.T, registry, id string, mutate func(*Manifest)) {
 	t.Helper()
-	kind, name, ok := strings.Cut(id, "/")
+	parts := strings.Split(id, "/")
+	if len(parts) != 3 { t.Fatalf("invalid module id %q", id) }
+	kind, name, ok := parts[1], parts[2], true
 	if !ok {
 		t.Fatalf("invalid module id %q", id)
 	}
@@ -234,8 +236,8 @@ func mutateExampleManifest(t *testing.T, registry, id string, mutate func(*Manif
 func planAgainstExampleRegistry(t *testing.T, registry, id string) (Plan, error) {
 	t.Helper()
 	root := writeTargetProject(t, "example.test/derivative", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/examples", Ref: "main"},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules:  []string{id},
 		Exclude:  []string{},
 	})

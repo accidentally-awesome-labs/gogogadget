@@ -65,9 +65,9 @@ func installTwoModules(t *testing.T) (string, *Engine, Plan) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -170,7 +170,7 @@ func TestApplyRestoresPreRunAuthoredBytesOnFailure(t *testing.T) {
 	changed, _ := removalRegistries(t)
 	newOptional := []byte("package optional\n\nconst Version = 99\n")
 	changed["registry/modules/page/optional/optional.go"] = &fstest.MapFile{Data: newOptional}
-	mutatePlannerModule(t, changed, "page/optional", func(module *Manifest) {
+	mutatePlannerModule(t, changed, "ggg/page/optional", func(module *Manifest) {
 		module.Revision = 2
 		module.Files[0].SHA256 = sha256Hex(newOptional)
 	})
@@ -234,7 +234,7 @@ const scenarioRegistryPath = "internal/web/templates/scenarios_gen.go"
 func scenarioRemovalProject(t *testing.T) (string, *Engine) {
 	t.Helper()
 	first, _ := removalRegistries(t)
-	mutatePlannerModule(t, first, "page/optional", func(module *Manifest) {
+	mutatePlannerModule(t, first, "ggg/page/optional", func(module *Manifest) {
 		module.Runtime.Scenarios = []ScenarioContribution{{
 			Slug: "optional", Title: "Optional", Summary: "Fixture scenario.",
 			Layout: "app", Surfaces: []string{"card"}, States: []string{"default"},
@@ -245,9 +245,9 @@ func scenarioRemovalProject(t *testing.T) (string, *Engine) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	return root, New(Options{Source: source, Generator: RegistryGenerator{}})
 }
@@ -271,7 +271,7 @@ func TestApplyDeletesAggregatesTheGraphNoLongerOwns(t *testing.T) {
 		t.Fatalf("install did not render %s: %v", scenarioRegistryPath, err)
 	}
 
-	remove, err := engine.Plan(ctx, root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+	remove, err := engine.Plan(ctx, root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(remove): %v", err)
 	}
@@ -314,7 +314,7 @@ func TestApplyRestoresDeletedAggregateOnFailure(t *testing.T) {
 		t.Fatalf("read aggregate: %v", err)
 	}
 
-	remove, err := engine.Plan(ctx, root, Operation{Kind: OpRemove, Modules: []string{"page/optional"}})
+	remove, err := engine.Plan(ctx, root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
 	if err != nil {
 		t.Fatalf("Plan(remove): %v", err)
 	}
@@ -401,7 +401,7 @@ func TestApplyRollbackRestoresOriginalMode(t *testing.T) {
 	changed, _ := removalRegistries(t)
 	newOptional := []byte("package optional\n\nconst Version = 99\n")
 	changed["registry/modules/page/optional/optional.go"] = &fstest.MapFile{Data: newOptional}
-	mutatePlannerModule(t, changed, "page/optional", func(module *Manifest) {
+	mutatePlannerModule(t, changed, "ggg/page/optional", func(module *Manifest) {
 		module.Revision = 2
 		module.Files[0].SHA256 = sha256Hex(newOptional)
 	})
@@ -439,7 +439,7 @@ func TestApplyReportsIncompleteRollback(t *testing.T) {
 	changed, _ := removalRegistries(t)
 	newOptional := []byte("package optional\n\nconst Version = 99\n")
 	changed["registry/modules/page/optional/optional.go"] = &fstest.MapFile{Data: newOptional}
-	mutatePlannerModule(t, changed, "page/optional", func(module *Manifest) {
+	mutatePlannerModule(t, changed, "ggg/page/optional", func(module *Manifest) {
 		module.Revision = 2
 		module.Files[0].SHA256 = sha256Hex(newOptional)
 	})

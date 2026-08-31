@@ -15,10 +15,9 @@ const (
 )
 
 func testLockedModule(id, digest string) LockedModule {
-	kind, name, ok := strings.Cut(id, "/")
-	if !ok {
-		panic("invalid test module id")
-	}
+	parts := strings.Split(id, "/")
+	if len(parts) != 3 { panic("invalid test module id") }
+	_, kind, name := parts[0], parts[1], parts[2]
 	source := "registry/modules/" + kind + "/" + name + "/" + name + ".go"
 	target := "internal/modules/" + name + ".go"
 	manifestFile := ManifestFile{
@@ -31,7 +30,7 @@ func testLockedModule(id, digest string) LockedModule {
 		ID:           id,
 		Revision:     1,
 		Contract:     1,
-		SourceCommit: testCommitA,
+		RegistryNamespace: "ggg", SnapshotSHA256: testCommitA, SourceCommit: testCommitA,
 		Reason:       "explicit",
 		RequiredBy:   []string{},
 		Manifest: Manifest{
@@ -42,7 +41,8 @@ func testLockedModule(id, digest string) LockedModule {
 			Contract:      1,
 			Title:         name,
 			Description:   "Test module " + name + ".",
-			Requires:      []string{},
+			Requires:      []Requirement{},
+			Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
 			Files:         []ManifestFile{manifestFile},
 			Claims:        NamespaceClaims{},
 			Runtime:       RuntimeContributions{},
@@ -65,12 +65,12 @@ func testLockedModule(id, digest string) LockedModule {
 }
 
 func testTwoModuleLock() Lock {
-	base := testLockedModule("element/base", testDigestA)
-	consumer := testLockedModule("component/consumer", testDigestB)
-	consumer.Manifest.Requires = []string{base.ID}
+	base := testLockedModule("ggg/element/base", testDigestA)
+	consumer := testLockedModule("ggg/component/consumer", testDigestB)
+	consumer.Manifest.Requires = []Requirement{{ID: base.ID, Contract: ContractBounds{Min: 1, Max: 1}},}
 	base.RequiredBy = []string{consumer.ID}
 	return Lock{
-		Schema:         1,
+		Schema: 2,
 		RegistryCommit: testCommitA,
 		Order:          []string{base.ID, consumer.ID},
 		Modules:        []LockedModule{consumer, base},
@@ -122,12 +122,9 @@ func pendingTestLock() Lock {
 
 func TestMarshalProjectPreservesEmptyArrays(t *testing.T) {
 	project := Project{
-		Schema: 1,
-		Registry: ProjectRegistry{
-			Repository: "gogogadget/gogogadget",
-			Ref:        "main",
-		},
-		Modules: []string{"profile/full"},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/profile/full"},
 		Exclude: []string{},
 	}
 
@@ -159,7 +156,7 @@ func TestParseLockRejectsInconsistentReverseDependencies(t *testing.T) {
 
 	t.Run("unknown reverse dependent", func(t *testing.T) {
 		lock := testTwoModuleLock()
-		lock.Modules[1].RequiredBy = []string{"workflow/missing"}
+		lock.Modules[1].RequiredBy = []string{"ggg/workflow/missing"}
 		_, err := ParseLock(marshalLockJSON(t, lock))
 		if err == nil || !strings.Contains(err.Error(), "required_by") {
 			t.Fatalf("ParseLock error = %v, want required_by mismatch", err)
@@ -309,7 +306,7 @@ func TestMarshalLockCanonicalizesWithoutMutation(t *testing.T) {
 		t.Fatalf("ParseLock(MarshalLock): %v", err)
 	}
 	gotConsumer := canonical.Modules[0]
-	if got, want := gotConsumer.ID, "component/consumer"; got != want {
+	if got, want := gotConsumer.ID, "ggg/component/consumer"; got != want {
 		t.Fatalf("first canonical module = %q, want %q", got, want)
 	}
 	if got, want := gotConsumer.Files[0].Path, "internal/modules/a.go"; got != want {
@@ -330,7 +327,7 @@ func TestMarshalLockCanonicalizesWithoutMutation(t *testing.T) {
 	if got, want := gotConsumer.Manifest.Tests.Capabilities[0], "a"; got != want {
 		t.Fatalf("first canonical test capability = %q, want %q", got, want)
 	}
-	if got, want := lock.Modules[0].ID, "element/base"; got != want {
+	if got, want := lock.Modules[0].ID, "ggg/element/base"; got != want {
 		t.Fatalf("MarshalLock mutated caller module order: first = %q", got)
 	}
 	if got, want := lock.Modules[1].Manifest.Files[0].Target, "internal/modules/z.go"; got != want {

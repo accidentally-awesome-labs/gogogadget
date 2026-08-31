@@ -142,9 +142,9 @@ func TestEveryUIRendererIsIndependentlyInstallable(t *testing.T) {
 
 		// The module id must name what it installs, so a reader of
 		// gogogadget.json can tell which component a line selects.
-		kind := "component/"
+		kind := "ggg/component/"
 		if m.Manifest.Kind == modkit.ModuleElement {
-			kind = "element/"
+			kind = "ggg/element/"
 		}
 		require.True(t, strings.HasPrefix(m.ID, kind),
 			"%s declares kind %s but its id says otherwise", m.ID, m.Manifest.Kind)
@@ -160,11 +160,11 @@ func TestSharedUIContractsBelongToCore(t *testing.T) {
 
 	var core *modkit.LockedModule
 	for i := range lock.Modules {
-		if lock.Modules[i].ID == "element/ui-core" {
+		if lock.Modules[i].ID == "ggg/element/ui-core" {
 			core = &lock.Modules[i]
 		}
 	}
-	require.NotNil(t, core, "element/ui-core must exist")
+	require.NotNil(t, core, "ggg/element/ui-core must exist")
 
 	owned := map[string]bool{}
 	for _, f := range core.Manifest.Files {
@@ -183,8 +183,11 @@ func TestSharedUIContractsBelongToCore(t *testing.T) {
 		if len(m.Manifest.Runtime.UI) == 0 {
 			continue
 		}
-		assert.Contains(t, m.Manifest.Requires, "element/ui-core",
-			"%s uses shared types but does not require element/ui-core", m.ID)
+		found := false
+		for _, requirement := range m.Manifest.Requires {
+			if requirement.ID == "ggg/element/ui-core" { found = true; break }
+		}
+		assert.Truef(t, found, "%s uses shared types but does not require element/ui-core", m.ID)
 	}
 }
 

@@ -66,7 +66,7 @@ func testArchive(t *testing.T, files map[string]string) []byte {
 
 func TestDirectorySourceResolvesContentAddressedSnapshot(t *testing.T) {
 	root := t.TempDir()
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2}`))
 	writeTestFile(t, root, "registry/file.txt", []byte("alpha"))
 
 	source := DirectorySource{Root: root}
@@ -136,7 +136,7 @@ func TestDirectorySourceResolvesContentAddressedSnapshot(t *testing.T) {
 
 func TestGitHubSourceResolvesAndCachesArchive(t *testing.T) {
 	archive := testArchive(t, map[string]string{
-		"widgets-" + testCommitA + "/registry.json": `{"schema":1}`,
+		"widgets-" + testCommitA + "/registry.json": `{"schema":2}`,
 		"widgets-" + testCommitA + "/registry/file": "payload",
 	})
 	var apiRequests atomic.Int32
@@ -275,8 +275,8 @@ func TestGitHubSourceRejectsInvalidResponsesAndOfflineMisses(t *testing.T) {
 // clean.
 func TestDirectorySourceCommitIgnoresProjectStateAndGeneratedOutput(t *testing.T) {
 	root := t.TempDir()
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":1}`))
-	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2}`))
+	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":2}`))
 	writeTestFile(t, root, "internal/widget/widget.go", []byte("package widget\n"))
 
 	source := DirectorySource{Root: root}
@@ -286,8 +286,8 @@ func TestDirectorySourceCommitIgnoresProjectStateAndGeneratedOutput(t *testing.T
 	}
 
 	// Everything below is project state or tool-owned output.
-	writeTestFile(t, root, "gogogadget.json", []byte(`{"schema":1}`))
-	writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":1}`))
+	writeTestFile(t, root, "gogogadget.json", []byte(`{"schema":2}`))
+	writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":2}`))
 	writeTestFile(t, root, "internal/modules/bootstrap_registry_gen.go", []byte("package modules\n"))
 	writeTestFile(t, root, "internal/web/templates/page_templ.go", []byte("package templates\n"))
 	writeTestFile(t, root, "static/app.css", []byte(".a{}\n"))

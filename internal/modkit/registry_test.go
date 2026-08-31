@@ -23,6 +23,26 @@ var publishedRegistryIncludes = []string{
 
 func putJSON(t *testing.T, files fstest.MapFS, name string, value any) {
 	t.Helper()
+	switch typed := value.(type) {
+	case RegistryRoot:
+		if typed.Namespace == "" { typed.Namespace = "ggg" }
+		if typed.CanonicalModule == "" { typed.CanonicalModule = "github.com/gogogadget/gogogadget" }
+		value = typed
+	case CatalogIndex:
+		typed.Schema = 2
+		value = typed
+	case ModuleDocument:
+		typed.Schema = 2
+		if typed.Module.Dependencies.Go == nil { typed.Module.Dependencies.Go = []GoDependency{} }
+		if typed.Module.Dependencies.Tools == nil { typed.Module.Dependencies.Tools = []ToolArtifact{} }
+		if typed.Module.Dependencies.Containers == nil { typed.Module.Dependencies.Containers = []ContainerDependency{} }
+		value = typed
+	case ProfileDocument:
+		typed.Schema = 2
+		if typed.Profile.RequiredProviderSlots == nil { typed.Profile.RequiredProviderSlots = []string{} }
+		if typed.Profile.ProviderDefaults == nil { typed.Profile.ProviderDefaults = map[string]ProviderSelections{} }
+		value = typed
+	}
 	data, err := json.Marshal(value)
 	if err != nil {
 		t.Fatalf("json.Marshal(%s): %v", name, err)
@@ -33,31 +53,31 @@ func putJSON(t *testing.T, files fstest.MapFS, name string, value any) {
 func registryFixture(t *testing.T) fstest.MapFS {
 	t.Helper()
 	files := fstest.MapFS{}
-	putJSON(t, files, "registry.json", RegistryRoot{Schema: 1, Includes: append([]string(nil), publishedRegistryIncludes...)})
+	putJSON(t, files, "registry.json", RegistryRoot{Schema: 2, Namespace: "ggg", CanonicalModule: "github.com/gogogadget/gogogadget", Includes: append([]string(nil), publishedRegistryIncludes...)})
 	for _, index := range []CatalogIndex{
-		{Schema: 1, Kind: CatalogElement, Items: []string{"registry/modules/element/button/module.json"}},
-		{Schema: 1, Kind: CatalogComponent, Items: []string{}},
-		{Schema: 1, Kind: CatalogPage, Items: []string{}},
-		{Schema: 1, Kind: CatalogWorkflow, Items: []string{}},
-		{Schema: 1, Kind: CatalogSystem, Items: []string{}},
-		{Schema: 1, Kind: CatalogProfile, Items: []string{"registry/profiles/full.json"}},
+		{Schema: 2, Kind: CatalogElement, Items: []string{"registry/modules/element/button/module.json"}},
+		{Schema: 2, Kind: CatalogComponent, Items: []string{}},
+		{Schema: 2, Kind: CatalogPage, Items: []string{}},
+		{Schema: 2, Kind: CatalogWorkflow, Items: []string{}},
+		{Schema: 2, Kind: CatalogSystem, Items: []string{}},
+		{Schema: 2, Kind: CatalogProfile, Items: []string{"registry/profiles/full.json"}},
 	} {
 		name := "registry/" + string(index.Kind) + "s.json"
 		putJSON(t, files, name, index)
 	}
-	module := testLockedModule("element/button", testDigestA).Manifest
-	putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: module})
+	module := testLockedModule("ggg/element/button", testDigestA).Manifest
+	putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
 	putJSON(t, files, "registry/profiles/full.json", ProfileDocument{
-		Schema: 1,
+		Schema: 2,
 		Profile: Profile{
-			ID:          "profile/full",
+			ID:          "ggg/profile/full",
 			Kind:        CatalogProfile,
 			Name:        "full",
 			Revision:    1,
 			Contract:    1,
 			Title:       "Full",
 			Description: "Every production module.",
-			Members:     []string{"element/button"},
+			Members:     []string{"ggg/element/button"}, RequiredProviderSlots: []string{}, ProviderDefaults: map[string]ProviderSelections{}, DefaultDeployment: "",
 		},
 	})
 	return files
@@ -71,13 +91,13 @@ func TestLoadCatalog(t *testing.T) {
 	if got, want := len(catalog.Modules), 1; got != want {
 		t.Fatalf("module count = %d, want %d", got, want)
 	}
-	if got, want := catalog.Modules[0].ID, "element/button"; got != want {
+	if got, want := catalog.Modules[0].ID, "ggg/element/button"; got != want {
 		t.Fatalf("module id = %q, want %q", got, want)
 	}
 	if got, want := len(catalog.Profiles), 1; got != want {
 		t.Fatalf("profile count = %d, want %d", got, want)
 	}
-	if got, want := catalog.Profiles[0].Members[0], "element/button"; got != want {
+	if got, want := catalog.Profiles[0].Members[0], "ggg/element/button"; got != want {
 		t.Fatalf("profile member = %q, want %q", got, want)
 	}
 }
@@ -85,7 +105,7 @@ func TestLoadCatalog(t *testing.T) {
 func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	t.Run("missing required include", func(t *testing.T) {
 		files := registryFixture(t)
-		putJSON(t, files, "registry.json", RegistryRoot{Schema: 1, Includes: publishedRegistryIncludes[:5]})
+		putJSON(t, files, "registry.json", RegistryRoot{Schema: 2, Namespace: "ggg", CanonicalModule: "github.com/gogogadget/gogogadget", Includes: publishedRegistryIncludes[:5]})
 		_, err := LoadCatalog(files)
 		if err == nil || !strings.Contains(err.Error(), "includes") {
 			t.Fatalf("LoadCatalog error = %v, want includes rejection", err)
@@ -94,7 +114,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 
 	t.Run("index kind must match include", func(t *testing.T) {
 		files := registryFixture(t)
-		putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 1, Kind: CatalogComponent, Items: []string{}})
+		putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 2, Kind: CatalogComponent, Items: []string{}})
 		_, err := LoadCatalog(files)
 		if err == nil || !strings.Contains(err.Error(), "kind") {
 			t.Fatalf("LoadCatalog error = %v, want kind rejection", err)
@@ -103,10 +123,10 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 
 	t.Run("duplicate module id", func(t *testing.T) {
 		files := registryFixture(t)
-		module := testLockedModule("element/button", testDigestA).Manifest
-		putJSON(t, files, "registry/modules/element/button/duplicate.json", ModuleDocument{Schema: 1, Module: module})
+		module := testLockedModule("ggg/element/button", testDigestA).Manifest
+		putJSON(t, files, "registry/modules/element/button/duplicate.json", ModuleDocument{Schema: 2, Module: module})
 		putJSON(t, files, "registry/elements.json", CatalogIndex{
-			Schema: 1,
+			Schema: 2,
 			Kind:   CatalogElement,
 			Items: []string{
 				"registry/modules/element/button/duplicate.json",
@@ -122,10 +142,10 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	t.Run("profile member must exist", func(t *testing.T) {
 		files := registryFixture(t)
 		putJSON(t, files, "registry/profiles/full.json", ProfileDocument{
-			Schema: 1,
+			Schema: 2,
 			Profile: Profile{
-				ID: "profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
-				Title: "Full", Description: "Every production module.", Members: []string{"element/missing"},
+				ID: "ggg/profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
+				Title: "Full", Description: "Every production module.", Members: []string{"ggg/element/missing"},
 			},
 		})
 		_, err := LoadCatalog(files)
@@ -136,9 +156,9 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 
 	t.Run("test-only module cannot enter production index", func(t *testing.T) {
 		files := registryFixture(t)
-		module := testLockedModule("element/button", testDigestA).Manifest
+		module := testLockedModule("ggg/element/button", testDigestA).Manifest
 		module.TestOnly = true
-		putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: module})
+		putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
 		_, err := LoadCatalog(files)
 		if err == nil || !strings.Contains(err.Error(), "test_only") {
 			t.Fatalf("LoadCatalog error = %v, want test_only rejection", err)
@@ -156,7 +176,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			files := registryFixture(t)
-			putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 1, Kind: CatalogElement, Items: []string{tt.item}})
+			putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 2, Kind: CatalogElement, Items: []string{tt.item}})
 			_, err := LoadCatalog(files)
 			if err == nil || !strings.Contains(err.Error(), "path") {
 				t.Fatalf("LoadCatalog error = %v, want item path rejection", err)
@@ -167,7 +187,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	t.Run("item prefix must match index kind", func(t *testing.T) {
 		files := registryFixture(t)
 		putJSON(t, files, "registry/elements.json", CatalogIndex{
-			Schema: 1, Kind: CatalogElement, Items: []string{"registry/modules/system/example/module.json"},
+			Schema: 2, Kind: CatalogElement, Items: []string{"registry/modules/system/example/module.json"},
 		})
 		_, err := LoadCatalog(files)
 		if err == nil || !strings.Contains(err.Error(), "stay under") {
@@ -177,8 +197,8 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 
 	t.Run("document kind must match index kind", func(t *testing.T) {
 		files := registryFixture(t)
-		module := testLockedModule("component/button", testDigestA).Manifest
-		putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 1, Module: module})
+		module := testLockedModule("ggg/component/button", testDigestA).Manifest
+		putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
 		_, err := LoadCatalog(files)
 		if err == nil || !strings.Contains(err.Error(), "kind") {
 			t.Fatalf("LoadCatalog error = %v, want document kind rejection", err)
@@ -188,7 +208,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	t.Run("items must be sorted", func(t *testing.T) {
 		files := registryFixture(t)
 		putJSON(t, files, "registry/elements.json", CatalogIndex{
-			Schema: 1, Kind: CatalogElement,
+			Schema: 2, Kind: CatalogElement,
 			Items: []string{"registry/modules/element/z/module.json", "registry/modules/element/a/module.json"},
 		})
 		_, err := LoadCatalog(files)
@@ -200,7 +220,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 	t.Run("items must be unique", func(t *testing.T) {
 		files := registryFixture(t)
 		putJSON(t, files, "registry/elements.json", CatalogIndex{
-			Schema: 1, Kind: CatalogElement,
+			Schema: 2, Kind: CatalogElement,
 			Items: []string{"registry/modules/element/button/module.json", "registry/modules/element/button/module.json"},
 		})
 		_, err := LoadCatalog(files)
@@ -217,7 +237,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 			{
 				name: "root",
 				mutate: func(t *testing.T, files fstest.MapFS) {
-					putJSON(t, files, "registry.json", RegistryRoot{Schema: 2, Includes: publishedRegistryIncludes})
+					putJSON(t, files, "registry.json", RegistryRoot{Schema: 2, Namespace: "ggg", CanonicalModule: "github.com/gogogadget/gogogadget", Includes: publishedRegistryIncludes})
 				},
 			},
 			{
@@ -229,7 +249,7 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 			{
 				name: "document",
 				mutate: func(t *testing.T, files fstest.MapFS) {
-					module := testLockedModule("element/button", testDigestA).Manifest
+					module := testLockedModule("ggg/element/button", testDigestA).Manifest
 					putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
 				},
 			},
@@ -251,10 +271,10 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 		data string
 		want string
 	}{
-		{name: "unknown field", data: `{"schema":1,"kind":"element","items":[],"extra":true}`, want: "unknown field"},
-		{name: "duplicate key", data: `{"schema":1,"schema":1,"kind":"element","items":[]}`, want: "duplicate"},
-		{name: "trailing data", data: `{"schema":1,"kind":"element","items":[]} {}`, want: "trailing"},
-		{name: "null items", data: `{"schema":1,"kind":"element","items":null}`, want: "null"},
+		{name: "unknown field", data: `{"schema":2,"kind":"element","items":[],"extra":true}`, want: "unknown field"},
+		{name: "duplicate key", data: `{"schema":2,"schema":2,"kind":"element","items":[]}`, want: "duplicate"},
+		{name: "trailing data", data: `{"schema":2,"kind":"element","items":[]} {}`, want: "trailing"},
+		{name: "null items", data: `{"schema":2,"kind":"element","items":null}`, want: "null"},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			files := registryFixture(t)
@@ -268,16 +288,16 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 
 	t.Run("returned modules are sorted by id", func(t *testing.T) {
 		files := registryFixture(t)
-		module := testLockedModule("component/card", testDigestB).Manifest
-		putJSON(t, files, "registry/modules/component/card/module.json", ModuleDocument{Schema: 1, Module: module})
+		module := testLockedModule("ggg/component/card", testDigestB).Manifest
+		putJSON(t, files, "registry/modules/component/card/module.json", ModuleDocument{Schema: 2, Module: module})
 		putJSON(t, files, "registry/components.json", CatalogIndex{
-			Schema: 1, Kind: CatalogComponent, Items: []string{"registry/modules/component/card/module.json"},
+			Schema: 2, Kind: CatalogComponent, Items: []string{"registry/modules/component/card/module.json"},
 		})
 		catalog, err := LoadCatalog(files)
 		if err != nil {
 			t.Fatalf("LoadCatalog: %v", err)
 		}
-		if got, want := catalog.Modules[0].ID, "component/card"; got != want {
+		if got, want := catalog.Modules[0].ID, "ggg/component/card"; got != want {
 			t.Fatalf("first module = %q, want %q", got, want)
 		}
 	})
@@ -302,8 +322,8 @@ func TestPublishedRegistryIsConsistent(t *testing.T) {
 	}
 	for _, module := range catalog.Modules {
 		for _, dependency := range module.Requires {
-			if _, ok := known[dependency]; !ok {
-				t.Fatalf("module %s requires %s, which the catalog does not publish", module.ID, dependency)
+			if _, ok := known[dependency.ID]; !ok {
+				t.Fatalf("module %s requires %s, which the catalog does not publish", module.ID, dependency.ID)
 			}
 		}
 	}
@@ -630,7 +650,7 @@ func TestInvalidContentTypeManifestRejected(t *testing.T) {
 	catalogWith := func(t *testing.T, contribution map[string]any) (Catalog, error) {
 		t.Helper()
 		module := map[string]any{
-			"id": "system/broken", "kind": "system", "name": "broken",
+			"id": "ggg/system/broken", "kind": "system", "name": "broken",
 			"revision": 1, "contract": 1, "title": "Broken",
 			"description": "A module with a content type declaration.",
 			"requires":    []string{}, "files": []any{}, "claims": map[string]any{},
@@ -638,13 +658,13 @@ func TestInvalidContentTypeManifestRejected(t *testing.T) {
 			"migrations": []any{}, "environment": []any{}, "docs": []any{},
 			"tests": map[string]any{}, "data": []any{}, "removal_policy": "free",
 		}
-		document, err := json.Marshal(map[string]any{"schema": 1, "module": module})
+		document, err := json.Marshal(map[string]any{"schema": 2, "module": module})
 		if err != nil {
 			t.Fatalf("marshal: %v", err)
 		}
 		files := registryFixture(t)
 		files["registry/systems.json"] = &fstest.MapFile{
-			Data: []byte(`{"schema":1,"kind":"system","items":["registry/modules/system/broken/module.json"]}`),
+			Data: []byte(`{"schema":2,"kind":"system","items":["registry/modules/system/broken/module.json"]}`),
 		}
 		files["registry/modules/system/broken/module.json"] = &fstest.MapFile{Data: document}
 		return LoadCatalog(files)

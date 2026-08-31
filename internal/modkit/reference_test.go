@@ -17,7 +17,7 @@ import (
 func referenceFixture() (Lock, []Manifest) {
 	mods := []Manifest{
 		{
-			ID: "element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
+			ID: "ggg/element/ui-core", Kind: ModuleElement, Name: "ui-core", Revision: 1, Contract: 1,
 			Runtime: RuntimeContributions{UI: []UIContribution{
 				{Name: "badge", Family: GalleryFeedback},
 				{
@@ -34,7 +34,7 @@ func referenceFixture() (Lock, []Manifest) {
 			}},
 		},
 		{
-			ID: "component/data-grid", Kind: ModuleComponent, Name: "data-grid", Revision: 1, Contract: 1,
+			ID: "ggg/component/data-grid", Kind: ModuleComponent, Name: "data-grid", Revision: 1, Contract: 1,
 			Runtime: RuntimeContributions{UI: []UIContribution{
 				{
 					Name:      "data-grid",
@@ -46,8 +46,8 @@ func referenceFixture() (Lock, []Manifest) {
 		},
 	}
 	lock := Lock{
-		Order:   []string{"element/ui-core", "component/data-grid"},
-		Modules: []LockedModule{{ID: "element/ui-core"}, {ID: "component/data-grid"}},
+		Order:   []string{"ggg/element/ui-core", "ggg/component/data-grid"},
+		Modules: []LockedModule{{ID: "ggg/element/ui-core"}, {ID: "ggg/component/data-grid"}},
 	}
 	return lock, mods
 }
@@ -72,7 +72,7 @@ func TestUIReferenceRegistryEmitsDeclaredInterface(t *testing.T) {
 		t.Fatalf("reference registry does not carry the lock index SHA")
 	}
 	for _, want := range []string{
-		`Name: "dialog"`, `Family: "overlays"`, `Module: "element/ui-core"`,
+		`Name: "dialog"`, `Family: "overlays"`, `Module: "ggg/element/ui-core"`,
 		`Signature: "templ Dialog(o DialogOpts)"`,
 		`Summary: "A modal dialog that owns focus while it is open."`,
 		`Guidance: "Use for a decision`,

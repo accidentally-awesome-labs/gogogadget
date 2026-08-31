@@ -6,37 +6,37 @@ import (
 )
 
 const canonicalProjectJSON = `{
-  "schema": 1,
+  "schema": 2,
   "registry": {
     "repository": "gogogadget/gogogadget",
     "ref": "main"
   },
   "modules": [
-    "component/card",
-    "profile/full"
+    "ggg/component/card",
+    "ggg/profile/full"
   ],
   "exclude": [
-    "component/chart"
+    "ggg/component/chart"
   ]
 }
 `
 
 const canonicalLockJSON = `{
-  "schema": 1,
+  "schema": 2,
   "registry_commit": "0123456789abcdef0123456789abcdef01234567",
   "order": [
-    "element/button"
+    "ggg/element/button"
   ],
   "modules": [
     {
-      "id": "element/button",
+      "id": "ggg/element/button",
       "revision": 1,
       "contract": 1,
       "source_commit": "0123456789abcdef0123456789abcdef01234567",
       "reason": "explicit",
       "required_by": [],
       "manifest": {
-        "id": "element/button",
+        "id": "ggg/element/button",
         "kind": "element",
         "name": "button",
         "revision": 1,
@@ -83,10 +83,10 @@ func TestParseProject(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseProject(canonical): %v", err)
 	}
-	if got, want := project.Registry.Repository, "gogogadget/gogogadget"; got != want {
+	if got, want := project.Registries[0].Repository, "gogogadget/gogogadget"; got != want {
 		t.Fatalf("repository = %q, want %q", got, want)
 	}
-	if got, want := strings.Join(project.Modules, ","), "component/card,profile/full"; got != want {
+	if got, want := strings.Join(project.Modules, ","), "ggg/component/card,profile/full"; got != want {
 		t.Fatalf("modules = %q, want %q", got, want)
 	}
 
@@ -97,12 +97,12 @@ func TestParseProject(t *testing.T) {
 	}{
 		{
 			name: "unknown top-level field",
-			json: strings.Replace(canonicalProjectJSON, `"schema": 1,`, `"schema": 1, "extra": true,`, 1),
+			json: strings.Replace(canonicalProjectJSON, `"schema": 2,`, `"schema": 2, "extra": true,`, 1),
 			want: "unknown field",
 		},
 		{
 			name: "duplicate top-level field",
-			json: strings.Replace(canonicalProjectJSON, `"schema": 1,`, `"schema": 1, "schema": 1,`, 1),
+			json: strings.Replace(canonicalProjectJSON, `"schema": 2,`, `"schema": 2, "schema": 2,`, 1),
 			want: "duplicate",
 		},
 		{
@@ -112,37 +112,37 @@ func TestParseProject(t *testing.T) {
 		},
 		{
 			name: "missing required field",
-			json: `{"schema":1,"registry":{"repository":"gogogadget/gogogadget","ref":"main"},"modules":[]}`,
+			json: `{"schema":2,"registry":{"repository":"gogogadget/gogogadget","ref":"main"},"modules":[]}`,
 			want: "exclude",
 		},
 		{
 			name: "unsupported schema",
-			json: strings.Replace(canonicalProjectJSON, `"schema": 1`, `"schema": 2`, 1),
+			json: strings.Replace(canonicalProjectJSON, `"schema": 2`, `"schema": 2`, 1),
 			want: "schema",
 		},
 		{
 			name: "unsorted modules",
-			json: strings.Replace(canonicalProjectJSON, "\"component/card\",\n    \"profile/full\"", "\"profile/full\",\n    \"component/card\"", 1),
+			json: strings.Replace(canonicalProjectJSON, "\"ggg/component/card\",\n    \"ggg/profile/full\"", "\"ggg/profile/full\",\n    \"ggg/component/card\"", 1),
 			want: "modules",
 		},
 		{
 			name: "duplicate modules",
-			json: strings.Replace(canonicalProjectJSON, `"profile/full"`, `"component/card"`, 1),
+			json: strings.Replace(canonicalProjectJSON, `"ggg/profile/full"`, `"ggg/component/card"`, 1),
 			want: "duplicate",
 		},
 		{
 			name: "invalid module id",
-			json: strings.Replace(canonicalProjectJSON, `"component/card"`, `"Component/Card"`, 1),
+			json: strings.Replace(canonicalProjectJSON, `"ggg/component/card"`, `"Component/Card"`, 1),
 			want: "module",
 		},
 		{
 			name: "exclude requires profile",
-			json: strings.Replace(canonicalProjectJSON, "    \"component/card\",\n    \"profile/full\"", "    \"component/card\"", 1),
+			json: strings.Replace(canonicalProjectJSON, "    \"ggg/component/card\",\n    \"ggg/profile/full\"", "    \"ggg/component/card\"", 1),
 			want: "exclude",
 		},
 		{
 			name: "arrays are required",
-			json: strings.Replace(canonicalProjectJSON, "\"exclude\": [\n    \"component/chart\"\n  ]", "\"exclude\": null", 1),
+			json: strings.Replace(canonicalProjectJSON, "\"exclude\": [\n    \"ggg/component/chart\"\n  ]", "\"exclude\": null", 1),
 			want: "exclude",
 		},
 	}
@@ -162,13 +162,10 @@ func TestParseProject(t *testing.T) {
 
 func TestMarshalProjectCanonical(t *testing.T) {
 	project := Project{
-		Schema: 1,
-		Registry: ProjectRegistry{
-			Repository: "gogogadget/gogogadget",
-			Ref:        "main",
-		},
-		Modules: []string{"profile/full", "component/card"},
-		Exclude: []string{"component/chart"},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/profile/full", "ggg/component/card"},
+		Exclude: []string{"ggg/component/chart"},
 	}
 
 	got, err := MarshalProject(project)
@@ -178,7 +175,7 @@ func TestMarshalProjectCanonical(t *testing.T) {
 	if string(got) != canonicalProjectJSON {
 		t.Fatalf("MarshalProject() =\n%s\nwant:\n%s", got, canonicalProjectJSON)
 	}
-	if got := strings.Join(project.Modules, ","); got != "profile/full,component/card" {
+	if got := strings.Join(project.Modules, ","); got != "ggg/profile/full,component/card" {
 		t.Fatalf("MarshalProject mutated caller modules: %q", got)
 	}
 }
@@ -188,7 +185,7 @@ func TestParseLock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ParseLock(canonical): %v", err)
 	}
-	if got, want := lock.Modules[0].Manifest.ID, "element/button"; got != want {
+	if got, want := lock.Modules[0].Manifest.ID, "ggg/element/button"; got != want {
 		t.Fatalf("manifest id = %q, want %q", got, want)
 	}
 	if got, want := lock.Modules[0].Files[0].State, FileModified; got != want {
@@ -202,7 +199,7 @@ func TestParseLock(t *testing.T) {
 	}{
 		{
 			name: "unknown field",
-			json: strings.Replace(canonicalLockJSON, `"schema": 1,`, `"schema": 1, "extra": true,`, 1),
+			json: strings.Replace(canonicalLockJSON, `"schema": 2,`, `"schema": 2, "extra": true,`, 1),
 			want: "unknown field",
 		},
 		{
@@ -217,7 +214,7 @@ func TestParseLock(t *testing.T) {
 		},
 		{
 			name: "manifest identity mismatch",
-			json: strings.Replace(canonicalLockJSON, "\"id\": \"element/button\",\n        \"kind\"", "\"id\": \"element/link\",\n        \"kind\"", 1),
+			json: strings.Replace(canonicalLockJSON, "\"id\": \"ggg/element/button\",\n        \"kind\"", "\"id\": \"ggg/element/link\",\n        \"kind\"", 1),
 			want: "manifest",
 		},
 		{
@@ -237,7 +234,7 @@ func TestParseLock(t *testing.T) {
 		},
 		{
 			name: "order must cover modules",
-			json: strings.Replace(canonicalLockJSON, "\"element/button\"\n  ],", "\"element/link\"\n  ],", 1),
+			json: strings.Replace(canonicalLockJSON, "\"ggg/element/button\"\n  ],", "\"ggg/element/link\"\n  ],", 1),
 			want: "order",
 		},
 	}

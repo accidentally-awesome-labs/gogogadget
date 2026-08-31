@@ -29,8 +29,8 @@ func migrationModule(t *testing.T, id string, count int) (fstest.MapFS, fstest.M
 			ID: migID, Kind: MigrationImmutable, Source: source, SHA256: sha256Hex(content),
 		})
 	}
-	mutatePlannerModule(t, first, "page/optional", func(m *Manifest) { m.Migrations = migrations })
-	mutatePlannerModule(t, second, "page/optional", func(m *Manifest) { m.Migrations = migrations })
+	mutatePlannerModule(t, first, "ggg/page/optional", func(m *Manifest) { m.Migrations = migrations })
+	mutatePlannerModule(t, second, "ggg/page/optional", func(m *Manifest) { m.Migrations = migrations })
 	return first, second
 }
 
@@ -42,9 +42,9 @@ func TestNewMigrationStartsAfterAdoptedBaseline(t *testing.T) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	// Adopted immutable ledger: 0001..0019 already present on disk.
 	for i := 1; i <= 19; i++ {
@@ -111,9 +111,9 @@ func TestImmutableMigrationNeverRewritten(t *testing.T) {
 		testCommitB: {Commit: testCommitB, FS: second},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -136,7 +136,7 @@ func TestImmutableMigrationNeverRewritten(t *testing.T) {
 		}
 	}
 	for _, module := range update.Lock.Modules {
-		if module.ID == "page/optional" {
+		if module.ID == "ggg/page/optional" {
 			if len(module.Migrations) != 1 || module.Migrations[0].Number != 1 {
 				t.Fatalf("migration mapping changed: %#v", module.Migrations)
 			}
@@ -147,7 +147,7 @@ func TestImmutableMigrationNeverRewritten(t *testing.T) {
 // Authored module targets must never claim tool-owned generated outputs.
 func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 	first, _ := removalRegistries(t)
-	mutatePlannerModule(t, first, "page/optional", func(m *Manifest) {
+	mutatePlannerModule(t, first, "ggg/page/optional", func(m *Manifest) {
 		m.Files = append(m.Files, ManifestFile{
 			Source: "registry/modules/page/optional/gen.templ",
 			Target: "static/app.css",
@@ -159,9 +159,9 @@ func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 		"main": {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	_, err := New(Options{Source: source}).Plan(context.Background(), root, Operation{Kind: OpSync})
 	if err == nil || !strings.Contains(err.Error(), "generated") {
@@ -176,16 +176,16 @@ func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
 	body := []byte("-- +goose Up\nSELECT 1;\n")
 	registry := fstest.MapFS{
-		"registry.json":            &fstest.MapFile{Data: []byte(`{"schema":1,"includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
-		"registry/elements.json":   &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"element","items":[]}`)},
-		"registry/components.json": &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"component","items":[]}`)},
-		"registry/pages.json":      &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"page","items":[]}`)},
-		"registry/workflows.json":  &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"workflow","items":[]}`)},
-		"registry/profiles.json":   &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"profile","items":[]}`)},
-		"registry/systems.json":    &fstest.MapFile{Data: []byte(`{"schema":1,"kind":"system","items":["registry/modules/system/legacy/module.json"]}`)},
+		"registry.json":            &fstest.MapFile{Data: []byte(`{"schema":2,"includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
+		"registry/elements.json":   &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"element","items":[]}`)},
+		"registry/components.json": &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"component","items":[]}`)},
+		"registry/pages.json":      &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"page","items":[]}`)},
+		"registry/workflows.json":  &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"workflow","items":[]}`)},
+		"registry/profiles.json":   &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"profile","items":[]}`)},
+		"registry/systems.json":    &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"system","items":["registry/modules/system/legacy/module.json"]}`)},
 		"registry/modules/system/legacy/migrations/0007_legacy.sql": &fstest.MapFile{Data: body},
-		"registry/modules/system/legacy/module.json": &fstest.MapFile{Data: []byte(`{"schema":1,"module":{
-			"id":"system/legacy","kind":"system","name":"legacy","revision":1,"contract":1,
+		"registry/modules/system/legacy/module.json": &fstest.MapFile{Data: []byte(`{"schema":2,"module":{
+			"id":"ggg/system/legacy","kind":"system","name":"legacy","revision":1,"contract":1,
 			"title":"Legacy","description":"Pre-existing schema.","requires":[],"files":[],
 			"claims":{},"runtime":{},
 			"migrations":[{"id":"0007_legacy","kind":"immutable",
@@ -195,9 +195,9 @@ func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
 	}
 
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"system/legacy"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/system/legacy"}, Exclude: []string{},
 	})
 	// The migration already shipped as 0007 and is applied in production.
 	writeTestFile(t, root, "internal/db/migrations/0007_legacy.sql", body)

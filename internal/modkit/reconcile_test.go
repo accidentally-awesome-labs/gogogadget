@@ -40,7 +40,7 @@ func conflictRegistries(t *testing.T) (fstest.MapFS, fstest.MapFS) {
 	t.Helper()
 	first := plannerRegistry(t)
 	optionalV1 := []byte("package optional\n\nconst Version = 1\n")
-	optional := testLockedModule("page/optional", sha256Hex(optionalV1)).Manifest
+	optional := testLockedModule("ggg/page/optional", sha256Hex(optionalV1)).Manifest
 	optional.Files = []ManifestFile{{
 		Source: "registry/modules/page/optional/optional.go", Target: "internal/modules/optional.go",
 		Class: FileClassGo, SHA256: sha256Hex(optionalV1), Contract: true,
@@ -49,7 +49,7 @@ func conflictRegistries(t *testing.T) (fstest.MapFS, fstest.MapFS) {
 
 	helperV1 := []byte("package button\n\nconst HelperVersion = 1\n")
 	first["registry/modules/element/button/button_helper.go"] = &fstest.MapFile{Data: helperV1}
-	mutatePlannerModule(t, first, "element/button", func(module *Manifest) {
+	mutatePlannerModule(t, first, "ggg/element/button", func(module *Manifest) {
 		module.Files = append(module.Files, ManifestFile{
 			Source: "registry/modules/element/button/button_helper.go",
 			Target: "internal/modules/button_helper.go",
@@ -68,7 +68,7 @@ var _ = modkit.OpSync
 	second["registry/modules/element/button/button.go"].Data = buttonV2
 	helperV2 := []byte("package button\n\nconst HelperVersion = 2\n")
 	second["registry/modules/element/button/button_helper.go"].Data = helperV2
-	mutatePlannerModule(t, second, "element/button", func(module *Manifest) {
+	mutatePlannerModule(t, second, "ggg/element/button", func(module *Manifest) {
 		module.Revision = 2
 		module.Contract = 2
 		module.Files[0].SHA256 = sha256Hex(buttonV2)
@@ -77,7 +77,7 @@ var _ = modkit.OpSync
 
 	optionalV2 := []byte("package optional\n\nconst Version = 2\n")
 	second["registry/modules/page/optional/optional.go"].Data = optionalV2
-	mutatePlannerModule(t, second, "page/optional", func(module *Manifest) {
+	mutatePlannerModule(t, second, "ggg/page/optional", func(module *Manifest) {
 		module.Revision = 2
 		module.Files[0].SHA256 = sha256Hex(optionalV2)
 	})
@@ -108,9 +108,9 @@ func prepareConflictFixture(t *testing.T) preparedConflict {
 		testCommitB: {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -130,23 +130,23 @@ func prepareConflictFixture(t *testing.T) preparedConflict {
 func TestAddMutatesIntentThroughSyncPlan(t *testing.T) {
 	registry := plannerRegistry(t)
 	putJSON(t, registry, "registry/profiles/full.json", ProfileDocument{
-		Schema: 1,
+		Schema: 2,
 		Profile: Profile{
-			ID: "profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
-			Title: "Full", Description: "Full catalog.", Members: []string{"component/card", "element/button"},
+			ID: "ggg/profile/full", Kind: CatalogProfile, Name: "full", Revision: 1, Contract: 1,
+			Title: "Full", Description: "Full catalog.", Members: []string{"ggg/component/card", "ggg/element/button"},
 		},
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"profile/full"}, Exclude: []string{"component/card"},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/profile/full"}, Exclude: []string{"ggg/component/card"},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
-	plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"component/card"}})
+	plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpAdd, Modules: []string{"ggg/component/card"}})
 	if err != nil {
 		t.Fatalf("Plan(add): %v", err)
 	}
-	if len(plan.Project.Exclude) != 0 || !slices.Contains(plan.Resolved, "component/card") {
+	if len(plan.Project.Exclude) != 0 || !slices.Contains(plan.Resolved, "ggg/component/card") {
 		t.Fatalf("add project/resolved = exclude %v resolved %v", plan.Project.Exclude, plan.Resolved)
 	}
 	intent := plannedChange(t, plan, "gogogadget.json")
@@ -165,18 +165,18 @@ func TestAddMutatesIntentThroughSyncPlan(t *testing.T) {
 func TestAddIsIdempotentAcrossMixedRequests(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"element/button"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/element/button"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
 	plan, err := engine.Plan(context.Background(), root, Operation{
-		Kind: OpAdd, Modules: []string{"component/card", "element/button"},
+		Kind: OpAdd, Modules: []string{"ggg/component/card", "ggg/element/button"},
 	})
 	if err != nil {
 		t.Fatalf("Plan(add mixed): %v", err)
 	}
-	if got, want := plan.Project.Modules, []string{"component/card", "element/button"}; !slices.Equal(got, want) {
+	if got, want := plan.Project.Modules, []string{"ggg/component/card", "ggg/element/button"}; !slices.Equal(got, want) {
 		t.Fatalf("planned modules = %v, want %v", got, want)
 	}
 }
@@ -187,7 +187,7 @@ func TestUpdateStagesEditedModuleAndUpdatesIndependentModule(t *testing.T) {
 	if got, want := plan.RegistryCommit, testCommitB; got != want {
 		t.Fatalf("registry commit = %q, want %q", got, want)
 	}
-	if got, want := plan.Project.Registry.Ref, "v2"; got != want {
+	if got, want := plan.Project.Registries[0].Ref, "v2"; got != want {
 		t.Fatalf("project ref = %q, want %q", got, want)
 	}
 	intent := plannedChange(t, plan, "gogogadget.json")
@@ -206,7 +206,7 @@ func TestUpdateStagesEditedModuleAndUpdatesIndependentModule(t *testing.T) {
 		t.Fatalf("conflict count = %d, want %d", got, want)
 	}
 	conflict := plan.Conflicts[0]
-	if conflict.Module != "element/button" || conflict.Path != "internal/modules/button.go" {
+	if conflict.Module != "ggg/element/button" || conflict.Path != "internal/modules/button.go" {
 		t.Fatalf("conflict = %#v", conflict)
 	}
 	if got, want := len(plan.Staged), 2; got != want {
@@ -243,15 +243,15 @@ func TestUpdateStagesEditedModuleAndUpdatesIndependentModule(t *testing.T) {
 	commits := map[string]string{}
 	for _, module := range plan.Lock.Modules {
 		commits[module.ID] = module.SourceCommit
-		if module.ID == "element/button" && module.Pending == nil {
+		if module.ID == "ggg/element/button" && module.Pending == nil {
 			t.Fatal("conflicted button has no pending target")
 		}
 	}
-	if commits["element/button"] != testCommitA || commits["component/card"] != testCommitA {
-		t.Fatalf("held commits = button %q card %q, want old %q", commits["element/button"], commits["component/card"], testCommitA)
+	if commits["ggg/element/button"] != testCommitA || commits["ggg/component/card"] != testCommitA {
+		t.Fatalf("held commits = button %q card %q, want old %q", commits["ggg/element/button"], commits["ggg/component/card"], testCommitA)
 	}
-	if commits["page/optional"] != testCommitB {
-		t.Fatalf("independent commit = %q, want %q", commits["page/optional"], testCommitB)
+	if commits["ggg/page/optional"] != testCommitB {
+		t.Fatalf("independent commit = %q, want %q", commits["ggg/page/optional"], testCommitB)
 	}
 
 	repeated, err := fixture.engine.Plan(context.Background(), fixture.root, Operation{Kind: OpUpdate, RegistryRef: "v2"})
@@ -278,9 +278,9 @@ func TestUpdateTreatsMatchingLocalAndUpstreamAsClean(t *testing.T) {
 		"v2": {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -311,7 +311,7 @@ func TestUpdateTreatsMatchingLocalAndUpstreamAsClean(t *testing.T) {
 		}
 	}
 	for _, module := range update.Lock.Modules {
-		if module.ID == "element/button" {
+		if module.ID == "ggg/element/button" {
 			if module.SourceCommit != testCommitB || module.Files[0].State != FileClean {
 				t.Fatalf("converged button source/state = %q/%q", module.SourceCommit, module.Files[0].State)
 			}
@@ -322,9 +322,9 @@ func TestUpdateTreatsMatchingLocalAndUpstreamAsClean(t *testing.T) {
 func TestSyncRefusesImplicitInstalledModuleRemoval(t *testing.T) {
 	firstRegistry, _ := conflictRegistries(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -333,9 +333,9 @@ func TestSyncRefusesImplicitInstalledModuleRemoval(t *testing.T) {
 	}
 	materializeConflictPlan(t, root, initial)
 	intent, err := MarshalProject(Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	if err != nil {
 		t.Fatalf("MarshalProject: %v", err)
@@ -365,14 +365,14 @@ func TestResolveConflictModes(t *testing.T) {
 				writeTestFile(t, fixture.root, "internal/modules/button.go", merged)
 			}
 			plan, err := fixture.engine.ResolveConflict(
-				context.Background(), fixture.root, "element/button", "internal/modules/button.go", tt.mode,
+				context.Background(), fixture.root, "ggg/element/button", "internal/modules/button.go", tt.mode,
 			)
 			if err != nil {
 				t.Fatalf("ResolveConflict: %v", err)
 			}
 			var button LockedModule
 			for _, module := range plan.Lock.Modules {
-				if module.ID == "element/button" {
+				if module.ID == "ggg/element/button" {
 					button = module
 				}
 			}
@@ -424,9 +424,9 @@ func TestSyncRestoresMissingOwnedFile(t *testing.T) {
 		"v2": {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -446,7 +446,7 @@ func TestSyncRestoresMissingOwnedFile(t *testing.T) {
 		t.Fatalf("missing-file restore change = %#v", change)
 	}
 	for _, module := range update.Lock.Modules {
-		if module.ID == "page/optional" && module.Files[0].State != FileClean {
+		if module.ID == "ggg/page/optional" && module.Files[0].State != FileClean {
 			t.Fatalf("restored file state = %q, want clean", module.Files[0].State)
 		}
 	}
@@ -455,7 +455,7 @@ func TestSyncRestoresMissingOwnedFile(t *testing.T) {
 func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 	t.Run("pristine drop deletes", func(t *testing.T) {
 		firstRegistry, secondRegistry := conflictRegistries(t)
-		mutatePlannerModule(t, secondRegistry, "page/optional", func(module *Manifest) {
+		mutatePlannerModule(t, secondRegistry, "ggg/page/optional", func(module *Manifest) {
 			module.Files = []ManifestFile{}
 			module.Revision = 2
 		})
@@ -464,9 +464,9 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 			"v2": {Commit: testCommitB, FS: secondRegistry},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-			Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -483,7 +483,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 			t.Fatalf("dropped-file change = %#v", change)
 		}
 		for _, module := range update.Lock.Modules {
-			if module.ID == "page/optional" && len(module.Files) != 0 {
+			if module.ID == "ggg/page/optional" && len(module.Files) != 0 {
 				t.Fatalf("dropped file remains locked: %#v", module.Files)
 			}
 		}
@@ -491,7 +491,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 
 	t.Run("modified drop refuses", func(t *testing.T) {
 		firstRegistry, secondRegistry := conflictRegistries(t)
-		mutatePlannerModule(t, secondRegistry, "page/optional", func(module *Manifest) {
+		mutatePlannerModule(t, secondRegistry, "ggg/page/optional", func(module *Manifest) {
 			module.Files = []ManifestFile{}
 			module.Revision = 2
 		})
@@ -500,9 +500,9 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 			"v2": {Commit: testCommitB, FS: secondRegistry},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema:   1,
-			Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-			Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+			Schema: 2,
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -523,7 +523,7 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 	migrationContent := []byte("-- resolved forward\nSELECT 1;\n")
 	migrationSource := "registry/modules/element/button/migrations/button-forward.sql"
 	secondRegistry[migrationSource] = &fstest.MapFile{Data: migrationContent}
-	mutatePlannerModule(t, secondRegistry, "element/button", func(module *Manifest) {
+	mutatePlannerModule(t, secondRegistry, "ggg/element/button", func(module *Manifest) {
 		module.Migrations = []ManifestMigration{{
 			ID: "button-forward", Kind: MigrationImmutable, Source: migrationSource, SHA256: sha256Hex(migrationContent),
 		}}
@@ -534,9 +534,9 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 		testCommitB: {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -551,7 +551,7 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 	}
 	materializeConflictPlan(t, root, update)
 	plan, err := engine.ResolveConflict(
-		context.Background(), root, "element/button", "internal/modules/button.go", ResolutionAcceptUpstream,
+		context.Background(), root, "ggg/element/button", "internal/modules/button.go", ResolutionAcceptUpstream,
 	)
 	if err != nil {
 		t.Fatalf("ResolveConflict: %v", err)
@@ -561,7 +561,7 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 		t.Fatalf("resolve migration change class = %q", migration.Class)
 	}
 	for _, module := range plan.Lock.Modules {
-		if module.ID == "element/button" {
+		if module.ID == "ggg/element/button" {
 			if len(module.Migrations) != 1 || module.Migrations[0].Number != 1 {
 				t.Fatalf("resolved migrations = %#v", module.Migrations)
 			}
@@ -580,9 +580,9 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 		testCommitB: {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "v1"},
-		Modules:  []string{"component/card", "page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -609,7 +609,7 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	}
 	for i := range lock.Modules {
 		module := &lock.Modules[i]
-		if module.ID != "element/button" || module.Pending == nil {
+		if module.ID != "ggg/element/button" || module.Pending == nil {
 			continue
 		}
 		for j := range module.Pending.Conflicts {
@@ -625,7 +625,7 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	}
 	writeTestFile(t, root, "gogogadget.lock.json", tamperedLock)
 	_, err = engine.ResolveConflict(
-		context.Background(), root, "element/button", "internal/modules/button_helper.go", ResolutionAcceptUpstream,
+		context.Background(), root, "ggg/element/button", "internal/modules/button_helper.go", ResolutionAcceptUpstream,
 	)
 	if err == nil || !strings.Contains(err.Error(), "candidate sha256 does not match target manifest payload") {
 		t.Fatalf("ResolveConflict error = %v, want fresh payload mismatch", err)
@@ -643,9 +643,9 @@ func TestAdoptionRefusesUnclaimedDivergentFile(t *testing.T) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema:   1,
-		Registry: ProjectRegistry{Repository: "local/registry", Ref: "main"},
-		Modules:  []string{"page/optional"}, Exclude: []string{},
+		Schema: 2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Modules:  []string{"ggg/page/optional"}, Exclude: []string{},
 	})
 	// The operator already had this file, with their own contents.
 	local := []byte("package optional\n\n// hand-written before adoption\nconst Version = 99\n")
