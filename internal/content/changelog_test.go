@@ -77,15 +77,15 @@ func TestChangelogClaimsMatchShippedFeatures(t *testing.T) {
 	all := joined.String()
 
 	for _, claim := range []string{
-		"Idempotency-Key",            // internal/api/idempotency.go
-		"OpenAPI",                    // internal/api/openapi.yaml
-		"AUDIT_RETENTION_DAYS",       // internal/config
-		"API_RATE_LIMIT_RPM",         // internal/config
-		"EventSource",                // static/app.js
-		"support",                    // users.admin_role
-		"dunning",                    // internal/billing
-		"content_entries",            // internal/db/migrations/0019_content_cms.sql
-		"/admin/content",             // internal/web/handlers_admin_content.go
+		"Idempotency-Key",      // internal/api/idempotency.go
+		"OpenAPI",              // internal/api/openapi.yaml
+		"AUDIT_RETENTION_DAYS", // internal/config
+		"API_RATE_LIMIT_RPM",   // internal/config
+		"EventSource",          // static/app.js
+		"support",              // users.admin_role
+		"dunning",              // internal/billing
+		"content_entries",      // internal/db/migrations/0019_content_cms.sql
+		"/admin/content",       // internal/web/handlers_admin_content.go
 	} {
 		assert.Contains(t, strings.ToLower(all), strings.ToLower(claim),
 			"the changelog should record %q, which shipped", claim)

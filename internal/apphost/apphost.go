@@ -144,12 +144,17 @@ type HealthRegistration struct {
 func AggregateHealth(ctx context.Context, registrations []HealthRegistration) HealthReport {
 	checked := time.Now()
 	checks := make([]HealthCheck, len(registrations))
-	var wg sync.WaitGroup
+	results := make(chan struct {
+		index int
+		check HealthCheck
+	}, len(registrations))
 	for i, registration := range registrations {
-		wg.Add(1)
 		go func(i int, registration HealthRegistration) {
-			defer wg.Done()
-			check := HealthCheck{Module: registration.Module, Slot: registration.Slot, Adapter: registration.Adapter, Target: registration.Target, Critical: registration.Critical}
+			check := HealthCheck{
+				Module: registration.Module, Slot: registration.Slot,
+				Adapter: registration.Adapter, Target: registration.Target,
+				Critical: registration.Critical,
+			}
 			checkCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
 			defer cancel()
 			result := make(chan error, 1)
@@ -174,10 +179,38 @@ func AggregateHealth(ctx context.Context, registrations []HealthRegistration) He
 				check.Error = checkCtx.Err().Error()
 			}
 			check.Healthy = check.Error == ""
-			checks[i] = check
+			results <- struct {
+				index int
+				check HealthCheck
+			}{i, check}
 		}(i, registration)
 	}
-	wg.Wait()
+
+	// The outer deadline is hard even for a checker that ignores cancellation.
+	// Workers report through a buffered channel, so a late result never races
+	// with this function's return and never blocks a leaked checker goroutine.
+	deadlineCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	remaining := len(registrations)
+	for remaining > 0 {
+		select {
+		case result := <-results:
+			checks[result.index] = result.check
+			remaining--
+		case <-deadlineCtx.Done():
+			for i := range checks {
+				if checks[i].Module == "" && i < len(registrations) {
+					registration := registrations[i]
+					checks[i] = HealthCheck{
+						Module: registration.Module, Slot: registration.Slot,
+						Adapter: registration.Adapter, Target: registration.Target,
+						Critical: registration.Critical, Error: deadlineCtx.Err().Error(),
+					}
+				}
+			}
+			remaining = 0
+		}
+	}
 	ready := true
 	for _, check := range checks {
 		if check.Critical && !check.Healthy {

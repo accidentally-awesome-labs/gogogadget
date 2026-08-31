@@ -59,8 +59,8 @@ func validateProject(p Project, canonical bool) error {
 	if len(p.Exclude) != 0 && !hasProfile {
 		return fmt.Errorf("project exclude requires a selected profile")
 	}
-	for slot, selections := range p.Providers {
-		if err := validateProviderSelections(slot, selections); err != nil {
+	for _, slot := range sortedKeys(p.Providers) {
+		if err := validateProviderSelections(slot, p.Providers[slot]); err != nil {
 			return err
 		}
 	}
@@ -262,10 +262,10 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateManifestMigrations(m.Migrations, canonical); err != nil {
 		return err
 	}
-	if m.Environment == nil {
-		return fmt.Errorf("manifest environment array is required")
-	}
 	if err := validateEnvironment(m.Environment, canonical); err != nil {
+		return err
+	}
+	if err := validateEnvironmentTargets(m.Environment, m.Runtime.System, m.ID); err != nil {
 		return err
 	}
 	if m.Docs == nil {
@@ -1976,6 +1976,26 @@ func validateAdapterEnvironment(items []EnvironmentVariable, system *SystemContr
 			}
 			if input.Secret != item.Secret {
 				return fmt.Errorf("adapter env key %q secret mismatch", input.EnvKey)
+			}
+		}
+	}
+	return nil
+}
+
+func validateEnvironmentTargets(items []EnvironmentVariable, system *SystemContribution, adapterID string) error {
+	known := map[string]struct{}{}
+	if system != nil && system.Adapter != nil {
+		for _, target := range system.Adapter.Targets {
+			known[adapterID+"@"+target.ID] = struct{}{}
+		}
+	}
+	for i, item := range items {
+		for _, target := range item.Targets {
+			if system == nil || system.Adapter == nil {
+				return fmt.Errorf("manifest environment[%d] target %q requires an adapter", i, target)
+			}
+			if _, ok := known[target]; !ok {
+				return fmt.Errorf("manifest environment[%d] target %q is not declared by adapter", i, target)
 			}
 		}
 	}

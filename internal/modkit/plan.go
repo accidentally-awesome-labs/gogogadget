@@ -218,7 +218,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
-	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}, {Module: "golang.org/x/text"}}
+	declaredImports := []GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}
 	if op.Kind == OpInit || (op.Kind == OpSync && hasLock) {
 		if goMod, readErr := os.ReadFile(filepath.Join(canonicalRoot, "go.mod")); readErr == nil {
 			if parsed, parseErr := modfile.Parse("go.mod", goMod, nil); parseErr == nil {
@@ -228,12 +228,18 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 			}
 		}
 	}
+	moduleByID := make(map[string]Manifest, len(graph.modules))
 	for _, module := range graph.modules {
+		moduleByID[module.ID] = module
 		declaredImports = append(declaredImports, module.Dependencies.Go...)
 	}
 	authored := map[string][]byte{}
 	for _, payload := range payloads {
 		authored[payload.file.Source] = payload.content
+		moduleDeps := append([]GoDependency{{Module: e.canonicalModule}, {Module: modulePath}}, moduleByID[payload.module].Dependencies.Go...)
+		if err := ValidateModuleDeclaredImports(payload.module, map[string][]byte{payload.file.Source: payload.content}, nil, moduleDeps); err != nil {
+			return Plan{}, err
+		}
 	}
 	if err := ValidateDeclaredImports(authored, nil, declaredImports); err != nil {
 		return Plan{}, err
@@ -249,6 +255,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		return Plan{}, err
 	}
 	finalLock.RuntimeOrders = runtimeOrders
+	finalLock.Providers = maps.Clone(desiredProject.Providers)
 	effective, err := EffectiveDependencies(graph.modules)
 	if err != nil {
 		return Plan{}, fmt.Errorf("resolve dependencies: %w", err)

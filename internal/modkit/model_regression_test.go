@@ -16,7 +16,9 @@ const (
 
 func testLockedModule(id, digest string) LockedModule {
 	parts := strings.Split(id, "/")
-	if len(parts) != 3 { panic("invalid test module id") }
+	if len(parts) != 3 {
+		panic("invalid test module id")
+	}
 	_, kind, name := parts[0], parts[1], parts[2]
 	source := "registry/modules/" + kind + "/" + name + "/" + name + ".go"
 	target := "internal/modules/" + name + ".go"
@@ -27,12 +29,12 @@ func testLockedModule(id, digest string) LockedModule {
 		SHA256: digest,
 	}
 	return LockedModule{
-		ID:           id,
-		Revision:     1,
-		Contract:     1,
+		ID:                id,
+		Revision:          1,
+		Contract:          1,
 		RegistryNamespace: "ggg", SnapshotSHA256: testCommitA, SourceCommit: testCommitA,
-		Reason:       "explicit",
-		RequiredBy:   []string{},
+		Reason:     "explicit",
+		RequiredBy: []string{},
 		Manifest: Manifest{
 			ID:            id,
 			Kind:          ModuleKind(kind),
@@ -42,7 +44,7 @@ func testLockedModule(id, digest string) LockedModule {
 			Title:         name,
 			Description:   "Test module " + name + ".",
 			Requires:      []Requirement{},
-			Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+			Dependencies:  Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
 			Files:         []ManifestFile{manifestFile},
 			Claims:        NamespaceClaims{},
 			Runtime:       RuntimeContributions{},
@@ -67,10 +69,10 @@ func testLockedModule(id, digest string) LockedModule {
 func testTwoModuleLock() Lock {
 	base := testLockedModule("ggg/element/base", testDigestA)
 	consumer := testLockedModule("ggg/component/consumer", testDigestB)
-	consumer.Manifest.Requires = []Requirement{{ID: base.ID, Contract: ContractBounds{Min: 1, Max: 1}},}
+	consumer.Manifest.Requires = []Requirement{{ID: base.ID, Contract: ContractBounds{Min: 1, Max: 1}}}
 	base.RequiredBy = []string{consumer.ID}
 	return Lock{
-		Schema: 2,
+		Schema:         2,
 		RegistryCommit: testCommitA,
 		Order:          []string{base.ID, consumer.ID},
 		Modules:        []LockedModule{consumer, base},
@@ -79,20 +81,40 @@ func testTwoModuleLock() Lock {
 
 func marshalLockJSON(t *testing.T, lock Lock) []byte {
 	t.Helper()
-	if lock.Registries == nil { lock.Registries = []LockedRegistry{} }
-	if lock.Snapshots == nil { lock.Snapshots = []LockedSnapshot{} }
-	if lock.Dependencies == nil { lock.Dependencies = []LockedDependency{} }
-	if lock.RuntimeOrders.Development == nil { lock.RuntimeOrders.Development = append([]string{}, lock.Order...) }
-	if lock.RuntimeOrders.Test == nil { lock.RuntimeOrders.Test = append([]string{}, lock.Order...) }
-	if lock.RuntimeOrders.Production == nil { lock.RuntimeOrders.Production = append([]string{}, lock.Order...) }
+	if lock.Registries == nil {
+		lock.Registries = []LockedRegistry{}
+	}
+	if lock.Snapshots == nil {
+		lock.Snapshots = []LockedSnapshot{}
+	}
+	if lock.Dependencies == nil {
+		lock.Dependencies = []LockedDependency{}
+	}
+	if lock.RuntimeOrders.Development == nil {
+		lock.RuntimeOrders.Development = append([]string{}, lock.Order...)
+	}
+	if lock.RuntimeOrders.Test == nil {
+		lock.RuntimeOrders.Test = append([]string{}, lock.Order...)
+	}
+	if lock.RuntimeOrders.Production == nil {
+		lock.RuntimeOrders.Production = append([]string{}, lock.Order...)
+	}
 	for i := range lock.Modules {
 		m := &lock.Modules[i].Manifest
-		if m.Dependencies.Go == nil { m.Dependencies.Go = []GoDependency{} }
-		if m.Dependencies.Tools == nil { m.Dependencies.Tools = []ToolArtifact{} }
-		if m.Dependencies.Containers == nil { m.Dependencies.Containers = []ContainerDependency{} }
+		if m.Dependencies.Go == nil {
+			m.Dependencies.Go = []GoDependency{}
+		}
+		if m.Dependencies.Tools == nil {
+			m.Dependencies.Tools = []ToolArtifact{}
+		}
+		if m.Dependencies.Containers == nil {
+			m.Dependencies.Containers = []ContainerDependency{}
+		}
 	}
 	data, err := json.Marshal(lock)
-	if err != nil { t.Fatalf("json.Marshal(lock): %v", err) }
+	if err != nil {
+		t.Fatalf("json.Marshal(lock): %v", err)
+	}
 	return data
 }
 
@@ -132,7 +154,7 @@ func pendingTestLock() Lock {
 
 func TestMarshalProjectPreservesEmptyArrays(t *testing.T) {
 	project := Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/profile/full"},
 		Exclude: []string{},

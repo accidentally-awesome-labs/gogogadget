@@ -5,7 +5,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "A textarea with Markdown affordances. No WYSIWYG engine and no client-side renderer: the stored value stays Markdown and the preview comes from the server's own goldmark pipeline.",

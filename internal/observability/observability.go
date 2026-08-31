@@ -17,5 +17,5 @@ type Reporter interface {
 // NoopReporter drops everything (unconfigured default).
 type NoopReporter struct{}
 
-func (NoopReporter) Capture(error)                            {}
-func (NoopReporter) CaptureRequest(*http.Request, error)      {}
+func (NoopReporter) Capture(error)                       {}
+func (NoopReporter) CaptureRequest(*http.Request, error) {}

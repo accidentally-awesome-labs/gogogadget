@@ -40,7 +40,7 @@ templ themeToggle() {
 func isAnchorLink(href string) bool { return strings.Contains(href, "#") }
 
 templ navLinks(page Page) {
-	for _, item := range PublicNav {
+	for _, item := range activeNav(PublicNav, environmentFrom(ctx)) {
 		<a
 			href={ templ.SafeURL(item.Href) }
 			if !isAnchorLink(item.Href) {
@@ -55,9 +55,16 @@ templ navLinks(page Page) {
 	}
 }
 
+templ shellSlotMarkers(slot string) {
+	for _, id := range ShellSlotIDs(ctx, slot) {
+		<template data-shell-slot={ id }></template>
+	}
+}
+
 templ Nav(page Page) {
 	<header class="border-b border-border bg-surface/80 backdrop-blur sticky top-0 z-(--z-nav)">
 		<nav class="max-w-page mx-auto flex items-center justify-between px-4 h-navbar" x-data="mobileNav" aria-label="Main">
+			@shellSlotMarkers("head")
 			@logo()
 			<div class="hidden md:flex items-center gap-6">
 				@navLinks(page)
@@ -90,7 +97,7 @@ templ Nav(page Page) {
 templ Footer(page Page) {
 	<footer class="border-t border-border mt-24">
 		<div class="max-w-page mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
-			for _, col := range FooterColumns {
+			for _, col := range activeColumns(FooterColumns, environmentFrom(ctx)) {
 				<div>
 					// h2, not h3. The footer follows the page's own h1, so an h3 here skips a
 					// level on any page whose last heading is the h1 - and a skipped level

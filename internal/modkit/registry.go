@@ -42,17 +42,17 @@ type ModuleDocument struct {
 	Module Manifest `json:"module"`
 }
 type Profile struct {
-	ID                    string                    `json:"id"`
-	Kind                  CatalogKind               `json:"kind"`
-	Name                  string                    `json:"name"`
-	Revision              int                       `json:"revision"`
-	Contract              int                       `json:"contract"`
-	Title                 string                    `json:"title"`
-	Description           string                    `json:"description"`
-	Members               []string                  `json:"members"`
-	RequiredProviderSlots []string                  `json:"required_provider_slots"`
+	ID                    string                        `json:"id"`
+	Kind                  CatalogKind                   `json:"kind"`
+	Name                  string                        `json:"name"`
+	Revision              int                           `json:"revision"`
+	Contract              int                           `json:"contract"`
+	Title                 string                        `json:"title"`
+	Description           string                        `json:"description"`
+	Members               []string                      `json:"members"`
+	RequiredProviderSlots []string                      `json:"required_provider_slots"`
 	ProviderDefaults      map[string]ProviderSelections `json:"provider_defaults"`
-	DefaultDeployment     string                    `json:"default_deployment"`
+	DefaultDeployment     string                        `json:"default_deployment"`
 }
 
 // ProfileDocument is the published envelope for one profile.
@@ -240,13 +240,21 @@ func validateProfile(profile Profile) error {
 	if profile.Members == nil || profile.RequiredProviderSlots == nil || profile.ProviderDefaults == nil {
 		return fmt.Errorf("profile members, required_provider_slots, and provider_defaults are required")
 	}
-	if err := validateStringSet("profile members", profile.Members, true, validateScopedProjectModuleID); err != nil { return err }
+	if err := validateStringSet("profile members", profile.Members, true, validateScopedProjectModuleID); err != nil {
+		return err
+	}
 	if err := validateStringSet("profile required_provider_slots", profile.RequiredProviderSlots, true, func(id string) error {
-		if !validScopedSlotID(id) { return fmt.Errorf("provider slot id %q is invalid", id) }
+		if !validScopedSlotID(id) {
+			return fmt.Errorf("provider slot id %q is invalid", id)
+		}
 		return nil
-	}); err != nil { return err }
+	}); err != nil {
+		return err
+	}
 	for slot, choices := range profile.ProviderDefaults {
-		if err := validateProviderSelections(slot, choices); err != nil { return err }
+		if err := validateProviderSelections(slot, choices); err != nil {
+			return err
+		}
 	}
 	return nil
 }

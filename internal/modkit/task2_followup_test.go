@@ -16,7 +16,7 @@ func TestExtractToolRejectsUnsafeArchiveAndInstallPaths(t *testing.T) {
 	data := []byte("tool")
 	hash := sha256.Sum256(data)
 	base := ToolArtifact{OS: "darwin", Arch: "arm64", URL: "https://example.test/tool", SHA256: hex.EncodeToString(hash[:]), Format: "raw", BinaryPath: "tool", InstallPath: "bin/tool"}
-	if err := ExtractTool(data, base, filepath.Join(t.TempDir(), "bin", "tool")); err != nil {
+	if err := ExtractTool(data, base, t.TempDir()); err != nil {
 		t.Fatalf("raw extraction: %v", err)
 	}
 	for _, artifact := range []ToolArtifact{
@@ -24,7 +24,7 @@ func TestExtractToolRejectsUnsafeArchiveAndInstallPaths(t *testing.T) {
 		{URL: base.URL, SHA256: base.SHA256, Format: "raw", BinaryPath: "../tool", InstallPath: "bin/tool"},
 		{URL: base.URL, SHA256: base.SHA256, Format: "raw", BinaryPath: "tool", InstallPath: "../tool"},
 	} {
-		if err := ExtractTool(data, artifact, filepath.Join(t.TempDir(), "bin", "tool")); err == nil {
+		if err := ExtractTool(data, artifact, t.TempDir()); err == nil {
 			t.Fatalf("unsafe artifact accepted: %#v", artifact)
 		}
 	}
@@ -50,7 +50,7 @@ func TestExtractToolRejectsZipTraversalAndUnlistedExecutables(t *testing.T) {
 	}
 	sum := sha256.Sum256(archive.Bytes())
 	artifact := ToolArtifact{OS: "darwin", Arch: "arm64", URL: "https://example.test/tool.zip", SHA256: hex.EncodeToString(sum[:]), Format: "zip", BinaryPath: "tool", InstallPath: "bin/tool"}
-	if err := ExtractTool(archive.Bytes(), artifact, filepath.Join(t.TempDir(), "bin", "tool")); err == nil {
+	if err := ExtractTool(archive.Bytes(), artifact, t.TempDir()); err == nil {
 		t.Fatal("zip with undeclared executable accepted")
 	}
 }
@@ -114,7 +114,7 @@ func TestBootstrapBranchesByEnvironmentAndGatesAdapters(t *testing.T) {
 	remote := local
 	remote.ID = "ggg/system/remote"
 	remote.Runtime.System = &SystemContribution{Package: "internal/remote", Constructor: "New", Adapter: &AdapterContribution{Slot: "ggg/mail", Targets: []ServiceTarget{{ID: "managed", Title: "Managed", Mode: "managed", Environments: []string{"production"}, Automation: "configure", Provisioner: "p"}}}, Needs: []RuntimeNeed{{Field: "Config", Capability: "config", Type: "*config.Config"}}, Provides: []RuntimeProvide{{Field: "Sender", Capability: "mail.sender", Type: "any"}}, Health: true}
-	lock := Lock{Schema: 2, RuntimeOrders: RuntimeOrders{Development: []string{config.ID, local.ID}, Test: []string{config.ID, local.ID}, Production: []string{config.ID, remote.ID}}, Modules: []LockedModule{{ID: config.ID}, {ID: local.ID}, {ID: remote.ID}}}
+	lock := Lock{Schema: 2, RuntimeOrders: RuntimeOrders{Development: []string{config.ID, local.ID}, Test: []string{config.ID, local.ID}, Production: []string{config.ID, remote.ID}}, Providers: map[string]ProviderSelections{"ggg/mail": {Development: ProviderSelection{Adapter: local.ID, Target: "filesystem"}, Test: ProviderSelection{Adapter: local.ID, Target: "filesystem"}, Production: ProviderSelection{Adapter: remote.ID, Target: "managed"}}}, Modules: []LockedModule{{ID: config.ID}, {ID: local.ID}, {ID: remote.ID}}}
 	out, err := emitBootstrapRegistry(context.Background(), "example.com/app", lock, []Manifest{config, local, remote})
 	if err != nil {
 		t.Fatal(err)
@@ -126,6 +126,9 @@ func TestBootstrapBranchesByEnvironmentAndGatesAdapters(t *testing.T) {
 	}
 	if strings.Count(out.Content, "local.New(ctx") != 2 || strings.Count(out.Content, "remote.New(ctx") != 1 {
 		t.Fatalf("adapter constructors should be selected per environment: len=%d", len(out.Content))
+	}
+	if !strings.Contains(out.Content, `Target: "managed"`) {
+		t.Fatalf("production health registration did not persist selected target: %s", out.Content)
 	}
 }
 func TestGeneratedExecutableContributionsCarryProviderGates(t *testing.T) {

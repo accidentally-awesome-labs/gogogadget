@@ -36,4 +36,3 @@ func TestIngestProxyRewritesPathAndHost(t *testing.T) {
 func TestNoopCapturer(t *testing.T) {
 	NoopCapturer{}.Capture("u", "event", map[string]any{"k": "v"}) // must not panic
 }
-

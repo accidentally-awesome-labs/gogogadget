@@ -20,7 +20,12 @@
     ],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "Project mutations for the app UI: validated create with plan-limit enforcement, rename, archive, and delete, each emitting audit, webhook, and analytics effects.",

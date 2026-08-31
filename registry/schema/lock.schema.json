@@ -19,7 +19,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
           },
           "uniqueItems": true
         },
@@ -90,6 +90,12 @@
         "runtime_orders": {
           "$ref": "#/$defs/RuntimeOrders"
         },
+        "providers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/ProviderSelections"
+          }
+        },
         "dependencies": {
           "type": "array",
           "items": {
@@ -128,13 +134,32 @@
       "required": [
         "schema",
         "registry_commit",
+        "dependencies",
         "registries",
         "snapshots",
         "order",
         "runtime_orders",
-        "dependencies",
         "modules"
       ]
+    },
+    "ProviderSelections": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "development": {"$ref": "#/$defs/ProviderSelection"},
+        "test": {"$ref": "#/$defs/ProviderSelection"},
+        "production": {"$ref": "#/$defs/ProviderSelection"}
+      },
+      "required": ["development", "test", "production"]
+    },
+    "ProviderSelection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {"type": "string", "minLength": 1},
+        "target": {"type": "string", "minLength": 1}
+      },
+      "required": ["adapter", "target"]
     },
     "LockedModule": {
       "type": "object",
@@ -142,7 +167,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         },
         "revision": {
           "type": "integer",
@@ -164,7 +189,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
           },
           "uniqueItems": true
         },

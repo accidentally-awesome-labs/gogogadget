@@ -1,122 +1,102 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/system/llm",
+    "kind": "system",
+    "name": "llm",
+    "revision": 1,
+    "contract": 1,
+    "title": "Language model",
+    "description": "Completer port backed by any OpenAI-compatible API. Unconfigured leaves the port nil so AI routes answer 503.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/llm/contract_test.go",
+        "target": "internal/llm/contract_test.go",
+        "class": "test",
+        "sha256": "1fe5f816eaee4651e8472f3c99c904bc097a752633d4450ec4788c387f2c4332",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/llm/llm.go",
+        "target": "internal/llm/llm.go",
+        "class": "go",
+        "sha256": "c8384605ba42b0897c7317df8d7c1764fb82a16fd8bc3537c6dad18dce1f64fb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/llm/llm_test.go",
+        "target": "internal/llm/llm_test.go",
+        "class": "test",
+        "sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/llm/module.go",
+        "target": "internal/llm/module.go",
+        "class": "go",
+        "sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/llm/module_test.go",
+        "target": "internal/llm/module_test.go",
+        "class": "test",
+        "sha256": "89eeb2d0c81c8b45c052d2f831c06b9bef04f7af487ecd4f1c472f3ff9f8b28e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "packages": [
         "internal/llm"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "Completer port backed by any OpenAI-compatible API. Unconfigured leaves the port nil so AI routes answer 503.",
-    "docs": [],
-    "environment": [
-      {
-        "description": "With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured",
-        "field": "LLMAPIKey",
-        "key": "LLM_API_KEY",
-        "secret": true,
-        "type": "string"
-      },
-      {
-        "default": "https://api.openai.com/v1",
-        "description": "Any OpenAI-compatible API base",
-        "field": "LLMBaseURL",
-        "key": "LLM_BASE_URL",
-        "trim_slash": true,
-        "type": "string"
-      },
-      {
-        "description": "Forced server-side, so callers cannot pick a model",
-        "field": "LLMModel",
-        "key": "LLM_MODEL",
-        "type": "string"
-      }
-    ],
-    "files": [
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "1fe5f816eaee4651e8472f3c99c904bc097a752633d4450ec4788c387f2c4332",
-        "source": "internal/llm/contract_test.go",
-        "target": "internal/llm/contract_test.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "2901ad52d8ef60022dda313c05e3619a8e25ef6c29a3c89b6034a1059a4d50d7",
-        "source": "internal/llm/llm.go",
-        "target": "internal/llm/llm.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
-        "source": "internal/llm/llm_test.go",
-        "target": "internal/llm/llm_test.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
-        "source": "internal/llm/module.go",
-        "target": "internal/llm/module.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "89eeb2d0c81c8b45c052d2f831c06b9bef04f7af487ecd4f1c472f3ff9f8b28e",
-        "source": "internal/llm/module_test.go",
-        "target": "internal/llm/module_test.go"
-      }
-    ],
-    "id": "ggg/system/llm",
-    "kind": "system",
-    "migrations": [],
-    "name": "llm",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/apphost"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/config"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "system": {
+        "package": "internal/llm",
         "constructor": "NewModule",
         "needs": [
           {
-            "capability": "config",
             "field": "Config",
-            "optional": false,
-            "type": "*config.Config"
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
           }
         ],
-        "package": "internal/llm",
         "provides": [
           {
-            "capability": "llm.completer",
             "field": "Completer",
+            "capability": "llm.completer",
             "type": "llm.Completer"
           }
         ],
@@ -124,12 +104,37 @@
         "stop": false
       }
     },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "LLM_API_KEY",
+        "field": "LLMAPIKey",
+        "type": "string",
+        "description": "With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured",
+        "secret": true
+      },
+      {
+        "key": "LLM_BASE_URL",
+        "field": "LLMBaseURL",
+        "type": "string",
+        "description": "Any OpenAI-compatible API base",
+        "default": "https://api.openai.com/v1",
+        "trim_slash": true
+      },
+      {
+        "key": "LLM_MODEL",
+        "field": "LLMModel",
+        "type": "string",
+        "description": "Forced server-side, so callers cannot pick a model"
+      }
+    ],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/llm"
       ]
     },
-    "title": "Language model"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -25,19 +25,33 @@ func putJSON(t *testing.T, files fstest.MapFS, name string, value any) {
 	t.Helper()
 	switch typed := value.(type) {
 	case RegistryRoot:
-		if typed.Namespace == "" { typed.Namespace = "ggg" }
-		if typed.CanonicalModule == "" { typed.CanonicalModule = "github.com/gogogadget/gogogadget" }
+		if typed.Namespace == "" {
+			typed.Namespace = "ggg"
+		}
+		if typed.CanonicalModule == "" {
+			typed.CanonicalModule = "github.com/gogogadget/gogogadget"
+		}
 		value = typed
 	case CatalogIndex:
 		value = typed
 	case ModuleDocument:
-		if typed.Module.Dependencies.Go == nil { typed.Module.Dependencies.Go = []GoDependency{} }
-		if typed.Module.Dependencies.Tools == nil { typed.Module.Dependencies.Tools = []ToolArtifact{} }
-		if typed.Module.Dependencies.Containers == nil { typed.Module.Dependencies.Containers = []ContainerDependency{} }
+		if typed.Module.Dependencies.Go == nil {
+			typed.Module.Dependencies.Go = []GoDependency{}
+		}
+		if typed.Module.Dependencies.Tools == nil {
+			typed.Module.Dependencies.Tools = []ToolArtifact{}
+		}
+		if typed.Module.Dependencies.Containers == nil {
+			typed.Module.Dependencies.Containers = []ContainerDependency{}
+		}
 		value = typed
 	case ProfileDocument:
-		if typed.Profile.RequiredProviderSlots == nil { typed.Profile.RequiredProviderSlots = []string{} }
-		if typed.Profile.ProviderDefaults == nil { typed.Profile.ProviderDefaults = map[string]ProviderSelections{} }
+		if typed.Profile.RequiredProviderSlots == nil {
+			typed.Profile.RequiredProviderSlots = []string{}
+		}
+		if typed.Profile.ProviderDefaults == nil {
+			typed.Profile.ProviderDefaults = map[string]ProviderSelections{}
+		}
 		value = typed
 	}
 	data, err := json.Marshal(value)
@@ -476,6 +490,32 @@ func TestParseLockEnforcesCatalogRequiredFields(t *testing.T) {
 	}
 }
 
+// The schema contract must validate the published instances, not merely have
+// matching property names. LoadCatalog traverses every indexed manifest/profile
+// and applies the same strict shape and value validation used by resolution.
+func TestPublishedSchemaInstancesValidate(t *testing.T) {
+	repo := os.DirFS("../..")
+	if _, err := LoadCatalog(repo); err != nil {
+		t.Fatalf("published registry instances: %v", err)
+	}
+	for _, name := range []string{"gogogadget.json", "gogogadget.lock.json"} {
+		data, err := fs.ReadFile(repo, name)
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		switch name {
+		case "gogogadget.json":
+			if _, err := ParseProject(data); err != nil {
+				t.Fatalf("published project instance: %v", err)
+			}
+		case "gogogadget.lock.json":
+			if _, err := ParseLock(data); err != nil {
+				t.Fatalf("published lock instance: %v", err)
+			}
+		}
+	}
+}
+
 func TestPublishedSchemasMatchModels(t *testing.T) {
 	repo := os.DirFS("../..")
 	definitions := map[string]map[string]any{}
@@ -650,11 +690,11 @@ func TestInvalidContentTypeManifestRejected(t *testing.T) {
 			"id": "ggg/system/broken", "kind": "system", "name": "broken",
 			"revision": 1, "contract": 1, "title": "Broken",
 			"description": "A module with a content type declaration.",
-			"requires": []any{}, "files": []any{}, "claims": map[string]any{},
-			"runtime": map[string]any{"content_types": []any{contribution}},
+			"requires":    []any{}, "files": []any{}, "claims": map[string]any{},
+			"runtime":    map[string]any{"content_types": []any{contribution}},
 			"migrations": []any{}, "environment": []any{}, "docs": []any{},
 			"tests": map[string]any{}, "data": []any{},
-			"dependencies": map[string]any{"go": []any{}, "tools": []any{}, "containers": []any{}},
+			"dependencies":   map[string]any{"go": []any{}, "tools": []any{}, "containers": []any{}},
 			"removal_policy": "free",
 		}
 		document, err := json.Marshal(map[string]any{"schema": 2, "module": module})

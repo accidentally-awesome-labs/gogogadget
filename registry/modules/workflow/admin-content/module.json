@@ -15,7 +15,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "Creates, updates, publishes, unpublishes, deletes, and restores content entries, owning the editor form contract, validation, revision snapshots, live Markdown preview, and audit effects.",

@@ -9,7 +9,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "The recurring-work table listing every schedule, its kind, scope, interval and next fire, plus the create form.",

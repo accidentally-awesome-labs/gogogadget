@@ -33,7 +33,12 @@
     ],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Core tenancy: the users, organizations, and memberships tables, their queries, and the initial schema every other module builds on.",

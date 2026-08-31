@@ -9,7 +9,16 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Streams the GDPR self-serve JSON download of everything the platform holds about one user across every organization, and audits the export.",

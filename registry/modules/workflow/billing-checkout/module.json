@@ -11,7 +11,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "Starts a Polar checkout, opens the hosted billing portal, and serves the polled plan-card fragment that settles the post-checkout success race.",

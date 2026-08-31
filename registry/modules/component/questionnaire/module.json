@@ -5,7 +5,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Native fields and a server-owned step. Each step posts its answer and the server decides what comes next, so a reload resumes rather than restarts.",

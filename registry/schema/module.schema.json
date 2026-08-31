@@ -131,7 +131,7 @@
         },
         "secret_redaction_owner": {
           "type": "string",
-          "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          "minLength": 1
         },
         "account_delete": {
           "type": "string",
@@ -358,7 +358,7 @@
         },
         "id": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         },
         "kind": {
           "type": "string",
@@ -419,7 +419,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+                "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
               },
               "contract": {
                 "type": "object",

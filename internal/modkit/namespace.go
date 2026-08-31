@@ -170,6 +170,33 @@ func validateProviderInventory(modules []Manifest) error {
 			slots[slot.ID] = slot
 		}
 	}
+	type provider struct {
+		module, slot, typ string
+		adapter           bool
+	}
+	providers := map[string]provider{}
+	for _, module := range modules {
+		sys := module.Runtime.System
+		if sys == nil {
+			continue
+		}
+		for _, provide := range sys.Provides {
+			current := provider{module: module.ID, typ: provide.Type, adapter: sys.Adapter != nil}
+			if sys.Adapter != nil {
+				current.slot = sys.Adapter.Slot
+			}
+			if previous, exists := providers[provide.Capability]; exists {
+				if !previous.adapter || !current.adapter {
+					return fmt.Errorf("runtime capability %q has multiple non-adapter providers (%s and %s)", provide.Capability, previous.module, current.module)
+				}
+				if previous.slot != current.slot || previous.typ != current.typ {
+					return fmt.Errorf("runtime capability %q conflicts across provider slots or types (%s and %s)", provide.Capability, previous.module, current.module)
+				}
+				continue
+			}
+			providers[provide.Capability] = current
+		}
+	}
 	for _, module := range modules {
 		sys := module.Runtime.System
 		if sys == nil || sys.Adapter == nil {
@@ -193,61 +220,91 @@ func validateProviderInventory(modules []Manifest) error {
 		if len(want) != len(got) {
 			return fmt.Errorf("adapter %s capability set does not exactly match provider slot %s", module.ID, sys.Adapter.Slot)
 		}
-		for capability, typ := range want {
+		for _, capability := range sortedKeys(want) {
+			typ := want[capability]
 			if got[capability] != typ {
 				return fmt.Errorf("adapter %s capability %q type %q does not match slot type %q", module.ID, capability, got[capability], typ)
+			}
+		}
+		for _, target := range sys.Adapter.Targets {
+			if (target.Automation == "provision" || target.Automation == "configure") && !hasContribution(module.Runtime.Provisioners, target.Provisioner) {
+				return fmt.Errorf("adapter %s target %s references unclaimed provisioner %q", module.ID, target.ID, target.Provisioner)
+			}
+			if target.DatabaseOperator != "" {
+				if sys.Adapter.Slot != "ggg/database" {
+					return fmt.Errorf("adapter %s target %s has database operator outside ggg/database", module.ID, target.ID)
+				}
+				if !hasDatabaseContribution(module.Runtime.DatabaseOps, target.DatabaseOperator) {
+					return fmt.Errorf("adapter %s target %s references unclaimed database operator %q", module.ID, target.ID, target.DatabaseOperator)
+				}
 			}
 		}
 	}
 	return nil
 }
+
+func hasContribution(items []ProvisionerContribution, id string) bool {
+	for _, item := range items {
+		if item.ID == id {
+			return true
+		}
+	}
+	return false
+}
+func hasDatabaseContribution(items []DatabaseOpsContribution, id string) bool {
+	for _, item := range items {
+		if item.ID == id {
+			return true
+		}
+	}
+	return false
+}
 func requireClaims(module Manifest) error {
 	check := func(kind string, declared, claims []string) error {
-		owned := map[string]bool{}
+		declaredSet := map[string]struct{}{}
+		for _, id := range declared {
+			declaredSet[id] = struct{}{}
+		}
+		claimSet := map[string]struct{}{}
 		for _, id := range claims {
-			owned[id] = true
+			claimSet[id] = struct{}{}
+			if _, ok := declaredSet[id]; !ok {
+				return fmt.Errorf("%s %s has no matching declaration", kind, id)
+			}
 		}
 		for _, id := range declared {
-			if !owned[id] {
+			if _, ok := claimSet[id]; !ok {
 				return fmt.Errorf("%s %s is not declared in matching namespace claim", kind, id)
 			}
 		}
 		return nil
 	}
-	if err := check("provider slot", func() []string {
-		out := []string{}
-		for _, v := range module.Runtime.ProviderSlots {
-			out = append(out, v.ID)
-		}
-		return out
-	}(), module.Claims.ProviderSlots); err != nil {
+	providerSlots := make([]string, 0, len(module.Runtime.ProviderSlots))
+	for _, value := range module.Runtime.ProviderSlots {
+		providerSlots = append(providerSlots, value.ID)
+	}
+	if err := check("provider slot", providerSlots, module.Claims.ProviderSlots); err != nil {
 		return err
 	}
-	if err := check("provisioner", func() []string {
-		out := []string{}
-		for _, v := range module.Runtime.Provisioners {
-			out = append(out, v.ID)
-		}
-		return out
-	}(), module.Claims.Provisioners); err != nil {
+	provisioners := make([]string, 0, len(module.Runtime.Provisioners))
+	for _, value := range module.Runtime.Provisioners {
+		provisioners = append(provisioners, value.ID)
+	}
+	if err := check("provisioner", provisioners, module.Claims.Provisioners); err != nil {
 		return err
 	}
-	if err := check("database op", func() []string {
-		out := []string{}
-		for _, v := range module.Runtime.DatabaseOps {
-			out = append(out, v.ID)
-		}
-		return out
-	}(), module.Claims.DatabaseOps); err != nil {
+	databaseOps := make([]string, 0, len(module.Runtime.DatabaseOps))
+	for _, value := range module.Runtime.DatabaseOps {
+		databaseOps = append(databaseOps, value.ID)
+	}
+	if err := check("database op", databaseOps, module.Claims.DatabaseOps); err != nil {
 		return err
 	}
-	if err := check("deploy", func() []string {
-		out := []string{}
-		for _, v := range module.Runtime.Deploy {
-			out = append(out, v.ID)
-		}
-		return out
-	}(), module.Claims.Deploy); err != nil {
+	deploy := make([]string, 0, len(module.Runtime.Deploy))
+	for _, value := range module.Runtime.Deploy {
+		deploy = append(deploy, value.ID)
+	}
+	if err := check("deploy", deploy, module.Claims.Deploy); err != nil {
 		return err
 	}
 	return nil

@@ -9,7 +9,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "Gives every integration-test package its own database so parallel packages cannot nuke each other's fixtures. Skips when no server is reachable.",

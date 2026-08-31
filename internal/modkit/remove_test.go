@@ -34,9 +34,9 @@ func installedRemovalProject(t *testing.T) (string, *Engine, fstest.MapFS) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -115,9 +115,9 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/profile/full"}, Exclude: []string{},
+			Modules: []string{"ggg/profile/full"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -215,9 +215,9 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 			t.Fatalf("Plan(remove with ref) error = %v", err)
 		}
 		bare := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card"}, Exclude: []string{},
 		})
 		if _, err := engine.Plan(context.Background(), bare, Operation{Kind: OpRemove, Modules: []string{"ggg/component/card"}}); err == nil || !strings.Contains(err.Error(), "existing gogogadget.lock.json") {
 			t.Fatalf("Plan(remove without lock) error = %v", err)
@@ -240,9 +240,9 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -347,9 +347,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -370,9 +370,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -421,9 +421,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -444,9 +444,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -487,9 +487,9 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 			testCommitA: {Commit: testCommitA, FS: first},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -535,9 +535,9 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 		testCommitB: {Commit: testCommitB, FS: secondRegistry},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{"ggg/component/card", "ggg/element/button", "ggg/page/optional"}, Exclude: []string{},
+		Modules: []string{"ggg/component/card", "ggg/element/button", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})

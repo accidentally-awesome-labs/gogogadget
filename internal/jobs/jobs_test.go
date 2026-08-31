@@ -515,3 +515,25 @@ func TestRunSurvivesAnUnusableQueueUntilTheContextEnds(t *testing.T) {
 		t.Fatal("Run did not return after its context was cancelled")
 	}
 }
+
+func TestNewWorkerDoesNotSilentlySelectDevelopment(t *testing.T) {
+	t.Setenv("APP_ENV", "")
+	worker := NewWorker(&sqlc.Queries{}, nil, slog.New(slog.DiscardHandler))
+	if worker.Environment != "" {
+		t.Fatalf("NewWorker environment = %q, want unset when APP_ENV is absent", worker.Environment)
+	}
+}
+
+func TestWorkerEnvironmentGatesProviderOwnedDefinitions(t *testing.T) {
+	for _, environment := range []string{"development", "test", "production"} {
+		worker := NewWorkerWithEnvironment(&sqlc.Queries{}, nil, slog.New(slog.DiscardHandler), environment)
+		if worker.Environment != environment {
+			t.Fatalf("worker environment = %q, want %q", worker.Environment, environment)
+		}
+		for kind, definition := range worker.definitions {
+			if definition.ProviderActive != nil && !definition.ProviderActive() {
+				t.Fatalf("inactive provider-owned definition %q registered in %s", kind, environment)
+			}
+		}
+	}
+}

@@ -53,7 +53,20 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        },
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.40.0"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -94,7 +107,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "72c4fb64409d01b29de3e081df22adda23dac355812511bedbf9d28b52ce01c3",
+        "sha256": "c3b2f296c92ef4f84fe2f7952370b2ba7b199d9735c2f633ce88b7a191921fb2",
         "rewrite_module": true,
         "contract": true
       },
@@ -102,7 +115,7 @@
         "source": "internal/jobs/jobs_test.go",
         "target": "internal/jobs/jobs_test.go",
         "class": "test",
-        "sha256": "ba553989ff9316dca7f1bc361cf244f92755dae39ec59f40074d05185214dce0",
+        "sha256": "efbdcfc87c568ff9e4a76fa14cf889fe1c4f36fcece57dac25b9f5766e86c70e",
         "rewrite_module": true,
         "contract": false
       },

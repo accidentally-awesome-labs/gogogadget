@@ -183,9 +183,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 			"v2": {Commit: testCommitB, FS: secondRegistry},
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -251,9 +251,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("missing lock", func(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
 		report, err := engine.Health(context.Background(), root)
@@ -268,9 +268,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("invalid lock", func(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":2,`))
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
@@ -298,9 +298,9 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 	t.Run("clean lock without pending state", func(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
-			Schema: 2,
+			Schema:     2,
 			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-			Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
 		initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})

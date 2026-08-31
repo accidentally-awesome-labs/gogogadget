@@ -186,7 +186,10 @@ func TestSharedUIContractsBelongToCore(t *testing.T) {
 		}
 		found := false
 		for _, requirement := range m.Manifest.Requires {
-			if requirement.ID == "ggg/element/ui-core" { found = true; break }
+			if requirement.ID == "ggg/element/ui-core" {
+				found = true
+				break
+			}
 		}
 		assert.Truef(t, found, "%s uses shared types but does not require element/ui-core", m.ID)
 	}

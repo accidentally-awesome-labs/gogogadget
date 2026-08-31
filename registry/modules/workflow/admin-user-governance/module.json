@@ -10,7 +10,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "Administrator mutations on a user account: disable or re-enable it and grant or revoke staff role, both audited.",

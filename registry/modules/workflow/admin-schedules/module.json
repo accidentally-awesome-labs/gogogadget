@@ -12,7 +12,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "Creating, enabling, running now and deleting recurring schedules, validated against the schedulable job kinds and audited.",

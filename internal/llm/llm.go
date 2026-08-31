@@ -29,7 +29,7 @@ type ChatRequest struct {
 
 // ChatResponse carries content + token usage (for metering).
 type ChatResponse struct {
-	Content, Model             string
+	Content, Model                 string
 	PromptTokens, CompletionTokens int
 }
 

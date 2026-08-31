@@ -9,7 +9,16 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/standard-webhooks/standard-webhooks/libraries",
+          "version": "v0.0.1"
+        }
+      ],
       "tools": []
     },
     "description": "Receives Polar subscription events, verifies the Standard Webhooks signature, and drives the subscription state machine.",

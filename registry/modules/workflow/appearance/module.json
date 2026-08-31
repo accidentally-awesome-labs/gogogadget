@@ -10,7 +10,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Persists the caller's named theme to the pre-paint cookie and the user row, and resolves the stored locale and theme onto every request so a preference set on one device applies on the next.",

@@ -9,7 +9,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        }
+      ],
       "tools": []
     },
     "description": "Renders one content entry through its own public view regardless of status or publication dates, so an editor previews exactly what readers get.",

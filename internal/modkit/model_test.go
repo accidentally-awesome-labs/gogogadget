@@ -163,7 +163,7 @@ func TestParseProject(t *testing.T) {
 
 func TestMarshalProjectCanonical(t *testing.T) {
 	project := Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/profile/full", "ggg/component/card"},
 		Exclude: []string{"ggg/component/chart"},
@@ -173,7 +173,9 @@ func TestMarshalProjectCanonical(t *testing.T) {
 	if err != nil {
 		t.Fatalf("MarshalProject: %v", err)
 	}
-	if _, err := ParseProject(got); err != nil { t.Fatalf("MarshalProject output is not parseable: %v", err) }
+	if _, err := ParseProject(got); err != nil {
+		t.Fatalf("MarshalProject output is not parseable: %v", err)
+	}
 	if got := strings.Join(project.Modules, ","); got != "ggg/profile/full,ggg/component/card" {
 		t.Fatalf("MarshalProject mutated caller modules: %q", got)
 	}
@@ -258,6 +260,10 @@ func TestMarshalLockCanonical(t *testing.T) {
 	}
 
 	got, err := MarshalLock(lock)
-	if err != nil { t.Fatalf("MarshalLock: %v", err) }
-	if _, err := ParseLock(got); err != nil { t.Fatalf("MarshalLock output is not parseable: %v", err) }
+	if err != nil {
+		t.Fatalf("MarshalLock: %v", err)
+	}
+	if _, err := ParseLock(got); err != nil {
+		t.Fatalf("MarshalLock output is not parseable: %v", err)
+	}
 }

@@ -9,7 +9,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        }
+      ],
       "tools": []
     },
     "description": "The blog index and post pages, backed by the content type declaration.",

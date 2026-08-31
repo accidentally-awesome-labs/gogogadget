@@ -186,7 +186,7 @@ func appNavSections(page Page, scope string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, item := range AppNav {
+		for _, item := range activeNav(AppNav, environmentFrom(ctx)) {
 			templ_7745c5c3_Err = appNavLink(page, item).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -227,7 +227,7 @@ func appNavSections(page Page, scope string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, item := range AdminNav {
+			for _, item := range activeNav(AdminNav, environmentFrom(ctx)) {
 				templ_7745c5c3_Err = appNavLink(page, item).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

@@ -5,7 +5,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Bar, line, area, donut and sparkline figures. Each renders a caption, summary and semantic data table always; the Chart.js visual is added on top only when the engine loads.",

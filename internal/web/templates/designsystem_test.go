@@ -243,7 +243,7 @@ func resolveHex(t *testing.T, sheet, token string) string {
 	}
 
 	for range 8 {
-		m := regexp.MustCompile(regexp.QuoteMeta(token)+`:\s*([^;\n]+)`).FindStringSubmatch(light)
+		m := regexp.MustCompile(regexp.QuoteMeta(token) + `:\s*([^;\n]+)`).FindStringSubmatch(light)
 		require.Lenf(t, m, 2, "input.css declares no light-mode %s", token)
 		value := strings.TrimSpace(m[1])
 		if inner := regexp.MustCompile(`^var\((--[a-z0-9-]+)\)$`).FindStringSubmatch(value); inner != nil {

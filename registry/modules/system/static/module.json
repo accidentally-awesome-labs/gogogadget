@@ -10,7 +10,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "The embedded static file set \u2014 built CSS, client JavaScript, fonts, icons, and the vendored browser assets \u2014 served with content-addressed caching.",

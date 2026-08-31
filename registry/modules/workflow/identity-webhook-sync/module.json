@@ -9,7 +9,20 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        },
+        {
+          "module": "github.com/svix/svix-webhooks",
+          "version": "v1.99.1"
+        }
+      ],
       "tools": []
     },
     "description": "Receives Clerk user and organization events and mirrors them into the local tables.",

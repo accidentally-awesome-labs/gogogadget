@@ -11,7 +11,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": []
     },
     "description": "The admin \"view as user\" flow: reason interstitial, session start, cookie-scoped identity override, and exit.",

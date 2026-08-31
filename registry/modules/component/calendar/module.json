@@ -5,7 +5,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Native date, datetime-local and two-input range fields stay authoritative; Cally adds a calendar in a first-party popover. Also a static month grid, an agenda scheduler and a checkbox availability grid.",

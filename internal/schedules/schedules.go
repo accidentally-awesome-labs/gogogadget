@@ -15,11 +15,11 @@ import (
 
 // Schedule is the create-time shape; NextRunAt zero = first fire immediately.
 type Schedule struct {
-	Name, Kind  string
-	Payload     map[string]any
-	ClerkOrgID  string // "" = system-wide
+	Name, Kind   string
+	Payload      map[string]any
+	ClerkOrgID   string // "" = system-wide
 	EverySeconds int
-	NextRunAt   time.Time
+	NextRunAt    time.Time
 }
 
 // Create inserts a schedule. every_seconds must be >= 60 (table CHECK).
@@ -34,7 +34,7 @@ func Create(ctx context.Context, q *sqlc.Queries, s Schedule) (sqlc.Schedule, er
 	}
 	return q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
 		Name: s.Name, Kind: s.Kind, Payload: raw,
-		ClerkOrgID: pgtype.Text{String: s.ClerkOrgID, Valid: s.ClerkOrgID != ""},
+		ClerkOrgID:   pgtype.Text{String: s.ClerkOrgID, Valid: s.ClerkOrgID != ""},
 		EverySeconds: int32(s.EverySeconds), NextRunAt: at,
 	})
 }

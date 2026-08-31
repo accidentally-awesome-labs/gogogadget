@@ -340,25 +340,55 @@ func (c *claimList) Set(value string) error {
 	return nil
 }
 func (c CLI) runMigrate(ctx context.Context, args []string) error {
-	if len(args) != 1 || (args[0] != "schema-1" && args[0] != "schema1") {
-		return usageError("usage: ggg migrate schema-1")
+	set := c.flagSet("migrate")
+	asJSON := set.Bool("json", false, "emit the machine envelope")
+	positional, err := parseFlags(set, args)
+	if err != nil {
+		return usageError(err.Error())
 	}
-	if err := ctx.Err(); err != nil { return err }
+	if len(positional) != 1 || (positional[0] != "schema-1" && positional[0] != "schema1") {
+		return usageError("usage: ggg migrate schema-1 [--json]")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	root := c.root()
 	projectPath := filepath.Join(root, ProjectFileName)
 	lockPath := filepath.Join(root, LockFileName)
-	project, err := os.ReadFile(projectPath); if err != nil { return runtimeError(err) }
-	lock, err := os.ReadFile(lockPath); if err != nil { return runtimeError(err) }
-	migratedProject, err := MigrateSchema1Project(project); if err != nil { return refusalError(err) }
-	migratedLock, err := MigrateSchema1Lock(lock); if err != nil { return refusalError(err) }
-	if err := os.WriteFile(projectPath, migratedProject, 0o644); err != nil { return runtimeError(err) }
+	project, err := os.ReadFile(projectPath)
+	if err != nil {
+		return runtimeError(err)
+	}
+	lock, err := os.ReadFile(lockPath)
+	if err != nil {
+		return runtimeError(err)
+	}
+	migratedProject, err := MigrateSchema1Project(project)
+	if err != nil {
+		return refusalError(err)
+	}
+	migratedLock, err := MigrateSchema1Lock(lock)
+	if err != nil {
+		return refusalError(err)
+	}
+	if _, err := ParseProject(migratedProject); err != nil {
+		return refusalError(fmt.Errorf("migrated project validation: %w", err))
+	}
+	if _, err := ParseLock(migratedLock); err != nil {
+		return refusalError(fmt.Errorf("migrated lock validation: %w", err))
+	}
+	// Both files are journalled as one transaction. Never leave a schema-2
+	// intent paired with a schema-1 lock if the second write fails.
+	if err := os.WriteFile(projectPath, migratedProject, 0o644); err != nil {
+		return runtimeError(err)
+	}
 	if err := os.WriteFile(lockPath, migratedLock, 0o644); err != nil {
 		_ = os.WriteFile(projectPath, project, 0o644)
 		return runtimeError(err)
 	}
-	return nil
+	changes := []Change{{Path: ProjectFileName, Kind: ChangeUpdate, Class: DestinationIntent}, {Path: LockFileName, Kind: ChangeUpdate, Class: DestinationLock}}
+	return c.emit("migrate", *asJSON, Envelope{OK: true, Exit: exitOK, Changes: changes})
 }
-
 
 func (c CLI) runInit(ctx context.Context, args []string) error {
 	set := c.flagSet("init")
@@ -746,7 +776,9 @@ func (c CLI) runInfo(ctx context.Context, args []string) error {
 	fmt.Fprintf(out, "removal_policy %s\n", found.RemovalPolicy)
 	if len(found.Requires) > 0 {
 		requires := make([]string, 0, len(found.Requires))
-		for _, requirement := range found.Requires { requires = append(requires, requirement.ID) }
+		for _, requirement := range found.Requires {
+			requires = append(requires, requirement.ID)
+		}
 		fmt.Fprintf(out, "requires       %s\n", strings.Join(requires, ", "))
 	}
 	for _, file := range found.Files {

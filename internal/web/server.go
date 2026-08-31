@@ -22,6 +22,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -209,7 +210,11 @@ func (s *Server) Handler() http.Handler {
 	h = s.accessLog(h)
 	h = s.requestID(h)
 	h = s.routeBodyLimit(h) // per-route declared cap, tighter than the global one
-	h = s.recover(h)
+	nextHandler := h
+	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next := r.WithContext(templates.WithProviderEnvironment(r.Context(), s.cfg.Env))
+		nextHandler.ServeHTTP(w, next)
+	})
 	return maxBytes(h, globalMaxBodyBytes) // global request cap on every route
 }
 

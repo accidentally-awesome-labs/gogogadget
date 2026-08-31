@@ -36,7 +36,7 @@ templ appNavLink(page Page, item NavItem) {
 // regardless.
 templ appNavSections(page Page, scope string) {
 	<nav class="flex flex-col gap-1 text-sm" aria-label={ navScopeLabel(ctx, scope, "sidebar.app_nav") }>
-		for _, item := range AppNav {
+		for _, item := range activeNav(AppNav, environmentFrom(ctx)) {
 			@appNavLink(page, item)
 		}
 	</nav>
@@ -46,7 +46,7 @@ templ appNavSections(page Page, scope string) {
 			// landmark carries the name itself.
 			<p class="eyebrow mb-2">{ i18n.T(ctx, "sidebar.admin") }</p>
 			<nav class="flex flex-col gap-1 text-sm" aria-label={ navScopeLabel(ctx, scope, "sidebar.admin") }>
-				for _, item := range AdminNav {
+				for _, item := range activeNav(AdminNav, environmentFrom(ctx)) {
 					@appNavLink(page, item)
 				}
 			</nav>

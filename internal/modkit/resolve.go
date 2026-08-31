@@ -247,7 +247,8 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 		return selectedGraph{}, fmt.Errorf("project providers must exactly match selected provider slots")
 	}
 	adapterByID := map[string]Manifest{}
-	for id, module := range moduleByID {
+	for _, id := range sortedKeys(moduleByID) {
+		module := moduleByID[id]
 		if module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
 			adapterByID[id] = module
 		}
@@ -257,6 +258,7 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 		slotsList = append(slotsList, slot)
 	}
 	sort.Strings(slotsList)
+	chosenAdapters := map[string]struct{}{}
 	for _, slot := range slotsList {
 		choices, ok := project.Providers[slot]
 		if !ok {
@@ -287,9 +289,17 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			if !found {
 				return selectedGraph{}, fmt.Errorf("provider %s target %q is missing from adapter %q", slot, selectedChoice.choice.Target, adapterID)
 			}
+			chosenAdapters[adapterID] = struct{}{}
 			if _, exists := selected[adapterID]; !exists {
 				selected[adapterID] = struct{}{}
 				reasons[adapterID] = "provider"
+			}
+		}
+	}
+	for _, explicitID := range project.Modules {
+		if adapter, ok := adapterByID[explicitID]; ok {
+			if _, chosen := chosenAdapters[adapter.ID]; !chosen {
+				return selectedGraph{}, fmt.Errorf("explicit adapter %q is not selected by provider choices; use ggg provider set", explicitID)
 			}
 		}
 	}
@@ -407,12 +417,14 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 	}
 	build := func(env string) ([]string, error) {
 		selected := map[string]struct{}{}
-		for id, module := range byID {
+		for _, id := range sortedKeys(byID) {
+			module := byID[id]
 			if module.Runtime.System != nil && module.Runtime.System.Adapter == nil {
 				selected[id] = struct{}{}
 			}
 		}
-		for slot, choices := range project.Providers {
+		for _, slot := range sortedKeys(project.Providers) {
+			choices := project.Providers[slot]
 			choice := choices.Development
 			switch env {
 			case "test":
@@ -435,7 +447,7 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 		indegree := make(map[string]int, len(selected))
 		dependents := make(map[string][]string, len(selected))
 		edges := make(map[string]map[string]struct{}, len(selected))
-		for id := range selected {
+		for _, id := range sortedKeys(selected) {
 			indegree[id] = 0
 			edges[id] = map[string]struct{}{}
 		}
@@ -450,7 +462,7 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 			indegree[consumer]++
 			dependents[provider] = append(dependents[provider], consumer)
 		}
-		for id := range selected {
+		for _, id := range sortedKeys(selected) {
 			module := byID[id]
 			for _, requirement := range module.Requires {
 				if _, exists := selected[requirement.ID]; !exists {
@@ -460,7 +472,7 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 			}
 		}
 		providers := map[string]string{}
-		for id := range selected {
+		for _, id := range sortedKeys(selected) {
 			module := byID[id]
 			if module.Runtime.System == nil {
 				continue
@@ -478,7 +490,7 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 				providers[provide.Capability] = id
 			}
 		}
-		for id := range selected {
+		for _, id := range sortedKeys(selected) {
 			module := byID[id]
 			if module.Runtime.System == nil {
 				continue
@@ -498,8 +510,8 @@ func RuntimeOrdersFor(ctx context.Context, modules []Manifest, project Project) 
 			sort.Strings(dependents[id])
 		}
 		ready := make([]string, 0)
-		for id, degree := range indegree {
-			if degree == 0 {
+		for _, id := range sortedKeys(indegree) {
+			if indegree[id] == 0 {
 				ready = append(ready, id)
 			}
 		}

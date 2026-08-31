@@ -9,33 +9,31 @@ import (
 )
 
 var providerEnv atomic.Value
-var providerBase atomic.Value
 
 func init() { providerEnv.Store("development") }
 
-func SetProviderEnvironment(env string) {
-	providerEnv.Store(env)
-	base, _ := providerBase.Load().([]NavSnapshot)
-	if len(base) == 0 {
-		base = []NavSnapshot{{Public: append([]NavItem{}, PublicNav...), App: append([]NavItem{}, AppNav...), Admin: append([]NavItem{}, AdminNav...), Footer: append([]NavColumn{}, FooterColumns...), Settings: append([]SettingsTab{}, SettingsNavigationRegistry...)}}
-		providerBase.Store(base)
-	}
-	s := base[0]
-	PublicNav = activeNav(s.Public, env)
-	AppNav = activeNav(s.App, env)
-	AdminNav = activeNav(s.Admin, env)
-	FooterColumns = activeColumns(s.Footer, env)
-	activeSettings := make([]SettingsTab, 0, len(s.Settings))
-	for _, tab := range s.Settings {
-		if tab.Item.ProviderActive == nil || tab.Item.ProviderActive() {
-			activeSettings = append(activeSettings, tab)
-		}
-	}
-	SettingsNavigationRegistry = activeSettings
-}
+// SetProviderEnvironment updates the default used by non-request callers.
+// It does not rewrite generated slices; each render filters a snapshot, so
+// concurrent servers cannot race over shared navigation state.
+func SetProviderEnvironment(env string) { providerEnv.Store(env) }
+
 func providerEnvironment() string { value, _ := providerEnv.Load().(string); return value }
 
-// ActiveShellSlots returns only shell contributions active for the configured
+// WithProviderEnvironment binds an environment to one request/render context.
+func WithProviderEnvironment(ctx context.Context, env string) context.Context {
+	return context.WithValue(ctx, providerEnvironmentKey{}, env)
+}
+
+type providerEnvironmentKey struct{}
+
+func environmentFrom(ctx context.Context) string {
+	if value, ok := ctx.Value(providerEnvironmentKey{}).(string); ok && value != "" {
+		return value
+	}
+	return providerEnvironment()
+}
+
+// ActiveShellSlots returns only shell contributions active for the requested
 // environment. Callers must use this instead of iterating the raw registry.
 func ActiveShellSlots(slot, env string) []string {
 	items := ShellSlotsRegistry[slot]
@@ -48,16 +46,23 @@ func ActiveShellSlots(slot, env string) []string {
 	return out
 }
 
+// ShellSlotIDs is the render-path view of generated shell registrations. It
+// intentionally returns a fresh slice so one request cannot mutate another
+// request's generated registry.
+func ShellSlotIDs(ctx context.Context, slot string) []string {
+	return ActiveShellSlots(slot, environmentFrom(ctx))
+}
+
 type NavSnapshot struct {
 	Public, App, Admin []NavItem
 	Footer             []NavColumn
 	Settings           []SettingsTab
 }
 
-func activeNav(items []NavItem, _ string) []NavItem {
+func activeNav(items []NavItem, env string) []NavItem {
 	out := make([]NavItem, 0, len(items))
 	for _, item := range items {
-		if item.ProviderActive == nil || item.ProviderActive() {
+		if item.ProviderActive == nil || item.ProviderActive(env) {
 			out = append(out, item)
 		}
 	}
@@ -85,7 +90,7 @@ type NavItem struct {
 	LabelKey, Href, Match string
 	// ProviderActive is nil for ordinary contributions and false when an
 	// adapter is inactive in the current environment.
-	ProviderActive func() bool
+	ProviderActive func(string) bool
 }
 
 // MatchPath is the prefix navCurrent compares the request path against.
@@ -128,7 +133,11 @@ func NavLabel(ctx context.Context, item NavItem) string {
 // flag conditions are evaluated per request rather than baked in.
 func settingsTabs(ctx context.Context) []NavItem {
 	items := make([]NavItem, 0, len(SettingsNavigationRegistry))
+	env := environmentFrom(ctx)
 	for _, tab := range SettingsNavigationRegistry {
+		if tab.Item.ProviderActive != nil && !tab.Item.ProviderActive(env) {
+			continue
+		}
 		if navConditionsMet(ctx, tab.Roles, tab.Flags) {
 			items = append(items, tab.Item)
 		}
@@ -136,7 +145,6 @@ func settingsTabs(ctx context.Context) []NavItem {
 	return items
 }
 
-// navConditionsMet evaluates a declared entry's conditions against the current
 // request. An unrecognised condition name is treated as unmet: showing a gated
 // entry because of a typo is the worse failure, and generation refuses unknown
 // names anyway, so this is a second line rather than the only one.

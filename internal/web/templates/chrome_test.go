@@ -81,6 +81,23 @@ func TestShellRendersChromeConfig(t *testing.T) {
 	assert.NotContains(t, side, `href="/app/projects"`, "the app nav must come from AppNav alone")
 }
 
+func TestNavRendersOnlyActiveShellSlotsForEnvironment(t *testing.T) {
+	originalRegistry, originalActive := ShellSlotsRegistry, ShellSlotActive
+	ShellSlotsRegistry = map[string][]string{"head": {"inactive", "active"}}
+	ShellSlotActive = map[string]func(string) bool{
+		"inactive": func(string) bool { return false },
+		"active":   func(env string) bool { return env == "production" },
+	}
+	t.Cleanup(func() {
+		ShellSlotsRegistry, ShellSlotActive = originalRegistry, originalActive
+	})
+	ctx := WithProviderEnvironment(t.Context(), "production")
+	var output strings.Builder
+	require.NoError(t, Nav(Page{Path: "/"}).Render(ctx, &output))
+	assert.NotContains(t, output.String(), `data-shell-slot="inactive"`)
+	assert.Contains(t, output.String(), `data-shell-slot="active"`)
+}
+
 // MatchPath is the prefix navCurrent compares against; an item with no
 // explicit Match falls back to its own Href.
 func TestNavItemMatchPath(t *testing.T) {

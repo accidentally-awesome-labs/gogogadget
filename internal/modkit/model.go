@@ -4,12 +4,12 @@ import "encoding/json"
 
 // Project is the hand-owned declaration of registry intent.
 type Project struct {
-	Schema    int                          `json:"schema"`
+	Schema     int                           `json:"schema"`
 	Registries []ProjectRegistry             `json:"registries"`
-	Modules   []string                      `json:"modules"`
-	Exclude   []string                      `json:"exclude"`
-	Providers map[string]ProviderSelections `json:"providers"`
-	Deployment string                       `json:"deployment"`
+	Modules    []string                      `json:"modules"`
+	Exclude    []string                      `json:"exclude"`
+	Providers  map[string]ProviderSelections `json:"providers"`
+	Deployment string                        `json:"deployment"`
 }
 
 // ProjectRegistry identifies one configured registry source.
@@ -212,18 +212,18 @@ const (
 
 // Manifest is the canonical, embedded snapshot of one resolved module.
 type Manifest struct {
-	ID          string               `json:"id"`
-	Kind        ModuleKind           `json:"kind"`
-	Name        string               `json:"name"`
-	Revision    int                  `json:"revision"`
-	Contract    int                  `json:"contract"`
-	Title       string               `json:"title"`
-	Description string               `json:"description"`
-	Requires    []Requirement        `json:"requires"`
+	ID           string               `json:"id"`
+	Kind         ModuleKind           `json:"kind"`
+	Name         string               `json:"name"`
+	Revision     int                  `json:"revision"`
+	Contract     int                  `json:"contract"`
+	Title        string               `json:"title"`
+	Description  string               `json:"description"`
+	Requires     []Requirement        `json:"requires"`
 	Dependencies Dependencies         `json:"dependencies"`
-	Files       []ManifestFile       `json:"files"`
-	Claims      NamespaceClaims      `json:"claims"`
-	Runtime     RuntimeContributions `json:"runtime"`
+	Files        []ManifestFile       `json:"files"`
+	Claims       NamespaceClaims      `json:"claims"`
+	Runtime      RuntimeContributions `json:"runtime"`
 	// Vendors records the provenance of every third-party file this module
 	// commits into the tree. Declared per module rather than centrally so that
 	// removing a module removes its vendored bytes with it.
@@ -245,14 +245,14 @@ type Manifest struct {
 	Docs          []DocumentationRef    `json:"docs"`
 	Tests         TestMetadata          `json:"tests"`
 	Data          []DataDeclaration     `json:"data"`
-	RemovalPolicy RemovalPolicy          `json:"removal_policy"`
+	RemovalPolicy RemovalPolicy         `json:"removal_policy"`
 	TestOnly      bool                  `json:"test_only,omitempty"`
 }
 
 // Requirement declares a dependency and the inclusive provider contract range
 // consumed by this module.
 type Requirement struct {
-	ID       string          `json:"id"`
+	ID       string         `json:"id"`
 	Contract ContractBounds `json:"contract"`
 }
 
@@ -273,12 +273,12 @@ type GoDependency struct {
 }
 
 type ToolArtifact struct {
-	OS         string `json:"os"`
-	Arch       string `json:"arch"`
-	URL        string `json:"url"`
-	SHA256     string `json:"sha256"`
-	Format     string `json:"format"`
-	BinaryPath string `json:"binary_path"`
+	OS          string `json:"os"`
+	Arch        string `json:"arch"`
+	URL         string `json:"url"`
+	SHA256      string `json:"sha256"`
+	Format      string `json:"format"`
+	BinaryPath  string `json:"binary_path"`
 	InstallPath string `json:"install_path"`
 }
 
@@ -318,25 +318,26 @@ type NamespaceClaims struct {
 	CLI           []string `json:"cli,omitempty"`
 	Deploy        []string `json:"deploy,omitempty"`
 }
+
 // RuntimeContributions is the typed, data-only runtime declaration. Empty
 // contributions encode as {}.
 type RuntimeContributions struct {
 	System        *SystemContribution        `json:"system,omitempty"`
 	ProviderSlots []ProviderSlotContribution `json:"provider_slots,omitempty"`
 	Provisioners  []ProvisionerContribution  `json:"provisioners,omitempty"`
-	DatabaseOps   []DatabaseOpsContribution   `json:"database_ops,omitempty"`
-	Deploy        []DeployContribution        `json:"deploy,omitempty"`
-	Routes        []RouteContribution          `json:"routes,omitempty"`
-	Jobs          []JobContribution            `json:"jobs,omitempty"`
-	Janitors      []JanitorContribution        `json:"janitors,omitempty"`
-	Queries       []QueryContribution          `json:"queries,omitempty"`
-	ContentTypes  []ContentTypeContribution    `json:"content_types,omitempty"`
-	Navigation    []NavigationContribution     `json:"navigation,omitempty"`
-	Slots         []SlotContribution           `json:"slots,omitempty"`
-	UI            []UIContribution             `json:"ui,omitempty"`
-	Assets        []AssetContribution           `json:"assets,omitempty"`
-	Scenarios     []ScenarioContribution        `json:"scenarios,omitempty"`
-	Visual        []VisualContribution          `json:"visual,omitempty"`
+	DatabaseOps   []DatabaseOpsContribution  `json:"database_ops,omitempty"`
+	Deploy        []DeployContribution       `json:"deploy,omitempty"`
+	Routes        []RouteContribution        `json:"routes,omitempty"`
+	Jobs          []JobContribution          `json:"jobs,omitempty"`
+	Janitors      []JanitorContribution      `json:"janitors,omitempty"`
+	Queries       []QueryContribution        `json:"queries,omitempty"`
+	ContentTypes  []ContentTypeContribution  `json:"content_types,omitempty"`
+	Navigation    []NavigationContribution   `json:"navigation,omitempty"`
+	Slots         []SlotContribution         `json:"slots,omitempty"`
+	UI            []UIContribution           `json:"ui,omitempty"`
+	Assets        []AssetContribution        `json:"assets,omitempty"`
+	Scenarios     []ScenarioContribution     `json:"scenarios,omitempty"`
+	Visual        []VisualContribution       `json:"visual,omitempty"`
 }
 
 type ProvisionerContribution struct {
@@ -356,11 +357,13 @@ type DeployContribution struct {
 	Package     string `json:"package"`
 	Constructor string `json:"constructor"`
 }
+
 // CapabilityContribution names one typed value exported by a provider slot.
 type CapabilityContribution struct {
 	Capability string `json:"capability"`
 	Type       string `json:"type"`
 }
+
 // ProviderSlotContribution declares a constructor-free provider seam.
 type ProviderSlotContribution struct {
 	ID           string                   `json:"id"`
@@ -390,7 +393,6 @@ type AdapterContribution struct {
 	Targets []ServiceTarget `json:"targets"`
 }
 
-
 // SystemContribution declares a directly compiled runtime constructor.
 type SystemContribution struct {
 	Package     string           `json:"package"`
@@ -410,19 +412,20 @@ type SystemContribution struct {
 	Health      bool                 `json:"health,omitempty"`
 	Adapter     *AdapterContribution `json:"adapter,omitempty"`
 }
+
 // ServiceTarget is the provider-facing endpoint choice exposed by an adapter.
 type ServiceTarget struct {
-	ID             string          `json:"id"`
-	Title          string          `json:"title"`
-	Mode           string          `json:"mode"`
-	Environments   []string        `json:"environments"`
-	Automation     string          `json:"automation"`
-	Provisioner    string          `json:"provisioner,omitempty"`
+	ID               string        `json:"id"`
+	Title            string        `json:"title"`
+	Mode             string        `json:"mode"`
+	Environments     []string      `json:"environments"`
+	Automation       string        `json:"automation"`
+	Provisioner      string        `json:"provisioner,omitempty"`
 	DatabaseOperator string        `json:"database_operator,omitempty"`
-	DocsURL        string          `json:"docs_url"`
-	ConsoleURL     string          `json:"console_url,omitempty"`
-	Inputs         []TargetInput   `json:"inputs"`
-	LocalService   *LocalService   `json:"local_service,omitempty"`
+	DocsURL          string        `json:"docs_url"`
+	ConsoleURL       string        `json:"console_url,omitempty"`
+	Inputs           []TargetInput `json:"inputs"`
+	LocalService     *LocalService `json:"local_service,omitempty"`
 }
 
 type TargetInput struct {
@@ -436,9 +439,9 @@ type TargetInput struct {
 }
 
 type LocalService struct {
-	Container   string              `json:"container"`
-	Ports       []LocalServicePort  `json:"ports"`
-	Environment []LocalServiceEnv   `json:"environment"`
+	Container   string               `json:"container"`
+	Ports       []LocalServicePort   `json:"ports"`
+	Environment []LocalServiceEnv    `json:"environment"`
 	Volumes     []LocalServiceVolume `json:"volumes"`
 	Health      LocalServiceHealth   `json:"health"`
 }
@@ -716,14 +719,14 @@ type VisualContribution struct {
 
 // AssetContribution declares an ordered same-origin static asset.
 type AssetContribution struct {
-	ID   string    `json:"id"`
-	Path string    `json:"path"`
-	Kind AssetKind `json:"kind"`
-	Engine string `json:"engine,omitempty"`
-	Integrity string `json:"integrity,omitempty"`
-	ESM    bool     `json:"esm,omitempty"`
-	Before []string `json:"before,omitempty"`
-	After  []string `json:"after,omitempty"`
+	ID        string    `json:"id"`
+	Path      string    `json:"path"`
+	Kind      AssetKind `json:"kind"`
+	Engine    string    `json:"engine,omitempty"`
+	Integrity string    `json:"integrity,omitempty"`
+	ESM       bool      `json:"esm,omitempty"`
+	Before    []string  `json:"before,omitempty"`
+	After     []string  `json:"after,omitempty"`
 }
 
 // ManifestMigration declares a reviewed, forward-only migration payload.
@@ -736,20 +739,20 @@ type ManifestMigration struct {
 
 // EnvironmentVariable is one generated configuration declaration.
 type EnvironmentVariable struct {
-	Key   string `json:"key"`
-	Field string `json:"field"`
-	Type        EnvType `json:"type"`
-	Description string `json:"description"`
-	Default     string `json:"default,omitempty"`
-	Example     string `json:"example,omitempty"`
-	Min         *int `json:"min,omitempty"`
-	Max         *int `json:"max,omitempty"`
-	Enum        []string `json:"enum,omitempty"`
-	TrimSlash   bool `json:"trim_slash,omitempty"`
-	Required    bool `json:"required,omitempty"`
-	ProductionRequired bool `json:"production_required,omitempty"`
-	Secret      bool `json:"secret,omitempty"`
-	Targets     []string `json:"targets,omitempty"`
+	Key                string   `json:"key"`
+	Field              string   `json:"field"`
+	Type               EnvType  `json:"type"`
+	Description        string   `json:"description"`
+	Default            string   `json:"default,omitempty"`
+	Example            string   `json:"example,omitempty"`
+	Min                *int     `json:"min,omitempty"`
+	Max                *int     `json:"max,omitempty"`
+	Enum               []string `json:"enum,omitempty"`
+	TrimSlash          bool     `json:"trim_slash,omitempty"`
+	Required           bool     `json:"required,omitempty"`
+	ProductionRequired bool     `json:"production_required,omitempty"`
+	Secret             bool     `json:"secret,omitempty"`
+	Targets            []string `json:"targets,omitempty"`
 }
 
 // EnvType is the parse a declared key needs.
@@ -809,29 +812,34 @@ type DataDeclaration struct {
 
 // Lock is the generated, committed resolved registry state.
 type Lock struct {
-	Schema         int                         `json:"schema"`
-	RegistryCommit string                      `json:"registry_commit"`
-	Registries     []LockedRegistry            `json:"registries"`
-	Snapshots      []LockedSnapshot            `json:"snapshots"`
-	Order          []string                    `json:"order"`
-	RuntimeOrders  RuntimeOrders               `json:"runtime_orders"`
-	Dependencies   []LockedDependency          `json:"dependencies"`
-	Modules        []LockedModule              `json:"modules"`
+	Schema         int              `json:"schema"`
+	RegistryCommit string           `json:"registry_commit"`
+	Registries     []LockedRegistry `json:"registries"`
+	Snapshots      []LockedSnapshot `json:"snapshots"`
+	Order          []string         `json:"order"`
+	RuntimeOrders  RuntimeOrders    `json:"runtime_orders"`
+	// Providers records the exact adapter@target selected for every slot and
+	// environment. Keeping this in the lock makes generated consumers (health,
+	// navigation, and shell registries) deterministic without consulting mutable
+	// intent at generation time.
+	Providers    map[string]ProviderSelections `json:"providers,omitempty"`
+	Dependencies []LockedDependency            `json:"dependencies"`
+	Modules      []LockedModule                `json:"modules"`
 }
 
 type LockedRegistry struct {
-	Namespace      string `json:"namespace"`
-	Source         string `json:"source"`
-	RequestedRef   string `json:"requested_ref"`
+	Namespace       string `json:"namespace"`
+	Source          string `json:"source"`
+	RequestedRef    string `json:"requested_ref"`
 	CanonicalModule string `json:"canonical_module"`
-	KeyFingerprint string `json:"key_fingerprint"`
+	KeyFingerprint  string `json:"key_fingerprint"`
 }
 
 type LockedSnapshot struct {
-	Namespace    string `json:"namespace"`
-	Commit       string `json:"commit"`
+	Namespace      string `json:"namespace"`
+	Commit         string `json:"commit"`
 	SnapshotSHA256 string `json:"snapshot_sha256"`
-	CacheKey     string `json:"cache_key"`
+	CacheKey       string `json:"cache_key"`
 }
 
 type RuntimeOrders struct {
@@ -850,18 +858,18 @@ type LockedDependency struct {
 
 // LockedModule is one installed module and its canonical manifest snapshot.
 type LockedModule struct {
-	ID           string            `json:"id"`
-	Revision     int               `json:"revision"`
-	Contract     int               `json:"contract"`
-	RegistryNamespace string       `json:"registry_namespace"`
-	SourceCommit string            `json:"source_commit"`
-	SnapshotSHA256 string          `json:"snapshot_sha256"`
-	Reason       string            `json:"reason"`
-	RequiredBy   []string          `json:"required_by"`
-	Manifest     Manifest          `json:"manifest"`
-	Files        []LockedFile      `json:"files"`
-	Migrations   []LockedMigration `json:"migrations"`
-	Pending      *PendingUpdate    `json:"pending,omitempty"`
+	ID                string            `json:"id"`
+	Revision          int               `json:"revision"`
+	Contract          int               `json:"contract"`
+	RegistryNamespace string            `json:"registry_namespace"`
+	SourceCommit      string            `json:"source_commit"`
+	SnapshotSHA256    string            `json:"snapshot_sha256"`
+	Reason            string            `json:"reason"`
+	RequiredBy        []string          `json:"required_by"`
+	Manifest          Manifest          `json:"manifest"`
+	Files             []LockedFile      `json:"files"`
+	Migrations        []LockedMigration `json:"migrations"`
+	Pending           *PendingUpdate    `json:"pending,omitempty"`
 }
 
 // LockedFile records the installed base and current local bytes of one target.

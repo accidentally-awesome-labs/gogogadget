@@ -5,7 +5,12 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "CSS scroll snap over a plain list. Autoplay is off by default, pauses on hover and focus, and never runs under reduced motion. The dots are real anchors to each slide.",

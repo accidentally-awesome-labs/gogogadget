@@ -125,3 +125,67 @@ func TestOSHostLoggerHonorsEnvironment(t *testing.T) {
 		}
 	})
 }
+
+type healthFunc func(context.Context) error
+
+func (f healthFunc) Health(ctx context.Context) error { return f(ctx) }
+
+func TestAggregateHealthRunsConcurrentlyAndOnlyCriticalAffectsReady(t *testing.T) {
+	release := make(chan struct{})
+	started := make(chan struct{}, 2)
+	checker := healthFunc(func(context.Context) error {
+		started <- struct{}{}
+		<-release
+		return nil
+	})
+	registrations := []HealthRegistration{
+		{Module: "a", Critical: true, Check: checker},
+		{Module: "b", Critical: false, Check: checker},
+	}
+	go func() {
+		<-started
+		<-started
+		close(release)
+	}()
+	report := AggregateHealth(context.Background(), registrations)
+	if len(report.Checks) != 2 || !report.Ready {
+		t.Fatalf("report = %#v, want two healthy checks and ready", report)
+	}
+}
+
+func TestAggregateHealthHardDeadlineAndPanicRecovery(t *testing.T) {
+	ignoreContext := healthFunc(func(context.Context) error {
+		select {}
+	})
+	start := time.Now()
+	report := AggregateHealth(context.Background(), []HealthRegistration{
+		{Module: "slow", Slot: "mail", Adapter: "dev", Target: "filesystem", Critical: true, Check: ignoreContext},
+		{Module: "panic", Critical: false, Check: healthFunc(func(context.Context) error { panic("boom") })},
+	})
+	if elapsed := time.Since(start); elapsed > 2500*time.Millisecond {
+		t.Fatalf("health exceeded hard deadline: %v", elapsed)
+	}
+	if report.Ready {
+		t.Fatal("critical timeout must make report not ready")
+	}
+	if report.Checks[1].Healthy || report.Checks[1].Error == "" {
+		t.Fatalf("panic check = %#v, want unhealthy error", report.Checks[1])
+	}
+}
+
+func TestHealthCacheUsesTenSecondWindow(t *testing.T) {
+	calls := 0
+	check := healthFunc(func(context.Context) error { calls++; return nil })
+	cache := &HealthCache{}
+	registrations := []HealthRegistration{{Module: "cached", Check: check}}
+	cache.Get(context.Background(), registrations)
+	cache.Get(context.Background(), registrations)
+	if calls != 1 {
+		t.Fatalf("checker calls = %d, want cached single call", calls)
+	}
+	cache.at = time.Now().Add(-11 * time.Second)
+	cache.Get(context.Background(), registrations)
+	if calls != 2 {
+		t.Fatalf("checker calls after expiry = %d, want 2", calls)
+	}
+}

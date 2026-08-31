@@ -376,9 +376,9 @@ func TestCLISyncCheckDetectsTamperedAndMissingGeneratedOutput(t *testing.T) {
 func TestCLISyncClaimsDivergentFileDuringAdoption(t *testing.T) {
 	root, engine := cliProject(t)
 	intent, err := MarshalProject(Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{"ggg/page/optional"}, Exclude: []string{},
+		Modules: []string{"ggg/page/optional"}, Exclude: []string{},
 	})
 	if err != nil {
 		t.Fatalf("MarshalProject: %v", err)

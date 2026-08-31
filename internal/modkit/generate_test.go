@@ -12,11 +12,20 @@ import (
 
 func genFixtureLock(t *testing.T) (Lock, []Manifest) {
 	t.Helper()
+	config := Manifest{
+		ID: "ggg/system/config", Kind: ModuleSystem, Name: "config",
+		Revision: 1, Contract: 1, Title: "Config", Description: "Config root.",
+		Files: []ManifestFile{}, Requires: []Requirement{}, RemovalPolicy: RemovalFree,
+		Runtime: RuntimeContributions{System: &SystemContribution{
+			Package: "internal/config", Constructor: "NewModule",
+			Needs: []RuntimeNeed{}, Provides: []RuntimeProvide{{Field: "Config", Capability: "config", Type: "*config.Config"}},
+		}},
+	}
 	system := Manifest{
 		ID: "ggg/system/alpha", Kind: ModuleSystem, Name: "alpha",
 		Revision: 1, Contract: 1, Title: "Alpha", Description: "Alpha system.",
 		Files:         []ManifestFile{},
-		Requires:      []Requirement{},
+		Requires:      []Requirement{{ID: "ggg/system/config", Contract: ContractBounds{Min: 1, Max: 1}}},
 		RemovalPolicy: RemovalFree,
 		Runtime: RuntimeContributions{
 			System: &SystemContribution{
@@ -46,17 +55,19 @@ func genFixtureLock(t *testing.T) (Lock, []Manifest) {
 		},
 	}
 	lock := Lock{
-		Schema: 2,
+		Schema:         2,
 		RegistryCommit: testCommitA,
-		Order:          []string{"ggg/system/alpha", "ggg/page/beta"},
+		Order:          []string{"ggg/system/config", "ggg/system/alpha", "ggg/page/beta"},
 		Modules: []LockedModule{
+			{ID: "ggg/system/config", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
+				RequiredBy: []string{"ggg/system/alpha"}, Manifest: config, Files: []LockedFile{}, Migrations: []LockedMigration{}},
 			{ID: "ggg/system/alpha", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
 				RequiredBy: []string{"ggg/page/beta"}, Manifest: system, Files: []LockedFile{}, Migrations: []LockedMigration{}},
 			{ID: "ggg/page/beta", Revision: 1, Contract: 1, SourceCommit: testCommitA, Reason: "explicit",
 				RequiredBy: []string{}, Manifest: page, Files: []LockedFile{}, Migrations: []LockedMigration{}},
 		},
 	}
-	return lock, []Manifest{system, page}
+	return lock, []Manifest{config, system, page}
 }
 
 func TestGenerateAllIsDeterministic(t *testing.T) {
@@ -79,6 +90,36 @@ func TestGenerateAllIsDeterministic(t *testing.T) {
 		if a[i].Path != b[i].Path || a[i].Content != b[i].Content {
 			t.Fatalf("file %d differs: %s vs %s", i, a[i].Path, b[i].Path)
 		}
+	}
+}
+
+func TestBootstrapRejectsConstructorGraphWithoutConfig(t *testing.T) {
+	module := Manifest{
+		ID: "ggg/system/orphan", Kind: ModuleSystem, Name: "orphan",
+		Revision: 1, Contract: 1, Title: "Orphan", Description: "Orphan.",
+		Requires: []Requirement{}, Files: []ManifestFile{}, Migrations: []ManifestMigration{},
+		Environment: []EnvironmentVariable{}, Docs: []DocumentationRef{}, Data: []DataDeclaration{},
+		Tests: TestMetadata{}, Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		RemovalPolicy: RemovalFree,
+		Runtime:       RuntimeContributions{System: &SystemContribution{Package: "internal/orphan", Constructor: "New"}},
+	}
+	lock := Lock{Schema: 2, RegistryCommit: testCommitA, Order: []string{module.ID}, RuntimeOrders: RuntimeOrders{Development: []string{module.ID}, Test: []string{module.ID}, Production: []string{module.ID}}}
+	if _, err := GenerateAll(context.Background(), "example.com/acme", lock, []Manifest{module}); err == nil || !strings.Contains(err.Error(), "config capability") {
+		t.Fatalf("GenerateAll error = %v, want config capability refusal", err)
+	}
+}
+func TestBootstrapCollapsedConstructorRemainsCompileSafe(t *testing.T) {
+	lock, graph := genFixtureLock(t)
+	graph[1].Runtime.System.Provides = []RuntimeProvide{}
+	graph[1].Runtime.System.Start = false
+	graph[1].Runtime.System.Stop = false
+	lock.Modules[1].Manifest = graph[1]
+	out, err := emitBootstrapRegistry(context.Background(), "example.com/acme", lock, graph)
+	if err != nil {
+		t.Fatalf("emitBootstrapRegistry: %v", err)
+	}
+	if !strings.Contains(out.Content, "_, err = alpha.New(ctx") {
+		t.Fatalf("collapsed constructor assignment missing:\n%s", out.Content)
 	}
 }
 
@@ -372,7 +413,7 @@ func TestBootstrapClosesStoppableModulesInReverseOrder(t *testing.T) {
 	second := Manifest{
 		ID: "ggg/system/omega", Kind: ModuleSystem, Name: "omega",
 		Revision: 1, Contract: 1, Title: "Omega", Description: "Omega system.",
-		Files: []ManifestFile{}, Requires: []Requirement{{ID: "ggg/system/alpha", Contract: ContractBounds{Min: 1, Max: 1}},}, RemovalPolicy: RemovalFree,
+		Files: []ManifestFile{}, Requires: []Requirement{{ID: "ggg/system/alpha", Contract: ContractBounds{Min: 1, Max: 1}}}, RemovalPolicy: RemovalFree,
 		Runtime: RuntimeContributions{System: &SystemContribution{
 			Package: "internal/omega", Constructor: "NewModule",
 			Needs:    []RuntimeNeed{{Field: "Alpha", Capability: "alpha", Type: "*alpha.Module"}},
@@ -1640,7 +1681,13 @@ func TestOpenAPIRegistryRejectsDuplicateIdentifiers(t *testing.T) {
 	}
 }
 
-func requirementList(ids []string) []Requirement { out:=make([]Requirement,0,len(ids)); for _, id := range ids { out=append(out, Requirement{ID:id, Contract:ContractBounds{Min:1,Max:1}}) }; return out }
+func requirementList(ids []string) []Requirement {
+	out := make([]Requirement, 0, len(ids))
+	for _, id := range ids {
+		out = append(out, Requirement{ID: id, Contract: ContractBounds{Min: 1, Max: 1}})
+	}
+	return out
+}
 
 func queryModule(id, name string, tables []string, queries []QueryContribution, requires []string) Manifest {
 	data := make([]DataDeclaration, 0, len(tables))
@@ -1874,7 +1921,7 @@ func TestSeedRegistryEmitsOrderedFragments(t *testing.T) {
 	flags := Manifest{
 		ID: "ggg/system/feature-flags", Kind: ModuleSystem, Name: "feature-flags",
 		Revision: 1, Contract: 1, Title: "Flags", Description: "x.",
-		Requires: []Requirement{{ID: "ggg/system/organizations", Contract: ContractBounds{Min: 1, Max: 1}},}, RemovalPolicy: RemovalFree,
+		Requires: []Requirement{{ID: "ggg/system/organizations", Contract: ContractBounds{Min: 1, Max: 1}}}, RemovalPolicy: RemovalFree,
 		Files: []ManifestFile{
 			{Source: "internal/db/testdata/seed/dev/flags.sql",
 				Target: "internal/db/testdata/seed/dev/flags.sql",

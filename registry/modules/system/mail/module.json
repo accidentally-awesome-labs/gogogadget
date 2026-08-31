@@ -9,7 +9,24 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
+          "module": "github.com/resendlabs/resend-go",
+          "version": "v1.7.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        },
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.40.0"
+        }
+      ],
       "tools": []
     },
     "description": "Sender port with a Resend adapter and a development sender that writes to disk.",

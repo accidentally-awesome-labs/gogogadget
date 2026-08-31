@@ -65,9 +65,9 @@ func installTwoModules(t *testing.T) (string, *Engine, Plan) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
 	initial, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -245,9 +245,9 @@ func scenarioRemovalProject(t *testing.T) (string, *Engine) {
 		testCommitA: {Commit: testCommitA, FS: first},
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
+		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	return root, New(Options{Source: source, Generator: RegistryGenerator{}})
 }

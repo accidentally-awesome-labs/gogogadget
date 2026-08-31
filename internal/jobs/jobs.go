@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"math/rand/v2"
 	"net/http"
+	"os"
 	"runtime/debug"
 	"time"
 
@@ -150,8 +151,11 @@ func (w *Worker) digestLocale() language.Tag {
 	return w.DigestLocale
 }
 
+// NewWorker uses the explicit APP_ENV when callers do not use
+// NewWorkerWithEnvironment. An unset environment stays unset: silently
+// selecting development could register the wrong provider-owned jobs.
 func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
-	return NewWorkerWithEnvironment(q, sender, log, "development")
+	return NewWorkerWithEnvironment(q, sender, log, os.Getenv("APP_ENV"))
 }
 
 func NewWorkerWithEnvironment(q *sqlc.Queries, sender mail.Sender, log *slog.Logger, environment string) *Worker {

@@ -29,7 +29,16 @@
     ],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",

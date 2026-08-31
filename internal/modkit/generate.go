@@ -320,11 +320,19 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		byID[module.ID] = module
 	}
 	configID := ""
+	configModulePresent := false
+	hasConstructor := false
 	handlerField := ""
 	providedTypes := map[string]string{}
 	for _, module := range modules {
+		if module.ID == "ggg/system/config" {
+			configModulePresent = true
+		}
 		if module.Runtime.System == nil {
 			continue
+		}
+		if module.Runtime.System.Package != "" && module.Runtime.System.Constructor != "" {
+			hasConstructor = true
 		}
 		for _, provide := range module.Runtime.System.Provides {
 			if provide.Capability == "config" && module.Runtime.System.Adapter == nil {
@@ -339,23 +347,18 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			providedTypes[provide.Capability] = provide.Type
 		}
 	}
+	// A real runtime with constructors cannot safely boot without the config
+	// root. Keep metadata-only graphs (and legacy synthetic fixtures that carry
+	// the config module but mutate its provides) generation-compatible.
+	if configID == "" && hasConstructor && !configModulePresent {
+		return nil, fmt.Errorf("config capability is required for bootstrap generation")
+	}
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package modules\n\n")
 	b.WriteString("import (\n\t\"context\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n")
-	templatesInstalled := false
-	for _, module := range modules {
-		for _, file := range module.Files {
-			if strings.HasPrefix(file.Target, "internal/web/templates/") {
-				templatesInstalled = true
-			}
-		}
-	}
 	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n"}
 	seenImports := map[string]struct{}{}
-	if templatesInstalled {
-		imports = append(imports, "\ttemplates \""+modulePath+"/internal/web/templates\"\n")
-	}
 	for _, module := range modules {
 		sys := module.Runtime.System
 		if sys == nil || sys.Package == "" {
@@ -459,7 +462,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			}
 			fmt.Fprintf(&b, "\tvar _ apphost.HealthChecker = %s\n", target)
 			fmt.Fprintf(&b, "\tr.health = append(r.health, apphost.HealthRegistration{Module: %s, Slot: %s, Adapter: %s, Target: %s, Critical: %t, Check: %s})\n",
-				goString(module.ID), goString(slot), goString(adapter), goString(firstTargetFor(module, env)), critical, target)
+				goString(module.ID), goString(slot), goString(adapter), goString(selectedTargetFor(lock, slot, module.ID, env)), critical, target)
 		}
 		return nil
 	}
@@ -506,9 +509,6 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			return nil, err
 		}
 		returnsRuntime = false
-		if templatesInstalled {
-			b.WriteString("\ttemplates.SetProviderEnvironment(r.Config.Env)\n")
-		}
 		b.WriteString("\tswitch r.Config.Env {\n\tcase \"development\":\n\t\tif err := r.bootDevelopment(ctx, h, opts); err != nil { return nil, err }\n\tcase \"test\":\n\t\tif err := r.bootTest(ctx, h, opts); err != nil { return nil, err }\n\tcase \"production\":\n\t\tif err := r.bootProduction(ctx, h, opts); err != nil { return nil, err }\n\tdefault:\n\t\treturn nil, fmt.Errorf(\"unknown APP_ENV %q\", r.Config.Env)\n\t}\n")
 	} else {
 		b.WriteString("\treturn nil, fmt.Errorf(\"config capability is required\")\n")
@@ -558,17 +558,22 @@ func providerSlotCritical(graph []Manifest, slot string) bool {
 	return false
 }
 
-func firstTargetFor(module Manifest, env string) string {
-	if module.Runtime.System == nil || module.Runtime.System.Adapter == nil {
-		return ""
-	}
-	for _, target := range module.Runtime.System.Adapter.Targets {
-		if containsString(target.Environments, env) {
-			return target.ID
+func selectedTargetFor(lock Lock, slot, adapter, env string) string {
+	if choices, ok := lock.Providers[slot]; ok {
+		switch env {
+		case "test":
+			if choices.Test.Adapter == adapter {
+				return choices.Test.Target
+			}
+		case "production":
+			if choices.Production.Adapter == adapter {
+				return choices.Production.Target
+			}
+		default:
+			if choices.Development.Adapter == adapter {
+				return choices.Development.Target
+			}
 		}
-	}
-	if len(module.Runtime.System.Adapter.Targets) > 0 {
-		return module.Runtime.System.Adapter.Targets[0].ID
 	}
 	return ""
 }
@@ -995,7 +1000,7 @@ func navItemLiteral(e navEntry) string {
 func navItemLiteralWithProvider(e navEntry, graph []Manifest, lock Lock) string {
 	literal := navItemLiteral(e)
 	if slot, adapter, ok := adapterForModule(graph, e.module); ok {
-		literal = strings.TrimSuffix(literal, "}") + fmt.Sprintf(", ProviderActive: func() bool { return providerActive(providerEnvironment(), %q, %q) }}", slot, adapter)
+		literal = strings.TrimSuffix(literal, "}") + fmt.Sprintf(", ProviderActive: func(env string) bool { return providerActive(env, %q, %q) }}", slot, adapter)
 	}
 	_ = lock
 	return literal
@@ -1224,7 +1229,8 @@ func emitShellSlotsRegistry(ctx context.Context, modulePath string, lock Lock, g
 		b.WriteString("\t},\n")
 	}
 	b.WriteString("}\n\nvar ShellSlotActive = map[string]func(string) bool{\n")
-	for id, owner := range owners {
+	for _, id := range sortedKeys(owners) {
+		owner := owners[id]
 		if slot, adapter, ok := adapterForModule(graph, owner); ok {
 			fmt.Fprintf(&b, "\t%s: func(env string) bool { return providerActive(env, %q, %q) },\n", goString(id), slot, adapter)
 		}
@@ -1242,7 +1248,9 @@ func emitLocalesRegistry(ctx context.Context, modulePath string, lock Lock, grap
 	if err != nil {
 		return nil, err
 	}
-
+	if len(declared.locales) == 0 {
+		return nil, nil
+	}
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package i18n\n\n")
@@ -2454,25 +2462,32 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("func parseDeclared(lookup func(string) string) (Config, []error) {\n")
 	b.WriteString("\tvar cfg Config\n\tvar errs []error\n")
 	for _, e := range declarations {
-		if err := writeEnvParse(&b, e); err != nil {
+		if err := writeEnvParse(&b, e, requiredExpression(e, lock)); err != nil {
 			return nil, err
 		}
 	}
 	b.WriteString("\treturn cfg, errs\n}\n\n")
 
-	// Production requirements are data: the module that needs a key in
-	// production is the module that declares it.
 	b.WriteString("// requireProductionKeys reports every declared key that production cannot\n")
 	b.WriteString("// boot without. Absent here means the dev fallback is genuinely safe.\n")
 	b.WriteString("func requireProductionKeys(lookup func(string) string) []error {\n")
 	b.WriteString("\tvar errs []error\n")
 	for _, e := range declarations {
-		if e.ProductionRequired {
-			fmt.Fprintf(&b, "\tif lookup(%s) == \"\" {\n", goString(e.Key))
-			fmt.Fprintf(&b, "\t\terrs = append(errs, errors.New(%s))\n",
-				goString(e.Key+" is required when APP_ENV=production"))
-			b.WriteString("\t}\n")
+		if !e.ProductionRequired && !e.Required {
+			continue
 		}
+		expr := requiredExpression(e, lock)
+		if e.ProductionRequired {
+			expr = "(" + expr + ") && lookup(\"APP_ENV\") == \"production\""
+		}
+		expr = strings.ReplaceAll(expr, "cfg.Env", "lookup(\"APP_ENV\")")
+		fmt.Fprintf(&b, "\tif %s && lookup(%s) == \"\" {\n", expr, goString(e.Key))
+		message := e.Key + " is required for selected provider target"
+		if e.ProductionRequired {
+			message = e.Key + " is required when APP_ENV=production"
+		}
+		fmt.Fprintf(&b, "\t\terrs = append(errs, errors.New(%s))\n", goString(message))
+		b.WriteString("\t}\n")
 	}
 	b.WriteString("\treturn errs\n}\n")
 
@@ -2522,9 +2537,42 @@ func goEnvType(t EnvType) string {
 	}
 }
 
+func requiredExpression(e EnvironmentVariable, lock Lock) string {
+	if len(e.Targets) == 0 {
+		return "true"
+	}
+	parts := make([]string, 0, 3)
+	for _, item := range []struct {
+		env    string
+		choice func(ProviderSelections) ProviderSelection
+	}{
+		{"development", func(v ProviderSelections) ProviderSelection { return v.Development }},
+		{"test", func(v ProviderSelections) ProviderSelection { return v.Test }},
+		{"production", func(v ProviderSelections) ProviderSelection { return v.Production }},
+	} {
+		active := false
+		for _, slot := range sortedKeys(lock.Providers) {
+			choices := lock.Providers[slot]
+			choice := item.choice(choices)
+			for _, target := range e.Targets {
+				if target == choice.Adapter+"@"+choice.Target || target == slot+"/"+choice.Adapter+"@"+choice.Target {
+					active = true
+				}
+			}
+		}
+		if active {
+			parts = append(parts, fmt.Sprintf(`cfg.Env == %q`, item.env))
+		}
+	}
+	if len(parts) == 0 {
+		return "false"
+	}
+	return "(" + strings.Join(parts, " || ") + ")"
+}
+
 // writeEnvParse emits the parse for one declaration. Each parse appends to errs
 // and leaves the field at its default on failure, so a later key is still read.
-func writeEnvParse(b *strings.Builder, e EnvironmentVariable) error {
+func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr string) error {
 	key := goString(e.Key)
 	switch e.Type {
 	case EnvString:
@@ -2547,7 +2595,7 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable) error {
 			b.WriteString("\t}\n")
 		}
 		if e.Required {
-			fmt.Fprintf(b, "\tif cfg.%s == \"\" {\n", e.Field)
+			fmt.Fprintf(b, "\tif %s && cfg.%s == \"\" {\n", requiredExpr, e.Field)
 			fmt.Fprintf(b, "\t\terrs = append(errs, errors.New(%s))\n\t}\n", goString(e.Key+" is required"))
 		}
 	case EnvBool:

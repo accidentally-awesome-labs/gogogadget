@@ -21,25 +21,25 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
           }
         },
         "exclude": {
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
           }
         },
         "providers": {
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/$defs/ProviderSelections"
+            "$ref": "#/$defs/ProjectProviderSelections"
           }
         },
         "deployment": {
           "type": "string",
-          "pattern": "^(?:$|[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*)$"
+          "pattern": "^(?:$|[a-z][a-z0-9]*(?:-[a-z0-9]+)*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*)$"
         }
       },
       "required": [
@@ -84,7 +84,7 @@
         "source"
       ]
     },
-    "ProviderSelections": {
+    "ProjectProviderSelections": {
       "type": "object",
       "additionalProperties": false,
       "properties": {

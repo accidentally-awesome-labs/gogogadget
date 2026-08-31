@@ -11,8 +11,8 @@
       "containers": [],
       "go": [
         {
-          "module": "golang.org/x/text",
-          "version": "v0.40.0"
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
         }
       ],
       "tools": []

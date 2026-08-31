@@ -212,7 +212,7 @@ func findRequire(file *modfile.File, modulePath string) *modfile.Require {
 
 // ExtractTool verifies an artifact digest before decoding it and rejects
 // traversal, links, extra files, and destinations outside bin/.
-func ExtractTool(data []byte, artifact ToolArtifact, dst string) error {
+func ExtractTool(data []byte, artifact ToolArtifact, root string) error {
 	if !strings.HasPrefix(artifact.URL, "https://") || !validSHA256(artifact.SHA256) {
 		return fmt.Errorf("invalid tool artifact metadata")
 	}
@@ -221,6 +221,19 @@ func ExtractTool(data []byte, artifact ToolArtifact, dst string) error {
 	}
 	if !validSafeArchivePath(artifact.BinaryPath) || !validSafeInstallPath(artifact.InstallPath) {
 		return fmt.Errorf("unsafe tool path")
+	}
+	dst := filepath.Join(root, filepath.FromSlash(artifact.InstallPath))
+	cleanRoot, err := filepath.Abs(root)
+	if err != nil {
+		return err
+	}
+	cleanDst, err := filepath.Abs(dst)
+	if err != nil {
+		return err
+	}
+	rel, err := filepath.Rel(cleanRoot, cleanDst)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("tool destination escapes project root")
 	}
 	sum := sha256.Sum256(data)
 	if hex.EncodeToString(sum[:]) != artifact.SHA256 {
@@ -356,6 +369,17 @@ func ValidateDeclaredImports(files map[string][]byte, generated []string, declar
 		if err := scan(fmt.Sprintf("generated_%d.go", i), []byte(source)); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// ValidateModuleDeclaredImports applies dependency ownership to one module's
+// authored files. A module may import the project/core module and only the
+// third-party modules it declares; dependencies declared by a sibling module
+// are intentionally not ambient.
+func ValidateModuleDeclaredImports(moduleID string, files map[string][]byte, generated []string, declared []GoDependency) error {
+	if err := ValidateDeclaredImports(files, generated, declared); err != nil {
+		return fmt.Errorf("module %s: %w", moduleID, err)
 	}
 	return nil
 }

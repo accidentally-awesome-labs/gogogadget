@@ -206,7 +206,9 @@ func copyExampleRegistry(t *testing.T) string {
 func mutateExampleManifest(t *testing.T, registry, id string, mutate func(*Manifest)) {
 	t.Helper()
 	parts := strings.Split(id, "/")
-	if len(parts) != 3 { t.Fatalf("invalid module id %q", id) }
+	if len(parts) != 3 {
+		t.Fatalf("invalid module id %q", id)
+	}
 	kind, name, ok := parts[1], parts[2], true
 	if !ok {
 		t.Fatalf("invalid module id %q", id)
@@ -236,10 +238,10 @@ func mutateExampleManifest(t *testing.T, registry, id string, mutate func(*Manif
 func planAgainstExampleRegistry(t *testing.T, registry, id string) (Plan, error) {
 	t.Helper()
 	root := writeTargetProject(t, "example.test/derivative", Project{
-		Schema: 2,
+		Schema:     2,
 		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
-		Modules:  []string{id},
-		Exclude:  []string{},
+		Modules: []string{id},
+		Exclude: []string{},
 	})
 	engine := New(Options{Source: DirectorySource{Root: registry}, Generator: RegistryGenerator{}})
 	return engine.Plan(context.Background(), root, Operation{Kind: OpSync, Offline: true})

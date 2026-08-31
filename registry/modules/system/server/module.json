@@ -102,7 +102,36 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/a-h/templ",
+          "version": "v0.3.1020"
+        },
+        {
+          "module": "github.com/go-playground/form/v4",
+          "version": "v4.3.0"
+        },
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/justinas/nosurf",
+          "version": "v1.2.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        },
+        {
+          "module": "github.com/svix/svix-webhooks",
+          "version": "v1.99.1"
+        },
+        {
+          "module": "golang.org/x/text",
+          "version": "v0.40.0"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -231,7 +260,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "85e7dad72ca4e59750b9151a165af8acb5efe10de102c3617cbc9eff336b6429",
+        "sha256": "9772bd45a592fbe26eb9512569226916e53360122d23b158e2209e0483acebef",
         "rewrite_module": true,
         "contract": true
       },
@@ -239,7 +268,7 @@
         "source": "internal/web/templates/chrome.go",
         "target": "internal/web/templates/chrome.go",
         "class": "go",
-        "sha256": "ece068ac04289ca13a7730c31724dacb5fc43f25ea36dfead277b07af64d8a99",
+        "sha256": "850af5821b76840556f05b19314ca70d4358d039b6bfb2fe84fe3f998eea0886",
         "rewrite_module": true,
         "contract": false
       },
@@ -247,7 +276,7 @@
         "source": "internal/web/templates/chrome_test.go",
         "target": "internal/web/templates/chrome_test.go",
         "class": "test",
-        "sha256": "911156612e608ef084687ba5d2364f6a5650bf9dae153cebec04ebf6b550b7f0",
+        "sha256": "9494d4a0879b35ba4a865950c66b821ef43c7eea1f801e276cbd82fb859c0d87",
         "rewrite_module": true,
         "contract": false
       },
@@ -263,7 +292,7 @@
         "source": "internal/web/templates/designsystem_test.go",
         "target": "internal/web/templates/designsystem_test.go",
         "class": "test",
-        "sha256": "4a24de5722b263b5297e74523693f16c467f71aa51d74754a76c1a055fd9f630",
+        "sha256": "5c375cf3225fb7a85cc4c42ad7e67d5f034f58e0d1583c19245f91d5a80026b9",
         "rewrite_module": true,
         "contract": false
       },
@@ -295,7 +324,7 @@
         "source": "internal/web/templates/nav.templ",
         "target": "internal/web/templates/nav.templ",
         "class": "templ",
-        "sha256": "94caabf435f5f58811058df51b64b9fd4a5802af5994c28395ddd3c447571eae",
+        "sha256": "10632148417ddec98cc1064b6b1d9b15e2d3d8438df809117e72c5e20971906b",
         "rewrite_module": true,
         "contract": false
       },
@@ -311,7 +340,7 @@
         "source": "internal/web/templates/sidebar.templ",
         "target": "internal/web/templates/sidebar.templ",
         "class": "templ",
-        "sha256": "03b0c578b39736abebfa9cfde0dae88e9189740931eaa35b7399979bc9935b2a",
+        "sha256": "b91607288b7965694ab343fde356af48b1962f5016cde3335a7c099bc415ea47",
         "rewrite_module": true,
         "contract": false
       },

@@ -13,7 +13,20 @@
     "data": [],
     "dependencies": {
       "containers": [],
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/standard-webhooks/standard-webhooks/libraries",
+          "version": "v0.0.1"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
       "tools": []
     },
     "description": "Creating, enabling, disabling, and rotating customer webhook endpoints, and replaying a delivery.",
