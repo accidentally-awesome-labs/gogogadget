@@ -21,15 +21,23 @@ Task 3 provider-selection, contract, and fixture requirements are implemented. M
 `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline`
 
 ```text
-registry 45f6b0433de61b6da58f5687469e0f43d3742eed71429f14434f646f6a9a32ac
+registry d35603f7647e0c597eb452aa6fd50492e8adb22d6bd537479cd6a0b325ba1a40
   update    lock       gogogadget.lock.json
-registry 45f6b0433de61b6da58f5687469e0f43d3742eed71429f14434f646f6a9a32ac
+registry d35603f7647e0c597eb452aa6fd50492e8adb22d6bd537479cd6a0b325ba1a40
 ```
 
-`go test ./internal/mail/... ./internal/storage/... ./internal/jobs ./internal/web/... ./internal/modules ./internal/modkit`
+`go test ./internal/mail/... ./internal/storage/...`
 
 ```text
-mail, storage, jobs, web, modules packages passed; modkit ownership and closure tests passed after final manifest refresh.
+ok  	github.com/gogogadget/gogogadget/internal/mail	(cached)
+?   	github.com/gogogadget/gogogadget/internal/mail/contract	[no test files]
+ok  	github.com/gogogadget/gogogadget/internal/mail/dev	(cached)
+ok  	github.com/gogogadget/gogogadget/internal/mail/resend	(cached)
+ok  	github.com/gogogadget/gogogadget/internal/mail/smtp	(cached)
+ok  	github.com/gogogadget/gogogadget/internal/storage	(cached)
+?   	github.com/gogogadget/gogogadget/internal/storage/contract	[no test files]
+ok  	github.com/gogogadget/gogogadget/internal/storage/filesystem	(cached)
+ok  	github.com/gogogadget/gogogadget/internal/storage/s3	0.195s
 ```
 
 `go run ./cmd/ggg registry validate`
@@ -48,8 +56,8 @@ The full validator also passed the four original element/component/page/workflow
 
 ## Commit
 
-Reviewed base: `d9f2137`. Prior fixture commits: `e170f3b`, `372682c`. Round-two implementation and generated refresh commit: `bdfaf4a`.
+Reviewed base: `d9f2137`. Prior fixture commits: `e170f3b`, `372682c`. Round-two implementation: `bdfaf4a`; shared-contract/config follow-up: `cdf8226`.
 
 ## Concerns
 
-Database-backed integration tests were not run because no local Postgres service was available. The focused command includes `internal/jobs`, all mail/storage adapter packages, web, modules, and modkit; SMTP STARTTLS/auth, storage security/protocol, ownership, fixture, and offline sync checks ran without Postgres.
+Database-backed integration tests were not run because no local Postgres service was available. The final focused command above covers the changed mail/storage adapter packages; prior final verification covered jobs, web, modules, and modkit before this contract-only follow-up.
