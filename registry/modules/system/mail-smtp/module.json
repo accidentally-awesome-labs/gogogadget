@@ -46,7 +46,7 @@
         "source": "internal/mail/smtp/contract_test.go",
         "target": "internal/mail/smtp/contract_test.go",
         "class": "test",
-        "sha256": "fc1caf77c175d0f897a676fc02a73392ec1604d96b396f5f01c93e1d2add42ed",
+        "sha256": "f88c434ef09c05290833c7d32897f5345ddfe356132027beca24eea3badc75b9",
         "rewrite_module": true,
         "contract": false
       },

@@ -12,6 +12,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	mailcontract "github.com/gogogadget/gogogadget/internal/mail/contract"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,10 +27,10 @@ func TestSMTPModuleContract(t *testing.T) {
 	cfg := &config.Config{Values: map[string]string{"SMTP_HOST": "127.0.0.1", "SMTP_PORT": fmt.Sprint(port)}, EmailFrom: "hello@example.com"}
 	module, err := NewModule(context.Background(), host, Deps{Config: cfg})
 	require.NoError(t, err)
-	require.NoError(t, module.Sender.Send(context.Background(), mail.Message{To: "to@example.com", Subject: "subject", Text: "plain", HTML: "<b>html</b>"}))
+	mailcontract.Run(t, func() mail.Sender { return module.Sender })
 	body := <-payload
-	require.Contains(t, body, "plain")
-	require.Contains(t, body, "<b>html</b>")
+	require.Contains(t, body, "Contract body")
+	require.Contains(t, body, "<p>Contract body</p>")
 	require.NotContains(t, body, "\r\r\n")
 }
 

@@ -49,10 +49,20 @@ func (s *ResendSender) Health(ctx context.Context) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	if s.client == nil {
+	if s.client == nil || s.client.Domains == nil {
 		return fmt.Errorf("resend client is nil")
 	}
-	return nil
+	done := make(chan error, 1)
+	go func() {
+		_, err := s.client.Domains.List()
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		return err
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 var _ mail.Sender = (*ResendSender)(nil)

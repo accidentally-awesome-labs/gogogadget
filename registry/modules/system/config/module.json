@@ -40,7 +40,7 @@
         "source": "internal/config/config_test.go",
         "target": "internal/config/config_test.go",
         "class": "test",
-        "sha256": "c542d343dc46de091a25fb73f30518c6a9690bc707b88da4a32f44a14e91157d",
+        "sha256": "6559ec401560b3d173cdb2d8b9382018e2548fbab4d06ef1cdcb80bea20c3963",
         "rewrite_module": true,
         "contract": false
       },

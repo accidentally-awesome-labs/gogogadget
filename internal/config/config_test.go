@@ -115,6 +115,20 @@ func TestTestNowFreezesClock(t *testing.T) {
 	assert.Contains(t, err.Error(), "TEST_NOW")
 }
 
+func TestProductionAggregatesManagedProviderCredentials(t *testing.T) {
+	baseEnv(t)
+	t.Setenv("APP_ENV", "production")
+	for _, key := range []string{"RESEND_API_KEY", "STORAGE_R2_ACCESS_KEY_ID", "STORAGE_R2_ACCOUNT_ID", "STORAGE_R2_BUCKET", "STORAGE_R2_SECRET_ACCESS_KEY"} {
+		t.Setenv(key, "")
+	}
+	_, err := Load()
+	require.Error(t, err)
+	for _, key := range []string{"RESEND_API_KEY", "STORAGE_R2_ACCESS_KEY_ID", "STORAGE_R2_ACCOUNT_ID", "STORAGE_R2_BUCKET", "STORAGE_R2_SECRET_ACCESS_KEY"} {
+		assert.Contains(t, err.Error(), key)
+	}
+	assert.NotContains(t, err.Error(), "re_test")
+}
+
 func TestAuditRetentionDaysParsing(t *testing.T) {
 	baseEnv(t)
 	t.Setenv("AUDIT_RETENTION_DAYS", "365")

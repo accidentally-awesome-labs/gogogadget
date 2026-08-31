@@ -57,3 +57,30 @@ func TestResendSenderProviderError(t *testing.T) {
 	sender.client.BaseURL = base
 	require.Error(t, sender.Send(context.Background(), mail.Message{To: "x@example.com", Subject: "s", HTML: "b"}))
 }
+
+func TestResendHealthReportsProviderStatus(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		code int
+		ok   bool
+	}{{"success", http.StatusOK, true}, {"failure", http.StatusUnauthorized, false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.Equal(t, http.MethodGet, r.Method)
+				w.WriteHeader(tc.code)
+				_, _ = w.Write([]byte(`{"data":[]}`))
+			}))
+			defer srv.Close()
+			sender := NewResendSender("re_test_key", "from@example.com")
+			base, err := url.Parse(srv.URL + "/")
+			require.NoError(t, err)
+			sender.client.BaseURL = base
+			err = sender.Health(context.Background())
+			if tc.ok {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
+}

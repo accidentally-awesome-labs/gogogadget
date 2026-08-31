@@ -45,3 +45,27 @@ func TestR2StoreServeRedirectsToPresignedURL(t *testing.T) {
 	assert.Contains(t, loc, "X-Amz-Signature=")
 	assert.Contains(t, loc, "X-Amz-Expires=900")
 }
+
+func TestR2StoreHealthReportsProviderSuccessAndFailure(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		code int
+		ok   bool
+	}{{"success", http.StatusOK, true}, {"failure", http.StatusUnauthorized, false}} {
+		t.Run(tc.name, func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.Equal(t, http.MethodHead, r.Method)
+				w.WriteHeader(tc.code)
+			}))
+			defer srv.Close()
+			store, err := NewR2Store(context.Background(), "acct", "key", "secret", "bucket", srv.URL)
+			require.NoError(t, err)
+			err = store.Health(context.Background())
+			if tc.ok {
+				require.NoError(t, err)
+			} else {
+				require.Error(t, err)
+			}
+		})
+	}
+}
