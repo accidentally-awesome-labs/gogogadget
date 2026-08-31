@@ -9,6 +9,7 @@ package apphost
 
 import (
 	"context"
+	"sync"
 	"log/slog"
 	"os"
 	"time"
@@ -114,3 +115,12 @@ func (h *mapHost) Env(key string) string { return h.env[key] }
 func (h *mapHost) Log() *slog.Logger     { return h.log }
 func (h *mapHost) Now() time.Time        { return h.at }
 func (h *mapHost) Version() string       { return h.version }
+
+
+// HealthCheck is the result of one runtime system or provider check.
+type HealthCheck struct { Module string `json:"module"`; Slot string `json:"slot"`; Adapter string `json:"adapter"`; Target string `json:"target"`; Error string `json:"error"`; Critical bool `json:"critical"`; Healthy bool `json:"healthy"` }
+type HealthReport struct { CheckedAt time.Time `json:"checked_at"`; Checks []HealthCheck `json:"checks"`; Ready bool `json:"ready"` }
+type HealthRegistration struct { Module string; Slot string; Adapter string; Target string; Critical bool; Check HealthChecker }
+func AggregateHealth(ctx context.Context, registrations []HealthRegistration) HealthReport { checked:=time.Now(); checks:=make([]HealthCheck,len(registrations)); var wg sync.WaitGroup; for i,r:=range registrations { wg.Add(1); go func(i int,r HealthRegistration){ defer wg.Done(); c:=HealthCheck{Module:r.Module,Slot:r.Slot,Adapter:r.Adapter,Target:r.Target,Critical:r.Critical}; cc,cancel:=context.WithTimeout(ctx,2*time.Second); defer cancel(); func(){ defer func(){if recover()!=nil {c.Error="health check panicked"}}(); if r.Check==nil {c.Error="health checker is nil"} else if err:=r.Check.Health(cc); err!=nil {c.Error=err.Error()} }(); c.Healthy=c.Error==""; checks[i]=c }(i,r) }; wg.Wait(); ready:=true; for _,c:=range checks {if c.Critical&&!c.Healthy {ready=false}}; return HealthReport{CheckedAt:checked,Checks:checks,Ready:ready} }
+type HealthCache struct { mu sync.Mutex; report HealthReport; at time.Time }
+func (c *HealthCache) Get(ctx context.Context, registrations []HealthRegistration) HealthReport { c.mu.Lock(); defer c.mu.Unlock(); if time.Since(c.at)<10*time.Second&&c.report.Checks!=nil{return c.report}; c.report=AggregateHealth(ctx,registrations); c.at=time.Now(); return c.report }
