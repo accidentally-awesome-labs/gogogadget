@@ -32,6 +32,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"io"
 	"io/fs"
 	"os"
@@ -64,15 +67,15 @@ type ExampleResult struct {
 	Generated []string `json:"generated"`
 	Compiled  []string `json:"compiled"`
 	Tested    []string `json:"tested"`
-	// ProviderSlot and ProviderSelections are populated for the mail/storage
-	// permutation closures. They make the environment switch an observed part
-	// of registry validation rather than a claim hidden in fixture metadata.
-	ProviderSlot       string                       `json:"provider_slot,omitempty"`
-	ProviderSelections map[string]ProviderSelection `json:"provider_selections,omitempty"`
-	ProviderSwitched   bool                         `json:"provider_switched,omitempty"`
-	Retained           []string                     `json:"retained"`
-	LockIdentityOnly   []string                     `json:"lock_identity_only"`
-	Compared           int                          `json:"compared"`
+	// Provider fields come from the installed lock and generated bootstrap AST,
+	// never from an expected table duplicated in the harness.
+	ProviderSlot              string                       `json:"provider_slot,omitempty"`
+	ProviderSelections        map[string]ProviderSelection `json:"provider_selections,omitempty"`
+	ProviderConstructorCounts map[string]int               `json:"provider_constructor_counts,omitempty"`
+	ProviderSwitched          bool                         `json:"provider_switched,omitempty"`
+	Retained                  []string                     `json:"retained"`
+	LockIdentityOnly          []string                     `json:"lock_identity_only"`
+	Compared                  int                          `json:"compared"`
 }
 
 type providerFixtureSpec struct {
@@ -515,14 +518,6 @@ func exerciseExampleClosure(
 	return exerciseStandardClosure(ctx, root, template, derivative, closure, log)
 }
 
-func providerFixtureChoices(spec providerFixtureSpec) ProviderSelections {
-	return ProviderSelections{
-		Development: ProviderSelection{Adapter: spec.local, Target: "filesystem"},
-		Test:        ProviderSelection{Adapter: spec.local, Target: "filesystem"},
-		Production:  ProviderSelection{Adapter: spec.managed, Target: "managed"},
-	}
-}
-
 func copyProviderSelections(values map[string]ProviderSelections) map[string]ProviderSelections {
 	out := make(map[string]ProviderSelections, len(values))
 	for slot, choices := range values {
@@ -531,19 +526,142 @@ func copyProviderSelections(values map[string]ProviderSelections) map[string]Pro
 	return out
 }
 
-func providerLegacyChoices(spec providerFixtureSpec) ProviderSelections {
+func providerChoicesFromModules(spec providerFixtureSpec, modules []Manifest) (ProviderSelections, error) {
 	choices := ProviderSelections{}
-	switch spec.slot {
-	case "ggg/mail":
-		choices.Development = ProviderSelection{Adapter: "ggg/system/mail-dev", Target: "filesystem"}
-		choices.Test = ProviderSelection{Adapter: "ggg/system/mail-dev", Target: "filesystem"}
-		choices.Production = ProviderSelection{Adapter: "ggg/system/mail-resend", Target: "resend"}
-	case "ggg/storage":
-		choices.Development = ProviderSelection{Adapter: "ggg/system/storage-filesystem", Target: "filesystem"}
-		choices.Test = ProviderSelection{Adapter: "ggg/system/storage-filesystem", Target: "filesystem"}
-		choices.Production = ProviderSelection{Adapter: "ggg/system/storage-s3", Target: "r2"}
+	for _, moduleID := range []string{spec.local, spec.managed} {
+		var module *Manifest
+		for i := range modules {
+			if modules[i].ID == moduleID {
+				module = &modules[i]
+				break
+			}
+		}
+		if module == nil || module.Runtime.System == nil || module.Runtime.System.Adapter == nil {
+			return ProviderSelections{}, fmt.Errorf("provider fixture %s does not declare an adapter", moduleID)
+		}
+		for _, target := range module.Runtime.System.Adapter.Targets {
+			for _, env := range target.Environments {
+				choice := ProviderSelection{Adapter: module.ID, Target: target.ID}
+				switch env {
+				case "development":
+					choices.Development = choice
+				case "test":
+					choices.Test = choice
+				case "production":
+					choices.Production = choice
+				}
+			}
+		}
 	}
-	return choices
+	for env, choice := range map[string]ProviderSelection{
+		"development": choices.Development,
+		"test":        choices.Test,
+		"production":  choices.Production,
+	} {
+		if choice.Adapter == "" || choice.Target == "" {
+			return ProviderSelections{}, fmt.Errorf("provider fixture %s has no target for %s", spec.slot, env)
+		}
+	}
+	return choices, nil
+}
+
+// observeProviderBoot parses the generated bootstrap, maps provider imports
+// back to their installed manifests, and counts constructor calls in each
+// environment branch. This observes generated wiring rather than comparing
+// two copies of a hardcoded selection table.
+func observeProviderBoot(root, slot string, lock Lock, modules []Manifest) (map[string]ProviderSelection, map[string]int, error) {
+	data, err := os.ReadFile(filepath.Join(root, "internal/modules/bootstrap_registry_gen.go"))
+	if err != nil {
+		return nil, nil, err
+	}
+	file, err := parser.ParseFile(token.NewFileSet(), "bootstrap_registry_gen.go", data, 0)
+	if err != nil {
+		return nil, nil, fmt.Errorf("parse generated bootstrap: %w", err)
+	}
+	imports := make(map[string]string)
+	for _, spec := range file.Imports {
+		importPath, err := strconv.Unquote(spec.Path.Value)
+		if err != nil {
+			return nil, nil, err
+		}
+		alias := filepath.Base(importPath)
+		if spec.Name != nil {
+			alias = spec.Name.Name
+		}
+		imports[alias] = importPath
+	}
+	packageModules := make(map[string]string)
+	for _, module := range modules {
+		if module.Runtime.System == nil || module.Runtime.System.Adapter == nil {
+			continue
+		}
+		packageModules[module.Runtime.System.Package] = module.ID
+	}
+	moduleByImport := func(importPath string) string {
+		for pkg, id := range packageModules {
+			if strings.HasSuffix(importPath, "/"+strings.TrimPrefix(pkg, "/")) || importPath == pkg {
+				return id
+			}
+		}
+		return ""
+	}
+	envFuncs := map[string]string{"development": "bootDevelopment", "test": "bootTest", "production": "bootProduction"}
+	observed := make(map[string]ProviderSelection, len(envFuncs))
+	counts := make(map[string]int, len(envFuncs))
+	for env, funcName := range envFuncs {
+		var fn *ast.FuncDecl
+		for _, decl := range file.Decls {
+			candidate, ok := decl.(*ast.FuncDecl)
+			if ok && candidate.Name.Name == funcName {
+				fn = candidate
+				break
+			}
+		}
+		if fn == nil {
+			return nil, nil, fmt.Errorf("generated bootstrap missing %s", funcName)
+		}
+		calls := make(map[string]int)
+		ast.Inspect(fn.Body, func(node ast.Node) bool {
+			call, ok := node.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+			selector, ok := call.Fun.(*ast.SelectorExpr)
+			if !ok || selector.Sel.Name != "NewModule" {
+				return true
+			}
+			ident, ok := selector.X.(*ast.Ident)
+			if !ok {
+				return true
+			}
+			id := moduleByImport(imports[ident.Name])
+			if id != "" {
+				calls[id]++
+			}
+			return true
+		})
+		choices, ok := lock.Providers[slot]
+		if !ok {
+			return nil, nil, fmt.Errorf("generated lock has no provider slot %s", slot)
+		}
+		expected := choices.Development
+		if env == "test" {
+			expected = choices.Test
+		} else if env == "production" {
+			expected = choices.Production
+		}
+		if calls[expected.Adapter] != 1 {
+			return nil, nil, fmt.Errorf("%s generated boot calls %s %d time(s), want exactly once", env, expected.Adapter, calls[expected.Adapter])
+		}
+		for id, count := range calls {
+			if id != expected.Adapter && count != 0 {
+				return nil, nil, fmt.Errorf("%s generated boot calls unselected provider %s", env, id)
+			}
+		}
+		observed[env] = expected
+		counts[env] = calls[expected.Adapter]
+	}
+	return observed, counts, nil
 }
 
 func switchProviderSelections(root, slot string, choices ProviderSelections) error {
@@ -564,22 +682,62 @@ func switchProviderSelections(root, slot string, choices ProviderSelections) err
 	return os.WriteFile(filepath.Join(root, ProjectFileName), updated, 0o644)
 }
 
+func expectProviderRefusals(ctx context.Context, root, slot string, selections map[string]ProviderSelection) error {
+	original, err := os.ReadFile(filepath.Join(root, ProjectFileName))
+	if err != nil {
+		return err
+	}
+	restore := func() error {
+		return os.WriteFile(filepath.Join(root, ProjectFileName), original, 0o644)
+	}
+	defer func() { _ = restore() }()
+	engine := New(Options{Source: DirectorySource{Root: root}, Generator: RegistryGenerator{}})
+	expectRefusal := func(name string, mutate func(*Project)) error {
+		project, parseErr := ParseProject(original)
+		if parseErr != nil {
+			return parseErr
+		}
+		mutate(&project)
+		updated, marshalErr := MarshalProject(project)
+		if marshalErr != nil {
+			return marshalErr
+		}
+		if writeErr := os.WriteFile(filepath.Join(root, ProjectFileName), updated, 0o644); writeErr != nil {
+			return writeErr
+		}
+		_, planErr := engine.Plan(ctx, root, Operation{Kind: OpSync, Offline: true})
+		if planErr == nil {
+			return fmt.Errorf("provider fixture refusal %s unexpectedly succeeded", name)
+		}
+		return restore()
+	}
+	if err := expectRefusal("missing selection", func(project *Project) {
+		project.Providers = copyProviderSelections(project.Providers)
+		delete(project.Providers, slot)
+	}); err != nil {
+		return err
+	}
+	local := selections["development"]
+	if err := expectRefusal("disallowed production target", func(project *Project) {
+		project.Providers = copyProviderSelections(project.Providers)
+		choices := project.Providers[slot]
+		choices.Production = local
+		project.Providers[slot] = choices
+	}); err != nil {
+		return err
+	}
+	if _, planErr := engine.Plan(ctx, root, Operation{Kind: OpRemove, Modules: []string{local.Adapter}, Offline: true}); planErr == nil {
+		return fmt.Errorf("provider fixture refusal selected adapter removal unexpectedly succeeded")
+	}
+	return nil
+}
+
 func exerciseProviderClosure(
 	ctx context.Context, root, template, derivative string, closure exampleClosure,
 	spec providerFixtureSpec, log io.Writer,
 ) (ExampleResult, error) {
-	result, err := exerciseStandardClosure(ctx, root, template, derivative, closure, log)
-	if err != nil {
-		return result, err
-	}
-	result.ProviderSlot = spec.slot
-	result.ProviderSelections = map[string]ProviderSelection{
-		"development": {Adapter: spec.local, Target: "filesystem"},
-		"test":        {Adapter: spec.local, Target: "filesystem"},
-		"production":  {Adapter: spec.managed, Target: "managed"},
-	}
-	result.ProviderSwitched = true
-	return result, nil
+	_ = spec
+	return exerciseStandardClosure(ctx, root, template, derivative, closure, log)
 }
 
 func exerciseStandardClosure(
@@ -596,6 +754,7 @@ func exerciseStandardClosure(
 	if err := copyProjectTree(template, derivative); err != nil {
 		return result, err
 	}
+
 	before, err := hashProjectTree(derivative)
 	if err != nil {
 		return result, err
@@ -616,7 +775,11 @@ func exerciseStandardClosure(
 		}
 	}
 	if spec, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
-		if err := switchProviderSelections(derivative, spec.slot, providerFixtureChoices(spec)); err != nil {
+		choices, choiceErr := providerChoicesFromModules(spec, closure.modules)
+		if choiceErr != nil {
+			return result, choiceErr
+		}
+		if err := switchProviderSelections(derivative, spec.slot, choices); err != nil {
 			return result, fmt.Errorf("select fixture providers: %w", err)
 		}
 		if _, err := applyDerivativeOperation(ctx, derivative,
@@ -708,7 +871,26 @@ func exerciseStandardClosure(
 	}
 
 	if spec, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
-		if err := switchProviderSelections(derivative, spec.slot, providerLegacyChoices(spec)); err != nil {
+		installedState, readErr := readDerivativeLock(derivative)
+		if readErr != nil {
+			return result, readErr
+		}
+		observed, counts, observeErr := observeProviderBoot(derivative, spec.slot, installedState, closure.modules)
+		if observeErr != nil {
+			return result, observeErr
+		}
+		result.ProviderSlot = spec.slot
+		result.ProviderSelections = observed
+		result.ProviderConstructorCounts = counts
+		result.ProviderSwitched = true
+		if refusalErr := expectProviderRefusals(ctx, derivative, spec.slot, observed); refusalErr != nil {
+			return result, refusalErr
+		}
+		baseline, parseErr := ParseProject(baselineProject)
+		if parseErr != nil {
+			return result, parseErr
+		}
+		if err := switchProviderSelections(derivative, spec.slot, baseline.Providers[spec.slot]); err != nil {
 			return result, fmt.Errorf("restore provider selections: %w", err)
 		}
 	}

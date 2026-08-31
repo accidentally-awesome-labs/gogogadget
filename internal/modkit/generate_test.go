@@ -1115,6 +1115,9 @@ func TestConfigRegistryEmitsTypedParse(t *testing.T) {
 		`must be an integer >= 0`,
 		// A closed string names the accepted set.
 		`must be one of development, test, production`,
+		// Typed/default adapter access uses the same normalized values as fields.
+		`cfg.Values["PORT"] = strconv.Itoa(cfg.Port)`,
+		`cfg.Values["APP_URL"] = cfg.AppURL`,
 		// Trailing slashes are stripped where declared.
 		`strings.TrimRight(pick(lookup, "APP_URL", "http://localhost:8080"), "/")`,
 		// Production requirements are declared data, not an authored list.

@@ -11,7 +11,9 @@ package config
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -73,13 +75,30 @@ func Load() (Config, error) {
 func (c Config) Production() bool  { return c.Env == "production" }
 func (c Config) Development() bool { return c.Env == "development" }
 
-// Value exposes adapter-owned configuration without forcing every candidate
-// adapter's fields into the core seam's generated struct.
+// Value exposes adapter-owned configuration after generated defaults and
+// normalization have been applied. It deliberately does not expose fields for
+// unselected provider candidates.
 func (c Config) Value(key string) string {
 	if c.Values == nil {
 		return ""
 	}
 	return c.Values[key]
+}
+
+// IntValue returns a generated integer declaration without making adapters
+// parse their own environment values. Config.LoadFrom validates declared
+// bounds; this fallback only supports manually assembled Config values in
+// adapter unit tests.
+func (c Config) IntValue(key string) (int, error) {
+	raw := c.Value(key)
+	if raw == "" {
+		return 0, fmt.Errorf("%s is not configured", key)
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("%s is invalid: %w", key, err)
+	}
+	return value, nil
 }
 func (c Config) Test() bool            { return c.Env == "test" }
 func (c Config) ClerkConfigured() bool { return c.ClerkSecretKey != "" }

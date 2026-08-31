@@ -279,6 +279,17 @@ func TestLoadFromAggregatesEveryValidationError(t *testing.T) {
 		}
 	}
 }
+func TestLoadFromValuesUseNormalizedDefaults(t *testing.T) {
+	cfg, err := LoadFrom(func(key string) string {
+		if key == "APP_ENV" {
+			return "test"
+		}
+		return ""
+	})
+	require.NoError(t, err)
+	require.Equal(t, "8080", cfg.Value("PORT"))
+	require.Equal(t, 8080, cfg.Port)
+}
 
 // Reported in declaration order, so the same broken environment always produces
 // the same message — a diffable one.

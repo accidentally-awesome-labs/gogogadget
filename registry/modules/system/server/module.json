@@ -204,7 +204,7 @@
         "source": "internal/web/module_test.go",
         "target": "internal/web/module_test.go",
         "class": "test",
-        "sha256": "8b3a3f6d53a2f8d5198ed5a85109e35b5c46d76adedad35ea2b9ba6faead30f9",
+        "sha256": "03fc5b700dab3f61aa06171bd926befb2ca7ca3a37e38e1c52642923285da133",
         "rewrite_module": true,
         "contract": false
       },

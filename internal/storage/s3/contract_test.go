@@ -2,61 +2,36 @@ package s3
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gogogadget/gogogadget/internal/storage"
 	storagecontract "github.com/gogogadget/gogogadget/internal/storage/contract"
-	"io"
-	"io/fs"
-	"net/http"
-	"testing"
+	"github.com/stretchr/testify/require"
 )
 
 func TestS3StoreContract(t *testing.T) {
 	var _ storage.Store = (*R2Store)(nil)
-	storagecontract.Run(t, func() storage.Store { return &contractStore{objects: map[string][]byte{}} })
-}
-
-type contractStore struct{ objects map[string][]byte }
-
-func (s *contractStore) Put(ctx context.Context, key, _ string, r io.Reader) (int64, error) {
-	if err := ctx.Err(); err != nil {
-		return 0, err
-	}
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return 0, err
-	}
-	s.objects[key] = b
-	return int64(len(b)), nil
-}
-func (s *contractStore) Serve(ctx context.Context, w http.ResponseWriter, key, filename, contentType string) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	b, ok := s.objects[key]
-	if !ok {
-		return fs.ErrNotExist
-	}
-	w.Header().Set("Content-Disposition", `attachment; filename="`+filename+`"`)
-	w.Header().Set("Content-Type", contentType)
-	_, err := w.Write(b)
-	return err
-}
-func (s *contractStore) ServeInline(ctx context.Context, w http.ResponseWriter, key, contentType string) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	b, ok := s.objects[key]
-	if !ok {
-		return fs.ErrNotExist
-	}
-	w.Header().Set("Content-Type", contentType)
-	_, err := w.Write(b)
-	return err
-}
-func (s *contractStore) Delete(ctx context.Context, key string) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	delete(s.objects, key)
-	return nil
+	backend := newDeterministicS3Backend("contract-bucket")
+	defer backend.Close()
+	store, err := NewR2Store(context.Background(), "acct", "AKIAEXAMPLE", "secret", "contract-bucket", backend.URL())
+	require.NoError(t, err)
+	storagecontract.RunWithOptions(t, func() storage.Store { return store }, storagecontract.Options{
+		ServeStatus: func(t *testing.T, code int) {
+			require.Equal(t, http.StatusSeeOther, code)
+		},
+		InlineStatus: func(t *testing.T, code int) {
+			require.Equal(t, http.StatusSeeOther, code)
+		},
+		AssertMissing: func(t *testing.T, s storage.Store, key string) {
+			rec := httptest.NewRecorder()
+			require.NoError(t, s.Serve(context.Background(), rec, key, "object.bin", ""))
+			require.Equal(t, http.StatusSeeOther, rec.Code)
+			resp, err := http.Get(rec.Header().Get("Location"))
+			require.NoError(t, err)
+			defer resp.Body.Close()
+			require.Equal(t, http.StatusNotFound, resp.StatusCode)
+		},
+	})
 }

@@ -58,7 +58,7 @@
         "source": "internal/storage/s3/contract_test.go",
         "target": "internal/storage/s3/contract_test.go",
         "class": "test",
-        "sha256": "ef5ecebff0f75bf8eba625a4a53688062fd54f332e3048c9dfea7255d07a0725",
+        "sha256": "79c7c8fb4cb251423e6543b452b44ece8daae242c3860292d4ad87d411a34187",
         "rewrite_module": true,
         "contract": false
       },

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -67,5 +68,59 @@ func TestR2StoreHealthReportsProviderSuccessAndFailure(t *testing.T) {
 				require.Error(t, err)
 			}
 		})
+	}
+}
+
+type deterministicS3Backend struct {
+	server  *httptest.Server
+	mu      sync.Mutex
+	objects map[string][]byte
+	bucket  string
+}
+
+func newDeterministicS3Backend(bucket string) *deterministicS3Backend {
+	backend := &deterministicS3Backend{objects: map[string][]byte{}, bucket: bucket}
+	backend.server = httptest.NewServer(http.HandlerFunc(backend.handle))
+	return backend
+}
+
+func (b *deterministicS3Backend) Close()      { b.server.Close() }
+func (b *deterministicS3Backend) URL() string { return b.server.URL }
+
+func (b *deterministicS3Backend) handle(w http.ResponseWriter, r *http.Request) {
+	prefix := "/" + b.bucket + "/"
+	if r.URL.Path == "/"+b.bucket && r.Method == http.MethodHead {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	if !strings.HasPrefix(r.URL.Path, prefix) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	key := strings.TrimPrefix(r.URL.Path, prefix)
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	switch r.Method {
+	case http.MethodPut:
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		b.objects[key] = body
+		w.WriteHeader(http.StatusOK)
+	case http.MethodGet:
+		body, ok := b.objects[key]
+		if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(body)
+	case http.MethodDelete:
+		delete(b.objects, key)
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }

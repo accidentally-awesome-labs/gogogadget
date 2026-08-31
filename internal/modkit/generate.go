@@ -2509,7 +2509,6 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("func parseDeclared(lookup func(string) string) (Config, []error) {\n")
 	b.WriteString("\tcfg := Config{Values: map[string]string{}}\n\tvar errs []error\n")
 	for _, e := range declarations {
-		fmt.Fprintf(&b, "\tcfg.Values[%s] = lookup(%s)\n", goString(e.Key), goString(e.Key))
 		if err := writeEnvParse(&b, e, requiredExpression(e, lock)); err != nil {
 			return nil, err
 		}
@@ -2635,6 +2634,10 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 			read = fmt.Sprintf("strings.TrimRight(%s, \"/\")", read)
 		}
 		fmt.Fprintf(b, "\tcfg.%s = %s\n", e.Field, read)
+		// Values is the adapter-facing view. Populate it from the parsed field,
+		// rather than the raw lookup, so defaults and normalization have one
+		// source of truth.
+		fmt.Fprintf(b, "\tcfg.Values[%s] = cfg.%s\n", key, e.Field)
 		if len(e.Enum) > 0 {
 			fmt.Fprintf(b, "\tswitch cfg.%s {\n\tcase ", e.Field)
 			for i, v := range e.Enum {
@@ -2654,6 +2657,7 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 		}
 	case EnvBool:
 		fmt.Fprintf(b, "\tcfg.%s = parseBool(pick(lookup, %s, %s))\n", e.Field, key, goString(e.Default))
+		fmt.Fprintf(b, "\tcfg.Values[%s] = strconv.FormatBool(cfg.%s)\n", key, e.Field)
 	case EnvInt:
 		if e.Default != "" {
 			if _, err := strconv.Atoi(e.Default); err != nil {
@@ -2661,19 +2665,22 @@ func writeEnvParse(b *strings.Builder, e EnvironmentVariable, requiredExpr strin
 			}
 			fmt.Fprintf(b, "\tcfg.%s = %s\n", e.Field, e.Default)
 		}
+		fmt.Fprintf(b, "\tcfg.Values[%s] = strconv.Itoa(cfg.%s)\n", key, e.Field)
 		fmt.Fprintf(b, "\tif raw := pick(lookup, %s, \"\"); raw != \"\" {\n", key)
 		b.WriteString("\t\tvalue, err := strconv.Atoi(raw)\n")
 		condition, explanation := intBound(e)
 		fmt.Fprintf(b, "\t\tif err != nil%s {\n", condition)
-		fmt.Fprintf(b, "\t\t\terrs = append(errs, fmt.Errorf(\"%s: %%q %s\", raw))\n", e.Key, explanation)
+		fmt.Fprintf(b, "\t\terrs = append(errs, fmt.Errorf(\"%s: %%q %s\", raw))\n", e.Key, explanation)
 		b.WriteString("\t\t} else {\n")
 		fmt.Fprintf(b, "\t\t\tcfg.%s = value\n", e.Field)
+		fmt.Fprintf(b, "\t\t\tcfg.Values[%s] = strconv.Itoa(cfg.%s)\n", key, e.Field)
 		b.WriteString("\t\t}\n\t}\n")
 	case EnvTime:
 		fmt.Fprintf(b, "\tif raw := pick(lookup, %s, \"\"); raw != \"\" {\n", key)
 		b.WriteString("\t\tvalue, err := time.Parse(time.RFC3339, raw)\n\t\tif err != nil {\n")
-		fmt.Fprintf(b, "\t\t\terrs = append(errs, fmt.Errorf(\"%s: %%v\", err))\n\t\t} else {\n", e.Key)
+		fmt.Fprintf(b, "\t\terrs = append(errs, fmt.Errorf(\"%s: %%v\", err))\n\t\t} else {\n", e.Key)
 		fmt.Fprintf(b, "\t\t\tcfg.%s = value\n", e.Field)
+		fmt.Fprintf(b, "\t\t\tcfg.Values[%s] = value.Format(time.RFC3339)\n", key)
 		b.WriteString("\t\t}\n\t}\n")
 	}
 	return nil

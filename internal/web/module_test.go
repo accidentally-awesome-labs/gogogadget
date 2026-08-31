@@ -10,6 +10,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/observability"
@@ -60,6 +61,42 @@ func TestNewModuleRejectsMissingDependencies(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			if _, err := NewModule(context.Background(), host, deps); err == nil {
 				t.Fatalf("NewModule(%s) = nil error, want failure", name)
+			}
+		})
+	}
+}
+
+func TestNewModuleRejectsMissingCapabilityWithoutDatabase(t *testing.T) {
+	host := apphost.Map(nil, time.Now(), "v-test")
+	base := Deps{
+		Config:  &config.Config{Env: "test", AppURL: "http://localhost:8080"},
+		DB:      &pgxpool.Pool{},
+		Queries: &sqlc.Queries{},
+	}
+	for _, tc := range []struct {
+		name string
+		deps func() Deps
+		want string
+	}{
+		{"storage", func() Deps {
+			return base
+		}, "server: storage store capability is required"},
+		{"flags", func() Deps {
+			d := base
+			d.Storage = storagefs.NewDevStore(t.TempDir())
+			return d
+		}, "server: flags evaluator capability is required"},
+		{"reporter", func() Deps {
+			d := base
+			d.Storage = storagefs.NewDevStore(t.TempDir())
+			d.Flags = flags.NewDBEvaluator(base.Queries, time.Second)
+			return d
+		}, "server: observability reporter capability is required"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := NewModule(context.Background(), host, tc.deps())
+			if err == nil || err.Error() != tc.want {
+				t.Fatalf("NewModule error = %v, want %q", err, tc.want)
 			}
 		})
 	}
