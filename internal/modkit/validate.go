@@ -280,6 +280,7 @@ func validateManifest(m Manifest, canonical bool) error {
 	if err := validateRuntime(m.Runtime, canonical); err != nil {
 		return err
 	}
+	if err := validateAdapterEnvironment(m.Environment, m.Runtime.System); err != nil { return err }
 	if err := validateVendors(m.Vendors, canonical); err != nil {
 		return err
 	}
@@ -1898,4 +1899,22 @@ func validSQLIdentifier(value string) bool {
 		}
 	}
 	return true
+}
+
+func validateAdapterEnvironment(items []EnvironmentVariable, system *SystemContribution) error {
+	if system == nil || system.Adapter == nil { return nil }
+	declared := map[string]EnvironmentVariable{}
+	for _, item := range items { declared[item.Key] = item }
+	mapped := map[string]string{}
+	for _, target := range system.Adapter.Targets {
+		for _, input := range target.Inputs {
+			if input.EnvKey == "" { continue }
+			item, ok := declared[input.EnvKey]
+			if !ok { return fmt.Errorf("adapter target %s input %q maps unknown env key %q", target.ID, input.Key, input.EnvKey) }
+			if prior, exists := mapped[input.EnvKey]; exists && prior != target.ID { return fmt.Errorf("adapter env key %q maps multiple targets", input.EnvKey) }
+			mapped[input.EnvKey] = target.ID
+			if input.Secret != item.Secret { return fmt.Errorf("adapter env key %q secret mismatch", input.EnvKey) }
+		}
+	}
+	return nil
 }
