@@ -44,7 +44,10 @@ func NewDevSender(log *slog.Logger, dir string) *DevSender {
 	return &DevSender{log: log, dir: dir}
 }
 
-func (s *DevSender) Send(_ context.Context, msg mail.Message) error {
+func (s *DevSender) Send(ctx context.Context, msg mail.Message) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(s.dir, 0o755); err != nil {
 		return err
 	}

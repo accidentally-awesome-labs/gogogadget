@@ -46,7 +46,7 @@
         "source": "internal/mail/smtp/contract_test.go",
         "target": "internal/mail/smtp/contract_test.go",
         "class": "test",
-        "sha256": "f88c434ef09c05290833c7d32897f5345ddfe356132027beca24eea3badc75b9",
+        "sha256": "d4b191a2d71ddb0da349ac09175d559a4fbbc7cd40bc29870f993a43e85f93ee",
         "rewrite_module": true,
         "contract": false
       },
@@ -54,7 +54,7 @@
         "source": "internal/mail/smtp/smtp.go",
         "target": "internal/mail/smtp/smtp.go",
         "class": "go",
-        "sha256": "18dd911f00565acdf1749d976478d725eebdc45596db7f1f389908bdd3d9359a",
+        "sha256": "8d8c857c187ca6f74a2bb99101c9141d8e0b33061cbcd0d9e06208badfd49bcc",
         "rewrite_module": true,
         "contract": true
       },

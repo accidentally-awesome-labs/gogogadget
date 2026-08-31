@@ -41,7 +41,10 @@ type ResendSender struct {
 func NewResendSender(apiKey, from string) *ResendSender {
 	return &ResendSender{client: resendgo.NewClient(apiKey), from: from}
 }
-func (s *ResendSender) Send(_ context.Context, msg mail.Message) error {
+func (s *ResendSender) Send(ctx context.Context, msg mail.Message) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	_, err := s.client.Emails.Send(&resendgo.SendEmailRequest{From: s.from, To: []string{msg.To}, Subject: msg.Subject, Html: msg.HTML, Text: msg.Text})
 	return err
 }

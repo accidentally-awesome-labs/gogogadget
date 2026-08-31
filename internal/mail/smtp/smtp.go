@@ -29,6 +29,9 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 		return nil, err
 	}
 	host := d.Config.Value("SMTP_HOST")
+	if host == "" {
+		host = "localhost"
+	}
 	port := 1025
 	if rawPort := d.Config.Value("SMTP_PORT"); rawPort != "" {
 		var err error

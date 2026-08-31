@@ -58,7 +58,7 @@
         "source": "internal/mail/resend/resend.go",
         "target": "internal/mail/resend/resend.go",
         "class": "go",
-        "sha256": "339989e46d8ab6b1b552e22c77231affebcf4e8adee6ac50caf502232aacc8b1",
+        "sha256": "b38f4a3c84199b1046fea65ad78bcfd2885425e40e349c2c19c04f6ecff18ca2",
         "rewrite_module": true,
         "contract": true
       }

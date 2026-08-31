@@ -54,7 +54,7 @@
         "source": "internal/mail/dev/dev.go",
         "target": "internal/mail/dev/dev.go",
         "class": "go",
-        "sha256": "9ca0022245e87f163022398324211c5110cedcdca24945ce1e1c6ec822f666a2",
+        "sha256": "a19ef0794de462a8e247b01c0849bd8269304a3898873599c5a2688b358ffc3c",
         "rewrite_module": true,
         "contract": true
       },
