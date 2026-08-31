@@ -15,6 +15,7 @@ Task 3 provider-selection, contract, and fixture requirements are complete. Mail
 ## Final verification
 
 Commit containing implementation and generated outputs: `22a1eef` (`fix: close task 3 adapter findings`).
+Report evidence revisions: `5d46fa6` (`docs: finalize task 3 evidence`) and `667ef98` (`docs: correct task 3 validation output`).
 
 `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline`
 
