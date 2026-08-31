@@ -79,9 +79,9 @@ func testTwoModuleLock() Lock {
 
 func marshalLockJSON(t *testing.T, lock Lock) []byte {
 	t.Helper()
-	data, err := json.Marshal(lock)
+	data, err := MarshalLock(lock)
 	if err != nil {
-		t.Fatalf("json.Marshal(lock): %v", err)
+		t.Fatalf("MarshalLock(lock): %v", err)
 	}
 	return data
 }

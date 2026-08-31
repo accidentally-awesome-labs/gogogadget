@@ -82,6 +82,9 @@ func MarshalLock(lock Lock) ([]byte, error) {
 		if clone.Modules[i].Manifest.Dependencies.Go == nil { clone.Modules[i].Manifest.Dependencies.Go = []GoDependency{} }
 		if clone.Modules[i].Manifest.Dependencies.Tools == nil { clone.Modules[i].Manifest.Dependencies.Tools = []ToolArtifact{} }
 		if clone.Modules[i].Manifest.Dependencies.Containers == nil { clone.Modules[i].Manifest.Dependencies.Containers = []ContainerDependency{} }
+		for j := range clone.Modules[i].Manifest.Environment {
+			if clone.Modules[i].Manifest.Environment[j].Type == "" { clone.Modules[i].Manifest.Environment[j].Type = EnvString }
+		}
 	}
 	canonicalizeLock(&clone)
 	if err := validateLock(clone, true); err != nil { return nil, err }

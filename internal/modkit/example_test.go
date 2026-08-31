@@ -166,7 +166,7 @@ func TestExampleClaimingGeneratedOutputIsRefused(t *testing.T) {
 	if err == nil {
 		t.Fatal("planning a module that authors a generated output succeeded")
 	}
-	const want = "module element/example-token targets generated output " +
+	const want = "module ggg/element/example-token targets generated output " +
 		"internal/web/templates/ui/example_token_templ.go; " +
 		"generated outputs are tool-owned and cannot be authored"
 	if !strings.Contains(err.Error(), want) {

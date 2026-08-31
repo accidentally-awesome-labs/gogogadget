@@ -88,33 +88,7 @@
           }
         },
         "runtime_orders": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "development": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "test": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "production": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "required": [
-            "development",
-            "test",
-            "production"
-          ]
+          "$ref": "#/$defs/RuntimeOrders"
         },
         "dependencies": {
           "type": "array",
@@ -388,6 +362,35 @@
         "candidate_sha256",
         "candidate_path",
         "diff_path"
+      ]
+    },
+    "RuntimeOrders": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "development": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "test": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "production": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "development",
+        "test",
+        "production"
       ]
     }
   }

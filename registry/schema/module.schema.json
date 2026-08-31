@@ -474,6 +474,7 @@
         }
       },
       "required": [
+        "files",
         "id",
         "kind",
         "name",
@@ -926,7 +927,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^profile/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+          "pattern": "^[a-z][a-z0-9-]*/profile/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         },
         "kind": {
           "type": "string",
@@ -956,9 +957,26 @@
           "type": "array",
           "items": {
             "type": "string",
-            "pattern": "^(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+            "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
           },
           "uniqueItems": true
+        },
+        "required_provider_slots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "provider_defaults": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "default_deployment": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*/(?:element|component|page|workflow|system)/[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
         }
       },
       "required": [
@@ -969,7 +987,10 @@
         "contract",
         "title",
         "description",
-        "members"
+        "members",
+        "required_provider_slots",
+        "provider_defaults",
+        "default_deployment"
       ]
     },
     "ProfileDocument": {
@@ -978,7 +999,7 @@
       "properties": {
         "schema": {
           "type": "integer",
-          "const": 1
+          "const": 2
         },
         "profile": {
           "$ref": "#/$defs/Profile"
@@ -2036,6 +2057,103 @@
         "id",
         "package",
         "constructor"
+      ]
+    },
+    "Dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "go": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GoDependency"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolArtifact"
+          }
+        },
+        "containers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContainerDependency"
+          }
+        }
+      },
+      "required": [
+        "go",
+        "tools",
+        "containers"
+      ]
+    },
+    "GoDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "module": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "module",
+        "version"
+      ]
+    },
+    "ToolArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "os": {
+          "type": "string"
+        },
+        "arch": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "binary_path": {
+          "type": "string"
+        },
+        "install_path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "os",
+        "arch",
+        "url",
+        "sha256",
+        "format",
+        "binary_path",
+        "install_path"
+      ]
+    },
+    "ContainerDependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "image"
       ]
     }
   }

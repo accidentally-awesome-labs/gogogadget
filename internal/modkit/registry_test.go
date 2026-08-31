@@ -29,16 +29,13 @@ func putJSON(t *testing.T, files fstest.MapFS, name string, value any) {
 		if typed.CanonicalModule == "" { typed.CanonicalModule = "github.com/gogogadget/gogogadget" }
 		value = typed
 	case CatalogIndex:
-		typed.Schema = 2
 		value = typed
 	case ModuleDocument:
-		typed.Schema = 2
 		if typed.Module.Dependencies.Go == nil { typed.Module.Dependencies.Go = []GoDependency{} }
 		if typed.Module.Dependencies.Tools == nil { typed.Module.Dependencies.Tools = []ToolArtifact{} }
 		if typed.Module.Dependencies.Containers == nil { typed.Module.Dependencies.Containers = []ContainerDependency{} }
 		value = typed
 	case ProfileDocument:
-		typed.Schema = 2
 		if typed.Profile.RequiredProviderSlots == nil { typed.Profile.RequiredProviderSlots = []string{} }
 		if typed.Profile.ProviderDefaults == nil { typed.Profile.ProviderDefaults = map[string]ProviderSelections{} }
 		value = typed

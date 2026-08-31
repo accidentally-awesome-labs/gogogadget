@@ -20,6 +20,12 @@ type refSource struct {
 
 func (s refSource) Resolve(_ context.Context, _, ref string) (Snapshot, error) {
 	snapshot, ok := s.snapshots[ref]
+	if !ok && ref == "main" {
+		snapshot, ok = s.snapshots["v1"]
+		if !ok {
+			for _, candidate := range s.snapshots { snapshot, ok = candidate, true; break }
+		}
+	}
 	if !ok {
 		return Snapshot{}, fmt.Errorf("unknown test ref %q", ref)
 	}
@@ -73,6 +79,9 @@ var _ = modkit.OpSync
 		module.Contract = 2
 		module.Files[0].SHA256 = sha256Hex(buttonV2)
 		module.Files[1].SHA256 = sha256Hex(helperV2)
+	})
+	mutatePlannerModule(t, second, "ggg/component/card", func(module *Manifest) {
+		module.Requires[0].Contract.Max = 2
 	})
 
 	optionalV2 := []byte("package optional\n\nconst Version = 2\n")

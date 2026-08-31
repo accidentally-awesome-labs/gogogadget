@@ -191,7 +191,7 @@ func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
 			"migrations":[{"id":"0007_legacy","kind":"immutable",
 			   "source":"registry/modules/system/legacy/migrations/0007_legacy.sql",
 			   "sha256":"` + sha256Hex(body) + `"}],
-			"environment":[],"docs":[],"tests":{},"data":[],"removal_policy":"retain-data"}}`)},
+			"environment":[],"docs":[],"tests":{},"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"retain-data"}}`)},
 	}
 
 	root := writeTargetProject(t, "example.com/acme/app", Project{
