@@ -151,10 +151,12 @@ func (w *Worker) digestLocale() language.Tag {
 }
 
 func NewWorker(q *sqlc.Queries, sender mail.Sender, log *slog.Logger) *Worker {
-	w := &Worker{q: q, sender: sender, log: log, poll: 2 * time.Second,
+	return NewWorkerWithEnvironment(q, sender, log, "development")
+}
+
+func NewWorkerWithEnvironment(q *sqlc.Queries, sender mail.Sender, log *slog.Logger, environment string) *Worker {
+	w := &Worker{Environment: environment, q: q, sender: sender, log: log, poll: 2 * time.Second,
 		WebhookGuard: guardWebhookURL, WebhookTransport: guardedTransport()}
-	// Built once from the generated table. The declarations close over w, so the
-	// collaborators callers assign after construction are still picked up.
 	w.definitions = make(map[string]Definition, len(workerDefinitions(w)))
 	for _, d := range workerDefinitions(w) {
 		if d.ProviderActive != nil && !d.ProviderActive() {

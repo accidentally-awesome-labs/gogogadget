@@ -343,8 +343,19 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString(genHeader(modulePath, lock))
 	b.WriteString("package modules\n\n")
 	b.WriteString("import (\n\t\"context\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n")
-	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n", "\ttemplates \"" + modulePath + "/internal/web/templates\"\n"}
+	templatesInstalled := false
+	for _, module := range modules {
+		for _, file := range module.Files {
+			if strings.HasPrefix(file.Target, "internal/web/templates/") {
+				templatesInstalled = true
+			}
+		}
+	}
+	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n"}
 	seenImports := map[string]struct{}{}
+	if templatesInstalled {
+		imports = append(imports, "\ttemplates \""+modulePath+"/internal/web/templates\"\n")
+	}
 	for _, module := range modules {
 		sys := module.Runtime.System
 		if sys == nil || sys.Package == "" {
@@ -466,6 +477,9 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 				continue
 			}
 			target := goVar(module.ID)
+			if len(module.Runtime.System.Provides) == 0 && !module.Runtime.System.Start && !module.Runtime.System.Stop && !module.Runtime.System.Health {
+				target = "_"
+			}
 			if err := emitCall(module, provider, target, env); err != nil {
 				return err
 			}
@@ -488,8 +502,12 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 			return nil, err
 		}
 		returnsRuntime = false
-		b.WriteString("\ttemplates.SetProviderEnvironment(r.Config.Env)\n")
+		if templatesInstalled {
+			b.WriteString("\ttemplates.SetProviderEnvironment(r.Config.Env)\n")
+		}
 		b.WriteString("\tswitch r.Config.Env {\n\tcase \"development\":\n\t\tif err := r.bootDevelopment(ctx, h, opts); err != nil { return nil, err }\n\tcase \"test\":\n\t\tif err := r.bootTest(ctx, h, opts); err != nil { return nil, err }\n\tcase \"production\":\n\t\tif err := r.bootProduction(ctx, h, opts); err != nil { return nil, err }\n\tdefault:\n\t\treturn nil, fmt.Errorf(\"unknown APP_ENV %q\", r.Config.Env)\n\t}\n")
+	} else {
+		b.WriteString("\treturn nil, fmt.Errorf(\"config capability is required\")\n")
 	}
 	b.WriteString("\treturn r, nil\n}\n\n")
 	if err := emitBranch("Development", "development", orders["development"]); err != nil {
