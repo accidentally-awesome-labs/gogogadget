@@ -3,6 +3,7 @@ package modkit
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -158,8 +159,10 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}
 
 	desiredProject := currentProject
+	desiredProject.Registries = append([]ProjectRegistry{}, currentProject.Registries...)
 	desiredProject.Modules = append([]string{}, currentProject.Modules...)
 	desiredProject.Exclude = append([]string{}, currentProject.Exclude...)
+	desiredProject.Providers = maps.Clone(currentProject.Providers)
 	if op.Kind == OpUpdate {
 		if len(op.Modules) != 0 {
 			return Plan{}, fmt.Errorf("update does not accept module operands")

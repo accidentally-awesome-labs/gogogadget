@@ -151,7 +151,7 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 		root, engine, _ := installedRemovalProject(t)
 		writeTestFile(t, root, "internal/modules/optional.go", []byte("local edit"))
 		_, err := engine.Plan(context.Background(), root, Operation{Kind: OpRemove, Modules: []string{"ggg/page/optional"}})
-		if err == nil || !strings.Contains(err.Error(), "ggg diff page/optional") {
+		if err == nil || !strings.Contains(err.Error(), "ggg diff ggg/page/optional") {
 			t.Fatalf("Plan error = %v, want modified-file refusal naming ggg diff", err)
 		}
 	})

@@ -79,10 +79,20 @@ func testTwoModuleLock() Lock {
 
 func marshalLockJSON(t *testing.T, lock Lock) []byte {
 	t.Helper()
-	data, err := MarshalLock(lock)
-	if err != nil {
-		t.Fatalf("MarshalLock(lock): %v", err)
+	if lock.Registries == nil { lock.Registries = []LockedRegistry{} }
+	if lock.Snapshots == nil { lock.Snapshots = []LockedSnapshot{} }
+	if lock.Dependencies == nil { lock.Dependencies = []LockedDependency{} }
+	if lock.RuntimeOrders.Development == nil { lock.RuntimeOrders.Development = append([]string{}, lock.Order...) }
+	if lock.RuntimeOrders.Test == nil { lock.RuntimeOrders.Test = append([]string{}, lock.Order...) }
+	if lock.RuntimeOrders.Production == nil { lock.RuntimeOrders.Production = append([]string{}, lock.Order...) }
+	for i := range lock.Modules {
+		m := &lock.Modules[i].Manifest
+		if m.Dependencies.Go == nil { m.Dependencies.Go = []GoDependency{} }
+		if m.Dependencies.Tools == nil { m.Dependencies.Tools = []ToolArtifact{} }
+		if m.Dependencies.Containers == nil { m.Dependencies.Containers = []ContainerDependency{} }
 	}
+	data, err := json.Marshal(lock)
+	if err != nil { t.Fatalf("json.Marshal(lock): %v", err) }
 	return data
 }
 

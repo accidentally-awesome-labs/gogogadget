@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"maps"
 	"slices"
 	"sort"
 	"strings"
@@ -172,7 +173,7 @@ func (e *Engine) planRemove(
 	for _, id := range requested {
 		desired.Modules = removeString(desired.Modules, id)
 		for _, selected := range desired.Modules {
-			if strings.HasPrefix(selected, "profile/") {
+			if strings.HasSuffix(selected, "/profile/"+strings.TrimPrefix(selected, "ggg/profile/")) || strings.HasPrefix(selected, "ggg/profile/") {
 				desired.Exclude = append(desired.Exclude, id)
 				break
 			}
@@ -439,12 +440,12 @@ func manifestMigrationOfKind(manifest Manifest, kind MigrationKind) (ManifestMig
 	}
 	return ManifestMigration{}, false
 }
-
 func equalProjects(left, right Project) bool {
 	return strings.Join(left.Modules, "\x00") == strings.Join(right.Modules, "\x00") &&
 		strings.Join(left.Exclude, "\x00") == strings.Join(right.Exclude, "\x00") &&
 		left.Schema == right.Schema &&
 		slices.Equal(left.Registries, right.Registries) &&
+		maps.Equal(left.Providers, right.Providers) &&
 		left.Deployment == right.Deployment
 }
 

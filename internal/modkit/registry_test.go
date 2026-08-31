@@ -650,10 +650,12 @@ func TestInvalidContentTypeManifestRejected(t *testing.T) {
 			"id": "ggg/system/broken", "kind": "system", "name": "broken",
 			"revision": 1, "contract": 1, "title": "Broken",
 			"description": "A module with a content type declaration.",
-			"requires":    []string{}, "files": []any{}, "claims": map[string]any{},
-			"runtime":    map[string]any{"content_types": []any{contribution}},
+			"requires": []any{}, "files": []any{}, "claims": map[string]any{},
+			"runtime": map[string]any{"content_types": []any{contribution}},
 			"migrations": []any{}, "environment": []any{}, "docs": []any{},
-			"tests": map[string]any{}, "data": []any{}, "removal_policy": "free",
+			"tests": map[string]any{}, "data": []any{},
+			"dependencies": map[string]any{"go": []any{}, "tools": []any{}, "containers": []any{}},
+			"removal_policy": "free",
 		}
 		document, err := json.Marshal(map[string]any{"schema": 2, "module": module})
 		if err != nil {
