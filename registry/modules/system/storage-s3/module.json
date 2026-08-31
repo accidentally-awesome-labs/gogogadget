@@ -71,6 +71,14 @@
         "contract": true
       },
       {
+        "source": "internal/storage/s3/protocol_test.go",
+        "target": "internal/storage/s3/protocol_test.go",
+        "class": "test",
+        "sha256": "e2856d0ec54fcb42239ae2357ff4935546b1f44d8f58b377d4b8561a655897d9",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/storage/s3/r2.go",
         "target": "internal/storage/s3/r2.go",
         "class": "go",

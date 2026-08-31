@@ -15,7 +15,7 @@
     ],
     "dependencies": {"go":[],"tools":[],"containers":[]},
     "files": [
-      {"source":"registry/modules/system/storage-managed/storage_s3.go","target":"internal/fixture/storages3/storage_s3.go","class":"go","sha256":"2a9507e6fba2a8e8e6bce8923f55dc71fcc03cb612a732eecf66a605c894d132","rewrite_module":true,"contract":true},
+      {"source":"registry/modules/system/storage-managed/storage_s3.go","target":"internal/fixture/storages3/storage_s3.go","class":"go","sha256":"3c71fc1433c438341b0a5fd9afda4107a249c8d78b547a5acac73d4154bd48f6","rewrite_module":true,"contract":true},
       {"source":"registry/modules/system/storage-managed/storage_s3_test.go","target":"internal/fixture/storages3/storage_s3_test.go","class":"test","sha256":"ed052363c0d1ed097bfe1f755848214746f8ee3cfdbfaa878a00afe65936e13c","rewrite_module":true,"contract":false}
     ],
     "claims": {"packages":["internal/fixture/storages3"]},

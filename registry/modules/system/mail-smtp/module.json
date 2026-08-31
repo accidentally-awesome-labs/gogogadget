@@ -54,9 +54,17 @@
         "source": "internal/mail/smtp/smtp.go",
         "target": "internal/mail/smtp/smtp.go",
         "class": "go",
-        "sha256": "908804a76e423e2f0e69c22ee7efcfeed8e2ecd5164f51c6aafcbb0b92c7ba3c",
+        "sha256": "853fa9fa98b0fd3f8a4d827d8ba722d0335807100c09415701bc2bccf23edc94",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/mail/smtp/starttls_test.go",
+        "target": "internal/mail/smtp/starttls_test.go",
+        "class": "test",
+        "sha256": "84fa9c647984235c09857469b0407f59f17bab223170c2fe8d6c7ca40112d751",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -133,14 +141,76 @@
               ],
               "automation": "manual",
               "docs_url": "https://pkg.go.dev/net/smtp",
-              "inputs": []
+              "inputs": [
+                {
+                  "key": "host",
+                  "env_key": "SMTP_HOST",
+                  "label": "SMTP host",
+                  "type": "string",
+                  "required": true,
+                  "secret": false
+                },
+                {
+                  "key": "port",
+                  "env_key": "SMTP_PORT",
+                  "label": "SMTP port",
+                  "type": "integer",
+                  "required": true,
+                  "secret": false
+                },
+                {
+                  "key": "username",
+                  "env_key": "SMTP_USERNAME",
+                  "label": "SMTP username",
+                  "type": "string",
+                  "required": false,
+                  "secret": true
+                },
+                {
+                  "key": "password",
+                  "env_key": "SMTP_PASSWORD",
+                  "label": "SMTP password",
+                  "type": "string",
+                  "required": false,
+                  "secret": true
+                }
+              ]
             }
           ]
         }
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "SMTP_HOST",
+        "field": "SMTPHost",
+        "type": "string",
+        "description": "SMTP server host",
+        "default": "localhost"
+      },
+      {
+        "key": "SMTP_PASSWORD",
+        "field": "SMTPPassword",
+        "type": "string",
+        "description": "SMTP password",
+        "secret": true
+      },
+      {
+        "key": "SMTP_PORT",
+        "field": "SMTPPort",
+        "type": "int",
+        "description": "SMTP server port",
+        "default": "1025"
+      },
+      {
+        "key": "SMTP_USERNAME",
+        "field": "SMTPUsername",
+        "type": "string",
+        "description": "SMTP username",
+        "secret": true
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

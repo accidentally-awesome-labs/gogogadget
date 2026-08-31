@@ -37,17 +37,19 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 type SMTPSender struct {
 	host, username, password, from string
 	port                           int
+	dialAddr                       string
+	tlsConfig                      *tls.Config
 }
 
 func NewSMTPSender(host string, port int, username, password, from string) *SMTPSender {
-	return &SMTPSender{host: host, port: port, username: username, password: password, from: from}
+	return &SMTPSender{host: host, port: port, username: username, password: password, from: from, dialAddr: host}
 }
 
 func (s *SMTPSender) Send(ctx context.Context, msg mail.Message) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	address := net.JoinHostPort(s.host, strconv.Itoa(s.port))
+	address := net.JoinHostPort(s.dialAddr, strconv.Itoa(s.port))
 	conn, err := (&net.Dialer{}).DialContext(ctx, "tcp", address)
 	if err != nil {
 		return err
@@ -57,9 +59,12 @@ func (s *SMTPSender) Send(ctx context.Context, msg mail.Message) error {
 		_ = conn.Close()
 		return err
 	}
-	defer client.Close()
-	if ok, _ := client.Extension("STARTTLS"); ok && s.host != "localhost" && s.host != "127.0.0.1" {
-		if err := client.StartTLS(&tls.Config{ServerName: s.host, MinVersion: tls.VersionTLS12}); err != nil {
+	if ok, _ := client.Extension("STARTTLS"); ok {
+		tlsOptions := s.tlsConfig
+		if tlsOptions == nil {
+			tlsOptions = &tls.Config{ServerName: s.host, MinVersion: tls.VersionTLS12}
+		}
+		if err := client.StartTLS(tlsOptions); err != nil {
 			return err
 		}
 	}

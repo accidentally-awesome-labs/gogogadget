@@ -65,6 +65,14 @@
         "sha256": "d942aa6ac820c75ebd1e8e40cbe7be9ce41cad4048bc2529ac280137303de454",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/storage/filesystem/security_test.go",
+        "target": "internal/storage/filesystem/security_test.go",
+        "class": "test",
+        "sha256": "5ece17169b36ba2714ad2bec9e1b93f2886ff849ce10d4c148b5da9b6b330394",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

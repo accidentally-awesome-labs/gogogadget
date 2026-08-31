@@ -57,7 +57,7 @@ test:
 ## fuzz: run both fuzzers briefly (CI runs this; make check deliberately does not)
 fuzz:
 	go test -run=^$$ -fuzz=FuzzFakeVerifier -fuzztime=15s ./internal/identity/
-	go test -run=^$$ -fuzz=FuzzSanitizeFilename -fuzztime=15s ./internal/mail/
+	go test -run=^$$ -fuzz=FuzzSanitizeFilename -fuzztime=15s ./internal/mail/dev/
 
 ## e2e: Playwright end-to-end suite (real server + db + browser)
 e2e:

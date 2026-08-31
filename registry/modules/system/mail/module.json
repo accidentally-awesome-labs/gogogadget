@@ -120,7 +120,7 @@
         "field": "EmailFrom",
         "type": "string",
         "description": "From header on outbound mail",
-        "default": "GoGoGadget \u003chello@example.com\u003e"
+        "default": "GoGoGadget <hello@example.com>"
       }
     ],
     "locales": {

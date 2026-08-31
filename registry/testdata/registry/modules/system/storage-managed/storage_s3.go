@@ -2,9 +2,9 @@ package storages3
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
-	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -27,8 +27,12 @@ func (store) Put(ctx context.Context, _ string, _ string, r io.Reader) (int64, e
 	}
 	return io.Copy(io.Discard, r)
 }
-func (store) Serve(ctx context.Context, _ http.ResponseWriter, _, _, _ string) error { return ctx.Err() }
-func (store) ServeInline(ctx context.Context, _ http.ResponseWriter, _, _ string) error { return ctx.Err() }
+func (store) Serve(ctx context.Context, _ http.ResponseWriter, _, _, _ string) error {
+	return ctx.Err()
+}
+func (store) ServeInline(ctx context.Context, _ http.ResponseWriter, _, _ string) error {
+	return ctx.Err()
+}
 func (store) Delete(ctx context.Context, _ string) error { return ctx.Err() }
 
 func NewModule(ctx context.Context, _ apphost.Host, deps Deps) (*Module, error) {

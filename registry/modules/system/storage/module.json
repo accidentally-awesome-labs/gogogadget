@@ -39,7 +39,7 @@
         "source": "internal/storage/contract/contract.go",
         "target": "internal/storage/contract/contract.go",
         "class": "go",
-        "sha256": "66de3c4c5436e22b27837d5bf5e3d18657f6d5c008d1af3854ab562476f8e972",
+        "sha256": "b8babef9c232bce9c75f3c8261ded546402092e2f50a15293147cc97e30d6b78",
         "rewrite_module": true,
         "contract": false
       },

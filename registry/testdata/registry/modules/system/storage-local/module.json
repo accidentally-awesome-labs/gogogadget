@@ -15,7 +15,7 @@
     ],
     "dependencies": {"go":[],"tools":[],"containers":[]},
     "files": [
-      {"source":"registry/modules/system/storage-local/storage_filesystem.go","target":"internal/fixture/storagefilesystem/storage_filesystem.go","class":"go","sha256":"87eea7e7db2efd5129f6fd8e3ed9dc9f4aa2e76422b23bb9477c14f89440258e","rewrite_module":true,"contract":true},
+      {"source":"registry/modules/system/storage-local/storage_filesystem.go","target":"internal/fixture/storagefilesystem/storage_filesystem.go","class":"go","sha256":"1d5ec43de543f278a47b4562f88c5df91241ba4d20a9708426b7b8198fa6d134","rewrite_module":true,"contract":true},
       {"source":"registry/modules/system/storage-local/storage_filesystem_test.go","target":"internal/fixture/storagefilesystem/storage_filesystem_test.go","class":"test","sha256":"5490d169b614a0bfdb49c0a4a379a9e1012d4a0f81ed24e28940b63c3590ad2e","rewrite_module":true,"contract":false}
     ],
     "claims": {"packages":["internal/fixture/storagefilesystem"]},
