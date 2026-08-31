@@ -46,13 +46,13 @@ ok  	github.com/gogogadget/gogogadget/internal/storage/s3	0.195s
 exercised 7 example closure(s):
 fixture/system/mail-providers
   installed 4 file(s), compiled ./..., tested ./internal/fixture/maillocal, ./internal/fixture/mailmanaged
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 fixture/system/storage-providers
   installed 4 file(s), compiled ./..., tested ./internal/fixture/storagefilesystem, ./internal/fixture/storages3
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 ```
 
-The full validator also passed the four original element/component/page/workflow closures and original system closure. The workflow closure retained its declared immutable migration. Final command output included the exact `example_closure_verified` diagnostics for all seven closures.
+The full validator also passed the four original element/component/page/workflow closures and original system closure. The workflow closure retained its declared immutable migration. Final command output included the exact `example_closure_verified` diagnostics for all seven closures; the final run restored 1,599 entries in each closure.
 
 ## Commit
 
