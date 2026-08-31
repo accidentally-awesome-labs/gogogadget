@@ -54,7 +54,7 @@
         "source": "internal/mail/smtp/smtp.go",
         "target": "internal/mail/smtp/smtp.go",
         "class": "go",
-        "sha256": "853fa9fa98b0fd3f8a4d827d8ba722d0335807100c09415701bc2bccf23edc94",
+        "sha256": "18dd911f00565acdf1749d976478d725eebdc45596db7f1f389908bdd3d9359a",
         "rewrite_module": true,
         "contract": true
       },

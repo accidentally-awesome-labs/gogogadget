@@ -28,10 +28,21 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	if d.Config.SMTPHost == "" {
+	host := d.Config.Value("SMTP_HOST")
+	port := 1025
+	if rawPort := d.Config.Value("SMTP_PORT"); rawPort != "" {
+		var err error
+		port, err = strconv.Atoi(rawPort)
+		if err != nil {
+			return nil, fmt.Errorf("mail smtp: SMTP_PORT is invalid: %w", err)
+		}
+	}
+	username := d.Config.Value("SMTP_USERNAME")
+	password := d.Config.Value("SMTP_PASSWORD")
+	if host == "" {
 		return nil, fmt.Errorf("mail smtp: SMTP_HOST is required")
 	}
-	return &Module{Sender: NewSMTPSender(d.Config.SMTPHost, d.Config.SMTPPort, d.Config.SMTPUsername, d.Config.SMTPPassword, d.Config.EmailFrom)}, nil
+	return &Module{Sender: NewSMTPSender(host, port, username, password, d.Config.EmailFrom)}, nil
 }
 
 type SMTPSender struct {

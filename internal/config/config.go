@@ -70,9 +70,18 @@ func Load() (Config, error) {
 	return LoadFrom(os.Getenv)
 }
 
-func (c Config) Production() bool       { return c.Env == "production" }
-func (c Config) Development() bool      { return c.Env == "development" }
-func (c Config) Test() bool             { return c.Env == "test" }
+func (c Config) Production() bool  { return c.Env == "production" }
+func (c Config) Development() bool { return c.Env == "development" }
+
+// Value exposes adapter-owned configuration without forcing every candidate
+// adapter's fields into the core seam's generated struct.
+func (c Config) Value(key string) string {
+	if c.Values == nil {
+		return ""
+	}
+	return c.Values[key]
+}
+func (c Config) Test() bool            { return c.Env == "test" }
 func (c Config) ClerkConfigured() bool { return c.ClerkSecretKey != "" }
 func (c Config) PolarConfigured() bool { return c.PolarAccessToken != "" }
 func (c Config) PostHogEnabled() bool  { return c.PostHogAPIKey != "" }

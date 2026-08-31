@@ -1,1 +1,129 @@
-{"schema":2,"module":{"id":"ggg/system/config","kind":"system","name":"config","revision":1,"contract":1,"title":"Configuration","description":"Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.","requires":[{"id":"ggg/system/apphost","contract":{"min":1,"max":1}}],"dependencies":{"go":[{"module":"github.com/stretchr/testify","version":"v1.11.1"}],"tools":[],"containers":[]},"files":[{"source":"internal/config/config.go","target":"internal/config/config.go","class":"go","sha256":"70d2f180f9f0baa165b8e79cba7f578762bd6bf71e2c4b2ccd66dbfdceadad27","rewrite_module":true,"contract":true},{"source":"internal/config/config_test.go","target":"internal/config/config_test.go","class":"test","sha256":"c542d343dc46de091a25fb73f30518c6a9690bc707b88da4a32f44a14e91157d","rewrite_module":true,"contract":false},{"source":"internal/config/module.go","target":"internal/config/module.go","class":"go","sha256":"bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc","rewrite_module":true,"contract":true},{"source":"internal/config/module_test.go","target":"internal/config/module_test.go","class":"test","sha256":"49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9","rewrite_module":true,"contract":false}],"claims":{"packages":["internal/config"]},"runtime":{"system":{"package":"internal/config","constructor":"NewModule","needs":[],"provides":[{"field":"Config","capability":"config","type":"*config.Config"}],"start":false,"stop":false}},"migrations":[],"environment":[{"key":"APP_ENV","field":"Env","type":"string","description":"development | test | production","default":"development","enum":["development","test","production"]},{"key":"APP_URL","field":"AppURL","type":"string","description":"Public base URL; trailing slash trimmed. Feeds auth and checkout redirects, email links, and webhook targets","default":"http://localhost:8080","trim_slash":true},{"key":"LOG_LEVEL","field":"LogLevel","type":"string","description":"debug | info | warn | error. Defaults to debug in development and info otherwise"},{"key":"SMTP_HOST","field":"SMTPHost","type":"string","description":"SMTP server host","default":"localhost"},{"key":"SMTP_PASSWORD","field":"SMTPPassword","type":"string","description":"SMTP password","secret":true},{"key":"SMTP_PORT","field":"SMTPPort","type":"int","description":"SMTP server port","default":"1025"},{"key":"SMTP_USERNAME","field":"SMTPUsername","type":"string","description":"SMTP username","secret":true},{"key":"TEST_NOW","field":"testNow","type":"time","description":"RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic"}],"docs":[],"tests":{"go_packages":["internal/config"]},"data":[],"removal_policy":"replacement-required"}}
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/config",
+    "kind": "system",
+    "name": "config",
+    "revision": 1,
+    "contract": 1,
+    "title": "Configuration",
+    "description": "Environment parsing and validation. Reads through the host seam so a runtime can boot against a fixed environment.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/config/config.go",
+        "target": "internal/config/config.go",
+        "class": "go",
+        "sha256": "54c4bbbbef0c86766848627522ad53a001108810aa6d0520752d1ad9b6f40bcd",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/config/config_test.go",
+        "target": "internal/config/config_test.go",
+        "class": "test",
+        "sha256": "c542d343dc46de091a25fb73f30518c6a9690bc707b88da4a32f44a14e91157d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/config/module.go",
+        "target": "internal/config/module.go",
+        "class": "go",
+        "sha256": "bf6b039b1173eb332cc2ebbde8cb3490a995ea13c69e57ed844c68527be674cc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/config/module_test.go",
+        "target": "internal/config/module_test.go",
+        "class": "test",
+        "sha256": "49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/config"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/config",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config"
+          }
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "APP_ENV",
+        "field": "Env",
+        "type": "string",
+        "description": "development | test | production",
+        "default": "development",
+        "enum": [
+          "development",
+          "test",
+          "production"
+        ]
+      },
+      {
+        "key": "APP_URL",
+        "field": "AppURL",
+        "type": "string",
+        "description": "Public base URL; trailing slash trimmed. Feeds auth and checkout redirects, email links, and webhook targets",
+        "default": "http://localhost:8080",
+        "trim_slash": true
+      },
+      {
+        "key": "LOG_LEVEL",
+        "field": "LogLevel",
+        "type": "string",
+        "description": "debug | info | warn | error. Defaults to debug in development and info otherwise"
+      },
+      {
+        "key": "TEST_NOW",
+        "field": "testNow",
+        "type": "time",
+        "description": "RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/config"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

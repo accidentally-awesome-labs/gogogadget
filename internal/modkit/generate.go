@@ -2495,6 +2495,8 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("// Config is the parsed environment. Every field is declared by the module\n")
 	b.WriteString("// that consumes it; behaviour over these values lives in config.go.\n")
 	b.WriteString("type Config struct {\n")
+	b.WriteString("\t// Values retains adapter-owned inputs for unselected adapters that share this binary.\n")
+	b.WriteString("\tValues map[string]string\n")
 	for _, e := range declarations {
 		fmt.Fprintf(&b, "\t// %s: %s\n", e.Key, e.Description)
 		fmt.Fprintf(&b, "\t%s %s\n", e.Field, goEnvType(e.Type))
@@ -2505,8 +2507,9 @@ func emitConfigRegistry(ctx context.Context, modulePath string, lock Lock, graph
 	b.WriteString("// in declaration order. It never returns early: an operator fixing one bad\n")
 	b.WriteString("// value should not have to re-run to discover the next.\n")
 	b.WriteString("func parseDeclared(lookup func(string) string) (Config, []error) {\n")
-	b.WriteString("\tvar cfg Config\n\tvar errs []error\n")
+	b.WriteString("\tcfg := Config{Values: map[string]string{}}\n\tvar errs []error\n")
 	for _, e := range declarations {
+		fmt.Fprintf(&b, "\tcfg.Values[%s] = lookup(%s)\n", goString(e.Key), goString(e.Key))
 		if err := writeEnvParse(&b, e, requiredExpression(e, lock)); err != nil {
 			return nil, err
 		}

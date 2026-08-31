@@ -23,7 +23,8 @@ func TestSMTPModuleContract(t *testing.T) {
 	go fakeSMTP(t, ln, payload)
 	port := ln.Addr().(*net.TCPAddr).Port
 	host := apphost.Map(nil, time.Now(), "test")
-	module, err := NewModule(context.Background(), host, Deps{Config: &config.Config{EmailFrom: "hello@example.com", SMTPHost: "127.0.0.1", SMTPPort: port}})
+	cfg := &config.Config{Values: map[string]string{"SMTP_HOST": "127.0.0.1", "SMTP_PORT": fmt.Sprint(port)}, EmailFrom: "hello@example.com"}
+	module, err := NewModule(context.Background(), host, Deps{Config: cfg})
 	require.NoError(t, err)
 	require.NoError(t, module.Sender.Send(context.Background(), mail.Message{To: "to@example.com", Subject: "subject", Text: "plain", HTML: "<b>html</b>"}))
 	body := <-payload
