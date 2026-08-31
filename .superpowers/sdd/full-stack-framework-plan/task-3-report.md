@@ -48,7 +48,7 @@ The full validator also passed the four original element/component/page/workflow
 
 ## Commit
 
-Reviewed base: `d9f2137`. Prior fixture implementation commits: `e170f3b`, `372682c`. Round-two fixes and final generated refresh are committed after this report.
+Reviewed base: `d9f2137`. Prior fixture commits: `e170f3b`, `372682c`. Round-two implementation and generated refresh commit: `bdfaf4a`.
 
 ## Concerns
 
