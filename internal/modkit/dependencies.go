@@ -1,17 +1,24 @@
 package modkit
 
 import (
+	"archive/tar"
+	"archive/zip"
+	"bytes"
+	"compress/gzip"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
+
 	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
 	"golang.org/x/mod/semver"
 )
-
 // ToolRunner executes a fixed argv in a project root; manifests never carry
 // shell fragments.
 type ToolRunner interface { Run(context.Context, string, []string) error }
@@ -58,4 +65,25 @@ func UpdateGoMod(ctx context.Context, root string, deps []LockedDependency, runn
 	newMod,err:=file.Format();if err!=nil{return nil,err};if err=os.WriteFile(modPath,newMod,0o644);err!=nil{return nil,err}
 	if runner!=nil {if err:=runner.Run(ctx,root,[]string{"go","mod","download"});err!=nil { _=os.WriteFile(modPath,oldMod,0o644); _=os.WriteFile(sumPath,oldSum,0o644); return nil,err }}
 	return deps,nil
+}
+// ExtractTool verifies an artifact digest before decoding it and rejects
+// traversal, links, and files other than the declared executable.
+func ExtractTool(data []byte, artifact ToolArtifact, dst string) error {
+	sum := sha256.Sum256(data)
+	if hex.EncodeToString(sum[:]) != artifact.SHA256 { return fmt.Errorf("tool digest mismatch") }
+	if filepath.IsAbs(artifact.BinaryPath) || !validSafeArchivePath(artifact.BinaryPath) { return fmt.Errorf("unsafe tool binary path") }
+	if filepath.IsAbs(artifact.InstallPath) || !validSafeInstallPath(artifact.InstallPath) { return fmt.Errorf("unsafe tool install path") }
+	var payload []byte
+	switch artifact.Format {
+	case "raw": payload = data
+	case "zip":
+		z, err := zip.NewReader(bytes.NewReader(data), int64(len(data))); if err != nil { return err }
+		for _, f := range z.File { if f.Name == artifact.BinaryPath { if f.Mode()&os.ModeSymlink != 0 { return fmt.Errorf("tool symlink rejected") }; r,err:=f.Open();if err!=nil{return err};payload,err=io.ReadAll(r);_ = r.Close();if err!=nil{return err} } }
+	case "tar.gz":
+		gz,err:=gzip.NewReader(bytes.NewReader(data));if err!=nil{return err}; tr:=tar.NewReader(gz)
+		for { h,err:=tr.Next();if err==io.EOF{break};if err!=nil{return err};if h.Name==artifact.BinaryPath {if h.Typeflag!=tar.TypeReg{return fmt.Errorf("tool non-regular file rejected")};payload,err=io.ReadAll(tr);if err!=nil{return err};break} }
+	default: return fmt.Errorf("unsupported tool format %q", artifact.Format)
+	}
+	if payload == nil { return fmt.Errorf("declared tool executable %q not found", artifact.BinaryPath) }
+	return os.WriteFile(dst, payload, 0o755)
 }
