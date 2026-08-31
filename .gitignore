@@ -8,3 +8,4 @@ e2e/test-results/
 
 # Local server binaries
 /server
+/.worktrees
