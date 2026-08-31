@@ -176,7 +176,7 @@ func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
 	body := []byte("-- +goose Up\nSELECT 1;\n")
 	registry := fstest.MapFS{
-		"registry.json":            &fstest.MapFile{Data: []byte(`{"schema":2,"includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
+		"registry.json":            &fstest.MapFile{Data: []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":["registry/elements.json","registry/components.json","registry/pages.json","registry/workflows.json","registry/systems.json","registry/profiles.json"]}`)},
 		"registry/elements.json":   &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"element","items":[]}`)},
 		"registry/components.json": &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"component","items":[]}`)},
 		"registry/pages.json":      &fstest.MapFile{Data: []byte(`{"schema":2,"kind":"page","items":[]}`)},

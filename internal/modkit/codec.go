@@ -72,10 +72,19 @@ func MarshalLock(lock Lock) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("clone lock: %w", err)
 	}
-	canonicalizeLock(&clone)
-	if err := validateLock(clone, true); err != nil {
-		return nil, err
+	if clone.Registries == nil { clone.Registries = []LockedRegistry{} }
+	if clone.Snapshots == nil { clone.Snapshots = []LockedSnapshot{} }
+	if clone.Dependencies == nil { clone.Dependencies = []LockedDependency{} }
+	if clone.RuntimeOrders.Development == nil { clone.RuntimeOrders.Development = append([]string{}, clone.Order...) }
+	if clone.RuntimeOrders.Test == nil { clone.RuntimeOrders.Test = append([]string{}, clone.Order...) }
+	if clone.RuntimeOrders.Production == nil { clone.RuntimeOrders.Production = append([]string{}, clone.Order...) }
+	for i := range clone.Modules {
+		if clone.Modules[i].Manifest.Dependencies.Go == nil { clone.Modules[i].Manifest.Dependencies.Go = []GoDependency{} }
+		if clone.Modules[i].Manifest.Dependencies.Tools == nil { clone.Modules[i].Manifest.Dependencies.Tools = []ToolArtifact{} }
+		if clone.Modules[i].Manifest.Dependencies.Containers == nil { clone.Modules[i].Manifest.Dependencies.Containers = []ContainerDependency{} }
 	}
+	canonicalizeLock(&clone)
+	if err := validateLock(clone, true); err != nil { return nil, err }
 	return marshalIndented(clone)
 }
 
@@ -268,6 +277,7 @@ func canonicalizeLock(lock *Lock) {
 
 func canonicalizeManifest(manifest *Manifest) {
 	sort.Slice(manifest.Requires, func(i, j int) bool { return manifest.Requires[i].ID < manifest.Requires[j].ID })
+	sort.Slice(manifest.Files, func(i, j int) bool { return manifest.Files[i].Target < manifest.Files[j].Target })
 	sort.Slice(manifest.Dependencies.Go, func(i, j int) bool { return manifest.Dependencies.Go[i].Module < manifest.Dependencies.Go[j].Module })
 	sort.Slice(manifest.Dependencies.Tools, func(i, j int) bool { return manifest.Dependencies.Tools[i].InstallPath < manifest.Dependencies.Tools[j].InstallPath })
 	sort.Slice(manifest.Dependencies.Containers, func(i, j int) bool { return manifest.Dependencies.Containers[i].Name < manifest.Dependencies.Containers[j].Name })

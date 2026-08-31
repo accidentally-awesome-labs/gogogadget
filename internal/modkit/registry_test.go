@@ -237,20 +237,20 @@ func TestLoadCatalogRejectsInvalidCatalogs(t *testing.T) {
 			{
 				name: "root",
 				mutate: func(t *testing.T, files fstest.MapFS) {
-					putJSON(t, files, "registry.json", RegistryRoot{Schema: 2, Namespace: "ggg", CanonicalModule: "github.com/gogogadget/gogogadget", Includes: publishedRegistryIncludes})
+					putJSON(t, files, "registry.json", RegistryRoot{Schema: 3, Namespace: "ggg", CanonicalModule: "github.com/gogogadget/gogogadget", Includes: publishedRegistryIncludes})
 				},
 			},
 			{
 				name: "index",
 				mutate: func(t *testing.T, files fstest.MapFS) {
-					putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 2, Kind: CatalogElement, Items: []string{}})
+					putJSON(t, files, "registry/elements.json", CatalogIndex{Schema: 3, Kind: CatalogElement, Items: []string{}})
 				},
 			},
 			{
 				name: "document",
 				mutate: func(t *testing.T, files fstest.MapFS) {
 					module := testLockedModule("ggg/element/button", testDigestA).Manifest
-					putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 2, Module: module})
+					putJSON(t, files, "registry/modules/element/button/module.json", ModuleDocument{Schema: 3, Module: module})
 				},
 			},
 		}

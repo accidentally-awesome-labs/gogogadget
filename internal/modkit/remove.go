@@ -358,7 +358,11 @@ func (e *Engine) planRemove(
 	sort.Slice(modules, func(i, j int) bool { return modules[i].ID < modules[j].ID })
 	finalLock := Lock{
 		Schema: 2, RegistryCommit: currentLock.RegistryCommit,
-		Order: order, Modules: modules,
+		Registries: append([]LockedRegistry{}, currentLock.Registries...),
+		Snapshots: append([]LockedSnapshot{}, currentLock.Snapshots...),
+		Order: order, RuntimeOrders: currentLock.RuntimeOrders,
+		Dependencies: append([]LockedDependency{}, currentLock.Dependencies...),
+		Modules: modules,
 	}
 
 	if !equalProjects(project, desired) {

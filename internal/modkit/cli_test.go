@@ -249,7 +249,7 @@ func mustCLIEngine(t *testing.T) *Engine {
 func TestCLIRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[`+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[`+
 		`"registry/elements.json","registry/components.json","registry/pages.json",`+
 		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
 	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
@@ -264,7 +264,7 @@ func TestCLIRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
 		"id":"ggg/system/widget","kind":"system","name":"widget","revision":1,"contract":1,
 		"title":"Widget","description":"A widget system.","requires":[],"files":[],
 		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
-		"data":[],"removal_policy":"free"}}`))
+		"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"free"}}`))
 
 	cli := CLI{Out: &bytes.Buffer{}, Root: root}
 	if err := cli.Run(context.Background(), []string{"registry", "build"}); err != nil {
@@ -292,7 +292,7 @@ func TestCLIRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
 func TestCLIResolvesSelfHostedRegistryFromTree(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[`+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[`+
 		`"registry/elements.json","registry/components.json","registry/pages.json",`+
 		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
 	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
@@ -304,7 +304,7 @@ func TestCLIResolvesSelfHostedRegistryFromTree(t *testing.T) {
 		"id":"ggg/system/widget","kind":"system","name":"widget","revision":1,"contract":1,
 		"title":"Widget","description":"A widget system.","requires":[],"files":[],
 		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
-		"data":[],"removal_policy":"free"}}`))
+		"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"free"}}`))
 
 	// No Engine injected: the CLI must build one that resolves locally.
 	cli := CLI{Out: &bytes.Buffer{}, Root: root}
@@ -453,7 +453,7 @@ func TestCLISyncClaimsDivergentFileDuringAdoption(t *testing.T) {
 func TestCLIRegistryBuildRefreshesPayloadDigests(t *testing.T) {
 	root := t.TempDir()
 	writeTestFile(t, root, "go.mod", []byte("module example.com/acme/app\n\ngo 1.26.6\n"))
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[`+
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[`+
 		`"registry/elements.json","registry/components.json","registry/pages.json",`+
 		`"registry/workflows.json","registry/systems.json","registry/profiles.json"]}`))
 	for _, kind := range []string{"elements", "components", "pages", "workflows", "systems"} {
@@ -470,7 +470,7 @@ func TestCLIRegistryBuildRefreshesPayloadDigests(t *testing.T) {
 		"files":[{"source":"internal/widget/widget.go","target":"internal/widget/widget.go",
 		          "class":"go","sha256":"`+sha256Hex(payload)+`","rewrite_module":true,"contract":true}],
 		"claims":{},"runtime":{},"migrations":[],"environment":[],"docs":[],"tests":{},
-		"data":[],"removal_policy":"free"}}`))
+		"data":[],"dependencies":{"go":[],"tools":[],"containers":[]},"removal_policy":"free"}}`))
 
 	cli := CLI{Out: &bytes.Buffer{}, Root: root}
 	if err := cli.Run(context.Background(), []string{"registry", "validate"}); err != nil {

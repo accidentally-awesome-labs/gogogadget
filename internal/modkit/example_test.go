@@ -146,7 +146,7 @@ func TestExampleWithMissingDependencyIsRefused(t *testing.T) {
 	if err == nil {
 		t.Fatal("planning a closure with an undeclared dependency succeeded")
 	}
-	const want = `required module "ggg/element/example-missing" is not present in the catalog`
+	const want = `module "ggg/element/example-token" requires missing dependency "ggg/element/example-missing"`
 	if !strings.Contains(err.Error(), want) {
 		t.Fatalf("error = %q, want it to contain %q", err, want)
 	}

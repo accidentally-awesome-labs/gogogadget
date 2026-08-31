@@ -405,8 +405,8 @@ func TestBootstrapClosesStoppableModulesInReverseOrder(t *testing.T) {
 	// Stop hooks are registered during Boot, so dependency order is captured by
 	// append order; Close then walks the slice backwards.
 	bootBody := bootstrap[strings.Index(bootstrap, "func Boot("):strings.Index(bootstrap, "func (r *Runtime) Handler(")]
-	alpha := strings.Index(bootBody, "r.stop = append(r.stop, system_alphaModule.Stop)")
-	omega := strings.Index(bootBody, "r.stop = append(r.stop, system_omegaModule.Stop)")
+	alpha := strings.Index(bootBody, "r.stop = append(r.stop, ggg_system_alphaModule.Stop)")
+	omega := strings.Index(bootBody, "r.stop = append(r.stop, ggg_system_omegaModule.Stop)")
 	if alpha < 0 || omega < 0 {
 		t.Fatalf("Boot does not register both stop hooks:\n%s", bootBody)
 	}
@@ -492,7 +492,7 @@ func TestBootstrapRunsStartableModules(t *testing.T) {
 			bootstrap = file.Content
 		}
 	}
-	if !strings.Contains(bootstrap, "r.start = append(r.start, system_alphaModule.Start)") {
+	if !strings.Contains(bootstrap, "r.start = append(r.start, ggg_system_alphaModule.Start)") {
 		t.Fatalf("Boot does not register the start hook:\n%s", bootstrap)
 	}
 	runBody := bootstrap[strings.Index(bootstrap, "func (r *Runtime) Run("):]
@@ -1176,7 +1176,7 @@ func TestEnvExampleAndReferenceCoverEveryDeclaredKey(t *testing.T) {
 		t.Fatalf(".env.example must carry non-secret defaults:\n%s", example)
 	}
 	// The reference states what production refuses to boot without.
-	if !strings.Contains(reference, "| `DATABASE_URL` | `system/example` | **production** |") {
+	if !strings.Contains(reference, "| `DATABASE_URL` | `ggg/system/example` | **production** |") {
 		t.Fatalf("reference must mark production-required keys:\n%s", reference)
 	}
 	// Bounds reach the reader rather than living only in the error message.

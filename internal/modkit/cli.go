@@ -688,7 +688,7 @@ func (c CLI) runInfo(ctx context.Context, args []string) error {
 		return usageError("usage: ggg info KIND/NAME [--json]")
 	}
 	id := positional[0]
-	if err := validateInstallableModuleID(id); err != nil {
+	if err := validateScopedProjectModuleID(id); err != nil {
 		return usageError(fmt.Sprintf("%s: %v", id, err))
 	}
 

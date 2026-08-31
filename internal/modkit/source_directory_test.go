@@ -19,7 +19,7 @@ import (
 // silent divergence discovered in CI.
 func TestLocalArtifactsDoNotChangeTheRegistryCommit(t *testing.T) {
 	root := t.TempDir()
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[]}`))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[]}`))
 	writeTestFile(t, root, "registry/modules/element/x/module.json", []byte(`{"id":"ggg/element/x"}`))
 	writeTestFile(t, root, "internal/web/real.go", []byte("package web\n"))
 
@@ -53,7 +53,7 @@ func TestLocalArtifactsDoNotChangeTheRegistryCommit(t *testing.T) {
 // identity at all and the exclusion has been drawn too wide.
 func TestRealSourceStillChangesTheRegistryCommit(t *testing.T) {
 	root := t.TempDir()
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"includes":[]}`))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[]}`))
 	writeTestFile(t, root, "internal/web/real.go", []byte("package web\n"))
 
 	before, err := DirectorySource{Root: root}.Resolve(context.Background(), "", "")
