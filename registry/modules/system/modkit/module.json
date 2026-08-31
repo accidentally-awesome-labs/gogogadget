@@ -59,7 +59,7 @@
         "source": "internal/modkit/cli.go",
         "target": "internal/modkit/cli.go",
         "class": "go",
-        "sha256": "ed748ae72a137f7243fc8c059c2c07f904514f78d18f29e3ab63e043a02b45ee",
+        "sha256": "6203d9eb5f169c4e0f08d02a8aa1a6466988e9fbe7618f466f9bfe5cc9407e99",
         "rewrite_module": true,
         "contract": true
       },
@@ -179,7 +179,7 @@
         "source": "internal/modkit/migration_v2.go",
         "target": "internal/modkit/migration_v2.go",
         "class": "go",
-        "sha256": "d1fddd286ed72e38dd498b55c0b9f04890ec9f7dc7915d0854cb6ff8ec39cd2e",
+        "sha256": "67e6509fddcdda458ef563f2908bb8309aab09771a944a8f524454cca7e2bc60",
         "rewrite_module": false,
         "contract": false
       },

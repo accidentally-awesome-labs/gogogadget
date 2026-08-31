@@ -113,6 +113,8 @@ func (c CLI) Run(ctx context.Context, args []string) error {
 		return c.runResolve(ctx, rest)
 	case "doctor":
 		return c.runDoctor(ctx, rest)
+	case "migrate":
+		return c.runMigrate(ctx, rest)
 	case "registry":
 		return c.runRegistry(ctx, rest)
 	default:
@@ -338,6 +340,26 @@ func (c *claimList) Set(value string) error {
 	*c = append(*c, trimmed)
 	return nil
 }
+func (c CLI) runMigrate(ctx context.Context, args []string) error {
+	if len(args) != 1 || (args[0] != "schema-1" && args[0] != "schema1") {
+		return usageError("usage: ggg migrate schema-1")
+	}
+	if err := ctx.Err(); err != nil { return err }
+	root := c.root()
+	projectPath := filepath.Join(root, ProjectFileName)
+	lockPath := filepath.Join(root, LockFileName)
+	project, err := os.ReadFile(projectPath); if err != nil { return runtimeError(err) }
+	lock, err := os.ReadFile(lockPath); if err != nil { return runtimeError(err) }
+	migratedProject, err := MigrateSchema1Project(project); if err != nil { return refusalError(err) }
+	migratedLock, err := MigrateSchema1Lock(lock); if err != nil { return refusalError(err) }
+	if err := os.WriteFile(projectPath, migratedProject, 0o644); err != nil { return runtimeError(err) }
+	if err := os.WriteFile(lockPath, migratedLock, 0o644); err != nil {
+		_ = os.WriteFile(projectPath, project, 0o644)
+		return runtimeError(err)
+	}
+	return nil
+}
+
 
 func (c CLI) runInit(ctx context.Context, args []string) error {
 	set := c.flagSet("init")
