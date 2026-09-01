@@ -27,7 +27,7 @@
         "source": "internal/llm/openai/openai.go",
         "target": "internal/llm/openai/openai.go",
         "class": "go",
-        "sha256": "92a8c0469c6acbaebc2467eab1ff3ee466a679cd5f935c8f878eed664753d399",
+        "sha256": "7cbdc98f53e81e27f68a1ff902764a38ba7abde6ec0725170530915999cedd7e",
         "rewrite_module": true,
         "contract": true
       },
@@ -35,7 +35,7 @@
         "source": "internal/llm/openai/openai_test.go",
         "target": "internal/llm/openai/openai_test.go",
         "class": "test",
-        "sha256": "9876ae9c6ce3e719b53637371182ad559f1c67f30a642149ba1fbcbb2ea56803",
+        "sha256": "8d770564ec407ae633d47296f4586502d95f6c4da8f564970f4923c12b173f94",
         "rewrite_module": true,
         "contract": false
       }

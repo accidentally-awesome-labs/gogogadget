@@ -39,7 +39,7 @@
         "source": "internal/llm/contract_test.go",
         "target": "internal/llm/contract_test.go",
         "class": "test",
-        "sha256": "1fe5f816eaee4651e8472f3c99c904bc097a752633d4450ec4788c387f2c4332",
+        "sha256": "354097ed78c42bdd1f0727ad9afe20c9c60758232d9cec7554500294c1726154",
         "rewrite_module": true,
         "contract": false
       },
@@ -47,17 +47,9 @@
         "source": "internal/llm/llm.go",
         "target": "internal/llm/llm.go",
         "class": "go",
-        "sha256": "07f5b6646429a82ebeac43fd8ba1c7e4a158e3af8cc0021e7884a78629165dae",
+        "sha256": "328e6069c091881c02eb8636ef37c190ec8a1eb8782caf78f8779095dac2f3b9",
         "rewrite_module": true,
         "contract": true
-      },
-      {
-        "source": "internal/llm/llm_test.go",
-        "target": "internal/llm/llm_test.go",
-        "class": "test",
-        "sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
-        "rewrite_module": true,
-        "contract": false
       }
     ],
     "claims": {

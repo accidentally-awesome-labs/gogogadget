@@ -940,11 +940,11 @@
     },
     {
       "path": "registry/modules/system/llm-openai-compatible/module.json",
-      "sha256": "444fcffe92355924fba180e4c6e113e05e600e20a0417898b64bd5ee1896481a"
+      "sha256": "ccc179daa3de54af0a99d0c4c53b87603722c36649fcda9636c9b8197c450d42"
     },
     {
       "path": "registry/modules/system/llm/module.json",
-      "sha256": "285e2d1cfcd9c75272a8617109fa5927f57aa7503fb30fe527e0a19d8eb1fbbe"
+      "sha256": "f44d8ae9c2c35ae089ed02a7adcbad59b7833fecb1eab2454e050c5c906e05af"
     },
     {
       "path": "registry/modules/system/mail-dev/module.json",
