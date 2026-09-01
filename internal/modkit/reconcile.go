@@ -107,15 +107,29 @@ func containsString(values []string, target string) bool {
 }
 
 func readPlannedPayloads(ctx context.Context, registryFS fs.FS, modules []Manifest, canonicalModule, modulePath string) ([]plannedAuthoredPayload, error) {
+	return readPlannedPayloadsWithSources(ctx, func(Manifest) fs.FS { return registryFS }, modules, []string{canonicalModule}, modulePath)
+}
+
+func readPlannedPayloadsFromCatalog(ctx context.Context, catalog Catalog, modules []Manifest, prefixes []string, modulePath string) ([]plannedAuthoredPayload, error) {
+	return readPlannedPayloadsWithSources(ctx, func(module Manifest) fs.FS {
+		if source := catalog.ModuleSources[module.ID]; source != nil {
+			return source
+		}
+		return nil
+	}, modules, prefixes, modulePath)
+}
+
+func readPlannedPayloadsWithSources(ctx context.Context, source func(Manifest) fs.FS, modules []Manifest, prefixes []string, modulePath string) ([]plannedAuthoredPayload, error) {
 	payloads := make([]plannedAuthoredPayload, 0)
 	for _, module := range modules {
+		registryFS := source(module)
+		if registryFS == nil {
+			return nil, fmt.Errorf("module %s has no registry source", module.ID)
+		}
 		for _, file := range module.Files {
 			if err := ctx.Err(); err != nil {
 				return nil, err
 			}
-			// A generated file is produced by the build, not distributed by the
-			// registry: the snapshot deliberately excludes generated outputs, so
-			// there is nothing to read or verify here.
 			if file.Class == FileClassGenerated {
 				continue
 			}
@@ -128,7 +142,7 @@ func readPlannedPayloads(ctx context.Context, registryFS fs.FS, modules []Manife
 			}
 			installed := append([]byte(nil), content...)
 			if file.RewriteModule {
-				installed, err = rewriteModuleImports(file.Target, content, canonicalModule, modulePath)
+				installed, err = rewriteModuleImportsForPrefixes(file.Target, content, prefixes, modulePath)
 				if err != nil {
 					return nil, fmt.Errorf("module %s payload %s: %w", module.ID, file.Source, err)
 				}

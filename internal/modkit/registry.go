@@ -61,10 +61,14 @@ type ProfileDocument struct {
 	Profile Profile `json:"profile"`
 }
 
-// Catalog is the fully validated production registry.
 type Catalog struct {
-	Modules  []Manifest
-	Profiles []Profile
+	Modules          []Manifest
+	Profiles         []Profile
+	Namespace        string
+	CanonicalModule  string
+	CanonicalModules []string
+	ModuleSources    map[string]fs.FS
+	ModuleRegistries map[string]string
 }
 
 var catalogIncludes = []struct {
@@ -79,21 +83,16 @@ var catalogIncludes = []struct {
 	{"registry/profiles.json", CatalogProfile},
 }
 
-// LoadCatalog loads only registry.json, its canonical explicit indexes, and the
-// documents explicitly named by those indexes.
 func LoadCatalog(fsys fs.FS) (Catalog, error) {
 	var catalog Catalog
-
-	var root RegistryRoot
-	if err := readCatalogJSON(fsys, "registry.json", &root); err != nil {
+	root, err := loadRegistryRoot(fsys)
+	if err != nil {
 		return catalog, err
 	}
-	if root.Schema != 2 {
-		return catalog, fmt.Errorf("registry.json schema must be 2")
-	}
-	if !validNamespace(root.Namespace) || strings.TrimSpace(root.CanonicalModule) == "" {
-		return catalog, fmt.Errorf("registry.json namespace and canonical_module are required")
-	}
+	catalog.Namespace, catalog.CanonicalModule = root.Namespace, root.CanonicalModule
+	catalog.CanonicalModules = []string{root.CanonicalModule}
+	catalog.ModuleSources = map[string]fs.FS{}
+	catalog.ModuleRegistries = map[string]string{}
 	if root.Includes == nil {
 		return catalog, fmt.Errorf("registry.json includes array is required")
 	}
@@ -170,6 +169,8 @@ func LoadCatalog(fsys fs.FS) (Catalog, error) {
 			identities[document.Module.ID] = item
 			modules[document.Module.ID] = struct{}{}
 			catalog.Modules = append(catalog.Modules, document.Module)
+			catalog.ModuleSources[document.Module.ID] = fsys
+			catalog.ModuleRegistries[document.Module.ID] = root.Namespace
 		}
 	}
 

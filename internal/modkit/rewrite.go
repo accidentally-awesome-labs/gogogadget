@@ -17,14 +17,22 @@ type byteReplacement struct {
 }
 
 func rewriteModuleImports(name string, content []byte, canonical, target string) ([]byte, error) {
+	return rewriteModuleImportsForPrefixes(name, content, []string{canonical}, target)
+}
+
+func rewriteModuleImportsForPrefixes(name string, content []byte, canonicals []string, target string) ([]byte, error) {
 	extension := strings.ToLower(filepath.Ext(name))
 	if extension != ".go" && extension != ".templ" {
 		return nil, fmt.Errorf("rewrite_module is unsupported for %s", name)
 	}
-	if !validPackagePath(canonical) || !validPackagePath(target) {
+	if !validPackagePath(target) || len(canonicals) == 0 {
 		return nil, fmt.Errorf("module rewrite paths are invalid")
 	}
-
+	for _, canonical := range canonicals {
+		if !validPackagePath(canonical) {
+			return nil, fmt.Errorf("module rewrite paths are invalid")
+		}
+	}
 	files := token.NewFileSet()
 	parsed, err := parser.ParseFile(files, name, content, parser.ImportsOnly)
 	if err != nil {
@@ -36,7 +44,15 @@ func rewriteModuleImports(name string, content []byte, canonical, target string)
 		if err != nil {
 			return nil, fmt.Errorf("parse import path in %s: %w", name, err)
 		}
-		if importPath != canonical && !strings.HasPrefix(importPath, canonical+"/") {
+		canonical := ""
+		for _, prefix := range canonicals {
+			if importPath == prefix || strings.HasPrefix(importPath, prefix+"/") {
+				if len(prefix) > len(canonical) {
+					canonical = prefix
+				}
+			}
+		}
+		if canonical == "" {
 			continue
 		}
 		rewritten := target + strings.TrimPrefix(importPath, canonical)

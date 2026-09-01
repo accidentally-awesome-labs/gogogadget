@@ -185,16 +185,24 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err := ctx.Err(); err != nil {
 		return Plan{}, err
 	}
-	snapshot, err := e.source.Resolve(ctx, desiredProject.Registries[0].Repository, desiredProject.Registries[0].Ref)
-	if err != nil {
-		return Plan{}, fmt.Errorf("resolve registry %s at %s: %w", desiredProject.Registries[0].Repository, desiredProject.Registries[0].Ref, err)
+	registrySources := make([]resolvedRegistry, 0, len(desiredProject.Registries))
+	for _, configured := range desiredProject.Registries {
+		snapshot, resolveErr := resolveSnapshot(ctx, e.source, configured, configured.Repository, configured.Ref)
+		if resolveErr != nil {
+			return Plan{}, fmt.Errorf("resolve registry %s at %s: %w", configured.Namespace, configured.Ref, resolveErr)
+		}
+		if strings.TrimSpace(snapshot.Commit) == "" || snapshot.FS == nil {
+			return Plan{}, fmt.Errorf("resolved registry snapshot is incomplete")
+		}
+		registrySources = append(registrySources, resolvedRegistry{config: configured, snapshot: snapshot})
 	}
-	if strings.TrimSpace(snapshot.Commit) == "" || snapshot.FS == nil {
-		return Plan{}, fmt.Errorf("resolved registry snapshot is incomplete")
+	if len(registrySources) == 0 {
+		return Plan{}, fmt.Errorf("project has no registries")
 	}
-	catalog, err := LoadCatalog(snapshot.FS)
+	snapshot := registrySources[0].snapshot
+	catalog, err := mergeResolvedCatalogs(ctx, registrySources)
 	if err != nil {
-		return Plan{}, fmt.Errorf("load registry catalog: %w", err)
+		return Plan{}, err
 	}
 	if op.Kind == OpAdd {
 		desiredProject, err = projectAfterAdd(desiredProject, catalog, op.Modules)
@@ -213,8 +221,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
-
-	payloads, err := readPlannedPayloads(ctx, snapshot.FS, graph.modules, e.canonicalModule, modulePath)
+	payloads, err := readPlannedPayloadsFromCatalog(ctx, catalog, graph.modules, canonicalPrefixes(catalog), modulePath)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -253,6 +260,23 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	)
 	if err != nil {
 		return Plan{}, err
+	}
+	finalLock.RegistryCommit, finalLock.Registries, finalLock.Snapshots = registryProvenance(registrySources, catalog, graph.modules)
+	for i := range finalLock.Modules {
+		if finalLock.Modules[i].Pending != nil {
+			continue
+		}
+		namespace := catalog.ModuleRegistries[finalLock.Modules[i].ID]
+		for _, source := range registrySources {
+			if source.config.Namespace == namespace {
+				finalLock.Modules[i].RegistryNamespace = namespace
+				finalLock.Modules[i].SourceCommit = source.snapshot.Commit
+				finalLock.Modules[i].SnapshotSHA256 = source.snapshot.SnapshotSHA256
+				if finalLock.Modules[i].SnapshotSHA256 == "" {
+					finalLock.Modules[i].SnapshotSHA256 = source.snapshot.Commit
+				}
+			}
+		}
 	}
 	finalLock.RuntimeOrders = runtimeOrders
 	finalLock.Providers = maps.Clone(desiredProject.Providers)

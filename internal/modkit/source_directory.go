@@ -13,6 +13,8 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -80,26 +82,52 @@ type DirectorySource struct {
 	Root string
 }
 
-func (s DirectorySource) Resolve(ctx context.Context, _, _ string) (Snapshot, error) {
+func (s DirectorySource) Resolve(ctx context.Context, args ...any) (Snapshot, error) {
+	legacy := len(args) >= 2
+	registry := ProjectRegistry{Source: "directory", Path: s.Root}
+	if len(args) == 1 {
+		if requested, ok := args[0].(ProjectRegistry); ok {
+			registry = requested
+		}
+	} else if len(args) >= 2 {
+		// Legacy Resolve(ctx, repository, ref) calls intentionally ignore the
+		// repository/ref: a directory's bytes are its immutable identity.
+		if requested, ok := args[0].(string); ok && requested != "" {
+			registry.Repository = requested
+		}
+		if requested, ok := args[1].(string); ok {
+			registry.Ref = requested
+		}
+	}
 	if err := ctx.Err(); err != nil {
 		return Snapshot{}, fmt.Errorf("resolve directory source: %w", err)
 	}
 	if s.Root == "" {
 		return Snapshot{}, fmt.Errorf("resolve directory source: root is empty")
 	}
-
-	rootInfo, err := os.Lstat(s.Root)
+	root := s.Root
+	if registry.Path != "" && registry.Path != "." && registry.Path != s.Root {
+		candidate := filepath.Join(s.Root, filepath.FromSlash(registry.Path))
+		relative, relErr := filepath.Rel(s.Root, candidate)
+		if relErr != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+			return Snapshot{}, fmt.Errorf("resolve directory source path %q: path escapes project root", registry.Path)
+		}
+		if info, statErr := os.Stat(filepath.Join(candidate, "registry.json")); statErr == nil && !info.IsDir() {
+			root = candidate
+		}
+	}
+	rootInfo, err := os.Lstat(root)
 	if err != nil {
-		return Snapshot{}, fmt.Errorf("stat directory source root %q: %w", s.Root, err)
+		return Snapshot{}, fmt.Errorf("stat directory source root %q: %w", root, err)
 	}
 	if rootInfo.Mode()&fs.ModeSymlink != 0 {
-		return Snapshot{}, fmt.Errorf("validate directory source root %q: symlinks are not allowed", s.Root)
+		return Snapshot{}, fmt.Errorf("validate directory source root %q: symlinks are not allowed", root)
 	}
 	if !rootInfo.IsDir() {
-		return Snapshot{}, fmt.Errorf("validate directory source root %q: not a directory", s.Root)
+		return Snapshot{}, fmt.Errorf("validate directory source root %q: not a directory", root)
 	}
 
-	rootFS := os.DirFS(s.Root)
+	rootFS := os.DirFS(root)
 	treeHash := sha256.New()
 	fileDigests := make(map[string][sha256.Size]byte)
 	fileSizes := make(map[string]int64)
@@ -206,14 +234,33 @@ func (s DirectorySource) Resolve(ctx context.Context, _, _ string) (Snapshot, er
 	if err := ctx.Err(); err != nil {
 		return Snapshot{}, fmt.Errorf("resolve directory source %q: %w", s.Root, err)
 	}
+	commit := hex.EncodeToString(treeHash.Sum(nil))
 
+	rootMetadata, metadataErr := loadRegistryRoot(rootFS)
+	if metadataErr != nil && !legacy {
+		return Snapshot{}, metadataErr
+	}
+	snapshotDigest := commit
+	if metadataErr == nil && rootMetadata.Schema == 2 {
+		verifyKey := registry.PublicKey
+		if verifyKey != "" {
+			if _, keyErr := RegistryKeyFingerprint(verifyKey); keyErr != nil {
+				verifyKey = ""
+			}
+		}
+		digest, signedErr := verifySnapshotFiles(rootFS, verifyKey, true)
+		if signedErr != nil {
+			return Snapshot{}, signedErr
+		}
+		if digest != "" {
+			snapshotDigest = digest
+		}
+	}
 	return Snapshot{
-		Commit: hex.EncodeToString(treeHash.Sum(nil)),
+		Commit: commit, SnapshotSHA256: snapshotDigest, CacheKey: snapshotDigest,
+		Registry: rootMetadata,
 		FS: &verifiedDirectoryFS{
-			base:        rootFS,
-			digests:     fileDigests,
-			fileSizes:   fileSizes,
-			directories: directories,
+			base: rootFS, digests: fileDigests, fileSizes: fileSizes, directories: directories,
 		},
 	}, nil
 }

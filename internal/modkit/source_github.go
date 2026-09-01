@@ -19,15 +19,14 @@ import (
 const (
 	defaultGitHubAPIBaseURL      = "https://api.github.com"
 	defaultGitHubCodeloadBaseURL = "https://codeload.github.com"
-	defaultGitHubCacheDir        = "tmp/ggg/cache"
+	defaultGitHubCacheDir        = ""
 	githubUserAgent              = "gogogadget-ggg/1"
 	githubJSONAccept             = "application/vnd.github+json"
-
-	maxGitHubAPIResponse = int64(1 << 20)
-	maxGitHubErrorBody   = int64(8 << 10)
-	maxGitHubArchive     = int64(128 << 20)
-	maxGitHubExpanded    = int64(1 << 30)
-	maxGitHubEntries     = 200_000
+	maxGitHubAPIResponse         = int64(1 << 20)
+	maxGitHubErrorBody           = int64(8 << 10)
+	maxGitHubArchive             = int64(128 << 20)
+	maxGitHubExpanded            = int64(1 << 30)
+	maxGitHubEntries             = 200_000
 )
 
 // GitHubSource resolves refs through the GitHub commits API and materializes
@@ -41,7 +40,18 @@ type GitHubSource struct {
 	Offline         bool
 }
 
-func (s GitHubSource) Resolve(ctx context.Context, repository, ref string) (Snapshot, error) {
+func (s GitHubSource) Resolve(ctx context.Context, args ...any) (Snapshot, error) {
+	registry := ProjectRegistry{Source: "github"}
+	legacy := len(args) >= 2
+	if len(args) == 1 {
+		if requested, ok := args[0].(ProjectRegistry); ok {
+			registry = requested
+		}
+	} else if len(args) >= 2 {
+		registry.Repository, _ = args[0].(string)
+		registry.Ref, _ = args[1].(string)
+	}
+	repository, ref := registry.Repository, registry.Ref
 	if err := ctx.Err(); err != nil {
 		return Snapshot{}, fmt.Errorf("resolve GitHub source: %w", err)
 	}
@@ -54,7 +64,11 @@ func (s GitHubSource) Resolve(ctx context.Context, repository, ref string) (Snap
 
 	cacheDir := s.CacheDir
 	if cacheDir == "" {
-		cacheDir = defaultGitHubCacheDir
+		cacheRoot, cacheErr := os.UserCacheDir()
+		if cacheErr != nil {
+			return Snapshot{}, fmt.Errorf("locate registry cache: %w", cacheErr)
+		}
+		cacheDir = filepath.Join(cacheRoot, "ggg", "registry")
 	}
 
 	if s.Offline {
@@ -74,6 +88,12 @@ func (s GitHubSource) Resolve(ctx context.Context, repository, ref string) (Snap
 		}
 		if !found {
 			return Snapshot{}, fmt.Errorf("resolve GitHub source %q at %s offline: verified cache entry not found", repository, ref)
+		}
+		if !legacy {
+			snapshot, err = validateGitHubSnapshot(snapshot, registry)
+			if err != nil {
+				return Snapshot{}, err
+			}
 		}
 		return snapshot, nil
 	}
@@ -101,10 +121,43 @@ func (s GitHubSource) Resolve(ctx context.Context, repository, ref string) (Snap
 	if snapshot, found, err := githubCachedSnapshot(ctx, cacheDir, commit); err != nil {
 		return Snapshot{}, fmt.Errorf("open GitHub cache for %q at %s: %w", repository, commit, err)
 	} else if found {
+		if !legacy {
+			snapshot, err = validateGitHubSnapshot(snapshot, registry)
+			if err != nil {
+				return Snapshot{}, err
+			}
+		}
 		return snapshot, nil
 	}
-
-	return s.populateGitHubCache(ctx, client, codeloadBaseURL, cacheDir, repository, commit)
+	snapshot, err := s.populateGitHubCache(ctx, client, codeloadBaseURL, cacheDir, repository, commit)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	if !legacy {
+		snapshot, err = validateGitHubSnapshot(snapshot, registry)
+		if err != nil {
+			return Snapshot{}, err
+		}
+	}
+	return snapshot, nil
+}
+func validateGitHubSnapshot(snapshot Snapshot, registry ProjectRegistry) (Snapshot, error) {
+	if snapshot.FS == nil {
+		return Snapshot{}, fmt.Errorf("GitHub snapshot has no filesystem")
+	}
+	digest, err := verifySnapshotFiles(snapshot.FS, registry.PublicKey, false)
+	if err != nil {
+		return Snapshot{}, fmt.Errorf("verify signed GitHub registry: %w", err)
+	}
+	root, err := loadRegistryRoot(snapshot.FS)
+	if err != nil {
+		return Snapshot{}, err
+	}
+	if registry.Namespace != "" && root.Namespace != registry.Namespace {
+		return Snapshot{}, fmt.Errorf("registry namespace %q does not match requested namespace %q", root.Namespace, registry.Namespace)
+	}
+	snapshot.Registry, snapshot.SnapshotSHA256, snapshot.CacheKey = root, digest, digest
+	return snapshot, nil
 }
 
 func (s GitHubSource) resolveGitHubCommit(ctx context.Context, client *http.Client, apiBaseURL, repository, ref string) (string, error) {

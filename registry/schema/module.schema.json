@@ -1479,6 +1479,8 @@
             "type": "string",
             "enum": [
               "default",
+              "disabled",
+              "busy",
               "loading",
               "empty",
               "error",

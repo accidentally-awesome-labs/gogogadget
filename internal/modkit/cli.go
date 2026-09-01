@@ -1131,6 +1131,10 @@ func (c CLI) runRegistry(ctx context.Context, args []string) error {
 		if err != nil {
 			return c.failure("registry build", *asJSON, runtimeError(err))
 		}
+		if _, snapshotErr := WriteRegistrySnapshot(c.root()); snapshotErr != nil {
+			return c.failure("registry build", *asJSON, runtimeError(snapshotErr))
+		}
+		built = append(built, RegistrySnapshotPath)
 		// Vendored bytes are verified here rather than in a separate audit, so
 		// a swapped third-party file fails the build instead of shipping. A
 		// check that has to be remembered is a check that eventually is not run.

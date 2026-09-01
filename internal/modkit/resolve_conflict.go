@@ -82,7 +82,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	}
 
 	pending := currentLock.Modules[moduleIndex].Pending
-	snapshot, err := e.source.Resolve(ctx, project.Registries[0].Repository, pending.RegistryCommit)
+	snapshot, err := resolveSnapshot(ctx, e.source, project.Registries[0], project.Registries[0].Repository, pending.RegistryCommit)
 	if err != nil {
 		return Plan{}, fmt.Errorf("resolve pending registry commit %s: %w", pending.RegistryCommit, err)
 	}

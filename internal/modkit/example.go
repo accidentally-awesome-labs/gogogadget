@@ -444,7 +444,7 @@ func prepareTemplateDerivative(ctx context.Context, root, template string, log i
 	}
 
 	engine := New(Options{Source: DirectorySource{Root: template}, Generator: RegistryGenerator{}})
-	snapshot, resolveErr := engine.source.Resolve(ctx, "", "")
+	snapshot, resolveErr := resolveSnapshot(ctx, engine.source, ProjectRegistry{Source: "directory", Path: template}, "", "")
 	if resolveErr != nil {
 		return fmt.Errorf("resolve derivative registry: %w", resolveErr)
 	}

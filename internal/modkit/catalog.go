@@ -15,7 +15,7 @@ func (e *Engine) Catalog(ctx context.Context, repository, ref string) (Catalog, 
 	if e.source == nil {
 		return Catalog{}, "", fmt.Errorf("catalog: engine has no registry source")
 	}
-	snapshot, err := e.source.Resolve(ctx, repository, ref)
+	snapshot, err := resolveSnapshot(ctx, e.source, ProjectRegistry{Repository: repository, Ref: ref, Source: "github"}, repository, ref)
 	if err != nil {
 		return Catalog{}, "", fmt.Errorf("resolve registry: %w", err)
 	}
