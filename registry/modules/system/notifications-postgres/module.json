@@ -18,7 +18,12 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.7.6"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -27,7 +32,7 @@
         "source": "internal/notifications/postgres/postgres.go",
         "target": "internal/notifications/postgres/postgres.go",
         "class": "go",
-        "sha256": "40ccba1eebb8ce1f5e338199866661596ea9d9156dc19373d0f04c007a7bb8ee",
+        "sha256": "1ad3fc8977b4ded41efe79315d6c7015e1ed3beb11b00da9bf856a81abca03da",
         "rewrite_module": true,
         "contract": true
       },

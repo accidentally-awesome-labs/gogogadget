@@ -976,7 +976,7 @@
     },
     {
       "path": "registry/modules/system/notifications-postgres/module.json",
-      "sha256": "2dd183d80449af0edc1ccf080537f57ad3ed47190c358608071193e283ba5240"
+      "sha256": "0c3b70e2883e3e44250e41af7699cb9056eac8cbcd298ee266bf3fb26025dec3"
     },
     {
       "path": "registry/modules/system/notifications/module.json",
