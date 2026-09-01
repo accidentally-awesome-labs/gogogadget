@@ -3389,17 +3389,17 @@ func registerRoutePattern(mux *http.ServeMux, p routePattern) (err error) {
 	return nil
 }
 
-// emitCommandsRegistry renders internal/modules/commands_registry_gen.go, the
-// project-local ggg command registry. One entry per RuntimeContributions.CLI
+// emitCommandsRegistry renders internal/gggcli/commands/commands_registry_gen.go,
+// the project-local ggg command registry. One entry per RuntimeContributions.CLI
 // declaration across the installed graph, in canonical (sorted by name) order.
 //
 // The registry is data, not behavior: installation executes nothing, and a
 // contributed handler runs only when the operator explicitly invokes its
 // command. The handler receives a gggcli.CommandContext whose only route back
 // into the project is the gggcli.Controller, so contributed code cannot build a
-// second engine or bypass planning. The built-in command names are reserved;
-// gggcli refuses a contributed command that collides with one when the command
-// table is assembled.
+// second engine or bypass planning. A contributed command declared by two
+// modules refuses generation; one colliding with a reserved built-in name is
+// skipped and reported when gggcli assembles the command table.
 func emitCommandsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -3413,8 +3413,16 @@ func emitCommandsRegistry(ctx context.Context, modulePath string, lock Lock, gra
 	imports := make([]string, 0, 1)
 	used := make(map[string]string, 1)
 	used["gggcli"] = modulePath + "/internal/gggcli"
+	owners := make(map[string]string)
 	for _, module := range orderedModules(lock, graph) {
 		for _, command := range module.Runtime.CLI {
+			// Two modules contributing the same command name cannot share the
+			// one dispatch table: refuse the sync rather than emit a registry
+			// where one declaration silently shadows the other.
+			if owner, clash := owners[command.Name]; clash {
+				return nil, fmt.Errorf("contributed command %q is declared by both %s and %s", command.Name, owner, module.ID)
+			}
+			owners[command.Name] = module.ID
 			pkg := resolveTypeImport(modulePath, command.Package)
 			name := uniqueImportName(pkg, used)
 			imports = append(imports, fmt.Sprintf("\t%s %s", name, goString(pkg)))
@@ -3426,7 +3434,7 @@ func emitCommandsRegistry(ctx context.Context, modulePath string, lock Lock, gra
 
 	var b strings.Builder
 	b.WriteString(genHeader(modulePath, lock))
-	b.WriteString("package modules\n\n")
+	b.WriteString("package commands\n\n")
 	b.WriteString("import (\n")
 	b.WriteString(fmt.Sprintf("\tgggcli %s\n", goString(modulePath+"/internal/gggcli")))
 	for _, line := range imports {
@@ -3444,5 +3452,5 @@ func emitCommandsRegistry(ctx context.Context, modulePath string, lock Lock, gra
 		}
 		b.WriteString("\t}\n}\n")
 	}
-	return &GeneratedFile{Path: "internal/modules/commands_registry_gen.go", Content: b.String()}, nil
+	return &GeneratedFile{Path: "internal/gggcli/commands/commands_registry_gen.go", Content: b.String()}, nil
 }

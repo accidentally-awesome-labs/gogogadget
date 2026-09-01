@@ -80,12 +80,6 @@ func (e UserCancelledError) Error() string {
 
 func (UserCancelledError) ExitCode() int { return exitRefusal }
 
-// cancelledAfterPreview is the sentinel handlers return when the operator
-// declines at the confirmation step that follows a preview.
-func cancelledAfterPreview(command string) error {
-	return UserCancelledError{Command: command}
-}
-
 // errNotAvailable reports a typed request or mutation the controller recognizes
 // but whose implementation ships with a later slice (project creation,
 // provisioning, deployment). It is a refusal, never a silent no-op.

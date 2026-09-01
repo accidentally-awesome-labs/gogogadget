@@ -5,28 +5,37 @@ import (
 	"strings"
 )
 
-// CommandTable returns every command this build serves: the built-ins plus the
-// project-local contributed commands, in canonical name order. Help,
-// completions, dispatch, and reserved-name checks all read this table, so a
-// command cannot exist in one and be invisible to another.
+// CommandTable returns the built-in command table in canonical name order.
+// Help, completions, dispatch, and reserved-name checks all read it, so a
+// command cannot exist in one place and be invisible in another.
 func CommandTable() []CommandSpec {
-	return commandTable(nil)
+	return builtInCommands()
 }
 
-// commandTable composes built-ins with a contributed set, refusing a
-// contributed command that collides with a built-in name. The registry loader
-// calls it with the generated project-local commands.
-func commandTable(contributed []ContributedCommand) []CommandSpec {
+// commandTable composes built-ins with a contributed set. A contributed
+// command colliding with a reserved built-in name is a diagnostic, not a
+// crash: the colliding command is skipped and the conflict is reported so the
+// console still serves every other command.
+func commandTable(contributed []ContributedCommand) ([]CommandSpec, []string) {
 	table := append([]CommandSpec{}, builtInCommands()...)
 	reserved := reservedCommandNames(table)
+	conflicts := make([]string, 0)
 	for _, command := range contributed {
 		if _, clash := reserved[command.Spec.Name]; clash {
-			panic(fmt.Sprintf("gggcli: contributed command %q collides with a reserved built-in name", command.Spec.Name))
+			conflicts = append(conflicts, command.Spec.Name)
+			continue
 		}
 		table = append(table, command.Spec)
 	}
 	sortSpecs(table)
-	return table
+	return table, conflicts
+}
+
+// IsReservedName reports whether a command name is a built-in and therefore
+// reserved against contributed commands.
+func IsReservedName(name string) bool {
+	_, ok := lookupSpec(builtInCommands(), name)
+	return ok
 }
 
 func sortSpecs(table []CommandSpec) {

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -48,6 +49,8 @@ const (
 // string, and one back stack.
 type model struct {
 	cc       gggcli.CommandContext
+	ctx      context.Context
+	program  *tea.Program
 	width    int
 	height   int
 	current  screen
@@ -68,29 +71,35 @@ type model struct {
 	diagnostics []diagnosticRow
 }
 
-func newModel(cc gggcli.CommandContext) model {
-	m := model{cc: cc, width: 80, height: 24, current: screenHome}
-	m.home = loadHome(cc)
+func newModel(ctx context.Context, cc gggcli.CommandContext) *model {
+	m := &model{cc: cc, ctx: ctx, width: 80, height: 24, current: screenHome}
+	m.home = loadHome(ctx, cc)
 	return m
 }
 
 // Init issues the initial window size so View has real dimensions.
-func (m model) Init() tea.Cmd { return nil }
+func (m *model) Init() tea.Cmd { return nil }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 		return m, nil
 	case tea.KeyMsg:
 		return m.handleKey(msg)
+	case resolveChoiceMsg:
+		return m.resolveChosen(msg)
+	case resolveAppliedMsg:
+		return m.resolveApplied(msg)
+	case applyDoneMsg:
+		return m.applyDone(msg)
 	}
 	return m, nil
 }
 
 // handleKey implements the console key contract: Esc back, ? help, / search,
 // Enter select/apply, Ctrl+C cancel.
-func (m model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c":
 		if m.current == screenPlan && m.planStaged {
@@ -137,9 +146,10 @@ func (m model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 }
 
-// selectItem acts on the cursor row. On Plan, Enter applies the previewed
-// sync through the same Apply the flags use.
-func (m model) selectItem() (tea.Model, tea.Cmd) {
+// selectItem acts on the cursor row. Plan apply and conflict resolution run
+// as tea.Cmds — never inside Update — so the terminal is never fought over
+// and the UI stays responsive while the controller works.
+func (m *model) selectItem() (tea.Model, tea.Cmd) {
 	switch m.current {
 	case screenHome:
 		switch m.cursor {
@@ -157,38 +167,10 @@ func (m model) selectItem() (tea.Model, tea.Cmd) {
 			m.push(screenDiagnostics)
 		}
 	case screenPlan:
-		result, err := applySync(m.cc)
-		if err != nil {
-			if gggcli.ExitCode(err) == modkit.ExitRefusal {
-				m.decision = cancelledAfterPlan
-				return m, tea.Quit
-			}
-			m.err = err
-			return m, tea.Quit
-		}
-		m.decision = applied
-		m.status = summarizeSync(result)
-		return m, tea.Quit
+		return m, m.applyFlow()
 	case screenConflicts:
 		if m.cursor < len(m.conflicts) {
-			row := m.conflicts[m.cursor]
-			mode, err := promptResolve(m.cc, row)
-			if err != nil {
-				m.err = err
-				return m, tea.Quit
-			}
-			if mode == "" {
-				// Dismissed the form before any plan existed.
-				m.decision = cancelledBeforePlan
-				return m, tea.Quit
-			}
-			_, applyErr := applyResolve(m.cc, row, mode)
-			if applyErr != nil {
-				m.err = applyErr
-				return m, tea.Quit
-			}
-			m.conflicts = loadConflicts(m.cc)
-			m.status = "resolved " + row.module + " " + row.path + "\n"
+			return m, m.resolveFlow(m.conflicts[m.cursor])
 		}
 	case screenCatalog:
 		// A module row has no in-console mutation; Enter on a filtered list
@@ -198,6 +180,94 @@ func (m model) selectItem() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// applyFlow runs the previewed sync outside the Update loop and reports the
+// outcome as one message.
+func (m *model) applyFlow() tea.Cmd {
+	return func() tea.Msg {
+		result, err := applySync(m.ctx, m.cc)
+		return applyDoneMsg{result: result, err: err}
+	}
+}
+
+func (m *model) applyDone(msg applyDoneMsg) (tea.Model, tea.Cmd) {
+	if msg.err != nil {
+		if gggcli.ExitCode(msg.err) == modkit.ExitRefusal {
+			m.decision = cancelledAfterPlan
+			return m, tea.Quit
+		}
+		m.err = msg.err
+		return m, tea.Quit
+	}
+	m.decision = applied
+	m.status = summarizeSync(msg.result)
+	return m, tea.Quit
+}
+
+// resolveFlow brackets the Huh form with ReleaseTerminal/RestoreTerminal so
+// the form owns the terminal exclusively, then applies the choice through
+// the controller — all outside the Update loop.
+func (m *model) resolveFlow(row conflictRow) tea.Cmd {
+	return func() tea.Msg {
+		if m.program != nil {
+			_ = m.program.ReleaseTerminal()
+			defer func() { _ = m.program.RestoreTerminal() }()
+		}
+		mode, err := promptResolve(m.ctx, m.cc, row)
+		if err != nil {
+			return resolveChoiceMsg{err: err}
+		}
+		if mode == "" {
+			// Dismissed the form before any plan existed.
+			return resolveChoiceMsg{dismissed: true}
+		}
+		if _, applyErr := applyResolve(m.ctx, m.cc, row, mode); applyErr != nil {
+			return resolveAppliedMsg{err: applyErr}
+		}
+		return resolveAppliedMsg{
+			conflicts: loadConflicts(m.ctx, m.cc),
+			status:    "resolved " + row.module + " " + row.path + "\n",
+		}
+	}
+}
+
+func (m *model) resolveChosen(msg resolveChoiceMsg) (tea.Model, tea.Cmd) {
+	if msg.err != nil {
+		m.err = msg.err
+		return m, tea.Quit
+	}
+	m.decision = cancelledBeforePlan
+	return m, tea.Quit
+}
+
+func (m *model) resolveApplied(msg resolveAppliedMsg) (tea.Model, tea.Cmd) {
+	if msg.err != nil {
+		m.err = msg.err
+		return m, tea.Quit
+	}
+	m.conflicts = msg.conflicts
+	m.status = msg.status
+	return m, nil
+}
+
+// resolveChoiceMsg carries the Huh form's outcome back to the model.
+type resolveChoiceMsg struct {
+	dismissed bool
+	err       error
+}
+
+// resolveAppliedMsg carries the applied resolution back to the model.
+type resolveAppliedMsg struct {
+	conflicts []conflictRow
+	status    string
+	err       error
+}
+
+// applyDoneMsg carries the applied sync outcome back to the model.
+type applyDoneMsg struct {
+	result gggcli.Result
+	err    error
+}
+
 func (m *model) push(target screen) {
 	m.stack = append(m.stack, m.current)
 	m.current = target
@@ -205,21 +275,24 @@ func (m *model) push(target screen) {
 	if m.cc.Controller == nil {
 		return
 	}
+	if target == screenCatalog {
+		m.catalog = loadCatalog(m.ctx, m.cc)
+	}
 	if target == screenConflicts {
-		m.conflicts = loadConflicts(m.cc)
+		m.conflicts = loadConflicts(m.ctx, m.cc)
 	}
 	if target == screenProviders {
-		m.providers = loadProviders(m.cc)
+		m.providers = loadProviders(m.ctx, m.cc)
 	}
 	if target == screenPlan {
-		m.plan = previewSync(m.cc)
+		m.plan = previewSync(m.ctx, m.cc)
 		m.planStaged = true
 	}
 	if target == screenDiagnostics {
-		m.diagnostics = loadDiagnostics(m.cc)
+		m.diagnostics = loadDiagnostics(m.ctx, m.cc)
 	}
 	if target == screenTasks {
-		m.tasks = loadTasks(m.cc)
+		m.tasks = loadTasks(m.ctx, m.cc)
 	}
 }
 
@@ -343,18 +416,4 @@ func pad(s string, width int) string {
 		return s + " "
 	}
 	return s + strings.Repeat(" ", width-w)
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

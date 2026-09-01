@@ -358,7 +358,7 @@ func TestCancellationContract(t *testing.T) {
 	if code := ExitCode(ErrCancelled); code != 0 {
 		t.Fatalf("cancel before plan exit = %d, want 0", code)
 	}
-	err := cancelledAfterPreview("sync")
+	err := UserCancelledError{Command: "sync"}
 	if code := ExitCode(err); code != 3 {
 		t.Fatalf("cancel after preview exit = %d, want 3", code)
 	}
@@ -374,4 +374,50 @@ func runAppWith(t *testing.T, app App, args ...string) (string, string, error) {
 	app.Out, app.Err = &out, &errOut
 	err := app.Run(context.Background(), args)
 	return out.String(), errOut.String(), err
+}
+
+// A planning refusal under --json must still emit the fixed ten-key envelope
+// with the command_failed diagnostic and the declared exit code: a machine
+// consumer parsing nothing on failure is a broken contract.
+func TestSyncPlanningRefusalEmitsJSONEnvelope(t *testing.T) {
+	root, engine := cliProject(t)
+	intent, err := modkit.MarshalProject(modkit.Project{
+		Schema:     2,
+		Registries: []modkit.ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: testKeyA}},
+		Providers:  map[string]modkit.ProviderSelections{}, Deployment: "",
+		Modules: []string{"ggg/page/does-not-exist"}, Exclude: []string{},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, root, modkit.ProjectFileName, intent)
+
+	out, _, err := runApp(t, root, engine, "sync", "--json")
+	if err == nil || exitOf(t, err) != 3 {
+		t.Fatalf("sync planning refusal = %v, want exit 3", err)
+	}
+	var envelope map[string]any
+	if err := json.Unmarshal([]byte(out), &envelope); err != nil {
+		t.Fatalf("refusal is not JSON: %v\n%s", err, out)
+	}
+	want := []string{"ok", "command", "run_id", "registry_commit", "resolved", "changes", "generated", "conflicts", "diagnostics", "exit"}
+	if len(envelope) != len(want) {
+		t.Fatalf("envelope has %d keys, want exactly %d: %s", len(envelope), len(want), out)
+	}
+	for _, key := range want {
+		if _, ok := envelope[key]; !ok {
+			t.Fatalf("envelope missing %q: %s", key, out)
+		}
+	}
+	if envelope["ok"] != false || envelope["exit"] != float64(3) || envelope["command"] != "sync" {
+		t.Fatalf("envelope = %#v", envelope)
+	}
+	diagnostics, ok := envelope["diagnostics"].([]any)
+	if !ok || len(diagnostics) != 1 {
+		t.Fatalf("diagnostics = %#v, want one command_failed entry", envelope["diagnostics"])
+	}
+	first, _ := diagnostics[0].(map[string]any)
+	if first["code"] != "command_failed" || first["severity"] != "error" {
+		t.Fatalf("diagnostic = %#v", first)
+	}
 }

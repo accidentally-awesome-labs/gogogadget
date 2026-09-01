@@ -189,5 +189,3 @@ func BuildRegistryIndexes(root string) (written []string, discovered []string, e
 	sort.Strings(discovered)
 	return written, discovered, nil
 }
-
-type usageError string

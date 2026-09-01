@@ -55,6 +55,12 @@ func (a App) Run(ctx context.Context, args []string) error {
 	argv := stripAccessible(args)
 
 	controller := NewController(ControllerOptions{Root: a.Root, Version: a.Version, Engine: a.Engine, WriteFile: a.WriteFile})
+	// Assemble the full table once. A contributed command that collides with
+	// a reserved name is skipped and reported; the remaining commands serve.
+	table, nameConflicts := commandTable(a.Contributed)
+	for _, name := range nameConflicts {
+		fmt.Fprintf(errOut, "warning: contributed command %q collides with a reserved built-in name and was skipped\n", name)
+	}
 	interactive := IsTerminal(out) && IsTerminalReader(in)
 
 	if len(argv) == 0 {
@@ -65,32 +71,36 @@ func (a App) Run(ctx context.Context, args []string) error {
 			return usageError("interactive_terminal_required")
 		}
 		return a.launchUI(ctx, controller, CommandContext{
-			Controller: controller, Out: out, Err: errOut, Stdin: in,
+			Controller: controller, Table: table, Out: out, Err: errOut, Stdin: in,
 			Version: a.Version, Interactive: true, Accessible: accessible,
 		})
 	}
 
-	// `--help` / `-h` / `help` are derived from the table.
+	// `--help` / `-h` / `help` are derived from the table. A --help request
+	// for an unknown command stays a usage failure.
 	name := argv[0]
 	if name == "--help" || name == "-h" {
-		fmt.Fprint(out, renderHelp(a.table(), ""))
+		fmt.Fprint(out, renderHelp(table, ""))
 		return nil
 	}
 	rest := argv[1:]
 	for _, arg := range rest {
 		if arg == "--help" || arg == "-h" {
-			fmt.Fprint(out, renderHelp(a.table(), name))
-			return nil
+			if _, known := lookupSpec(table, name); known {
+				fmt.Fprint(out, renderHelp(table, name))
+				return nil
+			}
+			return usageError(fmt.Sprintf("unknown command %q", name))
 		}
 	}
 
-	if _, ok := lookupSpec(a.table(), name); !ok {
+	if _, ok := lookupSpec(table, name); !ok {
 		return usageError(fmt.Sprintf("unknown command %q", name))
 	}
 
 	asJSON := containsFlag(rest, "json")
 	cc := CommandContext{
-		Controller: controller, Out: out, Err: errOut, Stdin: in,
+		Controller: controller, Table: table, Out: out, Err: errOut, Stdin: in,
 		Version: a.Version, AsJSON: asJSON, Interactive: interactive, Accessible: accessible,
 	}
 	if asJSON {
@@ -98,34 +108,39 @@ func (a App) Run(ctx context.Context, args []string) error {
 		cc.Interactive = false
 	}
 
-	if name == "help" {
-		result, err := controller.Execute(ctx, HelpRequest{Command: strings.Join(rest, " ")})
-		if err != nil {
-			return err
-		}
-		fmt.Fprint(out, result.Payload["text"])
-		return nil
-	}
-
 	handler := a.handlerFor(name)
 	result, err := handler(ctx, cc, rest)
 	if err != nil {
 		// A failed command that produced an envelope emits it exactly once,
-		// then the error carries the declared exit code to the caller.
+		// then the error carries the declared exit code to the caller. The
+		// error's message is what stderr will print, so it passes through the
+		// redactor too.
 		if result.Envelope.Command != "" {
 			if renderErr := a.render(cc, name, result); renderErr != nil {
 				return renderErr
 			}
 		}
-		return err
+		return redactedError{cause: err, redactor: controller.Redactor()}
 	}
 	return a.render(cc, name, result)
 }
 
-// table assembles the full command table: built-ins plus contributed commands.
-func (a App) table() []CommandSpec {
-	return commandTable(a.Contributed)
+// redactedError masks declared secret values in the error message the
+// process prints to stderr, so diagnostics cannot leak what envelopes and
+// prompts already hide.
+type redactedError struct {
+	cause    error
+	redactor *Redactor
 }
+
+func (e redactedError) Error() string {
+	if e.redactor == nil {
+		return e.cause.Error()
+	}
+	return e.redactor.Apply(e.cause.Error())
+}
+
+func (e redactedError) Unwrap() error { return e.cause }
 
 // handlerFor returns the execution path for a command: built-in handlers for
 // the reserved names, the contributed handler for a contributed one.

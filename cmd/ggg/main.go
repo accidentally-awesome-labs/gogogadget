@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/gogogadget/gogogadget/internal/gggcli"
-	"github.com/gogogadget/gogogadget/internal/modules"
+	"github.com/gogogadget/gogogadget/internal/gggcli/commands"
 )
 
 var version = "dev"
@@ -23,7 +23,7 @@ func run(args []string) error {
 		Out:         os.Stdout,
 		Err:         os.Stderr,
 		Version:     version,
-		Contributed: modules.CLICommands(),
+		Contributed: commands.CLICommands(),
 	}
 	return app.Run(context.Background(), args)
 }

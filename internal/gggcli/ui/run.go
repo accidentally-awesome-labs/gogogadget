@@ -25,8 +25,9 @@ func Run(ctx context.Context, cc gggcli.CommandContext, _ []string) (gggcli.Resu
 	if !cc.Interactive {
 		return gggcli.Result{}, terminalRequiredError{}
 	}
-	root := newModel(cc)
-	program := tea.NewProgram(root)
+	root := newModel(ctx, cc)
+	program := tea.NewProgram(root, tea.WithContext(ctx))
+	root.program = program
 	final, err := program.Run()
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
@@ -34,7 +35,7 @@ func Run(ctx context.Context, cc gggcli.CommandContext, _ []string) (gggcli.Resu
 		}
 		return gggcli.Result{}, runtimeError{err}
 	}
-	if m, ok := final.(model); ok {
+	if m, ok := final.(*model); ok {
 		switch m.decision {
 		case cancelledAfterPlan:
 			// The operator saw the plan and declined: the declared refusal.

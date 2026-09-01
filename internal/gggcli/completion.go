@@ -6,19 +6,21 @@ import (
 )
 
 // renderCompletion derives a shell completion script from the command table.
-// All three shells complete command names first and a named command's flags
-// once its word is fixed. The scripts are generated text, not hand-maintained
-// grammar: a command added to the table completes without further edits.
-func renderCompletion(table []CommandSpec, shell string) string {
+// All three shells complete command names first and a named command's own
+// flags once its word is fixed. The scripts are generated text, not
+// hand-maintained grammar: a command added to the table completes without
+// further edits. An unsupported shell is a usage failure, never an empty
+// success.
+func renderCompletion(table []CommandSpec, shell string) (string, error) {
 	switch shell {
 	case "bash":
-		return bashCompletion(table)
+		return bashCompletion(table), nil
 	case "zsh":
-		return zshCompletion(table)
+		return zshCompletion(table), nil
 	case "fish":
-		return fishCompletion(table)
+		return fishCompletion(table), nil
 	default:
-		return fmt.Sprintf("unsupported shell %q; supported shells are bash, zsh, fish", shell)
+		return "", usageError(fmt.Sprintf("unsupported shell %q; supported shells are bash, zsh, fish", shell))
 	}
 }
 
@@ -26,7 +28,7 @@ func bashCompletion(table []CommandSpec) string {
 	var b strings.Builder
 	b.WriteString(`# bash completion for ggg (derived from the ggg command table)
 _ggg_completions() {
-  local cur commands
+  local cur commands flags
   cur="${COMP_WORDS[COMP_CWORD]}"
 `)
 	b.WriteString("  commands=\"")
@@ -49,10 +51,12 @@ _ggg_completions() {
 		for _, flag := range spec.Flags {
 			flags = append(flags, "--"+flag.Name)
 		}
-		fmt.Fprintf(&b, "      %s) COMPREPLY=( $(compgen -W \"%s\" -- \"$cur\") ); return ;;\n",
-			strings.Join(commandWords(spec), "|"), strings.Join(flags, " "))
+		fmt.Fprintf(&b, "      %s) flags=\"%s\" ;;\n", spec.Name, strings.Join(flags, " "))
 	}
+	b.WriteString("      *) flags=\"\" ;;\n")
 	b.WriteString(`    esac
+    COMPREPLY=( $(compgen -W "$flags" -- "$cur") )
+    return
   fi
   if [ "$COMP_CWORD" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "$commands" -- "$cur") )
@@ -63,43 +67,31 @@ complete -F _ggg_completions ggg
 	return b.String()
 }
 
-func commandWords(spec CommandSpec) []string {
-	words := []string{spec.Name}
-	words = append(words, strings.Fields(spec.Usage)...)
-	return words
-}
-
 func zshCompletion(table []CommandSpec) string {
 	var b strings.Builder
-	b.WriteString("#compdef ggg\n# zsh completion for ggg (derived from the ggg command table)\n\n_ggg() {\n  local -a commands\n  commands=(\n")
+	b.WriteString("#compdef ggg\n")
+	b.WriteString("# zsh completion for ggg (derived from the ggg command table)\n\n")
+	b.WriteString("_ggg() {\n  local -a commands\n  commands=(\n")
 	for _, spec := range table {
 		fmt.Fprintf(&b, "    '%s:%s'\n", spec.Name, zshEscape(spec.Summary))
 	}
 	b.WriteString("  )\n")
-	b.WriteString(`  if (( CURRENT == 2 )); then
-    _describe -t commands 'ggg command' commands
-  else
-    local -a flags
-    flags=( `)
-	flags := zshFlagsFor(table, "")
-	b.WriteString(flags)
-	b.WriteString(`)
-    compadd -a flags
-  fi
-}
-_ggg "$@"
-`)
-	return b.String()
-}
-
-func zshFlagsFor(table []CommandSpec, _ string) string {
-	var all []string
+	b.WriteString("  if (( CURRENT == 2 )); then\n")
+	b.WriteString("    _describe -t commands 'ggg command' commands\n    return\n  fi\n")
+	b.WriteString("  local -a flags\n")
+	b.WriteString("  case \"$words[2]\" in\n")
 	for _, spec := range table {
-		for _, flag := range spec.Flags {
-			all = append(all, "'--"+flag.Name+"["+zshEscape(flag.Help)+"]'")
+		if len(spec.Flags) == 0 {
+			continue
 		}
+		fmt.Fprintf(&b, "    %s) flags=( ", spec.Name)
+		for _, flag := range spec.Flags {
+			fmt.Fprintf(&b, "'--%s[%s]' ", flag.Name, zshEscape(flag.Help))
+		}
+		b.WriteString(") ;;\n")
 	}
-	return strings.Join(all, " ")
+	b.WriteString("  esac\n  compadd -a flags\n}\n_ggg \"$@\"\n")
+	return b.String()
 }
 
 func zshEscape(s string) string {

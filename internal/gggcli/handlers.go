@@ -126,8 +126,9 @@ func builtInHandlers() map[string]CommandHandler {
 }
 
 func runVersion(_ context.Context, cc CommandContext, args []string) (Result, error) {
+	spec, _ := lookupSpec(builtInCommands(), "version")
 	if len(args) != 0 {
-		return Result{}, usageError("usage: ggg version")
+		return Result{}, usageError(spec.Usage)
 	}
 	version := cc.Version
 	if version == "" {
@@ -136,15 +137,23 @@ func runVersion(_ context.Context, cc CommandContext, args []string) (Result, er
 	return Result{Payload: map[string]any{"version": version}}, nil
 }
 
-func runHelp(ctx context.Context, cc CommandContext, args []string) (Result, error) {
-	return cc.Controller.Execute(ctx, HelpRequest{Command: strings.Join(args, " ")})
+func runHelp(_ context.Context, cc CommandContext, args []string) (Result, error) {
+	// Help is derived from the full table — built-ins plus contributed
+	// commands — so a contributed command is documented the moment it
+	// installs.
+	return Result{Payload: map[string]any{"text": renderHelp(cc.Table, strings.Join(args, " "))}}, nil
 }
 
 func runCompletion(_ context.Context, cc CommandContext, args []string) (Result, error) {
+	spec, _ := lookupSpec(builtInCommands(), "completion")
 	if len(args) != 1 {
-		return Result{}, usageError("usage: ggg completion bash|zsh|fish")
+		return Result{}, usageError(spec.Usage)
 	}
-	return cc.Controller.Execute(context.Background(), CompletionRequest{Shell: args[0]})
+	script, err := renderCompletion(cc.Table, args[0])
+	if err != nil {
+		return Result{}, err
+	}
+	return Result{Payload: map[string]any{"text": script}}, nil
 }
 
 func runCatalog(ctx context.Context, cc CommandContext, args []string) (Result, error) {
@@ -278,16 +287,15 @@ func drivePlanMutation(ctx context.Context, cc CommandContext, command string, m
 	if readOnly {
 		// Check/dry-run: report the plan, never write. Drift in planner output
 		// or generated aggregates is the declared conflict exit.
+		if plan.Local == nil {
+			return Result{Envelope: normalizeEnvelope(modkit.Envelope{Command: command, OK: true, Exit: exitOK})}, nil
+		}
+		drift := countDrift(*plan.Local)
 		exit := exitOK
-		drift := 0
-		if plan.Local != nil {
-			drift = countDrift(*plan.Local)
-			if drift > 0 || len(plan.Diagnostics) > 0 {
-				exit = exitConflict
-			}
+		if drift > 0 || len(plan.Diagnostics) > 0 {
+			exit = exitConflict
 		}
 		env := planEnvelope(*plan.Local, command, exit)
-		env.Command = command
 		if exit != exitOK {
 			return Result{Envelope: env}, conflictExit(fmt.Errorf("%s: %d pending change(s), %d generated drift(s)",
 				command, drift, len(plan.Diagnostics)))
@@ -402,8 +410,9 @@ func runResolve(ctx context.Context, cc CommandContext, args []string) (Result, 
 }
 
 func runIdentity(ctx context.Context, cc CommandContext, args []string) (Result, error) {
+	identitySpec, _ := lookupSpec(builtInCommands(), "identity")
 	if len(args) == 0 || args[0] != "link" {
-		return Result{}, usageError("usage: ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)")
+		return Result{}, usageError(identitySpec.Usage)
 	}
 	linkArgs := args[1:]
 	var environment, provider, subject, userID, orgID string
@@ -415,10 +424,10 @@ func runIdentity(ctx context.Context, cc CommandContext, args []string) (Result,
 		name := strings.TrimLeft(linkArgs[i], "-")
 		target, ok := values[name]
 		if !ok || !strings.HasPrefix(linkArgs[i], "-") {
-			return Result{}, usageError("usage: ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)")
+			return Result{}, usageError(identitySpec.Usage)
 		}
 		if i+1 >= len(linkArgs) {
-			return Result{}, usageError("usage: ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)")
+			return Result{}, usageError(identitySpec.Usage)
 		}
 		i++
 		*target = linkArgs[i]
@@ -449,8 +458,9 @@ func runMigrate(ctx context.Context, cc CommandContext, args []string) (Result, 
 }
 
 func runCache(_ context.Context, cc CommandContext, args []string) (Result, error) {
+	cacheSpec, _ := lookupSpec(builtInCommands(), "cache")
 	if len(args) != 1 || args[0] != "prune" {
-		return Result{}, usageError("usage: ggg cache prune")
+		return Result{}, usageError(cacheSpec.Usage)
 	}
 	if err := cc.Controller.previewTask(TaskMutation{Task: "cache-prune"}); err != nil {
 		return Result{}, err
@@ -459,20 +469,20 @@ func runCache(_ context.Context, cc CommandContext, args []string) (Result, erro
 }
 
 func runRegistry(ctx context.Context, cc CommandContext, args []string) (Result, error) {
+	spec, _ := lookupSpec(builtInCommands(), "registry")
 	if len(args) == 0 {
-		return Result{}, usageError("usage: ggg registry build|validate [--json]")
+		return Result{}, usageError(spec.Usage)
 	}
 	subcommand, rest := args[0], args[1:]
 	if subcommand != "build" && subcommand != "validate" {
 		return Result{}, usageError(fmt.Sprintf("unknown registry subcommand %q", subcommand))
 	}
-	spec, _ := lookupSpec(builtInCommands(), "registry")
 	parsed, err := parseArgv(spec, rest)
 	if err != nil {
 		return Result{}, err
 	}
 	if len(parsed.positional) != 0 {
-		return Result{}, usageError("usage: ggg registry " + subcommand + " [--json]")
+		return Result{}, usageError(spec.Usage)
 	}
 
 	if subcommand == "build" {
@@ -487,6 +497,8 @@ func runRegistry(ctx context.Context, cc CommandContext, args []string) (Result,
 	// --json... suppressed for JSON, which reads the envelope instead.
 	if cc.AsJSON {
 		ctx = WithProgressSink(ctx, io.Discard)
+	} else {
+		ctx = WithProgressSink(ctx, cc.Out)
 	}
 	return cc.Controller.Execute(ctx, RegistryReadRequest{Validate: true})
 }

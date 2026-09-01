@@ -5,7 +5,7 @@
     "kind": "system",
     "name": "modkit",
     "revision": 2,
-    "contract": 1,
+    "contract": 2,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
     "requires": [],

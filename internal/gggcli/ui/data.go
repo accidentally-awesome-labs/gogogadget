@@ -76,7 +76,7 @@ func payloadEntries(value any, out any) bool {
 	return json.Unmarshal(data, out) == nil
 }
 
-func loadHome(cc gggcli.CommandContext) homeData {
+func loadHome(ctx context.Context, cc gggcli.CommandContext) homeData {
 	data := homeData{project: "not initialized"}
 	if cc.Controller == nil {
 		return data
@@ -99,8 +99,8 @@ func loadHome(cc gggcli.CommandContext) homeData {
 	return data
 }
 
-func loadCatalog(cc gggcli.CommandContext) []catalogRow {
-	result, err := cc.Controller.Execute(context.Background(), gggcli.CatalogRequest{})
+func loadCatalog(ctx context.Context, cc gggcli.CommandContext) []catalogRow {
+	result, err := cc.Controller.Execute(ctx, gggcli.CatalogRequest{})
 	if err != nil {
 		return nil
 	}
@@ -119,8 +119,8 @@ func loadCatalog(cc gggcli.CommandContext) []catalogRow {
 	return rows
 }
 
-func loadConflicts(cc gggcli.CommandContext) []conflictRow {
-	result, err := cc.Controller.Execute(context.Background(), gggcli.DiffRequest{Upstream: true})
+func loadConflicts(ctx context.Context, cc gggcli.CommandContext) []conflictRow {
+	result, err := cc.Controller.Execute(ctx, gggcli.DiffRequest{Upstream: true})
 	if err != nil {
 		return nil
 	}
@@ -143,7 +143,7 @@ func loadConflicts(cc gggcli.CommandContext) []conflictRow {
 	return rows
 }
 
-func loadProviders(cc gggcli.CommandContext) []providerRow {
+func loadProviders(ctx context.Context, cc gggcli.CommandContext) []providerRow {
 	if cc.Controller == nil {
 		return nil
 	}
@@ -173,8 +173,8 @@ func loadProviders(cc gggcli.CommandContext) []providerRow {
 	return rows
 }
 
-func loadDiagnostics(cc gggcli.CommandContext) []diagnosticRow {
-	result, err := cc.Controller.Execute(context.Background(), gggcli.DoctorRequest{})
+func loadDiagnostics(ctx context.Context, cc gggcli.CommandContext) []diagnosticRow {
+	result, err := cc.Controller.Execute(ctx, gggcli.DoctorRequest{})
 	if err != nil && len(result.Envelope.Diagnostics) == 0 {
 		return nil
 	}
@@ -185,14 +185,14 @@ func loadDiagnostics(cc gggcli.CommandContext) []diagnosticRow {
 	return rows
 }
 
-func loadTasks(cc gggcli.CommandContext) []taskRow {
+func loadTasks(ctx context.Context, cc gggcli.CommandContext) []taskRow {
 	rows := []taskRow{}
-	if len(loadConflicts(cc)) == 0 {
+	if len(loadConflicts(ctx, cc)) == 0 {
 		rows = append(rows, taskRow{name: "sync check", outcome: "clean"})
 	} else {
 		rows = append(rows, taskRow{name: "sync check", outcome: "drift; see Conflicts"})
 	}
-	if len(loadDiagnostics(cc)) == 0 {
+	if len(loadDiagnostics(ctx, cc)) == 0 {
 		rows = append(rows, taskRow{name: "doctor", outcome: "ok"})
 	} else {
 		rows = append(rows, taskRow{name: "doctor", outcome: "findings; see Diagnostics"})
@@ -202,8 +202,8 @@ func loadTasks(cc gggcli.CommandContext) []taskRow {
 
 // previewSync builds the plan the Plan screen shows. Nothing writes: this is
 // the same Preview the flags use.
-func previewSync(cc gggcli.CommandContext) []string {
-	plan, err := cc.Controller.Preview(context.Background(), gggcli.SyncMutation{})
+func previewSync(ctx context.Context, cc gggcli.CommandContext) []string {
+	plan, err := cc.Controller.Preview(ctx, gggcli.SyncMutation{})
 	if err != nil {
 		return []string{"plan failed: " + err.Error()}
 	}
@@ -221,8 +221,8 @@ func previewSync(cc gggcli.CommandContext) []string {
 }
 
 // applySync applies the previewed sync through the same Apply the flags use.
-func applySync(cc gggcli.CommandContext) (gggcli.Result, error) {
-	plan, err := cc.Controller.Preview(context.Background(), gggcli.SyncMutation{})
+func applySync(ctx context.Context, cc gggcli.CommandContext) (gggcli.Result, error) {
+	plan, err := cc.Controller.Preview(ctx, gggcli.SyncMutation{})
 	if err != nil {
 		return gggcli.Result{}, err
 	}
@@ -240,18 +240,20 @@ func summarizeSync(result gggcli.Result) string {
 }
 
 // applyResolve resolves one staged conflict through the controller.
-func applyResolve(cc gggcli.CommandContext, row conflictRow, mode modkit.ResolutionMode) (gggcli.Result, error) {
-	plan, err := cc.Controller.Preview(context.Background(), gggcli.ResolveMutation{ModuleID: row.module, Path: row.path, Mode: mode})
+func applyResolve(ctx context.Context, cc gggcli.CommandContext, row conflictRow, mode modkit.ResolutionMode) (gggcli.Result, error) {
+	plan, err := cc.Controller.Preview(ctx, gggcli.ResolveMutation{ModuleID: row.module, Path: row.path, Mode: mode})
 	if err != nil {
 		return gggcli.Result{}, err
 	}
 	return cc.Controller.Apply(context.Background(), plan)
 }
 
-// promptResolve renders the Huh select for a conflict resolution. Accessible
-// mode comes from the command context (--accessible or GGG_ACCESSIBLE=1), and
-// Huh renders the same options linearly there. An empty mode means dismissed.
-func promptResolve(cc gggcli.CommandContext, row conflictRow) (modkit.ResolutionMode, error) {
+// promptResolve renders the Huh select for a conflict resolution. It runs
+// inside a tea.Cmd bracketed by ReleaseTerminal/RestoreTerminal, so the form
+// owns the terminal exclusively while it asks. Accessible mode comes from the
+// command context (--accessible or GGG_ACCESSIBLE=1), and Huh renders the
+// same options linearly there. An empty mode means dismissed.
+func promptResolve(ctx context.Context, cc gggcli.CommandContext, row conflictRow) (modkit.ResolutionMode, error) {
 	var choice string
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -265,7 +267,7 @@ func promptResolve(cc gggcli.CommandContext, row conflictRow) (modkit.Resolution
 				Value(&choice),
 		),
 	).WithAccessible(cc.Accessible).WithShowHelp(false)
-	if err := form.RunWithContext(context.Background()); err != nil {
+	if err := form.RunWithContext(ctx); err != nil {
 		if err == huh.ErrUserAborted {
 			return "", nil
 		}

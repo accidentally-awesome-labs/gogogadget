@@ -39,7 +39,7 @@ func (c *Controller) previewOperation(ctx context.Context, command string, op mo
 	}
 	local, err := engine.Plan(ctx, c.rootDir(), op)
 	if err != nil {
-		return Plan{}, refusalError(err)
+		return Plan{}, plannerFailure{refusalError(err)}
 	}
 	if dryRun {
 		generatedDrift, err := engine.GeneratedDrift(ctx, local)
@@ -49,15 +49,6 @@ func (c *Controller) previewOperation(ctx context.Context, command string, op mo
 		local.Diagnostics = append(local.Diagnostics, generatedDrift...)
 	}
 	return c.planFor(command, &local, op.Offline), nil
-}
-
-// planDriftExit maps a dry-run plan onto its declared exit code: drift in the
-// planner output or in generated aggregates is exit 4.
-func planDriftExit(plan Plan) int {
-	if plan.Local != nil && (countDrift(*plan.Local) > 0 || len(plan.Diagnostics) > 0) {
-		return exitConflict
-	}
-	return exitOK
 }
 
 // previewInit refuses to clobber an existing project before anything writes.
@@ -135,7 +126,8 @@ func (c *Controller) previewTask(mutation TaskMutation) error {
 			return usageError("identity link: environment must be development, test, or production")
 		}
 		if mutation.Provider == "" || mutation.Subject == "" || (mutation.UserID == "") == (mutation.OrgID == "") {
-			return usageError("usage: ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)")
+			identitySpec, _ := lookupSpec(builtInCommands(), "identity")
+			return usageError(identitySpec.Usage)
 		}
 		return nil
 	default:
@@ -364,7 +356,7 @@ func (c *Controller) executeRegistryValidate(ctx context.Context, request Regist
 
 	progress, ok := progressSinkFromContext(ctx)
 	if !ok {
-		progress = os.Stdout
+		progress = io.Discard
 	}
 	examples, err := modkit.ValidateExamples(ctx, c.rootDir(), progress)
 	if err != nil {

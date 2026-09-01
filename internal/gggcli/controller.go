@@ -171,7 +171,11 @@ func (c *Controller) Execute(ctx context.Context, req Request) (Result, error) {
 		return Result{Payload: map[string]any{"text": renderHelp(CommandTable(), request.Command)}}, nil
 
 	case CompletionRequest:
-		return Result{Payload: map[string]any{"text": renderCompletion(CommandTable(), request.Shell)}}, nil
+		script, err := renderCompletion(CommandTable(), request.Shell)
+		if err != nil {
+			return Result{}, err
+		}
+		return Result{Payload: map[string]any{"text": script}}, nil
 
 	case RegistryReadRequest:
 		return c.executeRegistryValidate(ctx, request)
@@ -210,13 +214,16 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 		}, mutation.Check)
 
 	case ResolveMutation:
+		if _, err := c.loadProject(); err != nil {
+			return Plan{}, err
+		}
 		engine, err := c.engine(true)
 		if err != nil {
 			return Plan{}, err
 		}
 		local, err := engine.ResolveConflict(ctx, c.rootDir(), mutation.ModuleID, mutation.Path, mutation.Mode)
 		if err != nil {
-			return Plan{}, refusalError(err)
+			return Plan{}, plannerFailure{refusalError(err)}
 		}
 		return c.planFor("resolve", &local, true), nil
 
@@ -255,8 +262,12 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 	}
 }
 
-// Apply is the single place a previewed plan becomes bytes on disk. The plan
-// must come from Preview: Apply refuses a plan it did not preview.
+// Apply is the single place a previewed modkit plan becomes bytes on disk:
+// every graph mutation's file writes go through it, journalled and rollback on
+// failure. Mutations without a local plan write through their enumerated
+// handler paths instead — the init intent file, the registry authoring
+// commands, and the trusted tasks — which are fixed operations with their own
+// journals, never a second planning engine. The plan must come from Preview.
 func (c *Controller) Apply(ctx context.Context, plan Plan) (Result, error) {
 	if plan.Local != nil {
 		engine, err := c.engine(operationOffline(plan))

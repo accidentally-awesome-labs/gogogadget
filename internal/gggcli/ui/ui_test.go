@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
@@ -12,9 +13,9 @@ import (
 
 // newTestModel returns the console model with a non-interactive command
 // context, so tests exercise the model without a terminal.
-func newTestModel(t *testing.T, cc gggcli.CommandContext) model {
+func newTestModel(t *testing.T) *model {
 	t.Helper()
-	m := newModel(cc)
+	m := newModel(context.Background(), gggcli.CommandContext{})
 	m.width, m.height = 80, 24
 	return m
 }
@@ -23,7 +24,7 @@ func newTestModel(t *testing.T, cc gggcli.CommandContext) model {
 // and the key legend, with no truncation at either size.
 func TestConsoleRendersAtBothSizes(t *testing.T) {
 	for _, size := range [][2]int{{80, 24}, {160, 50}} {
-		m := newTestModel(t, gggcli.CommandContext{})
+		m := newTestModel(t)
 		m.width, m.height = size[0], size[1]
 		view := renderView(m)
 		if !strings.Contains(view, "Home") {
@@ -40,9 +41,9 @@ func TestConsoleRendersAtBothSizes(t *testing.T) {
 
 // Resize: a WindowSizeMsg updates the render dimensions.
 func TestConsoleHandlesResize(t *testing.T) {
-	m := newTestModel(t, gggcli.CommandContext{})
+	m := newTestModel(t)
 	updated, _ := m.Update(tea.WindowSizeMsg{Width: 160, Height: 50})
-	if updated.(model).width != 160 {
+	if updated.(*model).width != 160 {
 		t.Fatal("resize ignored")
 	}
 }
@@ -50,28 +51,28 @@ func TestConsoleHandlesResize(t *testing.T) {
 // Key contract: Esc backs out through the stack, ? opens help, / searches the
 // catalog, arrows move the cursor, and Ctrl+C quits.
 func TestConsoleKeyContract(t *testing.T) {
-	m := newTestModel(t, gggcli.CommandContext{})
+	m := newTestModel(t)
 	updated, _ := m.Update(keyPress("down"))
-	if updated.(model).cursor != 1 {
+	if updated.(*model).cursor != 1 {
 		t.Fatal("down did not move the cursor")
 	}
-	updated, _ = updated.(model).Update(keyPress("?"))
-	if updated.(model).current != screenHelp {
+	updated, _ = updated.(*model).Update(keyPress("?"))
+	if updated.(*model).current != screenHelp {
 		t.Fatal("? did not open help")
 	}
-	updated, _ = updated.(model).Update(keyPress("esc"))
-	if updated.(model).current != screenHome {
+	updated, _ = updated.(*model).Update(keyPress("esc"))
+	if updated.(*model).current != screenHome {
 		t.Fatal("esc did not go back")
 	}
-	updated, _ = updated.(model).Update(keyPress("ctrl+c"))
-	if updated.(model).decision != cancelledBeforePlan {
+	updated, _ = updated.(*model).Update(keyPress("ctrl+c"))
+	if updated.(*model).decision != cancelledBeforePlan {
 		t.Fatal("ctrl+c before any plan must record cancelledBeforePlan")
 	}
 }
 
 // Search: typing after / narrows the catalog rows.
 func TestCatalogSearchFilters(t *testing.T) {
-	m := newTestModel(t, gggcli.CommandContext{})
+	m := newTestModel(t)
 	m.current = screenCatalog
 	m.catalog = []catalogRow{
 		{id: "ggg/component/card", state: "available", title: "card"},
@@ -86,7 +87,7 @@ func TestCatalogSearchFilters(t *testing.T) {
 // Unicode titles stay aligned because row padding measures rendered width,
 // not bytes.
 func TestUnicodeRowsRender(t *testing.T) {
-	m := newTestModel(t, gggcli.CommandContext{})
+	m := newTestModel(t)
 	m.current = screenCatalog
 	m.catalog = []catalogRow{
 		{id: "ggg/component/café", state: "available", title: "café ☕ カード"},
@@ -100,7 +101,7 @@ func TestUnicodeRowsRender(t *testing.T) {
 // NO_COLOR and non-TTY output must not emit ANSI escapes.
 func TestNoANSIWithoutColor(t *testing.T) {
 	t.Setenv("NO_COLOR", "1")
-	m := newTestModel(t, gggcli.CommandContext{})
+	m := newTestModel(t)
 	m.current = screenProviders
 	if view := renderView(m); strings.Contains(view, "\x1b[") {
 		t.Fatal("view contains ANSI escapes under NO_COLOR")
@@ -108,12 +109,10 @@ func TestNoANSIWithoutColor(t *testing.T) {
 }
 
 // renderView flattens the model's tea.View to its text.
-func renderView(m model) string {
+func renderView(m *model) string {
 	return m.View().Content
 }
 
-// keyPress builds the KeyMsg a key name produces, matching how the model
-// dispatches on msg.String().
 // keyPress builds the KeyMsg a key name produces, matching how the model
 // dispatches on msg.String().
 func keyPress(name string) tea.KeyMsg {
@@ -151,16 +150,16 @@ func TestRunRefusesNonTerminal(t *testing.T) {
 // Ctrl+C after a preview records the after-plan decision; Ctrl+C anywhere
 // else records the clean before-plan exit.
 func TestCancelDecisions(t *testing.T) {
-	m := newTestModel(t, gggcli.CommandContext{})
+	m := newTestModel(t)
 	m.push(screenPlan)
 	m.planStaged = true
 	updated, _ := m.Update(keyPress("ctrl+c"))
-	if updated.(model).decision != cancelledAfterPlan {
+	if updated.(*model).decision != cancelledAfterPlan {
 		t.Fatal("ctrl+c on a previewed plan must be cancelledAfterPlan")
 	}
-	home := newTestModel(t, gggcli.CommandContext{})
+	home := newTestModel(t)
 	updated, _ = home.Update(keyPress("ctrl+c"))
-	if updated.(model).decision != cancelledBeforePlan {
+	if updated.(*model).decision != cancelledBeforePlan {
 		t.Fatal("ctrl+c at home must be cancelledBeforePlan")
 	}
 }

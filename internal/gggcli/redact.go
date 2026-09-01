@@ -54,6 +54,9 @@ func (r *Redactor) ApplyEnvelope(env *modkit.Envelope) {
 	for i := range env.Diagnostics {
 		env.Diagnostics[i].Message = r.Apply(env.Diagnostics[i].Message)
 	}
+	for i := range env.Changes {
+		env.Changes[i].Path = r.Apply(env.Changes[i].Path)
+	}
 }
 
 // ApplyPayload walks a result payload and masks every string it finds, in

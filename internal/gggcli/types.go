@@ -272,6 +272,9 @@ type Result struct {
 // only route back into the project is Controller operations.
 type CommandContext struct {
 	Controller *Controller
+	// Table is the full command table this build serves: built-ins plus
+	// contributed commands. Help and completions derive from it.
+	Table []CommandSpec
 	// Out is the human/machine output stream; Err is the diagnostic stream.
 	Out io.Writer
 	Err io.Writer
