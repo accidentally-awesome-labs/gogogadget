@@ -2,26 +2,31 @@
 
 ## Final state
 
-Task 5 provider-neutral identity and billing cutover is complete at commit `50bb3f4`.
+Task 5 provider-neutral identity and billing cutover is complete at implementation commit `3612a6d` (report finalized in a subsequent documentation commit).
 
-- `ggg/system/identity` and `ggg/system/billing` are constructor-free seams with complete typed capabilities. Development/test and production choices select identity-dev/identity-clerk and billing-local/billing-polar adapters through provider selections. Hosted credential and signature checks are adapter-owned; hosted Clerk verification fails closed and subject linking verifies users and organizations through their respective APIs.
-- `identity-session` is a generated runtime capability consumed by web middleware. Provider subjects are mapped transactionally to opaque `usr_<32 hex>`/`org_<32 hex>` IDs, with conflict rereads, `ErrLinkRequired` for mutable email/slug collisions, provider provenance in request context, and ADMIN_EMAIL first-sight role grants. Dev/e2e seed fixtures include provider mappings, and dev login/org switching preserve provider subjects.
-- Account deletion resolves the active provider subject from session provenance or identity mappings before invoking the adapter deleter. Identity webhooks resolve/insert mapping rows for users, organizations, and memberships; deletion resolves mapped domain IDs.
-- `ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)` validates the selected adapter/target, uses subject-aware user/org verification, and writes an audited mapping transaction.
-- Billing uses injected immutable `PlanCatalog` values with deep-copy accessors; no mutable global Plans or SetProviderProductIDs remain. Local billing has stable local product IDs, authenticated `/app/billing/confirm` and `/app/billing/cancel` screen/action routes with nosurf tokens, current-product cancellation, non-colliding checkout event IDs, neutral idempotency, reactivation coverage, and a terminating registered portal destination. Local/dev webhook events cannot mutate state through the hosted webhook endpoint.
-- Migration `0020_provider_neutral_ids.sql` retains named legacy schema/customer guards and allows neutral local/dev ledger providers. Forward migration `0021_provider_explicit.sql` removes the legacy Polar provider default; all authored fixtures explicitly provide provider values. Identity/billing mapping tables, generated queries, lifecycle metadata, and manifests are owned and regenerated.
+- Identity and billing are constructor-free provider seams. Explicit provider choices select development/test identity-dev and billing-local adapters or production identity-clerk and billing-polar adapters. Hosted credential and signature verification is adapter-owned and fails closed.
+- `identity-session` is generated and required by web wiring. It transactionally maps provider subjects to opaque `usr_<32 hex>`/`org_<32 hex>` IDs, rereads conflicts, returns `identity.ErrLinkRequired` for mutable email/slug collisions, carries provider provenance, and grants configured `ADMIN_EMAIL` on first sight. Dev/e2e seed fixtures include identity subject and organization mappings; `/dev/login` and org switching use provider subjects.
+- Account deletion resolves the active provider subject before adapter deletion. Identity webhooks resolve or create user/org mappings, resolve mapped membership IDs, and delete mapped domain rows. Hosted user and organization link verification use separate Clerk APIs.
+- `ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)` validates project selection and adapter target, verifies the subject-aware port, and writes an audited mapping transaction.
+- Billing uses injected immutable plan catalogs with deep-copy accessors. Local billing assigns stable local product IDs, preserves product state across cancellation, authenticates `/app/billing/confirm` and `/app/billing/cancel` forms with nosurf tokens and POST actions, uses checkout-scoped idempotency for reactivation, rejects local/dev hosted-webhook mutation, and terminates portal navigation at the registered settings destination.
+- Forward migrations preserve 0001–0020 and add `0021_provider_explicit.sql` to remove the Polar provider default. The 0020 guard uses explicit named legacy FK/index/customer invariants and accepts neutral local/dev webhook providers. All mapping tables, queries, data lifecycle declarations, manifests, generated outputs, and seed files are registry-owned.
 
-## Exact final verification
+## Exact verification
 
 ```text
 $ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline
-registry 222720c49a83c4f2a97be4941b40ab0c475d32a55058dec73ec3b7c8ebbfc223
+registry 613c3fe8a7ddbebc92c32f9c64d4dabd976401a766553103bd966687859fc8dd
   update    lock       gogogadget.lock.json
 
 $ go tool sqlc generate
 # passed
 $ go tool templ generate
 (✓) Complete [ updates=0 ... ]
+
+$ go run ./cmd/seed -reset -registry e2e
+reset database gogogadget
+seeded 6 fragment(s)
+imported 3 posts, 8 releases
 
 $ go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web
 # passed (unfiltered)
@@ -30,4 +35,4 @@ $ make check
 # passed: registry drift, templ/sqlc generation, gofmt, sync check, go vet ./..., go test ./...
 ```
 
-The final worktree is clean. The final registry digest is `222720c49a83c4f2a97be4941b40ab0c475d32a55058dec73ec3b7c8ebbfc223`.
+Final implementation commit: `3612a6d`. Final report commit is recorded by git after this content is written. The worktree is clean after commit.
