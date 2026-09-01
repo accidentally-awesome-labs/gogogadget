@@ -129,6 +129,9 @@ type Worker struct {
 	// AuditRetentionDays > 0 makes the janitor delete audit rows older than
 	// that many days (AUDIT_RETENTION_DAYS). 0 = retain forever.
 	AuditRetentionDays int
+	// SearchDrain is the selected search adapter's outbox worker. It runs before
+	// ordinary jobs so indexing remains eventually consistent after commits.
+	SearchDrain func(context.Context) error
 	// Storage is the export target; set in cmd/server. Nil → export fails
 	// loudly (the handler should not enqueue without it).
 	Storage storage.Store
@@ -225,6 +228,11 @@ func (w *Worker) pass(ctx context.Context) (n int) {
 		}
 	}()
 
+	if w.SearchDrain != nil {
+		if err := w.SearchDrain(ctx); err != nil {
+			w.log.Error("search outbox", "error", err)
+		}
+	}
 	n, err := w.drain(ctx)
 	if err != nil {
 		w.log.Error("job worker", "error", err)
