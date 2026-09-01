@@ -54,13 +54,6 @@ func LoadFrom(lookup func(string) string) (Config, error) {
 
 	if cfg.Production() {
 		errs = append(errs, requireProductionKeys(lookup)...)
-		// Managed defaults are explicit provider choices, so missing credentials
-		// are aggregated before any constructor runs rather than falling back.
-		for _, key := range []string{"CACHE_REDIS_URL", "CACHE_REDIS_TOKEN", "RATE_LIMIT_REDIS_URL", "RATE_LIMIT_REDIS_TOKEN", "OTLP_ENDPOINT"} {
-			if lookup(key) == "" {
-				errs = append(errs, fmt.Errorf("%s provider: %s is required for the selected production provider", strings.ToLower(strings.Split(key, "_")[0]), key))
-			}
-		}
 	}
 
 	// Clerk fronts the Frontend API at clerk.<domain> on a production instance
