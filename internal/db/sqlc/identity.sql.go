@@ -41,6 +41,17 @@ func (q *Queries) GetIdentityOrganization(ctx context.Context, arg GetIdentityOr
 	return i, err
 }
 
+const getIdentityOrganizationByOrg = `-- name: GetIdentityOrganizationByOrg :one
+SELECT provider, subject, org_id FROM identity_organizations WHERE org_id = $1 ORDER BY provider, subject LIMIT 1
+`
+
+func (q *Queries) GetIdentityOrganizationByOrg(ctx context.Context, orgID string) (IdentityOrganization, error) {
+	row := q.db.QueryRow(ctx, getIdentityOrganizationByOrg, orgID)
+	var i IdentityOrganization
+	err := row.Scan(&i.Provider, &i.Subject, &i.OrgID)
+	return i, err
+}
+
 const getIdentitySubject = `-- name: GetIdentitySubject :one
 SELECT provider, subject, user_id FROM identity_subjects WHERE provider = $1 AND subject = $2
 `
@@ -52,6 +63,17 @@ type GetIdentitySubjectParams struct {
 
 func (q *Queries) GetIdentitySubject(ctx context.Context, arg GetIdentitySubjectParams) (IdentitySubject, error) {
 	row := q.db.QueryRow(ctx, getIdentitySubject, arg.Provider, arg.Subject)
+	var i IdentitySubject
+	err := row.Scan(&i.Provider, &i.Subject, &i.UserID)
+	return i, err
+}
+
+const getIdentitySubjectByUser = `-- name: GetIdentitySubjectByUser :one
+SELECT provider, subject, user_id FROM identity_subjects WHERE user_id = $1 ORDER BY provider, subject LIMIT 1
+`
+
+func (q *Queries) GetIdentitySubjectByUser(ctx context.Context, userID string) (IdentitySubject, error) {
+	row := q.db.QueryRow(ctx, getIdentitySubjectByUser, userID)
 	var i IdentitySubject
 	err := row.Scan(&i.Provider, &i.Subject, &i.UserID)
 	return i, err

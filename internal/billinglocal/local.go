@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 )
@@ -31,7 +32,7 @@ func (c *Client) CreateCheckout(_ context.Context, p billing.CheckoutParams) (st
 	}
 	u := c.BaseURL + "/billing/confirm?product=" + url.QueryEscape(p.ProductID) + "&customer=" + url.QueryEscape(p.CustomerExternalID)
 	if orgID != "" {
-		u += "&org=" + url.QueryEscape(orgID)
+		u += "&org=" + url.QueryEscape(orgID) + "&checkout=" + url.QueryEscape(fmt.Sprintf("%d", time.Now().UnixNano()))
 	}
 	return u, nil
 }

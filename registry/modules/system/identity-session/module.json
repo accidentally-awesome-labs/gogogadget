@@ -61,7 +61,7 @@
         "source": "internal/identity/session/module.go",
         "target": "internal/identity/session/module.go",
         "class": "go",
-        "sha256": "b25022c09576682c93fc13b94e08fdc07f2e832140cf916641da2ed00f6e35c2",
+        "sha256": "361d36d22d4cc8ff70de334edc28b97a3bb6e0555e9227245bba437fcd247678",
         "rewrite_module": true,
         "contract": true
       },
@@ -69,7 +69,7 @@
         "source": "internal/identity/session/session.go",
         "target": "internal/identity/session/session.go",
         "class": "go",
-        "sha256": "a49e537c8f3eac6e8bbab3fa62fc947ebdfe7e954a7986d4c648c96e5b160d93",
+        "sha256": "bfb79a92d2196a5367ac31e2e6fce1ab62b865572b00397c31a4736cf1747398",
         "rewrite_module": true,
         "contract": true
       },

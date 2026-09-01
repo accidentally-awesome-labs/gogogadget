@@ -11,29 +11,47 @@ import (
 type ctxKey string
 
 const (
-	ctxUser   ctxKey = "user"   // local users mirror row
-	ctxClaims ctxKey = "claims" // session claims
-	ctxOrg    ctxKey = "org"    // local orgs row for the active org
-	ctxPlan   ctxKey = "plan"   // billing.Plan, set by LoadPlan after RequireOrg
-	ctxSub    ctxKey = "sub"    // *sqlc.Subscription (nil = free), set by LoadPlan
+	ctxUser            ctxKey = "user"   // local users mirror row
+	ctxClaims          ctxKey = "claims" // session claims
+	ctxOrg             ctxKey = "org"    // local orgs row for the active org
+	ctxPlan            ctxKey = "plan"   // billing.Plan, set by LoadPlan after RequireOrg
+	ctxSub             ctxKey = "sub"
+	ctxProviderSession ctxKey = "provider_session"
 )
+
+type ProviderSession struct {
+	Provider    string
+	UserSubject string
+	OrgSubject  string
+}
+
+func WithProviderSession(ctx context.Context, p ProviderSession) context.Context {
+	return context.WithValue(ctx, ctxProviderSession, p)
+}
+
+func ProviderSessionFrom(ctx context.Context) (ProviderSession, bool) {
+	p, ok := ctx.Value(ctxProviderSession).(ProviderSession)
+	return p, ok
+}
 
 func WithUser(ctx context.Context, u *sqlc.User) context.Context {
 	return context.WithValue(ctx, ctxUser, u)
 }
+
 func WithClaims(ctx context.Context, c *Claims) context.Context {
 	return context.WithValue(ctx, ctxClaims, c)
 }
+
 func WithOrg(ctx context.Context, o *sqlc.Org) context.Context {
 	return context.WithValue(ctx, ctxOrg, o)
 }
 func WithPlan(ctx context.Context, p billing.Plan) context.Context {
 	return context.WithValue(ctx, ctxPlan, p)
 }
+
 func WithSub(ctx context.Context, s *sqlc.Subscription) context.Context {
 	return context.WithValue(ctx, ctxSub, s)
 }
-
 func UserFrom(ctx context.Context) *sqlc.User {
 	u, _ := ctx.Value(ctxUser).(*sqlc.User)
 	return u

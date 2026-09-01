@@ -32,7 +32,15 @@ func (s *Server) handleDevSwitchOrg(w http.ResponseWriter, r *http.Request) {
 	if m, err := s.q.GetMembership(r.Context(), sqlc.GetMembershipParams{OrgID: orgID, UserID: claims.UserID}); err == nil {
 		role = m.Role
 	}
-	s.setDevSessionCookie(w, claims.UserID, orgID, role)
+	userSubject := claims.UserID
+	orgSubject := orgID
+	if mapped, err := s.q.GetIdentitySubjectByUser(r.Context(), claims.UserID); err == nil {
+		userSubject = mapped.Subject
+	}
+	if mapped, err := s.q.GetIdentityOrganizationByOrg(r.Context(), orgID); err == nil {
+		orgSubject = mapped.Subject
+	}
+	s.setDevSessionCookie(w, userSubject, orgSubject, role)
 	http.Redirect(w, r, "/app", http.StatusSeeOther)
 }
 

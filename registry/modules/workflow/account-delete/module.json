@@ -83,7 +83,7 @@
         "source": "internal/web/workflow_account_delete.go",
         "target": "internal/web/workflow_account_delete.go",
         "class": "go",
-        "sha256": "c1e9b06a014ba2c9bcceac8f8b93d69561f0528ca5bbd463c670f75cce60983d",
+        "sha256": "898b7b27272ef10839ff51b42df4722c5aabf72a767fe217ff295b5afadedeab",
         "rewrite_module": true,
         "contract": false
       }

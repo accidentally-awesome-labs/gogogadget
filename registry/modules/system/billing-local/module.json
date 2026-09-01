@@ -36,6 +36,10 @@
         {
           "module": "github.com/jackc/pgx/v5",
           "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/justinas/nosurf",
+          "version": "v1.2.0"
         }
       ],
       "tools": [],
@@ -46,7 +50,7 @@
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",
-        "sha256": "9fcd8bd087cfd1d98c9995393b223c02f8a7e4cbebe2dad49f98b00af5bf2199",
+        "sha256": "049fa1eb159358de8406d6da07185b9802edbe236cbf9e3b77ed6754b4071ef1",
         "rewrite_module": true,
         "contract": true
       },
@@ -70,7 +74,15 @@
         "source": "internal/web/workflow_billing_local.go",
         "target": "internal/web/workflow_billing_local.go",
         "class": "go",
-        "sha256": "eb622c3dc47fa4c6ff90533f91c5e496352ca4fe95b67dbbc4c0d7799fa2c0ec",
+        "sha256": "25643e7c9b9298c8fd08d0805fcb066727244f5ce7621b54729d67ff9a18b5b4",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/workflow_billing_portal_local.go",
+        "target": "internal/web/workflow_billing_portal_local.go",
+        "class": "go",
+        "sha256": "6ea2325432c57ee8f484b4664292a1db08102936537673408048d54ca0d0dd4d",
         "rewrite_module": true,
         "contract": true
       }
@@ -200,6 +212,23 @@
           },
           "package": "internal/web",
           "handler": "handleBillingConfirm"
+        },
+        {
+          "id": "billing.local.portal",
+          "method": "GET",
+          "pattern": "/billing/portal",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "authenticated local billing portal screen",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 4096,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleBillingPortalLocal"
         }
       ]
     },

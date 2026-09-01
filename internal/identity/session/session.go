@@ -7,25 +7,27 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 )
 
 type Session struct {
-	Claims identity.Claims
-	User   sqlc.User
-	Org    *sqlc.Org
+	Claims          identity.Claims
+	User            sqlc.User
+	Org             *sqlc.Org
+	ProviderSession identity.ProviderSession
 }
 type Loader interface {
 	Load(context.Context, string) (Session, error)
 }
 type SessionLoader struct {
-	Pool   *pgxpool.Pool
-	Verify identity.Verifier
-	Fetch  identity.UserFetcher
+	Pool       *pgxpool.Pool
+	Verify     identity.Verifier
+	Fetch      identity.UserFetcher
+	AdminEmail string
 }
 
 func (l *SessionLoader) Load(ctx context.Context, token string) (Session, error) {
@@ -74,6 +76,12 @@ func (l *SessionLoader) Load(ctx context.Context, token string) (Session, error)
 			return Session{}, err
 		}
 		inserted, insertErr := q.InsertIdentitySubject(ctx, sqlc.InsertIdentitySubjectParams{Provider: pc.Provider, Subject: pc.UserSubject, UserID: user.UserID})
+		if l.AdminEmail != "" && strings.EqualFold(profile.Email, l.AdminEmail) {
+			if err := q.SetUserAdminRoleByEmail(ctx, sqlc.SetUserAdminRoleByEmailParams{Email: profile.Email, AdminRole: identity.RoleAdmin}); err != nil {
+				return Session{}, err
+			}
+			user.AdminRole = identity.RoleAdmin
+		}
 		if insertErr != nil {
 			_ = q.DeleteUser(ctx, user.UserID)
 			if !errors.Is(insertErr, pgx.ErrNoRows) {
@@ -125,7 +133,7 @@ func (l *SessionLoader) Load(ctx context.Context, token string) (Session, error)
 	if err = tx.Commit(ctx); err != nil {
 		return Session{}, err
 	}
-	return Session{Claims: claims, User: user, Org: org}, nil
+	return Session{Claims: claims, User: user, Org: org, ProviderSession: identity.ProviderSession{Provider: pc.Provider, UserSubject: pc.UserSubject, OrgSubject: pc.OrgSubject}}, nil
 }
 func opaqueID(prefix string) (string, error) {
 	var b [16]byte

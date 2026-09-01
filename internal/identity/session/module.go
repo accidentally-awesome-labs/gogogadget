@@ -26,5 +26,5 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return &Module{Loader: &SessionLoader{Pool: d.Pool, Verify: d.Verify, Fetch: d.Fetch}}, nil
+	return &Module{Loader: &SessionLoader{Pool: d.Pool, Verify: d.Verify, Fetch: d.Fetch, AdminEmail: d.Config.AdminEmail}}, nil
 }

@@ -16,6 +16,13 @@ VALUES ($1, $2, $3)
 ON CONFLICT (provider, subject) DO NOTHING
 RETURNING *;
 
+-- name: GetIdentitySubjectByUser :one
+SELECT * FROM identity_subjects WHERE user_id = $1 ORDER BY provider, subject LIMIT 1;
+
+-- name: GetIdentityOrganizationByOrg :one
+SELECT * FROM identity_organizations WHERE org_id = $1 ORDER BY provider, subject LIMIT 1;
+
+
 -- name: GetBillingAccount :one
 SELECT * FROM billing_accounts WHERE provider = $1 AND provider_customer_id = $2;
 

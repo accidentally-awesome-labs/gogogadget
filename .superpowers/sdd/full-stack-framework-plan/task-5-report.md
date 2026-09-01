@@ -136,3 +136,12 @@ Verification after review fixes:
 - `make check` passed fully after regeneration, including gofmt, registry drift, `go vet ./...`, and `go test ./...`.
 - Focused unfiltered identity, session, billing, billing-local, web, database, API, and jobs suites passed.
 - Final registry digest: `e67c3305fc3dcec889c79765d816695158ba597aec9efdfd714467797ce8aac9`.
+
+## Repair acceptance
+
+- Account deletion now resolves the provider subject from `identity_subjects` before invoking adapter deletion. Dev identity switching resolves provider subjects from the mapping tables, preserving opaque domain IDs; session first sight restores the configured `ADMIN_EMAIL` grant.
+- Local billing confirm/cancel preserve product/customer/checkout context through authenticated app-scope forms, enforce POST plus explicit CSRF token checks, use non-lifetime-colliding checkout event IDs, and expose an authenticated local portal screen. Local/dev webhook deliveries are rejected by the hosted webhook endpoint.
+- Added org/user mapping lookup queries and session context provider provenance; hosted `VerifySubject` uses the Clerk user API. Mapping lifecycle metadata and generated ownership remain synchronized.
+- `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed unfiltered.
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `5c4d67d7d48e257c05d7751593b18571b77957c9a12676328b0034c4eb437420`.
+- `make check` — passed fully (`gofmt`, registry drift, templ/sqlc, sync check, `go vet ./...`, and `go test ./...`).

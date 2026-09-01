@@ -23,6 +23,10 @@ func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid signature", http.StatusBadRequest)
 		return
 	}
+	if evt.Provider == "local" || evt.Provider == "dev" {
+		http.Error(w, "local billing events require authenticated confirmation", http.StatusForbidden)
+		return
+	}
 	msgID := evt.ID
 	if msgID == "" {
 		msgID = r.Header.Get("webhook-id")

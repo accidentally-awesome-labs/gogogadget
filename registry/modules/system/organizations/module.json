@@ -48,7 +48,7 @@
         "source": "internal/db/queries/identity.sql",
         "target": "internal/db/queries/identity.sql",
         "class": "query",
-        "sha256": "fa243f979765247452851de64b99aa6126639892a8653d9887f72fcf0420dab3",
+        "sha256": "93248df413023d0a9438774ecedc6cb01707d38f2b6c7ed92cb401eb3076196c",
         "rewrite_module": false,
         "contract": false
       },

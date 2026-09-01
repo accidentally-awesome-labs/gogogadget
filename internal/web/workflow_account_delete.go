@@ -74,9 +74,15 @@ func (s *Server) handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Provider first: a failed upstream delete must leave local data intact.
+	// Provider adapters receive upstream subjects, never opaque domain IDs.
 	if s.deleter != nil {
-		if err := s.deleter.DeleteUser(ctx, user.UserID); err != nil {
+		subject, err := s.q.GetIdentitySubjectByUser(ctx, user.UserID)
+		if err != nil {
+			s.log.Error("identity subject lookup failed", "user", user.UserID, "error", err)
+			s.renderError(w, r, err.Error())
+			return
+		}
+		if err := s.deleter.DeleteUser(ctx, subject.Subject); err != nil {
 			s.log.Error("identity user delete failed", "user", user.UserID, "error", err)
 			s.renderError(w, r, err.Error())
 			return

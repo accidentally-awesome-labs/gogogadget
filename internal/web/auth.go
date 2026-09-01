@@ -52,6 +52,7 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 		}
 		ctx := identity.WithUser(r.Context(), &session.User)
 		ctx = identity.WithClaims(ctx, &session.Claims)
+		ctx = identity.WithProviderSession(ctx, session.ProviderSession)
 		if session.Org != nil {
 			ctx = identity.WithOrg(ctx, session.Org)
 		}

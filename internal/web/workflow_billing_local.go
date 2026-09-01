@@ -11,6 +11,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5"
+	"github.com/justinas/nosurf"
 )
 
 func (s *Server) handleBillingConfirm(w http.ResponseWriter, r *http.Request) {
@@ -24,18 +25,42 @@ func (s *Server) handleBillingConfirm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
-	product, customer := r.URL.Query().Get("product"), r.URL.Query().Get("customer")
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+		if token := nosurf.Token(r); token == "" || (r.Header.Get("X-CSRF-Token") != token && r.FormValue("csrf_token") != token) {
+			http.Error(w, "invalid csrf token", http.StatusForbidden)
+			return
+		}
+	}
+	product, customer, checkout := r.URL.Query().Get("product"), r.URL.Query().Get("customer"), r.URL.Query().Get("checkout")
+	if product == "" {
+		product = r.FormValue("product")
+	}
+	if customer == "" {
+		customer = r.FormValue("customer")
+	}
+	if checkout == "" {
+		checkout = r.FormValue("checkout")
+	}
 	if product == "" || customer == "" || customer != org.OrgID {
 		http.Error(w, "invalid billing confirmation", http.StatusBadRequest)
 		return
 	}
 	if r.Method == http.MethodGet {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = fmt.Fprintf(w, `<main><h1>Confirm billing</h1><form method="post" action="/billing/confirm"><input type="hidden" name="product" value="%s"><button type="submit">Confirm</button></form></main>`, html.EscapeString(product))
+		_, _ = fmt.Fprintf(w, `<main><h1>Confirm billing</h1><form method="post" action="/billing/confirm"><input type="hidden" name="product" value="%s"><input type="hidden" name="customer" value="%s"><input type="hidden" name="checkout" value="%s"><button type="submit">Confirm</button></form></main>`, html.EscapeString(product), html.EscapeString(customer), html.EscapeString(checkout))
 		return
 	}
+	eventID := "confirm:" + customer + ":" + product
+	if checkout != "" {
+		eventID = "confirm:" + checkout
+	}
 	evt := client.ConfirmedEvent(product, customer, org.OrgID)
-	if err := s.processLocalBillingEvent(r, evt, "confirm:"+customer+":"+product); err != nil {
+	if err := s.processLocalBillingEvent(r, evt, eventID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -53,14 +78,28 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+		if token := nosurf.Token(r); token == "" || (r.Header.Get("X-CSRF-Token") != token && r.FormValue("csrf_token") != token) {
+			http.Error(w, "invalid csrf token", http.StatusForbidden)
+			return
+		}
+	}
 	customer := r.URL.Query().Get("customer")
+	if customer == "" {
+		customer = r.FormValue("customer")
+	}
 	if customer == "" || customer != org.OrgID {
 		http.Error(w, "invalid billing cancellation", http.StatusBadRequest)
 		return
 	}
 	if r.Method == http.MethodGet {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = w.Write([]byte(`<main><h1>Cancel billing</h1><form method="post" action="/billing/cancel"><button type="submit">Cancel</button></form></main>`))
+		_, _ = fmt.Fprintf(w, `<main><h1>Cancel billing</h1><form method="post" action="/billing/cancel"><input type="hidden" name="customer" value="%s"><button type="submit">Cancel</button></form></main>`, html.EscapeString(customer))
 		return
 	}
 	evt := client.CanceledEvent(customer, org.OrgID)

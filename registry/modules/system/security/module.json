@@ -61,7 +61,7 @@
         "source": "internal/web/auth.go",
         "target": "internal/web/auth.go",
         "class": "go",
-        "sha256": "3998f6f4c5eef2f02ded015e751dbcba5fc5b05f83934808c58e24e619fce0e5",
+        "sha256": "3d14ae851e1d667a3d60e89c0ac4c7dee7b89c33f4142115bac02b38ce463d59",
         "rewrite_module": true,
         "contract": true
       },
