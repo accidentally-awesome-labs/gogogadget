@@ -154,6 +154,16 @@ func RegistryKeyFingerprint(publicKey string) (string, error) {
 	return "sha256:" + hex.EncodeToString(sum[:]), nil
 }
 
+// RegistryPrivateKeyFromSeed derives a reproducible Ed25519 signing key from
+// exactly one 32-byte seed. Registry publishers can use this in deterministic
+// fixture/build tooling without ever serializing the private key in metadata.
+func RegistryPrivateKeyFromSeed(seed []byte) (ed25519.PrivateKey, error) {
+	if len(seed) != ed25519.SeedSize {
+		return nil, fmt.Errorf("registry signing seed must be %d bytes", ed25519.SeedSize)
+	}
+	return ed25519.NewKeyFromSeed(append([]byte(nil), seed...)), nil
+}
+
 func verifySnapshotFiles(fsys fs.FS, publicKey string, allowUnsigned bool) (string, error) {
 	data, err := fs.ReadFile(fsys, RegistrySnapshotPath)
 	if errors.Is(err, fs.ErrNotExist) {

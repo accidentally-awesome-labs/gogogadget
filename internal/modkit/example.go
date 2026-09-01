@@ -1290,112 +1290,113 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 	if err != nil {
 		return err
 	}
-
-	stripped := final
-	stripped.Modules = nil
-	stripped.Order = nil
-	stripped.RuntimeOrders = RuntimeOrders{}
-	found := make(map[string]LockedModule, len(ids))
+	removed := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		removed[id] = struct{}{}
+	}
+	baselineModules := make(map[string]LockedModule, len(baseline.Modules))
+	for _, module := range baseline.Modules {
+		baselineModules[module.ID] = module
+	}
+	finalModules := make(map[string]LockedModule, len(final.Modules))
 	for _, module := range final.Modules {
-		if slices.Contains(ids, module.ID) {
-			found[module.ID] = module
+		finalModules[module.ID] = module
+	}
+	for _, id := range ids {
+		module, ok := finalModules[id]
+		if !ok {
+			return fmt.Errorf("lock has no record of removed module %s; removal must leave a tombstone", id)
+		}
+		if module.Reason != removalTombstoneReason {
+			return fmt.Errorf("lock record for removed module %s has reason %q, want %q", id, module.Reason, removalTombstoneReason)
+		}
+		if len(module.Files) != 0 || len(module.Manifest.Files) != 0 {
+			return fmt.Errorf("tombstone for %s still claims authored files", id)
+		}
+		want := append([]LockedMigration{}, baselineModules[id].Migrations...)
+		known := make(map[string]struct{}, len(want))
+		for _, migration := range want {
+			known[migration.ID] = struct{}{}
+		}
+		for _, migration := range retainedFor(retained, id, final) {
+			if migration.ID == "" {
+				continue
+			}
+			if _, exists := known[migration.ID]; !exists {
+				want = append(want, migration)
+				known[migration.ID] = struct{}{}
+			}
+		}
+		sort.Slice(want, func(i, j int) bool { return want[i].ID < want[j].ID })
+		if !reflect.DeepEqual(module.Migrations, want) {
+			return fmt.Errorf("tombstone for %s carries migrations %v, want %v", id, module.Migrations, want)
+		}
+	}
+	for _, module := range baseline.Modules {
+		if _, isRemoved := removed[module.ID]; isRemoved {
 			continue
 		}
-		stripped.Modules = append(stripped.Modules, module)
-	}
-	for _, id := range final.Order {
-		if !slices.Contains(ids, id) {
-			stripped.Order = append(stripped.Order, id)
+		got, ok := finalModules[module.ID]
+		if !ok {
+			return fmt.Errorf("lock lost retained module %s", module.ID)
 		}
+		want := module
+		want.RequiredBy = got.RequiredBy
+		want.SourceCommit = got.SourceCommit
+		if !reflect.DeepEqual(got, want) {
+			return fmt.Errorf("retained module %s changed during removal", module.ID)
+		}
+	}
+	if !reflect.DeepEqual(final.Registries, baseline.Registries) {
+		return fmt.Errorf("removal changed registry declarations")
+	}
+	baselineSnapshots := make(map[string]LockedSnapshot, len(baseline.Snapshots))
+	for _, snapshot := range baseline.Snapshots {
+		baselineSnapshots[snapshot.Namespace] = snapshot
+	}
+	finalSnapshots := make(map[string]LockedSnapshot, len(final.Snapshots))
+	for _, snapshot := range final.Snapshots {
+		if snapshot.CacheKey != snapshot.SnapshotSHA256 || !validSHA256(snapshot.SnapshotSHA256) {
+			return fmt.Errorf("removal produced invalid registry snapshot identity for %s", snapshot.Namespace)
+		}
+		finalSnapshots[snapshot.Namespace] = snapshot
+	}
+	for namespace := range baselineSnapshots {
+		if _, ok := finalSnapshots[namespace]; !ok {
+			return fmt.Errorf("removal dropped registry snapshot %s", namespace)
+		}
+	}
+	for _, module := range final.Modules {
+		if module.Reason == removalTombstoneReason {
+			continue
+		}
+		snapshot, ok := finalSnapshots[module.RegistryNamespace]
+		if !ok || module.SourceCommit != snapshot.Commit || module.SnapshotSHA256 != snapshot.SnapshotSHA256 {
+			return fmt.Errorf("live module %s is not pinned to its registry snapshot", module.ID)
+		}
+	}
+	if !reflect.DeepEqual(final.Dependencies, baseline.Dependencies) {
+		return fmt.Errorf("removal changed dependency ownership")
 	}
 	filterOrder := func(order []string) []string {
 		out := make([]string, 0, len(order))
 		for _, id := range order {
-			if !slices.Contains(ids, id) {
+			if _, drop := removed[id]; !drop {
 				out = append(out, id)
 			}
 		}
 		return out
 	}
-	stripped.RuntimeOrders = RuntimeOrders{
-		Development: filterOrder(final.RuntimeOrders.Development),
-		Test:        filterOrder(final.RuntimeOrders.Test),
-		Production:  filterOrder(final.RuntimeOrders.Production),
+	if !slices.Equal(filterOrder(final.Order), filterOrder(baseline.Order)) {
+		return fmt.Errorf("removal changed retained module order")
 	}
-	for _, id := range ids {
-		module, ok := found[id]
-		if !ok {
-			return fmt.Errorf("lock has no record of removed module %s; removal must leave a tombstone", id)
-		}
-		if module.Reason != removalTombstoneReason {
-			return fmt.Errorf("lock record for removed module %s has reason %q, want %q",
-				id, module.Reason, removalTombstoneReason)
-		}
-		if len(module.Files) != 0 || len(module.Manifest.Files) != 0 {
-			return fmt.Errorf("tombstone for %s still claims %d authored file(s)", id, len(module.Files))
-		}
-		expected := retainedFor(retained, id, final)
-		if !reflect.DeepEqual(module.Migrations, expected) {
-			return fmt.Errorf("tombstone for %s carries migrations %v, want the allocated ledger %v",
-				id, module.Migrations, expected)
-		}
+	if !slices.Equal(filterOrder(final.RuntimeOrders.Development), filterOrder(baseline.RuntimeOrders.Development)) ||
+		!slices.Equal(filterOrder(final.RuntimeOrders.Test), filterOrder(baseline.RuntimeOrders.Test)) ||
+		!slices.Equal(filterOrder(final.RuntimeOrders.Production), filterOrder(baseline.RuntimeOrders.Production)) {
+		return fmt.Errorf("removal changed retained runtime order")
 	}
-
-	// The resolved commit is content-addressed over the tree, so a retained
-	// migration necessarily moves it, and every module's source_commit moves
-	// with it. That is the correct answer rather than drift: the derivative
-	// genuinely is not the tree it started as. With nothing retained the commit
-	// must come back exactly, and that is asserted rather than assumed.
-	if final.RegistryCommit != baseline.RegistryCommit || !slices.Equal(stripped.Order, baseline.Order) {
-		if final.RegistryCommit != baseline.RegistryCommit && len(retained) == 0 {
-			return fmt.Errorf(
-				"the resolved registry commit moved to %s with no retained migration to explain it",
-				final.RegistryCommit)
-		}
-		stripped.RegistryCommit = baseline.RegistryCommit
-		stripped.Registries = baseline.Registries
-		stripped.Snapshots = baseline.Snapshots
-		baselineModules := make(map[string]LockedModule, len(baseline.Modules))
-		baselineIDs := make(map[string]struct{}, len(baseline.Modules))
-		for _, module := range baseline.Modules {
-			baselineModules[module.ID] = module
-			baselineIDs[module.ID] = struct{}{}
-		}
-		filteredModules := stripped.Modules[:0]
-		for _, module := range stripped.Modules {
-			if _, ok := baselineIDs[module.ID]; ok || slices.Contains(ids, module.ID) {
-				filteredModules = append(filteredModules, module)
-			}
-		}
-		stripped.Modules = filteredModules
-		filteredOrder := stripped.Order[:0]
-		for _, id := range stripped.Order {
-			if _, ok := baselineIDs[id]; ok || slices.Contains(ids, id) {
-				filteredOrder = append(filteredOrder, id)
-			}
-		}
-		stripped.Order = filteredOrder
-		for i := range stripped.Modules {
-			previous, ok := baselineModules[stripped.Modules[i].ID]
-			if !ok {
-				continue
-			}
-			if stripped.Modules[i].Reason != removalTombstoneReason {
-				stripped.Modules[i].Reason = previous.Reason
-			}
-			stripped.Modules[i].RegistryNamespace = previous.RegistryNamespace
-			stripped.Modules[i].SourceCommit = previous.SourceCommit
-			stripped.Modules[i].SnapshotSHA256 = previous.SnapshotSHA256
-		}
-	}
-	stripped.RegistryCommit = baseline.RegistryCommit
-	stripped.Registries = baseline.Registries
-	stripped.Snapshots = baseline.Snapshots
-	stripped.Modules = append([]LockedModule(nil), baseline.Modules...)
-	stripped.Order = append([]string(nil), baseline.Order...)
-	stripped.RuntimeOrders = baseline.RuntimeOrders
-	if !reflect.DeepEqual(stripped, baseline) {
-		return fmt.Errorf("the lock differs from the baseline by more than the removal tombstones")
+	if got, want := registryCommitForModules(final.Modules), final.RegistryCommit; got != want {
+		return fmt.Errorf("lock registry commit %s does not match live module tuples %s", want, got)
 	}
 	return nil
 }

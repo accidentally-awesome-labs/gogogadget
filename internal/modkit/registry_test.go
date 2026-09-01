@@ -371,6 +371,7 @@ func TestPublishedRegistryIsConsistent(t *testing.T) {
 		"registry/schema/module.schema.json",
 		"registry/schema/project.schema.json",
 		"registry/schema/lock.schema.json",
+		"registry/schema/snapshot.schema.json",
 	} {
 		data, err := fs.ReadFile(repo, name)
 		if err != nil {
@@ -503,7 +504,7 @@ func TestPublishedSchemaInstancesValidate(t *testing.T) {
 			t.Fatalf("resolve repository root: %v", err)
 		}
 		compiler := jsonschema.NewCompiler()
-		for _, name := range []string{"registry.schema.json", "module.schema.json", "project.schema.json", "lock.schema.json"} {
+		for _, name := range []string{"registry.schema.json", "module.schema.json", "project.schema.json", "lock.schema.json", "snapshot.schema.json"} {
 			data, err := fs.ReadFile(repo, "registry/schema/"+name)
 			if err != nil {
 				t.Fatalf("read schema %s: %v", name, err)
@@ -547,6 +548,7 @@ func TestPublishedSchemaInstancesValidate(t *testing.T) {
 	}
 	validate("registry/schema/project.schema.json", "gogogadget.json")
 	validate("registry/schema/lock.schema.json", "gogogadget.lock.json")
+	validate("registry/schema/snapshot.schema.json", RegistrySnapshotPath)
 
 	var instances []string
 	if err := fs.WalkDir(repo, "registry/modules", func(name string, entry fs.DirEntry, err error) error {

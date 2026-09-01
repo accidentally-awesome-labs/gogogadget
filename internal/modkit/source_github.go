@@ -75,7 +75,7 @@ func (s GitHubSource) Resolve(ctx context.Context, registry ProjectRegistry) (Sn
 		if !exists {
 			return Snapshot{}, fmt.Errorf("resolve GitHub source %q at %s offline: verified cache entry not found", repository, ref)
 		}
-		snapshot, found, err := githubCachedSnapshot(ctx, cacheDir, ref)
+		snapshot, found, err := githubCachedSnapshotForCommit(ctx, cacheDir, ref)
 		if err != nil {
 			return Snapshot{}, fmt.Errorf("resolve GitHub source %q at %s offline: %w", repository, ref, err)
 		}
@@ -105,7 +105,7 @@ func (s GitHubSource) Resolve(ctx context.Context, registry ProjectRegistry) (Sn
 	if err := ensureGitHubCacheDir(cacheDir); err != nil {
 		return Snapshot{}, err
 	}
-	if snapshot, found, err := githubCachedSnapshot(ctx, cacheDir, commit); err != nil {
+	if snapshot, found, err := githubCachedSnapshotForCommit(ctx, cacheDir, commit); err != nil {
 		return Snapshot{}, fmt.Errorf("open GitHub cache for %q at %s: %w", repository, commit, err)
 	} else if found {
 		return validateGitHubSnapshot(snapshot, registry)
@@ -197,13 +197,20 @@ func (s GitHubSource) populateGitHubCache(ctx context.Context, client *http.Clie
 	if err := verifyGitHubTree(ctx, treePath); err != nil {
 		return Snapshot{}, fmt.Errorf("verify staged GitHub cache for %q at %s: %w", repository, commit, err)
 	}
-	if _, err := verifySnapshotFiles(os.DirFS(treePath), registry.PublicKey, false); err != nil {
+	snapshotDigest, err := verifySnapshotFiles(os.DirFS(treePath), registry.PublicKey, false)
+	if err != nil {
 		return Snapshot{}, fmt.Errorf("verify staged signed GitHub registry for %q at %s: %w", repository, commit, err)
 	}
+	if snapshotDigest == "" {
+		return Snapshot{}, fmt.Errorf("verify staged signed GitHub registry for %q at %s: empty snapshot digest", repository, commit)
+	}
+	if err := os.WriteFile(filepath.Join(stage, "commit"), []byte(commit+"\n"), 0o600); err != nil {
+		return Snapshot{}, fmt.Errorf("record GitHub snapshot commit %q: %w", commit, err)
+	}
 
-	finalPath := filepath.Join(cacheDir, commit)
+	finalPath := filepath.Join(cacheDir, snapshotDigest)
 	if err := os.Rename(stage, finalPath); err != nil {
-		winner, found, winnerErr := githubCachedSnapshot(ctx, cacheDir, commit)
+		winner, found, winnerErr := githubCachedSnapshot(ctx, cacheDir, snapshotDigest)
 		if winnerErr != nil {
 			return Snapshot{}, errors.Join(
 				fmt.Errorf("install staged GitHub cache %q as %q: %w", stage, finalPath, err),
@@ -217,7 +224,7 @@ func (s GitHubSource) populateGitHubCache(ctx context.Context, client *http.Clie
 	}
 	stage = ""
 
-	installed, found, err := githubCachedSnapshot(ctx, cacheDir, commit)
+	installed, found, err := githubCachedSnapshot(ctx, cacheDir, snapshotDigest)
 	if err != nil {
 		return Snapshot{}, fmt.Errorf("verify installed GitHub cache at %q: %w", finalPath, err)
 	}
@@ -311,8 +318,8 @@ func validateExistingGitHubCacheDir(cacheDir string) (bool, error) {
 	return true, nil
 }
 
-func githubCachedSnapshot(ctx context.Context, cacheDir, commit string) (Snapshot, bool, error) {
-	entryPath := filepath.Join(cacheDir, commit)
+func githubCachedSnapshot(ctx context.Context, cacheDir, cacheKey string) (Snapshot, bool, error) {
+	entryPath := filepath.Join(cacheDir, cacheKey)
 	entryInfo, err := os.Lstat(entryPath)
 	if errors.Is(err, fs.ErrNotExist) {
 		return Snapshot{}, false, nil
@@ -323,6 +330,17 @@ func githubCachedSnapshot(ctx context.Context, cacheDir, commit string) (Snapsho
 	if entryInfo.Mode()&fs.ModeSymlink != 0 || !entryInfo.IsDir() {
 		return Snapshot{}, false, fmt.Errorf("validate GitHub cache entry %q: expected a non-symlink directory", entryPath)
 	}
+	if !validSHA256(cacheKey) {
+		return Snapshot{}, false, fmt.Errorf("validate GitHub cache key %q: expected snapshot digest", cacheKey)
+	}
+	commitData, err := os.ReadFile(filepath.Join(entryPath, "commit"))
+	if err != nil {
+		return Snapshot{}, false, fmt.Errorf("read cached GitHub commit %q: %w", entryPath, err)
+	}
+	commit := strings.TrimSpace(string(commitData))
+	if !validGitHubCommit(commit) {
+		return Snapshot{}, false, fmt.Errorf("cached GitHub commit %q is invalid", commit)
+	}
 
 	archivePath := filepath.Join(entryPath, "archive.tar.gz")
 	archiveInfo, err := os.Lstat(archivePath)
@@ -332,7 +350,6 @@ func githubCachedSnapshot(ctx context.Context, cacheDir, commit string) (Snapsho
 	if archiveInfo.Mode()&fs.ModeSymlink != 0 || !archiveInfo.Mode().IsRegular() {
 		return Snapshot{}, false, fmt.Errorf("validate cached GitHub archive %q: expected a non-symlink regular file", archivePath)
 	}
-
 	treePath := filepath.Join(entryPath, "tree")
 	treeInfo, err := os.Lstat(treePath)
 	if err != nil {
@@ -344,8 +361,35 @@ func githubCachedSnapshot(ctx context.Context, cacheDir, commit string) (Snapsho
 	if err := verifyGitHubTree(ctx, treePath); err != nil {
 		return Snapshot{}, false, err
 	}
+	return Snapshot{Commit: commit, SnapshotSHA256: cacheKey, CacheKey: cacheKey, FS: os.DirFS(treePath)}, true, nil
+}
 
-	return Snapshot{Commit: commit, FS: os.DirFS(treePath)}, true, nil
+func githubCachedSnapshotForCommit(ctx context.Context, cacheDir, commit string) (Snapshot, bool, error) {
+	entries, err := os.ReadDir(cacheDir)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return Snapshot{}, false, nil
+		}
+		return Snapshot{}, false, err
+	}
+	var result Snapshot
+	found := false
+	for _, entry := range entries {
+		if !entry.IsDir() || !validSHA256(entry.Name()) {
+			continue
+		}
+		snapshot, ok, err := githubCachedSnapshot(ctx, cacheDir, entry.Name())
+		if err != nil {
+			return Snapshot{}, false, err
+		}
+		if ok && snapshot.Commit == commit {
+			if found {
+				return Snapshot{}, false, fmt.Errorf("multiple cached snapshots found for GitHub commit %q", commit)
+			}
+			result, found = snapshot, true
+		}
+	}
+	return result, found, nil
 }
 
 func verifyGitHubTree(ctx context.Context, treePath string) error {

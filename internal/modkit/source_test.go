@@ -212,6 +212,13 @@ func TestGitHubSourceResolvesAndCachesArchive(t *testing.T) {
 	if got := apiRequests.Load(); got != 2 {
 		t.Fatalf("API requests = %d, want 2 ref resolutions", got)
 	}
+	entries, err := os.ReadDir(cache)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != first.SnapshotSHA256 {
+		t.Fatalf("cache identity = %#v, want snapshot digest %q", entries, first.SnapshotSHA256)
+	}
 	payload, err := fs.ReadFile(second.FS, "registry/file")
 	if err != nil {
 		t.Fatalf("read cached payload: %v", err)
@@ -226,6 +233,23 @@ func TestGitHubSourceResolvesAndCachesArchive(t *testing.T) {
 	cached, err := offline.Resolve(context.Background(), offlineRegistry)
 	if err != nil {
 		t.Fatalf("Resolve(offline): %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(cache, first.SnapshotSHA256, "tree", "registry", "file"), []byte("corrupt"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	beforeCorrupt, err := os.ReadDir(cache)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := offline.Resolve(context.Background(), offlineRegistry); err == nil || !strings.Contains(err.Error(), "digest") {
+		t.Fatalf("Resolve(corrupt offline) error = %v, want digest refusal", err)
+	}
+	afterCorrupt, err := os.ReadDir(cache)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(afterCorrupt) != len(beforeCorrupt) || afterCorrupt[0].Name() != beforeCorrupt[0].Name() {
+		t.Fatalf("offline corruption changed cache entries: before=%v after=%v", beforeCorrupt, afterCorrupt)
 	}
 	if cached.Commit != testCommitA {
 		t.Fatalf("offline commit = %q, want %q", cached.Commit, testCommitA)

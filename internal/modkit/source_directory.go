@@ -227,21 +227,21 @@ func (s DirectorySource) Resolve(ctx context.Context, registry ProjectRegistry) 
 	if metadataErr != nil {
 		return Snapshot{}, metadataErr
 	}
-	snapshotDigest := commit
-	if registry.Source == "directory" {
-		verifyKey := registry.PublicKey
-		if verifyKey != "" {
-			if _, keyErr := RegistryKeyFingerprint(verifyKey); keyErr != nil {
-				return Snapshot{}, keyErr
-			}
+	if registry.Namespace != "" && registry.Namespace != rootMetadata.Namespace {
+		return Snapshot{}, fmt.Errorf("registry namespace %q does not match requested namespace %q", rootMetadata.Namespace, registry.Namespace)
+	}
+	verifyKey := registry.PublicKey
+	if verifyKey != "" {
+		if _, keyErr := RegistryKeyFingerprint(verifyKey); keyErr != nil {
+			return Snapshot{}, keyErr
 		}
-		digest, signedErr := verifySnapshotFiles(rootFS, verifyKey, true)
-		if signedErr != nil {
-			return Snapshot{}, signedErr
-		}
-		if digest != "" {
-			snapshotDigest = digest
-		}
+	}
+	snapshotDigest, verifyErr := verifySnapshotFiles(rootFS, verifyKey, true)
+	if verifyErr != nil {
+		return Snapshot{}, verifyErr
+	}
+	if snapshotDigest == "" {
+		snapshotDigest = commit
 	}
 	return Snapshot{
 		Commit: commit, SnapshotSHA256: snapshotDigest, CacheKey: snapshotDigest,

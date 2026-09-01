@@ -59,3 +59,28 @@ func registryProvenance(sources []resolvedRegistry, catalog Catalog, modules []M
 	}
 	return hex.EncodeToString(hash.Sum(nil)), registries, snapshots
 }
+
+// registryCommitForModules computes the lock identity from the live installed
+// modules. Removed tombstones are deliberately excluded: their source bytes no
+// longer participate in the resolved graph, while their migration ledger stays
+// in the lock.
+func registryCommitForModules(modules []LockedModule) string {
+	pairs := make([]string, 0, len(modules))
+	for _, module := range modules {
+		if module.Reason == removalTombstoneReason {
+			continue
+		}
+		digest := module.SnapshotSHA256
+		if digest == "" {
+			digest = module.SourceCommit
+		}
+		pairs = append(pairs, fmt.Sprintf("%s\x00%s", module.ID, digest))
+	}
+	sort.Strings(pairs)
+	hash := sha256.New()
+	for _, pair := range pairs {
+		_, _ = hash.Write([]byte(pair))
+		_, _ = hash.Write([]byte("\n"))
+	}
+	return hex.EncodeToString(hash.Sum(nil))
+}

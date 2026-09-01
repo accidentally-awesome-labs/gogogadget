@@ -3,10 +3,12 @@ package modkit
 import (
 	"bytes"
 	"context"
+	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
@@ -242,6 +244,21 @@ func TestExternalFixturePublicKeyFingerprintIsStable(t *testing.T) {
 		t.Fatalf("fingerprint = %q", fingerprint)
 	}
 }
+
+func TestExternalFixtureSignatureSeedIsReproducible(t *testing.T) {
+	seed := make([]byte, 32)
+	for i := range seed {
+		seed[i] = byte(i)
+	}
+	private, err := RegistryPrivateKeyFromSeed(seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	public := base64.StdEncoding.EncodeToString(private.Public().(ed25519.PublicKey))
+	if public != externalFixturePublicKey {
+		t.Fatalf("derived public key = %q, want fixture key %q", public, externalFixturePublicKey)
+	}
+}
 func TestExternalFixtureDependencyInstallAndOwnerOnlyRemoval(t *testing.T) {
 	root := t.TempDir()
 	original := []byte("module example.com/derivative\n\ngo 1.26.6\n")
@@ -417,11 +434,156 @@ func TestRegistryProvenanceTupleHashAndLockMetadata(t *testing.T) {
 		t.Fatalf("tuple registry commit = %q", hash)
 	}
 }
-func TestPlanEnvelopeRegistryCommitMatchesLock(t *testing.T) {
-	plan := Plan{RegistryCommit: "tuple-hash", Lock: Lock{RegistryCommit: "tuple-hash"}}
+func TestPlanEnvelopeRegistryCommitMatchesRealEnginePlan(t *testing.T) {
+	root := writeTargetProject(t, "example.com/plan-envelope", Project{
+		Schema:     2,
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "acme/registry", Ref: "main", PublicKey: externalFixturePublicKey}},
+		Modules:    []string{"ggg/component/card"},
+		Exclude:    []string{},
+		Providers:  map[string]ProviderSelections{},
+	})
+	engine := New(Options{Source: staticSource{snapshot: Snapshot{
+		Commit: testCommitA, FS: plannerRegistry(t),
+	}}})
+	plan, err := engine.Plan(context.Background(), root, Operation{Kind: OpSync})
+	if err != nil {
+		t.Fatalf("Engine.Plan: %v", err)
+	}
 	envelope := planEnvelope(plan, exitOK)
-	if envelope.RegistryCommit != plan.Lock.RegistryCommit {
-		t.Fatalf("envelope registry commit = %q, lock = %q", envelope.RegistryCommit, plan.Lock.RegistryCommit)
+	if envelope.RegistryCommit != registryCommitForModules(plan.Lock.Modules) {
+		t.Fatalf("envelope registry commit = %q, want tuple hash %q", envelope.RegistryCommit, registryCommitForModules(plan.Lock.Modules))
+	}
+	if envelope.RegistryCommit != plan.Lock.RegistryCommit || envelope.RegistryCommit != plan.RegistryCommit {
+		t.Fatalf("plan/envelope lock identity mismatch: plan=%q lock=%q envelope=%q", plan.RegistryCommit, plan.Lock.RegistryCommit, envelope.RegistryCommit)
+	}
+}
+
+type dualRegistrySource struct {
+	core, external Snapshot
+}
+
+func (s dualRegistrySource) Resolve(_ context.Context, registry ProjectRegistry) (Snapshot, error) {
+	switch registry.Namespace {
+	case "ggg":
+		return s.core, nil
+	case "acme":
+		return s.external, nil
+	default:
+		return Snapshot{}, fmt.Errorf("unknown registry namespace %q", registry.Namespace)
+	}
+}
+
+func TestExternalFixtureEngineInstallApplyRemoveCompileAndRestore(t *testing.T) {
+	core := registryFixture(t)
+	configContent := []byte("package config\n\ntype Config struct{}\n")
+	config := Manifest{
+		ID: "ggg/system/config", Kind: ModuleSystem, Name: "config", Revision: 1, Contract: 1,
+		Title: "Config", Description: "Core configuration.", Requires: []Requirement{},
+		Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		Files:        []ManifestFile{{Source: "registry/modules/system/config/config.go", Target: "internal/config/config.go", Class: FileClassGo, SHA256: sha256Hex(configContent), RewriteModule: true, Contract: true}},
+		Claims:       NamespaceClaims{Packages: []string{"internal/config"}},
+		Runtime: RuntimeContributions{System: &SystemContribution{
+			Package: "internal/config", Constructor: "NewModule",
+			Needs: []RuntimeNeed{}, Provides: []RuntimeProvide{{Field: "Config", Capability: "config", Type: "*config.Config"}},
+		}},
+		Migrations: []ManifestMigration{}, Environment: []EnvironmentVariable{}, Docs: []DocumentationRef{}, Tests: TestMetadata{}, Data: []DataDeclaration{},
+		RemovalPolicy: RemovalFree,
+	}
+	addPlannerModule(t, core, config, configContent)
+	mailContent := []byte("package mail\n\nimport \"context\"\n\ntype Message struct { To string }\ntype Sender interface { Send(context.Context, Message) error }\n")
+	mail := Manifest{
+		ID: "ggg/system/mail", Kind: ModuleSystem, Name: "mail", Revision: 1, Contract: 1,
+		Title: "Mail seam", Description: "Core mail contract.", Requires: []Requirement{},
+		Dependencies: Dependencies{Go: []GoDependency{}, Tools: []ToolArtifact{}, Containers: []ContainerDependency{}},
+		Files:        []ManifestFile{{Source: "registry/modules/system/mail/mail.go", Target: "internal/mail/mail.go", Class: FileClassGo, SHA256: sha256Hex(mailContent), RewriteModule: true, Contract: true}},
+		Claims:       NamespaceClaims{Packages: []string{"internal/mail"}, ProviderSlots: []string{"ggg/mail"}},
+		Runtime:      RuntimeContributions{ProviderSlots: []ProviderSlotContribution{{ID: "ggg/mail", Capabilities: []CapabilityContribution{{Capability: "mail.sender", Type: "mail.Sender"}}}}},
+		Migrations:   []ManifestMigration{}, Environment: []EnvironmentVariable{}, Docs: []DocumentationRef{}, Tests: TestMetadata{}, Data: []DataDeclaration{},
+		RemovalPolicy: RemovalFree,
+	}
+	addPlannerModule(t, core, mail, mailContent)
+	external := externalFixtureMapFS(t, nil)
+	modulePath := "registry/modules/system/mail-bridge.json"
+	var document ModuleDocument
+	if err := decodeStrict(external[modulePath].Data, &document); err != nil {
+		t.Fatal(err)
+	}
+	document.Module.Runtime.System.Adapter.Targets[0].Environments = []string{"development", "test", "production"}
+	putJSON(t, external, modulePath, document)
+	projectRoot := t.TempDir()
+	writeTestFile(t, projectRoot, "go.mod", []byte("module example.com/external-engine\n\ngo 1.26.6\n\nrequire github.com/stretchr/testify v1.11.1\n"))
+	project := Project{
+		Schema: 2,
+		Registries: []ProjectRegistry{
+			{Namespace: "ggg", Source: "directory", Path: "registry"},
+			{Namespace: "acme", Source: "directory", Path: "registry"},
+		},
+		Modules: []string{"ggg/system/config", "ggg/system/mail", "acme/system/mail-bridge"}, Exclude: []string{},
+		Providers: map[string]ProviderSelections{"ggg/mail": {
+			Development: ProviderSelection{Adapter: "acme/system/mail-bridge", Target: "bridge"},
+			Test:        ProviderSelection{Adapter: "acme/system/mail-bridge", Target: "bridge"},
+			Production:  ProviderSelection{Adapter: "acme/system/mail-bridge", Target: "bridge"},
+		}},
+	}
+	projectData, err := MarshalProject(project)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, projectRoot, ProjectFileName, projectData)
+	source := dualRegistrySource{
+		core:     Snapshot{Commit: testCommitA, FS: core},
+		external: Snapshot{Commit: testCommitB, SnapshotSHA256: testCommitB, FS: external},
+	}
+	engine := New(Options{Source: source, Generator: &scriptedGenerator{}, ToolRunner: OSCommandRunner{}})
+	plan, err := engine.Plan(context.Background(), projectRoot, Operation{Kind: OpSync})
+	if err != nil {
+		t.Fatalf("Engine.Plan: %v", err)
+	}
+	if _, err := engine.Apply(context.Background(), plan); err != nil {
+		t.Fatalf("Engine.Apply: %v", err)
+	}
+	bridgePath := filepath.Join(projectRoot, "internal/fixture/mailbridge/mail_bridge.go")
+	if _, err := os.Stat(bridgePath); err != nil {
+		t.Fatalf("external adapter was not installed: %v", err)
+	}
+	compile := exec.CommandContext(context.Background(), "go", "test", "./...")
+	compile.Dir = projectRoot
+	compile.Env = append(os.Environ(), "GOFLAGS=-mod=mod")
+	if output, err := compile.CombinedOutput(); err != nil {
+		t.Fatalf("external adapter compile: %v\n%s", err, output)
+	}
+	project.Providers = map[string]ProviderSelections{}
+	projectData, err = MarshalProject(project)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestFile(t, projectRoot, ProjectFileName, projectData)
+	beforeRemove := map[string][]byte{}
+	for _, name := range []string{"go.mod", "internal/mail/mail.go"} {
+		data, err := os.ReadFile(filepath.Join(projectRoot, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		beforeRemove[name] = data
+	}
+	remove, err := engine.Plan(context.Background(), projectRoot, Operation{Kind: OpRemove, Modules: []string{"acme/system/mail-bridge"}})
+	if err != nil {
+		t.Fatalf("Engine.Plan(remove): %v", err)
+	}
+	if _, err := engine.Apply(context.Background(), remove); err != nil {
+		t.Fatalf("Engine.Apply(remove): %v", err)
+	}
+	if _, err := os.Stat(bridgePath); !os.IsNotExist(err) {
+		t.Fatalf("external adapter source remains after removal: %v", err)
+	}
+	for name, want := range beforeRemove {
+		got, err := os.ReadFile(filepath.Join(projectRoot, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(got, want) {
+			t.Fatalf("%s changed after external install/remove", name)
+		}
 	}
 }
 func TestExternalRegistryRemainingSecurityContracts(t *testing.T) {

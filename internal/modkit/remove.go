@@ -158,24 +158,57 @@ func (e *Engine) planRemove(
 		}
 	}
 
-	var drainSnapshot *Snapshot
+	var drainSnapshots map[string]Snapshot
 	if needsDrainSnapshot {
 		if op.Offline {
-			return Plan{}, fmt.Errorf("drain-required removal needs the registry at commit %s; offline removal cannot materialize it", currentLock.RegistryCommit)
+			return Plan{}, fmt.Errorf("drain-required removal needs the registry at a pinned snapshot; offline removal cannot materialize it")
 		}
-		snapshot, err := e.source.Resolve(ctx, project.Registries[0])
-		if err != nil {
-			return Plan{}, fmt.Errorf("resolve registry %s at %s for drain migrations: %w",
-				project.Registries[0].Repository, currentLock.RegistryCommit, err)
-		}
-		if len(currentLock.Snapshots) > 0 {
-			wantCommit := currentLock.Snapshots[0].Commit
-			if snapshot.Commit != wantCommit {
-				return Plan{}, fmt.Errorf("drain registry resolved commit %s, want lock snapshot commit %s",
-					snapshot.Commit, wantCommit)
+		drainSnapshots = make(map[string]Snapshot)
+		for _, id := range requested {
+			module := installed[id]
+			if module.Manifest.RemovalPolicy != RemovalDrainRequired {
+				continue
 			}
+			namespace := module.RegistryNamespace
+			if namespace == "" {
+				return Plan{}, fmt.Errorf("drain-required module %s has no registry namespace pin", id)
+			}
+			var configured ProjectRegistry
+			foundRegistry := false
+			for _, candidate := range project.Registries {
+				if candidate.Namespace == namespace {
+					configured = candidate
+					foundRegistry = true
+					break
+				}
+			}
+			if !foundRegistry {
+				return Plan{}, fmt.Errorf("drain-required module %s registry namespace %q is not configured", id, namespace)
+			}
+			var pinned LockedSnapshot
+			foundSnapshot := false
+			for _, candidate := range currentLock.Snapshots {
+				if candidate.Namespace == namespace {
+					pinned = candidate
+					foundSnapshot = true
+					break
+				}
+			}
+			if !foundSnapshot || pinned.Commit == "" {
+				return Plan{}, fmt.Errorf("drain-required module %s has no pinned snapshot for registry namespace %q", id, namespace)
+			}
+			configured.Ref = pinned.Commit
+			snapshot, err := e.source.Resolve(ctx, configured)
+			if err != nil {
+				return Plan{}, fmt.Errorf("resolve registry %s at %s for drain migrations: %w",
+					namespace, pinned.Commit, err)
+			}
+			if snapshot.Commit != pinned.Commit {
+				return Plan{}, fmt.Errorf("drain registry %s resolved commit %s, want lock snapshot commit %s",
+					namespace, snapshot.Commit, pinned.Commit)
+			}
+			drainSnapshots[namespace] = snapshot
 		}
-		drainSnapshot = &snapshot
 	}
 
 	desired := project
@@ -197,7 +230,7 @@ func (e *Engine) planRemove(
 	}
 
 	allocated := make(map[string][]LockedMigration, len(requested))
-	if drainSnapshot != nil {
+	if len(drainSnapshots) > 0 {
 		maxNumber := 0
 		for _, module := range currentLock.Modules {
 			for _, migration := range module.Migrations {
@@ -230,6 +263,10 @@ func (e *Engine) planRemove(
 				migration, ok := manifestMigrationOfKind(module.Manifest, kind)
 				if !ok {
 					return Plan{}, fmt.Errorf("module %s lacks a %s migration", id, kind)
+				}
+				drainSnapshot, ok := drainSnapshots[module.RegistryNamespace]
+				if !ok {
+					return Plan{}, fmt.Errorf("drain snapshot for registry namespace %q is unavailable", module.RegistryNamespace)
 				}
 				content, err := fs.ReadFile(drainSnapshot.FS, migration.Source)
 				if err != nil {
@@ -369,7 +406,7 @@ func (e *Engine) planRemove(
 	}
 	sort.Slice(modules, func(i, j int) bool { return modules[i].ID < modules[j].ID })
 	finalLock := Lock{
-		Schema: 2, RegistryCommit: currentLock.RegistryCommit,
+		Schema: 2, RegistryCommit: registryCommitForModules(modules),
 		Registries: append([]LockedRegistry{}, currentLock.Registries...),
 		Snapshots:  append([]LockedSnapshot{}, currentLock.Snapshots...),
 		Order:      order, RuntimeOrders: currentLock.RuntimeOrders,
@@ -416,7 +453,7 @@ func (e *Engine) planRemove(
 	operation := op
 	operation.Modules = append([]string{}, op.Modules...)
 	return Plan{
-		Operation: operation, Root: canonicalRoot, RegistryCommit: currentLock.RegistryCommit,
+		Operation: operation, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit,
 		ModulePath: modulePath, Project: desired, Lock: finalLock,
 		Resolved: resolved, Order: append([]string{}, order...),
 		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: []StagedFile{},

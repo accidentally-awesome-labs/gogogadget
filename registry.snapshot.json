@@ -32,11 +32,11 @@
     },
     {
       "path": "registry/external-testdata/registry.snapshot.json",
-      "sha256": "10514a09a74da1b238d45d64d3c5ab7fb11e14e0862d6683f17bd631275fe195"
+      "sha256": "6eb05573aabfaf0c9190e120b1055aa2b2d0b1aba633b5fb7fa49ce9a948eae2"
     },
     {
       "path": "registry/external-testdata/registry.snapshot.sig",
-      "sha256": "7d4fc3394e524f11c2f4d3d96796bab09589768cbc30fa1dcc97498794aa04f7"
+      "sha256": "3fc28c889ba12f779c20ac5fcd4b596b8cab0847de6751e03014f1d3b94d9af4"
     },
     {
       "path": "registry/external-testdata/registry/components.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "registry/external-testdata/registry/modules/system/mail-bridge.json",
-      "sha256": "e13e56a40a3abc9b5afd0657760897bf9d48991eb1e9ea750f47619da3620d65"
+      "sha256": "95a885085a77bc8256e83337ae75569577ed0fcfd48d25fa3740171c025f0f2b"
     },
     {
       "path": "registry/external-testdata/registry/modules/system/mail-bridge/contracts.go.txt",
@@ -896,7 +896,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "9cab6690f3d2b9508ea55cfdc22b14d6dccdec0a9ad0dc0f7deb7aa1794e4443"
+      "sha256": "5c70f556e29d207c913060145589521f6137cef16c314c649847585a4f299c48"
     },
     {
       "path": "registry/modules/system/notifications/module.json",
@@ -1104,7 +1104,7 @@
     },
     {
       "path": "registry/schema/snapshot.schema.json",
-      "sha256": "069709dc7b17dcb15ded7c9257e56c6e9e42c17c37ae2f1d2071d3fbb30f66ec"
+      "sha256": "4f0513124956ffad7ba9024ccc153e5628aab1efaa4cc18e5a8e778e92482000"
     },
     {
       "path": "registry/systems.json",
