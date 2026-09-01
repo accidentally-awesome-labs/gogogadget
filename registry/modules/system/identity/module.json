@@ -59,7 +59,7 @@
         "source": "internal/identity/deleter.go",
         "target": "internal/identity/deleter.go",
         "class": "go",
-        "sha256": "9e354912fb693cb0688e422dba4a911aea9e1fff6e75c3d084b9eaa8ed68e0e4",
+        "sha256": "7a28751c90509f5df219a2e4dab73cc6c3461b4d4b61468221c16b832c7fd32e",
         "rewrite_module": true,
         "contract": true
       },
@@ -67,7 +67,7 @@
         "source": "internal/identity/fetcher.go",
         "target": "internal/identity/fetcher.go",
         "class": "go",
-        "sha256": "ea12515eae5ce05967462778102f7b086e43ccdaacc2002f69840f633162e186",
+        "sha256": "deb5144f2c826a52a81cbfbd927c1a8820ab1b3ce9671382eb18ec8edb86d09d",
         "rewrite_module": true,
         "contract": true
       },
@@ -83,7 +83,7 @@
         "source": "internal/identity/module.go",
         "target": "internal/identity/module.go",
         "class": "go",
-        "sha256": "b873e2b28e78dde4797651f04d348b29e3f755cad22295fce96f49fc9a266952",
+        "sha256": "7c72f42e6e41f7e869b9265c4883ba95e6f029671f1c00653a20f1842f7acc39",
         "rewrite_module": true,
         "contract": true
       },
@@ -107,7 +107,7 @@
         "source": "internal/identity/verifier.go",
         "target": "internal/identity/verifier.go",
         "class": "go",
-        "sha256": "47bb8680c0585e106d90d87df3d1eb28d0d8f0bb1088e6278e0f282a41510418",
+        "sha256": "0ab3c8f82195cb823aac832c1e3b45b33d0bf4b2fb47d1d7877d74016e8f0e37",
         "rewrite_module": true,
         "contract": true
       },

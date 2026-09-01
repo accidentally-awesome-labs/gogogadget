@@ -90,7 +90,7 @@
         "source": "internal/billing/module.go",
         "target": "internal/billing/module.go",
         "class": "go",
-        "sha256": "ab78fbd19169649cdd87d72d5101e542cbea31d8ecb073cf988e5aee21e5938c",
+        "sha256": "f0295be345fde6f9f23d99754019a31bd0ad42457f4e7f7a36a53e2c8c551f5e",
         "rewrite_module": true,
         "contract": true
       },
@@ -114,7 +114,7 @@
         "source": "internal/billing/plans.go",
         "target": "internal/billing/plans.go",
         "class": "go",
-        "sha256": "003de85a1622cd6c07822689a119fb9cb48f1151fc40cc6c394ef91c1650d913",
+        "sha256": "a939b6ec15000564a0217314e914b3c4f8c0fb67b1a2b97b08ad143c6b9b8b12",
         "rewrite_module": true,
         "contract": true
       },
@@ -138,7 +138,7 @@
         "source": "internal/billing/webhook.go",
         "target": "internal/billing/webhook.go",
         "class": "go",
-        "sha256": "209b13db8ae3b7aba7e164502c87838d80b892b6850658bfcffe922116b56d36",
+        "sha256": "4d295e82f9310e8e2815134990ff49968a42b571176a1ebd22274286e35e4c01",
         "rewrite_module": true,
         "contract": false
       },
