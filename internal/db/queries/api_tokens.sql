@@ -1,5 +1,5 @@
 -- name: InsertAPIToken :one
-INSERT INTO api_tokens (clerk_org_id, name, token_hash, scope, expires_at)
+INSERT INTO api_tokens (org_id, name, token_hash, scope, expires_at)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
@@ -11,8 +11,8 @@ UPDATE api_tokens SET last_used_at = now() WHERE id = $1;
 
 -- name: ListAPITokensByOrg :many
 SELECT * FROM api_tokens
-WHERE clerk_org_id = $1
+WHERE org_id = $1
 ORDER BY created_at DESC;
 
 -- name: RevokeAPIToken :exec
-UPDATE api_tokens SET revoked_at = now() WHERE id = $1 AND clerk_org_id = $2;
+UPDATE api_tokens SET revoked_at = now() WHERE id = $1 AND org_id = $2;

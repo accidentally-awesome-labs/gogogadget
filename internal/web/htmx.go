@@ -131,7 +131,7 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	// Feature gates flow into templates via the request context (SettingsTabs
 	// hides the Webhooks tab when its flag is off for this org).
 	if page.Org != nil && s.flags != nil {
-		r = r.WithContext(templates.WithWebhooksEnabled(r.Context(), s.flags.Enabled(r.Context(), page.Org.ClerkOrgID, "webhooks")))
+		r = r.WithContext(templates.WithWebhooksEnabled(r.Context(), s.flags.Enabled(r.Context(), page.Org.OrgID, "webhooks")))
 	}
 
 	component := content

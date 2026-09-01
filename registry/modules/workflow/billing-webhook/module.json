@@ -1,14 +1,44 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "billing.webhook.receive"
-      ]
-    },
+    "id": "ggg/workflow/billing-webhook",
+    "kind": "workflow",
+    "name": "billing-webhook",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Billing provider webhook",
+    "description": "Receives Polar subscription events, verifies the Standard Webhooks signature, and drives the subscription state machine.",
+    "requires": [
+      {
+        "id": "ggg/system/billing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -19,84 +49,54 @@
           "version": "v0.0.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Receives Polar subscription events, verifies the Standard Webhooks signature, and drives the subscription state machine.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "ba50fa5c1d4e6681c49913a6b914e23f10f480bde79a1df7f61edbd07332d534",
         "source": "internal/web/workflow_billing_webhook.go",
-        "target": "internal/web/workflow_billing_webhook.go"
+        "target": "internal/web/workflow_billing_webhook.go",
+        "class": "go",
+        "sha256": "43a138319139be0f8fd485e2eee61d75cd4868d5007d51c26eda5ba3c58860ac",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
-    "id": "ggg/workflow/billing-webhook",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "billing-webhook",
-    "removal_policy": "major-version-only",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/billing"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
+    "claims": {
+      "routes": [
+        "billing.webhook.receive"
+      ]
+    },
     "runtime": {
       "routes": [
         {
-          "handler": "handlePolarWebhook",
           "id": "billing.webhook.receive",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/webhooks/polar",
+          "scope": "webhook",
           "policy": {
-            "admin_write": false,
             "csrf_exempt": true,
             "csrf_reason": "Standard Webhooks signature verified with POLAR_WEBHOOK_SECRET; not a browser form",
-            "idempotent": true,
+            "rate_exempt": false,
             "maintenance_exempt": true,
             "max_body_bytes": 1048576,
-            "rate_exempt": false
+            "idempotent": true,
+            "admin_write": false
           },
-          "scope": "webhook"
+          "package": "internal/web",
+          "handler": "handlePolarWebhook"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Billing provider webhook"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "major-version-only"
+  }
 }

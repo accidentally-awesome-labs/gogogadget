@@ -20,7 +20,7 @@ WHERE id IN (
   ORDER BY next_run_at
   FOR UPDATE SKIP LOCKED
 )
-RETURNING id, name, kind, payload, clerk_org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at
+RETURNING id, name, kind, payload, org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at
 `
 
 // Advances next_run_at to now()+interval in the same statement: missed ticks
@@ -39,7 +39,7 @@ func (q *Queries) ClaimDueSchedules(ctx context.Context) ([]Schedule, error) {
 			&i.Name,
 			&i.Kind,
 			&i.Payload,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.EverySeconds,
 			&i.NextRunAt,
 			&i.LastRunAt,
@@ -59,16 +59,16 @@ func (q *Queries) ClaimDueSchedules(ctx context.Context) ([]Schedule, error) {
 
 const createSchedule = `-- name: CreateSchedule :one
 
-INSERT INTO schedules (name, kind, payload, clerk_org_id, every_seconds, next_run_at)
+INSERT INTO schedules (name, kind, payload, org_id, every_seconds, next_run_at)
 VALUES ($1, $2, $3, $4, $5, COALESCE($6::timestamptz, now()))
-RETURNING id, name, kind, payload, clerk_org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at
+RETURNING id, name, kind, payload, org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at
 `
 
 type CreateScheduleParams struct {
 	Name         string             `json:"name"`
 	Kind         string             `json:"kind"`
 	Payload      []byte             `json:"payload"`
-	ClerkOrgID   pgtype.Text        `json:"clerk_org_id"`
+	OrgID        pgtype.Text        `json:"org_id"`
 	EverySeconds int32              `json:"every_seconds"`
 	NextRunAt    pgtype.Timestamptz `json:"next_run_at"`
 }
@@ -79,7 +79,7 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 		arg.Name,
 		arg.Kind,
 		arg.Payload,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.EverySeconds,
 		arg.NextRunAt,
 	)
@@ -89,7 +89,7 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 		&i.Name,
 		&i.Kind,
 		&i.Payload,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.EverySeconds,
 		&i.NextRunAt,
 		&i.LastRunAt,
@@ -110,7 +110,7 @@ func (q *Queries) DeleteSchedule(ctx context.Context, id int64) error {
 }
 
 const getSchedule = `-- name: GetSchedule :one
-SELECT id, name, kind, payload, clerk_org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at FROM schedules WHERE id = $1
+SELECT id, name, kind, payload, org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at FROM schedules WHERE id = $1
 `
 
 func (q *Queries) GetSchedule(ctx context.Context, id int64) (Schedule, error) {
@@ -121,7 +121,7 @@ func (q *Queries) GetSchedule(ctx context.Context, id int64) (Schedule, error) {
 		&i.Name,
 		&i.Kind,
 		&i.Payload,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.EverySeconds,
 		&i.NextRunAt,
 		&i.LastRunAt,
@@ -133,7 +133,7 @@ func (q *Queries) GetSchedule(ctx context.Context, id int64) (Schedule, error) {
 }
 
 const listSchedules = `-- name: ListSchedules :many
-SELECT id, name, kind, payload, clerk_org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at FROM schedules ORDER BY name
+SELECT id, name, kind, payload, org_id, every_seconds, next_run_at, last_run_at, enabled, created_at, updated_at FROM schedules ORDER BY name
 `
 
 func (q *Queries) ListSchedules(ctx context.Context) ([]Schedule, error) {
@@ -150,7 +150,7 @@ func (q *Queries) ListSchedules(ctx context.Context) ([]Schedule, error) {
 			&i.Name,
 			&i.Kind,
 			&i.Payload,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.EverySeconds,
 			&i.NextRunAt,
 			&i.LastRunAt,

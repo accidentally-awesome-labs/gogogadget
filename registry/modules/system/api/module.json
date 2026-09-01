@@ -1,34 +1,37 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "internal/api"
-      ],
-      "queries": [
-        "api_tokens",
-        "idempotency_keys"
-      ]
-    },
+    "id": "ggg/system/api",
+    "kind": "system",
+    "name": "api",
+    "revision": 1,
     "contract": 1,
-    "data": [
+    "title": "JSON API",
+    "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
+    "requires": [
       {
-        "account_delete": "retain",
-        "export": true,
-        "organization_delete": "cascade",
-        "scope": "org",
-        "secret_redaction_owner": "system/api",
-        "table": "api_tokens"
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       },
       {
-        "account_delete": "retain",
-        "export": false,
-        "organization_delete": "cascade",
-        "scope": "org",
-        "table": "idempotency_keys"
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/rate-limit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       }
     ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -39,129 +42,185 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The second transport: bearer-token authentication, per-token rate limiting, idempotency keys, cursor pagination, and the OpenAPI description.",
-    "docs": [],
-    "environment": [
-      {
-        "default": "60",
-        "description": "Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated",
-        "field": "APIRateLimitPerMinute",
-        "key": "API_RATE_LIMIT_RPM",
-        "min": 1,
-        "type": "int"
-      }
-    ],
     "files": [
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "37eeabae6a4e47f3b2284886af9cae1a52eb21763bbd0f67dda72c61f6e9fe23",
         "source": "internal/api/ai.go",
-        "target": "internal/api/ai.go"
+        "target": "internal/api/ai.go",
+        "class": "go",
+        "sha256": "9c2d140f64b2a50823bf1c35c9220fb14da402b2856c24de38ce824753cb597c",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
         "source": "internal/api/cursor.go",
-        "target": "internal/api/cursor.go"
+        "target": "internal/api/cursor.go",
+        "class": "go",
+        "sha256": "74add469ba1ecc70124304dd081bf00c2328510578211b87306c4159b1327eee",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
         "source": "internal/api/cursor_test.go",
-        "target": "internal/api/cursor_test.go"
+        "target": "internal/api/cursor_test.go",
+        "class": "go",
+        "sha256": "d0689e7a0506f773757e019806167ed8db73e35f0b7770604761e12f82b62bce",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "603769c16c593758ac7aa24fefdb0d4212ae69d6d5cf7fa7b36bff0741943068",
         "source": "internal/api/idempotency.go",
-        "target": "internal/api/idempotency.go"
+        "target": "internal/api/idempotency.go",
+        "class": "go",
+        "sha256": "f5bd2a36e258cc321063664dfcfd9ad7c883be497d250a95fb87d3eb8ecf34fa",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "5ef8579194aed2eda52a7d439edafee044a560bd396e291524c1d61aca84c059",
         "source": "internal/api/openapi.go",
-        "target": "internal/api/openapi.go"
+        "target": "internal/api/openapi.go",
+        "class": "go",
+        "sha256": "5ef8579194aed2eda52a7d439edafee044a560bd396e291524c1d61aca84c059",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "476788638d7ef1a3b95a2a512dcf6fe43ff891c3c435bcdafeed8f727a3c6a28",
         "source": "internal/api/projects.go",
-        "target": "internal/api/projects.go"
+        "target": "internal/api/projects.go",
+        "class": "go",
+        "sha256": "f1633c507e261f98b27bbc40ab1cee8371389a93f8a38889573cb8c15d9c6e46",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "e587f0fd47b5b45309bc4c295fab43e884861915655970893844a036b6cae473",
         "source": "internal/api/tokens.go",
-        "target": "internal/api/tokens.go"
+        "target": "internal/api/tokens.go",
+        "class": "go",
+        "sha256": "53a1292fc95957fd9324f6418f466db6b73f0910c6f74ee280d573e49ea2dc4a",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
         "source": "internal/api/tokens_test.go",
-        "target": "internal/api/tokens_test.go"
-      },
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "2257325aa01ed5d8e30ba53a3d5715fa577aab39fac808a7b9619c65153e3f97",
-        "source": "internal/db/queries/api_tokens.sql",
-        "target": "internal/db/queries/api_tokens.sql"
-      },
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "b7936497cf18803ae6ac9c9e340a4fa11f8eb7fde20b00f065abcd38162cf426",
-        "source": "internal/db/queries/idempotency_keys.sql",
-        "target": "internal/db/queries/idempotency_keys.sql"
-      },
-      {
+        "target": "internal/api/tokens_test.go",
         "class": "go",
-        "contract": false,
+        "sha256": "a79f707991a64cd5dc93006b39d1c0ece29986e89ea13e73505c14e0ac96120e",
         "rewrite_module": true,
-        "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
-        "source": "internal/jobs/janitor_api.go",
-        "target": "internal/jobs/janitor_api.go"
+        "contract": false
       },
       {
-        "class": "test",
-        "contract": false,
+        "source": "internal/db/queries/api_tokens.sql",
+        "target": "internal/db/queries/api_tokens.sql",
+        "class": "query",
+        "sha256": "3d72487e4bd1ccc7bf3c9671dfd3757f57f108a8ef6d08c0ac36025f66cca980",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/idempotency_keys.sql",
+        "target": "internal/db/queries/idempotency_keys.sql",
+        "class": "query",
+        "sha256": "572136a982038663a28b094099036b3bbd146e2879e2e797179149cde78386a9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/janitor_api.go",
+        "target": "internal/jobs/janitor_api.go",
+        "class": "go",
+        "sha256": "60aa5336100eff662e4b20b67e3f9d48e55c0e96d3a4c38a226119a593e6bcb5",
         "rewrite_module": true,
-        "sha256": "1cdcf1c72ccb7b55553cf315151ec5a27c2f8cec46845bb407c7d9ef7416fe7b",
+        "contract": false
+      },
+      {
         "source": "internal/web/idempotency_test.go",
-        "target": "internal/web/idempotency_test.go"
+        "target": "internal/web/idempotency_test.go",
+        "class": "test",
+        "sha256": "31c3b70ef0b893bad56188e26b2fd55a4c5e0b6943cbb1008c99e786d34dcf89",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/system/api",
-    "kind": "system",
+    "claims": {
+      "packages": [
+        "internal/api"
+      ],
+      "queries": [
+        "api_tokens",
+        "idempotency_keys"
+      ]
+    },
+    "runtime": {
+      "janitors": [
+        {
+          "name": "idempotency_keys",
+          "package": "internal/jobs",
+          "handler": "janitorIdempotencyKeys"
+        }
+      ],
+      "queries": [
+        {
+          "name": "ClaimIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "CompleteIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "DeleteOldIdempotencyKeys",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "GetAPITokenByHash",
+          "table": "api_tokens"
+        },
+        {
+          "name": "GetIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "InsertAPIToken",
+          "table": "api_tokens"
+        },
+        {
+          "name": "ListAPITokensByOrg",
+          "table": "api_tokens"
+        },
+        {
+          "name": "ReleaseIdempotencyKey",
+          "table": "idempotency_keys"
+        },
+        {
+          "name": "RevokeAPIToken",
+          "table": "api_tokens"
+        },
+        {
+          "name": "TouchAPIToken",
+          "table": "api_tokens"
+        }
+      ]
+    },
     "migrations": [
       {
         "id": "0015_idempotency_keys",
         "kind": "immutable",
-        "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4",
-        "source": "internal/db/migrations/0015_idempotency_keys.sql"
+        "source": "internal/db/migrations/0015_idempotency_keys.sql",
+        "sha256": "d17a465e02a1ef405ff50a8c93294d3035631ca637296a9e09d9cff67c4397b4"
       }
     ],
-    "name": "api",
+    "environment": [
+      {
+        "key": "API_RATE_LIMIT_RPM",
+        "field": "APIRateLimitPerMinute",
+        "type": "int",
+        "description": "Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated",
+        "default": "60",
+        "min": 1
+      }
+    ],
     "openapi": {
       "components": {
         "responses": {
@@ -282,88 +341,29 @@
         }
       }
     },
-    "removal_policy": "major-version-only",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/rate-limit"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "janitors": [
-        {
-          "handler": "janitorIdempotencyKeys",
-          "name": "idempotency_keys",
-          "package": "internal/jobs"
-        }
-      ],
-      "queries": [
-        {
-          "name": "ClaimIdempotencyKey",
-          "table": "idempotency_keys"
-        },
-        {
-          "name": "CompleteIdempotencyKey",
-          "table": "idempotency_keys"
-        },
-        {
-          "name": "DeleteOldIdempotencyKeys",
-          "table": "idempotency_keys"
-        },
-        {
-          "name": "GetAPITokenByHash",
-          "table": "api_tokens"
-        },
-        {
-          "name": "GetIdempotencyKey",
-          "table": "idempotency_keys"
-        },
-        {
-          "name": "InsertAPIToken",
-          "table": "api_tokens"
-        },
-        {
-          "name": "ListAPITokensByOrg",
-          "table": "api_tokens"
-        },
-        {
-          "name": "ReleaseIdempotencyKey",
-          "table": "idempotency_keys"
-        },
-        {
-          "name": "RevokeAPIToken",
-          "table": "api_tokens"
-        },
-        {
-          "name": "TouchAPIToken",
-          "table": "api_tokens"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/api"
       ]
     },
-    "title": "JSON API"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "api_tokens",
+        "scope": "org",
+        "export": true,
+        "secret_redaction_owner": "system/api",
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      },
+      {
+        "table": "idempotency_keys",
+        "scope": "org",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "major-version-only"
+  }
 }

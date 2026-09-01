@@ -16,9 +16,9 @@ func TestCreateRoundtrip(t *testing.T) {
 	_, q := testdb.Open(t, "schedules")
 	ctx := context.Background()
 
-	// Org-bound schedule: clerk_org_id FK requires the org row.
+	// Org-bound schedule: org_id FK requires the org row.
 	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{
-		ClerkOrgID: "org_sched", Name: "Sched Org", Slug: "sched-org", ImageUrl: "",
+		OrgID: "org_sched", Name: "Sched Org", Slug: "sched-org", ImageUrl: "",
 	})
 	require.NoError(t, err)
 
@@ -26,13 +26,13 @@ func TestCreateRoundtrip(t *testing.T) {
 		Name:         "org-digest",
 		Kind:         "email.digest",
 		Payload:      map[string]any{"filter": "unread"},
-		ClerkOrgID:   "org_sched",
+		OrgID:   "org_sched",
 		EverySeconds: 3600,
 	})
 	require.NoError(t, err)
 	require.NotZero(t, orgSched.ID)
 
-	// System-wide schedule (ClerkOrgID "" → NULL).
+	// System-wide schedule (OrgID "" → NULL).
 	sysSched, err := schedules.Create(ctx, q, schedules.Schedule{
 		Name:         "system-sweep",
 		Kind:         "jobs.sweep",
@@ -54,8 +54,8 @@ func TestCreateRoundtrip(t *testing.T) {
 	assert.Equal(t, orgSched.ID, got.ID)
 	assert.Equal(t, "email.digest", got.Kind)
 	assert.JSONEq(t, `{"filter":"unread"}`, string(got.Payload))
-	assert.True(t, got.ClerkOrgID.Valid)
-	assert.Equal(t, "org_sched", got.ClerkOrgID.String)
+	assert.True(t, got.OrgID.Valid)
+	assert.Equal(t, "org_sched", got.OrgID.String)
 	assert.Equal(t, int32(3600), got.EverySeconds)
 	assert.True(t, got.Enabled)
 	assert.True(t, got.NextRunAt.Valid) // COALESCE → now()
@@ -63,7 +63,7 @@ func TestCreateRoundtrip(t *testing.T) {
 	got = byName["system-sweep"]
 	assert.Equal(t, sysSched.ID, got.ID)
 	assert.Equal(t, "jobs.sweep", got.Kind)
-	assert.False(t, got.ClerkOrgID.Valid) // system-wide = NULL
+	assert.False(t, got.OrgID.Valid) // system-wide = NULL
 	assert.Equal(t, int32(60), got.EverySeconds)
 }
 

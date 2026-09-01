@@ -1,46 +1,114 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "api.projects.create",
-        "api.projects.list"
-      ]
-    },
+    "id": "ggg/workflow/api-projects",
+    "kind": "workflow",
+    "name": "api-projects",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Projects API",
+    "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
+    "requires": [
+      {
+        "id": "ggg/system/api",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/workflow/openapi-contract",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The JSON API for listing and creating projects, behind bearer-token auth.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "e6adf3b0cfd0ec0dbe8b53c350ac6558eab17d0c564c223034155f50e0a73f35",
         "source": "internal/web/api_test.go",
-        "target": "internal/web/api_test.go"
+        "target": "internal/web/api_test.go",
+        "class": "test",
+        "sha256": "e27f5f218ac1a52243b72f7622e95d934bb0a3dfe507ac4a44f1e7686a0dc8f0",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/workflow/api-projects",
-    "kind": "workflow",
+    "claims": {
+      "routes": [
+        "api.projects.create",
+        "api.projects.list"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.projects.create",
+          "method": "POST",
+          "pattern": "/api/v1/projects",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPICreateProject"
+        },
+        {
+          "id": "api.projects.list",
+          "method": "GET",
+          "pattern": "/api/v1/projects",
+          "scope": "api-read",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIListProjects"
+        }
+      ]
+    },
     "migrations": [],
-    "name": "api-projects",
+    "environment": [],
     "openapi": {
+      "tags": [
+        {
+          "name": "projects",
+          "description": "The canonical CRUD resource."
+        }
+      ],
       "components": {
         "schemas": {
           "Project": {
             "properties": {
-              "clerk_org_id": {
+              "org_id": {
                 "description": "The organization the token belongs to.",
                 "type": "string"
               },
@@ -69,7 +137,7 @@
             },
             "required": [
               "id",
-              "clerk_org_id",
+              "org_id",
               "name",
               "status",
               "created_at",
@@ -81,8 +149,13 @@
       },
       "operations": [
         {
-          "description": "Newest first. Two pagination modes share one response shape:\n\n- **`cursor` (preferred)** \u2014 keyset paging. Follow `next_cursor` from\n  the previous response. Stable under concurrent writes: a cursor\n  names a row, so projects created while you page do not shift rows\n  across page boundaries, and depth costs nothing server-side.\n- **`offset` (legacy)** \u2014 the original contract, still honoured. It\n  repeats or drops rows when the set changes mid-walk.\n\n`next_cursor` is `null` on the last page. Cursors are opaque: echo\nthem back verbatim, never parse or construct them.\n",
+          "route_id": "api.projects.list",
           "operation_id": "listProjects",
+          "summary": "List projects for the token's organization.",
+          "description": "Newest first. Two pagination modes share one response shape:\n\n- **`cursor` (preferred)** — keyset paging. Follow `next_cursor` from\n  the previous response. Stable under concurrent writes: a cursor\n  names a row, so projects created while you page do not shift rows\n  across page boundaries, and depth costs nothing server-side.\n- **`offset` (legacy)** — the original contract, still honoured. It\n  repeats or drops rows when the set changes mid-walk.\n\n`next_cursor` is `null` on the last page. Cursors are opaque: echo\nthem back verbatim, never parse or construct them.\n",
+          "tags": [
+            "projects"
+          ],
           "parameters": [
             {
               "description": "Page size. Values outside 1\u2013100 fall back to the default.",
@@ -192,16 +265,16 @@
             "500": {
               "$ref": "#/components/responses/InternalError"
             }
-          },
-          "route_id": "api.projects.list",
-          "summary": "List projects for the token's organization.",
-          "tags": [
-            "projects"
-          ]
+          }
         },
         {
-          "description": "Enforces the same plan limit as the UI: at the cap the call fails with\n402 `plan_limit` rather than silently succeeding.\n",
+          "route_id": "api.projects.create",
           "operation_id": "createProject",
+          "summary": "Create a project.",
+          "description": "Enforces the same plan limit as the UI: at the cap the call fails with\n402 `plan_limit` rather than silently succeeding.\n",
+          "tags": [
+            "projects"
+          ],
           "request_body": {
             "content": {
               "application/json": {
@@ -260,90 +333,17 @@
             "500": {
               "$ref": "#/components/responses/InternalError"
             }
-          },
-          "route_id": "api.projects.create",
-          "summary": "Create a project.",
-          "tags": [
-            "projects"
-          ]
-        }
-      ],
-      "tags": [
-        {
-          "description": "The canonical CRUD resource.",
-          "name": "projects"
+          }
         }
       ]
     },
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/api"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/workflow/openapi-contract"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "routes": [
-        {
-          "handler": "handleAPICreateProject",
-          "id": "api.projects.create",
-          "method": "POST",
-          "package": "internal/web",
-          "pattern": "/api/v1/projects",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
-            "idempotent": true,
-            "maintenance_exempt": false,
-            "max_body_bytes": 65536,
-            "rate_exempt": false
-          },
-          "scope": "api-write"
-        },
-        {
-          "handler": "handleAPIListProjects",
-          "id": "api.projects.list",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/api/v1/projects",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "api-read"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Projects API"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -18,8 +18,8 @@ func Log(ctx context.Context, q *sqlc.Queries, orgID, userID, action string, met
 		raw = []byte(`{}`)
 	}
 	_, err = q.InsertAuditLog(ctx, sqlc.InsertAuditLogParams{
-		ClerkOrgID:  pgtype.Text{String: orgID, Valid: orgID != ""},
-		ClerkUserID: pgtype.Text{String: userID, Valid: userID != ""},
+		OrgID:  pgtype.Text{String: orgID, Valid: orgID != ""},
+		UserID: pgtype.Text{String: userID, Valid: userID != ""},
 		Action:      action,
 		Metadata:    raw,
 	})

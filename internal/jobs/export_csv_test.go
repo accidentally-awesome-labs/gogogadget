@@ -20,12 +20,12 @@ func TestExportProjectsCSVJob(t *testing.T) {
 	dir := t.TempDir()
 	w.Storage = storagefs.NewDevStore(dir)
 
-	_, err := pool.Exec(ctx, "INSERT INTO users (clerk_user_id, email, name, avatar_url) VALUES ('user_ex', 'ex@example.com', 'EX', '') ON CONFLICT DO NOTHING")
+	_, err := pool.Exec(ctx, "INSERT INTO users (user_id, email, name, avatar_url) VALUES ('user_ex', 'ex@example.com', 'EX', '') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, "INSERT INTO orgs (clerk_org_id, name, slug) VALUES ('org_ex', 'EX', 'ex') ON CONFLICT DO NOTHING")
+	_, err = pool.Exec(ctx, "INSERT INTO orgs (org_id, name, slug) VALUES ('org_ex', 'EX', 'ex') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
 	for _, name := range []string{"Alpha", "Beta"} {
-		_, err = q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_ex", Name: name})
+		_, err = q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_ex", Name: name})
 		require.NoError(t, err)
 	}
 
@@ -36,7 +36,7 @@ func TestExportProjectsCSVJob(t *testing.T) {
 		Key      string
 		Filename string
 	}
-	require.NoError(t, pool.QueryRow(ctx, "SELECT storage_key, filename FROM files WHERE clerk_org_id = 'org_ex'").Scan(&f.Key, &f.Filename))
+	require.NoError(t, pool.QueryRow(ctx, "SELECT storage_key, filename FROM files WHERE org_id = 'org_ex'").Scan(&f.Key, &f.Filename))
 	// The key carries a nanosecond prefix so two exports in the same second
 	// cannot overwrite each other; the human filename rides along after it.
 	assert.True(t, strings.HasPrefix(f.Key, "exports/org_ex/"), "keys stay namespaced per org: %s", f.Key)
@@ -52,7 +52,7 @@ func TestExportProjectsCSVJob(t *testing.T) {
 
 	// Notification with the download link.
 	var title, url string
-	require.NoError(t, pool.QueryRow(ctx, "SELECT title, url FROM notifications WHERE clerk_user_id = 'user_ex'").Scan(&title, &url))
+	require.NoError(t, pool.QueryRow(ctx, "SELECT title, url FROM notifications WHERE user_id = 'user_ex'").Scan(&title, &url))
 	assert.Equal(t, "Projects export ready", title)
 	assert.True(t, strings.HasPrefix(url, "/app/files/"))
 }

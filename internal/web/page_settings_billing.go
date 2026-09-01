@@ -22,12 +22,12 @@ func (s *Server) handleSettingsBilling(w http.ResponseWriter, r *http.Request) {
 	// render a polling fragment instead of asserting on immediate state.
 	processing := r.URL.Query().Get("success") == "1" && (sub == nil || sub.Status == "incomplete")
 
-	count, err := s.q.CountProjectsByOrg(ctx, org.ClerkOrgID)
+	count, err := s.q.CountProjectsByOrg(ctx, org.OrgID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	usedBytes, err := s.q.SumBytesByOrg(ctx, org.ClerkOrgID)
+	usedBytes, err := s.q.SumBytesByOrg(ctx, org.OrgID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -37,7 +37,7 @@ func (s *Server) handleSettingsBilling(w http.ResponseWriter, r *http.Request) {
 		monthStart := time.Date(s.cfg.Now().Year(), s.cfg.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
 		for _, m := range plan.Meters {
 			v, err := s.q.SumUsageByNameSince(ctx, sqlc.SumUsageByNameSinceParams{
-				ClerkOrgID: org.ClerkOrgID, Name: m.Key, CreatedAt: pgtype.Timestamptz{Time: monthStart, Valid: true},
+				OrgID: org.OrgID, Name: m.Key, CreatedAt: pgtype.Timestamptz{Time: monthStart, Valid: true},
 			})
 			if err != nil {
 				s.renderError(w, r, err.Error())

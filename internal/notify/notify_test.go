@@ -14,19 +14,19 @@ import (
 func seedUserOrg(t *testing.T, q *sqlc.Queries, userID, orgID string) {
 	t.Helper()
 	ctx := context.Background()
-	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: orgID, Name: orgID, Slug: orgID, ImageUrl: ""})
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: orgID, Name: orgID, Slug: orgID, ImageUrl: ""})
 	require.NoError(t, err)
-	_, err = q.UpsertUser(ctx, sqlc.UpsertUserParams{ClerkUserID: userID, Email: userID + "@example.com", Name: userID, AvatarUrl: ""})
+	_, err = q.UpsertUser(ctx, sqlc.UpsertUserParams{UserID: userID, Email: userID + "@example.com", Name: userID, AvatarUrl: ""})
 	require.NoError(t, err)
 	require.NoError(t, q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{
-		ClerkOrgID: orgID, ClerkUserID: userID, Role: "org:admin",
+		OrgID: orgID, UserID: userID, Role: "org:admin",
 	}))
 }
 
 func countNotifications(t *testing.T, q *sqlc.Queries, orgID, userID string) int64 {
 	t.Helper()
 	n, err := q.CountNotificationsByUser(context.Background(), sqlc.CountNotificationsByUserParams{
-		ClerkOrgID: orgID, ClerkUserID: userID,
+		OrgID: orgID, UserID: userID,
 	})
 	require.NoError(t, err)
 	return n
@@ -41,7 +41,7 @@ func TestSendWritesRow(t *testing.T) {
 
 	require.Equal(t, int64(1), countNotifications(t, q, "org_n", "user_n"))
 	rows, err := q.ListNotificationsByUser(ctx, sqlc.ListNotificationsByUserParams{
-		ClerkOrgID: "org_n", ClerkUserID: "user_n", Limit: 10, Offset: 0,
+		OrgID: "org_n", UserID: "user_n", Limit: 10, Offset: 0,
 	})
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
@@ -57,7 +57,7 @@ func TestSendMutedKindWritesNothing(t *testing.T) {
 
 	// Explicit opt-out row mutes the kind…
 	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
-		ClerkUserID: "user_n2", Kind: "welcome", InApp: false,
+		UserID: "user_n2", Kind: "welcome", InApp: false,
 	}))
 	notify.Send(ctx, q, "org_n2", "user_n2", "welcome", "Hello", "Body", "")
 	assert.Zero(t, countNotifications(t, q, "org_n2", "user_n2"), "muted kind must not land")
@@ -68,7 +68,7 @@ func TestSendMutedKindWritesNothing(t *testing.T) {
 
 	// …and a row set back to true un-mutes.
 	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
-		ClerkUserID: "user_n2", Kind: "welcome", InApp: true,
+		UserID: "user_n2", Kind: "welcome", InApp: true,
 	}))
 	notify.Send(ctx, q, "org_n2", "user_n2", "welcome", "Hello", "", "")
 	assert.Equal(t, int64(2), countNotifications(t, q, "org_n2", "user_n2"))
@@ -81,7 +81,7 @@ func TestSendOrgFansOutPerMember(t *testing.T) {
 	seedUserOrg(t, q, "user_m2", "org_o")
 	// Mute ONE member's kind: fan-out honors per-user prefs.
 	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
-		ClerkUserID: "user_m2", Kind: "payment_failed", InApp: false,
+		UserID: "user_m2", Kind: "payment_failed", InApp: false,
 	}))
 
 	notify.SendOrg(ctx, q, "org_o", "payment_failed", "Failed", "", "")

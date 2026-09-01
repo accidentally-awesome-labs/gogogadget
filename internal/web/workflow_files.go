@@ -41,13 +41,13 @@ func (s *Server) handleFileUpload(w http.ResponseWriter, r *http.Request) {
 
 	// Quota: existing bytes + incoming size vs plan cap.
 	if plan.MaxStorageMB > 0 {
-		used, err := s.q.SumBytesByOrg(ctx, org.ClerkOrgID)
+		used, err := s.q.SumBytesByOrg(ctx, org.OrgID)
 		if err != nil {
 			s.renderError(w, r, err.Error())
 			return
 		}
 		if used+header.Size > int64(plan.MaxStorageMB)*1024*1024 {
-			d, err := s.filesData(r, org.ClerkOrgID, 1, true)
+			d, err := s.filesData(r, org.OrgID, 1, true)
 			if err != nil {
 				s.renderError(w, r, err.Error())
 				return
@@ -57,14 +57,14 @@ func (s *Server) handleFileUpload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	key := storage.NewKey(org.ClerkOrgID, header.Filename)
+	key := storage.NewKey(org.OrgID, header.Filename)
 	size, err := s.store.Put(ctx, key, fileContentType(header), f)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
 	file, err := s.q.InsertFile(ctx, sqlc.InsertFileParams{
-		ClerkOrgID: org.ClerkOrgID, UploaderUserID: user.ClerkUserID,
+		OrgID: org.OrgID, UploaderUserID: user.UserID,
 		Filename: header.Filename, ContentType: fileContentType(header),
 		SizeBytes: size, StorageKey: key,
 	})
@@ -73,7 +73,7 @@ func (s *Server) handleFileUpload(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "file.uploaded", map[string]any{
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "file.uploaded", map[string]any{
 		"id": file.ID, "filename": file.Filename, "size_bytes": file.SizeBytes,
 	})
 	Toast(w, "success", "File uploaded")
@@ -95,7 +95,7 @@ func (s *Server) fileForOrg(w http.ResponseWriter, r *http.Request, orgID string
 		http.NotFound(w, r)
 		return sqlc.File{}, false
 	}
-	f, err := s.q.GetFileByID(r.Context(), sqlc.GetFileByIDParams{ID: id, ClerkOrgID: orgID})
+	f, err := s.q.GetFileByID(r.Context(), sqlc.GetFileByIDParams{ID: id, OrgID: orgID})
 	if err != nil {
 		http.NotFound(w, r)
 		return sqlc.File{}, false
@@ -107,7 +107,7 @@ func (s *Server) fileForOrg(w http.ResponseWriter, r *http.Request, orgID string
 // uploads are untrusted bytes; the global nosniff header backs this up.
 func (s *Server) handleFileDownload(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
-	f, ok := s.fileForOrg(w, r, org.ClerkOrgID)
+	f, ok := s.fileForOrg(w, r, org.OrgID)
 	if !ok {
 		return
 	}
@@ -121,17 +121,17 @@ func (s *Server) handleFileDelete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 	user := identity.UserFrom(r.Context())
-	f, ok := s.fileForOrg(w, r, org.ClerkOrgID)
+	f, ok := s.fileForOrg(w, r, org.OrgID)
 	if !ok {
 		return
 	}
-	if err := s.q.DeleteFile(ctx, sqlc.DeleteFileParams{ID: f.ID, ClerkOrgID: org.ClerkOrgID}); err != nil {
+	if err := s.q.DeleteFile(ctx, sqlc.DeleteFileParams{ID: f.ID, OrgID: org.OrgID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
 	// Object cleanup is best-effort: an orphaned object is cheaper than a
 	// resolvable 500 after the row is already gone.
 	_ = s.store.Delete(ctx, f.StorageKey)
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "file.deleted", map[string]any{"id": f.ID})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "file.deleted", map[string]any{"id": f.ID})
 	w.WriteHeader(http.StatusOK)
 }

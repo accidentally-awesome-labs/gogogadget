@@ -19,7 +19,7 @@ import (
 type exportShape struct {
 	ExportedAt string `json:"exported_at"`
 	User       struct {
-		ClerkUserID string `json:"clerk_user_id"`
+		UserID string `json:"user_id"`
 		Email       string `json:"email"`
 	} `json:"user"`
 	Memberships []struct {
@@ -50,7 +50,7 @@ func TestAccountExportDownloadsJSON(t *testing.T) {
 
 	var export exportShape
 	require.NoError(t, json.Unmarshal([]byte(body), &export))
-	assert.Equal(t, "user_ex", export.User.ClerkUserID)
+	assert.Equal(t, "user_ex", export.User.UserID)
 	assert.Equal(t, "user_ex@example.com", export.User.Email)
 	require.Len(t, export.Memberships, 1)
 	assert.Equal(t, "org_ex", export.Memberships[0].OrgID)
@@ -70,7 +70,7 @@ func TestAccountDeleteSoleMemberOrgCascades(t *testing.T) {
 	code, _, body := postForm(t, s, "/app/settings/account/delete", form, cookie)
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
 	assert.Contains(t, body, "match")
-	_, err := s.q.GetUserByClerkID(t.Context(), "user_del")
+	_, err := s.q.GetUserByID(t.Context(), "user_del")
 	require.NoError(t, err, "user survives a mismatched confirm")
 
 	// Right email → account + sole-member org gone, cookie cleared, redirect home.
@@ -86,9 +86,9 @@ func TestAccountDeleteSoleMemberOrgCascades(t *testing.T) {
 	}
 	assert.True(t, cleared, "session cookie cleared")
 
-	_, err = s.q.GetUserByClerkID(t.Context(), "user_del")
+	_, err = s.q.GetUserByID(t.Context(), "user_del")
 	require.Error(t, err, "mirror row deleted")
-	_, err = s.q.GetOrgByClerkID(t.Context(), "org_del")
+	_, err = s.q.GetOrgByID(t.Context(), "org_del")
 	require.Error(t, err, "sole-member org deleted with the account")
 
 	// Audit rows deliberately survive (audit_log has no FKs by design).
@@ -106,7 +106,7 @@ func TestAccountDeleteBlockedWhenSoleAdminOfMultiMemberOrg(t *testing.T) {
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
 	assert.Contains(t, body, "org_bl", "blocker names the org")
 
-	_, err := s.q.GetUserByClerkID(t.Context(), "user_bl")
+	_, err := s.q.GetUserByID(t.Context(), "user_bl")
 	require.NoError(t, err, "nothing deleted when blocked")
 }
 
@@ -136,7 +136,7 @@ func TestAccountDeleteRefusedUnderImpersonation(t *testing.T) {
 		adminCookie,
 		&http.Cookie{Name: "ggg_imp", Value: imp})
 	assert.Equal(t, http.StatusForbidden, code, "never delete under impersonation")
-	_, err := s.q.GetUserByClerkID(t.Context(), "user_imp_t")
+	_, err := s.q.GetUserByID(t.Context(), "user_imp_t")
 	require.NoError(t, err, "target user survives")
 }
 

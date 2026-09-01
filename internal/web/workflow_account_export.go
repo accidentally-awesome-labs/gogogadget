@@ -35,7 +35,7 @@ func (s *Server) handleAccountExport(w http.ResponseWriter, r *http.Request) {
 	user := identity.UserFrom(r.Context())
 	org := identity.OrgFrom(r.Context())
 
-	orgs, err := s.q.GetOrgsForUser(ctx, user.ClerkUserID)
+	orgs, err := s.q.GetOrgsForUser(ctx, user.UserID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -49,16 +49,16 @@ func (s *Server) handleAccountExport(w http.ResponseWriter, r *http.Request) {
 		Audit:         []sqlc.ListAuditByUserRow{},
 	}
 	for _, o := range orgs {
-		m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: o.ClerkOrgID, ClerkUserID: user.ClerkUserID})
+		m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: o.OrgID, UserID: user.UserID})
 		if err != nil {
 			s.renderError(w, r, err.Error())
 			return
 		}
 		export.Memberships = append(export.Memberships, exportMembership{
-			OrgID: o.ClerkOrgID, OrgName: o.Name, Role: m.Role, Since: m.CreatedAt.Time,
+			OrgID: o.OrgID, OrgName: o.Name, Role: m.Role, Since: m.CreatedAt.Time,
 		})
 		notes, err := s.q.ListNotificationsByUser(ctx, sqlc.ListNotificationsByUserParams{
-			ClerkOrgID: o.ClerkOrgID, ClerkUserID: user.ClerkUserID, Limit: 10000, Offset: 0,
+			OrgID: o.OrgID, UserID: user.UserID, Limit: 10000, Offset: 0,
 		})
 		if err != nil {
 			s.renderError(w, r, err.Error())
@@ -68,13 +68,13 @@ func (s *Server) handleAccountExport(w http.ResponseWriter, r *http.Request) {
 	}
 	// Declared preferences are part of the portable record: they are data the
 	// person entered, not derived state.
-	export.Preferences, err = s.q.ListNotificationPreferencesByUser(ctx, user.ClerkUserID)
+	export.Preferences, err = s.q.ListNotificationPreferencesByUser(ctx, user.UserID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
 	export.Audit, err = s.q.ListAuditByUser(ctx, sqlc.ListAuditByUserParams{
-		UserID: pgtype.Text{String: user.ClerkUserID, Valid: true}, Lim: 10000,
+		UserID: pgtype.Text{String: user.UserID, Valid: true}, Lim: 10000,
 	})
 	if err != nil {
 		s.renderError(w, r, err.Error())
@@ -88,9 +88,9 @@ func (s *Server) handleAccountExport(w http.ResponseWriter, r *http.Request) {
 	}
 	orgID := ""
 	if org != nil {
-		orgID = org.ClerkOrgID
+		orgID = org.OrgID
 	}
-	audit.Log(ctx, s.q, orgID, user.ClerkUserID, "account.exported", nil)
+	audit.Log(ctx, s.q, orgID, user.UserID, "account.exported", nil)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Disposition", `attachment; filename="gogogadget-data-export.json"`)

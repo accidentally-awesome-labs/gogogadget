@@ -37,8 +37,8 @@ func (m *MockClient) CreatePortalSession(_ context.Context, customerExternalID s
 	return m.PortalURL, nil
 }
 
-func (m *MockClient) RevokeSubscription(_ context.Context, polarSubscriptionID string) error {
-	m.RevokedIDs = append(m.RevokedIDs, polarSubscriptionID)
+func (m *MockClient) RevokeSubscription(_ context.Context, providerSubscriptionID string) error {
+	m.RevokedIDs = append(m.RevokedIDs, providerSubscriptionID)
 	return m.RevokeErr
 }
 

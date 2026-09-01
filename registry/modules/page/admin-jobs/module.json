@@ -1,14 +1,37 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "admin.jobs.index"
-      ]
-    },
+    "id": "ggg/page/admin-jobs",
+    "kind": "page",
+    "name": "admin-jobs",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Admin job queue",
+    "description": "The background job queue with state, attempt count, and dead-letter detail.",
+    "requires": [
+      {
+        "id": "ggg/system/jobs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -19,39 +42,74 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The background job queue with state, attempt count, and dead-letter detail.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "f7c61ae70a40c9e6486710b26bf0fc361c39d71803f1bcd6062ef3208cf74a3b",
         "source": "internal/web/admin_viewers_test.go",
-        "target": "internal/web/admin_viewers_test.go"
+        "target": "internal/web/admin_viewers_test.go",
+        "class": "test",
+        "sha256": "0d3e18227668c602e7bc8dd448d42c6dcf766c6f803563721a91ad0130e18372",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
         "source": "internal/web/handlers_admin_jobs.go",
-        "target": "internal/web/handlers_admin_jobs.go"
+        "target": "internal/web/handlers_admin_jobs.go",
+        "class": "go",
+        "sha256": "bdea16886e3d80cdca1e35a5cae38cfff7e268a329b369cf6eeb15c4560ddabe",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "b5a3c6e8186eabea7a0b9066ddfe3264f503eb214236ac94f4fe73c819f01cfa",
         "source": "internal/web/templates/admin_jobs.templ",
-        "target": "internal/web/templates/admin_jobs.templ"
+        "target": "internal/web/templates/admin_jobs.templ",
+        "class": "templ",
+        "sha256": "b5a3c6e8186eabea7a0b9066ddfe3264f503eb214236ac94f4fe73c819f01cfa",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/admin-jobs",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "admin.jobs.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.jobs.index",
+          "method": "GET",
+          "pattern": "/admin/jobs",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminJobs"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.jobs",
+          "area": "admin",
+          "route_id": "admin.jobs.index",
+          "label_key": "sidebar.admin_jobs",
+          "after": [
+            "nav.admin.audit"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "admin.jobs.col_actions": "Actions",
@@ -67,7 +125,7 @@
         "admin.jobs.requeue_title": "Requeue this job?",
         "admin.jobs.requeued": "Job requeued.",
         "admin.jobs.search_aria": "Search jobs",
-        "admin.jobs.search_placeholder": "Filter by kind\u2026",
+        "admin.jobs.search_placeholder": "Filter by kind…",
         "admin.jobs.status_dead": "dead",
         "admin.jobs.status_done": "done",
         "admin.jobs.status_pending": "pending",
@@ -78,91 +136,33 @@
       "es": {
         "admin.jobs.col_actions": "Acciones",
         "admin.jobs.col_attempts": "Intentos",
-        "admin.jobs.col_error": "\u00daltimo error",
+        "admin.jobs.col_error": "Último error",
         "admin.jobs.col_kind": "Tipo",
         "admin.jobs.col_run_at": "Ejecuta",
         "admin.jobs.col_status": "Estado",
         "admin.jobs.empty": "No hay trabajos que coincidan.",
         "admin.jobs.requeue": "Reencolar",
-        "admin.jobs.requeue_confirm": "\u00bfReencolar este trabajo fallido? Se reclamar\u00e1 de inmediato.",
+        "admin.jobs.requeue_confirm": "¿Reencolar este trabajo fallido? Se reclamará de inmediato.",
         "admin.jobs.requeue_row": "Reencolar %s",
-        "admin.jobs.requeue_title": "\u00bfReencolar este trabajo?",
+        "admin.jobs.requeue_title": "¿Reencolar este trabajo?",
         "admin.jobs.requeued": "Trabajo reencolado.",
         "admin.jobs.search_aria": "Buscar trabajos",
-        "admin.jobs.search_placeholder": "Filtrar por tipo\u2026",
+        "admin.jobs.search_placeholder": "Filtrar por tipo…",
         "admin.jobs.status_dead": "fallido",
         "admin.jobs.status_done": "completado",
         "admin.jobs.status_pending": "pendiente",
         "admin.jobs.status_retrying": "reintentando",
-        "admin.jobs.status_running": "en ejecuci\u00f3n",
+        "admin.jobs.status_running": "en ejecución",
         "admin.jobs.title": "Trabajos"
       }
     },
-    "migrations": [],
-    "name": "admin-jobs",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/jobs"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.admin.audit"
-          ],
-          "area": "admin",
-          "id": "nav.admin.jobs",
-          "label_key": "sidebar.admin_jobs",
-          "route_id": "admin.jobs.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleAdminJobs",
-          "id": "admin.jobs.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/admin/jobs",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "admin"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin job queue"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -17,7 +17,7 @@ func staffUser(t *testing.T, s *Server, id, org, role string) *http.Cookie {
 	t.Helper()
 	seedMembership(t, s, id, org, "org:admin")
 	require.NoError(t, s.q.SetUserAdminRole(t.Context(), sqlc.SetUserAdminRoleParams{
-		ClerkUserID: id, AdminRole: role,
+		UserID: id, AdminRole: role,
 	}))
 	return sessionCookie(id, org, "org:admin")
 }
@@ -123,7 +123,7 @@ func TestRoleChangePersistsAndAudits(t *testing.T) {
 		url.Values{"role": {identity.RoleSupport}}, admin)
 	require.Equal(t, http.StatusOK, code)
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_target")
+	u, err := s.q.GetUserByID(t.Context(), "user_target")
 	require.NoError(t, err)
 	assert.Equal(t, identity.RoleSupport, u.AdminRole)
 
@@ -142,7 +142,7 @@ func TestRoleChangeRejectsUnknownRole(t *testing.T) {
 		url.Values{"role": {"superuser"}}, admin)
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_target2")
+	u, err := s.q.GetUserByID(t.Context(), "user_target2")
 	require.NoError(t, err)
 	assert.Empty(t, u.AdminRole, "an unsupported role must not reach the CHECK constraint")
 }
@@ -165,7 +165,7 @@ func TestLastAdminCannotBeDemoted(t *testing.T) {
 	assert.Contains(t, strings.ToLower(hdr.Get("HX-Trigger")), "last admin",
 		"a refused demotion must tell the user why")
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_last")
+	u, err := s.q.GetUserByID(t.Context(), "user_last")
 	require.NoError(t, err)
 	assert.Equal(t, identity.RoleAdmin, u.AdminRole, "the last admin keeps the role")
 
@@ -174,7 +174,7 @@ func TestLastAdminCannotBeDemoted(t *testing.T) {
 	code, _, _ = postForm(t, s, "/admin/users/user_last/role",
 		url.Values{"role": {identity.RoleSupport}}, admin)
 	require.Equal(t, http.StatusOK, code)
-	u, err = s.q.GetUserByClerkID(t.Context(), "user_last")
+	u, err = s.q.GetUserByID(t.Context(), "user_last")
 	require.NoError(t, err)
 	assert.Equal(t, identity.RoleSupport, u.AdminRole)
 }
@@ -204,7 +204,7 @@ func TestImpersonationEndsWhenAdminDemotedToSupport(t *testing.T) {
 	require.NotNil(t, impCookie, "impersonation session cookie")
 
 	require.NoError(t, s.q.SetUserAdminRole(t.Context(), sqlc.SetUserAdminRoleParams{
-		ClerkUserID: "user_imp_adm", AdminRole: identity.RoleSupport,
+		UserID: "user_imp_adm", AdminRole: identity.RoleSupport,
 	}))
 
 	// The session must not survive the demotion: /admin is forbidden for the

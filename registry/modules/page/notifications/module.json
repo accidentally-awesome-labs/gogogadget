@@ -1,53 +1,114 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "notifications.index"
-      ]
-    },
+    "id": "ggg/page/notifications",
+    "kind": "page",
+    "name": "notifications",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Notifications list",
+    "description": "The signed-in user's notification inbox list with unread count and pagination, rendered full-page or as an htmx list fragment.",
+    "requires": [
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/notifications",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The signed-in user's notification inbox list with unread count and pagination, rendered full-page or as an htmx list fragment.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "fdd48b18ead1921b448409c9e94acc48345b90c8af2e4b8cfc689b43deabf747",
         "source": "internal/web/notifications_test.go",
-        "target": "internal/web/notifications_test.go"
+        "target": "internal/web/notifications_test.go",
+        "class": "test",
+        "sha256": "77e48286eea2f5fdf2cbf0ed88c57d040616f09156fb5004ba8d8090b8072c37",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "048399492453c24b42a7d241ca67a5dd9268f7f529eb493a5baa5b87e4a33b30",
         "source": "internal/web/page_notifications.go",
-        "target": "internal/web/page_notifications.go"
+        "target": "internal/web/page_notifications.go",
+        "class": "go",
+        "sha256": "d4f204193114ab0a31aaee0c35992f1663585af76829122e3dd8b82b80cc9c35",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "b1d147bf2529f444367ca3d2b661267aff9a23be6cce61a48a808dd3b1486a25",
         "source": "internal/web/templates/notifications.templ",
-        "target": "internal/web/templates/notifications.templ"
+        "target": "internal/web/templates/notifications.templ",
+        "class": "templ",
+        "sha256": "b1d147bf2529f444367ca3d2b661267aff9a23be6cce61a48a808dd3b1486a25",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/notifications",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "notifications.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "notifications.index",
+          "method": "GET",
+          "pattern": "/app/notifications",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleNotifications"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "notifications.empty_body": "You're all caught up.",
@@ -64,88 +125,27 @@
         "notifications.unread_aria": "%d unread notifications"
       },
       "es": {
-        "notifications.empty_body": "Est\u00e1s al d\u00eda.",
+        "notifications.empty_body": "Estás al día.",
         "notifications.empty_title": "No hay notificaciones",
-        "notifications.kind.export_ready": "Exportaci\u00f3n lista",
+        "notifications.kind.export_ready": "Exportación lista",
         "notifications.kind.payment_failed": "Pago fallido",
         "notifications.kind.webhook_failed": "Entrega de webhook fallida",
         "notifications.kind.welcome": "Bienvenida",
-        "notifications.mark_read": "Marcar como le\u00eddo",
+        "notifications.mark_read": "Marcar como leído",
         "notifications.open": "Abrir",
-        "notifications.read_all": "Marcar todo como le\u00eddo",
+        "notifications.read_all": "Marcar todo como leído",
         "notifications.title": "Notificaciones",
         "notifications.unread": "Sin leer",
         "notifications.unread_aria": "%d notificaciones sin leer"
       }
     },
-    "migrations": [],
-    "name": "notifications",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/notifications"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "routes": [
-        {
-          "handler": "handleNotifications",
-          "id": "notifications.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/notifications",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Notifications list"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

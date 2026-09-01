@@ -45,7 +45,7 @@ func (w *Worker) sendDigests(ctx context.Context, _ SchedulePayload) error {
 			since = u.LastDigestAt.Time
 		}
 		rows, err := w.q.ListNotificationsSince(ctx, sqlc.ListNotificationsSinceParams{
-			ClerkUserID: u.ClerkUserID,
+			UserID: u.UserID,
 			CreatedAt:   pgtype.Timestamptz{Time: since, Valid: true},
 			Limit:       digestMaxItems,
 		})
@@ -55,7 +55,7 @@ func (w *Worker) sendDigests(ctx context.Context, _ SchedulePayload) error {
 		if len(rows) == 0 {
 			// Nothing happened. Stamp anyway: a quiet account must not be
 			// rescanned on every pass, and an empty digest is spam.
-			if err := w.q.MarkUserDigestSent(ctx, u.ClerkUserID); err != nil {
+			if err := w.q.MarkUserDigestSent(ctx, u.UserID); err != nil {
 				return err
 			}
 			quiet++
@@ -74,7 +74,7 @@ func (w *Worker) sendDigests(ctx context.Context, _ SchedulePayload) error {
 		if err := w.sender.Send(ctx, msg); err != nil {
 			return err // retried with backoff; unstamped users are still due
 		}
-		if err := w.q.MarkUserDigestSent(ctx, u.ClerkUserID); err != nil {
+		if err := w.q.MarkUserDigestSent(ctx, u.UserID); err != nil {
 			return err
 		}
 		sent++

@@ -28,22 +28,22 @@ func TestRoundtripEveryTable(t *testing.T) {
 
 	// users
 	u, err := q.UpsertUser(ctx, sqlc.UpsertUserParams{
-		ClerkUserID: "user_rt1", Email: "rt@example.com", Name: "RT", AvatarUrl: "",
+		UserID: "user_rt1", Email: "rt@example.com", Name: "RT", AvatarUrl: "",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, "rt@example.com", string(u.Email))
-	gotU, err := q.GetUserByClerkID(ctx, "user_rt1")
+	gotU, err := q.GetUserByID(ctx, "user_rt1")
 	require.NoError(t, err)
-	assert.Equal(t, u.ClerkUserID, gotU.ClerkUserID)
+	assert.Equal(t, u.UserID, gotU.UserID)
 	assert.Equal(t, "weekly", gotU.DigestFrequency, "a new user is opted into the digest by default")
 	assert.False(t, gotU.LastDigestAt.Valid, "never sent = due immediately")
 
 	// digest cadence + stamp
 	require.NoError(t, q.SetUserDigestFrequency(ctx, sqlc.SetUserDigestFrequencyParams{
-		ClerkUserID: "user_rt1", DigestFrequency: "daily",
+		UserID: "user_rt1", DigestFrequency: "daily",
 	}))
 	require.NoError(t, q.MarkUserDigestSent(ctx, "user_rt1"))
-	gotU, err = q.GetUserByClerkID(ctx, "user_rt1")
+	gotU, err = q.GetUserByID(ctx, "user_rt1")
 	require.NoError(t, err)
 	assert.Equal(t, "daily", gotU.DigestFrequency)
 	require.True(t, gotU.LastDigestAt.Valid)
@@ -51,39 +51,41 @@ func TestRoundtripEveryTable(t *testing.T) {
 	due, err := q.ListUsersDueForDigest(ctx, 100)
 	require.NoError(t, err)
 	for _, d := range due {
-		assert.NotEqual(t, "user_rt1", d.ClerkUserID, "a freshly stamped user must drop out of the due set")
+		assert.NotEqual(t, "user_rt1", d.UserID, "a freshly stamped user must drop out of the due set")
 	}
 
 	// orgs
 	_, err = q.UpsertOrg(ctx, sqlc.UpsertOrgParams{
-		ClerkOrgID: "org_rt1", Name: "RT Org", Slug: "rt-org", ImageUrl: "",
+		OrgID: "org_rt1", Name: "RT Org", Slug: "rt-org", ImageUrl: "",
 	})
 	require.NoError(t, err)
-	_, err = q.GetOrgByClerkID(ctx, "org_rt1")
+	_, err = q.GetOrgByID(ctx, "org_rt1")
 	require.NoError(t, err)
 
 	// memberships
 	require.NoError(t, q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{
-		ClerkOrgID: "org_rt1", ClerkUserID: "user_rt1", Role: "org:admin",
+		OrgID: "org_rt1", UserID: "user_rt1", Role: "org:admin",
 	}))
 	members, err := q.ListMembersByOrg(ctx, "org_rt1")
 	require.NoError(t, err)
 	require.Len(t, members, 1)
 	assert.Equal(t, "org:admin", members[0].Role)
 
-	// subscriptions (upsert conflict target is clerk_org_id)
+	// subscriptions (upsert conflict target is org_id)
 	sub, err := q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_rt1", PolarSubscriptionID: pgtype.Text{String: "sub_1", Valid: true},
-		PolarCustomerID: "cust_1", ProductKey: "pro", Status: "active",
+		Provider: "polar",
+		OrgID: "org_rt1", ProviderSubscriptionID: pgtype.Text{String: "sub_1", Valid: true},
+		ProviderCustomerID: "cust_1", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)
 	sub2, err := q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_rt1", PolarSubscriptionID: pgtype.Text{String: "sub_2", Valid: true},
-		PolarCustomerID: "cust_1", ProductKey: "team", Status: "trialing",
+		Provider: "polar",
+		OrgID: "org_rt1", ProviderSubscriptionID: pgtype.Text{String: "sub_2", Valid: true},
+		ProviderCustomerID: "cust_1", ProductKey: "team", Status: "trialing",
 	})
 	require.NoError(t, err)
 	assert.Equal(t, sub.ID, sub2.ID, "resubscribe must overwrite the same org row")
-	assert.Equal(t, "sub_2", sub2.PolarSubscriptionID.String)
+	assert.Equal(t, "sub_2", sub2.ProviderSubscriptionID.String)
 
 	// webhook idempotency
 	id1, err := q.InsertWebhookEvent(ctx, sqlc.InsertWebhookEventParams{ID: "wh_rt1", Provider: "clerk", EventType: "user.created"})
@@ -94,28 +96,28 @@ func TestRoundtripEveryTable(t *testing.T) {
 
 	// audit
 	_, err = q.InsertAuditLog(ctx, sqlc.InsertAuditLogParams{
-		ClerkOrgID:  pgtype.Text{String: "org_rt1", Valid: true},
-		ClerkUserID: pgtype.Text{String: "user_rt1", Valid: true},
+		OrgID:  pgtype.Text{String: "org_rt1", Valid: true},
+		UserID: pgtype.Text{String: "user_rt1", Valid: true},
 		Action:      "project.created",
 		Metadata:    []byte(`{"name":"x"}`),
 	})
 	require.NoError(t, err)
-	rows, err := q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{ClerkOrgID: pgtype.Text{String: "org_rt1", Valid: true}, Limit: 10, Offset: 0})
+	rows, err := q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{OrgID: pgtype.Text{String: "org_rt1", Valid: true}, Limit: 10, Offset: 0})
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
 	assert.Equal(t, "rt@example.com", rows[0].ActorEmail)
 
 	// projects
-	p, err := q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_rt1", Name: "Alpha"})
+	p, err := q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_rt1", Name: "Alpha"})
 	require.NoError(t, err)
-	_, err = q.UpdateProject(ctx, sqlc.UpdateProjectParams{ID: p.ID, ClerkOrgID: "org_rt1", Name: "Alpha 2"})
+	_, err = q.UpdateProject(ctx, sqlc.UpdateProjectParams{ID: p.ID, OrgID: "org_rt1", Name: "Alpha 2"})
 	require.NoError(t, err)
-	found, err := q.ListProjectsByOrg(ctx, sqlc.ListProjectsByOrgParams{ClerkOrgID: "org_rt1", Column2: "lpha", Limit: 10, Offset: 0})
+	found, err := q.ListProjectsByOrg(ctx, sqlc.ListProjectsByOrgParams{OrgID: "org_rt1", Column2: "lpha", Limit: 10, Offset: 0})
 	require.NoError(t, err)
 	require.Len(t, found, 1)
 	assert.Equal(t, "Alpha 2", found[0].Name)
 	// cross-org reads never leak
-	_, err = q.GetProjectByID(ctx, sqlc.GetProjectByIDParams{ID: p.ID, ClerkOrgID: "org_other"})
+	_, err = q.GetProjectByID(ctx, sqlc.GetProjectByIDParams{ID: p.ID, OrgID: "org_other"})
 	require.ErrorIs(t, err, pgx.ErrNoRows)
 
 	// jobs
@@ -131,13 +133,13 @@ func TestRoundtripEveryTable(t *testing.T) {
 
 	// api tokens
 	tid, err := q.InsertAPIToken(ctx, sqlc.InsertAPITokenParams{
-		ClerkOrgID: "org_rt1", Name: "ci", TokenHash: "hash_rt1", Scope: "write",
+		OrgID: "org_rt1", Name: "ci", TokenHash: "hash_rt1", Scope: "write",
 	})
 	require.NoError(t, err)
 	tok, err := q.GetAPITokenByHash(ctx, "hash_rt1")
 	require.NoError(t, err)
 	assert.Equal(t, tid, tok.ID)
-	require.NoError(t, q.RevokeAPIToken(ctx, sqlc.RevokeAPITokenParams{ID: tid, ClerkOrgID: "org_rt1"}))
+	require.NoError(t, q.RevokeAPIToken(ctx, sqlc.RevokeAPITokenParams{ID: tid, OrgID: "org_rt1"}))
 	_, err = q.GetAPITokenByHash(ctx, "hash_rt1")
 	require.ErrorIs(t, err, pgx.ErrNoRows, "revoked token must not authenticate")
 
@@ -168,13 +170,13 @@ func TestRoundtripEveryTable(t *testing.T) {
 
 	// notification preferences — upsert idempotency on (user, kind)
 	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
-		ClerkUserID: "user_rt1", Kind: "welcome", InApp: false,
+		UserID: "user_rt1", Kind: "welcome", InApp: false,
 	}))
-	pref, err := q.GetNotificationPreference(ctx, sqlc.GetNotificationPreferenceParams{ClerkUserID: "user_rt1", Kind: "welcome"})
+	pref, err := q.GetNotificationPreference(ctx, sqlc.GetNotificationPreferenceParams{UserID: "user_rt1", Kind: "welcome"})
 	require.NoError(t, err)
 	assert.False(t, pref.InApp)
 	require.NoError(t, q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
-		ClerkUserID: "user_rt1", Kind: "welcome", InApp: true,
+		UserID: "user_rt1", Kind: "welcome", InApp: true,
 	}))
 	prefs, err := q.ListNotificationPreferencesByUser(ctx, "user_rt1")
 	require.NoError(t, err)
@@ -230,7 +232,7 @@ func TestRoundtripEveryTable(t *testing.T) {
 
 	// impersonation sessions must not block account deletion (no FK cascade)
 	_, err = q.UpsertUser(ctx, sqlc.UpsertUserParams{
-		ClerkUserID: "user_rt2", Email: "rt2@example.com", Name: "RT2", AvatarUrl: "",
+		UserID: "user_rt2", Email: "rt2@example.com", Name: "RT2", AvatarUrl: "",
 	})
 	require.NoError(t, err)
 	sess, err := q.InsertImpersonationSession(ctx, sqlc.InsertImpersonationSessionParams{
@@ -262,7 +264,7 @@ func TestRoundtripEveryTable(t *testing.T) {
 	// idempotency keys — the claim is a PK conflict, so a second claim with
 	// the same (org, key) must return no rows rather than a second row.
 	claim := sqlc.ClaimIdempotencyKeyParams{
-		ClerkOrgID: "org_rt1", Key: "k1", Endpoint: "POST /api/v1/projects", RequestHash: "abc",
+		OrgID: "org_rt1", Key: "k1", Endpoint: "POST /api/v1/projects", RequestHash: "abc",
 	}
 	row, err := q.ClaimIdempotencyKey(ctx, claim)
 	require.NoError(t, err)
@@ -271,9 +273,9 @@ func TestRoundtripEveryTable(t *testing.T) {
 	require.ErrorIs(t, err, pgx.ErrNoRows, "the second claimant must lose")
 
 	require.NoError(t, q.CompleteIdempotencyKey(ctx, sqlc.CompleteIdempotencyKeyParams{
-		ClerkOrgID: "org_rt1", Key: "k1", Status: 201, Response: []byte(`{"id":1}`),
+		OrgID: "org_rt1", Key: "k1", Status: 201, Response: []byte(`{"id":1}`),
 	}))
-	stored, err := q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_rt1", Key: "k1"})
+	stored, err := q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{OrgID: "org_rt1", Key: "k1"})
 	require.NoError(t, err)
 	assert.EqualValues(t, 201, stored.Status)
 	assert.Equal(t, `{"id":1}`, string(stored.Response), "bytes are stored verbatim, not normalized")
@@ -399,16 +401,16 @@ func TestProjectSearchFTS(t *testing.T) {
 	_, q := testdb.Open(t, "dbsearch")
 	ctx := context.Background()
 
-	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: "org_s", Name: "S", Slug: "s", ImageUrl: ""})
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: "org_s", Name: "S", Slug: "s", ImageUrl: ""})
 	require.NoError(t, err)
 	seed := []string{"Quarterly planning", "Launch checklist", "Quarterly revenue report", "Onboarding docs"}
 	for _, name := range seed {
-		_, err := q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_s", Name: name})
+		_, err := q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_s", Name: name})
 		require.NoError(t, err)
 	}
 
 	list := func(query string) []sqlc.Project {
-		rows, err := q.ListProjectsByOrg(ctx, sqlc.ListProjectsByOrgParams{ClerkOrgID: "org_s", Column2: query, Limit: 50, Offset: 0})
+		rows, err := q.ListProjectsByOrg(ctx, sqlc.ListProjectsByOrgParams{OrgID: "org_s", Column2: query, Limit: 50, Offset: 0})
 		require.NoError(t, err)
 		return rows
 	}
@@ -433,7 +435,7 @@ func TestProjectSearchFTS(t *testing.T) {
 	assert.Len(t, rows, 4)
 
 	// Count matches the same predicate.
-	n, err := q.CountProjectsByOrgSearch(ctx, sqlc.CountProjectsByOrgSearchParams{ClerkOrgID: "org_s", Column2: "Quarterly"})
+	n, err := q.CountProjectsByOrgSearch(ctx, sqlc.CountProjectsByOrgSearchParams{OrgID: "org_s", Column2: "Quarterly"})
 	require.NoError(t, err)
 	assert.Equal(t, int64(2), n)
 }

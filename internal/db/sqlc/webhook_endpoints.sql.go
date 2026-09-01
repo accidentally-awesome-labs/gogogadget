@@ -27,20 +27,20 @@ func (q *Queries) ClearExpiredPreviousSecrets(ctx context.Context, secretRotated
 }
 
 const getWebhookEndpoint = `-- name: GetWebhookEndpoint :one
-SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints WHERE id = $1 AND clerk_org_id = $2
+SELECT id, org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints WHERE id = $1 AND org_id = $2
 `
 
 type GetWebhookEndpointParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) GetWebhookEndpoint(ctx context.Context, arg GetWebhookEndpointParams) (WebhookEndpoint, error) {
-	row := q.db.QueryRow(ctx, getWebhookEndpoint, arg.ID, arg.ClerkOrgID)
+	row := q.db.QueryRow(ctx, getWebhookEndpoint, arg.ID, arg.OrgID)
 	var i WebhookEndpoint
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.CreatedBy,
 		&i.Url,
 		&i.Secret,
@@ -57,13 +57,13 @@ func (q *Queries) GetWebhookEndpoint(ctx context.Context, arg GetWebhookEndpoint
 
 const insertWebhookEndpoint = `-- name: InsertWebhookEndpoint :one
 
-INSERT INTO webhook_endpoints (clerk_org_id, created_by, url, secret, event_types, description)
+INSERT INTO webhook_endpoints (org_id, created_by, url, secret, event_types, description)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at
+RETURNING id, org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at
 `
 
 type InsertWebhookEndpointParams struct {
-	ClerkOrgID  string   `json:"clerk_org_id"`
+	OrgID       string   `json:"org_id"`
 	CreatedBy   string   `json:"created_by"`
 	Url         string   `json:"url"`
 	Secret      string   `json:"secret"`
@@ -74,7 +74,7 @@ type InsertWebhookEndpointParams struct {
 // webhook_endpoints (customer-facing outbound webhook targets)
 func (q *Queries) InsertWebhookEndpoint(ctx context.Context, arg InsertWebhookEndpointParams) (WebhookEndpoint, error) {
 	row := q.db.QueryRow(ctx, insertWebhookEndpoint,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.CreatedBy,
 		arg.Url,
 		arg.Secret,
@@ -84,7 +84,7 @@ func (q *Queries) InsertWebhookEndpoint(ctx context.Context, arg InsertWebhookEn
 	var i WebhookEndpoint
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.CreatedBy,
 		&i.Url,
 		&i.Secret,
@@ -100,20 +100,20 @@ func (q *Queries) InsertWebhookEndpoint(ctx context.Context, arg InsertWebhookEn
 }
 
 const listActiveEndpointsForEvent = `-- name: ListActiveEndpointsForEvent :many
-SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints
-WHERE clerk_org_id = $1
+SELECT id, org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints
+WHERE org_id = $1
   AND disabled_at IS NULL
   AND (event_types = '{}' OR $2::text = ANY(event_types))
 `
 
 type ListActiveEndpointsForEventParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	EventType  string `json:"event_type"`
+	OrgID     string `json:"org_id"`
+	EventType string `json:"event_type"`
 }
 
 // '{}' event_types = subscribed to everything.
 func (q *Queries) ListActiveEndpointsForEvent(ctx context.Context, arg ListActiveEndpointsForEventParams) ([]WebhookEndpoint, error) {
-	rows, err := q.db.Query(ctx, listActiveEndpointsForEvent, arg.ClerkOrgID, arg.EventType)
+	rows, err := q.db.Query(ctx, listActiveEndpointsForEvent, arg.OrgID, arg.EventType)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (q *Queries) ListActiveEndpointsForEvent(ctx context.Context, arg ListActiv
 		var i WebhookEndpoint
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.CreatedBy,
 			&i.Url,
 			&i.Secret,
@@ -146,13 +146,13 @@ func (q *Queries) ListActiveEndpointsForEvent(ctx context.Context, arg ListActiv
 }
 
 const listWebhookEndpointsByOrg = `-- name: ListWebhookEndpointsByOrg :many
-SELECT id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints
-WHERE clerk_org_id = $1
+SELECT id, org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at FROM webhook_endpoints
+WHERE org_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListWebhookEndpointsByOrg(ctx context.Context, clerkOrgID string) ([]WebhookEndpoint, error) {
-	rows, err := q.db.Query(ctx, listWebhookEndpointsByOrg, clerkOrgID)
+func (q *Queries) ListWebhookEndpointsByOrg(ctx context.Context, orgID string) ([]WebhookEndpoint, error) {
+	rows, err := q.db.Query(ctx, listWebhookEndpointsByOrg, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (q *Queries) ListWebhookEndpointsByOrg(ctx context.Context, clerkOrgID stri
 		var i WebhookEndpoint
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.CreatedBy,
 			&i.Url,
 			&i.Secret,
@@ -187,24 +187,24 @@ func (q *Queries) ListWebhookEndpointsByOrg(ctx context.Context, clerkOrgID stri
 const rotateWebhookEndpointSecret = `-- name: RotateWebhookEndpointSecret :one
 UPDATE webhook_endpoints
 SET secret_previous = secret, secret = $1, secret_rotated_at = now(), updated_at = now()
-WHERE id = $2 AND clerk_org_id = $3
-RETURNING id, clerk_org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at
+WHERE id = $2 AND org_id = $3
+RETURNING id, org_id, created_by, url, secret, event_types, description, disabled_at, created_at, updated_at, secret_previous, secret_rotated_at
 `
 
 type RotateWebhookEndpointSecretParams struct {
-	Secret     string `json:"secret"`
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	Secret string `json:"secret"`
+	ID     int64  `json:"id"`
+	OrgID  string `json:"org_id"`
 }
 
 // Rotation: the current secret becomes the previous one (still verifying
 // during the grace window), and a fresh secret takes over.
 func (q *Queries) RotateWebhookEndpointSecret(ctx context.Context, arg RotateWebhookEndpointSecretParams) (WebhookEndpoint, error) {
-	row := q.db.QueryRow(ctx, rotateWebhookEndpointSecret, arg.Secret, arg.ID, arg.ClerkOrgID)
+	row := q.db.QueryRow(ctx, rotateWebhookEndpointSecret, arg.Secret, arg.ID, arg.OrgID)
 	var i WebhookEndpoint
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.CreatedBy,
 		&i.Url,
 		&i.Secret,
@@ -222,16 +222,16 @@ func (q *Queries) RotateWebhookEndpointSecret(ctx context.Context, arg RotateWeb
 const setWebhookEndpointDisabled = `-- name: SetWebhookEndpointDisabled :exec
 UPDATE webhook_endpoints
 SET disabled_at = CASE WHEN $1::bool THEN now() ELSE NULL END, updated_at = now()
-WHERE id = $2 AND clerk_org_id = $3
+WHERE id = $2 AND org_id = $3
 `
 
 type SetWebhookEndpointDisabledParams struct {
-	Disabled   bool   `json:"disabled"`
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	Disabled bool   `json:"disabled"`
+	ID       int64  `json:"id"`
+	OrgID    string `json:"org_id"`
 }
 
 func (q *Queries) SetWebhookEndpointDisabled(ctx context.Context, arg SetWebhookEndpointDisabledParams) error {
-	_, err := q.db.Exec(ctx, setWebhookEndpointDisabled, arg.Disabled, arg.ID, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, setWebhookEndpointDisabled, arg.Disabled, arg.ID, arg.OrgID)
 	return err
 }

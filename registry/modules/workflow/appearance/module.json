@@ -1,132 +1,132 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "appearance.locale",
-        "appearance.set-theme"
-      ]
-    },
+    "id": "ggg/workflow/appearance",
+    "kind": "workflow",
+    "name": "appearance",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Theme preference",
+    "description": "Persists the caller's named theme to the pre-paint cookie and the user row, and resolves the stored locale and theme onto every request so a preference set on one device applies on the next.",
+    "requires": [
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Persists the caller's named theme to the pre-paint cookie and the user row, and resolves the stored locale and theme onto every request so a preference set on one device applies on the next.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "5b8ba6f713fd6ff4fa1f810dc951ba13c7c6233aac2d6bc20202f2281ae10b61",
         "source": "internal/web/appearance.go",
-        "target": "internal/web/appearance.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "9e5049267c0dbeb682ee44a7a9fd4a04793499e5ae7b56795fae5e51e61cd32d",
-        "source": "internal/web/appearance_test.go",
-        "target": "internal/web/appearance_test.go"
-      },
-      {
+        "target": "internal/web/appearance.go",
         "class": "go",
-        "contract": false,
+        "sha256": "5eddf406216e1cd8b72d40cd7f816ec9fa979fdb406bd3264396d9e53d0d65f2",
         "rewrite_module": true,
-        "sha256": "41c73566bcf534703fd2830d481466be084ca6194e677acbe673bf89b6a9cd0e",
+        "contract": true
+      },
+      {
+        "source": "internal/web/appearance_test.go",
+        "target": "internal/web/appearance_test.go",
+        "class": "test",
+        "sha256": "9f2c5d19d48942d4ba130d48a883e75a2966fe6dfebe14e33a0d0b9a9b5bfc30",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/handlers_locale.go",
-        "target": "internal/web/handlers_locale.go"
+        "target": "internal/web/handlers_locale.go",
+        "class": "go",
+        "sha256": "87e5c93751cadbca19990459881646caf7799973bd84fc9b8ca33228c51a2a00",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/workflow/appearance",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "appearance",
-    "removal_policy": "replacement-required",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
+    "claims": {
+      "routes": [
+        "appearance.locale",
+        "appearance.set-theme"
+      ]
+    },
     "runtime": {
       "routes": [
         {
-          "handler": "handleSetLocale",
           "id": "appearance.locale",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/set-locale",
+          "scope": "public",
           "policy": {
-            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": false
           },
-          "scope": "public"
+          "package": "internal/web",
+          "handler": "handleSetLocale"
         },
         {
-          "handler": "handleSetTheme",
           "id": "appearance.set-theme",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/set-theme",
+          "scope": "public",
           "policy": {
-            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": false
           },
-          "scope": "public"
+          "package": "internal/web",
+          "handler": "handleSetTheme"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Theme preference"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
 }

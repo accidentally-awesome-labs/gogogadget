@@ -82,7 +82,7 @@ templ AdminUsersTable(d AdminUsersData) {
 			}),
 		}) {
 			for _, u := range d.Users {
-				<tr id={ "user-" + u.ClerkUserID }>
+				<tr id={ "user-" + u.UserID }>
 					<td class="font-medium">{ string(u.Email) }</td>
 					<td>{ u.Name }</td>
 					<td class="text-fg-muted">{ u.CreatedAt.Time.Format("Jan 2, 2006") }</td>
@@ -106,7 +106,7 @@ templ AdminUsersTable(d AdminUsersData) {
 								if !u.DisabledAt.Valid {
 									@ui.ButtonLink(ui.ButtonLinkOpts{
 										Label: i18n.T(ctx, "admin.users.impersonate"),
-										Href:  "/admin/users/" + u.ClerkUserID + "/impersonate",
+										Href:  "/admin/users/" + u.UserID + "/impersonate",
 										Size:  ui.SizeXS,
 										Attrs: ui.Attrs{
 											TestID: "admin-impersonate",
@@ -115,14 +115,14 @@ templ AdminUsersTable(d AdminUsersData) {
 									})
 								}
 								@ui.ConfirmAction(ui.ConfirmActionOpts{
-									ID:           "disable-" + u.ClerkUserID,
+									ID:           "disable-" + u.UserID,
 									TriggerLabel: disableLabel(ctx, u),
 									Title:        disableTitle(ctx, u),
 									Message:      disableConfirm(ctx, u),
 									ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
 									CancelLabel:  i18n.T(ctx, "admin.cancel"),
 									Kind:         disableKind(u),
-									HX:           ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/disable"},
+									HX:           ui.HX{Post: "/admin/users/" + u.UserID + "/disable"},
 									Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
 								})
 							}
@@ -200,7 +200,7 @@ templ AdminOrgsPage(d AdminOrgsData) {
 		Empty:         adminOrgsEmpty(),
 	}) {
 		for _, o := range d.Orgs {
-			<tr id={ "org-" + o.ClerkOrgID }>
+			<tr id={ "org-" + o.OrgID }>
 				<td class="font-medium">{ o.Name }</td>
 				<td class="text-fg-muted">{ o.Slug }</td>
 				<td class="text-right tabular-nums">{ fmt.Sprint(o.MemberCount) }</td>
@@ -241,16 +241,16 @@ templ roleBadge(role string) {
 templ roleForm(u sqlc.User) {
 	@ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{
 		Class: "inline-block",
-		HX:    ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role"},
+		HX:    ui.HX{Post: "/admin/users/" + u.UserID + "/role"},
 	}}) {
 		@ui.Field(ui.FieldOpts{
-			ID:          "role-" + u.ClerkUserID,
+			ID:          "role-" + u.UserID,
 			Name:        "role",
 			Label:       i18n.T(ctx, "admin.users.role_aria", string(u.Email)),
 			HiddenLabel: true,
 		}) {
 			@ui.Select(ui.SelectOpts{
-				ID:   "role-" + u.ClerkUserID,
+				ID:   "role-" + u.UserID,
 				Name: "role",
 				Options: []ui.Option{
 					{Value: "", Label: i18n.T(ctx, "admin.users.role_none"), Selected: u.AdminRole == ""},
@@ -260,8 +260,8 @@ templ roleForm(u sqlc.User) {
 				Size: ui.SizeXS,
 				Attrs: ui.Attrs{
 					Class:  "w-28",
-					TestID: "role-select-" + u.ClerkUserID,
-					HX:     ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role", Trigger: "change", Swap: "none"},
+					TestID: "role-select-" + u.UserID,
+					HX:     ui.HX{Post: "/admin/users/" + u.UserID + "/role", Trigger: "change", Swap: "none"},
 				},
 			})
 		}

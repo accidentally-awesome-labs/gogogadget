@@ -14,15 +14,15 @@ func TestFakeVerifierParsesE2ETokens(t *testing.T) {
 
 	claims, err := v.Verify(ctx, "e2e:user_free:org_free:org:member")
 	require.NoError(t, err)
-	assert.Equal(t, "user_free", claims.UserID)
-	assert.Equal(t, "org_free", claims.OrgID)
+	assert.Equal(t, "user_free", claims.UserSubject)
+	assert.Equal(t, "org_free", claims.OrgSubject)
 	assert.Equal(t, "org:member", claims.OrgRole)
 
 	// Empty org = no active organization.
 	claims, err = v.Verify(ctx, "e2e:user_noorg::")
 	require.NoError(t, err)
-	assert.Equal(t, "user_noorg", claims.UserID)
-	assert.Equal(t, "", claims.OrgID)
+	assert.Equal(t, "user_noorg", claims.UserSubject)
+	assert.Equal(t, "", claims.OrgSubject)
 	assert.Equal(t, "", claims.OrgRole)
 
 	// Rejections.

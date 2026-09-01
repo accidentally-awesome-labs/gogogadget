@@ -1,53 +1,147 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "admin.schedules.index"
-      ]
-    },
+    "id": "ggg/page/admin-schedules",
+    "kind": "page",
+    "name": "admin-schedules",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Admin schedules list",
+    "description": "The recurring-work table listing every schedule, its kind, scope, interval and next fire, plus the create form.",
+    "requires": [
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/jobs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/schedules",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The recurring-work table listing every schedule, its kind, scope, interval and next fire, plus the create form.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
         "source": "internal/web/page_admin_schedules.go",
-        "target": "internal/web/page_admin_schedules.go"
+        "target": "internal/web/page_admin_schedules.go",
+        "class": "go",
+        "sha256": "523b85ed7cf75e76a0582c156a1bfe70df509940b64e8a939e52c96a2fd621f4",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "fedd3c9be9f55c1a606ca00179ba395c13ee32b403e3b2844c4ab7fa7e5f018e",
         "source": "internal/web/schedules_admin_test.go",
-        "target": "internal/web/schedules_admin_test.go"
+        "target": "internal/web/schedules_admin_test.go",
+        "class": "test",
+        "sha256": "7b22cf88f3bf874a4b5eb67a66a5d40dba07b3b062ff44eb844b8394fa0108de",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "197f9f239442091a29c2a1ef70083706ff87c06d33c1fec293fc96d291e824f5",
         "source": "internal/web/templates/admin_schedules.templ",
-        "target": "internal/web/templates/admin_schedules.templ"
+        "target": "internal/web/templates/admin_schedules.templ",
+        "class": "templ",
+        "sha256": "1d5568ec797fcf9b6ac80db3b7c18d9798107dde0fba529efdb6e7e098b1c136",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/admin-schedules",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "admin.schedules.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "admin.schedules.index",
+          "method": "GET",
+          "pattern": "/admin/schedules",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminSchedules"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.schedules",
+          "area": "admin",
+          "route_id": "admin.schedules.index",
+          "label_key": "sidebar.admin_schedules",
+          "after": [
+            "nav.admin.content"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "admin-schedules",
+          "path": "/admin/schedules",
+          "persona": "admin",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "admin.schedules.col_actions": "Actions",
@@ -68,7 +162,7 @@
         "admin.schedules.empty": "No schedules yet.",
         "admin.schedules.every_label": "Every (seconds)",
         "admin.schedules.hint": "Schedules enqueue their kind each interval; missed ticks are skipped, never caught up. Minimum interval 60s.",
-        "admin.schedules.invalid": "Name max 100 chars, kind must be schedulable, interval 60s\u201330 days, payload must be a JSON object.",
+        "admin.schedules.invalid": "Name max 100 chars, kind must be schedulable, interval 60s–30 days, payload must be a JSON object.",
         "admin.schedules.kind_label": "Kind",
         "admin.schedules.name_label": "Name",
         "admin.schedules.name_placeholder": "Daily digest",
@@ -90,20 +184,20 @@
         "admin.schedules.col_every": "Intervalo",
         "admin.schedules.col_kind": "Tipo",
         "admin.schedules.col_name": "Nombre",
-        "admin.schedules.col_next": "Pr\u00f3xima",
-        "admin.schedules.col_scope": "\u00c1mbito",
-        "admin.schedules.create": "Crear programaci\u00f3n",
-        "admin.schedules.create_title": "Nueva programaci\u00f3n",
-        "admin.schedules.created": "Programaci\u00f3n creada.",
+        "admin.schedules.col_next": "Próxima",
+        "admin.schedules.col_scope": "Ámbito",
+        "admin.schedules.create": "Crear programación",
+        "admin.schedules.create_title": "Nueva programación",
+        "admin.schedules.created": "Programación creada.",
         "admin.schedules.delete": "Eliminar",
-        "admin.schedules.delete_confirm": "\u00bfEliminar esta programaci\u00f3n? Los trabajos en curso no se ven afectados.",
+        "admin.schedules.delete_confirm": "¿Eliminar esta programación? Los trabajos en curso no se ven afectados.",
         "admin.schedules.delete_row": "Eliminar %s",
-        "admin.schedules.delete_title": "\u00bfEliminar esta programaci\u00f3n?",
-        "admin.schedules.deleted": "Programaci\u00f3n eliminada.",
-        "admin.schedules.empty": "A\u00fan no hay programaciones.",
+        "admin.schedules.delete_title": "¿Eliminar esta programación?",
+        "admin.schedules.deleted": "Programación eliminada.",
+        "admin.schedules.empty": "Aún no hay programaciones.",
         "admin.schedules.every_label": "Cada (segundos)",
-        "admin.schedules.hint": "Cada programaci\u00f3n encola su tipo en cada intervalo; los ticks perdidos se saltan, nunca se recuperan. Intervalo m\u00ednimo 60s.",
-        "admin.schedules.invalid": "Nombre m\u00e1x. 100, tipo programable, intervalo 60s\u201330 d\u00edas, payload debe ser un objeto JSON.",
+        "admin.schedules.hint": "Cada programación encola su tipo en cada intervalo; los ticks perdidos se saltan, nunca se recuperan. Intervalo mínimo 60s.",
+        "admin.schedules.invalid": "Nombre máx. 100, tipo programable, intervalo 60s–30 días, payload debe ser un objeto JSON.",
         "admin.schedules.kind_label": "Tipo",
         "admin.schedules.name_label": "Nombre",
         "admin.schedules.name_placeholder": "Resumen diario",
@@ -114,113 +208,19 @@
         "admin.schedules.row_actions_aria": "Acciones para %s",
         "admin.schedules.run_now": "Ejecutar ya",
         "admin.schedules.run_started": "Programada para el siguiente ciclo del worker.",
-        "admin.schedules.scope_label": "\u00c1mbito",
+        "admin.schedules.scope_label": "Ámbito",
         "admin.schedules.scope_system": "Todo el sistema",
         "admin.schedules.title": "Programaciones",
-        "admin.schedules.toggled": "Programaci\u00f3n actualizada."
+        "admin.schedules.toggled": "Programación actualizada."
       }
     },
-    "migrations": [],
-    "name": "admin-schedules",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/jobs"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/schedules"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.admin.content"
-          ],
-          "area": "admin",
-          "id": "nav.admin.schedules",
-          "label_key": "sidebar.admin_schedules",
-          "route_id": "admin.schedules.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleAdminSchedules",
-          "id": "admin.schedules.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/admin/schedules",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "admin"
-        }
-      ],
-      "visual": [
-        {
-          "id": "admin-schedules",
-          "masks": [
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/admin/schedules",
-          "persona": "admin",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin schedules list"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

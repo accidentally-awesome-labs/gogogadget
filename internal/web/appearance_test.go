@@ -18,7 +18,7 @@ func TestStoredLocaleBeatsCookie(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedMembership(t, s, "user_loc", "org_loc", "org:admin")
 	require.NoError(t, s.q.SetUserLocale(t.Context(), sqlc.SetUserLocaleParams{
-		ClerkUserID: "user_loc", Locale: "es",
+		UserID: "user_loc", Locale: "es",
 	}))
 
 	// A stale cookie from an earlier anonymous visit on this browser.
@@ -37,7 +37,7 @@ func TestQueryLangOverridesStoredLocale(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedMembership(t, s, "user_loc2", "org_loc2", "org:admin")
 	require.NoError(t, s.q.SetUserLocale(t.Context(), sqlc.SetUserLocaleParams{
-		ClerkUserID: "user_loc2", Locale: "es",
+		UserID: "user_loc2", Locale: "es",
 	}))
 
 	_, _, body := serve(t, s, "GET", "/app?lang=en", nil, nil,
@@ -59,7 +59,7 @@ func TestSetLocalePersistsToUserRow(t *testing.T) {
 		url.Values{"lang": {"es"}, "returnTo": {"/app/settings/account"}}, cookie)
 	require.Equal(t, http.StatusOK, code)
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_loc3")
+	u, err := s.q.GetUserByID(t.Context(), "user_loc3")
 	require.NoError(t, err)
 	assert.Equal(t, "es", u.Locale, "the switcher must write the durable copy, not just a cookie")
 }
@@ -70,7 +70,7 @@ func TestSetLocaleEmptyClearsPreference(t *testing.T) {
 	seedMembership(t, s, "user_loc4", "org_loc4", "org:admin")
 	cookie := sessionCookie("user_loc4", "org_loc4", "org:admin")
 	require.NoError(t, s.q.SetUserLocale(t.Context(), sqlc.SetUserLocaleParams{
-		ClerkUserID: "user_loc4", Locale: "es",
+		UserID: "user_loc4", Locale: "es",
 	}))
 
 	code, hdr, _ := postForm(t, s, "/set-locale",
@@ -78,7 +78,7 @@ func TestSetLocaleEmptyClearsPreference(t *testing.T) {
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, hdr.Get("Set-Cookie"), "lang=;", "the cookie is expired, not set to en")
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_loc4")
+	u, err := s.q.GetUserByID(t.Context(), "user_loc4")
 	require.NoError(t, err)
 	assert.Empty(t, u.Locale, "empty means follow the browser")
 
@@ -103,7 +103,7 @@ func TestDarkThemeRendersOnHTMLServerSide(t *testing.T) {
 	assert.NotContains(t, body, `class="dark"`, "the default renders no theme class")
 
 	require.NoError(t, s.q.SetUserTheme(t.Context(), sqlc.SetUserThemeParams{
-		ClerkUserID: "user_th", Theme: "dark",
+		UserID: "user_th", Theme: "dark",
 	}))
 	_, hdr, body := serve(t, s, "GET", "/app", nil, nil, cookie)
 	assert.Contains(t, body, `class="dark"`, "a saved dark theme paints dark on the first byte")
@@ -117,7 +117,7 @@ func TestSystemThemeRendersNoClass(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedMembership(t, s, "user_th2", "org_th2", "org:admin")
 	require.NoError(t, s.q.SetUserTheme(t.Context(), sqlc.SetUserThemeParams{
-		ClerkUserID: "user_th2", Theme: "system",
+		UserID: "user_th2", Theme: "system",
 	}))
 	_, _, body := serve(t, s, "GET", "/app", nil, nil,
 		sessionCookie("user_th2", "org_th2", "org:admin"))
@@ -135,14 +135,14 @@ func TestSetThemePersistsPostedValue(t *testing.T) {
 	code, hdr, _ := postForm(t, s, "/set-theme", url.Values{"theme": {"dark"}}, cookie)
 	require.Equal(t, http.StatusNoContent, code, "the toggle already flipped the class; nothing to swap")
 	assert.Contains(t, hdr.Get("Set-Cookie"), "theme=dark")
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_th3")
+	u, err := s.q.GetUserByID(t.Context(), "user_th3")
 	require.NoError(t, err)
 	assert.Equal(t, "dark", u.Theme)
 
 	code, hdr, _ = postForm(t, s, "/set-theme", url.Values{"theme": {"light"}}, cookie, &http.Cookie{Name: "theme", Value: "dark"})
 	require.Equal(t, http.StatusNoContent, code)
 	assert.Contains(t, hdr.Get("Set-Cookie"), "theme=light")
-	u, err = s.q.GetUserByClerkID(t.Context(), "user_th3")
+	u, err = s.q.GetUserByID(t.Context(), "user_th3")
 	require.NoError(t, err)
 	assert.Equal(t, "light", u.Theme)
 }
@@ -166,7 +166,7 @@ func TestSetThemeExplicitValueRedirects(t *testing.T) {
 		url.Values{"theme": {"dark"}, "returnTo": {"/app/settings/account"}}, cookie)
 	require.Equal(t, http.StatusOK, code, "a settings form gets a hard redirect so <html> re-renders")
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_th4")
+	u, err := s.q.GetUserByID(t.Context(), "user_th4")
 	require.NoError(t, err)
 	assert.Equal(t, "dark", u.Theme)
 }
@@ -179,7 +179,7 @@ func TestSetThemeRejectsUnknownValue(t *testing.T) {
 		sessionCookie("user_th5", "org_th5", "org:admin"))
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_th5")
+	u, err := s.q.GetUserByID(t.Context(), "user_th5")
 	require.NoError(t, err)
 	assert.Equal(t, "system", u.Theme, "an unsupported value must not reach the CHECK constraint")
 }
@@ -188,7 +188,7 @@ func TestAppearanceCardShowsCurrentChoices(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedMembership(t, s, "user_th6", "org_th6", "org:admin")
 	require.NoError(t, s.q.SetUserTheme(t.Context(), sqlc.SetUserThemeParams{
-		ClerkUserID: "user_th6", Theme: "dark",
+		UserID: "user_th6", Theme: "dark",
 	}))
 	_, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil,
 		sessionCookie("user_th6", "org_th6", "org:admin"))

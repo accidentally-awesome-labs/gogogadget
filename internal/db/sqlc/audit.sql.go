@@ -13,7 +13,7 @@ import (
 
 const countAuditAll = `-- name: CountAuditAll :one
 SELECT count(*) FROM audit_log a
-WHERE ($1::text = '' OR a.action ILIKE '%' || $1 || '%' OR a.clerk_org_id ILIKE '%' || $1 || '%')
+WHERE ($1::text = '' OR a.action ILIKE '%' || $1 || '%' OR a.org_id ILIKE '%' || $1 || '%')
 `
 
 func (q *Queries) CountAuditAll(ctx context.Context, filter string) (int64, error) {
@@ -24,11 +24,11 @@ func (q *Queries) CountAuditAll(ctx context.Context, filter string) (int64, erro
 }
 
 const countAuditByOrg = `-- name: CountAuditByOrg :one
-SELECT count(*) FROM audit_log WHERE clerk_org_id = $1
+SELECT count(*) FROM audit_log WHERE org_id = $1
 `
 
-func (q *Queries) CountAuditByOrg(ctx context.Context, clerkOrgID pgtype.Text) (int64, error) {
-	row := q.db.QueryRow(ctx, countAuditByOrg, clerkOrgID)
+func (q *Queries) CountAuditByOrg(ctx context.Context, orgID pgtype.Text) (int64, error) {
+	row := q.db.QueryRow(ctx, countAuditByOrg, orgID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -49,22 +49,22 @@ func (q *Queries) DeleteOldAuditRows(ctx context.Context, createdAt pgtype.Times
 }
 
 const insertAuditLog = `-- name: InsertAuditLog :one
-INSERT INTO audit_log (clerk_org_id, clerk_user_id, action, metadata)
+INSERT INTO audit_log (org_id, user_id, action, metadata)
 VALUES ($1, $2, $3, $4)
 RETURNING id
 `
 
 type InsertAuditLogParams struct {
-	ClerkOrgID  pgtype.Text `json:"clerk_org_id"`
-	ClerkUserID pgtype.Text `json:"clerk_user_id"`
-	Action      string      `json:"action"`
-	Metadata    []byte      `json:"metadata"`
+	OrgID    pgtype.Text `json:"org_id"`
+	UserID   pgtype.Text `json:"user_id"`
+	Action   string      `json:"action"`
+	Metadata []byte      `json:"metadata"`
 }
 
 func (q *Queries) InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) (int64, error) {
 	row := q.db.QueryRow(ctx, insertAuditLog,
-		arg.ClerkOrgID,
-		arg.ClerkUserID,
+		arg.OrgID,
+		arg.UserID,
 		arg.Action,
 		arg.Metadata,
 	)
@@ -74,10 +74,10 @@ func (q *Queries) InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) 
 }
 
 const listAuditAll = `-- name: ListAuditAll :many
-SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
+SELECT a.id, a.org_id, a.user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
 FROM audit_log a
-LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
-WHERE ($1::text = '' OR a.action ILIKE '%' || $1 || '%' OR a.clerk_org_id ILIKE '%' || $1 || '%')
+LEFT JOIN users u ON u.user_id = a.user_id
+WHERE ($1::text = '' OR a.action ILIKE '%' || $1 || '%' OR a.org_id ILIKE '%' || $1 || '%')
 ORDER BY a.created_at DESC
 LIMIT $3 OFFSET $2
 `
@@ -89,13 +89,13 @@ type ListAuditAllParams struct {
 }
 
 type ListAuditAllRow struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
-	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
-	Action      string             `json:"action"`
-	Metadata    []byte             `json:"metadata"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ActorEmail  string             `json:"actor_email"`
+	ID         int64              `json:"id"`
+	OrgID      pgtype.Text        `json:"org_id"`
+	UserID     pgtype.Text        `json:"user_id"`
+	Action     string             `json:"action"`
+	Metadata   []byte             `json:"metadata"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ActorEmail string             `json:"actor_email"`
 }
 
 // Platform-wide audit viewer (admin). Empty filter matches everything.
@@ -110,8 +110,8 @@ func (q *Queries) ListAuditAll(ctx context.Context, arg ListAuditAllParams) ([]L
 		var i ListAuditAllRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
-			&i.ClerkUserID,
+			&i.OrgID,
+			&i.UserID,
 			&i.Action,
 			&i.Metadata,
 			&i.CreatedAt,
@@ -128,32 +128,32 @@ func (q *Queries) ListAuditAll(ctx context.Context, arg ListAuditAllParams) ([]L
 }
 
 const listAuditByOrg = `-- name: ListAuditByOrg :many
-SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
+SELECT a.id, a.org_id, a.user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
 FROM audit_log a
-LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
-WHERE a.clerk_org_id = $1
+LEFT JOIN users u ON u.user_id = a.user_id
+WHERE a.org_id = $1
 ORDER BY a.created_at DESC
 LIMIT $2 OFFSET $3
 `
 
 type ListAuditByOrgParams struct {
-	ClerkOrgID pgtype.Text `json:"clerk_org_id"`
-	Limit      int32       `json:"limit"`
-	Offset     int32       `json:"offset"`
+	OrgID  pgtype.Text `json:"org_id"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
 }
 
 type ListAuditByOrgRow struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
-	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
-	Action      string             `json:"action"`
-	Metadata    []byte             `json:"metadata"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ActorEmail  string             `json:"actor_email"`
+	ID         int64              `json:"id"`
+	OrgID      pgtype.Text        `json:"org_id"`
+	UserID     pgtype.Text        `json:"user_id"`
+	Action     string             `json:"action"`
+	Metadata   []byte             `json:"metadata"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ActorEmail string             `json:"actor_email"`
 }
 
 func (q *Queries) ListAuditByOrg(ctx context.Context, arg ListAuditByOrgParams) ([]ListAuditByOrgRow, error) {
-	rows, err := q.db.Query(ctx, listAuditByOrg, arg.ClerkOrgID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listAuditByOrg, arg.OrgID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +163,8 @@ func (q *Queries) ListAuditByOrg(ctx context.Context, arg ListAuditByOrgParams) 
 		var i ListAuditByOrgRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
-			&i.ClerkUserID,
+			&i.OrgID,
+			&i.UserID,
 			&i.Action,
 			&i.Metadata,
 			&i.CreatedAt,
@@ -181,10 +181,10 @@ func (q *Queries) ListAuditByOrg(ctx context.Context, arg ListAuditByOrgParams) 
 }
 
 const listAuditByUser = `-- name: ListAuditByUser :many
-SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
+SELECT a.id, a.org_id, a.user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
 FROM audit_log a
-LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
-WHERE a.clerk_user_id = $1
+LEFT JOIN users u ON u.user_id = a.user_id
+WHERE a.user_id = $1
 ORDER BY a.created_at DESC
 LIMIT $2
 `
@@ -195,13 +195,13 @@ type ListAuditByUserParams struct {
 }
 
 type ListAuditByUserRow struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
-	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
-	Action      string             `json:"action"`
-	Metadata    []byte             `json:"metadata"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ActorEmail  string             `json:"actor_email"`
+	ID         int64              `json:"id"`
+	OrgID      pgtype.Text        `json:"org_id"`
+	UserID     pgtype.Text        `json:"user_id"`
+	Action     string             `json:"action"`
+	Metadata   []byte             `json:"metadata"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ActorEmail string             `json:"actor_email"`
 }
 
 // GDPR export: everything one user ever did, across orgs.
@@ -216,8 +216,8 @@ func (q *Queries) ListAuditByUser(ctx context.Context, arg ListAuditByUserParams
 		var i ListAuditByUserRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
-			&i.ClerkUserID,
+			&i.OrgID,
+			&i.UserID,
 			&i.Action,
 			&i.Metadata,
 			&i.CreatedAt,
@@ -234,31 +234,31 @@ func (q *Queries) ListAuditByUser(ctx context.Context, arg ListAuditByUserParams
 }
 
 const recentAuditByOrg = `-- name: RecentAuditByOrg :many
-SELECT a.id, a.clerk_org_id, a.clerk_user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
+SELECT a.id, a.org_id, a.user_id, a.action, a.metadata, a.created_at, COALESCE(u.email, '') AS actor_email
 FROM audit_log a
-LEFT JOIN users u ON u.clerk_user_id = a.clerk_user_id
-WHERE a.clerk_org_id = $1
+LEFT JOIN users u ON u.user_id = a.user_id
+WHERE a.org_id = $1
 ORDER BY a.created_at DESC
 LIMIT $2
 `
 
 type RecentAuditByOrgParams struct {
-	ClerkOrgID pgtype.Text `json:"clerk_org_id"`
-	Limit      int32       `json:"limit"`
+	OrgID pgtype.Text `json:"org_id"`
+	Limit int32       `json:"limit"`
 }
 
 type RecentAuditByOrgRow struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
-	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
-	Action      string             `json:"action"`
-	Metadata    []byte             `json:"metadata"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ActorEmail  string             `json:"actor_email"`
+	ID         int64              `json:"id"`
+	OrgID      pgtype.Text        `json:"org_id"`
+	UserID     pgtype.Text        `json:"user_id"`
+	Action     string             `json:"action"`
+	Metadata   []byte             `json:"metadata"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	ActorEmail string             `json:"actor_email"`
 }
 
 func (q *Queries) RecentAuditByOrg(ctx context.Context, arg RecentAuditByOrgParams) ([]RecentAuditByOrgRow, error) {
-	rows, err := q.db.Query(ctx, recentAuditByOrg, arg.ClerkOrgID, arg.Limit)
+	rows, err := q.db.Query(ctx, recentAuditByOrg, arg.OrgID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -268,8 +268,8 @@ func (q *Queries) RecentAuditByOrg(ctx context.Context, arg RecentAuditByOrgPara
 		var i RecentAuditByOrgRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
-			&i.ClerkUserID,
+			&i.OrgID,
+			&i.UserID,
 			&i.Action,
 			&i.Metadata,
 			&i.CreatedAt,

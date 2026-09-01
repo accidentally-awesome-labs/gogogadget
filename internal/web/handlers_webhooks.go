@@ -17,7 +17,6 @@ import (
 	"github.com/gogogadget/gogogadget/internal/mail"
 	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/jackc/pgx/v5"
-	svix "github.com/svix/svix-webhooks/go"
 )
 
 // POST /webhooks/clerk — Clerk delivers via Svix, so deliveries carry
@@ -38,13 +37,7 @@ func (s *Server) handleClerkWebhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		wh, err := svix.NewWebhook(s.cfg.ClerkWebhookSecret)
-		if err != nil {
-			s.log.Error("clerk webhook init", "error", err)
-			http.Error(w, "webhook config", http.StatusInternalServerError)
-			return
-		}
-		if err := wh.Verify(payload, r.Header); err != nil {
+		if err := identity.VerifyClerkWebhook(s.cfg.ClerkWebhookSecret, payload, r.Header); err != nil {
 			http.Error(w, "invalid signature", http.StatusBadRequest)
 			return
 		}
@@ -89,7 +82,7 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 			return err
 		}
 		user, err := s.q.UpsertUser(ctx, sqlc.UpsertUserParams{
-			ClerkUserID: id, Email: profile.Email, Name: profile.Name, AvatarUrl: profile.AvatarURL,
+			UserID: id, Email: profile.Email, Name: profile.Name, AvatarUrl: profile.AvatarURL,
 		})
 		if err != nil {
 			return err
@@ -125,7 +118,7 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		if err != nil {
 			return err
 		}
-		_, err = s.q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: id, Name: name, Slug: slug, ImageUrl: imageURL})
+		_, err = s.q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: id, Name: name, Slug: slug, ImageUrl: imageURL})
 		return err
 
 	case "organization.deleted":
@@ -136,11 +129,11 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		// FIRST revoke billing: an org must never be deleted while Polar keeps
 		// charging it. API failure → 500 so Clerk retries.
 		sub, err := s.q.GetSubscriptionByOrg(ctx, id)
-		if err == nil && sub.PolarSubscriptionID.Valid &&
+		if err == nil && sub.ProviderSubscriptionID.Valid &&
 			(sub.Status == "active" || sub.Status == "trialing" || sub.Status == "past_due") {
 			if s.billingClient == nil {
 				s.log.Warn("org deleted with live subscription but billing is not configured; cannot revoke", "org", id)
-			} else if err := s.billingClient.RevokeSubscription(ctx, sub.PolarSubscriptionID.String); err != nil {
+			} else if err := s.billingClient.RevokeSubscription(ctx, sub.ProviderSubscriptionID.String); err != nil {
 				return err
 			}
 		} else if err != nil && !errors.Is(err, pgx.ErrNoRows) {
@@ -155,11 +148,11 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		}
 		// Role is stored raw: no CHECK constraint, so buyer-added custom roles
 		// never wedge membership webhooks.
-		existing, merr := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID})
+		existing, merr := s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: orgID, UserID: userID})
 		if merr != nil && !errors.Is(merr, pgx.ErrNoRows) {
 			return merr
 		}
-		if err := s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID, Role: role}); err != nil {
+		if err := s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{OrgID: orgID, UserID: userID, Role: role}); err != nil {
 			return err
 		}
 		switch {
@@ -177,7 +170,7 @@ func (s *Server) processClerkEvent(ctx context.Context, evt identity.ClerkEvent)
 		if err != nil {
 			return err
 		}
-		if err := s.q.DeleteMembership(ctx, sqlc.DeleteMembershipParams{ClerkOrgID: orgID, ClerkUserID: userID}); err != nil {
+		if err := s.q.DeleteMembership(ctx, sqlc.DeleteMembershipParams{OrgID: orgID, UserID: userID}); err != nil {
 			return err
 		}
 		audit.Log(ctx, s.q, orgID, userID, "member.left", nil)

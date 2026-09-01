@@ -1,5 +1,84 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/workflow/admin-schedules",
+    "kind": "workflow",
+    "name": "admin-schedules",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin schedule mutations",
+    "description": "Creating, enabling, running now and deleting recurring schedules, validated against the schedulable job kinds and audited.",
+    "requires": [
+      {
+        "id": "ggg/page/admin-schedules",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/jobs",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/schedules",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_schedules.go",
+        "target": "internal/web/workflow_admin_schedules.go",
+        "class": "go",
+        "sha256": "fad927eb16b1ba69c3442a79738b8677f6596a8bb82c8fe292ebf850195177a7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "admin.schedules.create",
@@ -8,166 +87,87 @@
         "admin.schedules.toggle"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [
-        {
-          "module": "github.com/jackc/pgx/v5",
-          "version": "v5.10.0"
-        }
-      ],
-      "tools": []
-    },
-    "description": "Creating, enabling, running now and deleting recurring schedules, validated against the schedulable job kinds and audited.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "e02035da6eeff1fad841d218171565654ca71df2d133a47759fddb8d17692a01",
-        "source": "internal/web/workflow_admin_schedules.go",
-        "target": "internal/web/workflow_admin_schedules.go"
-      }
-    ],
-    "id": "ggg/workflow/admin-schedules",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "admin-schedules",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/page/admin-schedules"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/jobs"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/schedules"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "routes": [
         {
-          "handler": "handleAdminScheduleCreate",
           "id": "admin.schedules.create",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/schedules",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminScheduleCreate"
         },
         {
-          "handler": "handleAdminScheduleDelete",
           "id": "admin.schedules.delete",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/schedules/{id}/delete",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminScheduleDelete"
         },
         {
-          "handler": "handleAdminScheduleRun",
           "id": "admin.schedules.run",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/schedules/{id}/run",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminScheduleRun"
         },
         {
-          "handler": "handleAdminScheduleToggle",
           "id": "admin.schedules.toggle",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/schedules/{id}/toggle",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminScheduleToggle"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin schedule mutations"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

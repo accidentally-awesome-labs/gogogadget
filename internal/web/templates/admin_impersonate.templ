@@ -35,7 +35,7 @@ templ AdminImpersonateForm(d ImpersonateData) {
 				Target: "#impersonate-form-wrap", Swap: "outerHTML",
 				Attrs: ui.Attrs{
 					Class: "space-y-4",
-					HX:    ui.HX{Post: "/admin/users/" + d.Target.ClerkUserID + "/impersonate", Disable: true},
+					HX:    ui.HX{Post: "/admin/users/" + d.Target.UserID + "/impersonate", Disable: true},
 				},
 			}) {
 				@ui.Field(ui.FieldOpts{Name: "org", Label: i18n.T(ctx, "impersonation.org_label")}) {

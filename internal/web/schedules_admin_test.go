@@ -50,8 +50,8 @@ func TestAdminSchedulesCRUD(t *testing.T) {
 	row := rows[0]
 	assert.Equal(t, "Audit digest", row.Name)
 	assert.Equal(t, "usage.flush", row.Kind)
-	assert.True(t, row.ClerkOrgID.Valid)
-	assert.Equal(t, "org_sc", row.ClerkOrgID.String)
+	assert.True(t, row.OrgID.Valid)
+	assert.Equal(t, "org_sc", row.OrgID.String)
 	assert.True(t, row.Enabled)
 	assert.EqualValues(t, 3600, row.EverySeconds)
 

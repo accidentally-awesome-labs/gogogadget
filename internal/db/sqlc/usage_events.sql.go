@@ -20,7 +20,7 @@ WHERE id IN (
   LIMIT 100
   FOR UPDATE SKIP LOCKED
 )
-RETURNING id, clerk_org_id, name, value, metadata, external_id, created_at, flushed_at
+RETURNING id, org_id, name, value, metadata, external_id, created_at, flushed_at
 `
 
 // The 60s grace window avoids racing in-flight Record calls.
@@ -35,7 +35,7 @@ func (q *Queries) ClaimUsageBatch(ctx context.Context) ([]UsageEvent, error) {
 		var i UsageEvent
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Value,
 			&i.Metadata,
@@ -55,13 +55,13 @@ func (q *Queries) ClaimUsageBatch(ctx context.Context) ([]UsageEvent, error) {
 
 const insertUsageEvent = `-- name: InsertUsageEvent :one
 
-INSERT INTO usage_events (clerk_org_id, name, value, metadata, external_id)
+INSERT INTO usage_events (org_id, name, value, metadata, external_id)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, clerk_org_id, name, value, metadata, external_id, created_at, flushed_at
+RETURNING id, org_id, name, value, metadata, external_id, created_at, flushed_at
 `
 
 type InsertUsageEventParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
+	OrgID      string `json:"org_id"`
 	Name       string `json:"name"`
 	Value      int64  `json:"value"`
 	Metadata   []byte `json:"metadata"`
@@ -71,7 +71,7 @@ type InsertUsageEventParams struct {
 // usage_events (metered usage; flushed to Polar by the usage.flush schedule)
 func (q *Queries) InsertUsageEvent(ctx context.Context, arg InsertUsageEventParams) (UsageEvent, error) {
 	row := q.db.QueryRow(ctx, insertUsageEvent,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.Name,
 		arg.Value,
 		arg.Metadata,
@@ -80,7 +80,7 @@ func (q *Queries) InsertUsageEvent(ctx context.Context, arg InsertUsageEventPara
 	var i UsageEvent
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.Value,
 		&i.Metadata,
@@ -93,12 +93,12 @@ func (q *Queries) InsertUsageEvent(ctx context.Context, arg InsertUsageEventPara
 
 const listUsageEventsByOrg = `-- name: ListUsageEventsByOrg :many
 SELECT id, name, value, created_at FROM usage_events
-WHERE clerk_org_id = $1 ORDER BY created_at DESC LIMIT $2
+WHERE org_id = $1 ORDER BY created_at DESC LIMIT $2
 `
 
 type ListUsageEventsByOrgParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Limit      int32  `json:"limit"`
+	OrgID string `json:"org_id"`
+	Limit int32  `json:"limit"`
 }
 
 type ListUsageEventsByOrgRow struct {
@@ -109,7 +109,7 @@ type ListUsageEventsByOrgRow struct {
 }
 
 func (q *Queries) ListUsageEventsByOrg(ctx context.Context, arg ListUsageEventsByOrgParams) ([]ListUsageEventsByOrgRow, error) {
-	rows, err := q.db.Query(ctx, listUsageEventsByOrg, arg.ClerkOrgID, arg.Limit)
+	rows, err := q.db.Query(ctx, listUsageEventsByOrg, arg.OrgID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -135,17 +135,17 @@ func (q *Queries) ListUsageEventsByOrg(ctx context.Context, arg ListUsageEventsB
 
 const sumUsageByNameSince = `-- name: SumUsageByNameSince :one
 SELECT COALESCE(sum(value), 0)::bigint FROM usage_events
-WHERE clerk_org_id = $1 AND name = $2 AND created_at >= $3
+WHERE org_id = $1 AND name = $2 AND created_at >= $3
 `
 
 type SumUsageByNameSinceParams struct {
-	ClerkOrgID string             `json:"clerk_org_id"`
-	Name       string             `json:"name"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	OrgID     string             `json:"org_id"`
+	Name      string             `json:"name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) SumUsageByNameSince(ctx context.Context, arg SumUsageByNameSinceParams) (int64, error) {
-	row := q.db.QueryRow(ctx, sumUsageByNameSince, arg.ClerkOrgID, arg.Name, arg.CreatedAt)
+	row := q.db.QueryRow(ctx, sumUsageByNameSince, arg.OrgID, arg.Name, arg.CreatedAt)
 	var column_1 int64
 	err := row.Scan(&column_1)
 	return column_1, err

@@ -13,17 +13,17 @@ func (s *Server) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 
-	projects, err := s.q.CountProjectsByOrg(ctx, org.ClerkOrgID)
+	projects, err := s.q.CountProjectsByOrg(ctx, org.OrgID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	members, err := s.q.CountMembersByOrg(ctx, org.ClerkOrgID)
+	members, err := s.q.CountMembersByOrg(ctx, org.OrgID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	recent, err := s.q.RecentAuditByOrg(ctx, sqlc.RecentAuditByOrgParams{ClerkOrgID: sqlcText(org.ClerkOrgID), Limit: 10})
+	recent, err := s.q.RecentAuditByOrg(ctx, sqlc.RecentAuditByOrgParams{OrgID: sqlcText(org.OrgID), Limit: 10})
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

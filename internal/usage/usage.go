@@ -22,7 +22,7 @@ func Record(ctx context.Context, q *sqlc.Queries, orgID, name string, value int6
 		raw = []byte(`{}`)
 	}
 	_, err = q.InsertUsageEvent(ctx, sqlc.InsertUsageEventParams{
-		ClerkOrgID: orgID, Name: name, Value: value, Metadata: raw, ExternalID: externalID,
+		OrgID: orgID, Name: name, Value: value, Metadata: raw, ExternalID: externalID,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "usage record failed", "name", name, "org", orgID, "error", err)

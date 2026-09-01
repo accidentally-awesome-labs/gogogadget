@@ -30,9 +30,9 @@ type SubscriptionPayload struct {
 }
 
 // OrgID resolves the local org: checkout metadata first, then the Polar
-// customer's external id (both are the clerk_org_id by construction).
+// customer's external id (both are the org_id by construction).
 func (p SubscriptionPayload) OrgID() string {
-	if id := p.Metadata["clerk_org_id"]; id != "" {
+	if id := p.Metadata["org_id"]; id != "" {
 		return id
 	}
 	return p.Customer.ExternalID
@@ -74,7 +74,8 @@ const (
 type Processor struct {
 	Q            *sqlc.Queries
 	Log          *slog.Logger
-	ProductPlans map[string]string // polar product ID → plan key
+	ProductPlans map[string]string // provider product ID → plan key
+	Provider string
 	Emails       EmailSink
 	// Capture reports analytics events (nil = no-op until observability lands).
 	Capture func(userID, event string, props map[string]any)
@@ -85,6 +86,8 @@ type Processor struct {
 // logged and ACKed (200) so a stale product never wedges the endpoint.
 func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, sub SubscriptionPayload) error {
 	orgID := sub.OrgID()
+	provider := p.Provider
+	if provider == "" { provider = "polar" }
 	if orgID == "" {
 		p.Log.Warn("polar webhook: no org reference", "type", eventType, "sub", sub.ID)
 		return nil
@@ -93,6 +96,19 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 	if !ok {
 		p.Log.Warn("polar webhook: unknown product id (ignored)", "product", sub.ProductID, "type", eventType)
 		return nil
+	}
+
+	if sub.CustomerID != "" {
+		account, accountErr := p.Q.GetBillingAccount(ctx, sqlc.GetBillingAccountParams{Provider: provider, ProviderCustomerID: sub.CustomerID})
+		if accountErr == nil && account.OrgID != orgID { return fmt.Errorf("billing customer %q is already linked to another organization", sub.CustomerID) }
+		if accountErr != nil && !errors.Is(accountErr, pgx.ErrNoRows) { return accountErr }
+		if errors.Is(accountErr, pgx.ErrNoRows) {
+			if _, insertErr := p.Q.InsertBillingAccount(ctx, sqlc.InsertBillingAccountParams{Provider: provider, ProviderCustomerID: sub.CustomerID, OrgID: orgID}); insertErr != nil {
+				// A concurrent insert is safe only when it resolves to this org.
+				account, rereadErr := p.Q.GetBillingAccount(ctx, sqlc.GetBillingAccountParams{Provider: provider, ProviderCustomerID: sub.CustomerID})
+				if rereadErr != nil || account.OrgID != orgID { return fmt.Errorf("billing customer %q could not be linked", sub.CustomerID) }
+			}
+		}
 	}
 
 	// Read BEFORE upsert: transitions drive emails and audit.
@@ -115,9 +131,10 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 	}
 
 	if _, err := p.Q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		ClerkOrgID:          orgID,
-		PolarSubscriptionID: pgtype.Text{String: sub.ID, Valid: true},
-		PolarCustomerID:     sub.CustomerID,
+		OrgID:          orgID,
+		Provider:             provider,
+		ProviderSubscriptionID: pgtype.Text{String: sub.ID, Valid: true},
+		ProviderCustomerID:     sub.CustomerID,
 		ProductKey:          productKey,
 		Status:              sub.Status,
 		CurrentPeriodEnd:    periodEnd,

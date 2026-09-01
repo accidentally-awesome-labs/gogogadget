@@ -1,123 +1,123 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "admin.users.disable",
-        "admin.users.role"
-      ]
-    },
+    "id": "ggg/workflow/admin-user-governance",
+    "kind": "workflow",
+    "name": "admin-user-governance",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Admin user governance",
+    "description": "Administrator mutations on a user account: disable or re-enable it and grant or revoke staff role, both audited.",
+    "requires": [
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
           "version": "v5.10.0"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Administrator mutations on a user account: disable or re-enable it and grant or revoke staff role, both audited.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "9a6bd850fe9b372e7a8ea77f42159ed05a767339869e6a723bb4f93a20385d35",
         "source": "internal/web/workflow_admin_user_governance.go",
-        "target": "internal/web/workflow_admin_user_governance.go"
+        "target": "internal/web/workflow_admin_user_governance.go",
+        "class": "go",
+        "sha256": "b06d7a3bcc1e85e92d5d13ffb25d4d34c660734264f4820df91421c1e7430175",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/workflow/admin-user-governance",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "admin-user-governance",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
+    "claims": {
+      "routes": [
+        "admin.users.disable",
+        "admin.users.role"
+      ]
+    },
     "runtime": {
       "routes": [
         {
-          "handler": "handleAdminUserDisable",
           "id": "admin.users.disable",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/users/{id}/disable",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminUserDisable"
         },
         {
-          "handler": "handleAdminUserRole",
           "id": "admin.users.role",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/users/{id}/role",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminUserRole"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin user governance"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

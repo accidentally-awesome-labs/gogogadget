@@ -17,12 +17,12 @@ templ SelectOrg(orgs []sqlc.Org, devMode bool) {
 		<div class="mt-8 space-y-3" x-data="selectOrg">
 			for _, o := range orgs {
 				if devMode {
-					<a href={ "/dev/switch-org?org=" + o.ClerkOrgID } class="card flex items-center gap-3 hover:border-brand w-full" data-testid="select-org-button">
+					<a href={ "/dev/switch-org?org=" + o.OrgID } class="card flex items-center gap-3 hover:border-brand w-full" data-testid="select-org-button">
 						<span class="font-semibold">{ o.Name }</span>
 						<span class="text-sm text-fg-muted ml-auto">{ o.Slug }</span>
 					</a>
 				} else {
-					<button type="button" @click={ "choose('" + o.ClerkOrgID + "')" } class="card flex items-center gap-3 hover:border-brand w-full text-left cursor-pointer" data-testid="select-org-button">
+					<button type="button" @click={ "choose('" + o.OrgID + "')" } class="card flex items-center gap-3 hover:border-brand w-full text-left cursor-pointer" data-testid="select-org-button">
 						<span class="font-semibold">{ o.Name }</span>
 						<span class="text-sm text-fg-muted ml-auto">{ o.Slug }</span>
 					</button>

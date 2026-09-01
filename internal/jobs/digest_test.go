@@ -55,9 +55,9 @@ func digestWorker(t *testing.T, q *sqlc.Queries, sender mail.Sender) *Worker {
 func seedDigestUser(t *testing.T, pool poolExec, id, email, freq string, lastDigest any) {
 	t.Helper()
 	ctx := context.Background()
-	_, err := pool.Exec(ctx, `INSERT INTO users (clerk_user_id, email, name, digest_frequency, last_digest_at)
+	_, err := pool.Exec(ctx, `INSERT INTO users (user_id, email, name, digest_frequency, last_digest_at)
 		VALUES ($1, $2, 'Digest User', $3, $4)
-		ON CONFLICT (clerk_user_id) DO UPDATE SET digest_frequency = EXCLUDED.digest_frequency,
+		ON CONFLICT (user_id) DO UPDATE SET digest_frequency = EXCLUDED.digest_frequency,
 			last_digest_at = EXCLUDED.last_digest_at`, id, email, freq, lastDigest)
 	require.NoError(t, err)
 }
@@ -65,9 +65,9 @@ func seedDigestUser(t *testing.T, pool poolExec, id, email, freq string, lastDig
 func seedDigestOrgAndNotification(t *testing.T, pool poolExec, orgID, userID, title string) {
 	t.Helper()
 	ctx := context.Background()
-	_, err := pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ($1, $1, $1) ON CONFLICT DO NOTHING`, orgID)
+	_, err := pool.Exec(ctx, `INSERT INTO orgs (org_id, name, slug) VALUES ($1, $1, $1) ON CONFLICT DO NOTHING`, orgID)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO notifications (clerk_org_id, clerk_user_id, kind, title, body, url)
+	_, err = pool.Exec(ctx, `INSERT INTO notifications (org_id, user_id, kind, title, body, url)
 		VALUES ($1, $2, 'export.ready', $3, 'Body text', '/app/files')`, orgID, userID, title)
 	require.NoError(t, err)
 }
@@ -182,7 +182,7 @@ func TestDigestEmailLinksAndContent(t *testing.T) {
 
 func getUser(t *testing.T, q *sqlc.Queries, id string) sqlc.User {
 	t.Helper()
-	u, err := q.GetUserByClerkID(context.Background(), id)
+	u, err := q.GetUserByID(context.Background(), id)
 	require.NoError(t, err)
 	return u
 }
@@ -195,9 +195,9 @@ func clearDigestFixtures(t *testing.T, pool poolExec) {
 	t.Helper()
 	ctx := context.Background()
 	for _, stmt := range []string{
-		"DELETE FROM notifications WHERE clerk_org_id = 'org_dig'",
-		"DELETE FROM users WHERE clerk_user_id LIKE 'u\\_%'",
-		"DELETE FROM orgs WHERE clerk_org_id = 'org_dig'",
+		"DELETE FROM notifications WHERE org_id = 'org_dig'",
+		"DELETE FROM users WHERE user_id LIKE 'u\\_%'",
+		"DELETE FROM orgs WHERE org_id = 'org_dig'",
 	} {
 		_, err := pool.Exec(ctx, stmt)
 		require.NoError(t, err)
@@ -216,7 +216,7 @@ func TestDigestSpeaksTheUsersLanguage(t *testing.T) {
 	w := digestWorker(t, q, cap)
 	seedDigestUser(t, pool, "u_es", "es@example.com", "daily", nil)
 	seedDigestUser(t, pool, "u_en", "en@example.com", "daily", nil)
-	_, err := pool.Exec(ctx, `UPDATE users SET locale = 'es' WHERE clerk_user_id = 'u_es'`)
+	_, err := pool.Exec(ctx, `UPDATE users SET locale = 'es' WHERE user_id = 'u_es'`)
 	require.NoError(t, err)
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_es", "Exportación lista")
 	seedDigestOrgAndNotification(t, pool, "org_dig", "u_en", "Export ready")

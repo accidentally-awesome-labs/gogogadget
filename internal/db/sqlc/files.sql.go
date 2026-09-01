@@ -10,45 +10,45 @@ import (
 )
 
 const countFilesByOrg = `-- name: CountFilesByOrg :one
-SELECT count(*) FROM files WHERE clerk_org_id = $1
+SELECT count(*) FROM files WHERE org_id = $1
 `
 
-func (q *Queries) CountFilesByOrg(ctx context.Context, clerkOrgID string) (int64, error) {
-	row := q.db.QueryRow(ctx, countFilesByOrg, clerkOrgID)
+func (q *Queries) CountFilesByOrg(ctx context.Context, orgID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countFilesByOrg, orgID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const deleteFile = `-- name: DeleteFile :exec
-DELETE FROM files WHERE id = $1 AND clerk_org_id = $2
+DELETE FROM files WHERE id = $1 AND org_id = $2
 `
 
 type DeleteFileParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) DeleteFile(ctx context.Context, arg DeleteFileParams) error {
-	_, err := q.db.Exec(ctx, deleteFile, arg.ID, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, deleteFile, arg.ID, arg.OrgID)
 	return err
 }
 
 const getFileByID = `-- name: GetFileByID :one
-SELECT id, clerk_org_id, uploader_user_id, filename, content_type, size_bytes, storage_key, created_at FROM files WHERE id = $1 AND clerk_org_id = $2
+SELECT id, org_id, uploader_user_id, filename, content_type, size_bytes, storage_key, created_at FROM files WHERE id = $1 AND org_id = $2
 `
 
 type GetFileByIDParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) GetFileByID(ctx context.Context, arg GetFileByIDParams) (File, error) {
-	row := q.db.QueryRow(ctx, getFileByID, arg.ID, arg.ClerkOrgID)
+	row := q.db.QueryRow(ctx, getFileByID, arg.ID, arg.OrgID)
 	var i File
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.UploaderUserID,
 		&i.Filename,
 		&i.ContentType,
@@ -61,13 +61,13 @@ func (q *Queries) GetFileByID(ctx context.Context, arg GetFileByIDParams) (File,
 
 const insertFile = `-- name: InsertFile :one
 
-INSERT INTO files (clerk_org_id, uploader_user_id, filename, content_type, size_bytes, storage_key)
+INSERT INTO files (org_id, uploader_user_id, filename, content_type, size_bytes, storage_key)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, clerk_org_id, uploader_user_id, filename, content_type, size_bytes, storage_key, created_at
+RETURNING id, org_id, uploader_user_id, filename, content_type, size_bytes, storage_key, created_at
 `
 
 type InsertFileParams struct {
-	ClerkOrgID     string `json:"clerk_org_id"`
+	OrgID          string `json:"org_id"`
 	UploaderUserID string `json:"uploader_user_id"`
 	Filename       string `json:"filename"`
 	ContentType    string `json:"content_type"`
@@ -78,7 +78,7 @@ type InsertFileParams struct {
 // files (uploaded storage; org-scoped rows, bytes enforced at upload time)
 func (q *Queries) InsertFile(ctx context.Context, arg InsertFileParams) (File, error) {
 	row := q.db.QueryRow(ctx, insertFile,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.UploaderUserID,
 		arg.Filename,
 		arg.ContentType,
@@ -88,7 +88,7 @@ func (q *Queries) InsertFile(ctx context.Context, arg InsertFileParams) (File, e
 	var i File
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.UploaderUserID,
 		&i.Filename,
 		&i.ContentType,
@@ -100,20 +100,20 @@ func (q *Queries) InsertFile(ctx context.Context, arg InsertFileParams) (File, e
 }
 
 const listFilesByOrg = `-- name: ListFilesByOrg :many
-SELECT id, clerk_org_id, uploader_user_id, filename, content_type, size_bytes, storage_key, created_at FROM files
-WHERE clerk_org_id = $1
+SELECT id, org_id, uploader_user_id, filename, content_type, size_bytes, storage_key, created_at FROM files
+WHERE org_id = $1
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
 `
 
 type ListFilesByOrgParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Limit      int32  `json:"limit"`
-	Offset     int32  `json:"offset"`
+	OrgID  string `json:"org_id"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) ListFilesByOrg(ctx context.Context, arg ListFilesByOrgParams) ([]File, error) {
-	rows, err := q.db.Query(ctx, listFilesByOrg, arg.ClerkOrgID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listFilesByOrg, arg.OrgID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (q *Queries) ListFilesByOrg(ctx context.Context, arg ListFilesByOrgParams) 
 		var i File
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.UploaderUserID,
 			&i.Filename,
 			&i.ContentType,
@@ -142,11 +142,11 @@ func (q *Queries) ListFilesByOrg(ctx context.Context, arg ListFilesByOrgParams) 
 }
 
 const sumBytesByOrg = `-- name: SumBytesByOrg :one
-SELECT COALESCE(sum(size_bytes), 0)::bigint FROM files WHERE clerk_org_id = $1
+SELECT COALESCE(sum(size_bytes), 0)::bigint FROM files WHERE org_id = $1
 `
 
-func (q *Queries) SumBytesByOrg(ctx context.Context, clerkOrgID string) (int64, error) {
-	row := q.db.QueryRow(ctx, sumBytesByOrg, clerkOrgID)
+func (q *Queries) SumBytesByOrg(ctx context.Context, orgID string) (int64, error) {
+	row := q.db.QueryRow(ctx, sumBytesByOrg, orgID)
 	var column_1 int64
 	err := row.Scan(&column_1)
 	return column_1, err

@@ -202,7 +202,7 @@ func pricingAction(plan billing.Plan, authed bool, currentPlanKey string) templ.
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else if plan.PolarProductID != "" {
+		} else if plan.ProviderProductID != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "     ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

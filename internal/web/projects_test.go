@@ -20,7 +20,7 @@ func seedMembership(t *testing.T, s *Server, userID, orgID, role string) {
 	seedUser(t, s, userID, userID+"@example.com", userID)
 	seedOrg(t, s, orgID, orgID)
 	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{
-		ClerkOrgID: orgID, ClerkUserID: userID, Role: role,
+		OrgID: orgID, UserID: userID, Role: role,
 	}))
 }
 
@@ -59,10 +59,10 @@ func TestProjectCrossOrg404(t *testing.T) {
 	seedMembership(t, s, "user_x1", "org_x1", "org:admin")
 	seedMembership(t, s, "user_x2", "org_x2", "org:admin")
 
-	p, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_x2", Name: "Org B secret"})
+	p, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_x2", Name: "Org B secret"})
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id IN ('org_x1','org_x2')")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id IN ('org_x1','org_x2')")
 	})
 
 	base := fmt.Sprintf("/app/projects/%d", p.ID)
@@ -84,7 +84,7 @@ func TestProjectCrossOrg404(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, code)
 
 	// And it is untouched.
-	got, err := s.q.GetProjectByID(ctx, sqlc.GetProjectByIDParams{ID: p.ID, ClerkOrgID: "org_x2"})
+	got, err := s.q.GetProjectByID(ctx, sqlc.GetProjectByIDParams{ID: p.ID, OrgID: "org_x2"})
 	require.NoError(t, err)
 	assert.Equal(t, "Org B secret", got.Name)
 }
@@ -94,10 +94,10 @@ func TestFreePlanLimit422(t *testing.T) {
 	seedMembership(t, s, "user_l1", "org_l1", "org:admin")
 	ctx := t.Context()
 	for i := range 3 {
-		_, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_l1", Name: fmt.Sprintf("P%d", i)})
+		_, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_l1", Name: fmt.Sprintf("P%d", i)})
 		require.NoError(t, err)
 	}
-	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_l1'") })
+	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id = 'org_l1'") })
 
 	// 4th create on the free plan → 422 fragment with upgrade CTA.
 	code, _, body := postForm(t, s, "/app/projects", url.Values{"name": {"One too many"}}, sessionCookie("user_l1", "org_l1", "org:admin"))
@@ -128,8 +128,8 @@ func TestProjectCreateSearchArchiveDelete(t *testing.T) {
 	seedMembership(t, s, "user_c1", "org_c1", "org:admin")
 	cookie := sessionCookie("user_c1", "org_c1", "org:admin")
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_c1'")
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE clerk_org_id = 'org_c1'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id = 'org_c1'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE org_id = 'org_c1'")
 	})
 
 	// Create → soft navigation (HX-Location scoped to #content, so the shell and
@@ -146,7 +146,7 @@ func TestProjectCreateSearchArchiveDelete(t *testing.T) {
 
 	// Audit row written.
 	var n int
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE clerk_org_id='org_c1' AND action='project.created'`).Scan(&n))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE org_id='org_c1' AND action='project.created'`).Scan(&n))
 	assert.Equal(t, 1, n)
 
 	// Search finds it; nonsense search doesn't.
@@ -159,7 +159,7 @@ func TestProjectCreateSearchArchiveDelete(t *testing.T) {
 
 	// Archive → disappears from the default list.
 	var id int64
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT id FROM projects WHERE clerk_org_id='org_c1'`).Scan(&id))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT id FROM projects WHERE org_id='org_c1'`).Scan(&id))
 	code, _, _ = postForm(t, s, fmt.Sprintf("/app/projects/%d/archive", id), url.Values{}, cookie)
 	require.Equal(t, http.StatusOK, code)
 	code, _, body = serve(t, s, "GET", "/app/projects", nil, nil, cookie)
@@ -167,9 +167,9 @@ func TestProjectCreateSearchArchiveDelete(t *testing.T) {
 	assert.NotContains(t, body, "Launch checklist")
 
 	// Recreate + delete → 200 empty, audit written.
-	_, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_c1", Name: "Doomed"})
+	_, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_c1", Name: "Doomed"})
 	require.NoError(t, err)
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT id FROM projects WHERE clerk_org_id='org_c1' AND status='active'`).Scan(&id))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT id FROM projects WHERE org_id='org_c1' AND status='active'`).Scan(&id))
 	h := http.Header{}
 	h.Set("HX-Request", "true")
 	token, csrfCookies := csrfFor(t, s)
@@ -221,10 +221,10 @@ func TestProjectDeleteIsGatedByAnInPageDialog(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedMembership(t, s, "user_cfm", "org_cfm", "org:admin")
 	ctx := t.Context()
-	p, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_cfm", Name: "Confirmed"})
+	p, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_cfm", Name: "Confirmed"})
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_cfm'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id = 'org_cfm'")
 	})
 
 	code, _, body := serve(t, s, "GET", "/app/projects", nil, nil, sessionCookie("user_cfm", "org_cfm", "org:admin"))

@@ -50,7 +50,7 @@ func (w *Worker) exportProjectsCSV(ctx context.Context, p ExportProjectsPayload)
 		return err
 	}
 	f, err := w.q.InsertFile(ctx, sqlc.InsertFileParams{
-		ClerkOrgID: p.OrgID, UploaderUserID: p.UserID, Filename: filename,
+		OrgID: p.OrgID, UploaderUserID: p.UserID, Filename: filename,
 		ContentType: "text/csv", SizeBytes: size, StorageKey: key,
 	})
 	if err != nil {

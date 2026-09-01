@@ -1,25 +1,30 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "internal/audit"
-      ],
-      "queries": [
-        "audit"
-      ]
-    },
+    "id": "ggg/system/audit",
+    "kind": "system",
+    "name": "audit",
+    "revision": 1,
     "contract": 1,
-    "data": [
+    "title": "Audit log",
+    "description": "Fire-and-forget audit trail. Errors are logged, never returned: an audit hiccup must not fail the caller.",
+    "requires": [
       {
-        "account_delete": "retain",
-        "export": true,
-        "organization_delete": "retain",
-        "scope": "org",
-        "table": "audit_log"
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       }
     ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -30,89 +35,65 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Fire-and-forget audit trail. Errors are logged, never returned: an audit hiccup must not fail the caller.",
-    "docs": [],
-    "environment": [
-      {
-        "description": "The daily janitor deletes audit rows older than this many days; 0 retains forever",
-        "field": "AuditRetentionDays",
-        "key": "AUDIT_RETENTION_DAYS",
-        "min": 0,
-        "type": "int"
-      }
-    ],
     "files": [
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "6058348c53afe64a6a19e00859fe801cfdd4cb49b98abba53d7a579730471894",
         "source": "internal/audit/audit.go",
-        "target": "internal/audit/audit.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "521f4b65da047bc71d48a35c56e2b6eb884fed05159b2d63366afc106d551395",
-        "source": "internal/audit/audit_test.go",
-        "target": "internal/audit/audit_test.go"
-      },
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "d7ec28d3210898f4d427f0d91aff4deb7416239b629f905650a1494bcb268ede",
-        "source": "internal/db/queries/audit.sql",
-        "target": "internal/db/queries/audit.sql"
-      },
-      {
-        "class": "seed",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "96e4f5595e2311e32bff4b4eff122a812e325c32f72e173dbe69ef0b7ba552e4",
-        "source": "internal/db/testdata/seed/e2e/audit.sql",
-        "target": "internal/db/testdata/seed/e2e/audit.sql"
-      },
-      {
+        "target": "internal/audit/audit.go",
         "class": "go",
-        "contract": false,
+        "sha256": "8f33299c7cd4d449acdfb91e5e9a5102dd9ed31f4b8b039f341f0c426962ad63",
         "rewrite_module": true,
-        "sha256": "af0a61372818ff7f7ac47fd8f0740600cd08c0712f659590635750959868469d",
-        "source": "internal/jobs/janitor_audit.go",
-        "target": "internal/jobs/janitor_audit.go"
-      }
-    ],
-    "id": "ggg/system/audit",
-    "kind": "system",
-    "migrations": [],
-    "name": "audit",
-    "removal_policy": "retain-data",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
+        "contract": true
       },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
+        "source": "internal/audit/audit_test.go",
+        "target": "internal/audit/audit_test.go",
+        "class": "test",
+        "sha256": "dfeeec0f22384ac25228dfb4233e1a738e7fe22ac7bd6d46b34fc65835db2260",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/audit.sql",
+        "target": "internal/db/queries/audit.sql",
+        "class": "query",
+        "sha256": "353423e91ef52d0ed7c5a9807a3c70e361253118c1c7296379ab8e0bc025fceb",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/audit.sql",
+        "target": "internal/db/testdata/seed/e2e/audit.sql",
+        "class": "seed",
+        "sha256": "a6e40800ac3d5abe4ce71578a5ceaa03c3dcd0fcd80c375980e63ce9724c2988",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/jobs/janitor_audit.go",
+        "target": "internal/jobs/janitor_audit.go",
+        "class": "go",
+        "sha256": "af0a61372818ff7f7ac47fd8f0740600cd08c0712f659590635750959868469d",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 1,
+    "claims": {
+      "packages": [
+        "internal/audit"
+      ],
+      "queries": [
+        "audit"
+      ]
+    },
     "runtime": {
       "janitors": [
         {
-          "handler": "janitorAuditLog",
           "name": "audit_log",
-          "package": "internal/jobs"
+          "package": "internal/jobs",
+          "handler": "janitorAuditLog"
         }
       ],
       "queries": [
@@ -150,12 +131,31 @@
         }
       ]
     },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "AUDIT_RETENTION_DAYS",
+        "field": "AuditRetentionDays",
+        "type": "int",
+        "description": "The daily janitor deletes audit rows older than this many days; 0 retains forever",
+        "min": 0
+      }
+    ],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/audit"
       ]
     },
-    "title": "Audit log"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "audit_log",
+        "scope": "org",
+        "export": true,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
 }

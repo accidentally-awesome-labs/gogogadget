@@ -1,5 +1,90 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/system/organizations",
+    "kind": "system",
+    "name": "organizations",
+    "revision": 1,
+    "contract": 1,
+    "title": "Users, organizations, and membership",
+    "description": "Core tenancy: the users, organizations, and memberships tables, their queries, and the initial schema every other module builds on.",
+    "requires": [
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/db/queries/identity.sql",
+        "target": "internal/db/queries/identity.sql",
+        "class": "query",
+        "sha256": "fa243f979765247452851de64b99aa6126639892a8653d9887f72fcf0420dab3",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/memberships.sql",
+        "target": "internal/db/queries/memberships.sql",
+        "class": "query",
+        "sha256": "deb99534089e1655a3f4e3777abf0d0b23e2abf4ae3f39d7b02866531dbea63d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/orgs.sql",
+        "target": "internal/db/queries/orgs.sql",
+        "class": "query",
+        "sha256": "c759b504ab548d77c05c1e6f3ca3e2824b8c2604b5e9b7a2e35c46f7dcd77fe7",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/queries/users.sql",
+        "target": "internal/db/queries/users.sql",
+        "class": "query",
+        "sha256": "b52c186a41cd7881ad4c11dbfaf1f912e3587d1d42ce611a7ed37113e3ba9ab9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/dev/organizations.sql",
+        "target": "internal/db/testdata/seed/dev/organizations.sql",
+        "class": "seed",
+        "sha256": "19497879c07da32b2f1a8f7f9d81e66e0fc35c1e1c9354ceb2eca821c26a1030",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/db/testdata/seed/e2e/organizations.sql",
+        "target": "internal/db/testdata/seed/e2e/organizations.sql",
+        "class": "seed",
+        "sha256": "3c8be9d4050ee38de07eb7dc6244280c1eda4033e02fea6cd2925f7163b4f508",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/roles_test.go",
+        "target": "internal/web/roles_test.go",
+        "class": "test",
+        "sha256": "80e0fc7d7ac08a7a61c7983c2d7e7f4b509b0cee6923448cb063d039f300a870",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "queries": [
         "memberships",
@@ -7,121 +92,6 @@
         "users"
       ]
     },
-    "contract": 1,
-    "data": [
-      {
-        "account_delete": "cascade",
-        "export": true,
-        "organization_delete": "cascade",
-        "scope": "org",
-        "table": "org_members"
-      },
-      {
-        "account_delete": "manual",
-        "export": true,
-        "organization_delete": "manual",
-        "scope": "org",
-        "table": "orgs"
-      },
-      {
-        "account_delete": "manual",
-        "export": true,
-        "organization_delete": "retain",
-        "scope": "user",
-        "table": "users"
-      }
-    ],
-    "dependencies": {
-      "containers": [],
-      "go": [
-        {
-          "module": "github.com/stretchr/testify",
-          "version": "v1.11.1"
-        }
-      ],
-      "tools": []
-    },
-    "description": "Core tenancy: the users, organizations, and memberships tables, their queries, and the initial schema every other module builds on.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "f276bbe133d68732ccc861f82d4db136edd2588a839760be144ecb714beacd03",
-        "source": "internal/db/queries/memberships.sql",
-        "target": "internal/db/queries/memberships.sql"
-      },
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "f88b7aec7c74dec271de5fd8bc88dd53fcfa33c77093d7036862765a9bea6d79",
-        "source": "internal/db/queries/orgs.sql",
-        "target": "internal/db/queries/orgs.sql"
-      },
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "a7dceb474bc21081e9f0ace9417e6399c8a5cf11e67273258916572910a37d14",
-        "source": "internal/db/queries/users.sql",
-        "target": "internal/db/queries/users.sql"
-      },
-      {
-        "class": "seed",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "1f6461a477fb0d46afbe7dbb84e402340badc63c0e15db00674d5dc186cd3b79",
-        "source": "internal/db/testdata/seed/dev/organizations.sql",
-        "target": "internal/db/testdata/seed/dev/organizations.sql"
-      },
-      {
-        "class": "seed",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "12d9cda663239a21718fea87ea1e51d0d4985072ee5ba83e1aba454e07336477",
-        "source": "internal/db/testdata/seed/e2e/organizations.sql",
-        "target": "internal/db/testdata/seed/e2e/organizations.sql"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "777cafa60dc2d05252983ac8ee451c3b20c6c0506be3c5c93e3d5d38bf28759e",
-        "source": "internal/web/roles_test.go",
-        "target": "internal/web/roles_test.go"
-      }
-    ],
-    "id": "ggg/system/organizations",
-    "kind": "system",
-    "migrations": [
-      {
-        "id": "0001_init",
-        "kind": "immutable",
-        "sha256": "2f589cb3ed81a052b992af345e0a546706ae0844bf5bdbcf541ca317ce8c6c0e",
-        "source": "internal/db/migrations/0001_init.sql"
-      },
-      {
-        "id": "0018_admin_roles",
-        "kind": "immutable",
-        "sha256": "f64ff818cd920be3497d8b613b946f9258320eda14c6bdd7d238defd356f999b",
-        "source": "internal/db/migrations/0018_admin_roles.sql"
-      }
-    ],
-    "name": "organizations",
-    "removal_policy": "replacement-required",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "queries": [
         {
@@ -165,7 +135,7 @@
           "table": "org_members"
         },
         {
-          "name": "GetOrgByClerkID",
+          "name": "GetOrgByID",
           "table": "orgs"
         },
         {
@@ -173,7 +143,7 @@
           "table": "orgs"
         },
         {
-          "name": "GetUserByClerkID",
+          "name": "GetUserByID",
           "table": "users"
         },
         {
@@ -238,8 +208,52 @@
         }
       ]
     },
+    "migrations": [
+      {
+        "id": "0001_init",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0001_init.sql",
+        "sha256": "2f589cb3ed81a052b992af345e0a546706ae0844bf5bdbcf541ca317ce8c6c0e"
+      },
+      {
+        "id": "0018_admin_roles",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0018_admin_roles.sql",
+        "sha256": "f64ff818cd920be3497d8b613b946f9258320eda14c6bdd7d238defd356f999b"
+      },
+      {
+        "id": "0020_provider_neutral_ids",
+        "kind": "neutralize",
+        "source": "internal/db/migrations/0020_provider_neutral_ids.sql",
+        "sha256": "62dbb77a7ab73370de0e3a7de11a418209a92ae50dad329516ab041806490708"
+      }
+    ],
+    "environment": [],
+    "docs": [],
     "tests": {},
-    "title": "Users, organizations, and membership"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "org_members",
+        "scope": "org",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      },
+      {
+        "table": "orgs",
+        "scope": "org",
+        "export": true,
+        "account_delete": "manual",
+        "organization_delete": "manual"
+      },
+      {
+        "table": "users",
+        "scope": "user",
+        "export": true,
+        "account_delete": "manual",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "replacement-required"
+  }
 }

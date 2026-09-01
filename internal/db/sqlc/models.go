@@ -20,7 +20,7 @@ type Announcement struct {
 
 type ApiToken struct {
 	ID         int64              `json:"id"`
-	ClerkOrgID string             `json:"clerk_org_id"`
+	OrgID      string             `json:"org_id"`
 	Name       string             `json:"name"`
 	TokenHash  string             `json:"token_hash"`
 	Scope      string             `json:"scope"`
@@ -31,12 +31,18 @@ type ApiToken struct {
 }
 
 type AuditLog struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  pgtype.Text        `json:"clerk_org_id"`
-	ClerkUserID pgtype.Text        `json:"clerk_user_id"`
-	Action      string             `json:"action"`
-	Metadata    []byte             `json:"metadata"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ID        int64              `json:"id"`
+	OrgID     pgtype.Text        `json:"org_id"`
+	UserID    pgtype.Text        `json:"user_id"`
+	Action    string             `json:"action"`
+	Metadata  []byte             `json:"metadata"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type BillingAccount struct {
+	Provider           string `json:"provider"`
+	ProviderCustomerID string `json:"provider_customer_id"`
+	OrgID              string `json:"org_id"`
 }
 
 type ContentEntry struct {
@@ -90,7 +96,7 @@ type FeatureFlag struct {
 
 type File struct {
 	ID             int64              `json:"id"`
-	ClerkOrgID     string             `json:"clerk_org_id"`
+	OrgID          string             `json:"org_id"`
 	UploaderUserID string             `json:"uploader_user_id"`
 	Filename       string             `json:"filename"`
 	ContentType    string             `json:"content_type"`
@@ -100,13 +106,13 @@ type File struct {
 }
 
 type FlagOverride struct {
-	FlagKey    string `json:"flag_key"`
-	ClerkOrgID string `json:"clerk_org_id"`
-	Enabled    bool   `json:"enabled"`
+	FlagKey string `json:"flag_key"`
+	OrgID   string `json:"org_id"`
+	Enabled bool   `json:"enabled"`
 }
 
 type IdempotencyKey struct {
-	ClerkOrgID  string             `json:"clerk_org_id"`
+	OrgID       string             `json:"org_id"`
 	Key         string             `json:"key"`
 	Endpoint    string             `json:"endpoint"`
 	RequestHash string             `json:"request_hash"`
@@ -114,6 +120,18 @@ type IdempotencyKey struct {
 	Response    []byte             `json:"response"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
+type IdentityOrganization struct {
+	Provider string `json:"provider"`
+	Subject  string `json:"subject"`
+	OrgID    string `json:"org_id"`
+}
+
+type IdentitySubject struct {
+	Provider string `json:"provider"`
+	Subject  string `json:"subject"`
+	UserID   string `json:"user_id"`
 }
 
 type ImpersonationSession struct {
@@ -140,49 +158,49 @@ type Job struct {
 }
 
 type Notification struct {
-	ID          int64              `json:"id"`
-	ClerkOrgID  string             `json:"clerk_org_id"`
-	ClerkUserID string             `json:"clerk_user_id"`
-	Kind        string             `json:"kind"`
-	Title       string             `json:"title"`
-	Body        string             `json:"body"`
-	Url         string             `json:"url"`
-	ReadAt      pgtype.Timestamptz `json:"read_at"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ID        int64              `json:"id"`
+	OrgID     string             `json:"org_id"`
+	UserID    string             `json:"user_id"`
+	Kind      string             `json:"kind"`
+	Title     string             `json:"title"`
+	Body      string             `json:"body"`
+	Url       string             `json:"url"`
+	ReadAt    pgtype.Timestamptz `json:"read_at"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type NotificationPreference struct {
-	ClerkUserID string             `json:"clerk_user_id"`
-	Kind        string             `json:"kind"`
-	InApp       bool               `json:"in_app"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	UserID    string             `json:"user_id"`
+	Kind      string             `json:"kind"`
+	InApp     bool               `json:"in_app"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Org struct {
-	ClerkOrgID string             `json:"clerk_org_id"`
-	Name       string             `json:"name"`
-	Slug       string             `json:"slug"`
-	ImageUrl   string             `json:"image_url"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
+	OrgID     string             `json:"org_id"`
+	Name      string             `json:"name"`
+	Slug      string             `json:"slug"`
+	ImageUrl  string             `json:"image_url"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type OrgMember struct {
-	ClerkOrgID  string             `json:"clerk_org_id"`
-	ClerkUserID string             `json:"clerk_user_id"`
-	Role        string             `json:"role"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	OrgID     string             `json:"org_id"`
+	UserID    string             `json:"user_id"`
+	Role      string             `json:"role"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Project struct {
-	ID         int64              `json:"id"`
-	ClerkOrgID string             `json:"clerk_org_id"`
-	Name       string             `json:"name"`
-	Status     string             `json:"status"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	SearchTsv  interface{}        `json:"search_tsv"`
+	ID        int64              `json:"id"`
+	OrgID     string             `json:"org_id"`
+	Name      string             `json:"name"`
+	Status    string             `json:"status"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	SearchTsv interface{}        `json:"search_tsv"`
 }
 
 type Schedule struct {
@@ -190,7 +208,7 @@ type Schedule struct {
 	Name         string             `json:"name"`
 	Kind         string             `json:"kind"`
 	Payload      []byte             `json:"payload"`
-	ClerkOrgID   pgtype.Text        `json:"clerk_org_id"`
+	OrgID        pgtype.Text        `json:"org_id"`
 	EverySeconds int32              `json:"every_seconds"`
 	NextRunAt    pgtype.Timestamptz `json:"next_run_at"`
 	LastRunAt    pgtype.Timestamptz `json:"last_run_at"`
@@ -200,21 +218,22 @@ type Schedule struct {
 }
 
 type Subscription struct {
-	ID                  int64              `json:"id"`
-	ClerkOrgID          string             `json:"clerk_org_id"`
-	PolarSubscriptionID pgtype.Text        `json:"polar_subscription_id"`
-	PolarCustomerID     string             `json:"polar_customer_id"`
-	ProductKey          string             `json:"product_key"`
-	Status              string             `json:"status"`
-	CurrentPeriodEnd    pgtype.Timestamptz `json:"current_period_end"`
-	CancelAtPeriodEnd   bool               `json:"cancel_at_period_end"`
-	CreatedAt           pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt           pgtype.Timestamptz `json:"updated_at"`
+	ID                     int64              `json:"id"`
+	OrgID                  string             `json:"org_id"`
+	ProviderSubscriptionID pgtype.Text        `json:"provider_subscription_id"`
+	ProviderCustomerID     string             `json:"provider_customer_id"`
+	ProductKey             string             `json:"product_key"`
+	Status                 string             `json:"status"`
+	CurrentPeriodEnd       pgtype.Timestamptz `json:"current_period_end"`
+	CancelAtPeriodEnd      bool               `json:"cancel_at_period_end"`
+	CreatedAt              pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt              pgtype.Timestamptz `json:"updated_at"`
+	Provider               string             `json:"provider"`
 }
 
 type UsageEvent struct {
 	ID         int64              `json:"id"`
-	ClerkOrgID string             `json:"clerk_org_id"`
+	OrgID      string             `json:"org_id"`
 	Name       string             `json:"name"`
 	Value      int64              `json:"value"`
 	Metadata   []byte             `json:"metadata"`
@@ -224,7 +243,7 @@ type UsageEvent struct {
 }
 
 type User struct {
-	ClerkUserID     string             `json:"clerk_user_id"`
+	UserID          string             `json:"user_id"`
 	Email           string             `json:"email"`
 	Name            string             `json:"name"`
 	AvatarUrl       string             `json:"avatar_url"`
@@ -241,7 +260,7 @@ type User struct {
 type WebhookDelivery struct {
 	ID                 int64              `json:"id"`
 	EndpointID         int64              `json:"endpoint_id"`
-	ClerkOrgID         string             `json:"clerk_org_id"`
+	OrgID              string             `json:"org_id"`
 	EventType          string             `json:"event_type"`
 	Payload            []byte             `json:"payload"`
 	Status             string             `json:"status"`
@@ -254,7 +273,7 @@ type WebhookDelivery struct {
 
 type WebhookEndpoint struct {
 	ID              int64              `json:"id"`
-	ClerkOrgID      string             `json:"clerk_org_id"`
+	OrgID           string             `json:"org_id"`
 	CreatedBy       string             `json:"created_by"`
 	Url             string             `json:"url"`
 	Secret          string             `json:"secret"`

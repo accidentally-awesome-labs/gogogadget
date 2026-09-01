@@ -21,7 +21,7 @@ func TestClerkWebhookBypassWithoutSecret(t *testing.T) {
 	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, h)
 	require.Equal(t, http.StatusOK, code)
 
-	u, err := s.q.GetUserByClerkID(ctx, "user_ns1")
+	u, err := s.q.GetUserByID(ctx, "user_ns1")
 	require.NoError(t, err)
 	assert.Equal(t, "No Secret", u.Name)
 

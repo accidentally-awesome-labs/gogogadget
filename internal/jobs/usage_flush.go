@@ -31,7 +31,7 @@ func (w *Worker) flushUsage(ctx context.Context, _ SchedulePayload) error {
 
 		byOrg := map[string][]sqlc.UsageEvent{}
 		for _, e := range batch {
-			byOrg[e.ClerkOrgID] = append(byOrg[e.ClerkOrgID], e)
+			byOrg[e.OrgID] = append(byOrg[e.OrgID], e)
 		}
 		var failed []int64
 		for orgID, events := range byOrg {

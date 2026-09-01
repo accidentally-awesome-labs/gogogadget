@@ -126,7 +126,7 @@ func TestImpersonationDisabledTarget422(t *testing.T) {
 	adminUser(t, s, "user_dis_admin", "org_dis_admin")
 	seedMembership(t, s, "user_dis_target", "org_dis_target", "org:admin")
 	require.NoError(t, s.q.SetUserDisabled(t.Context(), sqlc.SetUserDisabledParams{
-		ClerkUserID: "user_dis_target", DisabledAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		UserID: "user_dis_target", DisabledAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}))
 
 	token, csrfCookies := csrfFor(t, s)
@@ -290,6 +290,6 @@ func TestImpersonationAuditDoesNotPublishTheSessionID(t *testing.T) {
 	require.Len(t, rows, 1)
 	assert.NotContains(t, string(rows[0].Metadata), imp.Value,
 		"the entry is org-scoped and its metadata is rendered to every member, so it must not carry a live credential")
-	assert.Equal(t, "org_audit", rows[0].ClerkOrgID.String,
+	assert.Equal(t, "org_audit", rows[0].OrgID.String,
 		"the entry must be findable in the target org's own feed")
 }

@@ -34,7 +34,7 @@ func ValidateProjectName(name string) (string, string) {
 // column can never silently change the API.
 type projectResponse struct {
 	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	OrgID string `json:"org_id"`
 	Name       string `json:"name"`
 	Status     string `json:"status"`
 	CreatedAt  string `json:"created_at"`
@@ -43,7 +43,7 @@ type projectResponse struct {
 
 func newProjectResponse(p sqlc.Project) projectResponse {
 	return projectResponse{
-		ID: p.ID, ClerkOrgID: p.ClerkOrgID, Name: p.Name, Status: p.Status,
+		ID: p.ID, OrgID: p.OrgID, Name: p.Name, Status: p.Status,
 		CreatedAt: p.CreatedAt.Time.UTC().Format(time.RFC3339),
 		UpdatedAt: p.UpdatedAt.Time.UTC().Format(time.RFC3339),
 	}
@@ -87,7 +87,7 @@ func (h *Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		params := sqlc.ListProjectsByOrgCursorParams{ClerkOrgID: org.ClerkOrgID, Lim: int32(limit) + 1}
+		params := sqlc.ListProjectsByOrgCursorParams{OrgID: org.OrgID, Lim: int32(limit) + 1}
 		if raw != "" {
 			params.CursorCreatedAt = pgtype.Timestamptz{Time: after.CreatedAt, Valid: true}
 			params.CursorID = pgtype.Int8{Int64: after.ID, Valid: true}
@@ -95,7 +95,7 @@ func (h *Projects) ListProjects(w http.ResponseWriter, r *http.Request) {
 		projects, err = h.Q.ListProjectsByOrgCursor(r.Context(), params) // limit+1 probes for a next page
 	} else {
 		projects, err = h.Q.ListProjectsByOrg(r.Context(), sqlc.ListProjectsByOrgParams{
-			ClerkOrgID: org.ClerkOrgID, Column2: "",
+			OrgID: org.OrgID, Column2: "",
 			Limit: int32(limit) + 1, Offset: int32(offset),
 		})
 	}
@@ -143,9 +143,9 @@ func (h *Projects) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan := billing.CurrentPlan(ctx, h.Q, org.ClerkOrgID, time.Now())
+	plan := billing.CurrentPlan(ctx, h.Q, org.OrgID, time.Now())
 	if plan.MaxProjects > 0 {
-		count, err := h.Q.CountProjectsByOrg(ctx, org.ClerkOrgID)
+		count, err := h.Q.CountProjectsByOrg(ctx, org.OrgID)
 		if err != nil {
 			WriteError(w, http.StatusInternalServerError, "internal_error", "Could not check plan limit.")
 			return
@@ -157,11 +157,11 @@ func (h *Projects) CreateProject(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	project, err := h.Q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: org.ClerkOrgID, Name: name})
+	project, err := h.Q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: org.OrgID, Name: name})
 	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "internal_error", "Could not create project.")
 		return
 	}
-	audit.Log(ctx, h.Q, org.ClerkOrgID, "", "project.created", map[string]any{"id": project.ID, "name": project.Name, "via": "api"})
+	audit.Log(ctx, h.Q, org.OrgID, "", "project.created", map[string]any{"id": project.ID, "name": project.Name, "via": "api"})
 	WriteJSON(w, http.StatusCreated, newProjectResponse(project))
 }

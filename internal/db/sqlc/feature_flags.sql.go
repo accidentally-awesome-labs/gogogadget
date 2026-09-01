@@ -21,16 +21,16 @@ func (q *Queries) DeleteFeatureFlag(ctx context.Context, key string) error {
 }
 
 const deleteFlagOverride = `-- name: DeleteFlagOverride :exec
-DELETE FROM flag_overrides WHERE flag_key = $1 AND clerk_org_id = $2
+DELETE FROM flag_overrides WHERE flag_key = $1 AND org_id = $2
 `
 
 type DeleteFlagOverrideParams struct {
-	FlagKey    string `json:"flag_key"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	FlagKey string `json:"flag_key"`
+	OrgID   string `json:"org_id"`
 }
 
 func (q *Queries) DeleteFlagOverride(ctx context.Context, arg DeleteFlagOverrideParams) error {
-	_, err := q.db.Exec(ctx, deleteFlagOverride, arg.FlagKey, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, deleteFlagOverride, arg.FlagKey, arg.OrgID)
 	return err
 }
 
@@ -52,18 +52,18 @@ func (q *Queries) GetFeatureFlag(ctx context.Context, key string) (FeatureFlag, 
 }
 
 const getFlagOverride = `-- name: GetFlagOverride :one
-SELECT flag_key, clerk_org_id, enabled FROM flag_overrides WHERE flag_key = $1 AND clerk_org_id = $2
+SELECT flag_key, org_id, enabled FROM flag_overrides WHERE flag_key = $1 AND org_id = $2
 `
 
 type GetFlagOverrideParams struct {
-	FlagKey    string `json:"flag_key"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	FlagKey string `json:"flag_key"`
+	OrgID   string `json:"org_id"`
 }
 
 func (q *Queries) GetFlagOverride(ctx context.Context, arg GetFlagOverrideParams) (FlagOverride, error) {
-	row := q.db.QueryRow(ctx, getFlagOverride, arg.FlagKey, arg.ClerkOrgID)
+	row := q.db.QueryRow(ctx, getFlagOverride, arg.FlagKey, arg.OrgID)
 	var i FlagOverride
-	err := row.Scan(&i.FlagKey, &i.ClerkOrgID, &i.Enabled)
+	err := row.Scan(&i.FlagKey, &i.OrgID, &i.Enabled)
 	return i, err
 }
 
@@ -100,15 +100,15 @@ func (q *Queries) ListFeatureFlags(ctx context.Context) ([]FeatureFlag, error) {
 }
 
 const listFlagOverridesByFlag = `-- name: ListFlagOverridesByFlag :many
-SELECT o.clerk_org_id, o.name, f.enabled AS override_enabled
+SELECT o.org_id, o.name, f.enabled AS override_enabled
 FROM flag_overrides f
-JOIN orgs o ON o.clerk_org_id = f.clerk_org_id
+JOIN orgs o ON o.org_id = f.org_id
 WHERE f.flag_key = $1
 ORDER BY o.name
 `
 
 type ListFlagOverridesByFlagRow struct {
-	ClerkOrgID      string `json:"clerk_org_id"`
+	OrgID           string `json:"org_id"`
 	Name            string `json:"name"`
 	OverrideEnabled bool   `json:"override_enabled"`
 }
@@ -123,7 +123,7 @@ func (q *Queries) ListFlagOverridesByFlag(ctx context.Context, flagKey string) (
 	var items []ListFlagOverridesByFlagRow
 	for rows.Next() {
 		var i ListFlagOverridesByFlagRow
-		if err := rows.Scan(&i.ClerkOrgID, &i.Name, &i.OverrideEnabled); err != nil {
+		if err := rows.Scan(&i.OrgID, &i.Name, &i.OverrideEnabled); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -186,18 +186,18 @@ func (q *Queries) UpsertFeatureFlag(ctx context.Context, arg UpsertFeatureFlagPa
 }
 
 const upsertFlagOverride = `-- name: UpsertFlagOverride :exec
-INSERT INTO flag_overrides (flag_key, clerk_org_id, enabled)
+INSERT INTO flag_overrides (flag_key, org_id, enabled)
 VALUES ($1, $2, $3)
-ON CONFLICT (flag_key, clerk_org_id) DO UPDATE SET enabled = EXCLUDED.enabled
+ON CONFLICT (flag_key, org_id) DO UPDATE SET enabled = EXCLUDED.enabled
 `
 
 type UpsertFlagOverrideParams struct {
-	FlagKey    string `json:"flag_key"`
-	ClerkOrgID string `json:"clerk_org_id"`
-	Enabled    bool   `json:"enabled"`
+	FlagKey string `json:"flag_key"`
+	OrgID   string `json:"org_id"`
+	Enabled bool   `json:"enabled"`
 }
 
 func (q *Queries) UpsertFlagOverride(ctx context.Context, arg UpsertFlagOverrideParams) error {
-	_, err := q.db.Exec(ctx, upsertFlagOverride, arg.FlagKey, arg.ClerkOrgID, arg.Enabled)
+	_, err := q.db.Exec(ctx, upsertFlagOverride, arg.FlagKey, arg.OrgID, arg.Enabled)
 	return err
 }

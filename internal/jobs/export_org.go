@@ -149,7 +149,7 @@ func (w *Worker) exportOrgJSON(ctx context.Context, p ExportProjectsPayload) err
 		return err
 	}
 	f, err := w.q.InsertFile(ctx, sqlc.InsertFileParams{
-		ClerkOrgID: p.OrgID, UploaderUserID: p.UserID, Filename: filename,
+		OrgID: p.OrgID, UploaderUserID: p.UserID, Filename: filename,
 		ContentType: "application/json", SizeBytes: size, StorageKey: key,
 	})
 	if err != nil {
@@ -178,11 +178,11 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 			"secrets are never exported. Rotate a webhook secret from Settings → Webhooks.",
 	}
 
-	org, err := w.q.GetOrgByClerkID(ctx, orgID)
+	org, err := w.q.GetOrgByID(ctx, orgID)
 	if err != nil {
 		return out, err
 	}
-	out.Org = exportOrg{ID: org.ClerkOrgID, Name: org.Name, Slug: org.Slug, CreatedAt: org.CreatedAt.Time.UTC()}
+	out.Org = exportOrg{ID: org.OrgID, Name: org.Name, Slug: org.Slug, CreatedAt: org.CreatedAt.Time.UTC()}
 
 	members, err := w.q.ListMembersByOrg(ctx, orgID)
 	if err != nil {
@@ -190,7 +190,7 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 	}
 	for _, m := range members {
 		out.Members = append(out.Members, exportMember{
-			UserID: m.ClerkUserID, Email: string(m.Email), Name: m.Name,
+			UserID: m.UserID, Email: string(m.Email), Name: m.Name,
 			Role: m.Role, JoinedAt: m.CreatedAt.Time.UTC(),
 		})
 	}
@@ -207,7 +207,7 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 		})
 	}
 
-	files, err := w.q.ListFilesByOrg(ctx, sqlc.ListFilesByOrgParams{ClerkOrgID: orgID, Limit: exportRowCap, Offset: 0})
+	files, err := w.q.ListFilesByOrg(ctx, sqlc.ListFilesByOrgParams{OrgID: orgID, Limit: exportRowCap, Offset: 0})
 	if err != nil {
 		return out, err
 	}
@@ -241,7 +241,7 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 	}
 
 	audit, err := w.q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{
-		ClerkOrgID: pgtype.Text{String: orgID, Valid: true}, Limit: exportRowCap, Offset: 0,
+		OrgID: pgtype.Text{String: orgID, Valid: true}, Limit: exportRowCap, Offset: 0,
 	})
 	if err != nil {
 		return out, err
@@ -249,13 +249,13 @@ func (w *Worker) collectOrgExport(ctx context.Context, orgID string) (orgExport,
 	out.Truncated["audit_log"] = len(audit) == exportRowCap
 	for _, a := range audit {
 		out.Audit = append(out.Audit, exportAuditEntry{
-			Action: a.Action, ActorID: a.ClerkUserID.String,
+			Action: a.Action, ActorID: a.UserID.String,
 			Metadata: json.RawMessage(a.Metadata), CreatedAt: a.CreatedAt.Time.UTC(),
 		})
 	}
 
 	usage, err := w.q.ListUsageEventsByOrg(ctx, sqlc.ListUsageEventsByOrgParams{
-		ClerkOrgID: orgID, Limit: exportRowCap + 1,
+		OrgID: orgID, Limit: exportRowCap + 1,
 	})
 	if err != nil {
 		return out, err

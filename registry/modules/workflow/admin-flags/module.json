@@ -1,5 +1,79 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/workflow/admin-flags",
+    "kind": "workflow",
+    "name": "admin-flags",
+    "revision": 1,
+    "contract": 1,
+    "title": "Admin feature flag mutations",
+    "description": "Creating, toggling, rolling out, deleting and per-organization overriding of feature flags, with cache invalidation and audit entries.",
+    "requires": [
+      {
+        "id": "ggg/page/admin-flags",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/feature-flags",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/workflow_admin_flags.go",
+        "target": "internal/web/workflow_admin_flags.go",
+        "class": "go",
+        "sha256": "65efe56ea249f5f7f47339b1deeaf5c19898829b5fc9ce7d0b4bd4c8254db4e0",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "admin.flags.create",
@@ -10,195 +84,121 @@
         "admin.flags.toggle"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "Creating, toggling, rolling out, deleting and per-organization overriding of feature flags, with cache invalidation and audit entries.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "030f15bde1015bf4a72dbc5385f32524149f83865bc325ff4d02a969e8bbd95c",
-        "source": "internal/web/workflow_admin_flags.go",
-        "target": "internal/web/workflow_admin_flags.go"
-      }
-    ],
-    "id": "ggg/workflow/admin-flags",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "admin-flags",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/page/admin-flags"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/feature-flags"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "routes": [
         {
-          "handler": "handleAdminFlagCreate",
           "id": "admin.flags.create",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/flags",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminFlagCreate"
         },
         {
-          "handler": "handleAdminFlagDelete",
           "id": "admin.flags.delete",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/flags/{key}/delete",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminFlagDelete"
         },
         {
-          "handler": "handleAdminFlagOverrideDelete",
           "id": "admin.flags.override_delete",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/flags/{key}/overrides/{org}/delete",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminFlagOverrideDelete"
         },
         {
-          "handler": "handleAdminFlagOverrideSet",
           "id": "admin.flags.override_set",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/flags/{key}/overrides",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminFlagOverrideSet"
         },
         {
-          "handler": "handleAdminFlagRollout",
           "id": "admin.flags.rollout",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/flags/{key}/rollout",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminFlagRollout"
         },
         {
-          "handler": "handleAdminFlagToggle",
           "id": "admin.flags.toggle",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/admin/flags/{key}/toggle",
+          "scope": "admin",
           "policy": {
-            "admin_write": true,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": true
           },
-          "scope": "admin"
+          "package": "internal/web",
+          "handler": "handleAdminFlagToggle"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Admin feature flag mutations"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

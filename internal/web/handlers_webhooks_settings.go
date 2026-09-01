@@ -37,18 +37,18 @@ func (s *Server) webhooksEnabled(r *http.Request) bool {
 	if org == nil {
 		return false
 	}
-	return s.flags.Enabled(r.Context(), org.ClerkOrgID, "webhooks")
+	return s.flags.Enabled(r.Context(), org.OrgID, "webhooks")
 }
 
 // webhooksData loads the section view model.
 func (s *Server) webhooksData(r *http.Request) (templates.WebhooksData, error) {
 	ctx := r.Context()
 	org := identity.OrgFrom(ctx)
-	endpoints, err := s.q.ListWebhookEndpointsByOrg(ctx, org.ClerkOrgID)
+	endpoints, err := s.q.ListWebhookEndpointsByOrg(ctx, org.OrgID)
 	if err != nil {
 		return templates.WebhooksData{}, err
 	}
-	deliveries, err := s.q.ListDeliveriesByOrg(ctx, org.ClerkOrgID)
+	deliveries, err := s.q.ListDeliveriesByOrg(ctx, org.OrgID)
 	if err != nil {
 		return templates.WebhooksData{}, err
 	}
@@ -101,7 +101,7 @@ func (s *Server) handleWebhookEndpointCreate(w http.ResponseWriter, r *http.Requ
 		eventTypes = []string{} // zero checked = all events; nil would encode NULL → NOT NULL violation
 	}
 	ep, err := s.q.InsertWebhookEndpoint(ctx, sqlc.InsertWebhookEndpointParams{
-		ClerkOrgID: org.ClerkOrgID, CreatedBy: user.ClerkUserID,
+		OrgID: org.OrgID, CreatedBy: user.UserID,
 		Url: rawURL, Secret: secret,
 		EventTypes: eventTypes, Description: description,
 	})
@@ -109,7 +109,7 @@ func (s *Server) handleWebhookEndpointCreate(w http.ResponseWriter, r *http.Requ
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "webhook_endpoint.created", map[string]any{"id": ep.ID, "url": ep.Url})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "webhook_endpoint.created", map[string]any{"id": ep.ID, "url": ep.Url})
 	Toast(w, "success", "Endpoint created")
 	s.renderWebhooksSection(w, r, templates.WebhooksData{NewSecret: secret})
 }
@@ -129,13 +129,13 @@ func (s *Server) handleWebhookEndpointToggle(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	disable := strings.HasSuffix(r.URL.Path, "/disable")
-	ep, err := s.q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: id, ClerkOrgID: org.ClerkOrgID})
+	ep, err := s.q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: id, OrgID: org.OrgID})
 	if err != nil {
 		http.NotFound(w, r)
 		return
 	}
 	if err := s.q.SetWebhookEndpointDisabled(ctx, sqlc.SetWebhookEndpointDisabledParams{
-		ID: id, Disabled: disable, ClerkOrgID: org.ClerkOrgID,
+		ID: id, Disabled: disable, OrgID: org.OrgID,
 	}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -144,7 +144,7 @@ func (s *Server) handleWebhookEndpointToggle(w http.ResponseWriter, r *http.Requ
 	if disable {
 		action = "webhook_endpoint.disabled"
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, action, map[string]any{"id": ep.ID})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, action, map[string]any{"id": ep.ID})
 	s.renderWebhooksSection(w, r, templates.WebhooksData{})
 }
 
@@ -163,7 +163,7 @@ func (s *Server) handleWebhookDeliveryReplay(w http.ResponseWriter, r *http.Requ
 		http.NotFound(w, r)
 		return
 	}
-	if err := s.q.ResetWebhookDelivery(ctx, sqlc.ResetWebhookDeliveryParams{ID: id, ClerkOrgID: org.ClerkOrgID}); err != nil {
+	if err := s.q.ResetWebhookDelivery(ctx, sqlc.ResetWebhookDeliveryParams{ID: id, OrgID: org.OrgID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -171,7 +171,7 @@ func (s *Server) handleWebhookDeliveryReplay(w http.ResponseWriter, r *http.Requ
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "webhook_delivery.replayed", map[string]any{"id": id})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "webhook_delivery.replayed", map[string]any{"id": id})
 	Toast(w, "success", "Delivery requeued")
 	s.renderWebhooksSection(w, r, templates.WebhooksData{})
 }
@@ -197,14 +197,14 @@ func (s *Server) handleWebhookEndpointRotate(w http.ResponseWriter, r *http.Requ
 	}
 	secret := webhooks.NewSecret()
 	ep, err := s.q.RotateWebhookEndpointSecret(ctx, sqlc.RotateWebhookEndpointSecretParams{
-		ID: id, ClerkOrgID: org.ClerkOrgID, Secret: secret,
+		ID: id, OrgID: org.OrgID, Secret: secret,
 	})
 	if err != nil {
 		// Cross-org ids simply do not match the WHERE clause.
 		http.NotFound(w, r)
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "webhook_endpoint.secret_rotated",
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "webhook_endpoint.secret_rotated",
 		map[string]any{"id": ep.ID, "url": ep.Url})
 	Toast(w, "success", i18n.T(ctx, "webhooks.rotated"))
 	s.renderWebhooksSection(w, r, templates.WebhooksData{NewSecret: secret, Rotated: true})

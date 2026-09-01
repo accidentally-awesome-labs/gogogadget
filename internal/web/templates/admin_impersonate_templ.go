@@ -232,7 +232,7 @@ func AdminImpersonateForm(d ImpersonateData) templ.Component {
 				Target: "#impersonate-form-wrap", Swap: "outerHTML",
 				Attrs: ui.Attrs{
 					Class: "space-y-4",
-					HX:    ui.HX{Post: "/admin/users/" + d.Target.ClerkUserID + "/impersonate", Disable: true},
+					HX:    ui.HX{Post: "/admin/users/" + d.Target.UserID + "/impersonate", Disable: true},
 				},
 			}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

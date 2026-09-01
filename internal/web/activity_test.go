@@ -16,7 +16,7 @@ func TestActivityVisibilityScoping(t *testing.T) {
 	seedUser(t, s, "user_act", "act@example.com", "Act")
 	seedOrg(t, s, "org_act", "act")
 	seedOrg(t, s, "org_act2", "act2")
-	require.NoError(t, s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{ClerkOrgID: "org_act", ClerkUserID: "user_act", Role: "org:admin"}))
+	require.NoError(t, s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{OrgID: "org_act", UserID: "user_act", Role: "org:admin"}))
 
 	audit.Log(ctx, s.q, "org_act", "user_act", "project.created", map[string]any{"name": "Alpha"})
 	audit.Log(ctx, s.q, "org_act", "user_act", "member.joined", map[string]any{"role": "org:admin"})
@@ -37,7 +37,7 @@ func TestActivityPaginationFragment(t *testing.T) {
 	ctx := t.Context()
 	seedUser(t, s, "user_pg", "pg@example.com", "Pg")
 	seedOrg(t, s, "org_pg", "pg")
-	require.NoError(t, s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{ClerkOrgID: "org_pg", ClerkUserID: "user_pg", Role: "org:admin"}))
+	require.NoError(t, s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{OrgID: "org_pg", UserID: "user_pg", Role: "org:admin"}))
 
 	for range 25 {
 		audit.Log(ctx, s.q, "org_pg", "user_pg", "project.created", nil)

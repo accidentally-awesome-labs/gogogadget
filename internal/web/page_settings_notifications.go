@@ -13,7 +13,7 @@ import (
 func (s *Server) handleSettingsNotifications(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	user := identity.UserFrom(r.Context())
-	rows, err := s.q.ListNotificationPreferencesByUser(ctx, user.ClerkUserID)
+	rows, err := s.q.ListNotificationPreferencesByUser(ctx, user.UserID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

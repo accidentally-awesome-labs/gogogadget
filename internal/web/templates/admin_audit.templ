@@ -46,10 +46,10 @@ templ AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string,
 						if row.ActorEmail != "" {
 							{ row.ActorEmail }
 						} else {
-							<span class="text-fg-muted">{ row.ClerkUserID.String }</span>
+							<span class="text-fg-muted">{ row.UserID.String }</span>
 						}
 					</td>
-					<td class="text-fg-muted hidden sm:table-cell">{ row.ClerkOrgID.String }</td>
+					<td class="text-fg-muted hidden sm:table-cell">{ row.OrgID.String }</td>
 					<td>
 						@ui.Badge(ui.BadgeOpts{Text: row.Action, Kind: ui.KindBrand})
 					</td>

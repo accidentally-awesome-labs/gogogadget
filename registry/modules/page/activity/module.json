@@ -1,53 +1,118 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "activity.index"
-      ]
-    },
+    "id": "ggg/page/activity",
+    "kind": "page",
+    "name": "activity",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Activity feed",
+    "description": "The organization's audit trail rendered for members, with search and pagination.",
+    "requires": [
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The organization's audit trail rendered for members, with search and pagination.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "5cd62f98c171860e7e31af5852dc10c9e20b57bcc9a66bb408f4289a1b2d2ab1",
         "source": "internal/web/activity_test.go",
-        "target": "internal/web/activity_test.go"
+        "target": "internal/web/activity_test.go",
+        "class": "test",
+        "sha256": "fe9b144987c15087b3c99f7313df7a81cc046b5c5df194d97f05e994291c928c",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "c4c33e1d804b57e9b10eaf98f03f9cd1917dab99606389d6fc77f6a0bf1cd098",
         "source": "internal/web/handlers_activity.go",
-        "target": "internal/web/handlers_activity.go"
+        "target": "internal/web/handlers_activity.go",
+        "class": "go",
+        "sha256": "180e54ba88dca344680820f0cfc69f6a95030ccb58023d47a6b150a747895ea1",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "4e68c53e2a2d9657603261a3d80c6e8bf56ec79f6e865aacec2f8c341067557e",
         "source": "internal/web/templates/activity.templ",
-        "target": "internal/web/templates/activity.templ"
+        "target": "internal/web/templates/activity.templ",
+        "class": "templ",
+        "sha256": "4e68c53e2a2d9657603261a3d80c6e8bf56ec79f6e865aacec2f8c341067557e",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/activity",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "activity.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "activity.index",
+          "method": "GET",
+          "pattern": "/app/activity",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleActivity"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.activity",
+          "area": "app",
+          "route_id": "activity.index",
+          "label_key": "sidebar.activity",
+          "after": [
+            "nav.app.files"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "activity.caption": "Audit trail for your organization",
@@ -59,99 +124,34 @@
         "activity.empty_title": "No activity yet",
         "activity.metadata": "metadata",
         "activity.pagination_aria": "Pagination",
-        "activity.pagination_next": "Next \u2192",
+        "activity.pagination_next": "Next →",
         "activity.pagination_page_of": "Page %d of %d",
-        "activity.pagination_prev": "\u2190 Previous",
+        "activity.pagination_prev": "← Previous",
         "activity.title": "Activity"
       },
       "es": {
-        "activity.caption": "Registro de auditor\u00eda de tu organizaci\u00f3n",
-        "activity.col_action": "Acci\u00f3n",
+        "activity.caption": "Registro de auditoría de tu organización",
+        "activity.col_action": "Acción",
         "activity.col_actor": "Actor",
         "activity.col_details": "Detalles",
-        "activity.col_when": "Cu\u00e1ndo",
-        "activity.empty_body": "Las acciones de tu organizaci\u00f3n aparecer\u00e1n aqu\u00ed.",
-        "activity.empty_title": "A\u00fan no hay actividad",
+        "activity.col_when": "Cuándo",
+        "activity.empty_body": "Las acciones de tu organización aparecerán aquí.",
+        "activity.empty_title": "Aún no hay actividad",
         "activity.metadata": "metadatos",
-        "activity.pagination_aria": "Paginaci\u00f3n",
-        "activity.pagination_next": "Siguiente \u2192",
-        "activity.pagination_page_of": "P\u00e1gina %d de %d",
-        "activity.pagination_prev": "\u2190 Anterior",
+        "activity.pagination_aria": "Paginación",
+        "activity.pagination_next": "Siguiente →",
+        "activity.pagination_page_of": "Página %d de %d",
+        "activity.pagination_prev": "← Anterior",
         "activity.title": "Actividad"
       }
     },
-    "migrations": [],
-    "name": "activity",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.app.files"
-          ],
-          "area": "app",
-          "id": "nav.app.activity",
-          "label_key": "sidebar.activity",
-          "route_id": "activity.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleActivity",
-          "id": "activity.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/activity",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Activity feed"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

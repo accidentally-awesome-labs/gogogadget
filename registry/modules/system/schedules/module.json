@@ -36,7 +36,7 @@
         "source": "internal/db/queries/schedules.sql",
         "target": "internal/db/queries/schedules.sql",
         "class": "query",
-        "sha256": "ad3b9d58edb55c8b021d0569dea65bad1a29b4d7a26ec7f811c8752b573183f4",
+        "sha256": "74e038573c417994b749d4b157838a6e884cd0dfaa34ec76692b4121ecdc3cee",
         "rewrite_module": false,
         "contract": false
       },
@@ -44,7 +44,7 @@
         "source": "internal/db/testdata/seed/dev/schedules.sql",
         "target": "internal/db/testdata/seed/dev/schedules.sql",
         "class": "seed",
-        "sha256": "60eed745467ce4b0540bd59ad22594b4b5146cd22b22aadf4f041281134b3ccb",
+        "sha256": "c16f730c59065ed0f6ce40b0f6b17802b45294a8485d84c0506c4a5d50f45081",
         "rewrite_module": false,
         "contract": false
       },
@@ -52,7 +52,7 @@
         "source": "internal/schedules/schedules.go",
         "target": "internal/schedules/schedules.go",
         "class": "go",
-        "sha256": "f4521f6e56800af1f7561c8782c6bb1493c428991dc505fd5fc1dbbc4550a8e0",
+        "sha256": "7c013a95d92752c1ab2e46248adcd6ddd123a6587c725224ce1da0388c535ebc",
         "rewrite_module": true,
         "contract": true
       },
@@ -60,7 +60,7 @@
         "source": "internal/schedules/schedules_test.go",
         "target": "internal/schedules/schedules_test.go",
         "class": "test",
-        "sha256": "7f6e70e4d067070a1bd1dfa66e0d1b063fc940ada455038b003cf12f1513964e",
+        "sha256": "7a534e3cb6f523f03b632b08621d5f7c0f3733d8260ac9d1db37fb40fb682a42",
         "rewrite_module": true,
         "contract": false
       }

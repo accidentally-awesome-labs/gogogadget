@@ -19,7 +19,7 @@ import (
 func sum(t *testing.T, q *sqlc.Queries, org, name string) int64 {
 	t.Helper()
 	n, err := q.SumUsageByNameSince(context.Background(), sqlc.SumUsageByNameSinceParams{
-		ClerkOrgID: org, Name: name, CreatedAt: pgtype.Timestamptz{Time: time.Unix(0, 0), Valid: true},
+		OrgID: org, Name: name, CreatedAt: pgtype.Timestamptz{Time: time.Unix(0, 0), Valid: true},
 	})
 	require.NoError(t, err)
 	return n
@@ -28,7 +28,7 @@ func sum(t *testing.T, q *sqlc.Queries, org, name string) int64 {
 func TestRecordWritesUsageEvent(t *testing.T) {
 	_, q := testdb.Open(t, "usage")
 	ctx := context.Background()
-	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: "org_u", Name: "U", Slug: "u", ImageUrl: ""})
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: "org_u", Name: "U", Slug: "u", ImageUrl: ""})
 	require.NoError(t, err)
 
 	usage.Record(ctx, q, "org_u", "ai.tokens", 42, "ext-1", map[string]any{"model": "gpt"})
@@ -40,7 +40,7 @@ func TestRecordWritesUsageEvent(t *testing.T) {
 func TestRecordUnmarshalableMetadataStillRecords(t *testing.T) {
 	_, q := testdb.Open(t, "usage2")
 	ctx := context.Background()
-	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: "org_u2", Name: "U2", Slug: "u2", ImageUrl: ""})
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: "org_u2", Name: "U2", Slug: "u2", ImageUrl: ""})
 	require.NoError(t, err)
 
 	// json.Marshal(chan) fails → Record falls back to {} and still records.

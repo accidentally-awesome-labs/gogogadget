@@ -50,14 +50,14 @@ func TestAdminAuditPageRendersAndFilters(t *testing.T) {
 	adminUser(t, s, "user_av", "org_av")
 	seedMembership(t, s, "user_av2", "org_av2", "org:member")
 	s.q.InsertAuditLog(t.Context(), sqlc.InsertAuditLogParams{
-		ClerkOrgID:  nullText("org_av"),
-		ClerkUserID: nullText("user_av"),
+		OrgID:  nullText("org_av"),
+		UserID: nullText("user_av"),
 		Action:      "project.created",
 		Metadata:    []byte(`{}`),
 	})
 	s.q.InsertAuditLog(t.Context(), sqlc.InsertAuditLogParams{
-		ClerkOrgID:  nullText("org_av2"),
-		ClerkUserID: nullText("user_av2"),
+		OrgID:  nullText("org_av2"),
+		UserID: nullText("user_av2"),
 		Action:      "account.exported",
 		Metadata:    []byte(`{}`),
 	})

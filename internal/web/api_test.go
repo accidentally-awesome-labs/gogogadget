@@ -15,7 +15,7 @@ import (
 )
 
 func sqlcCreateP(orgID, name string) sqlc.CreateProjectParams {
-	return sqlc.CreateProjectParams{ClerkOrgID: orgID, Name: name}
+	return sqlc.CreateProjectParams{OrgID: orgID, Name: name}
 }
 
 // createTokenViaUI drives the real create handler and returns the plaintext.
@@ -57,7 +57,7 @@ func TestAPITokenLifecycle(t *testing.T) {
 	_, err = s.q.CreateProject(ctx, sqlcCreateP("org_api2", "NotYours"))
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id IN ('org_api','org_api2')")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id IN ('org_api','org_api2')")
 	})
 
 	token := createTokenViaUI(t, s, "ci", "read", sessionCookie("user_api", "org_api", "org:admin"))
@@ -79,7 +79,7 @@ func TestAPITokenLifecycle(t *testing.T) {
 	toks, err := s.q.ListAPITokensByOrg(ctx, "org_api")
 	require.NoError(t, err)
 	require.Len(t, toks, 1)
-	require.NoError(t, s.q.RevokeAPIToken(ctx, sqlc.RevokeAPITokenParams{ID: toks[0].ID, ClerkOrgID: "org_api"}))
+	require.NoError(t, s.q.RevokeAPIToken(ctx, sqlc.RevokeAPITokenParams{ID: toks[0].ID, OrgID: "org_api"}))
 	code, out = apiGet(t, s, "/api/v1/projects", token)
 	require.Equal(t, http.StatusUnauthorized, code)
 }
@@ -109,7 +109,7 @@ func TestAPIPlanLimit402(t *testing.T) {
 		_, err := s.q.CreateProject(ctx, sqlcCreateP("org_lim", fmt.Sprintf("p%d", i)))
 		require.NoError(t, err)
 	}
-	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id='org_lim'") })
+	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id='org_lim'") })
 
 	writeToken := createTokenViaUI(t, s, "writer", "write", sessionCookie("user_lim", "org_lim", "org:admin"))
 	h := http.Header{}
@@ -127,8 +127,8 @@ func TestAPIWriteAndValidation(t *testing.T) {
 	ctx := t.Context()
 	seedMembership(t, s, "user_wr", "org_wr", "org:admin")
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id='org_wr'")
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE clerk_org_id='org_wr'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id='org_wr'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE org_id='org_wr'")
 	})
 
 	writeToken := createTokenViaUI(t, s, "writer", "write", sessionCookie("user_wr", "org_wr", "org:admin"))
@@ -141,7 +141,7 @@ func TestAPIWriteAndValidation(t *testing.T) {
 	require.Equal(t, http.StatusCreated, code)
 	assert.Contains(t, body, "From API")
 	var via string
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT metadata->>'via' FROM audit_log WHERE clerk_org_id='org_wr'`).Scan(&via))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT metadata->>'via' FROM audit_log WHERE org_id='org_wr'`).Scan(&via))
 	assert.Equal(t, "api", via)
 
 	// Invalid name → 422 validation_error.
@@ -170,7 +170,7 @@ func TestAPIProjectsCursorStableUnderInserts(t *testing.T) {
 	ctx := t.Context()
 	seedMembership(t, s, "user_cur", "org_cur", "org:admin")
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_cur'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id = 'org_cur'")
 	})
 	for i := range 6 {
 		_, err := s.q.CreateProject(ctx, sqlcCreateP("org_cur", fmt.Sprintf("P%d", i)))
@@ -220,7 +220,7 @@ func TestAPIProjectsCursorWalksEveryRowExactlyOnce(t *testing.T) {
 	ctx := t.Context()
 	seedMembership(t, s, "user_curw", "org_curw", "org:admin")
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id = 'org_curw'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id = 'org_curw'")
 	})
 	const total = 7
 	for i := range total {

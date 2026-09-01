@@ -1,57 +1,145 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "settings-notifications.index"
-      ]
-    },
+    "id": "ggg/page/settings-notifications",
+    "kind": "page",
+    "name": "settings-notifications",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Notification settings",
+    "description": "Renders the per-kind in-app notification mutes (default-on) and the digest cadence for the signed-in user.",
+    "requires": [
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/notifications",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Renders the per-kind in-app notification mutes (default-on) and the digest cadence for the signed-in user.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "abbbec1ab73cf0a10a34b03fcf93bf8176073686910b8400e31e5a88846ebbde",
         "source": "internal/web/notifications_prefs_test.go",
-        "target": "internal/web/notifications_prefs_test.go"
+        "target": "internal/web/notifications_prefs_test.go",
+        "class": "test",
+        "sha256": "df60bbc9fd3281a02851c73c949d6a546aa2aa3c0434ded5664cd7c5b565ca91",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "c042f314f154071018066da3bcd0dafc51a2c2e4739959d3abc98fc75797d981",
         "source": "internal/web/page_settings_notifications.go",
-        "target": "internal/web/page_settings_notifications.go"
+        "target": "internal/web/page_settings_notifications.go",
+        "class": "go",
+        "sha256": "320884cae4d6f6bdec64918b700683e06004f6a7e51ec7d1257692fbf6a1f481",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "e15a9d44b0cb39fa90424ac875f06f82f5e57c3521b866cc6b683b3f2cde9f68",
         "source": "internal/web/templates/settings_notifications.templ",
-        "target": "internal/web/templates/settings_notifications.templ"
+        "target": "internal/web/templates/settings_notifications.templ",
+        "class": "templ",
+        "sha256": "e15a9d44b0cb39fa90424ac875f06f82f5e57c3521b866cc6b683b3f2cde9f68",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/settings-notifications",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "settings-notifications.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-notifications.index",
+          "method": "GET",
+          "pattern": "/app/settings/notifications",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsNotifications"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.notifications",
+          "area": "settings",
+          "route_id": "settings-notifications.index",
+          "label_key": "settings.tab_notifications",
+          "after": [
+            "nav.settings.webhooks"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "notifications-prefs",
+          "path": "/app/settings/notifications",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "settings.digest_daily": "Daily",
-        "settings.digest_hint": "A periodic email summarizing the notifications above. In-app mutes apply first \u2014 a muted kind never reaches the digest.",
+        "settings.digest_hint": "A periodic email summarizing the notifications above. In-app mutes apply first — a muted kind never reaches the digest.",
         "settings.digest_label": "Email digest",
         "settings.digest_off": "Never",
         "settings.digest_weekly": "Weekly",
@@ -62,111 +150,23 @@
       },
       "es": {
         "settings.digest_daily": "Diario",
-        "settings.digest_hint": "Un correo peri\u00f3dico que resume las notificaciones anteriores. Los silencios en la app se aplican primero: un tipo silenciado nunca llega al resumen.",
+        "settings.digest_hint": "Un correo periódico que resume las notificaciones anteriores. Los silencios en la app se aplican primero: un tipo silenciado nunca llega al resumen.",
         "settings.digest_label": "Resumen por correo",
         "settings.digest_off": "Nunca",
         "settings.digest_weekly": "Semanal",
-        "settings.notifications_intro": "Elige qu\u00e9 notificaciones recibes en la app. Todo est\u00e1 activado por defecto.",
+        "settings.notifications_intro": "Elige qué notificaciones recibes en la app. Todo está activado por defecto.",
         "settings.notifications_save": "Guardar preferencias",
-        "settings.notifications_saved": "Preferencias de notificaci\u00f3n guardadas.",
-        "settings.notifications_title": "Preferencias de notificaci\u00f3n"
+        "settings.notifications_saved": "Preferencias de notificación guardadas.",
+        "settings.notifications_title": "Preferencias de notificación"
       }
     },
-    "migrations": [],
-    "name": "settings-notifications",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/notifications"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.settings.webhooks"
-          ],
-          "area": "settings",
-          "id": "nav.settings.notifications",
-          "label_key": "settings.tab_notifications",
-          "route_id": "settings-notifications.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleSettingsNotifications",
-          "id": "settings-notifications.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/settings/notifications",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ],
-      "visual": [
-        {
-          "id": "notifications-prefs",
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/app/settings/notifications",
-          "persona": "pro",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Notification settings"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

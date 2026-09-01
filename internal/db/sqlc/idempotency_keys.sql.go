@@ -12,14 +12,14 @@ import (
 )
 
 const claimIdempotencyKey = `-- name: ClaimIdempotencyKey :one
-INSERT INTO idempotency_keys (clerk_org_id, key, endpoint, request_hash)
+INSERT INTO idempotency_keys (org_id, key, endpoint, request_hash)
 VALUES ($1, $2, $3, $4)
-ON CONFLICT (clerk_org_id, key) DO NOTHING
-RETURNING clerk_org_id, key, endpoint, request_hash, status, response, created_at, updated_at
+ON CONFLICT (org_id, key) DO NOTHING
+RETURNING org_id, key, endpoint, request_hash, status, response, created_at, updated_at
 `
 
 type ClaimIdempotencyKeyParams struct {
-	ClerkOrgID  string `json:"clerk_org_id"`
+	OrgID       string `json:"org_id"`
 	Key         string `json:"key"`
 	Endpoint    string `json:"endpoint"`
 	RequestHash string `json:"request_hash"`
@@ -30,14 +30,14 @@ type ClaimIdempotencyKeyParams struct {
 // replay, conflict, and "still in flight".
 func (q *Queries) ClaimIdempotencyKey(ctx context.Context, arg ClaimIdempotencyKeyParams) (IdempotencyKey, error) {
 	row := q.db.QueryRow(ctx, claimIdempotencyKey,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.Key,
 		arg.Endpoint,
 		arg.RequestHash,
 	)
 	var i IdempotencyKey
 	err := row.Scan(
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Key,
 		&i.Endpoint,
 		&i.RequestHash,
@@ -52,20 +52,20 @@ func (q *Queries) ClaimIdempotencyKey(ctx context.Context, arg ClaimIdempotencyK
 const completeIdempotencyKey = `-- name: CompleteIdempotencyKey :exec
 UPDATE idempotency_keys
 SET status = $3, response = $4, updated_at = now()
-WHERE clerk_org_id = $1 AND key = $2
+WHERE org_id = $1 AND key = $2
 `
 
 type CompleteIdempotencyKeyParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Key        string `json:"key"`
-	Status     int32  `json:"status"`
-	Response   []byte `json:"response"`
+	OrgID    string `json:"org_id"`
+	Key      string `json:"key"`
+	Status   int32  `json:"status"`
+	Response []byte `json:"response"`
 }
 
 // Store the outcome so a retry replays it verbatim.
 func (q *Queries) CompleteIdempotencyKey(ctx context.Context, arg CompleteIdempotencyKeyParams) error {
 	_, err := q.db.Exec(ctx, completeIdempotencyKey,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.Key,
 		arg.Status,
 		arg.Response,
@@ -87,19 +87,19 @@ func (q *Queries) DeleteOldIdempotencyKeys(ctx context.Context, createdAt pgtype
 }
 
 const getIdempotencyKey = `-- name: GetIdempotencyKey :one
-SELECT clerk_org_id, key, endpoint, request_hash, status, response, created_at, updated_at FROM idempotency_keys WHERE clerk_org_id = $1 AND key = $2
+SELECT org_id, key, endpoint, request_hash, status, response, created_at, updated_at FROM idempotency_keys WHERE org_id = $1 AND key = $2
 `
 
 type GetIdempotencyKeyParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Key        string `json:"key"`
+	OrgID string `json:"org_id"`
+	Key   string `json:"key"`
 }
 
 func (q *Queries) GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyParams) (IdempotencyKey, error) {
-	row := q.db.QueryRow(ctx, getIdempotencyKey, arg.ClerkOrgID, arg.Key)
+	row := q.db.QueryRow(ctx, getIdempotencyKey, arg.OrgID, arg.Key)
 	var i IdempotencyKey
 	err := row.Scan(
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Key,
 		&i.Endpoint,
 		&i.RequestHash,
@@ -112,18 +112,18 @@ func (q *Queries) GetIdempotencyKey(ctx context.Context, arg GetIdempotencyKeyPa
 }
 
 const releaseIdempotencyKey = `-- name: ReleaseIdempotencyKey :exec
-DELETE FROM idempotency_keys WHERE clerk_org_id = $1 AND key = $2
+DELETE FROM idempotency_keys WHERE org_id = $1 AND key = $2
 `
 
 type ReleaseIdempotencyKeyParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Key        string `json:"key"`
+	OrgID string `json:"org_id"`
+	Key   string `json:"key"`
 }
 
 // Drop the claim so the client can genuinely retry. Used when the handler
 // fails in a way that says nothing about whether the work should happen
 // (5xx): pinning that outcome to the key would poison it permanently.
 func (q *Queries) ReleaseIdempotencyKey(ctx context.Context, arg ReleaseIdempotencyKeyParams) error {
-	_, err := q.db.Exec(ctx, releaseIdempotencyKey, arg.ClerkOrgID, arg.Key)
+	_, err := q.db.Exec(ctx, releaseIdempotencyKey, arg.OrgID, arg.Key)
 	return err
 }

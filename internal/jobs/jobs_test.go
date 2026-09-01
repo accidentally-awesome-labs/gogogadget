@@ -129,17 +129,17 @@ func TestTrialEndingGuardSkipsNonTrialing(t *testing.T) {
 	ctx := context.Background()
 
 	// Org with an ACTIVE subscription: a stale trial-ending job must not send.
-	_, err := pool.Exec(ctx, `INSERT INTO users (clerk_user_id, email) VALUES ('user_g', 'g@example.com') ON CONFLICT DO NOTHING`)
+	_, err := pool.Exec(ctx, `INSERT INTO users (user_id, email) VALUES ('user_g', 'g@example.com') ON CONFLICT DO NOTHING`)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ('org_g', 'G', 'g') ON CONFLICT DO NOTHING`)
+	_, err = pool.Exec(ctx, `INSERT INTO orgs (org_id, name, slug) VALUES ('org_g', 'G', 'g') ON CONFLICT DO NOTHING`)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (clerk_org_id, polar_customer_id, product_key, status)
-		VALUES ('org_g', 'cust_g', 'pro', 'active') ON CONFLICT (clerk_org_id) DO UPDATE SET status = 'active'`)
+	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (org_id, provider_customer_id, product_key, status)
+		VALUES ('org_g', 'cust_g', 'pro', 'active') ON CONFLICT (org_id) DO UPDATE SET status = 'active'`)
 	require.NoError(t, err)
 	defer func() {
-		_, _ = pool.Exec(context.Background(), `DELETE FROM subscriptions WHERE clerk_org_id = 'org_g'`)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM orgs WHERE clerk_org_id = 'org_g'`)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM users WHERE clerk_user_id = 'user_g'`)
+		_, _ = pool.Exec(context.Background(), `DELETE FROM subscriptions WHERE org_id = 'org_g'`)
+		_, _ = pool.Exec(context.Background(), `DELETE FROM orgs WHERE org_id = 'org_g'`)
+		_, _ = pool.Exec(context.Background(), `DELETE FROM users WHERE user_id = 'user_g'`)
 	}()
 
 	dir := t.TempDir()
@@ -271,14 +271,14 @@ func TestJanitorAppliesAuditRetention(t *testing.T) {
 func TestJanitorSweepsExpiredIdempotencyKeys(t *testing.T) {
 	pool, q := testdb.Open(t, "jobsidem")
 	ctx := context.Background()
-	_, err := pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ('org_jan','Jan','jan') ON CONFLICT DO NOTHING`)
+	_, err := pool.Exec(ctx, `INSERT INTO orgs (org_id, name, slug) VALUES ('org_jan','Jan','jan') ON CONFLICT DO NOTHING`)
 	require.NoError(t, err)
 
 	// One key inside the retention window, one past it — created_at defaults
 	// to now(), so the stale one is backdated directly.
 	for _, k := range []string{"fresh", "stale"} {
 		_, err = q.ClaimIdempotencyKey(ctx, sqlc.ClaimIdempotencyKeyParams{
-			ClerkOrgID: "org_jan", Key: k, Endpoint: "POST /api/v1/projects", RequestHash: "h",
+			OrgID: "org_jan", Key: k, Endpoint: "POST /api/v1/projects", RequestHash: "h",
 		})
 		require.NoError(t, err)
 	}
@@ -288,9 +288,9 @@ func TestJanitorSweepsExpiredIdempotencyKeys(t *testing.T) {
 
 	NewWorker(q, nil, slog.New(slog.NewTextHandler(io.Discard, nil))).janitorPass(ctx)
 
-	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_jan", Key: "stale"})
+	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{OrgID: "org_jan", Key: "stale"})
 	assert.ErrorIs(t, err, pgx.ErrNoRows, "keys past the retention window are swept")
-	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_jan", Key: "fresh"})
+	_, err = q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{OrgID: "org_jan", Key: "fresh"})
 	assert.NoError(t, err, "a key a client might still retry against must survive")
 }
 
@@ -298,15 +298,15 @@ func TestJanitorSweepsExpiredIdempotencyKeys(t *testing.T) {
 func seedDunningSub(t *testing.T, pool poolExec, orgID, status string) {
 	t.Helper()
 	ctx := context.Background()
-	_, err := pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ($1,$1,$1) ON CONFLICT DO NOTHING`, orgID)
+	_, err := pool.Exec(ctx, `INSERT INTO orgs (org_id, name, slug) VALUES ($1,$1,$1) ON CONFLICT DO NOTHING`, orgID)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO users (clerk_user_id, email, name) VALUES ($1, $1 || '@example.com', 'U') ON CONFLICT DO NOTHING`, "u_"+orgID)
+	_, err = pool.Exec(ctx, `INSERT INTO users (user_id, email, name) VALUES ($1, $1 || '@example.com', 'U') ON CONFLICT DO NOTHING`, "u_"+orgID)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO org_members (clerk_org_id, clerk_user_id, role) VALUES ($1, $2, 'org:admin') ON CONFLICT DO NOTHING`, orgID, "u_"+orgID)
+	_, err = pool.Exec(ctx, `INSERT INTO org_members (org_id, user_id, role) VALUES ($1, $2, 'org:admin') ON CONFLICT DO NOTHING`, orgID, "u_"+orgID)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (clerk_org_id, polar_customer_id, product_key, status)
+	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (org_id, provider_customer_id, product_key, status)
 		VALUES ($1, 'cus', 'pro', $2)
-		ON CONFLICT (clerk_org_id) DO UPDATE SET status = EXCLUDED.status`, orgID, status)
+		ON CONFLICT (org_id) DO UPDATE SET status = EXCLUDED.status`, orgID, status)
 	require.NoError(t, err)
 }
 
@@ -369,7 +369,7 @@ func TestFinalDunningNotifiesInApp(t *testing.T) {
 	require.NoError(t, err)
 
 	notes, err := q.ListNotificationsByUser(ctx, sqlc.ListNotificationsByUserParams{
-		ClerkOrgID: "org_final", ClerkUserID: "u_org_final", Limit: 10, Offset: 0,
+		OrgID: "org_final", UserID: "u_org_final", Limit: 10, Offset: 0,
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, notes)

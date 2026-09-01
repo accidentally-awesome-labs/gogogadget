@@ -44,7 +44,7 @@ func subPayload(eventType, subID, orgID, productID, status string, periodEnd tim
 	  "data": {
 	    "id": %q, "status": %q, "product_id": %q, "customer_id": "cust_1",
 	    "current_period_end": %q, "cancel_at_period_end": false,
-	    "customer": {"external_id": %q}, "metadata": {"clerk_org_id": %q}
+	    "customer": {"external_id": %q}, "metadata": {"org_id": %q}
 	  }
 	}`, eventType, subID, status, productID, periodEnd.Format(time.RFC3339), orgID, orgID))
 }
@@ -55,7 +55,7 @@ func polarServer(t *testing.T, mutate func(*Deps)) *Server {
 		d.Config.PolarAccessToken = "polar_test"
 		d.Config.PolarWebhookSecret = testPolarWebhookSecret
 		d.Config.PolarServer = "sandbox"
-		billing.SetPolarProductIDs("prod_pro", "prod_team")
+		billing.SetProviderProductIDs("prod_pro", "prod_team")
 		if mutate != nil {
 			mutate(d)
 		}
@@ -75,13 +75,13 @@ func TestPolarWebhookReplay(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "active", sub.Status)
 	assert.Equal(t, "pro", sub.ProductKey)
-	assert.Equal(t, "sub_pb1", sub.PolarSubscriptionID.String)
+	assert.Equal(t, "sub_pb1", sub.ProviderSubscriptionID.String)
 
 	// Replay: 200, no duplicate write (row count stays 1).
 	code, _, _ = serve(t, s, "POST", "/webhooks/polar", payload, signStandard(t, testPolarWebhookSecret, "msg_pb1", payload))
 	assert.Equal(t, http.StatusOK, code)
 	var n int
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM subscriptions WHERE clerk_org_id='org_pb'`).Scan(&n))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM subscriptions WHERE org_id='org_pb'`).Scan(&n))
 	assert.Equal(t, 1, n)
 }
 
@@ -120,17 +120,17 @@ func TestResubscribe(t *testing.T) {
 	canceled := subPayload("subscription.canceled", "sub_rs1", "org_rs", "prod_pro", "canceled", time.Now().Add(15*24*time.Hour))
 	serve(t, s, "POST", "/webhooks/polar", canceled, signStandard(t, testPolarWebhookSecret, "msg_rs2", canceled))
 
-	// Re-checkout arrives with a NEW polar_subscription_id → overwrites the row.
+	// Re-checkout arrives with a NEW provider_subscription_id → overwrites the row.
 	resub := subPayload("subscription.created", "sub_rs2", "org_rs", "prod_team", "active", time.Now().Add(30*24*time.Hour))
 	code, _, _ := serve(t, s, "POST", "/webhooks/polar", resub, signStandard(t, testPolarWebhookSecret, "msg_rs3", resub))
 	require.Equal(t, http.StatusOK, code)
 
 	var n int
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM subscriptions WHERE clerk_org_id='org_rs'`).Scan(&n))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM subscriptions WHERE org_id='org_rs'`).Scan(&n))
 	assert.Equal(t, 1, n, "exactly one subscription row per org")
 	sub, err := s.q.GetSubscriptionByOrg(ctx, "org_rs")
 	require.NoError(t, err)
-	assert.Equal(t, "sub_rs2", sub.PolarSubscriptionID.String)
+	assert.Equal(t, "sub_rs2", sub.ProviderSubscriptionID.String)
 	assert.Equal(t, "team", sub.ProductKey)
 	assert.Equal(t, "active", sub.Status)
 }
@@ -175,7 +175,7 @@ func TestUncanceledReactivates(t *testing.T) {
 	assert.Equal(t, "active", sub.Status)
 
 	var action string
-	require.NoError(t, s.db.QueryRow(ctx, `SELECT action FROM audit_log WHERE clerk_org_id='org_uc' ORDER BY id DESC LIMIT 1`).Scan(&action))
+	require.NoError(t, s.db.QueryRow(ctx, `SELECT action FROM audit_log WHERE org_id='org_uc' ORDER BY id DESC LIMIT 1`).Scan(&action))
 	assert.Equal(t, "subscription.reactivated", action)
 }
 
@@ -217,7 +217,7 @@ func TestCheckoutHandlerMockClient(t *testing.T) {
 	assert.Equal(t, "prod_pro", call.ProductID)
 	assert.Equal(t, "org_co", call.CustomerExternalID)
 	assert.Equal(t, "http://localhost:18080/app/settings/billing?success=1", call.SuccessURL)
-	assert.Equal(t, "org_co", call.Metadata["clerk_org_id"])
+	assert.Equal(t, "org_co", call.Metadata["org_id"])
 }
 
 func TestCheckoutUnknownPlan422(t *testing.T) {
@@ -246,16 +246,17 @@ func TestEntitledGateInCurrentPlan(t *testing.T) {
 
 	// Canceled sub PAST period end → plan resolves to free → 4th project 422s.
 	_, err := s.q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_eg", PolarSubscriptionID: pgtype.Text{String: "sub_eg", Valid: true},
-		PolarCustomerID: "cust_eg", ProductKey: "pro", Status: "canceled",
+		Provider: "polar",
+		OrgID: "org_eg", ProviderSubscriptionID: pgtype.Text{String: "sub_eg", Valid: true},
+		ProviderCustomerID: "cust_eg", ProductKey: "pro", Status: "canceled",
 		CurrentPeriodEnd: pgtype.Timestamptz{Time: time.Now().Add(-24 * time.Hour), Valid: true},
 	})
 	require.NoError(t, err)
 	for i := range 3 {
-		_, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: "org_eg", Name: fmt.Sprintf("p%d", i)})
+		_, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: "org_eg", Name: fmt.Sprintf("p%d", i)})
 		require.NoError(t, err)
 	}
-	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id='org_eg'") })
+	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id='org_eg'") })
 
 	code, _, body := postForm(t, s, "/app/projects", url.Values{"name": {"over"}}, sessionCookie("user_eg", "org_eg", "org:admin"))
 	assert.Equal(t, http.StatusUnprocessableEntity, code)
@@ -282,8 +283,9 @@ func TestSettingsBillingPage(t *testing.T) {
 
 	// Fragment endpoint with a row → the card without polling.
 	_, err := s.q.UpsertSubscription(t.Context(), sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_sb", PolarSubscriptionID: pgtype.Text{String: "sub_sb", Valid: true},
-		PolarCustomerID: "cust_sb", ProductKey: "pro", Status: "active",
+		Provider: "polar",
+		OrgID: "org_sb", ProviderSubscriptionID: pgtype.Text{String: "sub_sb", Valid: true},
+		ProviderCustomerID: "cust_sb", ProductKey: "pro", Status: "active",
 		CurrentPeriodEnd: pgtype.Timestamptz{Time: time.Now().Add(30 * 24 * time.Hour), Valid: true},
 	})
 	require.NoError(t, err)

@@ -65,7 +65,7 @@ func (s *Server) handleAdminContentCreate(w http.ResponseWriter, r *http.Request
 		Status:      "draft",
 		PublishedAt: parseAdminTime(in.PublishedAt),
 		UnpublishAt: parseAdminTime(in.UnpublishAt),
-		CreatedBy:   actor.ClerkUserID,
+		CreatedBy:   actor.UserID,
 	})
 	if err != nil {
 		if isUniqueViolation(err) {
@@ -76,8 +76,8 @@ func (s *Server) handleAdminContentCreate(w http.ResponseWriter, r *http.Request
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.snapshotRevision(ctx, entry, actor.ClerkUserID)
-	s.auditContent(ctx, actor.ClerkUserID, "content.created", entry)
+	s.snapshotRevision(ctx, entry, actor.UserID)
+	s.auditContent(ctx, actor.UserID, "content.created", entry)
 	s.cms.Invalidate()
 	Toast(w, "success", i18n.T(ctx, "admin.content.created"))
 	Navigate(w, r, "/admin/content")
@@ -136,8 +136,8 @@ func (s *Server) handleAdminContentUpdate(w http.ResponseWriter, r *http.Request
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.snapshotRevision(ctx, entry, actor.ClerkUserID)
-	s.auditContent(ctx, actor.ClerkUserID, "content.updated", entry)
+	s.snapshotRevision(ctx, entry, actor.UserID)
+	s.auditContent(ctx, actor.UserID, "content.updated", entry)
 	s.cms.Invalidate()
 	Toast(w, "success", i18n.T(ctx, "admin.content.updated"))
 	Navigate(w, r, "/admin/content")
@@ -183,7 +183,7 @@ func (s *Server) handleAdminContentPublish(w http.ResponseWriter, r *http.Reques
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.auditContent(ctx, actor.ClerkUserID, "content.published", entry)
+	s.auditContent(ctx, actor.UserID, "content.published", entry)
 	s.cms.Invalidate()
 	Toast(w, "success", i18n.T(ctx, "admin.content.published"))
 	Navigate(w, r, "/admin/content")
@@ -205,7 +205,7 @@ func (s *Server) handleAdminContentUnpublish(w http.ResponseWriter, r *http.Requ
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.auditContent(ctx, actor.ClerkUserID, "content.unpublished", entry)
+	s.auditContent(ctx, actor.UserID, "content.unpublished", entry)
 	s.cms.Invalidate()
 	Toast(w, "success", i18n.T(ctx, "admin.content.unpublished"))
 	Navigate(w, r, "/admin/content")
@@ -223,7 +223,7 @@ func (s *Server) handleAdminContentDelete(w http.ResponseWriter, r *http.Request
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.auditContent(ctx, actor.ClerkUserID, "content.deleted", entry)
+	s.auditContent(ctx, actor.UserID, "content.deleted", entry)
 	s.cms.Invalidate()
 	Toast(w, "success", i18n.T(ctx, "admin.content.deleted"))
 	Navigate(w, r, "/admin/content")
@@ -262,8 +262,8 @@ func (s *Server) handleAdminContentRestore(w http.ResponseWriter, r *http.Reques
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.snapshotRevision(ctx, entry, actor.ClerkUserID)
-	s.auditContent(ctx, actor.ClerkUserID, "content.restored", entry)
+	s.snapshotRevision(ctx, entry, actor.UserID)
+	s.auditContent(ctx, actor.UserID, "content.restored", entry)
 	s.cms.Invalidate()
 	Toast(w, "success", i18n.T(ctx, "admin.content.restored"))
 	Navigate(w, r, "/admin/content")

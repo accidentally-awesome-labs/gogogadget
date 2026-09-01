@@ -1,107 +1,107 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/workflow/notification-preferences",
+    "kind": "workflow",
+    "name": "notification-preferences",
+    "revision": 1,
+    "contract": 1,
+    "title": "Notification preference saving",
+    "description": "Persists per-kind in-app notification mutes from checkbox presence and the digest cadence, ignoring an unknown cadence rather than hitting the column CHECK.",
+    "requires": [
+      {
+        "id": "ggg/page/settings-notifications",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/notifications",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/workflow_notification_preferences.go",
+        "target": "internal/web/workflow_notification_preferences.go",
+        "class": "go",
+        "sha256": "1adcc69e50311ef8bc83ac6a8f1c7cbbb32db36cf8ba3de289df20a7951903c3",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "notification-preferences.save"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "Persists per-kind in-app notification mutes from checkbox presence and the digest cadence, ignoring an unknown cadence rather than hitting the column CHECK.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "59bbe4b136bf0fe0a575a1320a095c045735515c66625ecd8da08a5916a59c63",
-        "source": "internal/web/workflow_notification_preferences.go",
-        "target": "internal/web/workflow_notification_preferences.go"
-      }
-    ],
-    "id": "ggg/workflow/notification-preferences",
-    "kind": "workflow",
-    "migrations": [],
-    "name": "notification-preferences",
-    "removal_policy": "retain-data",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/page/settings-notifications"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/notifications"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "routes": [
         {
-          "handler": "handleSettingsNotificationsSave",
           "id": "notification-preferences.save",
           "method": "POST",
-          "package": "internal/web",
           "pattern": "/app/settings/notifications",
+          "scope": "app",
           "policy": {
-            "admin_write": false,
             "csrf_exempt": false,
             "csrf_reason": "",
-            "idempotent": false,
+            "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 0,
-            "rate_exempt": false
+            "idempotent": false,
+            "admin_write": false
           },
-          "scope": "app"
+          "package": "internal/web",
+          "handler": "handleSettingsNotificationsSave"
         }
       ]
     },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Notification preference saving"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "retain-data"
+  }
 }

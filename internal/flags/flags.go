@@ -70,7 +70,7 @@ func (e *DBEvaluator) flags(ctx context.Context) map[string]sqlc.FeatureFlag {
 // rollout increases (50% is a subset of 60%).
 func (e *DBEvaluator) Enabled(ctx context.Context, orgID, key string) bool {
 	// Per-org override wins.
-	ov, err := e.q.GetFlagOverride(ctx, sqlc.GetFlagOverrideParams{FlagKey: key, ClerkOrgID: orgID})
+	ov, err := e.q.GetFlagOverride(ctx, sqlc.GetFlagOverrideParams{FlagKey: key, OrgID: orgID})
 	if err == nil {
 		return ov.Enabled
 	}

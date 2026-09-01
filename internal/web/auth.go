@@ -37,15 +37,16 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		claims, err := s.verifier.Verify(r.Context(), cookie.Value)
+		providerClaims, err := s.verifier.Verify(r.Context(), cookie.Value)
 		if err != nil {
 			// Invalid/expired token → treat as unauthenticated; RequireAuth redirects.
 			next.ServeHTTP(w, r)
 			return
 		}
 
+		claims := &identity.Claims{UserID: providerClaims.UserSubject, OrgID: providerClaims.OrgSubject, OrgRole: providerClaims.OrgRole, OrgSlug: providerClaims.OrgSlug}
 		ctx := r.Context()
-		user, err := s.q.GetUserByClerkID(ctx, claims.UserID)
+		user, err := s.q.GetUserByID(ctx, claims.UserID)
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):
 			profile, ferr := s.fetcher.Fetch(ctx, claims.UserID)
@@ -55,7 +56,7 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 				return
 			}
 			user, err = s.q.UpsertUser(ctx, sqlc.UpsertUserParams{
-				ClerkUserID: claims.UserID, Email: profile.Email, Name: profile.Name, AvatarUrl: profile.AvatarURL,
+				UserID: claims.UserID, Email: profile.Email, Name: profile.Name, AvatarUrl: profile.AvatarURL,
 			})
 			if err != nil {
 				s.log.Error("identity sync upsert", "error", err)
@@ -80,7 +81,7 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 		ctx = s.applyStoredAppearance(w, r, ctx, user)
 		ctx = identity.WithClaims(ctx, claims)
 		if claims.OrgID != "" {
-			org, oerr := s.q.GetOrgByClerkID(ctx, claims.OrgID)
+			org, oerr := s.q.GetOrgByID(ctx, claims.OrgID)
 			switch {
 			case oerr == nil:
 				ctx = identity.WithOrg(ctx, &org)
@@ -89,11 +90,11 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 				// enough to seed the mirror. The organization.created webhook
 				// corrects the name on arrival (UpsertOrg overwrites).
 				org, oerr = s.q.UpsertOrg(ctx, sqlc.UpsertOrgParams{
-					ClerkOrgID: claims.OrgID, Name: claims.OrgSlug, Slug: claims.OrgSlug,
+					OrgID: claims.OrgID, Name: claims.OrgSlug, Slug: claims.OrgSlug,
 				})
 				if oerr == nil {
 					if err := s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{
-						ClerkOrgID: claims.OrgID, ClerkUserID: claims.UserID, Role: claims.OrgRole,
+						OrgID: claims.OrgID, UserID: claims.UserID, Role: claims.OrgRole,
 					}); err != nil {
 						s.log.Warn("lazy membership sync", "error", err)
 					}
@@ -198,14 +199,14 @@ func (s *Server) loadPlan(next http.Handler) http.Handler {
 			return
 		}
 		ctx := r.Context()
-		sub, err := s.q.GetSubscriptionByOrg(ctx, org.ClerkOrgID)
+		sub, err := s.q.GetSubscriptionByOrg(ctx, org.OrgID)
 		if err == nil {
 			ctx = identity.WithSub(ctx, &sub)
 		} else if !errors.Is(err, pgx.ErrNoRows) {
 			s.renderError(w, r, err.Error())
 			return
 		}
-		plan := billing.CurrentPlan(ctx, s.q, org.ClerkOrgID, s.cfg.Now())
+		plan := billing.CurrentPlan(ctx, s.q, org.OrgID, s.cfg.Now())
 		next.ServeHTTP(w, r.WithContext(identity.WithPlan(ctx, plan)))
 	})
 }

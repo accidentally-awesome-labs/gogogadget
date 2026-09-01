@@ -10,7 +10,7 @@ import (
 // GET /app/projects/{id}/edit
 func (s *Server) handleProjectEdit(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
-	project, ok := s.projectForOrg(w, r, org.ClerkOrgID)
+	project, ok := s.projectForOrg(w, r, org.OrgID)
 	if !ok {
 		return
 	}

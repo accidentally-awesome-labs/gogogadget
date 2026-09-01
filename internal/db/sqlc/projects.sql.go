@@ -13,25 +13,25 @@ import (
 
 const archiveProject = `-- name: ArchiveProject :exec
 UPDATE projects SET status = 'archived', updated_at = now()
-WHERE id = $1 AND clerk_org_id = $2
+WHERE id = $1 AND org_id = $2
 `
 
 type ArchiveProjectParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) ArchiveProject(ctx context.Context, arg ArchiveProjectParams) error {
-	_, err := q.db.Exec(ctx, archiveProject, arg.ID, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, archiveProject, arg.ID, arg.OrgID)
 	return err
 }
 
 const countProjectsByOrg = `-- name: CountProjectsByOrg :one
-SELECT count(*) FROM projects WHERE clerk_org_id = $1 AND status = 'active'
+SELECT count(*) FROM projects WHERE org_id = $1 AND status = 'active'
 `
 
-func (q *Queries) CountProjectsByOrg(ctx context.Context, clerkOrgID string) (int64, error) {
-	row := q.db.QueryRow(ctx, countProjectsByOrg, clerkOrgID)
+func (q *Queries) CountProjectsByOrg(ctx context.Context, orgID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countProjectsByOrg, orgID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -39,39 +39,39 @@ func (q *Queries) CountProjectsByOrg(ctx context.Context, clerkOrgID string) (in
 
 const countProjectsByOrgSearch = `-- name: CountProjectsByOrgSearch :one
 SELECT count(*) FROM projects
-WHERE clerk_org_id = $1 AND status = 'active'
+WHERE org_id = $1 AND status = 'active'
   AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%')
 `
 
 type CountProjectsByOrgSearchParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Column2    string `json:"column_2"`
+	OrgID   string `json:"org_id"`
+	Column2 string `json:"column_2"`
 }
 
 func (q *Queries) CountProjectsByOrgSearch(ctx context.Context, arg CountProjectsByOrgSearchParams) (int64, error) {
-	row := q.db.QueryRow(ctx, countProjectsByOrgSearch, arg.ClerkOrgID, arg.Column2)
+	row := q.db.QueryRow(ctx, countProjectsByOrgSearch, arg.OrgID, arg.Column2)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const createProject = `-- name: CreateProject :one
-INSERT INTO projects (clerk_org_id, name)
+INSERT INTO projects (org_id, name)
 VALUES ($1, $2)
-RETURNING id, clerk_org_id, name, status, created_at, updated_at, search_tsv
+RETURNING id, org_id, name, status, created_at, updated_at, search_tsv
 `
 
 type CreateProjectParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Name       string `json:"name"`
+	OrgID string `json:"org_id"`
+	Name  string `json:"name"`
 }
 
 func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error) {
-	row := q.db.QueryRow(ctx, createProject, arg.ClerkOrgID, arg.Name)
+	row := q.db.QueryRow(ctx, createProject, arg.OrgID, arg.Name)
 	var i Project
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.Status,
 		&i.CreatedAt,
@@ -82,34 +82,34 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 }
 
 const deleteProject = `-- name: DeleteProject :exec
-DELETE FROM projects WHERE id = $1 AND clerk_org_id = $2
+DELETE FROM projects WHERE id = $1 AND org_id = $2
 `
 
 type DeleteProjectParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) DeleteProject(ctx context.Context, arg DeleteProjectParams) error {
-	_, err := q.db.Exec(ctx, deleteProject, arg.ID, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, deleteProject, arg.ID, arg.OrgID)
 	return err
 }
 
 const getProjectByID = `-- name: GetProjectByID :one
-SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects WHERE id = $1 AND clerk_org_id = $2
+SELECT id, org_id, name, status, created_at, updated_at, search_tsv FROM projects WHERE id = $1 AND org_id = $2
 `
 
 type GetProjectByIDParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) GetProjectByID(ctx context.Context, arg GetProjectByIDParams) (Project, error) {
-	row := q.db.QueryRow(ctx, getProjectByID, arg.ID, arg.ClerkOrgID)
+	row := q.db.QueryRow(ctx, getProjectByID, arg.ID, arg.OrgID)
 	var i Project
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.Status,
 		&i.CreatedAt,
@@ -120,14 +120,14 @@ func (q *Queries) GetProjectByID(ctx context.Context, arg GetProjectByIDParams) 
 }
 
 const listAllProjectsByOrg = `-- name: ListAllProjectsByOrg :many
-SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects
-WHERE clerk_org_id = $1 AND status = 'active'
+SELECT id, org_id, name, status, created_at, updated_at, search_tsv FROM projects
+WHERE org_id = $1 AND status = 'active'
 ORDER BY created_at DESC
 `
 
 // Full list for CSV export (no pagination).
-func (q *Queries) ListAllProjectsByOrg(ctx context.Context, clerkOrgID string) ([]Project, error) {
-	rows, err := q.db.Query(ctx, listAllProjectsByOrg, clerkOrgID)
+func (q *Queries) ListAllProjectsByOrg(ctx context.Context, orgID string) ([]Project, error) {
+	rows, err := q.db.Query(ctx, listAllProjectsByOrg, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (q *Queries) ListAllProjectsByOrg(ctx context.Context, clerkOrgID string) (
 		var i Project
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Status,
 			&i.CreatedAt,
@@ -155,8 +155,8 @@ func (q *Queries) ListAllProjectsByOrg(ctx context.Context, clerkOrgID string) (
 }
 
 const listProjectsByOrg = `-- name: ListProjectsByOrg :many
-SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects
-WHERE clerk_org_id = $1 AND status = 'active'
+SELECT id, org_id, name, status, created_at, updated_at, search_tsv FROM projects
+WHERE org_id = $1 AND status = 'active'
   AND ($2::text = '' OR search_tsv @@ websearch_to_tsquery('simple', $2) OR name ILIKE '%' || $2 || '%')
 ORDER BY CASE WHEN $2::text = '' THEN 0 ELSE COALESCE(ts_rank(search_tsv, websearch_to_tsquery('simple', $2)), 0) END DESC,
          created_at DESC
@@ -164,10 +164,10 @@ LIMIT $3 OFFSET $4
 `
 
 type ListProjectsByOrgParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Column2    string `json:"column_2"`
-	Limit      int32  `json:"limit"`
-	Offset     int32  `json:"offset"`
+	OrgID   string `json:"org_id"`
+	Column2 string `json:"column_2"`
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
 }
 
 // Postgres FTS (websearch syntax: quotes, OR, -negation) with an ILIKE
@@ -175,7 +175,7 @@ type ListProjectsByOrgParams struct {
 // scores, else newest first.
 func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgParams) ([]Project, error) {
 	rows, err := q.db.Query(ctx, listProjectsByOrg,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.Column2,
 		arg.Limit,
 		arg.Offset,
@@ -189,7 +189,7 @@ func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgPa
 		var i Project
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Status,
 			&i.CreatedAt,
@@ -207,8 +207,8 @@ func (q *Queries) ListProjectsByOrg(ctx context.Context, arg ListProjectsByOrgPa
 }
 
 const listProjectsByOrgCursor = `-- name: ListProjectsByOrgCursor :many
-SELECT id, clerk_org_id, name, status, created_at, updated_at, search_tsv FROM projects
-WHERE clerk_org_id = $1 AND status = 'active'
+SELECT id, org_id, name, status, created_at, updated_at, search_tsv FROM projects
+WHERE org_id = $1 AND status = 'active'
   AND (
     $2::timestamptz IS NULL
     OR (created_at, id) < ($2::timestamptz, $3::bigint)
@@ -218,7 +218,7 @@ LIMIT $4
 `
 
 type ListProjectsByOrgCursorParams struct {
-	ClerkOrgID      string             `json:"clerk_org_id"`
+	OrgID           string             `json:"org_id"`
 	CursorCreatedAt pgtype.Timestamptz `json:"cursor_created_at"`
 	CursorID        pgtype.Int8        `json:"cursor_id"`
 	Lim             int32              `json:"lim"`
@@ -228,10 +228,10 @@ type ListProjectsByOrgCursorParams struct {
 // the (created_at, id) cursor, newest first. The id tiebreak makes the order
 // total — created_at alone can collide, which is exactly how offset paging
 // drops or repeats rows. A NULL cursor starts at the newest row. The
-// row-value comparison rides projects_org_idx (clerk_org_id, created_at DESC).
+// row-value comparison rides projects_org_idx (org_id, created_at DESC).
 func (q *Queries) ListProjectsByOrgCursor(ctx context.Context, arg ListProjectsByOrgCursorParams) ([]Project, error) {
 	rows, err := q.db.Query(ctx, listProjectsByOrgCursor,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.CursorCreatedAt,
 		arg.CursorID,
 		arg.Lim,
@@ -245,7 +245,7 @@ func (q *Queries) ListProjectsByOrgCursor(ctx context.Context, arg ListProjectsB
 		var i Project
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Status,
 			&i.CreatedAt,
@@ -264,22 +264,22 @@ func (q *Queries) ListProjectsByOrgCursor(ctx context.Context, arg ListProjectsB
 
 const updateProject = `-- name: UpdateProject :one
 UPDATE projects SET name = $3, updated_at = now()
-WHERE id = $1 AND clerk_org_id = $2
-RETURNING id, clerk_org_id, name, status, created_at, updated_at, search_tsv
+WHERE id = $1 AND org_id = $2
+RETURNING id, org_id, name, status, created_at, updated_at, search_tsv
 `
 
 type UpdateProjectParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
-	Name       string `json:"name"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
+	Name  string `json:"name"`
 }
 
 func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error) {
-	row := q.db.QueryRow(ctx, updateProject, arg.ID, arg.ClerkOrgID, arg.Name)
+	row := q.db.QueryRow(ctx, updateProject, arg.ID, arg.OrgID, arg.Name)
 	var i Project
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.Status,
 		&i.CreatedAt,

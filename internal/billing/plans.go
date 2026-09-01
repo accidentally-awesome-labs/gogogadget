@@ -9,7 +9,7 @@ import "github.com/gogogadget/gogogadget/internal/db/sqlc"
 type Plan struct {
 	Key, Name, PriceDisplay string
 	PriceUSDMonthly         int
-	PolarProductID          string   // from env POLAR_PRODUCT_PRO / POLAR_PRODUCT_TEAM; "" for free
+	ProviderProductID          string   // provider product identifier; "" for free
 	MaxProjects             int      // -1 = unlimited
 	MaxMembers              int      // informational only (invitations are Clerk-hosted)
 	MaxStorageMB            int      // -1 = unlimited
@@ -57,14 +57,14 @@ func PlanByKey(key string) Plan {
 	return Plans[0]
 }
 
-// SetPolarProductIDs injects product IDs from config at boot.
-func SetPolarProductIDs(pro, team string) {
+// SetProviderProductIDs injects product IDs from config at boot. The catalog API is preferred for new code.
+func SetProviderProductIDs(pro, team string) {
 	for i := range Plans {
 		switch Plans[i].Key {
 		case "pro":
-			Plans[i].PolarProductID = pro
+			Plans[i].ProviderProductID = pro
 		case "team":
-			Plans[i].PolarProductID = team
+			Plans[i].ProviderProductID = team
 		}
 	}
 }

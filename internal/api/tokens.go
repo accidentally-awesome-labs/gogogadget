@@ -119,7 +119,7 @@ func (m *Middleware) RequireAPIToken(scope string, next http.Handler) http.Handl
 			return
 		}
 
-		org, err := m.Q.GetOrgByClerkID(r.Context(), token.ClerkOrgID)
+		org, err := m.Q.GetOrgByID(r.Context(), token.OrgID)
 		if err != nil {
 			WriteError(w, http.StatusInternalServerError, "internal_error", "Organization lookup failed.")
 			return

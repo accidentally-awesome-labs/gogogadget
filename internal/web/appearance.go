@@ -117,9 +117,9 @@ func (s *Server) handleSetTheme(w http.ResponseWriter, r *http.Request) {
 	s.setPrefCookie(w, themeCookieName, next)
 	if user := identity.UserFrom(r.Context()); user != nil {
 		if err := s.q.SetUserTheme(r.Context(), sqlc.SetUserThemeParams{
-			ClerkUserID: user.ClerkUserID, Theme: next,
+			UserID: user.UserID, Theme: next,
 		}); err != nil {
-			s.log.Error("set theme", "error", err, "user", user.ClerkUserID)
+			s.log.Error("set theme", "error", err, "user", user.UserID)
 		}
 	}
 	// A form that names where it came from gets a HARD redirect: the theme

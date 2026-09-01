@@ -16,14 +16,14 @@ import (
 
 func seedUser(t *testing.T, s *Server, id, email, name string) {
 	t.Helper()
-	_, err := s.q.UpsertUser(t.Context(), sqlc.UpsertUserParams{ClerkUserID: id, Email: email, Name: name})
+	_, err := s.q.UpsertUser(t.Context(), sqlc.UpsertUserParams{UserID: id, Email: email, Name: name})
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = s.q.DeleteUser(context.Background(), id) })
 }
 
 func seedOrg(t *testing.T, s *Server, id, slug string) {
 	t.Helper()
-	_, err := s.q.UpsertOrg(t.Context(), sqlc.UpsertOrgParams{ClerkOrgID: id, Name: slug + " Org", Slug: slug})
+	_, err := s.q.UpsertOrg(t.Context(), sqlc.UpsertOrgParams{OrgID: id, Name: slug + " Org", Slug: slug})
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = s.q.DeleteOrg(context.Background(), id) })
 }
@@ -48,7 +48,7 @@ func TestRequireAuthAcceptsValidSession(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedUser(t, s, "user_a1", "a1@example.com", "A One")
 	seedOrg(t, s, "org_a1", "a1")
-	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{ClerkOrgID: "org_a1", ClerkUserID: "user_a1", Role: "org:admin"}))
+	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{OrgID: "org_a1", UserID: "user_a1", Role: "org:admin"}))
 
 	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil, sessionCookie("user_a1", "org_a1", "org:admin"))
 	assert.Equal(t, http.StatusOK, code)
@@ -144,10 +144,10 @@ func TestRequireNotDisabled(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedUser(t, s, "user_d1", "d1@example.com", "D One")
 	seedOrg(t, s, "org_d1", "d1")
-	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{ClerkOrgID: "org_d1", ClerkUserID: "user_d1", Role: "org:admin"}))
+	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{OrgID: "org_d1", UserID: "user_d1", Role: "org:admin"}))
 
 	now := time.Now()
-	require.NoError(t, s.q.SetUserDisabled(t.Context(), sqlc.SetUserDisabledParams{ClerkUserID: "user_d1", DisabledAt: pgtype.Timestamptz{Time: now, Valid: true}}))
+	require.NoError(t, s.q.SetUserDisabled(t.Context(), sqlc.SetUserDisabledParams{UserID: "user_d1", DisabledAt: pgtype.Timestamptz{Time: now, Valid: true}}))
 
 	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil, sessionCookie("user_d1", "org_d1", "org:admin"))
 	assert.Equal(t, http.StatusForbidden, code)
@@ -160,7 +160,7 @@ func TestRequireOrgSelectsOrCreates(t *testing.T) {
 	// Memberships but no active org → SelectOrg page lists them.
 	seedUser(t, s, "user_m1", "m1@example.com", "M One")
 	seedOrg(t, s, "org_m1", "m1")
-	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{ClerkOrgID: "org_m1", ClerkUserID: "user_m1", Role: "org:member"}))
+	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{OrgID: "org_m1", UserID: "user_m1", Role: "org:member"}))
 
 	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil, sessionCookie("user_m1", "", ""))
 	assert.Equal(t, http.StatusOK, code)
@@ -194,7 +194,7 @@ func TestRequireOrgRedirectsBoostedSyncInterstitial(t *testing.T) {
 	req.Header.Set("HX-Request", "true")
 	req.Header.Set("HX-Boosted", "true")
 	ctx := identity.WithClaims(req.Context(), &identity.Claims{UserID: "user_sync", OrgID: "org_sync"})
-	ctx = identity.WithUser(ctx, &sqlc.User{ClerkUserID: "user_sync"})
+	ctx = identity.WithUser(ctx, &sqlc.User{UserID: "user_sync"})
 	rec := httptest.NewRecorder()
 
 	s.requireOrg(next).ServeHTTP(rec, req.WithContext(ctx))
@@ -208,32 +208,32 @@ func TestRequireAdmin(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedUser(t, s, "user_adm", "adm@example.com", "Adm")
 	seedOrg(t, s, "org_adm", "adm")
-	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{ClerkOrgID: "org_adm", ClerkUserID: "user_adm", Role: "org:admin"}))
+	require.NoError(t, s.q.UpsertMembership(t.Context(), sqlc.UpsertMembershipParams{OrgID: "org_adm", UserID: "user_adm", Role: "org:admin"}))
 
 	probe := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(204) })
 	h := s.requireStaff(probe)
 
 	// Non-admin → 403.
 	req := httptest.NewRequest("GET", "/admin", nil)
-	ctx := identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", AdminRole: ""})
+	ctx := identity.WithUser(req.Context(), &sqlc.User{UserID: "user_adm", AdminRole: ""})
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req.WithContext(ctx))
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 
 	// Support reads the admin area too — the write boundary is a separate guard.
 	rec = httptest.NewRecorder()
-	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", AdminRole: identity.RoleSupport})))
+	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{UserID: "user_adm", AdminRole: identity.RoleSupport})))
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 
 	// Admin → pass.
 	rec = httptest.NewRecorder()
-	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{ClerkUserID: "user_adm", AdminRole: identity.RoleAdmin})))
+	h.ServeHTTP(rec, req.WithContext(identity.WithUser(req.Context(), &sqlc.User{UserID: "user_adm", AdminRole: identity.RoleAdmin})))
 	assert.Equal(t, http.StatusNoContent, rec.Code)
 }
 
 func TestLoadPlanDefaultsFree(t *testing.T) {
 	s := integrationServer(t, nil)
-	org := &sqlc.Org{ClerkOrgID: "org_plan_none"}
+	org := &sqlc.Org{OrgID: "org_plan_none"}
 	probe := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		p := identity.PlanFrom(r.Context())
 		assert.Equal(t, "free", p.Key)
@@ -254,10 +254,10 @@ func TestLazyOrgSync(t *testing.T) {
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, "Dashboard")
 
-	org, err := s.q.GetOrgByClerkID(t.Context(), "org_lazy")
+	org, err := s.q.GetOrgByID(t.Context(), "org_lazy")
 	require.NoError(t, err)
 	assert.Equal(t, "org_lazy", org.Slug)
-	m, err := s.q.GetMembership(t.Context(), sqlc.GetMembershipParams{ClerkOrgID: "org_lazy", ClerkUserID: "user_lazy"})
+	m, err := s.q.GetMembership(t.Context(), sqlc.GetMembershipParams{OrgID: "org_lazy", UserID: "user_lazy"})
 	require.NoError(t, err)
 	assert.Equal(t, "org:admin", m.Role)
 
@@ -265,7 +265,7 @@ func TestLazyOrgSync(t *testing.T) {
 	payload := []byte(`{"type": "organization.created", "data": {"id": "org_lazy", "name": "Real Name", "slug": "org_lazy"}}`)
 	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, signSvix(t, testWebhookSecret, "msg_lazy1", payload))
 	require.Equal(t, http.StatusOK, code)
-	org, _ = s.q.GetOrgByClerkID(t.Context(), "org_lazy")
+	org, _ = s.q.GetOrgByID(t.Context(), "org_lazy")
 	assert.Equal(t, "Real Name", org.Name)
 }
 

@@ -20,7 +20,7 @@ func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 	ctx := r.Context()
-	orgParam := sqlcText(org.ClerkOrgID)
+	orgParam := sqlcText(org.OrgID)
 
 	total, err := s.q.CountAuditByOrg(ctx, orgParam)
 	if err != nil {
@@ -30,7 +30,7 @@ func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
 	totalPages := max(int(math.Ceil(float64(total)/activityPageSize)), 1)
 
 	rows, err := s.q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{
-		ClerkOrgID: orgParam,
+		OrgID: orgParam,
 		Limit:      activityPageSize,
 		Offset:     int32((page - 1) * activityPageSize),
 	})

@@ -33,7 +33,7 @@ func (s *Server) handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orgs, err := s.q.GetOrgsForUser(ctx, user.ClerkUserID)
+	orgs, err := s.q.GetOrgsForUser(ctx, user.UserID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -44,22 +44,22 @@ func (s *Server) handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 	var blockers []string
 	soleOrgs := make([]string, 0, len(orgs))
 	for _, o := range orgs {
-		members, err := s.q.CountMembersByOrg(ctx, o.ClerkOrgID)
+		members, err := s.q.CountMembersByOrg(ctx, o.OrgID)
 		if err != nil {
 			s.renderError(w, r, err.Error())
 			return
 		}
 		if members == 1 {
-			soleOrgs = append(soleOrgs, o.ClerkOrgID)
+			soleOrgs = append(soleOrgs, o.OrgID)
 			continue
 		}
-		m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: o.ClerkOrgID, ClerkUserID: user.ClerkUserID})
+		m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: o.OrgID, UserID: user.UserID})
 		if err != nil {
 			s.renderError(w, r, err.Error())
 			return
 		}
 		if m.Role == "org:admin" {
-			admins, err := s.q.CountAdminsByOrg(ctx, o.ClerkOrgID)
+			admins, err := s.q.CountAdminsByOrg(ctx, o.OrgID)
 			if err != nil {
 				s.renderError(w, r, err.Error())
 				return
@@ -76,15 +76,15 @@ func (s *Server) handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 
 	// Provider first: a failed upstream delete must leave local data intact.
 	if s.deleter != nil {
-		if err := s.deleter.DeleteUser(ctx, user.ClerkUserID); err != nil {
-			s.log.Error("identity user delete failed", "user", user.ClerkUserID, "error", err)
+		if err := s.deleter.DeleteUser(ctx, user.UserID); err != nil {
+			s.log.Error("identity user delete failed", "user", user.UserID, "error", err)
 			s.renderError(w, r, err.Error())
 			return
 		}
 	}
 
 	// Impersonation rows reference users with NO cascade — they must go first.
-	if err := s.q.DeleteImpersonationSessionsForUser(ctx, user.ClerkUserID); err != nil {
+	if err := s.q.DeleteImpersonationSessionsForUser(ctx, user.UserID); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -99,12 +99,12 @@ func (s *Server) handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 		}
 		deleted = append(deleted, orgID)
 	}
-	if err := s.q.DeleteUser(ctx, user.ClerkUserID); err != nil {
+	if err := s.q.DeleteUser(ctx, user.UserID); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
 	// Audit rows deliberately survive (audit_log has no FKs by design).
-	audit.Log(ctx, s.q, "", user.ClerkUserID, "account.deleted", map[string]any{"orgs_deleted": deleted})
+	audit.Log(ctx, s.q, "", user.UserID, "account.deleted", map[string]any{"orgs_deleted": deleted})
 
 	s.clearSessionCookie(w)
 	FlashToast(w, "success", i18n.T(ctx, "settings.account_deleted"))

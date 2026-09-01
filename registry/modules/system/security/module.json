@@ -1,10 +1,44 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {},
+    "id": "ggg/system/security",
+    "kind": "system",
+    "name": "security",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Middleware and request security",
+    "description": "The load-bearing middleware chain — recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF — and the route-group guards. The CSRF step publishes the token twice: as the inherited request header htmx reads, and into the request context that ui.Form draws its hidden field from, so a form submitted with no JavaScript is accepted.",
+    "requires": [
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/rate-limit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -19,95 +53,61 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The load-bearing middleware chain \u2014 recover, request id, access log, locale, maintenance mode, rate limit, secure headers, session load, CSRF \u2014 and the route-group guards. The CSRF step publishes the token twice: as the inherited request header htmx reads, and into the request context that ui.Form draws its hidden field from, so a form submitted with no JavaScript is accepted.",
-    "docs": [],
-    "environment": [
-      {
-        "description": "true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/`",
-        "field": "MaintenanceMode",
-        "key": "MAINTENANCE_MODE",
-        "type": "bool"
-      }
-    ],
     "files": [
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "06f513e15df3fce19ab446c7cd62723afd021d8d45fdee12307abfb69bc0fd3e",
         "source": "internal/web/auth.go",
-        "target": "internal/web/auth.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "0ab35b2d32f0337041923538a320c3577e5740377848d046f38d0d296f835c36",
-        "source": "internal/web/csrf_form_test.go",
-        "target": "internal/web/csrf_form_test.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "9c8f27f47036954c5bffdc6b5e50fb2e593481f8af574497a3680c27de702e5d",
-        "source": "internal/web/maintenance_test.go",
-        "target": "internal/web/maintenance_test.go"
-      },
-      {
+        "target": "internal/web/auth.go",
         "class": "go",
-        "contract": true,
+        "sha256": "9704f1173fc31e73b4b6eca8177d817493a4d3330221c535e4b0ce6dd1a6f422",
         "rewrite_module": true,
-        "sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
+        "contract": true
+      },
+      {
+        "source": "internal/web/csrf_form_test.go",
+        "target": "internal/web/csrf_form_test.go",
+        "class": "test",
+        "sha256": "0ab35b2d32f0337041923538a320c3577e5740377848d046f38d0d296f835c36",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/maintenance_test.go",
+        "target": "internal/web/maintenance_test.go",
+        "class": "test",
+        "sha256": "9c8f27f47036954c5bffdc6b5e50fb2e593481f8af574497a3680c27de702e5d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/middleware.go",
-        "target": "internal/web/middleware.go"
+        "target": "internal/web/middleware.go",
+        "class": "go",
+        "sha256": "a2a7e2429107759432fa39fa119092a3f931bdf0ac705d718f1baa35c9a835bf",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
-    "id": "ggg/system/security",
-    "kind": "system",
-    "migrations": [],
-    "name": "security",
-    "removal_policy": "replacement-required",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/rate-limit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
+    "claims": {},
     "runtime": {},
+    "migrations": [],
+    "environment": [
+      {
+        "key": "MAINTENANCE_MODE",
+        "field": "MaintenanceMode",
+        "type": "bool",
+        "description": "true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/`"
+      }
+    ],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Middleware and request security"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
 }

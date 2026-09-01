@@ -65,14 +65,14 @@ func (s *Server) handleAdminScheduleCreate(w http.ResponseWriter, r *http.Reques
 	every, _ := strconv.Atoi(strings.TrimSpace(input.EverySeconds))
 	row, err := s.q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
 		Name: input.Name, Kind: input.Kind, Payload: raw,
-		ClerkOrgID:   pgtype.Text{String: input.OrgID, Valid: input.OrgID != ""},
+		OrgID:   pgtype.Text{String: input.OrgID, Valid: input.OrgID != ""},
 		EverySeconds: int32(every),
 	})
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, input.OrgID, user.ClerkUserID, "schedule.created", map[string]any{
+	audit.Log(ctx, s.q, input.OrgID, user.UserID, "schedule.created", map[string]any{
 		"id": row.ID, "kind": row.Kind, "every_seconds": every,
 	})
 	Toast(w, "success", i18n.T(ctx, "admin.schedules.created"))
@@ -97,7 +97,7 @@ func (s *Server) handleAdminScheduleToggle(w http.ResponseWriter, r *http.Reques
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, row.ClerkOrgID.String, user.ClerkUserID, "schedule.updated", map[string]any{
+	audit.Log(ctx, s.q, row.OrgID.String, user.UserID, "schedule.updated", map[string]any{
 		"id": id, "enabled": !row.Enabled,
 	})
 	Toast(w, "success", i18n.T(ctx, "admin.schedules.toggled"))
@@ -122,7 +122,7 @@ func (s *Server) handleAdminScheduleRun(w http.ResponseWriter, r *http.Request) 
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, row.ClerkOrgID.String, user.ClerkUserID, "schedule.run_now", map[string]any{"id": id, "kind": row.Kind})
+	audit.Log(ctx, s.q, row.OrgID.String, user.UserID, "schedule.run_now", map[string]any{"id": id, "kind": row.Kind})
 	Toast(w, "success", i18n.T(ctx, "admin.schedules.run_started"))
 	Navigate(w, r, "/admin/schedules")
 }
@@ -140,7 +140,7 @@ func (s *Server) handleAdminScheduleDelete(w http.ResponseWriter, r *http.Reques
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, "", user.ClerkUserID, "schedule.deleted", map[string]any{"id": id})
+	audit.Log(ctx, s.q, "", user.UserID, "schedule.deleted", map[string]any{"id": id})
 	Toast(w, "success", i18n.T(ctx, "admin.schedules.deleted"))
 	Navigate(w, r, "/admin/schedules")
 }

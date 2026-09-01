@@ -206,7 +206,7 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 		Attrs:    ui.Attrs{TestID: "flag-overrides", Class: "max-w-3xl mb-6"},
 	}) {
 		for _, o := range overrides {
-			<tr id={ "flag-override-row-" + o.ClerkOrgID } data-testid={ "flag-override-" + o.ClerkOrgID }>
+			<tr id={ "flag-override-row-" + o.OrgID } data-testid={ "flag-override-" + o.OrgID }>
 				<td class="font-medium">{ o.Name }</td>
 				<td>
 					if o.OverrideEnabled {
@@ -218,15 +218,15 @@ templ AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverri
 				<td class="text-right">
 					if AdminWrite(ctx) {
 						@ui.ConfirmAction(ui.ConfirmActionOpts{
-							ID:           "flag-override-delete-dialog-" + o.ClerkOrgID,
+							ID:           "flag-override-delete-dialog-" + o.OrgID,
 							TriggerLabel: i18n.T(ctx, "flags.override_delete_row", o.Name),
 							Title:        i18n.T(ctx, "flags.override_delete_title"),
 							Message:      i18n.T(ctx, "flags.override_delete_confirm"),
 							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
 							CancelLabel:  i18n.T(ctx, "admin.cancel"),
 							Kind:         ui.KindDanger,
-							HX:           ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides/" + o.ClerkOrgID + "/delete"},
-							Attrs:        ui.Attrs{TestID: "flag-override-delete-" + o.ClerkOrgID},
+							HX:           ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides/" + o.OrgID + "/delete"},
+							Attrs:        ui.Attrs{TestID: "flag-override-delete-" + o.OrgID},
 						})
 					}
 				</td>
@@ -271,7 +271,7 @@ templ adminFlagOverridesEmpty() {
 func orgOptions(orgs []sqlc.Org) []ui.Option {
 	out := make([]ui.Option, 0, len(orgs))
 	for _, o := range orgs {
-		out = append(out, ui.Option{Value: o.ClerkOrgID, Label: o.Name})
+		out = append(out, ui.Option{Value: o.OrgID, Label: o.Name})
 	}
 	return out
 }

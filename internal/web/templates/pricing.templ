@@ -54,7 +54,7 @@ templ pricingAction(plan billing.Plan, authed bool, currentPlanKey string) {
 			Disabled: true,
 			Attrs:    ui.Attrs{Class: "w-full"},
 		})
-	} else if plan.PolarProductID != "" {
+	} else if plan.ProviderProductID != "" {
 		// Target and Swap restate htmx's own defaults - the form itself,
 		// innerHTML - because Form always emits hx-target, and an empty one
 		// resolves through querySelector("") and throws. On success the handler

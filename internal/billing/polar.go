@@ -114,9 +114,9 @@ func (c *PolarClient) CreatePortalSession(ctx context.Context, customerExternalI
 	return out.CustomerPortalURL, nil
 }
 
-func (c *PolarClient) RevokeSubscription(ctx context.Context, polarSubscriptionID string) error {
+func (c *PolarClient) RevokeSubscription(ctx context.Context, providerSubscriptionID string) error {
 	// Polar 2026-04: revoke is DELETE /v1/subscriptions/{id}.
-	return c.do(ctx, http.MethodDelete, "/v1/subscriptions/"+polarSubscriptionID, nil, nil)
+	return c.do(ctx, http.MethodDelete, "/v1/subscriptions/"+providerSubscriptionID, nil, nil)
 }
 
 func (c *PolarClient) IngestUsage(ctx context.Context, customerExternalID string, events []UsageEvent) error {

@@ -42,7 +42,7 @@ func fileIDFromList(t *testing.T, body string) int64 {
 
 func fileParamsFor(orgID, filename string, size int64) sqlc.InsertFileParams {
 	return sqlc.InsertFileParams{
-		ClerkOrgID: orgID, UploaderUserID: "user_seed", Filename: filename,
+		OrgID: orgID, UploaderUserID: "user_seed", Filename: filename,
 		ContentType: "application/octet-stream", SizeBytes: size,
 		StorageKey: storage.NewKey(orgID, filename),
 	}
@@ -102,7 +102,7 @@ func TestFileUploadQuotaRejected(t *testing.T) {
 	_, err := s.q.InsertFile(t.Context(), fileParamsFor("org_quota", "big.bin", 50*1024*1024))
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM files WHERE clerk_org_id = 'org_quota'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM files WHERE org_id = 'org_quota'")
 	})
 
 	cookie := sessionCookie("user_quota", "org_quota", "org:admin")
@@ -173,7 +173,7 @@ func TestFileDeleteIsGatedByAnInPageDialog(t *testing.T) {
 	f, err := s.q.InsertFile(t.Context(), fileParamsFor("org_fcfm", "gated.txt", 12))
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM files WHERE clerk_org_id = 'org_fcfm'")
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM files WHERE org_id = 'org_fcfm'")
 	})
 
 	id := strconv.FormatInt(f.ID, 10)

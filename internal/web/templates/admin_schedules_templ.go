@@ -38,8 +38,8 @@ type SchedulesData struct {
 }
 
 func scheduleScope(s sqlc.Schedule) string {
-	if s.ClerkOrgID.Valid {
-		return s.ClerkOrgID.String
+	if s.OrgID.Valid {
+		return s.OrgID.String
 	}
 	return "system"
 }
@@ -59,7 +59,7 @@ func scopeOptions(ctx context.Context, orgs []sqlc.Org, selected string) []ui.Op
 	out := make([]ui.Option, 0, len(orgs)+1)
 	out = append(out, ui.Option{Value: "", Label: i18n.T(ctx, "admin.schedules.scope_system"), Selected: selected == ""})
 	for _, o := range orgs {
-		out = append(out, ui.Option{Value: o.ClerkOrgID, Label: o.Name, Selected: o.ClerkOrgID == selected})
+		out = append(out, ui.Option{Value: o.OrgID, Label: o.Name, Selected: o.OrgID == selected})
 	}
 	return out
 }

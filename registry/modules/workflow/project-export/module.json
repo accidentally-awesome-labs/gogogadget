@@ -67,7 +67,7 @@
         "source": "internal/jobs/export_csv.go",
         "target": "internal/jobs/export_csv.go",
         "class": "go",
-        "sha256": "78b5b985fd664279a0210388fb5e616e41cec769d4e006adf5f37527f1a305b6",
+        "sha256": "7f3a557e8c29545bac6fe01ab68a7c5d3f08fad0408c8eaec1bffd513306f94d",
         "rewrite_module": true,
         "contract": false
       },
@@ -75,7 +75,7 @@
         "source": "internal/jobs/export_csv_test.go",
         "target": "internal/jobs/export_csv_test.go",
         "class": "test",
-        "sha256": "83929189bc028ef89cf0fe6e1e68ef5a6dd61c3c611699a10bdfd8d7c9781d26",
+        "sha256": "3f0fdc2300391f1a5b4200f7d6485e638710dd77fbf4930345983c530afe4422",
         "rewrite_module": true,
         "contract": false
       },
@@ -83,7 +83,7 @@
         "source": "internal/web/workflow_project_export.go",
         "target": "internal/web/workflow_project_export.go",
         "class": "go",
-        "sha256": "e286195b52bfe68c5b3e73532d03ef6af0be890b6e8b9e8899f0480e7dd66b73",
+        "sha256": "e92d2c83b835670775917512af5e4ce9d5e914b3ec0370f4de8cbbd365d83e53",
         "rewrite_module": true,
         "contract": false
       }

@@ -293,9 +293,9 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var11 string
-				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue("user-" + u.ClerkUserID)
+				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue("user-" + u.UserID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 85, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 85, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 				if templ_7745c5c3_Err != nil {
@@ -390,7 +390,7 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 						if !u.DisabledAt.Valid {
 							templ_7745c5c3_Err = ui.ButtonLink(ui.ButtonLinkOpts{
 								Label: i18n.T(ctx, "admin.users.impersonate"),
-								Href:  "/admin/users/" + u.ClerkUserID + "/impersonate",
+								Href:  "/admin/users/" + u.UserID + "/impersonate",
 								Size:  ui.SizeXS,
 								Attrs: ui.Attrs{
 									TestID: "admin-impersonate",
@@ -406,14 +406,14 @@ func AdminUsersTable(d AdminUsersData) templ.Component {
 							return templ_7745c5c3_Err
 						}
 						templ_7745c5c3_Err = ui.ConfirmAction(ui.ConfirmActionOpts{
-							ID:           "disable-" + u.ClerkUserID,
+							ID:           "disable-" + u.UserID,
 							TriggerLabel: disableLabel(ctx, u),
 							Title:        disableTitle(ctx, u),
 							Message:      disableConfirm(ctx, u),
 							ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
 							CancelLabel:  i18n.T(ctx, "admin.cancel"),
 							Kind:         disableKind(u),
-							HX:           ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/disable"},
+							HX:           ui.HX{Post: "/admin/users/" + u.UserID + "/disable"},
 							Attrs:        ui.Attrs{TestID: "admin-disable-toggle"},
 						}).Render(ctx, templ_7745c5c3_Buffer)
 						if templ_7745c5c3_Err != nil {
@@ -596,9 +596,9 @@ func AdminOrgsPage(d AdminOrgsData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var20 string
-				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue("org-" + o.ClerkOrgID)
+				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue("org-" + o.OrgID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 203, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin.templ`, Line: 203, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 				if templ_7745c5c3_Err != nil {
@@ -825,7 +825,7 @@ func roleForm(u sqlc.User) templ.Component {
 				}
 				ctx = templ.InitializeContext(ctx)
 				templ_7745c5c3_Err = ui.Select(ui.SelectOpts{
-					ID:   "role-" + u.ClerkUserID,
+					ID:   "role-" + u.UserID,
 					Name: "role",
 					Options: []ui.Option{
 						{Value: "", Label: i18n.T(ctx, "admin.users.role_none"), Selected: u.AdminRole == ""},
@@ -835,8 +835,8 @@ func roleForm(u sqlc.User) templ.Component {
 					Size: ui.SizeXS,
 					Attrs: ui.Attrs{
 						Class:  "w-28",
-						TestID: "role-select-" + u.ClerkUserID,
-						HX:     ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role", Trigger: "change", Swap: "none"},
+						TestID: "role-select-" + u.UserID,
+						HX:     ui.HX{Post: "/admin/users/" + u.UserID + "/role", Trigger: "change", Swap: "none"},
 					},
 				}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
@@ -845,7 +845,7 @@ func roleForm(u sqlc.User) templ.Component {
 				return nil
 			})
 			templ_7745c5c3_Err = ui.Field(ui.FieldOpts{
-				ID:          "role-" + u.ClerkUserID,
+				ID:          "role-" + u.UserID,
 				Name:        "role",
 				Label:       i18n.T(ctx, "admin.users.role_aria", string(u.Email)),
 				HiddenLabel: true,
@@ -857,7 +857,7 @@ func roleForm(u sqlc.User) templ.Component {
 		})
 		templ_7745c5c3_Err = ui.Form(ui.FormOpts{Swap: "none", Attrs: ui.Attrs{
 			Class: "inline-block",
-			HX:    ui.HX{Post: "/admin/users/" + u.ClerkUserID + "/role"},
+			HX:    ui.HX{Post: "/admin/users/" + u.UserID + "/role"},
 		}}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -1,32 +1,118 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/page/settings-organization",
+    "kind": "page",
+    "name": "settings-organization",
+    "revision": 1,
+    "contract": 1,
+    "title": "Organization settings",
+    "description": "Renders the organization settings tab with the member roster, the hosted Clerk organization-portal link, and the admin-only export control.",
+    "requires": [
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/workflow/auth-session",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/workflow/organization-export",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/page_settings_organization.go",
+        "target": "internal/web/page_settings_organization.go",
+        "class": "go",
+        "sha256": "fefae7da9871db9b09b19ce280e09cd76cadb73f17a94cb45699903e7eac84a7",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "settings-organization.index"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-organization.index",
+          "method": "GET",
+          "pattern": "/app/settings/org",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsOrg"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.org",
+          "area": "settings",
+          "route_id": "settings-organization.index",
+          "label_key": "settings.tab_org",
+          "after": [
+            "nav.settings.account"
+          ]
+        }
+      ]
     },
-    "description": "Renders the organization settings tab with the member roster, the hosted Clerk organization-portal link, and the admin-only export control.",
-    "docs": [],
+    "migrations": [],
     "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "f68e96de477f289a61e8bc49964d11ee267e2936e1230dee6be395209b77f451",
-        "source": "internal/web/page_settings_organization.go",
-        "target": "internal/web/page_settings_organization.go"
-      }
-    ],
-    "id": "ggg/page/settings-organization",
-    "kind": "page",
     "locales": {
       "en": {
         "settings.org_clerk_managed": "Invitations and roles are managed by Clerk.",
@@ -35,9 +121,9 @@
         "settings.org_col_role": "Role",
         "settings.org_export_body": "A JSON snapshot of everything held for this organization: members, projects, files, audit log, billing state, and the API and webhook inventory. Secrets are never included. You'll get a notification with the download when it's ready.",
         "settings.org_export_button": "Export data",
-        "settings.org_export_started": "Export started \u2014 you'll get a notification when it's ready.",
+        "settings.org_export_started": "Export started — you'll get a notification when it's ready.",
         "settings.org_export_title": "Export organization data",
-        "settings.org_manage_link": "Manage organization \u2192",
+        "settings.org_manage_link": "Manage organization →",
         "settings.org_members_caption": "Members of this organization, with their email address and role",
         "settings.org_members_empty": "No members yet.",
         "settings.org_members_heading": "Members",
@@ -49,117 +135,31 @@
       },
       "es": {
         "settings.org_clerk_managed": "Las invitaciones y los roles se gestionan en Clerk.",
-        "settings.org_col_email": "Correo electr\u00f3nico",
+        "settings.org_col_email": "Correo electrónico",
         "settings.org_col_member": "Miembro",
         "settings.org_col_role": "Rol",
-        "settings.org_export_body": "Una instant\u00e1nea JSON de todo lo que se guarda de esta organizaci\u00f3n: miembros, proyectos, archivos, registro de auditor\u00eda, estado de facturaci\u00f3n e inventario de API y webhooks. Nunca incluye secretos. Recibir\u00e1s una notificaci\u00f3n con la descarga cuando est\u00e9 lista.",
+        "settings.org_export_body": "Una instantánea JSON de todo lo que se guarda de esta organización: miembros, proyectos, archivos, registro de auditoría, estado de facturación e inventario de API y webhooks. Nunca incluye secretos. Recibirás una notificación con la descarga cuando esté lista.",
         "settings.org_export_button": "Exportar datos",
-        "settings.org_export_started": "Exportaci\u00f3n iniciada: recibir\u00e1s una notificaci\u00f3n cuando est\u00e9 lista.",
-        "settings.org_export_title": "Exportar datos de la organizaci\u00f3n",
-        "settings.org_manage_link": "Gestionar organizaci\u00f3n \u2192",
-        "settings.org_members_caption": "Miembros de esta organizaci\u00f3n, con su correo electr\u00f3nico y su rol",
-        "settings.org_members_empty": "Todav\u00eda no hay miembros.",
+        "settings.org_export_started": "Exportación iniciada: recibirás una notificación cuando esté lista.",
+        "settings.org_export_title": "Exportar datos de la organización",
+        "settings.org_manage_link": "Gestionar organización →",
+        "settings.org_members_caption": "Miembros de esta organización, con su correo electrónico y su rol",
+        "settings.org_members_empty": "Todavía no hay miembros.",
         "settings.org_members_heading": "Miembros",
         "settings.org_name": "Nombre",
         "settings.org_slug": "Slug",
-        "settings.org_title": "Configuraci\u00f3n de la organizaci\u00f3n",
-        "settings.select_org_sub": "Eres miembro de %d organizaci\u00f3n(es). Elige una para continuar.",
-        "settings.select_org_title": "Elige una organizaci\u00f3n"
+        "settings.org_title": "Configuración de la organización",
+        "settings.select_org_sub": "Eres miembro de %d organización(es). Elige una para continuar.",
+        "settings.select_org_title": "Elige una organización"
       }
     },
-    "migrations": [],
-    "name": "settings-organization",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/workflow/auth-session"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/workflow/organization-export"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.settings.account"
-          ],
-          "area": "settings",
-          "id": "nav.settings.org",
-          "label_key": "settings.tab_org",
-          "route_id": "settings-organization.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleSettingsOrg",
-          "id": "settings-organization.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/settings/org",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Organization settings"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

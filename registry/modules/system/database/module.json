@@ -1,14 +1,30 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "internal/db"
-      ]
-    },
+    "id": "ggg/system/database",
+    "kind": "system",
+    "name": "database",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Database",
+    "description": "The Postgres connection pool, the embedded migration runner, and the generated query layer's configuration. Owns the pool lifecycle: opening, migrating, and closing.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -23,132 +39,116 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The Postgres connection pool, the embedded migration runner, and the generated query layer's configuration. Owns the pool lifecycle: opening, migrating, and closing.",
-    "docs": [],
-    "environment": [
-      {
-        "default": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
-        "description": "Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting",
-        "example": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
-        "field": "DatabaseURL",
-        "key": "DATABASE_URL",
-        "production_required": true,
-        "secret": true,
-        "type": "string"
-      }
-    ],
     "files": [
       {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
-        "sha256": "ccb3b880b84603714b5d5fcba119a0f6de8dc5e32ad7b38fdcae71a0be9b9e20",
         "source": "internal/db/db.go",
-        "target": "internal/db/db.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "18df25340a9430e8adb080e25854c22150caea6ce0f51f6bd617bbe056d15801",
-        "source": "internal/db/db_test.go",
-        "target": "internal/db/db_test.go"
-      },
-      {
+        "target": "internal/db/db.go",
         "class": "go",
-        "contract": true,
+        "sha256": "ccb3b880b84603714b5d5fcba119a0f6de8dc5e32ad7b38fdcae71a0be9b9e20",
         "rewrite_module": true,
-        "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+        "contract": true
+      },
+      {
+        "source": "internal/db/db_test.go",
+        "target": "internal/db/db_test.go",
+        "class": "test",
+        "sha256": "35ae94d9d15e99cf8b928c5d0536ceb9c7acc70a8b067bf23f69ed51e47a52b7",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/db/module.go",
-        "target": "internal/db/module.go"
+        "target": "internal/db/module.go",
+        "class": "go",
+        "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+        "rewrite_module": true,
+        "contract": true
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "8a351703d6ceafa6438159aa858936d6dcd26ea423768b58b96c361275525f77",
         "source": "internal/db/module_test.go",
-        "target": "internal/db/module_test.go"
-      },
-      {
+        "target": "internal/db/module_test.go",
         "class": "test",
-        "contract": false,
+        "sha256": "8a351703d6ceafa6438159aa858936d6dcd26ea423768b58b96c361275525f77",
         "rewrite_module": true,
-        "sha256": "ce6b67cb5e0aa0cc7cae9d5bacf4fe0b2b5665c8d9abe4368d96d4785484ebc6",
+        "contract": false
+      },
+      {
         "source": "internal/db/seed_registry_test.go",
-        "target": "internal/db/seed_registry_test.go"
+        "target": "internal/db/seed_registry_test.go",
+        "class": "test",
+        "sha256": "ce6b67cb5e0aa0cc7cae9d5bacf4fe0b2b5665c8d9abe4368d96d4785484ebc6",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "asset",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "24898229406d72c9b4f1b871019b8e1828d2f3d0398b33562e3a364651e9e932",
         "source": "sqlc.yaml",
-        "target": "sqlc.yaml"
+        "target": "sqlc.yaml",
+        "class": "asset",
+        "sha256": "24898229406d72c9b4f1b871019b8e1828d2f3d0398b33562e3a364651e9e932",
+        "rewrite_module": false,
+        "contract": false
       }
     ],
-    "id": "ggg/system/database",
-    "kind": "system",
-    "migrations": [],
-    "name": "database",
-    "removal_policy": "replacement-required",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/apphost"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/config"
-      }
-    ],
-    "revision": 1,
+    "claims": {
+      "packages": [
+        "internal/db"
+      ]
+    },
     "runtime": {
       "system": {
+        "package": "internal/db",
         "constructor": "NewModule",
         "needs": [
           {
-            "capability": "config",
             "field": "Config",
-            "optional": false,
-            "type": "*config.Config"
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
           }
         ],
-        "package": "internal/db",
         "provides": [
           {
-            "capability": "database.pool",
             "field": "Pool",
+            "capability": "database.pool",
             "type": "*pgxpool.Pool"
           },
           {
-            "capability": "database.queries",
             "field": "Queries",
+            "capability": "database.queries",
             "type": "*sqlc.Queries"
           }
         ],
-        "start": false,
-        "stop": true,
         "type_imports": [
           "github.com/jackc/pgx/v5/pgxpool",
           "internal/db/sqlc"
-        ]
+        ],
+        "start": false,
+        "stop": true
       }
     },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "DATABASE_URL",
+        "field": "DatabaseURL",
+        "type": "string",
+        "description": "Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting",
+        "default": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
+        "example": "postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable",
+        "production_required": true,
+        "secret": true
+      }
+    ],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/db"
       ]
     },
-    "title": "Database"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
 }

@@ -180,7 +180,7 @@
         "source": "internal/web/htmx.go",
         "target": "internal/web/htmx.go",
         "class": "go",
-        "sha256": "360921293b3d63c5d1a1e28cd9d41e344b0de0123f1c3f3dfdb7b1ef5825f1e7",
+        "sha256": "5be352cc01be8f8165aad0a8d3f031cc049307c4fa6ea656d0ff73d5face9a6b",
         "rewrite_module": true,
         "contract": true
       },

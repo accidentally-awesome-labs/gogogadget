@@ -17,7 +17,7 @@ import (
 
 func webhookEndpointParams(orgID string) sqlc.InsertWebhookEndpointParams {
 	return sqlc.InsertWebhookEndpointParams{
-		ClerkOrgID: orgID, CreatedBy: "user_seed", Url: "https://hooks.example.com/x",
+		OrgID: orgID, CreatedBy: "user_seed", Url: "https://hooks.example.com/x",
 		Secret: webhooks.NewSecret(), EventTypes: []string{}, Description: "",
 	}
 }
@@ -122,13 +122,13 @@ func TestWebhookDeliveryReplayResets(t *testing.T) {
 	ep, err := s.q.InsertWebhookEndpoint(ctx, webhookEndpointParams("org_whr"))
 	require.NoError(t, err)
 	d, err := s.q.InsertWebhookDelivery(ctx, sqlc.InsertWebhookDeliveryParams{
-		EndpointID: ep.ID, ClerkOrgID: "org_whr", EventType: "project.created", Payload: []byte(`{"type":"project.created","data":{"id":1}}`),
+		EndpointID: ep.ID, OrgID: "org_whr", EventType: "project.created", Payload: []byte(`{"type":"project.created","data":{"id":1}}`),
 	})
 	require.NoError(t, err)
 	require.NoError(t, s.q.MarkDeliveryDead(ctx, sqlc.MarkDeliveryDeadParams{ID: d.ID, LastError: "test"}))
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_deliveries WHERE clerk_org_id = 'org_whr'")
-		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_endpoints WHERE clerk_org_id = 'org_whr'")
+		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_deliveries WHERE org_id = 'org_whr'")
+		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_endpoints WHERE org_id = 'org_whr'")
 		_, _ = s.db.Exec(ctx, "DELETE FROM jobs WHERE kind = 'webhook.deliver'")
 	})
 
@@ -164,24 +164,24 @@ func TestEmitCreatesDeliveriesAndJobs(t *testing.T) {
 	require.NoError(t, err)
 	// Endpoint subscribed to project.deleted only — must NOT get created events.
 	_, err = s.q.InsertWebhookEndpoint(ctx, sqlc.InsertWebhookEndpointParams{
-		ClerkOrgID: "org_emit", CreatedBy: "user_seed", Url: "https://hooks.example.com/filtered",
+		OrgID: "org_emit", CreatedBy: "user_seed", Url: "https://hooks.example.com/filtered",
 		Secret: webhooks.NewSecret(), EventTypes: []string{"project.deleted"}, Description: "",
 	})
 	require.NoError(t, err)
 	// Disabled endpoint — never gets anything.
 	disabledEp, err := s.q.InsertWebhookEndpoint(ctx, webhookEndpointParams("org_emit"))
 	require.NoError(t, err)
-	require.NoError(t, s.q.SetWebhookEndpointDisabled(ctx, sqlc.SetWebhookEndpointDisabledParams{ID: disabledEp.ID, Disabled: true, ClerkOrgID: "org_emit"}))
+	require.NoError(t, s.q.SetWebhookEndpointDisabled(ctx, sqlc.SetWebhookEndpointDisabledParams{ID: disabledEp.ID, Disabled: true, OrgID: "org_emit"}))
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_deliveries WHERE clerk_org_id = 'org_emit'")
-		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_endpoints WHERE clerk_org_id = 'org_emit'")
+		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_deliveries WHERE org_id = 'org_emit'")
+		_, _ = s.db.Exec(ctx, "DELETE FROM webhook_endpoints WHERE org_id = 'org_emit'")
 		_, _ = s.db.Exec(ctx, "DELETE FROM jobs WHERE kind = 'webhook.deliver'")
 	})
 
 	webhooks.Emit(ctx, s.q, "org_emit", "project.created", map[string]any{"id": 1, "name": "X", "status": "active", "org_id": "org_emit"})
 
 	var deliveries int
-	require.NoError(t, s.db.QueryRow(ctx, "SELECT count(*) FROM webhook_deliveries WHERE clerk_org_id = 'org_emit'").Scan(&deliveries))
+	require.NoError(t, s.db.QueryRow(ctx, "SELECT count(*) FROM webhook_deliveries WHERE org_id = 'org_emit'").Scan(&deliveries))
 	assert.Equal(t, 1, deliveries, "only the all-events endpoint matched")
 
 	var jobsCount int
@@ -190,7 +190,7 @@ func TestEmitCreatesDeliveriesAndJobs(t *testing.T) {
 
 	// Envelope shape.
 	var payload []byte
-	require.NoError(t, s.db.QueryRow(ctx, "SELECT payload FROM webhook_deliveries WHERE clerk_org_id = 'org_emit'").Scan(&payload))
+	require.NoError(t, s.db.QueryRow(ctx, "SELECT payload FROM webhook_deliveries WHERE org_id = 'org_emit'").Scan(&payload))
 	assert.Contains(t, string(payload), `"type": "project.created"`)
 	assert.Contains(t, string(payload), `"occurred_at"`)
 }
@@ -215,7 +215,7 @@ func TestWebhookSecretRotation(t *testing.T) {
 	code, _, _ := serve(t, s, "POST", "/app/settings/webhooks/endpoints/"+itoa64(ep.ID)+"/rotate", nil, h,
 		append(csrfCookies, sessionCookie("user_whz", "org_whz", "org:admin"))...)
 	require.Equal(t, http.StatusNotFound, code)
-	unchanged, err := s.q.GetWebhookEndpoint(t.Context(), sqlc.GetWebhookEndpointParams{ID: ep.ID, ClerkOrgID: "org_whr"})
+	unchanged, err := s.q.GetWebhookEndpoint(t.Context(), sqlc.GetWebhookEndpointParams{ID: ep.ID, OrgID: "org_whr"})
 	require.NoError(t, err)
 	assert.Equal(t, original, unchanged.Secret)
 
@@ -226,7 +226,7 @@ func TestWebhookSecretRotation(t *testing.T) {
 	assert.Contains(t, body, `data-testid="webhook-secret-reveal"`)
 	assert.Contains(t, body, `data-testid="webhook-rotate-note"`, "grace window explained on rotation")
 
-	rotated, err := s.q.GetWebhookEndpoint(t.Context(), sqlc.GetWebhookEndpointParams{ID: ep.ID, ClerkOrgID: "org_whr"})
+	rotated, err := s.q.GetWebhookEndpoint(t.Context(), sqlc.GetWebhookEndpointParams{ID: ep.ID, OrgID: "org_whr"})
 	require.NoError(t, err)
 	assert.NotEqual(t, original, rotated.Secret, "new secret minted")
 	assert.Equal(t, original, rotated.SecretPrevious, "old secret retained for the grace window")

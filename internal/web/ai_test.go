@@ -61,7 +61,7 @@ func TestAIChatSuccessMeters(t *testing.T) {
 	// 100 tokens recorded against the org meter.
 	var n int64
 	require.NoError(t, s.db.QueryRow(t.Context(),
-		"SELECT COALESCE(sum(value),0) FROM usage_events WHERE clerk_org_id = 'org_ai1' AND name = 'ai_tokens'").Scan(&n))
+		"SELECT COALESCE(sum(value),0) FROM usage_events WHERE org_id = 'org_ai1' AND name = 'ai_tokens'").Scan(&n))
 	assert.Equal(t, int64(100), n)
 
 	// Meter shows on the billing page.
@@ -82,7 +82,7 @@ func TestAIChat402OverMeter(t *testing.T) {
 
 	// Free plan = 100k/mo. Seed usage at the cap.
 	_, err := s.q.InsertUsageEvent(t.Context(), sqlc.InsertUsageEventParams{
-		ClerkOrgID: "org_ai2", Name: "ai_tokens", Value: 100_000, Metadata: []byte(`{}`), ExternalID: "",
+		OrgID: "org_ai2", Name: "ai_tokens", Value: 100_000, Metadata: []byte(`{}`), ExternalID: "",
 	})
 	require.NoError(t, err)
 

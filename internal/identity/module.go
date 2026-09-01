@@ -23,6 +23,8 @@ type Module struct {
 	Verifier Verifier
 	Fetcher  UserFetcher
 	Deleter  Deleter
+	Navigator Navigator
+	Webhook Webhook
 }
 
 // NewModule resolves the identity triple by a single precedence rule: the dev

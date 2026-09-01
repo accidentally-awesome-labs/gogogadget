@@ -13,19 +13,19 @@ const notificationsPageSize = 20
 
 func (s *Server) notificationsData(r *http.Request, orgID, userID string, page int) (templates.NotificationsData, error) {
 	ctx := r.Context()
-	total, err := s.q.CountNotificationsByUser(ctx, sqlc.CountNotificationsByUserParams{ClerkOrgID: orgID, ClerkUserID: userID})
+	total, err := s.q.CountNotificationsByUser(ctx, sqlc.CountNotificationsByUserParams{OrgID: orgID, UserID: userID})
 	if err != nil {
 		return templates.NotificationsData{}, err
 	}
 	totalPages := max(int((total+notificationsPageSize-1)/notificationsPageSize), 1)
 	items, err := s.q.ListNotificationsByUser(ctx, sqlc.ListNotificationsByUserParams{
-		ClerkOrgID: orgID, ClerkUserID: userID,
+		OrgID: orgID, UserID: userID,
 		Limit: notificationsPageSize, Offset: int32((page - 1) * notificationsPageSize),
 	})
 	if err != nil {
 		return templates.NotificationsData{}, err
 	}
-	unread, err := s.q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{ClerkOrgID: orgID, ClerkUserID: userID})
+	unread, err := s.q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{OrgID: orgID, UserID: userID})
 	if err != nil {
 		return templates.NotificationsData{}, err
 	}
@@ -40,7 +40,7 @@ func (s *Server) handleNotifications(w http.ResponseWriter, r *http.Request) {
 	if page < 1 {
 		page = 1
 	}
-	d, err := s.notificationsData(r, org.ClerkOrgID, user.ClerkUserID, page)
+	d, err := s.notificationsData(r, org.OrgID, user.UserID, page)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

@@ -55,7 +55,7 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 
 	// Freemium enforcement: per-action limit, not a route lock.
 	if plan.MaxProjects > 0 {
-		count, err := s.q.CountProjectsByOrg(ctx, org.ClerkOrgID)
+		count, err := s.q.CountProjectsByOrg(ctx, org.OrgID)
 		if err != nil {
 			s.renderError(w, r, err.Error())
 			return
@@ -67,14 +67,14 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	project, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{ClerkOrgID: org.ClerkOrgID, Name: name})
+	project, err := s.q.CreateProject(ctx, sqlc.CreateProjectParams{OrgID: org.OrgID, Name: name})
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
-	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.created", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.ClerkOrgID})
-	s.analytics.Capture(user.ClerkUserID, "project_created", map[string]any{"org_id": org.ClerkOrgID, "project_id": project.ID})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
+	webhooks.Emit(ctx, s.q, org.OrgID, "project.created", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.OrgID})
+	s.analytics.Capture(user.UserID, "project_created", map[string]any{"org_id": org.OrgID, "project_id": project.ID})
 	Toast(w, "success", "Project created")
 	Navigate(w, r, "/app/projects")
 }
@@ -87,7 +87,7 @@ func (s *Server) projectForOrg(w http.ResponseWriter, r *http.Request, orgID str
 		s.handleNotFound(w, r)
 		return sqlc.Project{}, false
 	}
-	project, err := s.q.GetProjectByID(r.Context(), sqlc.GetProjectByIDParams{ID: id, ClerkOrgID: orgID})
+	project, err := s.q.GetProjectByID(r.Context(), sqlc.GetProjectByIDParams{ID: id, OrgID: orgID})
 	if errors.Is(err, pgx.ErrNoRows) {
 		s.handleNotFound(w, r)
 		return sqlc.Project{}, false
@@ -104,7 +104,7 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 	user := identity.UserFrom(r.Context())
-	project, ok := s.projectForOrg(w, r, org.ClerkOrgID)
+	project, ok := s.projectForOrg(w, r, org.OrgID)
 	if !ok {
 		return
 	}
@@ -120,12 +120,12 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := s.q.UpdateProject(ctx, sqlc.UpdateProjectParams{ID: project.ID, ClerkOrgID: org.ClerkOrgID, Name: name}); err != nil {
+	if _, err := s.q.UpdateProject(ctx, sqlc.UpdateProjectParams{ID: project.ID, OrgID: org.OrgID, Name: name}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "name": name})
-	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.updated", map[string]any{"id": project.ID, "name": name, "status": project.Status, "org_id": org.ClerkOrgID})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.updated", map[string]any{"id": project.ID, "name": name})
+	webhooks.Emit(ctx, s.q, org.OrgID, "project.updated", map[string]any{"id": project.ID, "name": name, "status": project.Status, "org_id": org.OrgID})
 	Toast(w, "success", "Project updated")
 	Navigate(w, r, "/app/projects")
 }
@@ -135,16 +135,16 @@ func (s *Server) handleProjectArchive(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 	user := identity.UserFrom(r.Context())
-	project, ok := s.projectForOrg(w, r, org.ClerkOrgID)
+	project, ok := s.projectForOrg(w, r, org.OrgID)
 	if !ok {
 		return
 	}
-	if err := s.q.ArchiveProject(ctx, sqlc.ArchiveProjectParams{ID: project.ID, ClerkOrgID: org.ClerkOrgID}); err != nil {
+	if err := s.q.ArchiveProject(ctx, sqlc.ArchiveProjectParams{ID: project.ID, OrgID: org.OrgID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.updated", map[string]any{"id": project.ID, "status": "archived"})
-	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.archived", map[string]any{"id": project.ID, "name": project.Name, "status": "archived", "org_id": org.ClerkOrgID})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.updated", map[string]any{"id": project.ID, "status": "archived"})
+	webhooks.Emit(ctx, s.q, org.OrgID, "project.archived", map[string]any{"id": project.ID, "name": project.Name, "status": "archived", "org_id": org.OrgID})
 	Toast(w, "success", "Project archived")
 	Navigate(w, r, "/app/projects")
 }
@@ -154,16 +154,16 @@ func (s *Server) handleProjectDelete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
 	user := identity.UserFrom(r.Context())
-	project, ok := s.projectForOrg(w, r, org.ClerkOrgID)
+	project, ok := s.projectForOrg(w, r, org.OrgID)
 	if !ok {
 		return
 	}
-	if err := s.q.DeleteProject(ctx, sqlc.DeleteProjectParams{ID: project.ID, ClerkOrgID: org.ClerkOrgID}); err != nil {
+	if err := s.q.DeleteProject(ctx, sqlc.DeleteProjectParams{ID: project.ID, OrgID: org.OrgID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name})
-	webhooks.Emit(ctx, s.q, org.ClerkOrgID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.ClerkOrgID})
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name})
+	webhooks.Emit(ctx, s.q, org.OrgID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.OrgID})
 	Toast(w, "success", "Project deleted")
 	w.WriteHeader(http.StatusOK)
 }

@@ -37,8 +37,8 @@ func TestNewModuleLeavesClientNilWhenUnconfigured(t *testing.T) {
 // Product IDs are package-level billing truth; the module constructor is the
 // one place that installs them, so plan lookup works after boot.
 func TestNewModuleInstallsProductIDs(t *testing.T) {
-	pro, team := PlanByKey("pro").PolarProductID, PlanByKey("team").PolarProductID
-	t.Cleanup(func() { SetPolarProductIDs(pro, team) })
+	pro, team := PlanByKey("pro").ProviderProductID, PlanByKey("team").ProviderProductID
+	t.Cleanup(func() { SetProviderProductIDs(pro, team) })
 
 	h := apphost.Map(nil, time.Now(), "test")
 	if _, err := NewModule(context.Background(), h, Deps{Config: &config.Config{
@@ -47,10 +47,10 @@ func TestNewModuleInstallsProductIDs(t *testing.T) {
 	}}); err != nil {
 		t.Fatalf("NewModule: %v", err)
 	}
-	if got := PlanByKey("pro").PolarProductID; got != "prod_pro_module" {
+	if got := PlanByKey("pro").ProviderProductID; got != "prod_pro_module" {
 		t.Fatalf("pro product id = %q, want %q", got, "prod_pro_module")
 	}
-	if got := PlanByKey("team").PolarProductID; got != "prod_team_module" {
+	if got := PlanByKey("team").ProviderProductID; got != "prod_team_module" {
 		t.Fatalf("team product id = %q, want %q", got, "prod_team_module")
 	}
 }

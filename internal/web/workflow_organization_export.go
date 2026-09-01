@@ -37,12 +37,12 @@ func (s *Server) handleOrgExport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := jobs.Enqueue(ctx, s.q, jobs.KindExportOrgJSON, jobs.ExportProjectsPayload{
-		OrgID: org.ClerkOrgID, UserID: user.ClerkUserID,
+		OrgID: org.OrgID, UserID: user.UserID,
 	}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, org.ClerkOrgID, user.ClerkUserID, "org.exported", nil)
+	audit.Log(ctx, s.q, org.OrgID, user.UserID, "org.exported", nil)
 	Toast(w, "success", i18n.T(ctx, "settings.org_export_started"))
 	w.WriteHeader(http.StatusOK)
 }

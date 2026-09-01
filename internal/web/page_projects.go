@@ -23,21 +23,21 @@ func (s *Server) handleProjects(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
-	total, err := s.q.CountProjectsByOrgSearch(ctx, sqlc.CountProjectsByOrgSearchParams{ClerkOrgID: org.ClerkOrgID, Column2: q})
+	total, err := s.q.CountProjectsByOrgSearch(ctx, sqlc.CountProjectsByOrgSearchParams{OrgID: org.OrgID, Column2: q})
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
 	totalPages := max(int(math.Ceil(float64(total)/projectsPageSize)), 1)
 	projects, err := s.q.ListProjectsByOrg(ctx, sqlc.ListProjectsByOrgParams{
-		ClerkOrgID: org.ClerkOrgID, Column2: q,
+		OrgID: org.OrgID, Column2: q,
 		Limit: projectsPageSize, Offset: int32((page - 1) * projectsPageSize),
 	})
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	count, err := s.q.CountProjectsByOrg(ctx, org.ClerkOrgID)
+	count, err := s.q.CountProjectsByOrg(ctx, org.OrgID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

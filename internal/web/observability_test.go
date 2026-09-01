@@ -38,7 +38,7 @@ func TestProjectCreatedCaptured(t *testing.T) {
 	fake := &fakeCapturer{}
 	s := integrationServer(t, func(d *Deps) { d.Analytics = fake })
 	seedMembership(t, s, "user_ph", "org_ph", "org:admin")
-	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id='org_ph'") })
+	t.Cleanup(func() { _, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id='org_ph'") })
 
 	code, _, _ := postForm(t, s, "/app/projects", url.Values{"name": {"Tracked"}}, sessionCookie("user_ph", "org_ph", "org:admin"))
 	require.Equal(t, http.StatusOK, code)

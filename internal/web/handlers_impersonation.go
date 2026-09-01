@@ -67,22 +67,22 @@ func (s *Server) applyImpersonation(w http.ResponseWriter, r *http.Request, ctx 
 	}
 	// The admin must STILL hold the full role: demotion mid-session — to
 	// 'support' or to nothing — kills the impersonation.
-	admin, err := s.q.GetUserByClerkID(ctx, sess.AdminUserID)
+	admin, err := s.q.GetUserByID(ctx, sess.AdminUserID)
 	if err != nil || !identity.IsAdmin(&admin) {
 		clear()
 		return ctx
 	}
-	target, err := s.q.GetUserByClerkID(ctx, sess.TargetUserID)
+	target, err := s.q.GetUserByID(ctx, sess.TargetUserID)
 	if err != nil {
 		clear()
 		return ctx
 	}
-	org, err := s.q.GetOrgByClerkID(ctx, sess.TargetOrgID)
+	org, err := s.q.GetOrgByID(ctx, sess.TargetOrgID)
 	if err != nil {
 		clear()
 		return ctx
 	}
-	m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: sess.TargetOrgID, ClerkUserID: sess.TargetUserID})
+	m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: sess.TargetOrgID, UserID: sess.TargetUserID})
 	if err != nil {
 		clear()
 		return ctx
@@ -92,7 +92,7 @@ func (s *Server) applyImpersonation(w http.ResponseWriter, r *http.Request, ctx 
 	ctx = identity.WithUser(ctx, &target)
 	ctx = identity.WithOrg(ctx, &org)
 	ctx = identity.WithClaims(ctx, &identity.Claims{
-		UserID: target.ClerkUserID, OrgID: org.ClerkOrgID, OrgRole: m.Role, OrgSlug: org.Slug,
+		UserID: target.UserID, OrgID: org.OrgID, OrgRole: m.Role, OrgSlug: org.Slug,
 	})
 	ctx = identity.WithImpersonator(ctx, identity.Impersonator{AdminUserID: sess.AdminUserID, SessionID: sess.ID})
 	return ctx
@@ -115,7 +115,7 @@ const (
 func (s *Server) handleAdminImpersonateForm(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	targetID := r.PathValue("id")
-	target, err := s.q.GetUserByClerkID(ctx, targetID)
+	target, err := s.q.GetUserByID(ctx, targetID)
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -133,7 +133,7 @@ func (s *Server) handleAdminImpersonateForm(w http.ResponseWriter, r *http.Reque
 // stated reason survives the round trip (project-form convention).
 func (s *Server) renderImpersonateFormError(w http.ResponseWriter, r *http.Request, target sqlc.User, reason, msg string) {
 	ctx := r.Context()
-	orgs, err := s.q.GetOrgsForUser(ctx, target.ClerkUserID)
+	orgs, err := s.q.GetOrgsForUser(ctx, target.UserID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -148,7 +148,7 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 	admin := identity.UserFrom(ctx)
 	targetID := r.PathValue("id")
 
-	target, err := s.q.GetUserByClerkID(ctx, targetID)
+	target, err := s.q.GetUserByID(ctx, targetID)
 	if err != nil {
 		http.NotFound(w, r)
 		return
@@ -175,16 +175,16 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, "target has no organization", http.StatusUnprocessableEntity)
 			return
 		}
-		orgID = orgs[0].ClerkOrgID
+		orgID = orgs[0].OrgID
 	}
 	// The target must actually be a member of the chosen org.
-	if _, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: orgID, ClerkUserID: targetID}); err != nil {
+	if _, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: orgID, UserID: targetID}); err != nil {
 		http.Error(w, "target is not a member of that organization", http.StatusUnprocessableEntity)
 		return
 	}
 
 	sess, err := s.q.InsertImpersonationSession(ctx, sqlc.InsertImpersonationSessionParams{
-		ID: newImpersonationID(), AdminUserID: admin.ClerkUserID,
+		ID: newImpersonationID(), AdminUserID: admin.UserID,
 		TargetUserID: targetID, TargetOrgID: orgID,
 		ExpiresAt: pgtype.Timestamptz{Time: time.Now().Add(2 * time.Hour), Valid: true},
 		Reason:    reason,
@@ -198,7 +198,7 @@ func (s *Server) handleAdminImpersonate(w http.ResponseWriter, r *http.Request) 
 		HttpOnly: true, SameSite: http.SameSiteLaxMode, Secure: s.cfg.Production(),
 		MaxAge: 2 * 60 * 60,
 	})
-	audit.Log(ctx, s.q, orgID, admin.ClerkUserID, "impersonation.start", map[string]any{
+	audit.Log(ctx, s.q, orgID, admin.UserID, "impersonation.start", map[string]any{
 		// The session id is deliberately absent. It is a live credential for the
 		// duration of the impersonation, and this entry is org-scoped - every
 		// member of the target organization reads it on /app/activity, where the

@@ -28,7 +28,7 @@ func (s *Server) handleAdminFlagToggle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.invalidateFlagCache()
-	audit.Log(ctx, s.q, "", user.ClerkUserID, "flag.updated", map[string]any{"key": key, "enabled": !f.Enabled})
+	audit.Log(ctx, s.q, "", user.UserID, "flag.updated", map[string]any{"key": key, "enabled": !f.Enabled})
 	s.handleAdminFlags(w, r)
 }
 
@@ -51,7 +51,7 @@ func (s *Server) handleAdminFlagRollout(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	s.invalidateFlagCache()
-	audit.Log(ctx, s.q, "", user.ClerkUserID, "flag.updated", map[string]any{"key": key, "rollout": rollout})
+	audit.Log(ctx, s.q, "", user.UserID, "flag.updated", map[string]any{"key": key, "rollout": rollout})
 	s.handleAdminFlags(w, r)
 }
 
@@ -99,7 +99,7 @@ func (s *Server) handleAdminFlagCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.invalidateFlagCache()
-	audit.Log(ctx, s.q, "", user.ClerkUserID, "flag.created", map[string]any{"key": input.Key, "rollout": rollout})
+	audit.Log(ctx, s.q, "", user.UserID, "flag.created", map[string]any{"key": input.Key, "rollout": rollout})
 	Toast(w, "success", i18n.T(ctx, "flags.created"))
 	Navigate(w, r, "/admin/flags")
 }
@@ -118,7 +118,7 @@ func (s *Server) handleAdminFlagDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.invalidateFlagCache()
-	audit.Log(ctx, s.q, "", user.ClerkUserID, "flag.deleted", map[string]any{"key": key})
+	audit.Log(ctx, s.q, "", user.UserID, "flag.deleted", map[string]any{"key": key})
 	Toast(w, "success", i18n.T(ctx, "flags.deleted"))
 	Navigate(w, r, "/admin/flags")
 }
@@ -138,12 +138,12 @@ func (s *Server) handleAdminFlagOverrideSet(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	if err := s.q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{
-		FlagKey: key, ClerkOrgID: orgID, Enabled: r.PostFormValue("state") == "on",
+		FlagKey: key, OrgID: orgID, Enabled: r.PostFormValue("state") == "on",
 	}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, orgID, user.ClerkUserID, "flag.override", map[string]any{
+	audit.Log(ctx, s.q, orgID, user.UserID, "flag.override", map[string]any{
 		"key": key, "enabled": r.PostFormValue("state") == "on",
 	})
 	Toast(w, "success", i18n.T(ctx, "flags.override_saved"))
@@ -155,11 +155,11 @@ func (s *Server) handleAdminFlagOverrideDelete(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	user := identity.UserFrom(ctx)
 	key, orgID := r.PathValue("key"), r.PathValue("org")
-	if err := s.q.DeleteFlagOverride(ctx, sqlc.DeleteFlagOverrideParams{FlagKey: key, ClerkOrgID: orgID}); err != nil {
+	if err := s.q.DeleteFlagOverride(ctx, sqlc.DeleteFlagOverrideParams{FlagKey: key, OrgID: orgID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, orgID, user.ClerkUserID, "flag.override_removed", map[string]any{"key": key})
+	audit.Log(ctx, s.q, orgID, user.UserID, "flag.override_removed", map[string]any{"key": key})
 	Toast(w, "success", i18n.T(ctx, "flags.override_deleted"))
 	Navigate(w, r, "/admin/flags/"+key)
 }

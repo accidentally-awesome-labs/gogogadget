@@ -12,7 +12,7 @@ import (
 )
 
 const getWebhookDelivery = `-- name: GetWebhookDelivery :one
-SELECT id, endpoint_id, clerk_org_id, event_type, payload, status, attempts, last_response_status, last_error, delivered_at, created_at FROM webhook_deliveries WHERE id = $1
+SELECT id, endpoint_id, org_id, event_type, payload, status, attempts, last_response_status, last_error, delivered_at, created_at FROM webhook_deliveries WHERE id = $1
 `
 
 func (q *Queries) GetWebhookDelivery(ctx context.Context, id int64) (WebhookDelivery, error) {
@@ -21,7 +21,7 @@ func (q *Queries) GetWebhookDelivery(ctx context.Context, id int64) (WebhookDeli
 	err := row.Scan(
 		&i.ID,
 		&i.EndpointID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.EventType,
 		&i.Payload,
 		&i.Status,
@@ -36,14 +36,14 @@ func (q *Queries) GetWebhookDelivery(ctx context.Context, id int64) (WebhookDeli
 
 const insertWebhookDelivery = `-- name: InsertWebhookDelivery :one
 
-INSERT INTO webhook_deliveries (endpoint_id, clerk_org_id, event_type, payload)
+INSERT INTO webhook_deliveries (endpoint_id, org_id, event_type, payload)
 VALUES ($1, $2, $3, $4)
-RETURNING id, endpoint_id, clerk_org_id, event_type, payload, status, attempts, last_response_status, last_error, delivered_at, created_at
+RETURNING id, endpoint_id, org_id, event_type, payload, status, attempts, last_response_status, last_error, delivered_at, created_at
 `
 
 type InsertWebhookDeliveryParams struct {
 	EndpointID int64  `json:"endpoint_id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	OrgID      string `json:"org_id"`
 	EventType  string `json:"event_type"`
 	Payload    []byte `json:"payload"`
 }
@@ -52,7 +52,7 @@ type InsertWebhookDeliveryParams struct {
 func (q *Queries) InsertWebhookDelivery(ctx context.Context, arg InsertWebhookDeliveryParams) (WebhookDelivery, error) {
 	row := q.db.QueryRow(ctx, insertWebhookDelivery,
 		arg.EndpointID,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.EventType,
 		arg.Payload,
 	)
@@ -60,7 +60,7 @@ func (q *Queries) InsertWebhookDelivery(ctx context.Context, arg InsertWebhookDe
 	err := row.Scan(
 		&i.ID,
 		&i.EndpointID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.EventType,
 		&i.Payload,
 		&i.Status,
@@ -74,9 +74,9 @@ func (q *Queries) InsertWebhookDelivery(ctx context.Context, arg InsertWebhookDe
 }
 
 const listDeliveriesByOrg = `-- name: ListDeliveriesByOrg :many
-SELECT d.id, d.endpoint_id, d.clerk_org_id, d.event_type, d.payload, d.status, d.attempts, d.last_response_status, d.last_error, d.delivered_at, d.created_at, e.url AS endpoint_url FROM webhook_deliveries d
+SELECT d.id, d.endpoint_id, d.org_id, d.event_type, d.payload, d.status, d.attempts, d.last_response_status, d.last_error, d.delivered_at, d.created_at, e.url AS endpoint_url FROM webhook_deliveries d
 JOIN webhook_endpoints e ON e.id = d.endpoint_id
-WHERE d.clerk_org_id = $1
+WHERE d.org_id = $1
 ORDER BY d.created_at DESC
 LIMIT 50
 `
@@ -84,7 +84,7 @@ LIMIT 50
 type ListDeliveriesByOrgRow struct {
 	ID                 int64              `json:"id"`
 	EndpointID         int64              `json:"endpoint_id"`
-	ClerkOrgID         string             `json:"clerk_org_id"`
+	OrgID              string             `json:"org_id"`
 	EventType          string             `json:"event_type"`
 	Payload            []byte             `json:"payload"`
 	Status             string             `json:"status"`
@@ -96,8 +96,8 @@ type ListDeliveriesByOrgRow struct {
 	EndpointUrl        string             `json:"endpoint_url"`
 }
 
-func (q *Queries) ListDeliveriesByOrg(ctx context.Context, clerkOrgID string) ([]ListDeliveriesByOrgRow, error) {
-	rows, err := q.db.Query(ctx, listDeliveriesByOrg, clerkOrgID)
+func (q *Queries) ListDeliveriesByOrg(ctx context.Context, orgID string) ([]ListDeliveriesByOrgRow, error) {
+	rows, err := q.db.Query(ctx, listDeliveriesByOrg, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (q *Queries) ListDeliveriesByOrg(ctx context.Context, clerkOrgID string) ([
 		if err := rows.Scan(
 			&i.ID,
 			&i.EndpointID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.EventType,
 			&i.Payload,
 			&i.Status,
@@ -181,15 +181,15 @@ const resetWebhookDelivery = `-- name: ResetWebhookDelivery :exec
 UPDATE webhook_deliveries
 SET status = 'pending', attempts = 0, last_response_status = NULL,
     last_error = '', delivered_at = NULL
-WHERE id = $1 AND clerk_org_id = $2
+WHERE id = $1 AND org_id = $2
 `
 
 type ResetWebhookDeliveryParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) ResetWebhookDelivery(ctx context.Context, arg ResetWebhookDeliveryParams) error {
-	_, err := q.db.Exec(ctx, resetWebhookDelivery, arg.ID, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, resetWebhookDelivery, arg.ID, arg.OrgID)
 	return err
 }

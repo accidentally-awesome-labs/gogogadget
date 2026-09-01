@@ -21,7 +21,7 @@ func (s *Server) handleSettingsNotificationsSave(w http.ResponseWriter, r *http.
 	}
 	for _, kind := range notify.Kinds {
 		err := s.q.UpsertNotificationPreference(ctx, sqlc.UpsertNotificationPreferenceParams{
-			ClerkUserID: user.ClerkUserID, Kind: kind, InApp: r.PostForm.Has("kind_" + kind),
+			UserID: user.UserID, Kind: kind, InApp: r.PostForm.Has("kind_" + kind),
 		})
 		if err != nil {
 			s.renderError(w, r, err.Error())
@@ -33,7 +33,7 @@ func (s *Server) handleSettingsNotificationsSave(w http.ResponseWriter, r *http.
 	// POST should not 500 on it.
 	if f := r.PostFormValue("digest_frequency"); templates.IsDigestFrequency(f) {
 		if err := s.q.SetUserDigestFrequency(ctx, sqlc.SetUserDigestFrequencyParams{
-			ClerkUserID: user.ClerkUserID, DigestFrequency: f,
+			UserID: user.UserID, DigestFrequency: f,
 		}); err != nil {
 			s.renderError(w, r, err.Error())
 			return

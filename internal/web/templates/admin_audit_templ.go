@@ -127,9 +127,9 @@ func AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string, 
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(row.ClerkUserID.String)
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(row.UserID.String)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_audit.templ`, Line: 49, Col: 59}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_audit.templ`, Line: 49, Col: 54}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -145,9 +145,9 @@ func AdminAuditTable(rows []sqlc.ListAuditAllRow, now time.Time, filter string, 
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(row.ClerkOrgID.String)
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(row.OrgID.String)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_audit.templ`, Line: 52, Col: 75}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_audit.templ`, Line: 52, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {

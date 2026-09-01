@@ -51,7 +51,7 @@ func TestAdminDisableFlow(t *testing.T) {
 	code, _, _ = postForm(t, s, "/admin/users/user_target/disable", nil, sessionCookie("user_root2", "org_root2", "org:admin"))
 	require.Equal(t, http.StatusOK, code)
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_target")
+	u, err := s.q.GetUserByID(t.Context(), "user_target")
 	require.NoError(t, err)
 	require.True(t, u.DisabledAt.Valid)
 
@@ -78,8 +78,9 @@ func TestAdminOrgsPlanBadges(t *testing.T) {
 
 	// Give root3's org a pro subscription so the badge shows.
 	_, err := s.q.UpsertSubscription(t.Context(), sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_root3", PolarSubscriptionID: pgtype.Text{String: "sub_root3", Valid: true},
-		PolarCustomerID: "cust_root3", ProductKey: "pro", Status: "active",
+		Provider: "polar",
+		OrgID: "org_root3", ProviderSubscriptionID: pgtype.Text{String: "sub_root3", Valid: true},
+		ProviderCustomerID: "cust_root3", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)
 

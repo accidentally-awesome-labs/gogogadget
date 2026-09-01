@@ -16,7 +16,7 @@ import (
 func (s *Server) handleNotificationsBadge(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
 	user := identity.UserFrom(r.Context())
-	unread, err := s.q.CountUnreadByUser(r.Context(), sqlc.CountUnreadByUserParams{ClerkOrgID: org.ClerkOrgID, ClerkUserID: user.ClerkUserID})
+	unread, err := s.q.CountUnreadByUser(r.Context(), sqlc.CountUnreadByUserParams{OrgID: org.OrgID, UserID: user.UserID})
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -34,11 +34,11 @@ func (s *Server) handleNotificationRead(w http.ResponseWriter, r *http.Request) 
 		http.NotFound(w, r)
 		return
 	}
-	if err := s.q.MarkNotificationRead(ctx, sqlc.MarkNotificationReadParams{ID: id, ClerkOrgID: org.ClerkOrgID, ClerkUserID: user.ClerkUserID}); err != nil {
+	if err := s.q.MarkNotificationRead(ctx, sqlc.MarkNotificationReadParams{ID: id, OrgID: org.OrgID, UserID: user.UserID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	d, err := s.notificationsData(r, org.ClerkOrgID, user.ClerkUserID, 1)
+	d, err := s.notificationsData(r, org.OrgID, user.UserID, 1)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -51,11 +51,11 @@ func (s *Server) handleNotificationsReadAll(w http.ResponseWriter, r *http.Reque
 	ctx := r.Context()
 	org := identity.OrgFrom(ctx)
 	user := identity.UserFrom(ctx)
-	if err := s.q.MarkAllRead(ctx, sqlc.MarkAllReadParams{ClerkOrgID: org.ClerkOrgID, ClerkUserID: user.ClerkUserID}); err != nil {
+	if err := s.q.MarkAllRead(ctx, sqlc.MarkAllReadParams{OrgID: org.OrgID, UserID: user.UserID}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	d, err := s.notificationsData(r, org.ClerkOrgID, user.ClerkUserID, 1)
+	d, err := s.notificationsData(r, org.OrgID, user.UserID, 1)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
@@ -94,7 +94,7 @@ func (s *Server) handleNotificationsStream(w http.ResponseWriter, r *http.Reques
 
 	ctx := r.Context()
 	unread := func() int64 {
-		n, err := s.q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{ClerkOrgID: org.ClerkOrgID, ClerkUserID: user.ClerkUserID})
+		n, err := s.q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{OrgID: org.OrgID, UserID: user.UserID})
 		if err != nil {
 			s.log.Error("sse unread count", "error", err)
 			return -1

@@ -1,7 +1,7 @@
 -- schedules (recurring work — claimed by the jobs worker each poll cycle)
 
 -- name: CreateSchedule :one
-INSERT INTO schedules (name, kind, payload, clerk_org_id, every_seconds, next_run_at)
+INSERT INTO schedules (name, kind, payload, org_id, every_seconds, next_run_at)
 VALUES ($1, $2, $3, $4, $5, COALESCE(sqlc.narg(next_run_at)::timestamptz, now()))
 RETURNING *;
 

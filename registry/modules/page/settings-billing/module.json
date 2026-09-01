@@ -1,14 +1,58 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "settings-billing.index"
-      ]
-    },
+    "id": "ggg/page/settings-billing",
+    "kind": "page",
+    "name": "settings-billing",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Billing settings",
+    "description": "Renders the organization's plan, subscription state, project count, storage use and metered usage for the current month.",
+    "requires": [
+      {
+        "id": "ggg/system/billing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/usage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -23,54 +67,105 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Renders the organization's plan, subscription state, project count, storage use and metered usage for the current month.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "29d0ecae19034bb2958966cb69584414880aee9703f35847711fd7520e731e0a",
         "source": "internal/web/billing_test.go",
-        "target": "internal/web/billing_test.go"
+        "target": "internal/web/billing_test.go",
+        "class": "test",
+        "sha256": "d85d16a228df665cfc82100d4aa68a29ee5102b3c1a63aa73f130ce00d9855b4",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "80085320536fc136d2fa996687d31a8a047ba61b09c4678d3880d323f157b67d",
         "source": "internal/web/page_settings_billing.go",
-        "target": "internal/web/page_settings_billing.go"
+        "target": "internal/web/page_settings_billing.go",
+        "class": "go",
+        "sha256": "2f8e4004508206e9ff60054203250b555fe165c36e81c7aa9371039891ce5666",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "0e70ee448184b92a03ad825011195e3ab82444f2aba7a87ea5c5ef7d46c6f56f",
         "source": "internal/web/templates/billing.templ",
-        "target": "internal/web/templates/billing.templ"
+        "target": "internal/web/templates/billing.templ",
+        "class": "templ",
+        "sha256": "0e70ee448184b92a03ad825011195e3ab82444f2aba7a87ea5c5ef7d46c6f56f",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/settings-billing",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "settings-billing.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-billing.index",
+          "method": "GET",
+          "pattern": "/app/settings/billing",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsBilling"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.billing",
+          "area": "settings",
+          "route_id": "settings-billing.index",
+          "label_key": "settings.tab_billing",
+          "after": [
+            "nav.settings.org"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "billing",
+          "path": "/app/settings/billing",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "billing.current_plan": "Current plan",
         "billing.ends_on": "Your plan ends on %s.",
-        "billing.manage": "Manage subscription \u2192",
+        "billing.manage": "Manage subscription →",
         "billing.meter_title": "%s this month",
         "billing.not_configured": "%s not configured",
-        "billing.not_configured_body": "This service isn't set up yet \u2014 the app degrades instead of crashing.",
+        "billing.not_configured_body": "This service isn't set up yet — the app degrades instead of crashing.",
         "billing.period_ends": "Current period ends %s.",
         "billing.plan_free": "free",
         "billing.plan_heading": "%s plan",
-        "billing.processing_sub": "Confirming with the payment provider \u2014 this takes a few seconds.",
-        "billing.processing_title": "Processing your subscription\u2026",
+        "billing.processing_sub": "Confirming with the payment provider — this takes a few seconds.",
+        "billing.processing_title": "Processing your subscription…",
         "billing.projects": "Projects",
-        "billing.setup_guide": "Setup guide \u2192",
+        "billing.setup_guide": "Setup guide →",
         "billing.storage": "Storage",
         "billing.title": "Billing",
         "billing.upgrade_to": "Upgrade to %s",
@@ -79,125 +174,30 @@
       "es": {
         "billing.current_plan": "Plan actual",
         "billing.ends_on": "Tu plan termina el %s.",
-        "billing.manage": "Gestionar suscripci\u00f3n \u2192",
+        "billing.manage": "Gestionar suscripción →",
         "billing.meter_title": "%s este mes",
-        "billing.not_configured": "%s no est\u00e1 configurado",
-        "billing.not_configured_body": "Este servicio a\u00fan no est\u00e1 configurado \u2014 la aplicaci\u00f3n se degrada en lugar de fallar.",
-        "billing.period_ends": "El per\u00edodo actual termina el %s.",
+        "billing.not_configured": "%s no está configurado",
+        "billing.not_configured_body": "Este servicio aún no está configurado — la aplicación se degrada en lugar de fallar.",
+        "billing.period_ends": "El período actual termina el %s.",
         "billing.plan_free": "gratis",
         "billing.plan_heading": "Plan %s",
-        "billing.processing_sub": "Confirmando con el proveedor de pagos \u2014 esto tarda unos segundos.",
-        "billing.processing_title": "Procesando tu suscripci\u00f3n\u2026",
+        "billing.processing_sub": "Confirmando con el proveedor de pagos — esto tarda unos segundos.",
+        "billing.processing_title": "Procesando tu suscripción…",
         "billing.projects": "Proyectos",
-        "billing.setup_guide": "Gu\u00eda de configuraci\u00f3n \u2192",
+        "billing.setup_guide": "Guía de configuración →",
         "billing.storage": "Almacenamiento",
-        "billing.title": "Facturaci\u00f3n",
+        "billing.title": "Facturación",
         "billing.upgrade_to": "Mejorar a %s",
-        "billing.welcome": "Tu suscripci\u00f3n est\u00e1 activa. \u00a1Bienvenido a bordo!"
+        "billing.welcome": "Tu suscripción está activa. ¡Bienvenido a bordo!"
       }
     },
-    "migrations": [],
-    "name": "settings-billing",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/billing"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/usage"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.settings.org"
-          ],
-          "area": "settings",
-          "id": "nav.settings.billing",
-          "label_key": "settings.tab_billing",
-          "route_id": "settings-billing.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleSettingsBilling",
-          "id": "settings-billing.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/settings/billing",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ],
-      "visual": [
-        {
-          "id": "billing",
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/app/settings/billing",
-          "persona": "pro",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Billing settings"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

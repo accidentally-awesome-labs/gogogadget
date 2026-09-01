@@ -21,7 +21,7 @@ func (s *Server) filesData(r *http.Request, orgID string, page int, limitHit boo
 	}
 	totalPages := max(int((total+filesPageSize-1)/filesPageSize), 1)
 	files, err := s.q.ListFilesByOrg(ctx, sqlc.ListFilesByOrgParams{
-		ClerkOrgID: orgID, Limit: filesPageSize, Offset: int32((page - 1) * filesPageSize),
+		OrgID: orgID, Limit: filesPageSize, Offset: int32((page - 1) * filesPageSize),
 	})
 	if err != nil {
 		return templates.FilesData{}, err
@@ -43,7 +43,7 @@ func (s *Server) handleFiles(w http.ResponseWriter, r *http.Request) {
 	if page < 1 {
 		page = 1
 	}
-	d, err := s.filesData(r, org.ClerkOrgID, page, false)
+	d, err := s.filesData(r, org.OrgID, page, false)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

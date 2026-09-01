@@ -18,12 +18,12 @@ VALUES ($1, $2, $3, $4)
 ON CONFLICT (key) DO NOTHING;
 
 -- name: UpsertFlagOverride :exec
-INSERT INTO flag_overrides (flag_key, clerk_org_id, enabled)
+INSERT INTO flag_overrides (flag_key, org_id, enabled)
 VALUES ($1, $2, $3)
-ON CONFLICT (flag_key, clerk_org_id) DO UPDATE SET enabled = EXCLUDED.enabled;
+ON CONFLICT (flag_key, org_id) DO UPDATE SET enabled = EXCLUDED.enabled;
 
 -- name: GetFlagOverride :one
-SELECT * FROM flag_overrides WHERE flag_key = $1 AND clerk_org_id = $2;
+SELECT * FROM flag_overrides WHERE flag_key = $1 AND org_id = $2;
 
 -- DeleteFeatureFlag removes the flag; flag_overrides cascade (FK ON DELETE
 -- CASCADE, migration 0008).
@@ -32,11 +32,11 @@ DELETE FROM feature_flags WHERE key = $1;
 
 -- ListFlagOverridesByFlag joins orgs for display names.
 -- name: ListFlagOverridesByFlag :many
-SELECT o.clerk_org_id, o.name, f.enabled AS override_enabled
+SELECT o.org_id, o.name, f.enabled AS override_enabled
 FROM flag_overrides f
-JOIN orgs o ON o.clerk_org_id = f.clerk_org_id
+JOIN orgs o ON o.org_id = f.org_id
 WHERE f.flag_key = $1
 ORDER BY o.name;
 
 -- name: DeleteFlagOverride :exec
-DELETE FROM flag_overrides WHERE flag_key = $1 AND clerk_org_id = $2;
+DELETE FROM flag_overrides WHERE flag_key = $1 AND org_id = $2;

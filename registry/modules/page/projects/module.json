@@ -1,53 +1,141 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "projects.index"
-      ]
-    },
+    "id": "ggg/page/projects",
+    "kind": "page",
+    "name": "projects",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Projects list",
+    "description": "The organization's project list with free-text search and numbered pagination, rendered full-page or as an htmx table fragment.",
+    "requires": [
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "The organization's project list with free-text search and numbered pagination, rendered full-page or as an htmx table fragment.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "d1e57afe0c68cbe0892cec54ecee27899bbe59a0f5b6c2ce72f8c5f5bf41b147",
         "source": "internal/web/page_projects.go",
-        "target": "internal/web/page_projects.go"
+        "target": "internal/web/page_projects.go",
+        "class": "go",
+        "sha256": "6c1626e3df620fbd75689f2b4ca5e2dc9c4d556c38d6e311d725832ac36f8944",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "131476df7a6ad0734d29446af475ae28711baab5e1c102f87382bff24a1e3026",
         "source": "internal/web/projects_test.go",
-        "target": "internal/web/projects_test.go"
+        "target": "internal/web/projects_test.go",
+        "class": "test",
+        "sha256": "b6d9d6a479c2e4c95875587dd8c3a5aee815a8192610076d280c3298c3535874",
+        "rewrite_module": true,
+        "contract": false
       },
       {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "cf9510729255b2843b4144ab98a244fda0f282ee30f3662189bd93c6163fe75f",
         "source": "internal/web/templates/projects.templ",
-        "target": "internal/web/templates/projects.templ"
+        "target": "internal/web/templates/projects.templ",
+        "class": "templ",
+        "sha256": "cf9510729255b2843b4144ab98a244fda0f282ee30f3662189bd93c6163fe75f",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/page/projects",
-    "kind": "page",
+    "claims": {
+      "routes": [
+        "projects.index"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "projects.index",
+          "method": "GET",
+          "pattern": "/app/projects",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleProjects"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.app.projects",
+          "area": "app",
+          "route_id": "projects.index",
+          "label_key": "sidebar.projects",
+          "after": [
+            "nav.app.dashboard"
+          ]
+        }
+      ],
+      "visual": [
+        {
+          "id": "projects",
+          "path": "/app/projects",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "projects.archive": "Archive",
@@ -70,7 +158,7 @@
         "projects.export": "Export CSV",
         "projects.field_name": "Name",
         "projects.field_placeholder": "Launch checklist",
-        "projects.filtered_empty_body": "No project matches \u201c%s\u201d.",
+        "projects.filtered_empty_body": "No project matches “%s”.",
         "projects.filtered_empty_title": "No matches",
         "projects.fix_error": "Please fix the error below.",
         "projects.limit_hit": "You've reached the %s plan limit of %s projects.",
@@ -78,25 +166,25 @@
         "projects.pagination_page": "Page %d",
         "projects.save": "Save changes",
         "projects.search_label": "Search projects",
-        "projects.search_placeholder": "Search projects\u2026",
+        "projects.search_placeholder": "Search projects…",
         "projects.title": "Projects",
         "projects.toolbar_label": "Project list controls",
-        "projects.upgrade": "Upgrade to create more \u2192",
+        "projects.upgrade": "Upgrade to create more →",
         "projects.usage_meter_label": "Project quota",
         "projects.usage_title": "Projects used on %s"
       },
       "es": {
         "projects.archive": "Archivar",
         "projects.cancel": "Cancelar",
-        "projects.caption": "Proyectos de tu organizaci\u00f3n",
-        "projects.clear_search": "Borrar la b\u00fasqueda",
+        "projects.caption": "Proyectos de tu organización",
+        "projects.clear_search": "Borrar la búsqueda",
         "projects.col_actions": "Acciones",
         "projects.col_created": "Creado",
         "projects.col_name": "Nombre",
         "projects.create": "Crear proyecto",
         "projects.delete": "Eliminar",
         "projects.delete_action": "Eliminar definitivamente",
-        "projects.delete_confirm": "\u00bfEliminar este proyecto? Esta acci\u00f3n no se puede deshacer.",
+        "projects.delete_confirm": "¿Eliminar este proyecto? Esta acción no se puede deshacer.",
         "projects.delete_row": "Eliminar %s",
         "projects.delete_title": "Eliminar proyecto",
         "projects.edit": "Editar",
@@ -105,118 +193,30 @@
         "projects.empty_title": "No hay proyectos",
         "projects.export": "Exportar CSV",
         "projects.field_name": "Nombre",
-        "projects.field_placeholder": "Lista de verificaci\u00f3n de lanzamiento",
-        "projects.filtered_empty_body": "Ning\u00fan proyecto coincide con \u00ab%s\u00bb.",
+        "projects.field_placeholder": "Lista de verificación de lanzamiento",
+        "projects.filtered_empty_body": "Ningún proyecto coincide con «%s».",
         "projects.filtered_empty_title": "Sin coincidencias",
-        "projects.fix_error": "Corrige el error que aparece a continuaci\u00f3n.",
-        "projects.limit_hit": "Has llegado al l\u00edmite del plan %s de %s proyectos.",
+        "projects.fix_error": "Corrige el error que aparece a continuación.",
+        "projects.limit_hit": "Has llegado al límite del plan %s de %s proyectos.",
         "projects.new": "Nuevo proyecto",
-        "projects.pagination_page": "P\u00e1gina %d",
+        "projects.pagination_page": "Página %d",
         "projects.save": "Guardar cambios",
         "projects.search_label": "Buscar proyectos",
-        "projects.search_placeholder": "Buscar proyectos\u2026",
+        "projects.search_placeholder": "Buscar proyectos…",
         "projects.title": "Proyectos",
         "projects.toolbar_label": "Controles de la lista de proyectos",
-        "projects.upgrade": "Mejora tu plan para crear m\u00e1s \u2192",
+        "projects.upgrade": "Mejora tu plan para crear más →",
         "projects.usage_meter_label": "Cuota de proyectos",
         "projects.usage_title": "Proyectos usados en el plan %s"
       }
     },
-    "migrations": [],
-    "name": "projects",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.app.dashboard"
-          ],
-          "area": "app",
-          "id": "nav.app.projects",
-          "label_key": "sidebar.projects",
-          "route_id": "projects.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleProjects",
-          "id": "projects.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/projects",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ],
-      "visual": [
-        {
-          "id": "projects",
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/app/projects",
-          "persona": "pro",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Projects list"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

@@ -17,15 +17,15 @@ import (
 func TestLogWritesRowWithMetadata(t *testing.T) {
 	_, q := testdb.Open(t, "audit")
 	ctx := context.Background()
-	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: "org_a", Name: "A", Slug: "a", ImageUrl: ""})
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: "org_a", Name: "A", Slug: "a", ImageUrl: ""})
 	require.NoError(t, err)
-	_, err = q.UpsertUser(ctx, sqlc.UpsertUserParams{ClerkUserID: "user_a", Email: "a@example.com", Name: "A", AvatarUrl: ""})
+	_, err = q.UpsertUser(ctx, sqlc.UpsertUserParams{UserID: "user_a", Email: "a@example.com", Name: "A", AvatarUrl: ""})
 	require.NoError(t, err)
 
 	audit.Log(ctx, q, "org_a", "user_a", "project.created", map[string]any{"id": 7})
 
 	rows, err := q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{
-		ClerkOrgID: pgtype.Text{String: "org_a", Valid: true}, Limit: 10, Offset: 0,
+		OrgID: pgtype.Text{String: "org_a", Valid: true}, Limit: 10, Offset: 0,
 	})
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
@@ -43,8 +43,8 @@ func TestLogEmptyOrgUserWritesNullColumns(t *testing.T) {
 	rows, err := q.ListAuditAll(ctx, sqlc.ListAuditAllParams{Filter: "system.tick", Off: 0, Lim: 10})
 	require.NoError(t, err)
 	require.Len(t, rows, 1)
-	assert.False(t, rows[0].ClerkOrgID.Valid, "empty org lands as NULL")
-	assert.False(t, rows[0].ClerkUserID.Valid, "empty user lands as NULL")
+	assert.False(t, rows[0].OrgID.Valid, "empty org lands as NULL")
+	assert.False(t, rows[0].UserID.Valid, "empty user lands as NULL")
 }
 
 func TestLogCanceledContextNoPanicNoReturn(t *testing.T) {

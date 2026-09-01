@@ -1,25 +1,30 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "internal/usage"
-      ],
-      "queries": [
-        "usage_events"
-      ]
-    },
+    "id": "ggg/system/usage",
+    "kind": "system",
+    "name": "usage",
+    "revision": 1,
     "contract": 1,
-    "data": [
+    "title": "Usage metering",
+    "description": "Fire-and-forget usage records, flushed to the billing provider by a job.",
+    "requires": [
       {
-        "account_delete": "retain",
-        "export": true,
-        "organization_delete": "cascade",
-        "scope": "org",
-        "table": "usage_events"
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       }
     ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -30,89 +35,65 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Fire-and-forget usage records, flushed to the billing provider by a job.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "6bf1b67f1a6d80ad80adeb5032ecaf479bdce7111e384faaf3b5000b52cefdfe",
         "source": "internal/db/queries/usage_events.sql",
-        "target": "internal/db/queries/usage_events.sql"
+        "target": "internal/db/queries/usage_events.sql",
+        "class": "query",
+        "sha256": "5767d92e343d71df23d72e6269b19abd7ccfcb1b1bc2dea5330c886ef9d5b367",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "2197146eacdc5b8b63283d4405a6757e9f8aef72b59887aa271b8c362f56adee",
         "source": "internal/jobs/usage_flush.go",
-        "target": "internal/jobs/usage_flush.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "1095ddd913ee17f7dfb1f11561f39166eec36d572f517f1e8e0378591eb4067c",
-        "source": "internal/jobs/usage_flush_test.go",
-        "target": "internal/jobs/usage_flush_test.go"
-      },
-      {
+        "target": "internal/jobs/usage_flush.go",
         "class": "go",
-        "contract": true,
+        "sha256": "c54e71e93b587089ecfbee16dd3c2ca53c046e50c40ae9011164f06db246127c",
         "rewrite_module": true,
-        "sha256": "3f07c087b4b25816858786fe9ba55e21b0c094c7bd3c5a3090198f1c4d043bd7",
-        "source": "internal/usage/usage.go",
-        "target": "internal/usage/usage.go"
+        "contract": false
       },
       {
+        "source": "internal/jobs/usage_flush_test.go",
+        "target": "internal/jobs/usage_flush_test.go",
         "class": "test",
-        "contract": false,
+        "sha256": "87a5406d21bdb98a8a3be4837160ccfd933f60e4054908b74f424fd045bfeda3",
         "rewrite_module": true,
-        "sha256": "a2c80413e0384696a35d6037bd6b577bfe1f541656a28bc58fc1b63903c2fd29",
-        "source": "internal/usage/usage_test.go",
-        "target": "internal/usage/usage_test.go"
-      }
-    ],
-    "id": "ggg/system/usage",
-    "kind": "system",
-    "migrations": [
-      {
-        "id": "0007_usage_events",
-        "kind": "immutable",
-        "sha256": "a1cce2ad5e3c88ec2f0d72b2c7dcc9e9bb945a75a37bb3c17a0c839cc79ab7ce",
-        "source": "internal/db/migrations/0007_usage_events.sql"
-      }
-    ],
-    "name": "usage",
-    "removal_policy": "retain-data",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
+        "contract": false
       },
       {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
+        "source": "internal/usage/usage.go",
+        "target": "internal/usage/usage.go",
+        "class": "go",
+        "sha256": "25ac3cc7931e59bebee1afa208249064ed68d34a030f524a7cfff012a7846f09",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/usage/usage_test.go",
+        "target": "internal/usage/usage_test.go",
+        "class": "test",
+        "sha256": "de4144e169fb7727ac0c0a5b1969e91266f96255930745b0aa14b02d8679a6e4",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "revision": 1,
+    "claims": {
+      "packages": [
+        "internal/usage"
+      ],
+      "queries": [
+        "usage_events"
+      ]
+    },
     "runtime": {
       "jobs": [
         {
-          "handler": "defineUsageFlush",
           "kind": "usage.flush",
-          "max_attempts": 0,
           "package": "internal/jobs",
+          "handler": "defineUsageFlush",
           "schedulable": true
         }
       ],
@@ -139,12 +120,30 @@
         }
       ]
     },
+    "migrations": [
+      {
+        "id": "0007_usage_events",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0007_usage_events.sql",
+        "sha256": "a1cce2ad5e3c88ec2f0d72b2c7dcc9e9bb945a75a37bb3c17a0c839cc79ab7ce"
+      }
+    ],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/usage"
       ]
     },
-    "title": "Usage metering"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "usage_events",
+        "scope": "org",
+        "export": true,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
 }

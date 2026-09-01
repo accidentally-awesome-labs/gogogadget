@@ -1,40 +1,112 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/page/settings-api-tokens",
+    "kind": "page",
+    "name": "settings-api-tokens",
+    "revision": 1,
+    "contract": 1,
+    "title": "API token settings",
+    "description": "Renders the organization's API tokens with their scope and last-used state.",
+    "requires": [
+      {
+        "id": "ggg/system/api",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/page_settings_api_tokens.go",
+        "target": "internal/web/page_settings_api_tokens.go",
+        "class": "go",
+        "sha256": "9ed404a7d1799e7b6c42f51ca99caf9381e1872696a51c34c0dc9588943bd530",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/api_tokens.templ",
+        "target": "internal/web/templates/api_tokens.templ",
+        "class": "templ",
+        "sha256": "30835f69e26d8ae18d79209e5a6d521806caccf97b87d644194ab5720453afc1",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "settings-api-tokens.index"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
+    "runtime": {
+      "routes": [
+        {
+          "id": "settings-api-tokens.index",
+          "method": "GET",
+          "pattern": "/app/settings/api",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleSettingsAPI"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.settings.api",
+          "area": "settings",
+          "route_id": "settings-api-tokens.index",
+          "label_key": "settings.tab_api",
+          "after": [
+            "nav.settings.billing"
+          ]
+        }
+      ]
     },
-    "description": "Renders the organization's API tokens with their scope and last-used state.",
-    "docs": [],
+    "migrations": [],
     "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "acd12c044f2168ec0a1f2278784ec99734f6461833597bd9b2f436f038d8f9ea",
-        "source": "internal/web/page_settings_api_tokens.go",
-        "target": "internal/web/page_settings_api_tokens.go"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "30835f69e26d8ae18d79209e5a6d521806caccf97b87d644194ab5720453afc1",
-        "source": "internal/web/templates/api_tokens.templ",
-        "target": "internal/web/templates/api_tokens.templ"
-      }
-    ],
-    "id": "ggg/page/settings-api-tokens",
-    "kind": "page",
     "locales": {
       "en": {
         "api.col_actions": "Actions",
@@ -51,7 +123,7 @@
         "api.name_placeholder": "CI deploys",
         "api.never_used": "never",
         "api.reveal_note": "This is the only time the plaintext is shown.",
-        "api.reveal_title": "Token created \u2014 copy it now",
+        "api.reveal_title": "Token created — copy it now",
         "api.revoke_cancel": "Keep token",
         "api.revoke_confirm": "API calls using this token start failing immediately, and it cannot be restored.",
         "api.revoke_cta": "Revoke token",
@@ -65,109 +137,37 @@
       "es": {
         "api.col_actions": "Acciones",
         "api.col_created": "Creado",
-        "api.col_last_used": "\u00daltimo uso",
+        "api.col_last_used": "Último uso",
         "api.col_name": "Nombre",
         "api.col_scope": "Alcance",
-        "api.copied": "\u00a1Copiado!",
+        "api.copied": "¡Copiado!",
         "api.copy": "Copiar",
         "api.create": "Crear",
         "api.create_title": "Crear un token",
-        "api.empty": "Todav\u00eda no hay tokens.",
+        "api.empty": "Todavía no hay tokens.",
         "api.name_label": "Nombre",
         "api.name_placeholder": "Despliegues de CI",
         "api.never_used": "nunca",
-        "api.reveal_note": "Esta es la \u00fanica vez que se muestra el texto plano.",
-        "api.reveal_title": "Token creado \u2014 c\u00f3pialo ahora",
+        "api.reveal_note": "Esta es la única vez que se muestra el texto plano.",
+        "api.reveal_title": "Token creado — cópialo ahora",
         "api.revoke_cancel": "Conservar token",
-        "api.revoke_confirm": "Las llamadas a la API que usen este token empezar\u00e1n a fallar de inmediato y no se puede restaurar.",
+        "api.revoke_confirm": "Las llamadas a la API que usen este token empezarán a fallar de inmediato y no se puede restaurar.",
         "api.revoke_cta": "Revocar token",
         "api.revoke_named": "Revocar %s",
-        "api.revoke_title": "\u00bfRevocar este token?",
+        "api.revoke_title": "¿Revocar este token?",
         "api.revoked": "revocado",
         "api.scope_label": "Alcance",
-        "api.table_caption": "Tokens de API de esta organizaci\u00f3n, con su alcance y su \u00faltimo uso",
+        "api.table_caption": "Tokens de API de esta organización, con su alcance y su último uso",
         "api.title": "Tokens de API"
       }
     },
-    "migrations": [],
-    "name": "settings-api-tokens",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/api"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "after": [
-            "nav.settings.billing"
-          ],
-          "area": "settings",
-          "id": "nav.settings.api",
-          "label_key": "settings.tab_api",
-          "route_id": "settings-api-tokens.index"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleSettingsAPI",
-          "id": "settings-api-tokens.index",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/settings/api",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "API token settings"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

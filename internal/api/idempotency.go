@@ -66,7 +66,7 @@ func (m *Middleware) Idempotent(next http.Handler) http.Handler {
 		org := identity.OrgFrom(r.Context())
 		sum := sha256.Sum256(body)
 		claim := sqlc.ClaimIdempotencyKeyParams{
-			ClerkOrgID:  org.ClerkOrgID,
+			OrgID:  org.OrgID,
 			Key:         key,
 			Endpoint:    r.Method + " " + r.URL.Path,
 			RequestHash: hex.EncodeToString(sum[:]),
@@ -93,14 +93,14 @@ func (m *Middleware) Idempotent(next http.Handler) http.Handler {
 		// case the client is retrying to escape.
 		if rec.status >= 500 {
 			if err := m.Q.ReleaseIdempotencyKey(r.Context(), sqlc.ReleaseIdempotencyKeyParams{
-				ClerkOrgID: claim.ClerkOrgID, Key: claim.Key,
+				OrgID: claim.OrgID, Key: claim.Key,
 			}); err != nil {
 				m.logf("idempotency release failed", err)
 			}
 			return
 		}
 		if err := m.Q.CompleteIdempotencyKey(r.Context(), sqlc.CompleteIdempotencyKeyParams{
-			ClerkOrgID: claim.ClerkOrgID, Key: claim.Key,
+			OrgID: claim.OrgID, Key: claim.Key,
 			Status:   int32(rec.status),
 			Response: rec.body.Bytes(),
 		}); err != nil {
@@ -114,7 +114,7 @@ func (m *Middleware) Idempotent(next http.Handler) http.Handler {
 // replay serves the stored outcome of an earlier request with this key.
 func (m *Middleware) replay(w http.ResponseWriter, r *http.Request, claim sqlc.ClaimIdempotencyKeyParams) {
 	prior, err := m.Q.GetIdempotencyKey(r.Context(), sqlc.GetIdempotencyKeyParams{
-		ClerkOrgID: claim.ClerkOrgID, Key: claim.Key,
+		OrgID: claim.OrgID, Key: claim.Key,
 	})
 	if err != nil {
 		// Raced with the janitor (or a release): the key is free again, and

@@ -29,7 +29,7 @@ func (s *Server) handleDevSwitchOrg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	role := "org:member"
-	if m, err := s.q.GetMembership(r.Context(), sqlc.GetMembershipParams{ClerkOrgID: orgID, ClerkUserID: claims.UserID}); err == nil {
+	if m, err := s.q.GetMembership(r.Context(), sqlc.GetMembershipParams{OrgID: orgID, UserID: claims.UserID}); err == nil {
 		role = m.Role
 	}
 	s.setDevSessionCookie(w, claims.UserID, orgID, role)

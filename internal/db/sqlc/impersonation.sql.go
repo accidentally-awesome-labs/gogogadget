@@ -15,7 +15,7 @@ const deleteImpersonationSessionsForUser = `-- name: DeleteImpersonationSessions
 DELETE FROM impersonation_sessions WHERE target_user_id = $1 OR admin_user_id = $1
 `
 
-// Account deletion: both FK columns reference users(clerk_user_id) with NO
+// Account deletion: both FK columns reference users(user_id) with NO
 // cascade, so the rows must go before the user row does.
 func (q *Queries) DeleteImpersonationSessionsForUser(ctx context.Context, targetUserID string) error {
 	_, err := q.db.Exec(ctx, deleteImpersonationSessionsForUser, targetUserID)

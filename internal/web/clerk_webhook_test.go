@@ -36,7 +36,7 @@ func TestUserCreatedWebhook(t *testing.T) {
 	assert.Equal(t, http.StatusOK, code)
 
 	// Mirror row exists with the display name.
-	u, err := s.q.GetUserByClerkID(ctx, "user_wh1")
+	u, err := s.q.GetUserByID(ctx, "user_wh1")
 	require.NoError(t, err)
 	assert.Equal(t, "wh1@example.com", string(u.Email))
 	assert.Equal(t, "Will Hughes", u.Name)
@@ -78,7 +78,7 @@ func TestMembershipWebhook(t *testing.T) {
 	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, signSvix(t, testWebhookSecret, "msg_mem1", payload))
 	assert.Equal(t, http.StatusOK, code)
 
-	m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: "org_mem", ClerkUserID: "user_mem"})
+	m, err := s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: "org_mem", UserID: "user_mem"})
 	require.NoError(t, err)
 	assert.Equal(t, "org:admin", m.Role)
 
@@ -89,7 +89,7 @@ func TestMembershipWebhook(t *testing.T) {
 	}`)
 	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload2, signSvix(t, testWebhookSecret, "msg_mem2", payload2))
 	assert.Equal(t, http.StatusOK, code)
-	m, _ = s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: "org_mem", ClerkUserID: "user_mem"})
+	m, _ = s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: "org_mem", UserID: "user_mem"})
 	assert.Equal(t, "org:billing_manager", m.Role)
 
 	// Deleted → row gone.
@@ -99,7 +99,7 @@ func TestMembershipWebhook(t *testing.T) {
 	}`)
 	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload3, signSvix(t, testWebhookSecret, "msg_mem3", payload3))
 	assert.Equal(t, http.StatusOK, code)
-	_, err = s.q.GetMembership(ctx, sqlc.GetMembershipParams{ClerkOrgID: "org_mem", ClerkUserID: "user_mem"})
+	_, err = s.q.GetMembership(ctx, sqlc.GetMembershipParams{OrgID: "org_mem", UserID: "user_mem"})
 	require.ErrorIs(t, err, pgx.ErrNoRows)
 }
 
@@ -110,8 +110,9 @@ func TestOrgDeletedRevokesBilling(t *testing.T) {
 	seedOrg(t, s, "org_del", "del")
 
 	_, err := s.q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_del", PolarSubscriptionID: pgtype.Text{String: "sub_del", Valid: true},
-		PolarCustomerID: "cust_del", ProductKey: "pro", Status: "active",
+		Provider: "polar",
+		OrgID: "org_del", ProviderSubscriptionID: pgtype.Text{String: "sub_del", Valid: true},
+		ProviderCustomerID: "cust_del", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)
 
@@ -120,7 +121,7 @@ func TestOrgDeletedRevokesBilling(t *testing.T) {
 	assert.Equal(t, http.StatusOK, code)
 	assert.Equal(t, []string{"sub_del"}, mock.RevokedIDs, "revoke must fire BEFORE the mirror delete")
 
-	_, err = s.q.GetOrgByClerkID(ctx, "org_del")
+	_, err = s.q.GetOrgByID(ctx, "org_del")
 	require.ErrorIs(t, err, pgx.ErrNoRows)
 }
 
@@ -131,8 +132,9 @@ func TestOrgDeletedRevokeFailureMeans500(t *testing.T) {
 	seedOrg(t, s, "org_del2", "del2")
 
 	_, err := s.q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		ClerkOrgID: "org_del2", PolarSubscriptionID: pgtype.Text{String: "sub_del2", Valid: true},
-		PolarCustomerID: "cust_del2", ProductKey: "pro", Status: "active",
+		Provider: "polar",
+		OrgID: "org_del2", ProviderSubscriptionID: pgtype.Text{String: "sub_del2", Valid: true},
+		ProviderCustomerID: "cust_del2", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)
 
@@ -141,6 +143,6 @@ func TestOrgDeletedRevokeFailureMeans500(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, code, "revoke failure must 500 so Clerk retries")
 
 	// Mirror row retained (the delete never ran).
-	_, err = s.q.GetOrgByClerkID(ctx, "org_del2")
+	_, err = s.q.GetOrgByID(ctx, "org_del2")
 	require.NoError(t, err)
 }

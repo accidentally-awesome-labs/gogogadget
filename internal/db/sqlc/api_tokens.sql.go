@@ -12,7 +12,7 @@ import (
 )
 
 const getAPITokenByHash = `-- name: GetAPITokenByHash :one
-SELECT id, clerk_org_id, name, token_hash, scope, last_used_at, expires_at, revoked_at, created_at FROM api_tokens WHERE token_hash = $1 AND revoked_at IS NULL
+SELECT id, org_id, name, token_hash, scope, last_used_at, expires_at, revoked_at, created_at FROM api_tokens WHERE token_hash = $1 AND revoked_at IS NULL
 `
 
 func (q *Queries) GetAPITokenByHash(ctx context.Context, tokenHash string) (ApiToken, error) {
@@ -20,7 +20,7 @@ func (q *Queries) GetAPITokenByHash(ctx context.Context, tokenHash string) (ApiT
 	var i ApiToken
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.TokenHash,
 		&i.Scope,
@@ -33,22 +33,22 @@ func (q *Queries) GetAPITokenByHash(ctx context.Context, tokenHash string) (ApiT
 }
 
 const insertAPIToken = `-- name: InsertAPIToken :one
-INSERT INTO api_tokens (clerk_org_id, name, token_hash, scope, expires_at)
+INSERT INTO api_tokens (org_id, name, token_hash, scope, expires_at)
 VALUES ($1, $2, $3, $4, $5)
 RETURNING id
 `
 
 type InsertAPITokenParams struct {
-	ClerkOrgID string             `json:"clerk_org_id"`
-	Name       string             `json:"name"`
-	TokenHash  string             `json:"token_hash"`
-	Scope      string             `json:"scope"`
-	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
+	OrgID     string             `json:"org_id"`
+	Name      string             `json:"name"`
+	TokenHash string             `json:"token_hash"`
+	Scope     string             `json:"scope"`
+	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
 }
 
 func (q *Queries) InsertAPIToken(ctx context.Context, arg InsertAPITokenParams) (int64, error) {
 	row := q.db.QueryRow(ctx, insertAPIToken,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.Name,
 		arg.TokenHash,
 		arg.Scope,
@@ -60,13 +60,13 @@ func (q *Queries) InsertAPIToken(ctx context.Context, arg InsertAPITokenParams) 
 }
 
 const listAPITokensByOrg = `-- name: ListAPITokensByOrg :many
-SELECT id, clerk_org_id, name, token_hash, scope, last_used_at, expires_at, revoked_at, created_at FROM api_tokens
-WHERE clerk_org_id = $1
+SELECT id, org_id, name, token_hash, scope, last_used_at, expires_at, revoked_at, created_at FROM api_tokens
+WHERE org_id = $1
 ORDER BY created_at DESC
 `
 
-func (q *Queries) ListAPITokensByOrg(ctx context.Context, clerkOrgID string) ([]ApiToken, error) {
-	rows, err := q.db.Query(ctx, listAPITokensByOrg, clerkOrgID)
+func (q *Queries) ListAPITokensByOrg(ctx context.Context, orgID string) ([]ApiToken, error) {
+	rows, err := q.db.Query(ctx, listAPITokensByOrg, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (q *Queries) ListAPITokensByOrg(ctx context.Context, clerkOrgID string) ([]
 		var i ApiToken
 		if err := rows.Scan(
 			&i.ID,
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.TokenHash,
 			&i.Scope,
@@ -96,16 +96,16 @@ func (q *Queries) ListAPITokensByOrg(ctx context.Context, clerkOrgID string) ([]
 }
 
 const revokeAPIToken = `-- name: RevokeAPIToken :exec
-UPDATE api_tokens SET revoked_at = now() WHERE id = $1 AND clerk_org_id = $2
+UPDATE api_tokens SET revoked_at = now() WHERE id = $1 AND org_id = $2
 `
 
 type RevokeAPITokenParams struct {
-	ID         int64  `json:"id"`
-	ClerkOrgID string `json:"clerk_org_id"`
+	ID    int64  `json:"id"`
+	OrgID string `json:"org_id"`
 }
 
 func (q *Queries) RevokeAPIToken(ctx context.Context, arg RevokeAPITokenParams) error {
-	_, err := q.db.Exec(ctx, revokeAPIToken, arg.ID, arg.ClerkOrgID)
+	_, err := q.db.Exec(ctx, revokeAPIToken, arg.ID, arg.OrgID)
 	return err
 }
 

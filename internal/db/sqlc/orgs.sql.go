@@ -23,23 +23,23 @@ func (q *Queries) CountOrgs(ctx context.Context) (int64, error) {
 }
 
 const deleteOrg = `-- name: DeleteOrg :exec
-DELETE FROM orgs WHERE clerk_org_id = $1
+DELETE FROM orgs WHERE org_id = $1
 `
 
-func (q *Queries) DeleteOrg(ctx context.Context, clerkOrgID string) error {
-	_, err := q.db.Exec(ctx, deleteOrg, clerkOrgID)
+func (q *Queries) DeleteOrg(ctx context.Context, orgID string) error {
+	_, err := q.db.Exec(ctx, deleteOrg, orgID)
 	return err
 }
 
-const getOrgByClerkID = `-- name: GetOrgByClerkID :one
-SELECT clerk_org_id, name, slug, image_url, created_at, updated_at FROM orgs WHERE clerk_org_id = $1
+const getOrgByID = `-- name: GetOrgByID :one
+SELECT org_id, name, slug, image_url, created_at, updated_at FROM orgs WHERE org_id = $1
 `
 
-func (q *Queries) GetOrgByClerkID(ctx context.Context, clerkOrgID string) (Org, error) {
-	row := q.db.QueryRow(ctx, getOrgByClerkID, clerkOrgID)
+func (q *Queries) GetOrgByID(ctx context.Context, orgID string) (Org, error) {
+	row := q.db.QueryRow(ctx, getOrgByID, orgID)
 	var i Org
 	err := row.Scan(
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.Slug,
 		&i.ImageUrl,
@@ -50,14 +50,14 @@ func (q *Queries) GetOrgByClerkID(ctx context.Context, clerkOrgID string) (Org, 
 }
 
 const getOrgsForUser = `-- name: GetOrgsForUser :many
-SELECT o.clerk_org_id, o.name, o.slug, o.image_url, o.created_at, o.updated_at FROM orgs o
-JOIN org_members m ON m.clerk_org_id = o.clerk_org_id
-WHERE m.clerk_user_id = $1
+SELECT o.org_id, o.name, o.slug, o.image_url, o.created_at, o.updated_at FROM orgs o
+JOIN org_members m ON m.org_id = o.org_id
+WHERE m.user_id = $1
 ORDER BY o.name
 `
 
-func (q *Queries) GetOrgsForUser(ctx context.Context, clerkUserID string) ([]Org, error) {
-	rows, err := q.db.Query(ctx, getOrgsForUser, clerkUserID)
+func (q *Queries) GetOrgsForUser(ctx context.Context, userID string) ([]Org, error) {
+	rows, err := q.db.Query(ctx, getOrgsForUser, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (q *Queries) GetOrgsForUser(ctx context.Context, clerkUserID string) ([]Org
 	for rows.Next() {
 		var i Org
 		if err := rows.Scan(
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Slug,
 			&i.ImageUrl,
@@ -84,7 +84,7 @@ func (q *Queries) GetOrgsForUser(ctx context.Context, clerkUserID string) ([]Org
 }
 
 const listOrgs = `-- name: ListOrgs :many
-SELECT clerk_org_id, name, slug, image_url, created_at, updated_at FROM orgs ORDER BY name
+SELECT org_id, name, slug, image_url, created_at, updated_at FROM orgs ORDER BY name
 `
 
 // ListOrgs feeds admin org pickers (no stats baggage).
@@ -98,7 +98,7 @@ func (q *Queries) ListOrgs(ctx context.Context) ([]Org, error) {
 	for rows.Next() {
 		var i Org
 		if err := rows.Scan(
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Slug,
 			&i.ImageUrl,
@@ -116,15 +116,15 @@ func (q *Queries) ListOrgs(ctx context.Context) ([]Org, error) {
 }
 
 const listOrgsWithStats = `-- name: ListOrgsWithStats :many
-SELECT o.clerk_org_id, o.name, o.slug, o.image_url, o.created_at, o.updated_at,
-  (SELECT count(*) FROM org_members m WHERE m.clerk_org_id = o.clerk_org_id) AS member_count,
+SELECT o.org_id, o.name, o.slug, o.image_url, o.created_at, o.updated_at,
+  (SELECT count(*) FROM org_members m WHERE m.org_id = o.org_id) AS member_count,
   CASE
     WHEN s.status IN ('active', 'trialing', 'past_due') THEN s.product_key
     WHEN s.status = 'canceled' AND s.current_period_end > now() THEN s.product_key
     ELSE 'free'
   END AS product_key
 FROM orgs o
-LEFT JOIN subscriptions s ON s.clerk_org_id = o.clerk_org_id
+LEFT JOIN subscriptions s ON s.org_id = o.org_id
 ORDER BY o.created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -135,7 +135,7 @@ type ListOrgsWithStatsParams struct {
 }
 
 type ListOrgsWithStatsRow struct {
-	ClerkOrgID  string             `json:"clerk_org_id"`
+	OrgID       string             `json:"org_id"`
 	Name        string             `json:"name"`
 	Slug        string             `json:"slug"`
 	ImageUrl    string             `json:"image_url"`
@@ -157,7 +157,7 @@ func (q *Queries) ListOrgsWithStats(ctx context.Context, arg ListOrgsWithStatsPa
 	for rows.Next() {
 		var i ListOrgsWithStatsRow
 		if err := rows.Scan(
-			&i.ClerkOrgID,
+			&i.OrgID,
 			&i.Name,
 			&i.Slug,
 			&i.ImageUrl,
@@ -177,30 +177,30 @@ func (q *Queries) ListOrgsWithStats(ctx context.Context, arg ListOrgsWithStatsPa
 }
 
 const upsertOrg = `-- name: UpsertOrg :one
-INSERT INTO orgs (clerk_org_id, name, slug, image_url)
+INSERT INTO orgs (org_id, name, slug, image_url)
 VALUES ($1, $2, $3, $4)
-ON CONFLICT (clerk_org_id) DO UPDATE
+ON CONFLICT (org_id) DO UPDATE
 SET name = EXCLUDED.name, slug = EXCLUDED.slug, image_url = EXCLUDED.image_url, updated_at = now()
-RETURNING clerk_org_id, name, slug, image_url, created_at, updated_at
+RETURNING org_id, name, slug, image_url, created_at, updated_at
 `
 
 type UpsertOrgParams struct {
-	ClerkOrgID string `json:"clerk_org_id"`
-	Name       string `json:"name"`
-	Slug       string `json:"slug"`
-	ImageUrl   string `json:"image_url"`
+	OrgID    string `json:"org_id"`
+	Name     string `json:"name"`
+	Slug     string `json:"slug"`
+	ImageUrl string `json:"image_url"`
 }
 
 func (q *Queries) UpsertOrg(ctx context.Context, arg UpsertOrgParams) (Org, error) {
 	row := q.db.QueryRow(ctx, upsertOrg,
-		arg.ClerkOrgID,
+		arg.OrgID,
 		arg.Name,
 		arg.Slug,
 		arg.ImageUrl,
 	)
 	var i Org
 	err := row.Scan(
-		&i.ClerkOrgID,
+		&i.OrgID,
 		&i.Name,
 		&i.Slug,
 		&i.ImageUrl,

@@ -678,9 +678,9 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var24 string
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue("flag-override-row-" + o.ClerkOrgID)
+				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue("flag-override-row-" + o.OrgID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 47}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 				if templ_7745c5c3_Err != nil {
@@ -691,9 +691,9 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var25 string
-				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue("flag-override-" + o.ClerkOrgID)
+				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue("flag-override-" + o.OrgID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 95}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/web/templates/admin_flags.templ`, Line: 209, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 				if templ_7745c5c3_Err != nil {
@@ -733,15 +733,15 @@ func AdminFlagDetailPage(flag sqlc.FeatureFlag, overrides []sqlc.ListFlagOverrid
 				}
 				if AdminWrite(ctx) {
 					templ_7745c5c3_Err = ui.ConfirmAction(ui.ConfirmActionOpts{
-						ID:           "flag-override-delete-dialog-" + o.ClerkOrgID,
+						ID:           "flag-override-delete-dialog-" + o.OrgID,
 						TriggerLabel: i18n.T(ctx, "flags.override_delete_row", o.Name),
 						Title:        i18n.T(ctx, "flags.override_delete_title"),
 						Message:      i18n.T(ctx, "flags.override_delete_confirm"),
 						ConfirmLabel: i18n.T(ctx, "admin.confirm_continue"),
 						CancelLabel:  i18n.T(ctx, "admin.cancel"),
 						Kind:         ui.KindDanger,
-						HX:           ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides/" + o.ClerkOrgID + "/delete"},
-						Attrs:        ui.Attrs{TestID: "flag-override-delete-" + o.ClerkOrgID},
+						HX:           ui.HX{Post: "/admin/flags/" + flag.Key + "/overrides/" + o.OrgID + "/delete"},
+						Attrs:        ui.Attrs{TestID: "flag-override-delete-" + o.OrgID},
 					}).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -922,7 +922,7 @@ func adminFlagOverridesEmpty() templ.Component {
 func orgOptions(orgs []sqlc.Org) []ui.Option {
 	out := make([]ui.Option, 0, len(orgs))
 	for _, o := range orgs {
-		out = append(out, ui.Option{Value: o.ClerkOrgID, Label: o.Name})
+		out = append(out, ui.Option{Value: o.OrgID, Label: o.Name})
 	}
 	return out
 }

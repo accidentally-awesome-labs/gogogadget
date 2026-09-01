@@ -176,17 +176,17 @@ func webhookTestSetup(t *testing.T) (*Worker, *sqlc.Queries, *pgxpool.Pool, int6
 	t.Helper()
 	pool, q := testSetup(t)
 	ctx := context.Background()
-	_, err := pool.Exec(ctx, "INSERT INTO users (clerk_user_id, email, name, avatar_url) VALUES ('user_wh', 'wh@example.com', 'WH', '') ON CONFLICT DO NOTHING")
+	_, err := pool.Exec(ctx, "INSERT INTO users (user_id, email, name, avatar_url) VALUES ('user_wh', 'wh@example.com', 'WH', '') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, "INSERT INTO orgs (clerk_org_id, name, slug) VALUES ('org_wh', 'WH Org', 'wh') ON CONFLICT DO NOTHING")
+	_, err = pool.Exec(ctx, "INSERT INTO orgs (org_id, name, slug) VALUES ('org_wh', 'WH Org', 'wh') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, "INSERT INTO org_members (clerk_org_id, clerk_user_id, role) VALUES ('org_wh', 'user_wh', 'org:admin') ON CONFLICT DO NOTHING")
+	_, err = pool.Exec(ctx, "INSERT INTO org_members (org_id, user_id, role) VALUES ('org_wh', 'user_wh', 'org:admin') ON CONFLICT DO NOTHING")
 	require.NoError(t, err)
 	w := testWorker(q, t.TempDir())
 	w.WebhookGuard = func(context.Context, string) error { return nil }
 	w.WebhookTransport = http.DefaultTransport.(*http.Transport).Clone()
 	ep, err := q.InsertWebhookEndpoint(ctx, sqlc.InsertWebhookEndpointParams{
-		ClerkOrgID: "org_wh", CreatedBy: "user_wh", Url: "https://placeholder.invalid", Secret: "whsec_test", EventTypes: []string{}, Description: "",
+		OrgID: "org_wh", CreatedBy: "user_wh", Url: "https://placeholder.invalid", Secret: "whsec_test", EventTypes: []string{}, Description: "",
 	})
 	require.NoError(t, err)
 	return w, q, pool, ep.ID
@@ -204,7 +204,7 @@ func pointEndpoint(t *testing.T, pool *pgxpool.Pool, epID int64, rawURL string) 
 func insertDelivery(t *testing.T, q *sqlc.Queries, endpointID int64) sqlc.WebhookDelivery {
 	t.Helper()
 	d, err := q.InsertWebhookDelivery(context.Background(), sqlc.InsertWebhookDeliveryParams{
-		EndpointID: endpointID, ClerkOrgID: "org_wh", EventType: "project.created",
+		EndpointID: endpointID, OrgID: "org_wh", EventType: "project.created",
 		Payload: []byte(`{"type":"project.created","data":{"id":7}}`),
 	})
 	require.NoError(t, err)
@@ -287,7 +287,7 @@ func TestWebhookDeliverDeadLetterNotifies(t *testing.T) {
 	assert.Equal(t, "dead", row.Status)
 
 	// The endpoint owner got an in-app notification.
-	n, err := q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{ClerkOrgID: "org_wh", ClerkUserID: "user_wh"})
+	n, err := q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{OrgID: "org_wh", UserID: "user_wh"})
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), n)
 }
@@ -312,7 +312,7 @@ func TestWebhookDeliverStaysPendingWhileQueueWillRetry(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "pending", row.Status, "attempt 7 of 8 leaves a retry, so the delivery is not dead yet")
 
-	n, err := q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{ClerkOrgID: "org_wh", ClerkUserID: "user_wh"})
+	n, err := q.CountUnreadByUser(ctx, sqlc.CountUnreadByUserParams{OrgID: "org_wh", UserID: "user_wh"})
 	require.NoError(t, err)
 	assert.Equal(t, int64(0), n, "no permanent-failure notification while retries remain")
 }
@@ -396,7 +396,7 @@ func TestJanitorClearsExpiredPreviousSecrets(t *testing.T) {
 
 	w.janitorPass(ctx)
 
-	ep, err := q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: epID, ClerkOrgID: "org_wh"})
+	ep, err := q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: epID, OrgID: "org_wh"})
 	require.NoError(t, err)
 	assert.Empty(t, ep.SecretPrevious, "expired previous secret cleared")
 	assert.False(t, ep.SecretRotatedAt.Valid)

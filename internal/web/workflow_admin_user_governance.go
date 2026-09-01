@@ -18,7 +18,7 @@ func (s *Server) handleAdminUserDisable(w http.ResponseWriter, r *http.Request) 
 	ctx := r.Context()
 	admin := identity.UserFrom(r.Context())
 	id := r.PathValue("id")
-	user, err := s.q.GetUserByClerkID(ctx, id)
+	user, err := s.q.GetUserByID(ctx, id)
 	if err != nil {
 		s.handleNotFound(w, r)
 		return
@@ -30,11 +30,11 @@ func (s *Server) handleAdminUserDisable(w http.ResponseWriter, r *http.Request) 
 	} else {
 		action = "admin.user_enabled"
 	}
-	if err := s.q.SetUserDisabled(ctx, sqlc.SetUserDisabledParams{ClerkUserID: id, DisabledAt: disabledAt}); err != nil {
+	if err := s.q.SetUserDisabled(ctx, sqlc.SetUserDisabledParams{UserID: id, DisabledAt: disabledAt}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, "", admin.ClerkUserID, action, map[string]any{"target": id, "email": string(user.Email)})
+	audit.Log(ctx, s.q, "", admin.UserID, action, map[string]any{"target": id, "email": string(user.Email)})
 	if disabledAt.Valid {
 		Toast(w, "success", string(user.Email)+" disabled")
 	} else {
@@ -53,7 +53,7 @@ func (s *Server) handleAdminUserRole(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	actor := identity.UserFrom(ctx)
 	id := r.PathValue("id")
-	target, err := s.q.GetUserByClerkID(ctx, id)
+	target, err := s.q.GetUserByID(ctx, id)
 	if err != nil {
 		s.handleNotFound(w, r)
 		return
@@ -82,11 +82,11 @@ func (s *Server) handleAdminUserRole(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	if err := s.q.SetUserAdminRole(ctx, sqlc.SetUserAdminRoleParams{ClerkUserID: id, AdminRole: role}); err != nil {
+	if err := s.q.SetUserAdminRole(ctx, sqlc.SetUserAdminRoleParams{UserID: id, AdminRole: role}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, "", actor.ClerkUserID, "admin.role_changed", map[string]any{
+	audit.Log(ctx, s.q, "", actor.UserID, "admin.role_changed", map[string]any{
 		"target": id, "email": string(target.Email), "from": target.AdminRole, "to": role,
 	})
 	Toast(w, "success", string(target.Email)+" → "+roleLabel(ctx, role))

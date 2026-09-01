@@ -98,7 +98,7 @@ func TestOpenAPISpecServed(t *testing.T) {
 func TestOpenAPIProjectShapeMatchesHandler(t *testing.T) {
 	s := integrationServer(t, nil)
 	seedOrg(t, s, "org_spec", "Spec Org")
-	_, err := s.q.CreateProject(t.Context(), sqlc.CreateProjectParams{ClerkOrgID: "org_spec", Name: "Spec project"})
+	_, err := s.q.CreateProject(t.Context(), sqlc.CreateProjectParams{OrgID: "org_spec", Name: "Spec project"})
 	require.NoError(t, err)
 	token := seedAPIToken(t, s, "org_spec", "read")
 
@@ -168,7 +168,7 @@ func seedAPIToken(t *testing.T, s *Server, orgID, scope string) string {
 	plaintext, hash, err := api.GenerateToken()
 	require.NoError(t, err)
 	_, err = s.q.InsertAPIToken(t.Context(), sqlc.InsertAPITokenParams{
-		ClerkOrgID: orgID, Name: "spec-test", TokenHash: hash, Scope: scope,
+		OrgID: orgID, Name: "spec-test", TokenHash: hash, Scope: scope,
 	})
 	require.NoError(t, err)
 	return plaintext

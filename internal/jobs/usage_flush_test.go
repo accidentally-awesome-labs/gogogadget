@@ -17,14 +17,14 @@ import (
 
 func seedUsageOrg(t *testing.T, q *sqlc.Queries, orgID string) {
 	t.Helper()
-	_, err := q.UpsertOrg(context.Background(), sqlc.UpsertOrgParams{ClerkOrgID: orgID, Name: orgID, Slug: orgID, ImageUrl: ""})
+	_, err := q.UpsertOrg(context.Background(), sqlc.UpsertOrgParams{OrgID: orgID, Name: orgID, Slug: orgID, ImageUrl: ""})
 	require.NoError(t, err)
 }
 
 func insertUsage(t *testing.T, q *sqlc.Queries, orgID, name string, value int64) sqlc.UsageEvent {
 	t.Helper()
 	e, err := q.InsertUsageEvent(context.Background(), sqlc.InsertUsageEventParams{
-		ClerkOrgID: orgID, Name: name, Value: value, Metadata: []byte(`{}`), ExternalID: "",
+		OrgID: orgID, Name: name, Value: value, Metadata: []byte(`{}`), ExternalID: "",
 	})
 	require.NoError(t, err)
 	return e
@@ -113,7 +113,7 @@ func TestSumUsageByNameSince(t *testing.T) {
 	insertUsage(t, q, "org_u4", "other", 999)
 
 	since := pgtype.Timestamptz{Time: time.Now().Add(-time.Hour), Valid: true}
-	sum, err := q.SumUsageByNameSince(ctx, sqlc.SumUsageByNameSinceParams{ClerkOrgID: "org_u4", Name: "ai_tokens", CreatedAt: since})
+	sum, err := q.SumUsageByNameSince(ctx, sqlc.SumUsageByNameSinceParams{OrgID: "org_u4", Name: "ai_tokens", CreatedAt: since})
 	require.NoError(t, err)
 	assert.Equal(t, int64(30), sum)
 
@@ -121,7 +121,7 @@ func TestSumUsageByNameSince(t *testing.T) {
 	old := insertUsage(t, q, "org_u4", "ai_tokens", 500)
 	_, err = pool.Exec(ctx, "UPDATE usage_events SET created_at = $1 WHERE id = $2", time.Now().Add(-48*time.Hour), old.ID)
 	require.NoError(t, err)
-	sum, err = q.SumUsageByNameSince(ctx, sqlc.SumUsageByNameSinceParams{ClerkOrgID: "org_u4", Name: "ai_tokens", CreatedAt: since})
+	sum, err = q.SumUsageByNameSince(ctx, sqlc.SumUsageByNameSinceParams{OrgID: "org_u4", Name: "ai_tokens", CreatedAt: since})
 	require.NoError(t, err)
 	assert.Equal(t, int64(30), sum, "older rows excluded")
 }

@@ -57,17 +57,17 @@ func TestDBEvaluatorOverrideWins(t *testing.T) {
 	_, q := testdb.Open(t, "flags")
 	ctx := context.Background()
 	// flag_overrides references orgs — the overridden org must exist.
-	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{ClerkOrgID: "org_ovr", Name: "Override Org", Slug: "override-org", ImageUrl: ""})
+	_, err := q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: "org_ovr", Name: "Override Org", Slug: "override-org", ImageUrl: ""})
 	require.NoError(t, err)
 	// Globally disabled; override turns it ON for this org.
 	insertFlag(t, ctx, q, "flag_global_off", false, 0)
 	// Globally enabled at 100%; override turns it OFF for this org.
 	insertFlag(t, ctx, q, "flag_global_on", true, 100)
 	require.NoError(t, q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{
-		FlagKey: "flag_global_off", ClerkOrgID: "org_ovr", Enabled: true,
+		FlagKey: "flag_global_off", OrgID: "org_ovr", Enabled: true,
 	}))
 	require.NoError(t, q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{
-		FlagKey: "flag_global_on", ClerkOrgID: "org_ovr", Enabled: false,
+		FlagKey: "flag_global_on", OrgID: "org_ovr", Enabled: false,
 	}))
 
 	e := freshEvaluator(q)

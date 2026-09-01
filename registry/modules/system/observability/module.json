@@ -91,7 +91,7 @@
         "source": "internal/web/observability_test.go",
         "target": "internal/web/observability_test.go",
         "class": "test",
-        "sha256": "dcac08193170a05822fbc76baee2880a9ecf34c2c732b66e5a6b43a365512ea7",
+        "sha256": "e803068551b482738259dfdfd33c2a0949fb6c54c7672f991d60acb4ca1a2fef",
         "rewrite_module": true,
         "contract": false
       }

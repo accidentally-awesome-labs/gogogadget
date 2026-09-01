@@ -1,33 +1,30 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "packages": [
-        "internal/notify"
-      ],
-      "queries": [
-        "notification_preferences",
-        "notifications"
-      ]
-    },
+    "id": "ggg/system/notifications",
+    "kind": "system",
+    "name": "notifications",
+    "revision": 1,
     "contract": 1,
-    "data": [
+    "title": "In-app notifications",
+    "description": "Fire-and-forget in-app notifications and per-user delivery preferences, including the email digest cadence.",
+    "requires": [
       {
-        "account_delete": "cascade",
-        "export": true,
-        "organization_delete": "retain",
-        "scope": "user",
-        "table": "notification_preferences"
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       },
       {
-        "account_delete": "cascade",
-        "export": true,
-        "organization_delete": "cascade",
-        "scope": "user",
-        "table": "notifications"
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       }
     ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -38,141 +35,90 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Fire-and-forget in-app notifications and per-user delivery preferences, including the email digest cadence.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "bfbad0f619496a9e1854571afb759ae7b731aa4a127ea3cae7a1593c32df33ad",
         "source": "internal/db/queries/notification_preferences.sql",
-        "target": "internal/db/queries/notification_preferences.sql"
-      },
-      {
+        "target": "internal/db/queries/notification_preferences.sql",
         "class": "query",
-        "contract": false,
+        "sha256": "00dccbffb061638c0b02a46d50f3b77375e2624ffa49fb7ea54b8a62f7de3bc4",
         "rewrite_module": false,
-        "sha256": "931af3de19675866b6e7bb816bfde48c72d9601897fb020e29c9040e48de3608",
+        "contract": false
+      },
+      {
         "source": "internal/db/queries/notifications.sql",
-        "target": "internal/db/queries/notifications.sql"
+        "target": "internal/db/queries/notifications.sql",
+        "class": "query",
+        "sha256": "b2eea39a102b151372bec712f12829b51495948d8e87b6d8b607c40378ed8404",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "seed",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "fc108fcee8f029f4a75e141a1f894514d844ba4987eee16937529c0ad27e5623",
         "source": "internal/db/testdata/seed/dev/notifications.sql",
-        "target": "internal/db/testdata/seed/dev/notifications.sql"
-      },
-      {
+        "target": "internal/db/testdata/seed/dev/notifications.sql",
         "class": "seed",
-        "contract": false,
+        "sha256": "af367f833335c173c92c657f8d4093d4bcd5e1b5c11b9d6cac44820c6f25549c",
         "rewrite_module": false,
-        "sha256": "278a3c63b17fda8a5ed9e2d30d11318535ef7a737a502860306b7fca8e733cae",
+        "contract": false
+      },
+      {
         "source": "internal/db/testdata/seed/e2e/notifications.sql",
-        "target": "internal/db/testdata/seed/e2e/notifications.sql"
+        "target": "internal/db/testdata/seed/e2e/notifications.sql",
+        "class": "seed",
+        "sha256": "3f0963b5af77d5f7fb42bc0ea12191640322d966cbb4f6cb11f3e41571790c7a",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "fd3596068b438ae8e7279d7b183bde8d6e588d75b98471e9d875a4c300b02a82",
         "source": "internal/jobs/digest.go",
-        "target": "internal/jobs/digest.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "44ba7e6ca971a1309878a960835e036f75986c059bdc14456467efc14903d992",
-        "source": "internal/jobs/digest_test.go",
-        "target": "internal/jobs/digest_test.go"
-      },
-      {
+        "target": "internal/jobs/digest.go",
         "class": "go",
-        "contract": true,
+        "sha256": "d25f6c4fa050e6bd4d0786e30b552ba87a9b925bb136200e95bafa73df625f78",
         "rewrite_module": true,
-        "sha256": "0edeca147226a36b6c0fcec787617cf6e6959fae79379541df66b592efbd0c92",
-        "source": "internal/notify/notify.go",
-        "target": "internal/notify/notify.go"
+        "contract": false
       },
       {
+        "source": "internal/jobs/digest_test.go",
+        "target": "internal/jobs/digest_test.go",
         "class": "test",
-        "contract": false,
+        "sha256": "76f3f2047b4cf22f9876d92ddb03d19cdf597927441b14841af20981da4b0d50",
         "rewrite_module": true,
-        "sha256": "f9b0760690b6a7bc9c0e121af6ce5fee6812344c3946b908a1e233a0bb2aa0aa",
+        "contract": false
+      },
+      {
+        "source": "internal/notify/notify.go",
+        "target": "internal/notify/notify.go",
+        "class": "go",
+        "sha256": "d493c136af3dbdd366af3ba25af27dcff88287b8565f8f08a1171dc9c17a31c6",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/notify/notify_test.go",
-        "target": "internal/notify/notify_test.go"
+        "target": "internal/notify/notify_test.go",
+        "class": "test",
+        "sha256": "2184b470cd5daa9f722bc8032a5ae8472d150415316033d9ade306d37c69dc23",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/system/notifications",
-    "kind": "system",
-    "locales": {
-      "en": {
-        "email.digest.cta": "See all notifications:",
-        "email.digest.intro": "A summary of your notifications since the last digest.",
-        "email.digest.manage": "Change how often you get this:",
-        "email.digest.subject": "Your GoGoGadget digest",
-        "email.digest.title": "Here's what happened%s"
-      },
-      "es": {
-        "email.digest.cta": "Ver todas las notificaciones:",
-        "email.digest.intro": "Un resumen de tus notificaciones desde el \u00faltimo env\u00edo.",
-        "email.digest.manage": "Cambia la frecuencia de estos correos:",
-        "email.digest.subject": "Tu resumen de GoGoGadget",
-        "email.digest.title": "Esto es lo que pas\u00f3%s"
-      }
+    "claims": {
+      "packages": [
+        "internal/notify"
+      ],
+      "queries": [
+        "notification_preferences",
+        "notifications"
+      ]
     },
-    "migrations": [
-      {
-        "id": "0005_notifications",
-        "kind": "immutable",
-        "sha256": "78c18575bd4fb1bddc5b46f81bdc26f741df094609312d119f74c9ee89a643e0",
-        "source": "internal/db/migrations/0005_notifications.sql"
-      },
-      {
-        "id": "0012_notification_preferences",
-        "kind": "immutable",
-        "sha256": "6192ed2d1ad7e1c266b4076a3b226c407014e20f905816f4bc46e94d3603c6a9",
-        "source": "internal/db/migrations/0012_notification_preferences.sql"
-      },
-      {
-        "id": "0016_email_digest",
-        "kind": "immutable",
-        "sha256": "835fa42a66956e1023e5699baae78326648b4995dd42840b8e7ebfd249f154ac",
-        "source": "internal/db/migrations/0016_email_digest.sql"
-      }
-    ],
-    "name": "notifications",
-    "removal_policy": "retain-data",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "jobs": [
         {
-          "handler": "defineEmailDigest",
           "kind": "email.digest",
-          "max_attempts": 0,
           "package": "internal/jobs",
+          "handler": "defineEmailDigest",
           "schedulable": true
         }
       ],
@@ -223,12 +169,65 @@
         }
       ]
     },
+    "migrations": [
+      {
+        "id": "0005_notifications",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0005_notifications.sql",
+        "sha256": "78c18575bd4fb1bddc5b46f81bdc26f741df094609312d119f74c9ee89a643e0"
+      },
+      {
+        "id": "0012_notification_preferences",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0012_notification_preferences.sql",
+        "sha256": "6192ed2d1ad7e1c266b4076a3b226c407014e20f905816f4bc46e94d3603c6a9"
+      },
+      {
+        "id": "0016_email_digest",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0016_email_digest.sql",
+        "sha256": "835fa42a66956e1023e5699baae78326648b4995dd42840b8e7ebfd249f154ac"
+      }
+    ],
+    "environment": [],
+    "locales": {
+      "en": {
+        "email.digest.cta": "See all notifications:",
+        "email.digest.intro": "A summary of your notifications since the last digest.",
+        "email.digest.manage": "Change how often you get this:",
+        "email.digest.subject": "Your GoGoGadget digest",
+        "email.digest.title": "Here's what happened%s"
+      },
+      "es": {
+        "email.digest.cta": "Ver todas las notificaciones:",
+        "email.digest.intro": "Un resumen de tus notificaciones desde el último envío.",
+        "email.digest.manage": "Cambia la frecuencia de estos correos:",
+        "email.digest.subject": "Tu resumen de GoGoGadget",
+        "email.digest.title": "Esto es lo que pasó%s"
+      }
+    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/notify"
       ]
     },
-    "title": "In-app notifications"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "notification_preferences",
+        "scope": "user",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "retain"
+      },
+      {
+        "table": "notifications",
+        "scope": "user",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
 }

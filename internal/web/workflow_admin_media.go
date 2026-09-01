@@ -64,14 +64,14 @@ func (s *Server) handleAdminMediaUpload(w http.ResponseWriter, r *http.Request) 
 	}
 	m, err := s.q.InsertMedia(ctx, sqlc.InsertMediaParams{
 		Filename: header.Filename, ContentType: sniffed, SizeBytes: size,
-		StorageKey: key, Alt: "", UploadedBy: actor.ClerkUserID,
+		StorageKey: key, Alt: "", UploadedBy: actor.UserID,
 	})
 	if err != nil {
 		_ = s.store.Delete(ctx, key) // never orphan the object
 		s.renderError(w, r, err.Error())
 		return
 	}
-	audit.Log(ctx, s.q, "", actor.ClerkUserID, "content.media_uploaded", map[string]any{
+	audit.Log(ctx, s.q, "", actor.UserID, "content.media_uploaded", map[string]any{
 		"id": m.ID, "filename": m.Filename, "content_type": m.ContentType, "size_bytes": m.SizeBytes,
 	})
 	Toast(w, "success", i18n.T(ctx, "admin.media.uploaded"))
@@ -98,7 +98,7 @@ func (s *Server) handleAdminMediaDelete(w http.ResponseWriter, r *http.Request) 
 	// Best-effort: an orphaned object is cheaper than a resolvable 500 after
 	// the row is already gone.
 	_ = s.store.Delete(ctx, m.StorageKey)
-	audit.Log(ctx, s.q, "", actor.ClerkUserID, "content.media_deleted", map[string]any{"id": id})
+	audit.Log(ctx, s.q, "", actor.UserID, "content.media_deleted", map[string]any{"id": id})
 	Toast(w, "success", i18n.T(ctx, "admin.media.deleted"))
 	Navigate(w, r, "/admin/media")
 }

@@ -49,25 +49,49 @@ func (q *Queries) CountUsersSince(ctx context.Context, createdAt pgtype.Timestam
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users WHERE clerk_user_id = $1
+DELETE FROM users WHERE user_id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, clerkUserID string) error {
-	_, err := q.db.Exec(ctx, deleteUser, clerkUserID)
+func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
+	_, err := q.db.Exec(ctx, deleteUser, userID)
 	return err
 }
 
-const getUserByClerkID = `-- name: GetUserByClerkID :one
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users WHERE email = $1
+`
 
-SELECT clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users WHERE clerk_user_id = $1
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Email,
+		&i.Name,
+		&i.AvatarUrl,
+		&i.DisabledAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Locale,
+		&i.DigestFrequency,
+		&i.LastDigestAt,
+		&i.Theme,
+		&i.AdminRole,
+	)
+	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+
+SELECT user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users WHERE user_id = $1
 `
 
 // users mirror table (identity is Clerk; these rows are a local query cache)
-func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByClerkID, clerkUserID)
+func (q *Queries) GetUserByID(ctx context.Context, userID string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, userID)
 	var i User
 	err := row.Scan(
-		&i.ClerkUserID,
+		&i.UserID,
 		&i.Email,
 		&i.Name,
 		&i.AvatarUrl,
@@ -84,7 +108,7 @@ func (q *Queries) GetUserByClerkID(ctx context.Context, clerkUserID string) (Use
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users
+SELECT user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users
 WHERE ($1::text = '' OR email ILIKE '%' || $1 || '%')
 ORDER BY created_at DESC
 LIMIT $2 OFFSET $3
@@ -106,7 +130,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
-			&i.ClerkUserID,
+			&i.UserID,
 			&i.Email,
 			&i.Name,
 			&i.AvatarUrl,
@@ -130,7 +154,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 }
 
 const listUsersDueForDigest = `-- name: ListUsersDueForDigest :many
-SELECT clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users
+SELECT user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role FROM users
 WHERE disabled_at IS NULL
   AND digest_frequency <> 'off'
   AND (
@@ -157,7 +181,7 @@ func (q *Queries) ListUsersDueForDigest(ctx context.Context, limit int32) ([]Use
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
-			&i.ClerkUserID,
+			&i.UserID,
 			&i.Email,
 			&i.Name,
 			&i.AvatarUrl,
@@ -181,27 +205,27 @@ func (q *Queries) ListUsersDueForDigest(ctx context.Context, limit int32) ([]Use
 }
 
 const markUserDigestSent = `-- name: MarkUserDigestSent :exec
-UPDATE users SET last_digest_at = now(), updated_at = now() WHERE clerk_user_id = $1
+UPDATE users SET last_digest_at = now(), updated_at = now() WHERE user_id = $1
 `
 
 // Stamped after a successful send: the stamp is also the next window's start,
 // so writing it before delivery would silently drop that period's content.
-func (q *Queries) MarkUserDigestSent(ctx context.Context, clerkUserID string) error {
-	_, err := q.db.Exec(ctx, markUserDigestSent, clerkUserID)
+func (q *Queries) MarkUserDigestSent(ctx context.Context, userID string) error {
+	_, err := q.db.Exec(ctx, markUserDigestSent, userID)
 	return err
 }
 
 const setUserAdminRole = `-- name: SetUserAdminRole :exec
-UPDATE users SET admin_role = $2, updated_at = now() WHERE clerk_user_id = $1
+UPDATE users SET admin_role = $2, updated_at = now() WHERE user_id = $1
 `
 
 type SetUserAdminRoleParams struct {
-	ClerkUserID string `json:"clerk_user_id"`
-	AdminRole   string `json:"admin_role"`
+	UserID    string `json:"user_id"`
+	AdminRole string `json:"admin_role"`
 }
 
 func (q *Queries) SetUserAdminRole(ctx context.Context, arg SetUserAdminRoleParams) error {
-	_, err := q.db.Exec(ctx, setUserAdminRole, arg.ClerkUserID, arg.AdminRole)
+	_, err := q.db.Exec(ctx, setUserAdminRole, arg.UserID, arg.AdminRole)
 	return err
 }
 
@@ -221,87 +245,87 @@ func (q *Queries) SetUserAdminRoleByEmail(ctx context.Context, arg SetUserAdminR
 }
 
 const setUserDigestFrequency = `-- name: SetUserDigestFrequency :exec
-UPDATE users SET digest_frequency = $2, updated_at = now() WHERE clerk_user_id = $1
+UPDATE users SET digest_frequency = $2, updated_at = now() WHERE user_id = $1
 `
 
 type SetUserDigestFrequencyParams struct {
-	ClerkUserID     string `json:"clerk_user_id"`
+	UserID          string `json:"user_id"`
 	DigestFrequency string `json:"digest_frequency"`
 }
 
 func (q *Queries) SetUserDigestFrequency(ctx context.Context, arg SetUserDigestFrequencyParams) error {
-	_, err := q.db.Exec(ctx, setUserDigestFrequency, arg.ClerkUserID, arg.DigestFrequency)
+	_, err := q.db.Exec(ctx, setUserDigestFrequency, arg.UserID, arg.DigestFrequency)
 	return err
 }
 
 const setUserDisabled = `-- name: SetUserDisabled :exec
-UPDATE users SET disabled_at = $2, updated_at = now() WHERE clerk_user_id = $1
+UPDATE users SET disabled_at = $2, updated_at = now() WHERE user_id = $1
 `
 
 type SetUserDisabledParams struct {
-	ClerkUserID string             `json:"clerk_user_id"`
-	DisabledAt  pgtype.Timestamptz `json:"disabled_at"`
+	UserID     string             `json:"user_id"`
+	DisabledAt pgtype.Timestamptz `json:"disabled_at"`
 }
 
 func (q *Queries) SetUserDisabled(ctx context.Context, arg SetUserDisabledParams) error {
-	_, err := q.db.Exec(ctx, setUserDisabled, arg.ClerkUserID, arg.DisabledAt)
+	_, err := q.db.Exec(ctx, setUserDisabled, arg.UserID, arg.DisabledAt)
 	return err
 }
 
 const setUserLocale = `-- name: SetUserLocale :exec
-UPDATE users SET locale = $2, updated_at = now() WHERE clerk_user_id = $1
+UPDATE users SET locale = $2, updated_at = now() WHERE user_id = $1
 `
 
 type SetUserLocaleParams struct {
-	ClerkUserID string `json:"clerk_user_id"`
-	Locale      string `json:"locale"`
+	UserID string `json:"user_id"`
+	Locale string `json:"locale"`
 }
 
 // ” restores "follow the browser" rather than pinning English.
 func (q *Queries) SetUserLocale(ctx context.Context, arg SetUserLocaleParams) error {
-	_, err := q.db.Exec(ctx, setUserLocale, arg.ClerkUserID, arg.Locale)
+	_, err := q.db.Exec(ctx, setUserLocale, arg.UserID, arg.Locale)
 	return err
 }
 
 const setUserTheme = `-- name: SetUserTheme :exec
-UPDATE users SET theme = $2, updated_at = now() WHERE clerk_user_id = $1
+UPDATE users SET theme = $2, updated_at = now() WHERE user_id = $1
 `
 
 type SetUserThemeParams struct {
-	ClerkUserID string `json:"clerk_user_id"`
-	Theme       string `json:"theme"`
+	UserID string `json:"user_id"`
+	Theme  string `json:"theme"`
 }
 
 func (q *Queries) SetUserTheme(ctx context.Context, arg SetUserThemeParams) error {
-	_, err := q.db.Exec(ctx, setUserTheme, arg.ClerkUserID, arg.Theme)
+	_, err := q.db.Exec(ctx, setUserTheme, arg.UserID, arg.Theme)
 	return err
 }
 
 const upsertUser = `-- name: UpsertUser :one
-INSERT INTO users (clerk_user_id, email, name, avatar_url)
+INSERT INTO users (user_id, email, name, avatar_url)
 VALUES ($1, $2, $3, $4)
-ON CONFLICT (clerk_user_id) DO UPDATE
+ON CONFLICT (user_id) DO UPDATE
 SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = now()
-RETURNING clerk_user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role
+RETURNING user_id, email, name, avatar_url, disabled_at, created_at, updated_at, locale, digest_frequency, last_digest_at, theme, admin_role
 `
 
 type UpsertUserParams struct {
-	ClerkUserID string `json:"clerk_user_id"`
-	Email       string `json:"email"`
-	Name        string `json:"name"`
-	AvatarUrl   string `json:"avatar_url"`
+	UserID    string `json:"user_id"`
+	Email     string `json:"email"`
+	Name      string `json:"name"`
+	AvatarUrl string `json:"avatar_url"`
 }
 
 func (q *Queries) UpsertUser(ctx context.Context, arg UpsertUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, upsertUser,
-		arg.ClerkUserID,
+		arg.UserID,
 		arg.Email,
 		arg.Name,
 		arg.AvatarUrl,
 	)
 	var i User
 	err := row.Scan(
-		&i.ClerkUserID,
+		&i.UserID,
 		&i.Email,
 		&i.Name,
 		&i.AvatarUrl,

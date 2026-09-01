@@ -1,13 +1,14 @@
 -- name: GetSubscriptionByOrg :one
-SELECT * FROM subscriptions WHERE clerk_org_id = $1;
+SELECT * FROM subscriptions WHERE org_id = $1;
 
--- Resubscribe after cancellation arrives with a NEW polar_subscription_id,
--- so clerk_org_id is the only safe conflict target.
+-- Resubscribe after cancellation arrives with a NEW provider_subscription_id,
+-- so org_id is the only safe conflict target.
 -- name: UpsertSubscription :one
-INSERT INTO subscriptions (clerk_org_id, polar_subscription_id, polar_customer_id, product_key, status, current_period_end, cancel_at_period_end)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-ON CONFLICT (clerk_org_id) DO UPDATE
-SET polar_subscription_id = EXCLUDED.polar_subscription_id,
+INSERT INTO subscriptions (org_id, provider, provider_subscription_id, provider_customer_id, product_key, status, current_period_end, cancel_at_period_end)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT (org_id) DO UPDATE
+SET provider = EXCLUDED.provider,
+    provider_subscription_id = EXCLUDED.provider_subscription_id,
     product_key = EXCLUDED.product_key,
     status = EXCLUDED.status,
     current_period_end = EXCLUDED.current_period_end,

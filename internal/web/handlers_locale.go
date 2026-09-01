@@ -56,9 +56,9 @@ func (s *Server) storeLocale(r *http.Request, locale string) {
 		return
 	}
 	if err := s.q.SetUserLocale(r.Context(), sqlc.SetUserLocaleParams{
-		ClerkUserID: user.ClerkUserID, Locale: locale,
+		UserID: user.UserID, Locale: locale,
 	}); err != nil {
-		s.log.Error("set locale", "error", err, "user", user.ClerkUserID)
+		s.log.Error("set locale", "error", err, "user", user.UserID)
 	}
 }
 

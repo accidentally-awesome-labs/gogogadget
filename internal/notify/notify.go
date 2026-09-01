@@ -24,7 +24,7 @@ var Kinds = []string{"welcome", "payment_failed", "export.ready", "webhook.faile
 // caller's work.
 func Send(ctx context.Context, q *sqlc.Queries, orgID, userID, kind, title, body, url string) {
 	pref, err := q.GetNotificationPreference(ctx, sqlc.GetNotificationPreferenceParams{
-		ClerkUserID: userID, Kind: kind,
+		UserID: userID, Kind: kind,
 	})
 	switch {
 	case err == nil && !pref.InApp:
@@ -34,7 +34,7 @@ func Send(ctx context.Context, q *sqlc.Queries, orgID, userID, kind, title, body
 		slog.ErrorContext(ctx, "notification preference lookup failed", "kind", kind, "user", userID, "error", err)
 	}
 	_, err = q.InsertNotification(ctx, sqlc.InsertNotificationParams{
-		ClerkOrgID: orgID, ClerkUserID: userID,
+		OrgID: orgID, UserID: userID,
 		Kind: kind, Title: title, Body: body, Url: url,
 	})
 	if err != nil {
@@ -50,6 +50,6 @@ func SendOrg(ctx context.Context, q *sqlc.Queries, orgID, kind, title, body, url
 		return
 	}
 	for _, m := range members {
-		Send(ctx, q, orgID, m.ClerkUserID, kind, title, body, url)
+		Send(ctx, q, orgID, m.UserID, kind, title, body, url)
 	}
 }

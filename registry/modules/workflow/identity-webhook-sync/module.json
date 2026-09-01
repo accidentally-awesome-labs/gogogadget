@@ -1,14 +1,37 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "routes": [
-        "identity.webhook.receive"
-      ]
-    },
+    "id": "ggg/workflow/identity-webhook-sync",
+    "kind": "workflow",
+    "name": "identity-webhook-sync",
+    "revision": 1,
     "contract": 1,
-    "data": [],
+    "title": "Identity provider sync",
+    "description": "Receives Clerk user and organization events and mirrors them into the local tables.",
+    "requires": [
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -23,107 +46,84 @@
           "version": "v1.99.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Receives Clerk user and organization events and mirrors them into the local tables.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "f91157a6ab1e89035738f821018670dae341c64f1bf3d8da279aba27834fadaa",
         "source": "internal/web/clerk_webhook_test.go",
-        "target": "internal/web/clerk_webhook_test.go"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "af0feb48f509a15ee2751bea3aa18cf61217bb215b72b380b70389222965c50a",
-        "source": "internal/web/handlers_webhooks.go",
-        "target": "internal/web/handlers_webhooks.go"
-      },
-      {
+        "target": "internal/web/clerk_webhook_test.go",
         "class": "test",
-        "contract": false,
+        "sha256": "d982b600af2455ed5794ecc5ac4b4865dbf042afa3132f494ddd9695c58b7d66",
         "rewrite_module": true,
-        "sha256": "1abdbf33cb793afe8ccb918d6883dc33a4d171b3b195d07ee7bc00f9616da8d9",
+        "contract": false
+      },
+      {
+        "source": "internal/web/handlers_webhooks.go",
+        "target": "internal/web/handlers_webhooks.go",
+        "class": "go",
+        "sha256": "864b5862b9a2d00599b0b7ef58f74ea460f9f06d1d7d60d0c913efd497b22bfd",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/webhook_bypass_test.go",
-        "target": "internal/web/webhook_bypass_test.go"
+        "target": "internal/web/webhook_bypass_test.go",
+        "class": "test",
+        "sha256": "fea34378c24cf6dbec8506ba5c6efd2305f3f008293b6f84c916e2886c6aa0d5",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/workflow/identity-webhook-sync",
-    "kind": "workflow",
+    "claims": {
+      "routes": [
+        "identity.webhook.receive"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "identity.webhook.receive",
+          "method": "POST",
+          "pattern": "/webhooks/clerk",
+          "scope": "webhook",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "svix signature verified with CLERK_WEBHOOK_SECRET; not a browser form",
+            "rate_exempt": false,
+            "maintenance_exempt": true,
+            "max_body_bytes": 1048576,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleClerkWebhook"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
     "locales": {
       "en": {
         "email.welcome.body": "Your workspace is ready. Create your first project, invite your team, and upgrade when you outgrow the free plan.",
-        "email.welcome.cta": "Open your dashboard \u2192",
+        "email.welcome.cta": "Open your dashboard →",
         "email.welcome.subject": "Welcome to GoGoGadget",
         "email.welcome.title": "Welcome aboard%s!"
       },
       "es": {
-        "email.welcome.body": "Tu espacio de trabajo est\u00e1 listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
-        "email.welcome.cta": "Abre tu panel \u2192",
+        "email.welcome.body": "Tu espacio de trabajo está listo. Crea tu primer proyecto, invita a tu equipo y actualiza cuando superes el plan gratuito.",
+        "email.welcome.cta": "Abre tu panel →",
         "email.welcome.subject": "Te damos la bienvenida a GoGoGadget",
-        "email.welcome.title": "\u00a1Bienvenido a bordo%s!"
+        "email.welcome.title": "¡Bienvenido a bordo%s!"
       }
     },
-    "migrations": [],
-    "name": "identity-webhook-sync",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "routes": [
-        {
-          "handler": "handleClerkWebhook",
-          "id": "identity.webhook.receive",
-          "method": "POST",
-          "package": "internal/web",
-          "pattern": "/webhooks/clerk",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": true,
-            "csrf_reason": "svix signature verified with CLERK_WEBHOOK_SECRET; not a browser form",
-            "idempotent": true,
-            "maintenance_exempt": true,
-            "max_body_bytes": 1048576,
-            "rate_exempt": false
-          },
-          "scope": "webhook"
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Identity provider sync"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

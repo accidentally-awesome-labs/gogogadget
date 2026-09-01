@@ -11,21 +11,21 @@ import (
 
 const getNotificationPreference = `-- name: GetNotificationPreference :one
 
-SELECT clerk_user_id, kind, in_app, created_at, updated_at FROM notification_preferences
-WHERE clerk_user_id = $1 AND kind = $2
+SELECT user_id, kind, in_app, created_at, updated_at FROM notification_preferences
+WHERE user_id = $1 AND kind = $2
 `
 
 type GetNotificationPreferenceParams struct {
-	ClerkUserID string `json:"clerk_user_id"`
-	Kind        string `json:"kind"`
+	UserID string `json:"user_id"`
+	Kind   string `json:"kind"`
 }
 
 // notification_preferences (per-user per-kind mutes; absent row = default-on)
 func (q *Queries) GetNotificationPreference(ctx context.Context, arg GetNotificationPreferenceParams) (NotificationPreference, error) {
-	row := q.db.QueryRow(ctx, getNotificationPreference, arg.ClerkUserID, arg.Kind)
+	row := q.db.QueryRow(ctx, getNotificationPreference, arg.UserID, arg.Kind)
 	var i NotificationPreference
 	err := row.Scan(
-		&i.ClerkUserID,
+		&i.UserID,
 		&i.Kind,
 		&i.InApp,
 		&i.CreatedAt,
@@ -35,13 +35,13 @@ func (q *Queries) GetNotificationPreference(ctx context.Context, arg GetNotifica
 }
 
 const listNotificationPreferencesByUser = `-- name: ListNotificationPreferencesByUser :many
-SELECT clerk_user_id, kind, in_app, created_at, updated_at FROM notification_preferences
-WHERE clerk_user_id = $1
+SELECT user_id, kind, in_app, created_at, updated_at FROM notification_preferences
+WHERE user_id = $1
 ORDER BY kind
 `
 
-func (q *Queries) ListNotificationPreferencesByUser(ctx context.Context, clerkUserID string) ([]NotificationPreference, error) {
-	rows, err := q.db.Query(ctx, listNotificationPreferencesByUser, clerkUserID)
+func (q *Queries) ListNotificationPreferencesByUser(ctx context.Context, userID string) ([]NotificationPreference, error) {
+	rows, err := q.db.Query(ctx, listNotificationPreferencesByUser, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (q *Queries) ListNotificationPreferencesByUser(ctx context.Context, clerkUs
 	for rows.Next() {
 		var i NotificationPreference
 		if err := rows.Scan(
-			&i.ClerkUserID,
+			&i.UserID,
 			&i.Kind,
 			&i.InApp,
 			&i.CreatedAt,
@@ -67,19 +67,19 @@ func (q *Queries) ListNotificationPreferencesByUser(ctx context.Context, clerkUs
 }
 
 const upsertNotificationPreference = `-- name: UpsertNotificationPreference :exec
-INSERT INTO notification_preferences (clerk_user_id, kind, in_app)
+INSERT INTO notification_preferences (user_id, kind, in_app)
 VALUES ($1, $2, $3)
-ON CONFLICT (clerk_user_id, kind) DO UPDATE
+ON CONFLICT (user_id, kind) DO UPDATE
 SET in_app = EXCLUDED.in_app, updated_at = now()
 `
 
 type UpsertNotificationPreferenceParams struct {
-	ClerkUserID string `json:"clerk_user_id"`
-	Kind        string `json:"kind"`
-	InApp       bool   `json:"in_app"`
+	UserID string `json:"user_id"`
+	Kind   string `json:"kind"`
+	InApp  bool   `json:"in_app"`
 }
 
 func (q *Queries) UpsertNotificationPreference(ctx context.Context, arg UpsertNotificationPreferenceParams) error {
-	_, err := q.db.Exec(ctx, upsertNotificationPreference, arg.ClerkUserID, arg.Kind, arg.InApp)
+	_, err := q.db.Exec(ctx, upsertNotificationPreference, arg.UserID, arg.Kind, arg.InApp)
 	return err
 }

@@ -12,7 +12,7 @@ func (s *Server) handlePricing(w http.ResponseWriter, r *http.Request) {
 	authed := identity.UserFrom(r.Context()) != nil && identity.OrgFrom(r.Context()) != nil
 	currentPlan := ""
 	if authed {
-		currentPlan = billing.CurrentPlan(r.Context(), s.q, identity.OrgFrom(r.Context()).ClerkOrgID, s.cfg.Now()).Key
+		currentPlan = billing.CurrentPlan(r.Context(), s.q, identity.OrgFrom(r.Context()).OrgID, s.cfg.Now()).Key
 	}
 	s.Render(w, r, Page{
 		Title:       "Pricing",

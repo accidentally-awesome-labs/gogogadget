@@ -1,5 +1,94 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/workflow/files",
+    "kind": "workflow",
+    "name": "files",
+    "revision": 1,
+    "contract": 1,
+    "title": "File upload, download and delete",
+    "description": "File mutations and object transport for the app UI: quota-enforced multipart upload, always-attachment download, and delete with best-effort object cleanup.",
+    "requires": [
+      {
+        "id": "ggg/page/files",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/audit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/storage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/db/queries/files.sql",
+        "target": "internal/db/queries/files.sql",
+        "class": "query",
+        "sha256": "122dd706bbba17739f40577d24d60c09ceef4129398dd1df0787deb7334ffac5",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/web/workflow_files.go",
+        "target": "internal/web/workflow_files.go",
+        "class": "go",
+        "sha256": "ff5310dffc3952079be79e65ef7bf05cd938a37c78238683571c1dddcd46fd3c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "files.delete",
@@ -7,117 +96,60 @@
         "files.upload"
       ]
     },
-    "contract": 1,
-    "data": [
-      {
-        "account_delete": "cascade",
-        "export": true,
-        "external_objects": [
-          "object-storage"
-        ],
-        "organization_delete": "cascade",
-        "scope": "org",
-        "table": "files"
-      }
-    ],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
-    },
-    "description": "File mutations and object transport for the app UI: quota-enforced multipart upload, always-attachment download, and delete with best-effort object cleanup.",
-    "docs": [],
-    "environment": [],
-    "files": [
-      {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "6d420370621e851d8587117736cfe40f79be8c26bec2db5ec5d5a22fa17ff9bf",
-        "source": "internal/db/queries/files.sql",
-        "target": "internal/db/queries/files.sql"
-      },
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "cd3d710bf99e084fd6468bc3eca786357a6d01e3b3abb2f7d3d6a30f186e8cd7",
-        "source": "internal/web/workflow_files.go",
-        "target": "internal/web/workflow_files.go"
-      }
-    ],
-    "id": "ggg/workflow/files",
-    "kind": "workflow",
-    "migrations": [
-      {
-        "id": "0003_files",
-        "kind": "immutable",
-        "sha256": "5c361c8d9c9aed9fa7dd0d366ef1789278fd4922a4d6ed873771e3b1137987c6",
-        "source": "internal/db/migrations/0003_files.sql"
-      }
-    ],
-    "name": "files",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/page/files"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/audit"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/identity"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/security"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/storage"
-      }
-    ],
-    "revision": 1,
     "runtime": {
+      "routes": [
+        {
+          "id": "files.delete",
+          "method": "DELETE",
+          "pattern": "/app/files/{id}",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFileDelete"
+        },
+        {
+          "id": "files.download",
+          "method": "GET",
+          "pattern": "/app/files/{id}",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFileDownload"
+        },
+        {
+          "id": "files.upload",
+          "method": "POST",
+          "pattern": "/app/files",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleFileUpload"
+        }
+      ],
       "queries": [
         {
           "name": "CountFilesByOrg",
@@ -143,67 +175,35 @@
           "name": "SumBytesByOrg",
           "table": "files"
         }
-      ],
-      "routes": [
-        {
-          "handler": "handleFileDelete",
-          "id": "files.delete",
-          "method": "DELETE",
-          "package": "internal/web",
-          "pattern": "/app/files/{id}",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        },
-        {
-          "handler": "handleFileDownload",
-          "id": "files.download",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/app/files/{id}",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        },
-        {
-          "handler": "handleFileUpload",
-          "id": "files.upload",
-          "method": "POST",
-          "package": "internal/web",
-          "pattern": "/app/files",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "app"
-        }
       ]
     },
+    "migrations": [
+      {
+        "id": "0003_files",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0003_files.sql",
+        "sha256": "5c361c8d9c9aed9fa7dd0d366ef1789278fd4922a4d6ed873771e3b1137987c6"
+      }
+    ],
+    "environment": [],
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "File upload, download and delete"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "files",
+        "scope": "org",
+        "export": true,
+        "account_delete": "cascade",
+        "organization_delete": "cascade",
+        "external_objects": [
+          "object-storage"
+        ]
+      }
+    ],
+    "removal_policy": "free"
+  }
 }

@@ -22,17 +22,17 @@ func (s *Server) handleBillingCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	plan := billing.PlanByKey(r.FormValue("plan"))
-	if plan.PolarProductID == "" {
+	if plan.ProviderProductID == "" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		s.Render(w, r, Page{Title: "Billing", Layout: templates.LayoutApp},
 			templates.BillingError("That plan isn't available for checkout."))
 		return
 	}
 	url, err := s.billingClient.CreateCheckout(r.Context(), billing.CheckoutParams{
-		ProductID:          plan.PolarProductID,
+		ProductID:          plan.ProviderProductID,
 		SuccessURL:         s.cfg.AppURL + "/app/settings/billing?success=1",
-		CustomerExternalID: org.ClerkOrgID,
-		Metadata:           map[string]string{"clerk_org_id": org.ClerkOrgID},
+		CustomerExternalID: org.OrgID,
+		Metadata:           map[string]string{"org_id": org.OrgID},
 	})
 	if err != nil {
 		s.log.Error("create checkout", "error", err)
@@ -51,7 +51,7 @@ func (s *Server) handleBillingPortal(w http.ResponseWriter, r *http.Request) {
 		s.renderBillingNotConfigured(w, r)
 		return
 	}
-	url, err := s.billingClient.CreatePortalSession(r.Context(), org.ClerkOrgID)
+	url, err := s.billingClient.CreatePortalSession(r.Context(), org.OrgID)
 	if err != nil {
 		s.log.Error("create portal session", "error", err)
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -72,7 +72,7 @@ func (s *Server) renderBillingNotConfigured(w http.ResponseWriter, r *http.Reque
 func (s *Server) handleSettingsBillingFragment(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(r.Context())
-	sub, err := s.q.GetSubscriptionByOrg(ctx, org.ClerkOrgID)
+	sub, err := s.q.GetSubscriptionByOrg(ctx, org.OrgID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		s.Render(w, r, Page{Title: "Billing", Layout: templates.LayoutApp},
 			templates.BillingCard(identity.PlanFrom(ctx), nil, true))

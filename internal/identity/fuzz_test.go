@@ -39,9 +39,9 @@ func FuzzFakeVerifier(f *testing.F) {
 			return
 		}
 		// Success: claims must round-trip the token parts exactly.
-		assert.Equal(t, "e2e:"+claims.UserID+":"+claims.OrgID+":"+claims.OrgRole, token,
+		assert.Equal(t, "e2e:"+claims.UserSubject+":"+claims.OrgSubject+":"+claims.OrgRole, token,
 			"claims do not round-trip token %q", token)
-		assert.NotEmpty(t, claims.UserID, "empty userID accepted for token %q", token)
-		assert.Equal(t, claims.OrgID, claims.OrgSlug, "OrgSlug must mirror OrgID for token %q", token)
+		assert.NotEmpty(t, claims.UserSubject, "empty userID accepted for token %q", token)
+		assert.Equal(t, claims.OrgSubject, claims.OrgSlug, "OrgSlug must mirror OrgID for token %q", token)
 	})
 }

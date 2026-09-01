@@ -66,7 +66,7 @@ func Emit(ctx context.Context, q *sqlc.Queries, orgID, eventType string, data an
 	}
 
 	endpoints, err := q.ListActiveEndpointsForEvent(ctx, sqlc.ListActiveEndpointsForEventParams{
-		ClerkOrgID: orgID, EventType: eventType,
+		OrgID: orgID, EventType: eventType,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "webhook emit lookup", "type", eventType, "org", orgID, "error", err)
@@ -74,7 +74,7 @@ func Emit(ctx context.Context, q *sqlc.Queries, orgID, eventType string, data an
 	}
 	for _, ep := range endpoints {
 		d, err := q.InsertWebhookDelivery(ctx, sqlc.InsertWebhookDeliveryParams{
-			EndpointID: ep.ID, ClerkOrgID: orgID, EventType: eventType, Payload: env,
+			EndpointID: ep.ID, OrgID: orgID, EventType: eventType, Payload: env,
 		})
 		if err != nil {
 			slog.ErrorContext(ctx, "webhook delivery insert", "type", eventType, "endpoint", ep.ID, "error", err)

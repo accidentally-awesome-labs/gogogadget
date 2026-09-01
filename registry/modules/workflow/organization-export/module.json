@@ -78,7 +78,7 @@
         "source": "internal/jobs/export_org.go",
         "target": "internal/jobs/export_org.go",
         "class": "go",
-        "sha256": "cf52dd603ab27b089c92e8e3806de134efe50ea71b71603f9e5802dfeb9fc79f",
+        "sha256": "88b2c00534366912954df49e26f26116fd864cd487feca44da07d59534180d78",
         "rewrite_module": true,
         "contract": false
       },
@@ -86,7 +86,7 @@
         "source": "internal/jobs/export_org_test.go",
         "target": "internal/jobs/export_org_test.go",
         "class": "test",
-        "sha256": "02e45d0fe3ebbccdf52bb25349472f41568684add7b3280292d2c17a547bed77",
+        "sha256": "0513d4cc58b90710dd210c98e2cbcb94fc26ae649cc782489340b3922989d624",
         "rewrite_module": true,
         "contract": false
       },
@@ -94,7 +94,7 @@
         "source": "internal/web/workflow_organization_export.go",
         "target": "internal/web/workflow_organization_export.go",
         "class": "go",
-        "sha256": "64d13eea44cbae6df43050e0c940269508598b94a0c39d62f3f4c7496c455e55",
+        "sha256": "6d53c214348be9b430f10a1267af66a510d8bce3c1d3cbfbd5b16827bbd8934a",
         "rewrite_module": true,
         "contract": true
       }

@@ -61,14 +61,14 @@ func (h *AI) Chat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Plan meter: current-month usage + the estimate vs the cap.
-	plan := billing.CurrentPlan(ctx, h.Q, org.ClerkOrgID, time.Now())
+	plan := billing.CurrentPlan(ctx, h.Q, org.OrgID, time.Now())
 	for _, m := range plan.Meters {
 		if m.Key != "ai_tokens" || m.LimitPerMonth <= 0 {
 			continue
 		}
 		monthStart := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.UTC)
 		used, err := h.Q.SumUsageByNameSince(ctx, sqlc.SumUsageByNameSinceParams{
-			ClerkOrgID: org.ClerkOrgID, Name: "ai_tokens",
+			OrgID: org.OrgID, Name: "ai_tokens",
 			CreatedAt: pgtype.Timestamptz{Time: monthStart, Valid: true},
 		})
 		if err != nil {
@@ -88,10 +88,10 @@ func (h *AI) Chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := int64(resp.PromptTokens + resp.CompletionTokens)
-	usage.Record(ctx, h.Q, org.ClerkOrgID, "ai_tokens", total, "", map[string]any{
+	usage.Record(ctx, h.Q, org.OrgID, "ai_tokens", total, "", map[string]any{
 		"_llm": map[string]any{"model": resp.Model, "prompt_tokens": resp.PromptTokens, "completion_tokens": resp.CompletionTokens, "total_tokens": total},
 	})
-	audit.Log(ctx, h.Q, org.ClerkOrgID, "", "ai.chat", map[string]any{"via": "api", "model": resp.Model, "tokens": total})
+	audit.Log(ctx, h.Q, org.OrgID, "", "ai.chat", map[string]any{"via": "api", "model": resp.Model, "tokens": total})
 
 	WriteJSON(w, http.StatusOK, map[string]any{
 		"content": resp.Content,

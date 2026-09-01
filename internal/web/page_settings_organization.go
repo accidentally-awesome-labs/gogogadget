@@ -10,7 +10,7 @@ import (
 // GET /app/settings/org
 func (s *Server) handleSettingsOrg(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
-	members, err := s.q.ListMembersByOrg(r.Context(), org.ClerkOrgID)
+	members, err := s.q.ListMembersByOrg(r.Context(), org.OrgID)
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return

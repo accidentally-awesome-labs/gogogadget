@@ -49,9 +49,9 @@ func TestFlagEvaluatorSemantics(t *testing.T) {
 	assert.Less(t, on, 40, "some orgs out of the 50% bucket")
 
 	// Override wins over everything (even rollout 0).
-	require.NoError(t, s.q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{FlagKey: "beta", ClerkOrgID: "org_fl", Enabled: true}))
+	require.NoError(t, s.q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{FlagKey: "beta", OrgID: "org_fl", Enabled: true}))
 	assert.True(t, ev4.Enabled(ctx, "org_fl", "beta"), "org override on wins over rollout 0")
-	require.NoError(t, s.q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{FlagKey: "beta", ClerkOrgID: "org_fl", Enabled: false}))
+	require.NoError(t, s.q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{FlagKey: "beta", OrgID: "org_fl", Enabled: false}))
 	require.NoError(t, s.q.SetFeatureFlagRollout(ctx, sqlc.SetFeatureFlagRolloutParams{Key: "beta", Rollout: 100}))
 	ev5 := flags.NewDBEvaluator(s.q, time.Minute)
 	assert.False(t, ev5.Enabled(ctx, "org_fl", "beta"), "org override off wins over full rollout")
@@ -162,7 +162,7 @@ func TestAdminFlagDeleteCascadesOverrides(t *testing.T) {
 	s := integrationServer(t, nil)
 	adminUser(t, s, "user_fd", "org_fd")
 	require.NoError(t, s.q.UpsertFeatureFlag(t.Context(), sqlc.UpsertFeatureFlagParams{Key: "flag_del", Description: "", Enabled: true, Rollout: 100}))
-	require.NoError(t, s.q.UpsertFlagOverride(t.Context(), sqlc.UpsertFlagOverrideParams{FlagKey: "flag_del", ClerkOrgID: "org_fd", Enabled: false}))
+	require.NoError(t, s.q.UpsertFlagOverride(t.Context(), sqlc.UpsertFlagOverrideParams{FlagKey: "flag_del", OrgID: "org_fd", Enabled: false}))
 	s.invalidateFlagCache()
 	cookie := sessionCookie("user_fd", "org_fd", "org:admin")
 

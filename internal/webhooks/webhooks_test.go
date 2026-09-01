@@ -14,7 +14,7 @@ import (
 
 func seedOrg(t *testing.T, q *sqlc.Queries, id string) {
 	t.Helper()
-	_, err := q.UpsertOrg(context.Background(), sqlc.UpsertOrgParams{ClerkOrgID: id, Name: id, Slug: id, ImageUrl: ""})
+	_, err := q.UpsertOrg(context.Background(), sqlc.UpsertOrgParams{OrgID: id, Name: id, Slug: id, ImageUrl: ""})
 	require.NoError(t, err)
 }
 
@@ -25,12 +25,12 @@ func insertEndpoint(t *testing.T, q *sqlc.Queries, orgID, url, events string, di
 		require.NoError(t, json.Unmarshal([]byte(events), &eventTypes))
 	}
 	ep, err := q.InsertWebhookEndpoint(context.Background(), sqlc.InsertWebhookEndpointParams{
-		ClerkOrgID: orgID, CreatedBy: "user_w", Url: url, Secret: webhooks.NewSecret(), EventTypes: eventTypes, Description: "",
+		OrgID: orgID, CreatedBy: "user_w", Url: url, Secret: webhooks.NewSecret(), EventTypes: eventTypes, Description: "",
 	})
 	require.NoError(t, err)
 	if disabled {
 		require.NoError(t, q.SetWebhookEndpointDisabled(context.Background(), sqlc.SetWebhookEndpointDisabledParams{
-			ID: ep.ID, ClerkOrgID: orgID, Disabled: true,
+			ID: ep.ID, OrgID: orgID, Disabled: true,
 		}))
 	}
 	return ep.ID

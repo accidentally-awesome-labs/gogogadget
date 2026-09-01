@@ -7,7 +7,7 @@ import "context"
 type Client interface {
 	CreateCheckout(ctx context.Context, p CheckoutParams) (checkoutURL string, err error)
 	CreatePortalSession(ctx context.Context, customerExternalID string) (portalURL string, err error)
-	RevokeSubscription(ctx context.Context, polarSubscriptionID string) error
+	RevokeSubscription(ctx context.Context, providerSubscriptionID string) error
 	IngestUsage(ctx context.Context, customerExternalID string, events []UsageEvent) error
 }
 

@@ -29,17 +29,17 @@ func TestNotificationPrefsPageAndSave(t *testing.T) {
 	code, _, _ = postForm(t, s, "/app/settings/notifications", form, cookie)
 	assert.Equal(t, http.StatusOK, code)
 
-	muted, err := s.q.GetNotificationPreference(t.Context(), sqlc.GetNotificationPreferenceParams{ClerkUserID: "user_np", Kind: "welcome"})
+	muted, err := s.q.GetNotificationPreference(t.Context(), sqlc.GetNotificationPreferenceParams{UserID: "user_np", Kind: "welcome"})
 	require.NoError(t, err)
 	assert.False(t, muted.InApp)
-	on, err := s.q.GetNotificationPreference(t.Context(), sqlc.GetNotificationPreferenceParams{ClerkUserID: "user_np", Kind: "payment_failed"})
+	on, err := s.q.GetNotificationPreference(t.Context(), sqlc.GetNotificationPreferenceParams{UserID: "user_np", Kind: "payment_failed"})
 	require.NoError(t, err)
 	assert.True(t, on.InApp)
 
 	// The muted kind blocks notify.Send; the on kind still lands.
 	notify.Send(t.Context(), s.q, "org_np", "user_np", "welcome", "muted", "", "")
 	notify.Send(t.Context(), s.q, "org_np", "user_np", "payment_failed", "sent", "", "")
-	n, err := s.q.CountNotificationsByUser(t.Context(), sqlc.CountNotificationsByUserParams{ClerkOrgID: "org_np", ClerkUserID: "user_np"})
+	n, err := s.q.CountNotificationsByUser(t.Context(), sqlc.CountNotificationsByUserParams{OrgID: "org_np", UserID: "user_np"})
 	require.NoError(t, err)
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), n, "only the unmuted kind wrote a row")
@@ -63,7 +63,7 @@ func TestDigestFrequencyPersists(t *testing.T) {
 	code, _, _ = postForm(t, s, "/app/settings/notifications",
 		url.Values{"digest_frequency": {"daily"}}, cookie)
 	require.Equal(t, http.StatusOK, code)
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_dig")
+	u, err := s.q.GetUserByID(t.Context(), "user_dig")
 	require.NoError(t, err)
 	assert.Equal(t, "daily", u.DigestFrequency)
 
@@ -82,7 +82,7 @@ func TestDigestFrequencyRejectsUnknownValue(t *testing.T) {
 		url.Values{"digest_frequency": {"hourly'; DROP TABLE users; --"}}, cookie)
 	assert.Equal(t, http.StatusOK, code, "an unknown cadence is ignored, not a 500")
 
-	u, err := s.q.GetUserByClerkID(t.Context(), "user_digx")
+	u, err := s.q.GetUserByID(t.Context(), "user_digx")
 	require.NoError(t, err)
 	assert.Equal(t, "weekly", u.DigestFrequency, "the stored value is untouched")
 }

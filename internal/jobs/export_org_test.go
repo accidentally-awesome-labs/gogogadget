@@ -36,17 +36,17 @@ func seedExportOrg(t *testing.T, pool poolExec, q *sqlc.Queries, orgID string) {
 		sql  string
 		args []any
 	}{
-		{`INSERT INTO orgs (clerk_org_id, name, slug) VALUES ($1, 'Export Org', $1) ON CONFLICT DO NOTHING`, []any{orgID}},
-		{`INSERT INTO users (clerk_user_id, email, name) VALUES ('user_exp', 'exp@example.com', 'Exporter') ON CONFLICT DO NOTHING`, nil},
-		{`INSERT INTO org_members (clerk_org_id, clerk_user_id, role) VALUES ($1, 'user_exp', 'org:admin') ON CONFLICT DO NOTHING`, []any{orgID}},
-		{`INSERT INTO projects (clerk_org_id, name) VALUES ($1, 'Exported project')`, []any{orgID}},
-		{`INSERT INTO files (clerk_org_id, uploader_user_id, filename, content_type, size_bytes, storage_key)
+		{`INSERT INTO orgs (org_id, name, slug) VALUES ($1, 'Export Org', $1) ON CONFLICT DO NOTHING`, []any{orgID}},
+		{`INSERT INTO users (user_id, email, name) VALUES ('user_exp', 'exp@example.com', 'Exporter') ON CONFLICT DO NOTHING`, nil},
+		{`INSERT INTO org_members (org_id, user_id, role) VALUES ($1, 'user_exp', 'org:admin') ON CONFLICT DO NOTHING`, []any{orgID}},
+		{`INSERT INTO projects (org_id, name) VALUES ($1, 'Exported project')`, []any{orgID}},
+		{`INSERT INTO files (org_id, uploader_user_id, filename, content_type, size_bytes, storage_key)
 		  VALUES ($1, 'user_exp', 'notes.txt', 'text/plain', 12, 'k/notes.txt')`, []any{orgID}},
-		{`INSERT INTO api_tokens (clerk_org_id, name, token_hash, scope) VALUES ($1, 'ci', $2, 'read')`, []any{orgID, exportTokenHash}},
-		{`INSERT INTO webhook_endpoints (clerk_org_id, created_by, url, secret, event_types)
+		{`INSERT INTO api_tokens (org_id, name, token_hash, scope) VALUES ($1, 'ci', $2, 'read')`, []any{orgID, exportTokenHash}},
+		{`INSERT INTO webhook_endpoints (org_id, created_by, url, secret, event_types)
 		  VALUES ($1, 'user_exp', 'https://example.test/hook', $2, ARRAY['project.created'])`, []any{orgID, exportSecret}},
-		{`INSERT INTO audit_log (clerk_org_id, clerk_user_id, action, metadata) VALUES ($1, 'user_exp', 'project.created', '{"id":1}')`, []any{orgID}},
-		{`INSERT INTO subscriptions (clerk_org_id, polar_customer_id, product_key, status)
+		{`INSERT INTO audit_log (org_id, user_id, action, metadata) VALUES ($1, 'user_exp', 'project.created', '{"id":1}')`, []any{orgID}},
+		{`INSERT INTO subscriptions (org_id, provider_customer_id, product_key, status)
 		  VALUES ($1, 'cus_x', 'pro', 'active') ON CONFLICT DO NOTHING`, []any{orgID}},
 	} {
 		_, err := pool.Exec(ctx, stmt.sql, stmt.args...)
@@ -117,9 +117,9 @@ func TestOrgExportIsScopedToOneOrg(t *testing.T) {
 	pool, q := testdb.Open(t, "jobsexport")
 	ctx := context.Background()
 	seedExportOrg(t, pool, q, "org_exp3")
-	_, err := pool.Exec(ctx, `INSERT INTO orgs (clerk_org_id, name, slug) VALUES ('org_other', 'Other', 'other') ON CONFLICT DO NOTHING`)
+	_, err := pool.Exec(ctx, `INSERT INTO orgs (org_id, name, slug) VALUES ('org_other', 'Other', 'other') ON CONFLICT DO NOTHING`)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO projects (clerk_org_id, name) VALUES ('org_other', 'Not yours')`)
+	_, err = pool.Exec(ctx, `INSERT INTO projects (org_id, name) VALUES ('org_other', 'Not yours')`)
 	require.NoError(t, err)
 
 	w := exportWorker(t, q, &captureSender{})
@@ -142,7 +142,7 @@ func TestOrgExportJobStoresFileAndNotifies(t *testing.T) {
 	payload := ExportProjectsPayload{OrgID: orgID, UserID: "user_exp"}
 	require.NoError(t, w.exportOrgJSON(ctx, payload))
 
-	files, err := q.ListFilesByOrg(ctx, sqlc.ListFilesByOrgParams{ClerkOrgID: orgID, Limit: 10, Offset: 0})
+	files, err := q.ListFilesByOrg(ctx, sqlc.ListFilesByOrgParams{OrgID: orgID, Limit: 10, Offset: 0})
 	require.NoError(t, err)
 	require.Len(t, files, 2, "the seeded file plus the export")
 	var export sqlc.File
@@ -165,7 +165,7 @@ func TestOrgExportJobStoresFileAndNotifies(t *testing.T) {
 	assert.NotContains(t, string(raw), exportSecret)
 
 	notes, err := q.ListNotificationsByUser(ctx, sqlc.ListNotificationsByUserParams{
-		ClerkOrgID: orgID, ClerkUserID: "user_exp", Limit: 10, Offset: 0,
+		OrgID: orgID, UserID: "user_exp", Limit: 10, Offset: 0,
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, notes, "the requester must learn the export is ready")

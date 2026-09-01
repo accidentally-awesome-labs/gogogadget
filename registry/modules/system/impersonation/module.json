@@ -1,22 +1,30 @@
 {
+  "schema": 2,
   "module": {
-    "claims": {
-      "queries": [
-        "impersonation"
-      ]
-    },
+    "id": "ggg/system/impersonation",
+    "kind": "system",
+    "name": "impersonation",
+    "revision": 1,
     "contract": 1,
-    "data": [
+    "title": "Support impersonation",
+    "description": "Audited, time-boxed administrator impersonation of a user, including the recorded reason.",
+    "requires": [
       {
-        "account_delete": "manual",
-        "export": false,
-        "organization_delete": "retain",
-        "scope": "user",
-        "table": "impersonation_sessions"
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
       }
     ],
     "dependencies": {
-      "containers": [],
       "go": [
         {
           "module": "github.com/jackc/pgx/v5",
@@ -27,94 +35,32 @@
           "version": "v1.11.1"
         }
       ],
-      "tools": []
+      "tools": [],
+      "containers": []
     },
-    "description": "Audited, time-boxed administrator impersonation of a user, including the recorded reason.",
-    "docs": [],
-    "environment": [],
     "files": [
       {
-        "class": "query",
-        "contract": false,
-        "rewrite_module": false,
-        "sha256": "e85ee2a16336b6b7ea9e01046241b2846ba0ceb6a43dd314b660d4444bab7744",
         "source": "internal/db/queries/impersonation.sql",
-        "target": "internal/db/queries/impersonation.sql"
+        "target": "internal/db/queries/impersonation.sql",
+        "class": "query",
+        "sha256": "6017580b63e0f70bf13f74ae7b6350afec60164a7cedb8cf5b89fca258bc1e53",
+        "rewrite_module": false,
+        "contract": false
       },
       {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "517b1ed90bb131d9df76a601a5ac73663912be28c7166edfffdb089647e61f2c",
         "source": "internal/web/impersonation_test.go",
-        "target": "internal/web/impersonation_test.go"
+        "target": "internal/web/impersonation_test.go",
+        "class": "test",
+        "sha256": "85bb916a633e0fd09c6d5a7091d4e8b29d5274014365717740e7cbc11e07fac8",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
-    "id": "ggg/system/impersonation",
-    "kind": "system",
-    "locales": {
-      "en": {
-        "impersonation.banner": "Viewing as",
-        "impersonation.cancel": "Cancel",
-        "impersonation.exit": "Exit",
-        "impersonation.no_orgs": "This user has no organization to view as.",
-        "impersonation.org_label": "Organization",
-        "impersonation.reason_hint": "Recorded on the session and in both audit entries (start and stop). 10\u2013280 characters.",
-        "impersonation.reason_invalid": "State a reason of 10\u2013280 characters \u2014 it goes in the audit trail.",
-        "impersonation.reason_label": "Reason",
-        "impersonation.reason_placeholder": "Ticket #1234 \u2014 reproducing the failing export",
-        "impersonation.start_button": "Start session",
-        "impersonation.start_intro": "You are about to view the app as %s. The session lasts 2 hours, is visible to you as a banner, and is recorded.",
-        "impersonation.start_title": "View as user"
-      },
-      "es": {
-        "impersonation.banner": "Viendo como",
-        "impersonation.cancel": "Cancelar",
-        "impersonation.exit": "Salir",
-        "impersonation.no_orgs": "Este usuario no tiene ninguna organizaci\u00f3n que ver.",
-        "impersonation.org_label": "Organizaci\u00f3n",
-        "impersonation.reason_hint": "Se registra en la sesi\u00f3n y en ambas entradas de auditor\u00eda (inicio y fin). 10\u2013280 caracteres.",
-        "impersonation.reason_invalid": "Indica un motivo de 10 a 280 caracteres: queda en el registro de auditor\u00eda.",
-        "impersonation.reason_label": "Motivo",
-        "impersonation.reason_placeholder": "Ticket #1234: reproducir la exportaci\u00f3n fallida",
-        "impersonation.start_button": "Iniciar sesi\u00f3n",
-        "impersonation.start_intro": "Vas a ver la app como %s. La sesi\u00f3n dura 2 horas, te aparecer\u00e1 un aviso y queda registrada.",
-        "impersonation.start_title": "Ver como usuario"
-      }
+    "claims": {
+      "queries": [
+        "impersonation"
+      ]
     },
-    "migrations": [
-      {
-        "id": "0009_impersonation",
-        "kind": "immutable",
-        "sha256": "e79847e3da06cbe89fdde459c9b61675fdde0c27777c856dcdd214616af3623b",
-        "source": "internal/db/migrations/0009_impersonation.sql"
-      },
-      {
-        "id": "0014_impersonation_reason",
-        "kind": "immutable",
-        "sha256": "89286f5e88b1066e78f5e7641afd655fdb89ea6cabca525c700c7beb8c6a343f",
-        "source": "internal/db/migrations/0014_impersonation_reason.sql"
-      }
-    ],
-    "name": "impersonation",
-    "removal_policy": "retain-data",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/database"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/organizations"
-      }
-    ],
-    "revision": 1,
     "runtime": {
       "queries": [
         {
@@ -135,8 +81,62 @@
         }
       ]
     },
+    "migrations": [
+      {
+        "id": "0009_impersonation",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0009_impersonation.sql",
+        "sha256": "e79847e3da06cbe89fdde459c9b61675fdde0c27777c856dcdd214616af3623b"
+      },
+      {
+        "id": "0014_impersonation_reason",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0014_impersonation_reason.sql",
+        "sha256": "89286f5e88b1066e78f5e7641afd655fdb89ea6cabca525c700c7beb8c6a343f"
+      }
+    ],
+    "environment": [],
+    "locales": {
+      "en": {
+        "impersonation.banner": "Viewing as",
+        "impersonation.cancel": "Cancel",
+        "impersonation.exit": "Exit",
+        "impersonation.no_orgs": "This user has no organization to view as.",
+        "impersonation.org_label": "Organization",
+        "impersonation.reason_hint": "Recorded on the session and in both audit entries (start and stop). 10–280 characters.",
+        "impersonation.reason_invalid": "State a reason of 10–280 characters — it goes in the audit trail.",
+        "impersonation.reason_label": "Reason",
+        "impersonation.reason_placeholder": "Ticket #1234 — reproducing the failing export",
+        "impersonation.start_button": "Start session",
+        "impersonation.start_intro": "You are about to view the app as %s. The session lasts 2 hours, is visible to you as a banner, and is recorded.",
+        "impersonation.start_title": "View as user"
+      },
+      "es": {
+        "impersonation.banner": "Viendo como",
+        "impersonation.cancel": "Cancelar",
+        "impersonation.exit": "Salir",
+        "impersonation.no_orgs": "Este usuario no tiene ninguna organización que ver.",
+        "impersonation.org_label": "Organización",
+        "impersonation.reason_hint": "Se registra en la sesión y en ambas entradas de auditoría (inicio y fin). 10–280 caracteres.",
+        "impersonation.reason_invalid": "Indica un motivo de 10 a 280 caracteres: queda en el registro de auditoría.",
+        "impersonation.reason_label": "Motivo",
+        "impersonation.reason_placeholder": "Ticket #1234: reproducir la exportación fallida",
+        "impersonation.start_button": "Iniciar sesión",
+        "impersonation.start_intro": "Vas a ver la app como %s. La sesión dura 2 horas, te aparecerá un aviso y queda registrada.",
+        "impersonation.start_title": "Ver como usuario"
+      }
+    },
+    "docs": [],
     "tests": {},
-    "title": "Support impersonation"
-  },
-  "schema": 2
+    "data": [
+      {
+        "table": "impersonation_sessions",
+        "scope": "user",
+        "export": false,
+        "account_delete": "manual",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "retain-data"
+  }
 }

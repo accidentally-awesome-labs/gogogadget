@@ -23,23 +23,24 @@ func (q *Queries) CountActiveSubscriptions(ctx context.Context) (int64, error) {
 }
 
 const getSubscriptionByOrg = `-- name: GetSubscriptionByOrg :one
-SELECT id, clerk_org_id, polar_subscription_id, polar_customer_id, product_key, status, current_period_end, cancel_at_period_end, created_at, updated_at FROM subscriptions WHERE clerk_org_id = $1
+SELECT id, org_id, provider_subscription_id, provider_customer_id, product_key, status, current_period_end, cancel_at_period_end, created_at, updated_at, provider FROM subscriptions WHERE org_id = $1
 `
 
-func (q *Queries) GetSubscriptionByOrg(ctx context.Context, clerkOrgID string) (Subscription, error) {
-	row := q.db.QueryRow(ctx, getSubscriptionByOrg, clerkOrgID)
+func (q *Queries) GetSubscriptionByOrg(ctx context.Context, orgID string) (Subscription, error) {
+	row := q.db.QueryRow(ctx, getSubscriptionByOrg, orgID)
 	var i Subscription
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
-		&i.PolarSubscriptionID,
-		&i.PolarCustomerID,
+		&i.OrgID,
+		&i.ProviderSubscriptionID,
+		&i.ProviderCustomerID,
 		&i.ProductKey,
 		&i.Status,
 		&i.CurrentPeriodEnd,
 		&i.CancelAtPeriodEnd,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Provider,
 	)
 	return i, err
 }
@@ -76,35 +77,38 @@ func (q *Queries) ListRevenueSubscriptions(ctx context.Context) ([]ListRevenueSu
 }
 
 const upsertSubscription = `-- name: UpsertSubscription :one
-INSERT INTO subscriptions (clerk_org_id, polar_subscription_id, polar_customer_id, product_key, status, current_period_end, cancel_at_period_end)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-ON CONFLICT (clerk_org_id) DO UPDATE
-SET polar_subscription_id = EXCLUDED.polar_subscription_id,
+INSERT INTO subscriptions (org_id, provider, provider_subscription_id, provider_customer_id, product_key, status, current_period_end, cancel_at_period_end)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+ON CONFLICT (org_id) DO UPDATE
+SET provider = EXCLUDED.provider,
+    provider_subscription_id = EXCLUDED.provider_subscription_id,
     product_key = EXCLUDED.product_key,
     status = EXCLUDED.status,
     current_period_end = EXCLUDED.current_period_end,
     cancel_at_period_end = EXCLUDED.cancel_at_period_end,
     updated_at = now()
-RETURNING id, clerk_org_id, polar_subscription_id, polar_customer_id, product_key, status, current_period_end, cancel_at_period_end, created_at, updated_at
+RETURNING id, org_id, provider_subscription_id, provider_customer_id, product_key, status, current_period_end, cancel_at_period_end, created_at, updated_at, provider
 `
 
 type UpsertSubscriptionParams struct {
-	ClerkOrgID          string             `json:"clerk_org_id"`
-	PolarSubscriptionID pgtype.Text        `json:"polar_subscription_id"`
-	PolarCustomerID     string             `json:"polar_customer_id"`
-	ProductKey          string             `json:"product_key"`
-	Status              string             `json:"status"`
-	CurrentPeriodEnd    pgtype.Timestamptz `json:"current_period_end"`
-	CancelAtPeriodEnd   bool               `json:"cancel_at_period_end"`
+	OrgID                  string             `json:"org_id"`
+	Provider               string             `json:"provider"`
+	ProviderSubscriptionID pgtype.Text        `json:"provider_subscription_id"`
+	ProviderCustomerID     string             `json:"provider_customer_id"`
+	ProductKey             string             `json:"product_key"`
+	Status                 string             `json:"status"`
+	CurrentPeriodEnd       pgtype.Timestamptz `json:"current_period_end"`
+	CancelAtPeriodEnd      bool               `json:"cancel_at_period_end"`
 }
 
-// Resubscribe after cancellation arrives with a NEW polar_subscription_id,
-// so clerk_org_id is the only safe conflict target.
+// Resubscribe after cancellation arrives with a NEW provider_subscription_id,
+// so org_id is the only safe conflict target.
 func (q *Queries) UpsertSubscription(ctx context.Context, arg UpsertSubscriptionParams) (Subscription, error) {
 	row := q.db.QueryRow(ctx, upsertSubscription,
-		arg.ClerkOrgID,
-		arg.PolarSubscriptionID,
-		arg.PolarCustomerID,
+		arg.OrgID,
+		arg.Provider,
+		arg.ProviderSubscriptionID,
+		arg.ProviderCustomerID,
 		arg.ProductKey,
 		arg.Status,
 		arg.CurrentPeriodEnd,
@@ -113,15 +117,16 @@ func (q *Queries) UpsertSubscription(ctx context.Context, arg UpsertSubscription
 	var i Subscription
 	err := row.Scan(
 		&i.ID,
-		&i.ClerkOrgID,
-		&i.PolarSubscriptionID,
-		&i.PolarCustomerID,
+		&i.OrgID,
+		&i.ProviderSubscriptionID,
+		&i.ProviderCustomerID,
 		&i.ProductKey,
 		&i.Status,
 		&i.CurrentPeriodEnd,
 		&i.CancelAtPeriodEnd,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Provider,
 	)
 	return i, err
 }

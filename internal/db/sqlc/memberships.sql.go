@@ -12,58 +12,58 @@ import (
 )
 
 const countAdminsByOrg = `-- name: CountAdminsByOrg :one
-SELECT count(*) FROM org_members WHERE clerk_org_id = $1 AND role = 'org:admin'
+SELECT count(*) FROM org_members WHERE org_id = $1 AND role = 'org:admin'
 `
 
 // Sole-admin guard for account deletion: a multi-member org whose only admin
 // leaves would be orphaned.
-func (q *Queries) CountAdminsByOrg(ctx context.Context, clerkOrgID string) (int64, error) {
-	row := q.db.QueryRow(ctx, countAdminsByOrg, clerkOrgID)
+func (q *Queries) CountAdminsByOrg(ctx context.Context, orgID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countAdminsByOrg, orgID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const countMembersByOrg = `-- name: CountMembersByOrg :one
-SELECT count(*) FROM org_members WHERE clerk_org_id = $1
+SELECT count(*) FROM org_members WHERE org_id = $1
 `
 
-func (q *Queries) CountMembersByOrg(ctx context.Context, clerkOrgID string) (int64, error) {
-	row := q.db.QueryRow(ctx, countMembersByOrg, clerkOrgID)
+func (q *Queries) CountMembersByOrg(ctx context.Context, orgID string) (int64, error) {
+	row := q.db.QueryRow(ctx, countMembersByOrg, orgID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
 const deleteMembership = `-- name: DeleteMembership :exec
-DELETE FROM org_members WHERE clerk_org_id = $1 AND clerk_user_id = $2
+DELETE FROM org_members WHERE org_id = $1 AND user_id = $2
 `
 
 type DeleteMembershipParams struct {
-	ClerkOrgID  string `json:"clerk_org_id"`
-	ClerkUserID string `json:"clerk_user_id"`
+	OrgID  string `json:"org_id"`
+	UserID string `json:"user_id"`
 }
 
 func (q *Queries) DeleteMembership(ctx context.Context, arg DeleteMembershipParams) error {
-	_, err := q.db.Exec(ctx, deleteMembership, arg.ClerkOrgID, arg.ClerkUserID)
+	_, err := q.db.Exec(ctx, deleteMembership, arg.OrgID, arg.UserID)
 	return err
 }
 
 const getMembership = `-- name: GetMembership :one
-SELECT clerk_org_id, clerk_user_id, role, created_at FROM org_members WHERE clerk_org_id = $1 AND clerk_user_id = $2
+SELECT org_id, user_id, role, created_at FROM org_members WHERE org_id = $1 AND user_id = $2
 `
 
 type GetMembershipParams struct {
-	ClerkOrgID  string `json:"clerk_org_id"`
-	ClerkUserID string `json:"clerk_user_id"`
+	OrgID  string `json:"org_id"`
+	UserID string `json:"user_id"`
 }
 
 func (q *Queries) GetMembership(ctx context.Context, arg GetMembershipParams) (OrgMember, error) {
-	row := q.db.QueryRow(ctx, getMembership, arg.ClerkOrgID, arg.ClerkUserID)
+	row := q.db.QueryRow(ctx, getMembership, arg.OrgID, arg.UserID)
 	var i OrgMember
 	err := row.Scan(
-		&i.ClerkOrgID,
-		&i.ClerkUserID,
+		&i.OrgID,
+		&i.UserID,
 		&i.Role,
 		&i.CreatedAt,
 	)
@@ -71,24 +71,24 @@ func (q *Queries) GetMembership(ctx context.Context, arg GetMembershipParams) (O
 }
 
 const listMembersByOrg = `-- name: ListMembersByOrg :many
-SELECT u.clerk_user_id, u.email, u.name, u.avatar_url, m.role, m.created_at
+SELECT u.user_id, u.email, u.name, u.avatar_url, m.role, m.created_at
 FROM org_members m
-JOIN users u ON u.clerk_user_id = m.clerk_user_id
-WHERE m.clerk_org_id = $1
+JOIN users u ON u.user_id = m.user_id
+WHERE m.org_id = $1
 ORDER BY m.created_at
 `
 
 type ListMembersByOrgRow struct {
-	ClerkUserID string             `json:"clerk_user_id"`
-	Email       string             `json:"email"`
-	Name        string             `json:"name"`
-	AvatarUrl   string             `json:"avatar_url"`
-	Role        string             `json:"role"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UserID    string             `json:"user_id"`
+	Email     string             `json:"email"`
+	Name      string             `json:"name"`
+	AvatarUrl string             `json:"avatar_url"`
+	Role      string             `json:"role"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) ListMembersByOrg(ctx context.Context, clerkOrgID string) ([]ListMembersByOrgRow, error) {
-	rows, err := q.db.Query(ctx, listMembersByOrg, clerkOrgID)
+func (q *Queries) ListMembersByOrg(ctx context.Context, orgID string) ([]ListMembersByOrgRow, error) {
+	rows, err := q.db.Query(ctx, listMembersByOrg, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (q *Queries) ListMembersByOrg(ctx context.Context, clerkOrgID string) ([]Li
 	for rows.Next() {
 		var i ListMembersByOrgRow
 		if err := rows.Scan(
-			&i.ClerkUserID,
+			&i.UserID,
 			&i.Email,
 			&i.Name,
 			&i.AvatarUrl,
@@ -115,19 +115,19 @@ func (q *Queries) ListMembersByOrg(ctx context.Context, clerkOrgID string) ([]Li
 }
 
 const upsertMembership = `-- name: UpsertMembership :exec
-INSERT INTO org_members (clerk_org_id, clerk_user_id, role)
+INSERT INTO org_members (org_id, user_id, role)
 VALUES ($1, $2, $3)
-ON CONFLICT (clerk_org_id, clerk_user_id) DO UPDATE
+ON CONFLICT (org_id, user_id) DO UPDATE
 SET role = EXCLUDED.role
 `
 
 type UpsertMembershipParams struct {
-	ClerkOrgID  string `json:"clerk_org_id"`
-	ClerkUserID string `json:"clerk_user_id"`
-	Role        string `json:"role"`
+	OrgID  string `json:"org_id"`
+	UserID string `json:"user_id"`
+	Role   string `json:"role"`
 }
 
 func (q *Queries) UpsertMembership(ctx context.Context, arg UpsertMembershipParams) error {
-	_, err := q.db.Exec(ctx, upsertMembership, arg.ClerkOrgID, arg.ClerkUserID, arg.Role)
+	_, err := q.db.Exec(ctx, upsertMembership, arg.OrgID, arg.UserID, arg.Role)
 	return err
 }

@@ -1,4 +1,4 @@
-INSERT INTO projects (clerk_org_id, name, created_at, updated_at) VALUES
+INSERT INTO projects (org_id, name, created_at, updated_at) VALUES
   ('org_pro', 'Alpha',   '2026-01-15T00:00:00Z', '2026-01-15T00:00:00Z'),
   ('org_pro', 'Bravo',   '2026-01-15T01:00:00Z', '2026-01-15T01:00:00Z'),
   ('org_pro', 'Charlie', '2026-01-15T02:00:00Z', '2026-01-15T02:00:00Z'),

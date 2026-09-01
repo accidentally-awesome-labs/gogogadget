@@ -35,15 +35,15 @@ func projectCount(t *testing.T, s *Server, org string) int {
 	t.Helper()
 	var n int
 	require.NoError(t, s.db.QueryRow(context.Background(),
-		`SELECT count(*) FROM projects WHERE clerk_org_id = $1`, org).Scan(&n))
+		`SELECT count(*) FROM projects WHERE org_id = $1`, org).Scan(&n))
 	return n
 }
 
 func idemCleanup(t *testing.T, s *Server, org string) {
 	t.Cleanup(func() {
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE clerk_org_id=$1", org)
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM idempotency_keys WHERE clerk_org_id=$1", org)
-		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE clerk_org_id=$1", org)
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM projects WHERE org_id=$1", org)
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM idempotency_keys WHERE org_id=$1", org)
+		_, _ = s.db.Exec(context.Background(), "DELETE FROM audit_log WHERE org_id=$1", org)
 	})
 }
 
@@ -119,7 +119,7 @@ func TestIdempotentIsOptIn(t *testing.T) {
 
 	var keys int
 	require.NoError(t, s.db.QueryRow(context.Background(),
-		`SELECT count(*) FROM idempotency_keys WHERE clerk_org_id='org_ido'`).Scan(&keys))
+		`SELECT count(*) FROM idempotency_keys WHERE org_id='org_ido'`).Scan(&keys))
 	assert.Zero(t, keys, "keyless requests must not write rows")
 }
 
@@ -227,7 +227,7 @@ func TestIdempotentReleasesClaimOnServerError(t *testing.T) {
 	boom.ServeHTTP(rec, req)
 	require.Equal(t, http.StatusInternalServerError, rec.Code)
 
-	_, err := s.q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{ClerkOrgID: "org_id5", Key: "key-5xx"})
+	_, err := s.q.GetIdempotencyKey(ctx, sqlc.GetIdempotencyKeyParams{OrgID: "org_id5", Key: "key-5xx"})
 	assert.Error(t, err, "the claim must be gone so the client can genuinely retry")
 }
 
@@ -235,7 +235,7 @@ func TestIdempotentReleasesClaimOnServerError(t *testing.T) {
 // bare Idempotent wrapper can be exercised without the token middleware.
 func idemRequest(t *testing.T, s *Server, orgID, key, body string) (*http.Request, *httptest.ResponseRecorder) {
 	t.Helper()
-	org, err := s.q.GetOrgByClerkID(t.Context(), orgID)
+	org, err := s.q.GetOrgByID(t.Context(), orgID)
 	require.NoError(t, err)
 	req := httptest.NewRequest("POST", "/api/v1/projects", strings.NewReader(body))
 	req.Header.Set("Idempotency-Key", key)

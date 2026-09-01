@@ -39,7 +39,7 @@ func (w *Worker) deliverWebhook(ctx context.Context, p WebhookDeliverPayload, at
 	if err != nil {
 		return err
 	}
-	ep, err := w.q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: d.EndpointID, ClerkOrgID: d.ClerkOrgID})
+	ep, err := w.q.GetWebhookEndpoint(ctx, sqlc.GetWebhookEndpointParams{ID: d.EndpointID, OrgID: d.OrgID})
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (w *Worker) deliverWebhook(ctx context.Context, p WebhookDeliverPayload, at
 		if err := w.q.MarkDeliveryDead(ctx, sqlc.MarkDeliveryDeadParams{ID: d.ID, LastError: attemptErr.Error()}); err != nil {
 			return err
 		}
-		notify.Send(ctx, w.q, d.ClerkOrgID, ep.CreatedBy, "webhook.failed",
+		notify.Send(ctx, w.q, d.OrgID, ep.CreatedBy, "webhook.failed",
 			"Webhook delivery failed permanently", ep.Url+" — "+attemptErr.Error(), "/app/settings/webhooks")
 	}
 	return attemptErr
