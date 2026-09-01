@@ -23,6 +23,11 @@ type Controller struct {
 	injected  *modkit.Engine
 	writeFile func(path string, data []byte, mode os.FileMode) error
 	redactor  *Redactor
+	// table is the full command table this invocation serves: built-ins plus
+	// the contributed commands. Help and completions render from it, so the
+	// sealed HelpRequest/CompletionRequest and the `help`/`completion`
+	// handlers can never diverge. Nil means the built-ins only.
+	table []CommandSpec
 }
 
 // ControllerOptions configures a Controller.
@@ -36,6 +41,9 @@ type ControllerOptions struct {
 	Engine *modkit.Engine
 	// WriteFile replaces direct file writes (test hook for rollback paths).
 	WriteFile func(path string, data []byte, mode os.FileMode) error
+	// Table is the assembled command table — built-ins plus contributed
+	// commands. Help and completion requests render from it.
+	Table []CommandSpec
 }
 
 // NewController constructs the command platform's single controller.
@@ -45,6 +53,7 @@ func NewController(opts ControllerOptions) *Controller {
 		version:   opts.Version,
 		injected:  opts.Engine,
 		writeFile: opts.WriteFile,
+		table:     opts.Table,
 	}
 }
 
@@ -144,6 +153,15 @@ func (c *Controller) Redactor() *Redactor {
 	return r
 }
 
+// commandTable reports the table this invocation serves: the assembled one,
+// or the built-ins when none was supplied.
+func (c *Controller) commandTable() []CommandSpec {
+	if c.table == nil {
+		return CommandTable()
+	}
+	return c.table
+}
+
 // Execute performs a read-only request and returns the renderer boundary
 // result. It never writes to the project.
 func (c *Controller) Execute(ctx context.Context, req Request) (Result, error) {
@@ -168,10 +186,10 @@ func (c *Controller) Execute(ctx context.Context, req Request) (Result, error) {
 		return c.executeDoctor(ctx, request)
 
 	case HelpRequest:
-		return Result{Payload: map[string]any{"text": renderHelp(CommandTable(), request.Command)}}, nil
+		return Result{Payload: map[string]any{"text": renderHelp(c.commandTable(), request.Command)}}, nil
 
 	case CompletionRequest:
-		script, err := renderCompletion(CommandTable(), request.Shell)
+		script, err := renderCompletion(c.commandTable(), request.Shell)
 		if err != nil {
 			return Result{}, err
 		}

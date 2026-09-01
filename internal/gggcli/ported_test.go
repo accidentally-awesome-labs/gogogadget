@@ -143,26 +143,41 @@ func TestCLIInfoCarriesLinksAndVerify(t *testing.T) {
 // A generated target has no base digest, so it never appears in a change
 // report; whether generated output is stale is `sync --check`'s question.
 func TestDiffIgnoresGeneratedTargets(t *testing.T) {
-	entries := []DiffEntry{}
-	lock := modkit.Lock{Modules: []modkit.LockedModule{{
-		ID: "ggg/system/static",
-		Files: []modkit.LockedFile{
-			{Path: "static/app.css", State: modkit.FileGenerated, BaseSHA256: ""},
-			{Path: "internal/thing.go", State: modkit.FileClean, BaseSHA256: "abc"},
-		},
-	}}}
-
-	for _, module := range lock.Modules {
-		for _, file := range module.Files {
-			if file.State == modkit.FileGenerated {
-				continue
-			}
-			entries = append(entries, DiffEntry{Module: module.ID, Path: file.Path})
-		}
+	baseDigest := sha256Hex([]byte("package widget\n"))
+	manifest := baseModule("ggg/system/widget", "system", "widget")
+	manifest.Files = []modkit.ManifestFile{
+		{Source: "registry/modules/system/widget/widget.go", Target: "internal/widget/widget.go", Class: modkit.FileClassGo, SHA256: baseDigest},
+		{Source: "registry/modules/system/widget/widget.css", Target: "static/widget.css", Class: modkit.FileClassGenerated},
 	}
+	lock := modkit.Lock{
+		Schema: 2, RegistryCommit: testCommitA,
+		Order: []string{manifest.ID},
+		Modules: []modkit.LockedModule{{
+			ID: manifest.ID, Revision: 1, Contract: 1, SourceCommit: testCommitA,
+			Reason: "explicit", RequiredBy: []string{}, Manifest: manifest,
+			Files: []modkit.LockedFile{
+				{Path: "internal/widget/widget.go", Source: manifest.Files[0].Source, BaseSHA256: baseDigest, LocalSHA256: baseDigest, State: modkit.FileClean},
+				{Path: "static/widget.css", Source: manifest.Files[1].Source, State: modkit.FileGenerated},
+			},
+			Migrations: []modkit.LockedMigration{},
+		}},
+	}
+	data, err := modkit.MarshalLock(lock)
+	require.NoError(t, err)
 
-	require.Len(t, entries, 1, "a generated payload must not appear in a change report")
-	assert.Equal(t, "internal/thing.go", entries[0].Path)
+	root := t.TempDir()
+	writeTestFile(t, root, modkit.LockFileName, data)
+	// A locally edited source file is a real change; the generated target
+	// must stay out of the report because it has no base to compare against.
+	writeTestFile(t, root, "internal/widget/widget.go", []byte("package widget\n\nconst Edited = true\n"))
+
+	controller := NewController(ControllerOptions{Root: root})
+	entries, commit, err := controller.collectDiff(nil, false)
+	require.NoError(t, err)
+	assert.Equal(t, testCommitA, commit)
+	require.Len(t, entries, 1, "only the edited source file may appear: %#v", entries)
+	assert.Equal(t, "internal/widget/widget.go", entries[0].Path)
+	assert.Equal(t, "modified", entries[0].State)
 }
 
 var _ = context.Background

@@ -52,7 +52,7 @@
         "source": "internal/gggcli/app.go",
         "target": "internal/gggcli/app.go",
         "class": "go",
-        "sha256": "9117f3da3928213283012cce015be499118fe6ebf8552d469b1846a4991134e1",
+        "sha256": "08dbabc5654b5413bfcba42966eae3f4f7ed303a346d82ae04d067a4d4ebc7de",
         "rewrite_module": true,
         "contract": false
       },
@@ -60,7 +60,7 @@
         "source": "internal/gggcli/cli_test.go",
         "target": "internal/gggcli/cli_test.go",
         "class": "test",
-        "sha256": "681ff09e9074a01b42fafac78789d1f376ce631d424fa0f44556cf32a611fb22",
+        "sha256": "a2d505d951c9b93409ad0cf5bd2167c8f3ddd9cd34c7cba69edbe975eea1e825",
         "rewrite_module": true,
         "contract": false
       },
@@ -84,7 +84,7 @@
         "source": "internal/gggcli/controller.go",
         "target": "internal/gggcli/controller.go",
         "class": "go",
-        "sha256": "dca7297bd759ea1c03eb0d834a7481066656468918b1d319f1ee2f6b2a63a11a",
+        "sha256": "21b8bd9cf02092bbceeb1928fc36d39d27f8ff79b4177a5c16c4a204a93143a5",
         "rewrite_module": true,
         "contract": false
       },
@@ -132,7 +132,7 @@
         "source": "internal/gggcli/ported_test.go",
         "target": "internal/gggcli/ported_test.go",
         "class": "test",
-        "sha256": "b78311886acba3ce569b2c9e5ec3f9d87220db9cb45d6efbdf27bceed65424b4",
+        "sha256": "c1e5d1740fd814270839470e751e1bf1a39bd8842c1a1efbe742e974530d3b72",
         "rewrite_module": true,
         "contract": false
       },

@@ -325,6 +325,55 @@ func TestHelpAndCompletionsDerivedFromTable(t *testing.T) {
 	}
 }
 
+// The sealed HelpRequest/CompletionRequest on Controller.Execute and the
+// `help`/`completion` handlers must render the same table. One build serves
+// one command set: the same request may not yield different text depending
+// on the entry point.
+func TestExecuteHelpMatchesHandlerTable(t *testing.T) {
+	contributed := []ContributedCommand{{Spec: CommandSpec{Name: "ui", Summary: "Open the console", Usage: "ggg ui"}}}
+	table, conflicts := commandTable(contributed)
+	if len(conflicts) != 0 {
+		t.Fatalf("commandTable conflicts: %v", conflicts)
+	}
+	controller := NewController(ControllerOptions{Table: table})
+
+	helpResult, err := controller.Execute(context.Background(), HelpRequest{})
+	if err != nil {
+		t.Fatalf("Execute help: %v", err)
+	}
+	helpText, _ := helpResult.Payload["text"].(string)
+	completionResult, err := controller.Execute(context.Background(), CompletionRequest{Shell: "bash"})
+	if err != nil {
+		t.Fatalf("Execute completion: %v", err)
+	}
+	completionText, _ := completionResult.Payload["text"].(string)
+
+	var appOut bytes.Buffer
+	app := App{Out: &appOut, Contributed: contributed}
+	if err := app.Run(context.Background(), []string{"help"}); err != nil {
+		t.Fatalf("handler help: %v", err)
+	}
+	handlerHelp := appOut.String()
+	appOut.Reset()
+	if err := app.Run(context.Background(), []string{"completion", "bash"}); err != nil {
+		t.Fatalf("handler completion: %v", err)
+	}
+	handlerCompletion := appOut.String()
+
+	if handlerHelp != helpText {
+		t.Fatalf("Execute help diverges from the handler path:\nexecute:\n%s\nhandler:\n%s", helpText, handlerHelp)
+	}
+	if handlerCompletion != completionText {
+		t.Fatalf("Execute completion diverges from the handler path:\nexecute:\n%s\nhandler:\n%s", completionText, handlerCompletion)
+	}
+	if !strings.Contains(helpText, "Open the console") {
+		t.Fatalf("contributed command missing from help: %s", helpText)
+	}
+	if !strings.Contains(completionText, "ui") {
+		t.Fatalf("contributed command missing from completion: %s", completionText)
+	}
+}
+
 // No-arg without a terminal is the declared usage failure, never a UI.
 func TestNoArgNonTTYIsInteractiveTerminalRequired(t *testing.T) {
 	_, _, err := runApp(t, t.TempDir(), nil)

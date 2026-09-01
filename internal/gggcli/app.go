@@ -29,8 +29,9 @@ type App struct {
 	// WriteFile replaces direct file writes (test hook for rollback paths).
 	WriteFile func(path string, data []byte, mode os.FileMode) error
 	// Contributed carries the project-local commands from the generated
-	// registry. Assembly refuses a contributed command colliding with a
-	// reserved built-in name.
+	// registry. A contributed command colliding with a reserved built-in
+	// name is skipped and reported on stderr; the built-in keeps its
+	// place and every other contributed command still serves.
 	Contributed []ContributedCommand
 }
 
@@ -54,13 +55,13 @@ func (a App) Run(ctx context.Context, args []string) error {
 	}
 	argv := stripAccessible(args)
 
-	controller := NewController(ControllerOptions{Root: a.Root, Version: a.Version, Engine: a.Engine, WriteFile: a.WriteFile})
 	// Assemble the full table once. A contributed command that collides with
 	// a reserved name is skipped and reported; the remaining commands serve.
 	table, nameConflicts := commandTable(a.Contributed)
 	for _, name := range nameConflicts {
 		fmt.Fprintf(errOut, "warning: contributed command %q collides with a reserved built-in name and was skipped\n", name)
 	}
+	controller := NewController(ControllerOptions{Root: a.Root, Version: a.Version, Engine: a.Engine, WriteFile: a.WriteFile, Table: table})
 	interactive := IsTerminal(out) && IsTerminalReader(in)
 
 	if len(argv) == 0 {
