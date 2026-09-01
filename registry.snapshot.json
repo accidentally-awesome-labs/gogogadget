@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "270e0bd14f9e8586356d5247773ac0231e428af17dd8cd766f5ccf5a934b37ef"
+      "sha256": "5b7fa727f38c0b7a42821c2a985808ce8632055392478cb778a95733566e2d5c"
     },
     {
       "path": "registry/modules/system/static/module.json",

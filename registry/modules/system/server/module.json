@@ -241,6 +241,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/realtime_test.go",
+        "target": "internal/web/realtime_test.go",
+        "class": "test",
+        "sha256": "6f926cd06998cb5fb72ab9f55b8ee80b19618a2352992f36531c88f3aa8a3573",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/route.go",
         "target": "internal/web/route.go",
         "class": "go",
