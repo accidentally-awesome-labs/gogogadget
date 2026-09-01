@@ -40,7 +40,7 @@
         "source": "internal/observability/sentryadapter/sentry_test.go",
         "target": "internal/observability/sentryadapter/sentry_test.go",
         "class": "test",
-        "sha256": "597fcc0ae3f86d775c828fa9f54f4137163c65c9aa76900fe81dab0b3967b61a",
+        "sha256": "53241e759107fac3338b960a7962aa6aec41b01349c5b6676ae531b643893d2e",
         "rewrite_module": true,
         "contract": false
       }
@@ -93,7 +93,6 @@
         "field": "SentryDSN",
         "type": "string",
         "description": "Sentry Dsn",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/observability-sentry@sentry"
