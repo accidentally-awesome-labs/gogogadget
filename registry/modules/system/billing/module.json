@@ -215,8 +215,16 @@
           "table": "subscriptions"
         },
         {
+          "name": "GetBillingAccount",
+          "table": "billing_accounts"
+        },
+        {
           "name": "GetSubscriptionByOrg",
           "table": "subscriptions"
+        },
+        {
+          "name": "InsertBillingAccount",
+          "table": "billing_accounts"
         },
         {
           "name": "ListRevenueSubscriptions",
@@ -293,7 +301,7 @@
         "table": "billing_accounts",
         "scope": "org",
         "export": false,
-        "account_delete": "cascade",
+        "account_delete": "retain",
         "organization_delete": "cascade"
       },
       {

@@ -72,6 +72,14 @@
         "sha256": "a49e537c8f3eac6e8bbab3fa62fc947ebdfe7e954a7986d4c648c96e5b160d93",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/identity/session/session_test.go",
+        "target": "internal/identity/session/session_test.go",
+        "class": "test",
+        "sha256": "325b1823715c3c78d4dbb06d75dac0800d322211b2248eeb122ba9f9d5aebe81",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

@@ -41,7 +41,13 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 		}
 		session, loadErr := s.sessionLoader.Load(r.Context(), cookie.Value)
 		if loadErr != nil {
-			next.ServeHTTP(w, r)
+			if errors.Is(loadErr, identity.ErrInvalidToken) {
+				s.log.Debug("identity session rejected", "error", loadErr)
+				next.ServeHTTP(w, r)
+				return
+			}
+			s.log.Error("identity session load failed", "error", loadErr)
+			s.renderStatus(w, r, http.StatusServiceUnavailable, "Identity unavailable", "We could not load your account session. Please retry.")
 			return
 		}
 		ctx := identity.WithUser(r.Context(), &session.User)

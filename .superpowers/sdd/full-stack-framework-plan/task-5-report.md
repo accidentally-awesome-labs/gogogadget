@@ -105,3 +105,11 @@ Verification after review fixes:
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `f4af69b8cb8fa1d8bc0995088c0e9bfb0de5e9137a06f4ac0442fc39c7e16457`.
 - `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal -count=1` — passed.
 - `go test ./internal/db -run 'TestProviderNeutralMigrationPreservesLegacyRows|TestMigrateUpDown' -count=1` — passed.
+
+## Final review acceptance verification
+
+- `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed unfiltered.
+- `go tool sqlc generate` and `go tool templ generate` — passed with zero updates.
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `3bde3ad737f5ab27b86b4c95816ce4224651dce62e83bf8602bdb8d8a6ddc5fb`.
+- Focused `go vet` over CLI, modkit, identity, billing, session, web, API, and config — passed.
+- `make check` reached its formatting gate but reports five pre-existing unrelated files (`internal/audit/audit.go`, `internal/db/db_test.go`, `internal/jobs/digest.go`, `internal/schedules/schedules.go`, `internal/schedules/schedules_test.go`); all Task 5 changed authored files are gofmt-clean.

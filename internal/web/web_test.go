@@ -10,9 +10,12 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/flags"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
@@ -34,8 +37,12 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	server, err := NewServer(Deps{
 		Config: &cfg, Log: log, Version: "test",
 		Docs: &content.Docs{}, Storage: storagefs.NewDevStore(t.TempDir()),
-		Flags:    flags.NewDBEvaluator(nil, 30*time.Second),
-		Reporter: observability.NoopReporter{},
+		Flags: flags.NewDBEvaluator(nil, 30*time.Second), Reporter: observability.NoopReporter{},
+		Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
+		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
+		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
+		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
+		SessionLoader: testSessionLoader{},
 	})
 	if err != nil {
 		t.Fatalf("NewServer: %v", err)

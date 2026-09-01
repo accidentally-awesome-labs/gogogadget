@@ -8,6 +8,7 @@ import (
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
@@ -35,8 +36,10 @@ func TestUserCreatedWebhook(t *testing.T) {
 	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, signSvix(t, testWebhookSecret, msgID, payload))
 	assert.Equal(t, http.StatusOK, code)
 
-	// Mirror row exists with the display name.
-	u, err := s.q.GetUserByID(ctx, "user_wh1")
+	// Mirror row is reached through the provider-subject mapping.
+	mapping, err := s.q.GetIdentitySubject(ctx, sqlc.GetIdentitySubjectParams{Provider: "dev", Subject: "user_wh1"})
+	require.NoError(t, err)
+	u, err := s.q.GetUserByID(ctx, mapping.UserID)
 	require.NoError(t, err)
 	assert.Equal(t, "wh1@example.com", string(u.Email))
 	assert.Equal(t, "Will Hughes", u.Name)
@@ -53,12 +56,10 @@ func TestUserCreatedWebhook(t *testing.T) {
 	var n int
 	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM jobs WHERE kind = 'email.welcome'`).Scan(&n))
 	assert.Equal(t, 1, n)
-
-	_ = s.q.DeleteUser(ctx, "user_wh1")
+	_ = s.q.DeleteUser(ctx, mapping.UserID)
 }
-
 func TestClerkWebhookBadSignature(t *testing.T) {
-	s := integrationServer(t, nil)
+	s := integrationServer(t, func(d *Deps) { d.IdentityWebhook = identity.ClerkWebhook{Secret: testWebhookSecret} })
 	payload := userCreatedPayload("user_bad", "em_1", "bad@example.com", "B", "A")
 	h := signSvix(t, "whsec_aGVsbG8td29ybGQtdGhpcy1pcy13cm9uZw==", "msg_bad", payload)
 	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, h)

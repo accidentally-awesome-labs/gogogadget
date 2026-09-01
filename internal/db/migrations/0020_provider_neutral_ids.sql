@@ -63,7 +63,7 @@ ALTER TABLE flag_overrides RENAME COLUMN clerk_org_id TO org_id;
 ALTER TABLE notification_preferences RENAME COLUMN clerk_user_id TO user_id;
 ALTER TABLE idempotency_keys RENAME COLUMN clerk_org_id TO org_id;
 ALTER TABLE webhook_events DROP CONSTRAINT webhook_events_provider_check;
-ALTER TABLE webhook_events ADD CONSTRAINT webhook_events_provider_check CHECK (provider IN ('clerk','polar','local'));
+ALTER TABLE webhook_events ADD CONSTRAINT webhook_events_provider_check CHECK (provider IN ('clerk','polar','local','dev'));
 ALTER TABLE subscriptions ADD COLUMN provider TEXT DEFAULT 'polar';
 UPDATE subscriptions SET provider='polar' WHERE provider IS NULL;
 ALTER TABLE subscriptions ALTER COLUMN provider SET NOT NULL;

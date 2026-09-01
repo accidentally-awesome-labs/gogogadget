@@ -57,7 +57,7 @@
         "source": "internal/web/auth_test.go",
         "target": "internal/web/auth_test.go",
         "class": "test",
-        "sha256": "f7403e7cc791fea9b7fd8b943633f137f46d7ae568169627c7e8bc7390c34652",
+        "sha256": "ebc62376ea6e8d06582f466e0649c7b1c558856eb0ee2137dd08d820fdbf3c08",
         "rewrite_module": true,
         "contract": false
       },
@@ -65,7 +65,7 @@
         "source": "internal/web/workflow_auth_session.go",
         "target": "internal/web/workflow_auth_session.go",
         "class": "go",
-        "sha256": "2158ba8d97c0249a634f93e157cac613a3d90fd2421fb3d060565817facfd333",
+        "sha256": "18d4cbc08535ce6e7e2ca2abcb80591117766bd4c7600dbf0575d20542862b6d",
         "rewrite_module": true,
         "contract": true
       }

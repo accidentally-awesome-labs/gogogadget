@@ -66,6 +66,9 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	if mutate != nil {
 		mutate(&deps)
 	}
+	if !deps.Config.DevAuthBypass {
+		deps.IdentityNavigator = identity.PortalNavigator{BaseURL: deps.Config.ClerkPortalURL}
+	}
 	server, err := NewServer(deps)
 	if err != nil {
 		t.Fatalf("NewServer: %v", err)

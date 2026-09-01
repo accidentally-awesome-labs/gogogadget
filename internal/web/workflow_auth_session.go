@@ -18,7 +18,11 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dev/login", http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, s.navigator.LoginURL(r.URL.Query().Get("return_to")), http.StatusSeeOther)
+	returnTo := r.URL.Query().Get("return_to")
+	if returnTo == "" {
+		returnTo = s.cfg.AppURL + "/?after-auth=1"
+	}
+	http.Redirect(w, r, s.navigator.LoginURL(returnTo), http.StatusSeeOther)
 }
 
 // GET /signup → Clerk hosted sign-up.

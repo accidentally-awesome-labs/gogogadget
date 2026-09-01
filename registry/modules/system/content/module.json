@@ -195,7 +195,7 @@
         "source": "internal/web/content_type_test.go",
         "target": "internal/web/content_type_test.go",
         "class": "test",
-        "sha256": "1b1a1caa5fad09fa8437bcc0e15a62a60643bed7f3e77a3b910c81a14b25c087",
+        "sha256": "8b738f2e014ee4bf10e1d9cb07da3480a2058aea9d7dc552b225b865ef63266c",
         "rewrite_module": true,
         "contract": false
       },

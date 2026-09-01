@@ -105,6 +105,11 @@ func (s *Server) processIdentityEvent(ctx context.Context, evt identity.Event) e
 		if err != nil {
 			return err
 		}
+		if sub, subErr := s.q.GetSubscriptionByOrg(ctx, mapped.OrgID); subErr == nil && sub.ProviderSubscriptionID.Valid && s.billingClient != nil {
+			if revokeErr := s.billingClient.RevokeSubscription(ctx, sub.ProviderSubscriptionID.String); revokeErr != nil {
+				return revokeErr
+			}
+		}
 		return s.q.DeleteOrg(ctx, mapped.OrgID)
 	case "organizationMembership.created", "organizationMembership.updated", "organizationMembership.deleted":
 		if evt.Membership == nil {
@@ -174,7 +179,7 @@ func insertedUser(q *sqlc.Queries, ctx context.Context, id string) (sqlc.User, e
 func (s *Server) identityOrg(ctx context.Context, provider string, event identity.OrganizationEvent) (sqlc.Org, error) {
 	mapped, err := s.q.GetIdentityOrganization(ctx, sqlc.GetIdentityOrganizationParams{Provider: provider, Subject: event.Subject})
 	if err == nil {
-		return s.q.GetOrgByID(ctx, mapped.OrgID)
+		return s.q.UpsertOrg(ctx, sqlc.UpsertOrgParams{OrgID: mapped.OrgID, Name: event.Name, Slug: event.Slug, ImageUrl: event.ImageURL})
 	}
 	if !errors.Is(err, pgx.ErrNoRows) {
 		return sqlc.Org{}, err

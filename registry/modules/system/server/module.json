@@ -204,7 +204,7 @@
         "source": "internal/web/module_test.go",
         "target": "internal/web/module_test.go",
         "class": "test",
-        "sha256": "03fc5b700dab3f61aa06171bd926befb2ca7ca3a37e38e1c52642923285da133",
+        "sha256": "70b69e18fb07f79e50908c28b32e2f643c135f4c284e2a7978d627b8ec1c6332",
         "rewrite_module": true,
         "contract": false
       },
@@ -369,10 +369,18 @@
         "contract": false
       },
       {
+        "source": "internal/web/test_session_test.go",
+        "target": "internal/web/test_session_test.go",
+        "class": "test",
+        "sha256": "4681d600c749fdc587cf36ff459c1bd902d3308958533de5db02a4e4d0d15d61",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/testhelpers_test.go",
         "target": "internal/web/testhelpers_test.go",
         "class": "test",
-        "sha256": "181a5cd4d9ad6141c33868d94264711a5c0220d97452995e35fdd6c455eb2fa0",
+        "sha256": "85e23ce37c8881660726fb40d71c8c256cc1f9b335c2a55aa9a4e6353e9e5e6a",
         "rewrite_module": true,
         "contract": false
       },
@@ -388,7 +396,7 @@
         "source": "internal/web/web_test.go",
         "target": "internal/web/web_test.go",
         "class": "test",
-        "sha256": "fb514f52ce660bc1c4ec33c17c9fd8cac318b1b5705fbeb3f71657193db9549d",
+        "sha256": "a0c80b96976ec4a9a2b264588493c7ad5fe64e69cf8a6ea81db88973b4a33607",
         "rewrite_module": true,
         "contract": false
       }

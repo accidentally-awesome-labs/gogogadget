@@ -266,7 +266,7 @@ transitive closure itself.
 | `ggg/system/database` | Database | `ggg/system/apphost` `ggg/system/config` | `replacement-required` |
 | `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |
-| `ggg/system/identity` | Identity | — | `major-version-only` |
+| `ggg/system/identity` | Identity | `ggg/system/organizations` | `major-version-only` |
 | `ggg/system/identity-clerk` | Clerk identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
 | `ggg/system/identity-dev` | Development identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
 | `ggg/system/identity-session` | Identity sessions | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/identity` | `free` |

@@ -139,6 +139,10 @@
           "table": "orgs"
         },
         {
+          "name": "GetOrgBySlug",
+          "table": "orgs"
+        },
+        {
           "name": "GetOrgsForUser",
           "table": "orgs"
         },
@@ -225,7 +229,7 @@
         "id": "0020_provider_neutral_ids",
         "kind": "neutralize",
         "source": "internal/db/migrations/0020_provider_neutral_ids.sql",
-        "sha256": "e7d20602971a082e1e099ed1ee060b17510dd69a745b90049677c7b9f89cb4bf"
+        "sha256": "028cd83f25f7e3c85ef76ef7b4923d2c87b22381947cf92be07d9d1d1e27d8d6"
       }
     ],
     "environment": [],

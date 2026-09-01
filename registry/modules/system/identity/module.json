@@ -8,7 +8,15 @@
     "contract": 1,
     "title": "Identity",
     "description": "Authentication ports (verifier, user fetcher, deleter), request context keys, and provider account sync.",
-    "requires": [],
+    "requires": [
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
     "dependencies": {
       "go": [
         {
@@ -580,6 +588,28 @@
               "type": "identity.Webhook"
             }
           ]
+        }
+      ],
+      "queries": [
+        {
+          "name": "GetIdentityOrganization",
+          "table": "identity_organizations"
+        },
+        {
+          "name": "GetIdentitySubject",
+          "table": "identity_subjects"
+        },
+        {
+          "name": "GetUserByEmail",
+          "table": "users"
+        },
+        {
+          "name": "InsertIdentityOrganization",
+          "table": "identity_organizations"
+        },
+        {
+          "name": "InsertIdentitySubject",
+          "table": "identity_subjects"
         }
       ]
     },
@@ -1236,7 +1266,7 @@
         "table": "identity_organizations",
         "scope": "org",
         "export": false,
-        "account_delete": "cascade",
+        "account_delete": "retain",
         "organization_delete": "cascade"
       },
       {
@@ -1244,7 +1274,7 @@
         "scope": "user",
         "export": false,
         "account_delete": "cascade",
-        "organization_delete": "cascade"
+        "organization_delete": "retain"
       }
     ],
     "removal_policy": "major-version-only"

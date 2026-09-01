@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -164,10 +166,14 @@ func TestUnknownKindIsNotFound(t *testing.T) {
 // notices a missing page.
 func TestInvalidTypeDeclarationIsRefused(t *testing.T) {
 	_, err := NewServer(Deps{
-		Config:       &config.Config{Env: "test", AppURL: "http://localhost:18080"},
-		Log:          testLogger(),
-		Docs:         &content.Docs{},
+		Config: &config.Config{Env: "test", AppURL: "http://localhost:18080"},
+		Log:    testLogger(), Docs: &content.Docs{},
 		ContentTypes: []content.Type{{Kind: "Bad Kind", LabelKey: "l", PluralKey: "p"}},
+		Verifier:     identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
+		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
+		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
+		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
+		SessionLoader: testSessionLoader{},
 	})
 	if err == nil {
 		t.Fatal("NewServer accepted an invalid content type declaration")

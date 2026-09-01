@@ -232,14 +232,13 @@ func TestCheckoutUnknownPlan422(t *testing.T) {
 	assert.Contains(t, body, "isn&#39;t available")
 }
 
-func TestBillingNotConfigured503(t *testing.T) {
-	s := integrationServer(t, nil) // no Polar keys, no client
+func TestBillingUnselectedPlanRefusesCheckout(t *testing.T) {
+	s := integrationServer(t, nil)
 	seedMembership(t, s, "user_nc", "org_nc", "org:admin")
 
 	code, _, body := postForm(t, s, "/app/billing/checkout", url.Values{"plan": {"pro"}}, sessionCookie("user_nc", "org_nc", "org:admin"))
-	assert.Equal(t, http.StatusServiceUnavailable, code)
-	assert.Contains(t, body, "Billing not configured")
-	assert.Contains(t, body, "/docs/billing")
+	assert.Equal(t, http.StatusUnprocessableEntity, code)
+	assert.Contains(t, body, "isn&#39;t available")
 }
 
 func TestEntitledGateInCurrentPlan(t *testing.T) {

@@ -8,11 +8,14 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -26,12 +29,13 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 	host := apphost.Map(nil, time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), "v-test")
 
 	module, err := NewModule(context.Background(), host, Deps{
-		Config:   &config.Config{Env: "test", AppURL: "http://localhost:8080"},
-		DB:       pool,
-		Queries:  queries,
-		Storage:  storagefs.NewDevStore(t.TempDir()),
-		Flags:    flags.NewDBEvaluator(queries, 30*time.Second),
-		Reporter: observability.NoopReporter{},
+		Config: &config.Config{Env: "test", AppURL: "http://localhost:8080"},
+		DB:     pool, Queries: queries, Storage: storagefs.NewDevStore(t.TempDir()),
+		Flags: flags.NewDBEvaluator(queries, 30*time.Second), Reporter: observability.NoopReporter{},
+		Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
+		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
+		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
+		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
 	})
 	if err != nil {
 		t.Fatalf("NewModule: %v", err)

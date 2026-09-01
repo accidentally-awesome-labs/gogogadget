@@ -130,15 +130,14 @@ func TestSettingsHideClerkLinksWhenAccountPortalIsUnconfigured(t *testing.T) {
 	assert.NotContains(t, body, "Manage organization")
 }
 
-func TestRequireAuth503WhenUnconfigured(t *testing.T) {
+func TestRequireAuthWhenNoProviderIsSelected(t *testing.T) {
 	s := integrationServer(t, func(d *Deps) {
 		d.Config.DevAuthBypass = false
 		d.Config.ClerkSecretKey = ""
 	})
-	code, _, body := serve(t, s, "GET", "/app/settings/account", nil, nil)
-	assert.Equal(t, http.StatusServiceUnavailable, code)
-	assert.Contains(t, body, "Auth not configured")
-	assert.Contains(t, body, "/docs/authentication")
+	code, hdr, _ := serve(t, s, "GET", "/app/settings/account", nil, nil)
+	assert.Equal(t, http.StatusSeeOther, code)
+	assert.Equal(t, "/login", hdr.Get("Location"))
 }
 
 func TestRequireNotDisabled(t *testing.T) {
@@ -255,18 +254,19 @@ func TestLazyOrgSync(t *testing.T) {
 	require.Equal(t, http.StatusOK, code)
 	assert.Contains(t, body, "Dashboard")
 
-	org, err := s.q.GetOrgByID(t.Context(), "org_lazy")
+	mapping, err := s.q.GetIdentityOrganization(t.Context(), sqlc.GetIdentityOrganizationParams{Provider: "dev", Subject: "org_lazy"})
+	require.NoError(t, err)
+	org, err := s.q.GetOrgByID(t.Context(), mapping.OrgID)
 	require.NoError(t, err)
 	assert.Equal(t, "org_lazy", org.Slug)
-	m, err := s.q.GetMembership(t.Context(), sqlc.GetMembershipParams{OrgID: "org_lazy", UserID: "user_lazy"})
+	m, err := s.q.GetMembership(t.Context(), sqlc.GetMembershipParams{OrgID: mapping.OrgID, UserID: "user_lazy"})
 	require.NoError(t, err)
 	assert.Equal(t, "org:admin", m.Role)
-
 	// A later organization.created webhook corrects the placeholder name.
 	payload := []byte(`{"type": "organization.created", "data": {"id": "org_lazy", "name": "Real Name", "slug": "org_lazy"}}`)
 	code, _, _ = serve(t, s, "POST", "/webhooks/clerk", payload, signSvix(t, testWebhookSecret, "msg_lazy1", payload))
 	require.Equal(t, http.StatusOK, code)
-	org, _ = s.q.GetOrgByID(t.Context(), "org_lazy")
+	org, _ = s.q.GetOrgByID(t.Context(), mapping.OrgID)
 	assert.Equal(t, "Real Name", org.Name)
 }
 
