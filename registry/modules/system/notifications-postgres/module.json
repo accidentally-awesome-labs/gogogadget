@@ -35,7 +35,7 @@
         "source": "internal/notifications/postgres/postgres_test.go",
         "target": "internal/notifications/postgres/postgres_test.go",
         "class": "test",
-        "sha256": "1c16b23da8e40748cf8c80254d31c10de1d29e586b2ae1e91dbb6b39fb780423",
+        "sha256": "29956ab218af5503b75034744c5da3f850db5dcbdef224100033ab3f7ce28689",
         "rewrite_module": true,
         "contract": false
       }

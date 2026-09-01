@@ -40,7 +40,7 @@
         "source": "internal/usage/postgres/postgres_test.go",
         "target": "internal/usage/postgres/postgres_test.go",
         "class": "test",
-        "sha256": "52ba3303fa6d3e6cfb5f2831380411b79ae8fa918a352309238bfa35be9b00ce",
+        "sha256": "56d376fba6b0c57a1747c53a6ce0e0dbe38257ce32529f08ddf318b810224a8f",
         "rewrite_module": true,
         "contract": false
       }

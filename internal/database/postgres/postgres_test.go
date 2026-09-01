@@ -1,8 +1,6 @@
 package postgres
 
 import (
-	"context"
-	"github.com/gogogadget/gogogadget/internal/search"
 	"testing"
 )
 

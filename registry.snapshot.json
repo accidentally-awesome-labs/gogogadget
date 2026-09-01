@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "41d46d912e0ecf22c901c29bb63f0f9bd8381a6ccaf520ca0e42649d9b5c86fd"
+      "sha256": "981db5aed401be27c5d70d350baa1891014256fcbce4bba5a6484cf7c47d7413"
     },
     {
       "path": "registry/modules/system/database/module.json",
@@ -976,7 +976,7 @@
     },
     {
       "path": "registry/modules/system/notifications-postgres/module.json",
-      "sha256": "427e00423ff42e00d697c63a1012fdd0ab6558cfc032e7a50bc195abc03c5fc4"
+      "sha256": "2dd183d80449af0edc1ccf080537f57ad3ed47190c358608071193e283ba5240"
     },
     {
       "path": "registry/modules/system/notifications/module.json",
@@ -1092,7 +1092,7 @@
     },
     {
       "path": "registry/modules/system/usage-postgres/module.json",
-      "sha256": "dbabeeb583e56518edc85c0a0f7f041302bcf6a6c6fcfedd8817ee12ab48e23e"
+      "sha256": "762efba63b14ef5349a535e9d99ee2bc8c0cc0a508378abe9e37a65c636e9de6"
     },
     {
       "path": "registry/modules/system/usage/module.json",
@@ -1100,7 +1100,7 @@
     },
     {
       "path": "registry/modules/system/webhooks-postgres/module.json",
-      "sha256": "bc4749bb2809c161fd9a953a98da6827bdaf44e95e8f4d31d8ab20e6264433e9"
+      "sha256": "eebe88aa4c87619150aa235fa83034d3f68e11924c6e7cf90d817a56a6d6174f"
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",

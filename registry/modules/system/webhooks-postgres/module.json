@@ -35,7 +35,7 @@
         "source": "internal/webhooks/postgres/postgres_test.go",
         "target": "internal/webhooks/postgres/postgres_test.go",
         "class": "test",
-        "sha256": "74235a58437419b1dabd5f0133a45c0525e47b13923ea7fd496b84f63183413f",
+        "sha256": "faa32d239693f05463ce8f6f88139f77a0c7fabb8bd3237c3b9ddf117d9cdf89",
         "rewrite_module": true,
         "contract": false
       }
