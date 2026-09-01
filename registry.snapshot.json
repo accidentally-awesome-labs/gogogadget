@@ -840,7 +840,7 @@
     },
     {
       "path": "registry/modules/system/audit-export-otlp/module.json",
-      "sha256": "1ac2f97d903ac7ae5db5edefcb81be86f169a51bbc55de88b069516e91a58230"
+      "sha256": "cd5c8d4cd6ea3ef90539d3879e3fb3a1a278d5c47c9062aec17382f85f6bd3df"
     },
     {
       "path": "registry/modules/system/audit-export/module.json",

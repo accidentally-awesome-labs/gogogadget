@@ -27,7 +27,7 @@
         "source": "internal/audit_export/otlp/otlp.go",
         "target": "internal/audit_export/otlp/otlp.go",
         "class": "go",
-        "sha256": "2fc1873a7ba02105ce36e6d741fccef0e0a2b772078c27d3f72a378f6886bc62",
+        "sha256": "9ef5080a5cd2f3eff40ba0702b1f4123657c2677a141a80afd8bd9ebf2c250f3",
         "rewrite_module": true,
         "contract": true
       },
@@ -88,8 +88,6 @@
         "field": "OtlpAuditExportUrl",
         "type": "string",
         "description": "Otlp Audit Export Url",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/audit-export-otlp@otlp"
         ]

@@ -8,6 +8,8 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/audit"
 	"net/http"
+	"strings"
+	"time"
 )
 
 type Exporter struct {
@@ -15,7 +17,9 @@ type Exporter struct {
 	Client   *http.Client
 }
 
-func New(endpoint string) *Exporter { return &Exporter{Endpoint: endpoint, Client: http.DefaultClient} }
+func New(endpoint string) *Exporter {
+	return &Exporter{Endpoint: strings.TrimRight(endpoint, "/"), Client: &http.Client{Timeout: 2 * time.Second}}
+}
 func (e *Exporter) Export(c context.Context, entry audit.Entry) error {
 	if e == nil || e.Endpoint == "" {
 		return fmt.Errorf("audit export: endpoint is required")
@@ -53,7 +57,17 @@ type Deps struct{}
 type Module struct{ Value *Exporter }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(h.Env("OTLP_AUDIT_EXPORT_URL"))}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	endpoint := ""
+	if h != nil {
+		endpoint = h.Env("OTLP_AUDIT_EXPORT_URL")
+	}
+	if endpoint == "" {
+		return nil, fmt.Errorf("audit export: OTLP_AUDIT_EXPORT_URL is required")
+	}
+	return &Module{Value: New(endpoint)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error {
