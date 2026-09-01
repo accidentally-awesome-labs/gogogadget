@@ -2,7 +2,7 @@
 
 ## Final state
 
-Task 5 provider-neutral identity and billing cutover is complete at commit `608bd51`.
+Task 5 provider-neutral identity and billing cutover is complete at commit `50bb3f4`.
 
 - `ggg/system/identity` and `ggg/system/billing` are constructor-free seams with complete typed capabilities. Development/test and production choices select identity-dev/identity-clerk and billing-local/billing-polar adapters through provider selections. Hosted credential and signature checks are adapter-owned; hosted Clerk verification fails closed and subject linking verifies users and organizations through their respective APIs.
 - `identity-session` is a generated runtime capability consumed by web middleware. Provider subjects are mapped transactionally to opaque `usr_<32 hex>`/`org_<32 hex>` IDs, with conflict rereads, `ErrLinkRequired` for mutable email/slug collisions, provider provenance in request context, and ADMIN_EMAIL first-sight role grants. Dev/e2e seed fixtures include provider mappings, and dev login/org switching preserve provider subjects.
