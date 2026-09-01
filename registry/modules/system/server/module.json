@@ -204,7 +204,7 @@
         "source": "internal/web/module_test.go",
         "target": "internal/web/module_test.go",
         "class": "test",
-        "sha256": "70b69e18fb07f79e50908c28b32e2f643c135f4c284e2a7978d627b8ec1c6332",
+        "sha256": "78d4b114a65056ac7953790965019ef188586981451235bca500854e26775bfb",
         "rewrite_module": true,
         "contract": false
       },
@@ -260,7 +260,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "56f6cfe3302bff8088564190d2dfbd6d388e87a4de72dd8b55d84c6d6569855d",
+        "sha256": "3af0cb35a8cc1f5f0303028544ce90f02b3505baf01a93073cf42f67b9d9ab20",
         "rewrite_module": true,
         "contract": true
       },
@@ -380,7 +380,7 @@
         "source": "internal/web/testhelpers_test.go",
         "target": "internal/web/testhelpers_test.go",
         "class": "test",
-        "sha256": "85e23ce37c8881660726fb40d71c8c256cc1f9b335c2a55aa9a4e6353e9e5e6a",
+        "sha256": "0b7fcb882d66b092e9d11fd10510d1c34b299c4c67ce7d024456f36a774ebbf4",
         "rewrite_module": true,
         "contract": false
       },

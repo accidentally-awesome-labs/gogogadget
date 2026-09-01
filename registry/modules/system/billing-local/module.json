@@ -62,7 +62,7 @@
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",
-        "sha256": "5ab6f552f6a7ec69443a6c51f3abe0728a3d9fa994b8c8e488c75440d95c48f6",
+        "sha256": "5c2678d8fc04da7f2d53fe4366aee0c4e17e19c6896befe9c26e49ac16e5557b",
         "rewrite_module": true,
         "contract": true
       },

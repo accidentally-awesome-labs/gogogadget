@@ -16,6 +16,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -36,6 +37,7 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
 		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
+		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}},
 	})
 	if err != nil {
 		t.Fatalf("NewModule: %v", err)

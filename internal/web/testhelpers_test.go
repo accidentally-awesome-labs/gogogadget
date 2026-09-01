@@ -20,6 +20,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -60,14 +61,17 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{BaseURL: cfg.AppURL},
 		IdentityWebhook: identity.DevWebhook{}, BillingWebhook: billinglocal.LocalWebhook{},
 		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
-		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second),
-		Reporter: observability.NoopReporter{},
+		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second), Reporter: observability.NoopReporter{},
+		SessionLoader: identitysession.Loader(&identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}, AdminEmail: cfg.AdminEmail}),
 	}
 	if mutate != nil {
 		mutate(&deps)
 	}
 	if !deps.Config.DevAuthBypass {
 		deps.IdentityNavigator = identity.PortalNavigator{BaseURL: deps.Config.ClerkPortalURL}
+	}
+	if loader, ok := deps.SessionLoader.(*identitysession.SessionLoader); ok {
+		loader.AdminEmail = deps.Config.AdminEmail
 	}
 	server, err := NewServer(deps)
 	if err != nil {

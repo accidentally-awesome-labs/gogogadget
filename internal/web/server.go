@@ -118,6 +118,7 @@ func NewServer(d Deps) (*Server, error) {
 		"identity.deleter": d.IdentityDeleter, "identity.navigator": d.IdentityNavigator,
 		"identity.webhook": d.IdentityWebhook, "billing.client": d.Billing,
 		"billing.catalog": d.BillingCatalog, "billing.webhook": d.BillingWebhook,
+		"identity.session": d.SessionLoader,
 	} {
 		if value == nil {
 			return nil, fmt.Errorf("web: required capability %s is missing", name)
@@ -132,12 +133,6 @@ func NewServer(d Deps) (*Server, error) {
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
 		analytics: analytics.NoopCapturer{}, store: d.Storage, llm: d.LLM,
 		flags: d.Flags, reporter: d.Reporter, mux: http.NewServeMux(),
-	}
-	if s.sessionLoader == nil {
-		if d.DB == nil {
-			return nil, errors.New("web: session loader or database capability is required")
-		}
-		s.sessionLoader = &identitysession.SessionLoader{Pool: d.DB, Verify: d.Verifier, Fetch: d.Fetcher}
 	}
 	reg, err := content.NewRegistry(contentTypesOf(d))
 	if err != nil {

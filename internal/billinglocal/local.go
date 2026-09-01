@@ -38,7 +38,7 @@ func (c *Client) CreateCheckout(_ context.Context, p billing.CheckoutParams) (st
 }
 
 func (c *Client) CreatePortalSession(_ context.Context, customer string) (string, error) {
-	return c.BaseURL + "/app/billing/portal?customer=" + url.QueryEscape(customer), nil
+	return c.BaseURL + "/app/settings/billing?portal=local", nil
 }
 func (c *Client) RevokeSubscription(_ context.Context, sub string) error {
 	c.mu.Lock()

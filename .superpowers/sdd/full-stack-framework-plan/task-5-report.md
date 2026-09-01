@@ -169,4 +169,13 @@ Verification after review fixes:
 - Session context carries provider provenance for subject-correct deletion and dev org switching. Slug collisions return `identity.ErrLinkRequired`; hosted organization linking uses the Clerk organization API, not the user API.
 - Added and passed `TestLocalBillingConfirmCancelReactivates` (authenticated GET screen, CSRF-protected POST, ledger write, cancel, and reactivation).
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `c8f6dbcb489ccc9920b04529dd8143c71c233627a11f785caedf9d3402c9f52f`.
+
+## Round 3 repair follow-up
+
+- Local billing uses adapter-owned stable product IDs and preserves checkout/product state through confirm, cancel, and reactivation; portal sessions terminate at the registered settings route rather than redirecting to the portal action itself.
+- Local confirmation/cancellation forms carry CSRF tokens and `/app` actions; local routes remain authenticated and local/dev webhook deliveries are refused by the hosted webhook endpoint.
+- Session loading is supplied explicitly by the generated identity-session capability; web no longer constructs a hidden fallback loader. Active provider provenance is carried through request context for subject-correct deletion.
+- `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed unfiltered.
+- `make check` — passed fully, including generated drift, templ/sqlc, gofmt, `go vet ./...`, and `go test ./...`.
+- Final registry digest: `56e888ed68c0f0b0df792331391382fe2bdc2e4c563e6f02553d48433b7de109`.
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `d95c819a12cc441195d63f245b0d17a4507698e65682ade396e0b40a6abc2f2f`.

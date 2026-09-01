@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
-      "sha256": "49b472ec0963bdb88706fe8c50083af45d4def4c0af78052f1e046c5ad9977a6"
+      "sha256": "22ff16ce2afdde24e5ff83608a18f596e23754cd25370683f517392669fd2586"
     },
     {
       "path": "registry/modules/system/billing-polar/module.json",
@@ -952,7 +952,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "91acc3b8ff2282e595f66f93acf082e9c60dc24b8887d7078fa9783d8909f7d8"
+      "sha256": "c2ef64d6c60d3031094cdb439e42f0166f9cbb82b71852e001f314aa69c7ce5b"
     },
     {
       "path": "registry/modules/system/static/module.json",
