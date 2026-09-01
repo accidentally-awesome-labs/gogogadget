@@ -136,7 +136,7 @@
         "source": "internal/identity/verifier.go",
         "target": "internal/identity/verifier.go",
         "class": "go",
-        "sha256": "bfbbb624716717e220107ed89827522986e841dcdc4d2d9fd671dbeae3a40fe4",
+        "sha256": "93b8a77ecf53c52f585c469d2070da683ef822f97c8f2dd13b29b43d7049a33a",
         "rewrite_module": true,
         "contract": true
       },
@@ -1231,7 +1231,7 @@
         "settings.disabled_title": "Account disabled"
       },
       "es": {
-        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organizaci\u00f3n si crees que esto es un error.",
+        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
         "settings.disabled_title": "Cuenta deshabilitada"
       }
     },

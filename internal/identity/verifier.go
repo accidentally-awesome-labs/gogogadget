@@ -13,6 +13,7 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwks"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"github.com/clerk/clerk-sdk-go/v2/user"
 )
 
 // Claims is the internal, provider-neutral session identity. IDs are opaque
@@ -27,11 +28,14 @@ type ProviderClaims struct {
 type Verifier interface {
 	Verify(context.Context, string) (*ProviderClaims, error)
 }
-
-type ClerkVerifier struct{ jwksClient *jwks.Client }
+type ClerkVerifier struct {
+	jwksClient *jwks.Client
+	userClient *user.Client
+}
 
 func NewClerkVerifier(secretKey string) *ClerkVerifier {
-	return &ClerkVerifier{jwksClient: jwks.NewClient(&clerk.ClientConfig{BackendConfig: clerk.BackendConfig{Key: &secretKey}})}
+	cfg := &clerk.ClientConfig{BackendConfig: clerk.BackendConfig{Key: &secretKey}}
+	return &ClerkVerifier{jwksClient: jwks.NewClient(cfg), userClient: user.NewClient(cfg)}
 }
 func (v *ClerkVerifier) Verify(ctx context.Context, token string) (*ProviderClaims, error) {
 	claims, err := jwt.Verify(ctx, &jwt.VerifyParams{Token: token, JWKSClient: v.jwksClient, Leeway: 10 * time.Second})
@@ -60,5 +64,15 @@ func (FakeVerifier) VerifySubject(_ context.Context, subject string) (*ProviderC
 	return &ProviderClaims{Provider: "dev", UserSubject: subject}, nil
 }
 func (v *ClerkVerifier) VerifySubject(ctx context.Context, subject string) (*ProviderClaims, error) {
+	if subject == "" || v == nil || v.userClient == nil {
+		return nil, ErrInvalidToken
+	}
+	u, err := v.userClient.Get(ctx, subject)
+	if err != nil {
+		return nil, err
+	}
+	if u.ID != subject {
+		return nil, fmt.Errorf("identity: verified subject mismatch")
+	}
 	return &ProviderClaims{Provider: "clerk", UserSubject: subject}, nil
 }

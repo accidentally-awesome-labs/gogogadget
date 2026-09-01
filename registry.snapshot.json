@@ -880,7 +880,7 @@
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "d147ec4c4a83c039ccc5bc924780fb392f915f2d28f80d8467f898bf8bf7faa3"
+      "sha256": "d6ce869d5fb68483d83d5fa9bcf2ca95118ee5744e6ae062254cb67e55974a3e"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",

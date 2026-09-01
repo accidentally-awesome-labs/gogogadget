@@ -128,3 +128,11 @@ Verification after review fixes:
 - `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed.
 - `make check` — passed fully; this includes `go vet ./...` and `go test ./...`.
 - Final registry digest: `b2c546cb07d61941cff82ed4a4c59e2ae3105bd97a177c3f881069949307f683`.
+
+## Round 2 subject-verification fix
+
+- `ClerkVerifier.VerifySubject` now uses the hosted Clerk user API client and requires the returned user ID to exactly match the requested subject; it no longer treats an arbitrary subject as verified.
+- `identity.PortalNavigator` and catalog injection remain provider-neutral; generated/configured runtime paths are unchanged.
+- `make check` passed fully after regeneration, including gofmt, registry drift, `go vet ./...`, and `go test ./...`.
+- Focused unfiltered identity, session, billing, billing-local, web, database, API, and jobs suites passed.
+- Final registry digest: `e67c3305fc3dcec889c79765d816695158ba597aec9efdfd714467797ce8aac9`.
