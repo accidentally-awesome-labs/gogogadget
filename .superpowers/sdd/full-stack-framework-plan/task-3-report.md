@@ -6,113 +6,115 @@ Task 3 provider-selection, contract, and fixture requirements are complete. Mail
 
 ## Changed clusters
 
-- Shared storage contract now accepts provider-specific response/missing-key behavior. The real `*s3.R2Store` runs the shared contract against a deterministic `httptest` S3 backend; filesystem and S3 traversal/header/SigV4/presigned security tests remain adapter-owned.
-- SMTP consumes the generated configuration `Values` view after defaults and normalization. Integer parsing is centralized in `config.Config.IntValue`; the unreachable `SMTP_HOST` required branch is removed. The SMTP tests cover default localhost/1025 and invalid ports.
+- Shared storage contract retains the real `*s3.R2Store` harness plus protocol, traversal, header, SigV4, presigned-URL, and security coverage; filesystem and S3 adapters continue to run the shared contract table.
+- SMTP no longer recreates manifest defaults in Go. `NewModule` consumes generated configuration values and rejects missing host or invalid/missing typed port values. The SMTP parity test reads `SMTP_HOST` and `SMTP_PORT` defaults from `registry/modules/system/mail-smtp/module.json`, feeds those declared values through the adapter, and verifies the resulting Mailpit/no-host behavior.
 - Provider closure validation derives targets from fixture manifests, observes generated boot branches through Go AST parsing, records selected adapter and constructor counts from the installed lock/generated bootstrap, and exercises missing-selection, disallowed-production-target, and selected-adapter-removal refusals against the actual fixture project.
 - Added DB-free `web.NewModule` missing storage/flags/reporter capability tests using typed dependency placeholders, without opening Postgres.
-- Generated outputs were refreshed only through `ggg registry build` and offline sync. Task 2 tombstones, ownership/digests, fixed envelope, and no vendor fallback remain intact.
+- Generated outputs were refreshed only through `ggg registry build` and offline sync. Task 2 tombstones, ownership/digests, fixed envelope, and no vendor fallback remain intact. The storage-S3 protocol-test manifest digest is current.
 
 ## Final verification
 
-Commit containing implementation and generated outputs: `22a1eef` (`fix: close task 3 adapter findings`).
-Report evidence revisions: `5d46fa6` (`docs: finalize task 3 evidence`) and `667ef98` (`docs: correct task 3 validation output`).
+Reviewed base head: `51242a90a2d0bfc62ac35f6eb9029b14da2128a1`.
+
+Current implementation/generated-output head before this report commit: `1669ee33d59f21da47a3b5f8e083aecb493441e4` (`fix: make smtp defaults manifest-owned`).
 
 `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline`
 
 ```text
-registry eb885d416bcdbf6e577a741b1f71b50556a4b9f7a2344a3cd9b10e3de2fad65
-  update    lock       gogogadget.lock.json
-registry eb885d416bcdbf6e577a741b1f71b50556a4b9f7a2344a3cd9b10e3de2fad65
+registry 23cf34e81712c4fdbc1f78ad2b1f46b9cec22a63679de2ab29066eebbf3adfa8
+registry 23cf34e81712c4fdbc1f78ad2b1f46b9cec22a63679de2ab29066eebbf3adfa8
 ```
 
-Final registry digest: `eb885d416bcdbf6e577a741b1f71b50556a4b9f7a2344a3cd9b10e3de2fad65`.
+Final registry digest: `23cf34e81712c4fdbc1f78ad2b1f46b9cec22a63679de2ab29066eebbf3adfa8`.
 
-`go test ./internal/storage/contract ./internal/storage/filesystem ./internal/storage/s3 ./internal/mail/smtp ./internal/web -run 'Test(S3StoreContract|FilesystemStoreContract|SMTPModuleUsesTypedDefaultsAndRejectsInvalidPort|NewModuleRejectsMissingCapabilityWithoutDatabase)' -count=1`
+`go test ./internal/storage/contract ./internal/storage/filesystem ./internal/storage/s3 ./internal/mail/smtp ./internal/web -run 'Test(S3StoreContract|FilesystemStoreContract|SMTPModuleUsesDeclaredDefaultsAndRejectsInvalidPort|NewModuleRejectsMissingCapabilityWithoutDatabase)' -count=1`
 
 ```text
 ?    github.com/gogogadget/gogogadget/internal/storage/contract [no test files]
-ok   github.com/gogogadget/gogogadget/internal/storage/filesystem 0.202s
-ok   github.com/gogogadget/gogogadget/internal/storage/s3 0.285s
-ok   github.com/gogogadget/gogogadget/internal/mail/smtp 0.276s
-ok   github.com/gogogadget/gogogadget/internal/web 0.311s
+ok   github.com/gogogadget/gogogadget/internal/storage/filesystem 0.272s
+ok   github.com/gogogadget/gogogadget/internal/storage/s3 0.203s
+ok   github.com/gogogadget/gogogadget/internal/mail/smtp 0.223s
+ok   github.com/gogogadget/gogogadget/internal/web 0.318s
 ```
 
 `go test ./internal/jobs ./internal/web ./internal/modules ./internal/modkit ./internal/config -count=1`
 
 ```text
-ok   github.com/gogogadget/gogogadget/internal/jobs 12.624s
-ok   github.com/gogogadget/gogogadget/internal/web 61.008s
-ok   github.com/gogogadget/gogogadget/internal/modules 3.309s
-ok   github.com/gogogadget/gogogadget/internal/modkit 6.315s
-ok   github.com/gogogadget/gogogadget/internal/config 0.121s
+ok   github.com/gogogadget/gogogadget/internal/jobs 13.746s
+ok   github.com/gogogadget/gogogadget/internal/web 99.586s
+ok   github.com/gogogadget/gogogadget/internal/modules 2.525s
+ok   github.com/gogogadget/gogogadget/internal/modkit 7.120s
+ok   github.com/gogogadget/gogogadget/internal/config 0.127s
 ```
 
 `go run ./cmd/ggg registry validate`
 
 ```text
 preparing derivative from /Users/salar/Projects/gogogadget/.worktrees/full-stack-framework
-  rebuilt 3 manifest digest(s) in the derivative (stale upstream, reported by sync --check)
 
 ggg/element/example-token
   closure: ggg/element/example-token
   installed 3 file(s)
   compiled ./... and generated 24 file(s)
   module tests passed in ./internal/web/templates/ui
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 
 ggg/component/example-callout
   closure: ggg/element/example-token, ggg/component/example-callout
   installed 7 file(s)
   compiled ./... and generated 26 file(s)
   module tests passed in ./internal/web/templates/ui
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 
 ggg/page/example-status
   closure: ggg/element/example-token, ggg/component/example-callout, ggg/page/example-status
   installed 9 file(s)
   compiled ./... and generated 28 file(s)
   module tests passed in ./internal/web/templates/ui
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 
 ggg/workflow/example-ping
   closure: ggg/element/example-token, ggg/component/example-callout, ggg/page/example-status, ggg/workflow/example-ping
   installed 13 file(s)
   compiled ./... and generated 29 file(s)
   module tests passed in ./internal/web/templates/ui
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 1 migration(s) retained
 
 fixture/system/mail-providers
   closure: fixture/system/mail-local, fixture/system/mail-managed, fixture/system/mail-providers
   installed 4 file(s)
   compiled ./... and generated 27 file(s)
   module tests passed in ./internal/fixture/maillocal, ./internal/fixture/mailmanaged
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 
 fixture/system/storage-providers
   closure: fixture/system/storage-local, fixture/system/storage-managed, fixture/system/storage-providers
   installed 4 file(s)
   compiled ./... and generated 27 file(s)
   module tests passed in ./internal/fixture/storagefilesystem, ./internal/fixture/storages3
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 
 ggg/system/example-clock
   closure: ggg/system/example-clock
   installed 2 file(s)
   compiled ./... and generated 26 file(s)
   module tests passed in ./internal/example/clock
-  removed; 1600 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
+  removed; 1599 tree entries restored, 23 aggregate(s) differ only in the lock-identity header, 0 migration(s) retained
 
 exercised 7 example closure(s):
-  info     example_closure_verified element closure ggg/element/example-token: installed 3 file(s), regenerated 24, compiled, 1600 tree entries restored byte for byte
-  info     example_closure_verified component closure ggg/element/example-token+ggg/component/example-callout: installed 7 file(s), regenerated 26, compiled, 1600 tree entries restored byte for byte
-  info     example_closure_verified page closure ggg/element/example-token+ggg/component/example-callout+ggg/page/example-status: installed 9 file(s), regenerated 28, compiled, 1600 tree entries restored byte for byte
-  info     example_closure_verified workflow closure ggg/element/example-token+ggg/component/example-callout+ggg/page/example-status+ggg/workflow/example-ping: installed 13 file(s), regenerated 29, compiled, 1600 tree entries restored byte for byte, retained migration(s) internal/db/migrations/0020_example_ping_events.sql
-  info     example_closure_verified system closure fixture/system/mail-local+fixture/system/mail-managed+fixture/system/mail-providers: installed 4 file(s), regenerated 27, compiled, 1600 tree entries restored byte for byte
-  info     example_closure_verified system closure fixture/system/storage-local+fixture/system/storage-managed+fixture/system/storage-providers: installed 4 file(s), regenerated 27, compiled, 1600 tree entries restored byte for byte
-  info     example_closure_verified system closure ggg/system/example-clock: installed 2 file(s), regenerated 26, compiled, 1600 tree entries restored byte for byte
-
+  info     example_closure_verified element closure ggg/element/example-token: installed 3 file(s), regenerated 24, compiled, 1599 tree entries restored byte for byte
+  info     example_closure_verified component closure ggg/element/example-token+ggg/component/example-callout: installed 7 file(s), regenerated 26, compiled, 1599 tree entries restored byte for byte
+  info     example_closure_verified page closure ggg/element/example-token+ggg/component/example-callout+ggg/page/example-status: installed 9 file(s), regenerated 28, compiled, 1599 tree entries restored byte for byte
+  info     example_closure_verified workflow closure ggg/element/example-token+ggg/component/example-callout+ggg/page/example-status+ggg/workflow/example-ping: installed 13 file(s), regenerated 29, compiled, 1599 tree entries restored byte for byte, retained migration(s) internal/db/migrations/0020_example_ping_events.sql
+  info     example_closure_verified system closure fixture/system/mail-local+fixture/system/mail-managed+fixture/system/mail-providers: installed 4 file(s), regenerated 27, compiled, 1599 tree entries restored byte for byte
+  info     example_closure_verified system closure fixture/system/storage-local+fixture/system/storage-managed+fixture/system/storage-providers: installed 4 file(s), regenerated 27, compiled, 1599 tree entries restored byte for byte
+  info     example_closure_verified system closure ggg/system/example-clock: installed 2 file(s), regenerated 26, compiled, 1599 tree entries restored byte for byte
 ```
-`gofmt -d` over all changed Go files produced no output.
+
+`git diff --name-only -- '*.go' | xargs gofmt -d`
+
+```text
+```
 
 `make fuzz`
 
@@ -120,27 +122,27 @@ exercised 7 example closure(s):
 go test -run=^$ -fuzz=FuzzFakeVerifier -fuzztime=15s ./internal/identity/
 fuzz: elapsed: 0s, gathering baseline coverage: 0/12 completed
 fuzz: elapsed: 0s, gathering baseline coverage: 12/12 completed, now fuzzing with 10 workers
-fuzz: elapsed: 3s, execs: 238105 (79350/sec), new interesting: 0 (total: 12)
-fuzz: elapsed: 6s, execs: 434405 (65447/sec), new interesting: 0 (total: 12)
-fuzz: elapsed: 9s, execs: 630006 (65079/sec), new interesting: 0 (total: 12)
-fuzz: elapsed: 12s, execs: 825428 (65257/sec), new interesting: 0 (total: 12)
-fuzz: elapsed: 15s, execs: 1006891 (60433/sec), new interesting: 0 (total: 12)
-fuzz: elapsed: 15s, execs: 1006891 (0/sec), new interesting: 0 (total: 12)
+fuzz: elapsed: 3s, execs: 230055 (76655/sec), new interesting: 0 (total: 12)
+fuzz: elapsed: 6s, execs: 466191 (78726/sec), new interesting: 0 (total: 12)
+fuzz: elapsed: 9s, execs: 688960 (74239/sec), new interesting: 0 (total: 12)
+fuzz: elapsed: 12s, execs: 929962 (80340/sec), new interesting: 0 (total: 12)
+fuzz: elapsed: 15s, execs: 1131875 (67305/sec), new interesting: 0 (total: 12)
+fuzz: elapsed: 15s, execs: 1131875 (0/sec), new interesting: 0 (total: 12)
 PASS
-ok   github.com/gogogadget/gogogadget/internal/identity 15.386s
+ok   github.com/gogogadget/gogogadget/internal/identity 15.409s
 go test -run=^$ -fuzz=FuzzSanitizeFilename -fuzztime=15s ./internal/mail/dev/
-fuzz: elapsed: 0s, gathering baseline coverage: 0/12 completed
-fuzz: elapsed: 0s, gathering baseline coverage: 12/12 completed, now fuzzing with 10 workers
-fuzz: elapsed: 3s, execs: 166710 (55563/sec), new interesting: 31 (total: 43)
-fuzz: elapsed: 6s, execs: 336697 (56650/sec), new interesting: 35 (total: 47)
-fuzz: elapsed: 9s, execs: 430704 (31340/sec), new interesting: 35 (total: 47)
-fuzz: elapsed: 12s, execs: 594255 (54523/sec), new interesting: 37 (total: 49)
-fuzz: elapsed: 15s, execs: 693324 (33026/sec), new interesting: 37 (total: 49)
-fuzz: elapsed: 16s, execs: 693324 (0/sec), new interesting: 37 (total: 49)
+fuzz: elapsed: 0s, gathering baseline coverage: 0/49 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 49/49 completed, now fuzzing with 10 workers
+fuzz: elapsed: 3s, execs: 138167 (46034/sec), new interesting: 0 (total: 49)
+fuzz: elapsed: 6s, execs: 304285 (55396/sec), new interesting: 0 (total: 49)
+fuzz: elapsed: 9s, execs: 469677 (55129/sec), new interesting: 0 (total: 49)
+fuzz: elapsed: 12s, execs: 646039 (58784/sec), new interesting: 0 (total: 49)
+fuzz: elapsed: 15s, execs: 855035 (69656/sec), new interesting: 0 (total: 49)
+fuzz: elapsed: 15s, execs: 855035 (0/sec), new interesting: 0 (total: 49)
 PASS
-ok   github.com/gogogadget/gogogadget/internal/mail/dev 16.220s
+ok   github.com/gogogadget/gogogadget/internal/mail/dev 15.403s
 ```
 
 ## Database-gated verification
 
-Dedicated migration/database integration, e2e, visual, smoke, and Docker gates were not run in this fix pass. The focused package command above passed; it is not being represented as the full database gate. No database skip was hidden or converted into a success claim.
+Dedicated migration/database integration, e2e, visual, smoke, and Docker gates were not run in this fix pass because they require the configured Postgres/Docker environment. The focused and package regression commands above passed; they are not being represented as the full database gate. No database skip was hidden or converted into a success claim.
