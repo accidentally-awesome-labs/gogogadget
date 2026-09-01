@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/audit"
-	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
@@ -23,7 +23,7 @@ func (s *Server) handleAdminFlagToggle(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if err := s.q.SetFeatureFlagEnabled(ctx, sqlc.SetFeatureFlagEnabledParams{Key: key, Enabled: !f.Enabled}); err != nil {
+	if err := s.flags.Upsert(ctx, flags.Flag{Key: f.Key, Description: f.Description, Enabled: !f.Enabled, Rollout: int(f.Rollout)}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -46,7 +46,26 @@ func (s *Server) handleAdminFlagRollout(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "rollout must be 0–100", http.StatusUnprocessableEntity)
 		return
 	}
-	if err := s.q.SetFeatureFlagRollout(ctx, sqlc.SetFeatureFlagRolloutParams{Key: key, Rollout: int32(rollout)}); err != nil {
+	current, listErr := s.flags.List(ctx)
+	if listErr != nil {
+		s.renderError(w, r, listErr.Error())
+		return
+	}
+	var selected flags.Flag
+	found := false
+	for _, candidate := range current {
+		if candidate.Key == key {
+			selected = candidate
+			found = true
+			break
+		}
+	}
+	if !found {
+		http.NotFound(w, r)
+		return
+	}
+	selected.Rollout = rollout
+	if err := s.flags.Upsert(ctx, selected); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -92,9 +111,7 @@ func (s *Server) handleAdminFlagCreate(w http.ResponseWriter, r *http.Request) {
 		s.renderFlagFormError(w, r, input, i18n.T(ctx, "flags.exists"))
 		return
 	}
-	if err := s.q.UpsertFeatureFlag(ctx, sqlc.UpsertFeatureFlagParams{
-		Key: input.Key, Description: input.Description, Enabled: false, Rollout: int32(rollout),
-	}); err != nil {
+	if err := s.flags.Upsert(ctx, flags.Flag{Key: input.Key, Description: input.Description, Enabled: false, Rollout: rollout}); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -113,7 +130,7 @@ func (s *Server) handleAdminFlagDelete(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	if err := s.q.DeleteFeatureFlag(ctx, key); err != nil {
+	if err := s.flags.Delete(ctx, key); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -137,9 +154,7 @@ func (s *Server) handleAdminFlagOverrideSet(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "org and state (on|off) are required", http.StatusUnprocessableEntity)
 		return
 	}
-	if err := s.q.UpsertFlagOverride(ctx, sqlc.UpsertFlagOverrideParams{
-		FlagKey: key, OrgID: orgID, Enabled: r.PostFormValue("state") == "on",
-	}); err != nil {
+	if err := s.flags.SetOverride(ctx, key, orgID, r.PostFormValue("state") == "on"); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
@@ -155,7 +170,7 @@ func (s *Server) handleAdminFlagOverrideDelete(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 	user := identity.UserFrom(ctx)
 	key, orgID := r.PathValue("key"), r.PathValue("org")
-	if err := s.q.DeleteFlagOverride(ctx, sqlc.DeleteFlagOverrideParams{FlagKey: key, OrgID: orgID}); err != nil {
+	if err := s.flags.DeleteOverride(ctx, key, orgID); err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}

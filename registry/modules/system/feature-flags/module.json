@@ -110,7 +110,7 @@
         "source": "internal/flags/service.go",
         "target": "internal/flags/service.go",
         "class": "go",
-        "sha256": "63798250330c0ca57a0f7d8905520fd158196199a234d1987319e59df813fec1",
+        "sha256": "d98b0531dc532d3bdb7da255cb77f7934872dc696c5b11cdc06df5d0cedf0075",
         "rewrite_module": true,
         "contract": true
       }

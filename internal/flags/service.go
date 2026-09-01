@@ -2,6 +2,7 @@ package flags
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 )
 
@@ -19,7 +20,16 @@ func (e *DBEvaluator) List(ctx context.Context) ([]Flag, error) {
 	return out, nil
 }
 func (e *DBEvaluator) Upsert(ctx context.Context, f Flag) error {
-	return e.q.UpsertFeatureFlag(ctx, sqlc.UpsertFeatureFlagParams{Key: f.Key, Description: f.Description, Enabled: f.Enabled, Rollout: int32(f.Rollout)})
+	if e == nil || e.q == nil {
+		return fmt.Errorf("flags: queries are required")
+	}
+	if _, err := e.q.GetFeatureFlag(ctx, f.Key); err != nil {
+		return e.q.UpsertFeatureFlag(ctx, sqlc.UpsertFeatureFlagParams{Key: f.Key, Description: f.Description, Enabled: f.Enabled, Rollout: int32(f.Rollout)})
+	}
+	if err := e.q.SetFeatureFlagEnabled(ctx, sqlc.SetFeatureFlagEnabledParams{Key: f.Key, Enabled: f.Enabled}); err != nil {
+		return err
+	}
+	return e.q.SetFeatureFlagRollout(ctx, sqlc.SetFeatureFlagRolloutParams{Key: f.Key, Rollout: int32(f.Rollout)})
 }
 func (e *DBEvaluator) Delete(ctx context.Context, key string) error {
 	return e.q.DeleteFeatureFlag(ctx, key)

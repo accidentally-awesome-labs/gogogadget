@@ -69,7 +69,7 @@
         "source": "internal/web/workflow_admin_flags.go",
         "target": "internal/web/workflow_admin_flags.go",
         "class": "go",
-        "sha256": "65efe56ea249f5f7f47339b1deeaf5c19898829b5fc9ce7d0b4bd4c8254db4e0",
+        "sha256": "61d7b6e88e816d900c055ec0b9dd399c7c16197c392aafaf596ac6015dfd607e",
         "rewrite_module": true,
         "contract": false
       }

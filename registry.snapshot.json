@@ -904,7 +904,7 @@
     },
     {
       "path": "registry/modules/system/feature-flags/module.json",
-      "sha256": "11c833f9345d0d37d77503bbf395ce7260211afbec2437c49db939c76ef994b6"
+      "sha256": "3f3e34afa54b4629772df0ba176ae67cec0d5f92ce3fcbc1b599bc67eb22a630"
     },
     {
       "path": "registry/modules/system/i18n/module.json",
@@ -1128,7 +1128,7 @@
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",
-      "sha256": "880220547b343b0e12a0854c68ea930873247a26e8cc85faf9310b1df13bd9be"
+      "sha256": "ee827daeb70445df149bc524a43acc74e46b4319e7b17ab60feb4f450c088918"
     },
     {
       "path": "registry/modules/workflow/admin-job-requeue/module.json",
