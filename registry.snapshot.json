@@ -828,7 +828,7 @@
     },
     {
       "path": "registry/modules/system/api/module.json",
-      "sha256": "d50ad374ee119a2c8a3dbcb62242884bb0f1f876d4236d057ff619505e4e4fdd"
+      "sha256": "397953256d900505ebd3aab4242bf193b89e4654b268cd20461181062239329c"
     },
     {
       "path": "registry/modules/system/apphost/module.json",
@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "36c7f009917c98bc3a173ba110ee1871ff471a8d42fa5d1e1d46008eaaa9c635"
+      "sha256": "3d270633b1a9cc3437e7c1b82d4f7e08977827ca6764c5712a177e6d07abd196"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1200,7 +1200,7 @@
     },
     {
       "path": "registry/modules/workflow/openapi-contract/module.json",
-      "sha256": "3516e2b35d854ca542e237599479e6f2e492d87f5aca146660166887777722ad"
+      "sha256": "4b649c5679f4130115134c80911e072bc21ddfead2752a108191364c1f24f0ac"
     },
     {
       "path": "registry/modules/workflow/organization-export/module.json",

@@ -28,6 +28,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/realtime"
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/gogogadget/gogogadget/internal/telemetry"
+	"github.com/gogogadget/gogogadget/internal/usage"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/gogogadget/gogogadget/internal/webhooks"
 	"github.com/jackc/pgx/v5"
@@ -66,6 +67,7 @@ type Server struct {
 	identityWebhook identity.Webhook
 	billingWebhook  billing.BillingWebhook
 	webhookEmitter  webhooks.Emitter
+	usageRecorder   usage.Recorder
 	mux             *http.ServeMux
 
 	// metrics is the process-local Prometheus registry (see metrics.go).
@@ -121,6 +123,7 @@ type Deps struct {
 	IdentityWebhook   identity.Webhook
 	BillingWebhook    billing.BillingWebhook
 	WebhookEmitter    webhooks.Emitter
+	UsageRecorder     usage.Recorder
 }
 
 func NewServer(d Deps) (*Server, error) {
@@ -153,7 +156,7 @@ func NewServer(d Deps) (*Server, error) {
 		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
 		analytics: d.Analytics, store: d.Storage, llm: d.LLM, flags: d.Flags,
-		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, mux: http.NewServeMux(),
+		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, usageRecorder: d.UsageRecorder, mux: http.NewServeMux(),
 	}
 	reg, _ := content.NewRegistry(contentTypesOf(d))
 	s.types = reg

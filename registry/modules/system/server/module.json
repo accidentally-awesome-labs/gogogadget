@@ -276,7 +276,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "e21b2ea3ccb6280b2d5c24845f80c3bf5f71482c987e5be68df6d62a7aec9b91",
+        "sha256": "80c4821d8bc657a91dc0067149a5956be3fc1eba059adf4998efa05222935658",
         "rewrite_module": true,
         "contract": true
       },
@@ -548,6 +548,12 @@
             "field": "Telemetry",
             "capability": "telemetry.providers",
             "type": "telemetry.Providers",
+            "optional": true
+          },
+          {
+            "field": "UsageRecorder",
+            "capability": "usage.recorder",
+            "type": "usage.Recorder",
             "optional": true
           },
           {

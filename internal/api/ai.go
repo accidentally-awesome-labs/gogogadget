@@ -19,9 +19,10 @@ import (
 // AI serves POST /api/v1/ai/chat — the metered LLM endpoint. Unconfigured
 // (nil Completer) → 503 not_configured; over the plan meter → 402 plan_limit.
 type AI struct {
-	Q       *sqlc.Queries
-	LLM     llm.Completer
-	Catalog billing.PlanCatalog
+	Q        *sqlc.Queries
+	LLM      llm.Completer
+	Catalog  billing.PlanCatalog
+	Recorder usage.Recorder
 }
 
 type chatRequest struct {
@@ -93,9 +94,15 @@ func (h *AI) Chat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := int64(resp.PromptTokens + resp.CompletionTokens)
-	usage.Record(ctx, h.Q, org.OrgID, "ai_tokens", total, "", map[string]any{
-		"_llm": map[string]any{"model": resp.Model, "prompt_tokens": resp.PromptTokens, "completion_tokens": resp.CompletionTokens, "total_tokens": total},
-	})
+	if h.Recorder != nil {
+		_ = h.Recorder.Record(ctx, org.OrgID, "ai_tokens", total, "", map[string]any{
+			"_llm": map[string]any{"model": resp.Model, "prompt_tokens": resp.PromptTokens, "completion_tokens": resp.CompletionTokens, "total_tokens": total},
+		})
+	} else {
+		usage.Record(ctx, h.Q, org.OrgID, "ai_tokens", total, "", map[string]any{
+			"_llm": map[string]any{"model": resp.Model, "prompt_tokens": resp.PromptTokens, "completion_tokens": resp.CompletionTokens, "total_tokens": total},
+		})
+	}
 	audit.Log(ctx, h.Q, org.OrgID, "", "ai.chat", map[string]any{"via": "api", "model": resp.Model, "tokens": total})
 
 	WriteJSON(w, http.StatusOK, map[string]any{

@@ -26,7 +26,7 @@ type apiSurface struct {
 func newAPISurface(s *Server) apiSurface {
 	middleware := api.NewMiddleware(s.q, s.cfg.APIRateLimitPerMinute)
 	projects := &api.Projects{Q: s.q, Catalog: s.billingCatalog}
-	ai := &api.AI{Q: s.q, LLM: s.llm, Catalog: s.billingCatalog}
+	ai := &api.AI{Q: s.q, LLM: s.llm, Catalog: s.billingCatalog, Recorder: s.usageRecorder}
 	return apiSurface{
 		middleware:    middleware,
 		listProjects:  http.HandlerFunc(projects.ListProjects),
