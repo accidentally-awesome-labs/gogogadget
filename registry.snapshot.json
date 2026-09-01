@@ -1100,7 +1100,7 @@
     },
     {
       "path": "registry/modules/system/webhooks-postgres/module.json",
-      "sha256": "f1994bc401f01e883b0a926d2d93d62fe4bf74f37cd4921b9004e9d900b746fa"
+      "sha256": "6e7f0f09e7fd7affea0bb06ff3efb8336116990112854fada4a3062a1a0237e6"
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",

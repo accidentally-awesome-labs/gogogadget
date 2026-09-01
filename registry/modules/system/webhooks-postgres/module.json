@@ -102,6 +102,12 @@
         "kind": "immutable",
         "source": "internal/db/migrations/0023_webhook_outbox.sql",
         "sha256": "9eda271e30602886dc16b37f0b3fa3f6ed423d37f326a479efd4c6538e82b77d"
+      },
+      {
+        "id": "0024_webhook_outbox_org_fk",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0024_webhook_outbox_org_fk.sql",
+        "sha256": "7d5a3f4a9e7e72d122ebecdb8d1c39320cf777416a28469285a8b31c6af8e57a"
       }
     ],
     "environment": [],
