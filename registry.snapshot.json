@@ -1004,7 +1004,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit-redis/module.json",
-      "sha256": "d3011e3a66015313c4b18cdb6f7136ba70feaf7652f5fc2e729a2aee5c9a40dd"
+      "sha256": "4391cc5b49c922f8a7021824e696b2715428a3fd08bea41103e13d6f1e528075"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",

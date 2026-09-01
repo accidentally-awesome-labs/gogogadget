@@ -55,7 +55,6 @@ func (c *RESTClient) Allow(ctx context.Context, key string, limit int, window ti
 		return 0, false, fmt.Errorf("rate limit redis: missing result")
 	}
 	var used int
-	fmt.Sprint(out.Result[0])
 	if n, ok := out.Result[0].(float64); ok {
 		used = int(n)
 	}
