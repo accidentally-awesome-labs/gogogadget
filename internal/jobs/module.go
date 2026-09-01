@@ -23,13 +23,14 @@ import (
 // Storage are optional: unconfigured billing makes the usage flush no-op, and an
 // absent store makes export jobs fail loudly rather than silently succeed.
 type Deps struct {
-	Config   *config.Config
-	Queries  *sqlc.Queries
-	Sender   mail.Sender
-	Billing  billing.Client
-	Storage  storage.Store
-	Reporter observability.Reporter
-	Notifier notifications.Notifier
+	Config       *config.Config
+	Queries      *sqlc.Queries
+	Sender       mail.Sender
+	Billing      billing.Client
+	Storage      storage.Store
+	Reporter     observability.Reporter
+	Notifier     notifications.Notifier
+	WebhookDrain func(context.Context) error
 }
 
 // Module is the constructed background-worker closure.
@@ -60,6 +61,7 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	worker.Billing = d.Billing
 	worker.Storage = d.Storage
 	worker.Notifier = d.Notifier
+	worker.WebhookDrain = d.WebhookDrain
 	worker.AppURL = d.Config.AppURL
 	worker.AuditRetentionDays = d.Config.AuditRetentionDays
 

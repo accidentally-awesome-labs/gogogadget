@@ -132,8 +132,9 @@ type Worker struct {
 	AuditRetentionDays int
 	// SearchDrain is the selected search adapter's outbox worker. It runs before
 	// ordinary jobs so indexing remains eventually consistent after commits.
-	SearchDrain func(context.Context) error
-	Notifier    notifications.Notifier
+	SearchDrain  func(context.Context) error
+	Notifier     notifications.Notifier
+	WebhookDrain func(context.Context) error
 	// AuditExport drains the audit-export outbox after durable ledger writes.
 	AuditExport func(context.Context) error
 	// Storage is the export target; set in cmd/server. Nil → export fails
@@ -232,6 +233,11 @@ func (w *Worker) pass(ctx context.Context) (n int) {
 		}
 	}()
 
+	if w.WebhookDrain != nil {
+		if err := w.WebhookDrain(ctx); err != nil {
+			w.log.Error("webhook outbox", "error", err)
+		}
+	}
 	if w.AuditExport != nil {
 		if err := w.AuditExport(ctx); err != nil {
 			w.log.Error("audit export", "error", err)

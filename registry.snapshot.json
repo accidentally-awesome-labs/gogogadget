@@ -932,7 +932,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "aaf0b3c7f8aa0e815b8fd2d0cca25a3567b42dc16f606cc31b5a5b71e8b19b9c"
+      "sha256": "639103299b3b0d20d27a0f7a076e20bee83a96556f9220934201b828f822abe9"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
@@ -1100,7 +1100,7 @@
     },
     {
       "path": "registry/modules/system/webhooks-postgres/module.json",
-      "sha256": "6e7f0f09e7fd7affea0bb06ff3efb8336116990112854fada4a3062a1a0237e6"
+      "sha256": "d673474f6623f2d758b3c1f3455f1f81e37ad056ef57556888b551c06661f4c0"
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",

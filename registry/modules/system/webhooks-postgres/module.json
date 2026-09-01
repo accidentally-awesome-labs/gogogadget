@@ -29,6 +29,14 @@
     },
     "files": [
       {
+        "source": "internal/webhooks/postgres/drain.go",
+        "target": "internal/webhooks/postgres/drain.go",
+        "class": "go",
+        "sha256": "9e4fc57d2dbc0dc2abe227a1b5cc40e17bec0da03889a6f6c3e0c4c4c0834629",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/webhooks/postgres/postgres.go",
         "target": "internal/webhooks/postgres/postgres.go",
         "class": "go",
