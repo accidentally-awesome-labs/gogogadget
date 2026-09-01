@@ -123,7 +123,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "OTLP_API_KEY",
+        "field": "OtlpApiKey",
+        "type": "string",
+        "description": "Otlp Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/telemetry-otlp@otlp"
+        ]
+      },
+      {
+        "key": "OTLP_ENDPOINT",
+        "field": "OtlpEndpoint",
+        "type": "string",
+        "description": "Otlp Endpoint",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/telemetry-otlp@collector"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

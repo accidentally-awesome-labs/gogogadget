@@ -1,6 +1,6 @@
 {
   "schema": 2,
-  "registry_commit": "8de0414780af3f3d742394405ca0a3441d6a061e3e662285d3b5fb26294087f4",
+  "registry_commit": "e0f34403594882fbed04351b99fcb8e993c2bb6afd5f6192a1484b8f7a77fac3",
   "registries": [
     {
       "namespace": "ggg",
@@ -13,9 +13,9 @@
   "snapshots": [
     {
       "namespace": "ggg",
-      "commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
-      "cache_key": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f"
+      "commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "cache_key": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44"
     }
   ],
   "order": [
@@ -295,7 +295,13 @@
     "ggg/workflow/project-export",
     "ggg/workflow/projects",
     "ggg/page/project-edit",
-    "ggg/workflow/seo-discovery"
+    "ggg/workflow/seo-discovery",
+    "ggg/system/analytics-posthog",
+    "ggg/system/feature-flags-launchdarkly",
+    "ggg/system/notifications-knock",
+    "ggg/system/search-typesense",
+    "ggg/system/usage-openmeter",
+    "ggg/system/webhooks-svix"
   ],
   "runtime_orders": {
     "development": [
@@ -1054,8 +1060,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1151,8 +1157,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1231,8 +1237,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/confirm-action"
@@ -1313,8 +1319,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1387,8 +1393,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1469,8 +1475,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1549,8 +1555,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/kanban",
@@ -1627,8 +1633,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1702,8 +1708,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -1800,8 +1806,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2060,8 +2066,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2151,8 +2157,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2290,8 +2296,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2364,8 +2370,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/markdown-editor"
@@ -2467,8 +2473,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2694,8 +2700,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2793,8 +2799,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2866,8 +2872,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -2939,8 +2945,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3039,8 +3045,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3113,8 +3119,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3188,8 +3194,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/data-grid",
@@ -3296,8 +3302,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3396,8 +3402,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3543,8 +3549,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3623,8 +3629,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3697,8 +3703,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3800,8 +3806,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3918,8 +3924,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -3991,8 +3997,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4084,8 +4090,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4157,8 +4163,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4321,8 +4327,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4402,8 +4408,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/calendar"
@@ -4479,8 +4485,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/calendar"
@@ -4559,8 +4565,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/calendar"
@@ -4636,8 +4642,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4716,8 +4722,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4789,8 +4795,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4867,8 +4873,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -4941,8 +4947,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5024,8 +5030,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/context-menu",
@@ -5132,8 +5138,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5230,8 +5236,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5311,8 +5317,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/questionnaire"
@@ -5412,8 +5418,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/composer",
@@ -5489,8 +5495,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5562,8 +5568,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/markdown-editor"
@@ -5666,8 +5672,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5740,8 +5746,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -5838,8 +5844,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/composer"
@@ -5937,8 +5943,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6010,8 +6016,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6083,8 +6089,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6192,8 +6198,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6265,8 +6271,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6363,8 +6369,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6437,8 +6443,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6640,8 +6646,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6713,8 +6719,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6787,8 +6793,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -6869,8 +6875,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7046,8 +7052,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7134,8 +7140,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7208,8 +7214,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7290,8 +7296,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/usage-card"
@@ -7366,8 +7372,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7439,8 +7445,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7515,8 +7521,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7589,8 +7595,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7663,8 +7669,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/kanban"
@@ -7741,8 +7747,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7843,8 +7849,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -7943,8 +7949,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8031,8 +8037,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8130,8 +8136,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8203,8 +8209,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/data-grid"
@@ -8303,8 +8309,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8443,8 +8449,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8542,8 +8548,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8616,8 +8622,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8694,8 +8700,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/onboarding-checklist"
@@ -8795,8 +8801,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -8869,8 +8875,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9021,8 +9027,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9095,8 +9101,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9169,8 +9175,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9250,8 +9256,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9350,8 +9356,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/data-grid"
@@ -9461,8 +9467,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9536,8 +9542,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9617,8 +9623,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9690,8 +9696,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/questionnaire"
@@ -9766,8 +9772,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9840,8 +9846,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -9914,8 +9920,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10013,8 +10019,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10111,8 +10117,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10189,8 +10195,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10263,8 +10269,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10336,8 +10342,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10409,8 +10415,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/calendar",
@@ -10512,8 +10518,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/questionnaire"
@@ -10612,8 +10618,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10686,8 +10692,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10759,8 +10765,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10861,8 +10867,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -10935,8 +10941,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11008,8 +11014,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11082,8 +11088,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11155,8 +11161,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11234,8 +11240,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11309,8 +11315,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/questionnaire"
@@ -11387,8 +11393,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/composer",
@@ -11463,8 +11469,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11552,8 +11558,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11632,8 +11638,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11706,8 +11712,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11780,8 +11786,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/toast-region"
@@ -11895,8 +11901,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -11977,8 +11983,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12051,8 +12057,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12125,8 +12131,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12274,8 +12280,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12354,8 +12360,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/comment",
@@ -12454,8 +12460,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/kanban"
@@ -12553,8 +12559,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/composer",
@@ -12656,8 +12662,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12730,8 +12736,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12827,8 +12833,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12901,8 +12907,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -12998,8 +13004,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/section"
@@ -13101,8 +13107,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/activity-item",
@@ -13192,8 +13198,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/toast"
@@ -13293,8 +13299,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13391,8 +13397,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13484,8 +13490,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13558,8 +13564,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13655,8 +13661,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/search-input"
@@ -13731,8 +13737,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13825,8 +13831,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13898,8 +13904,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -13996,8 +14002,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14095,8 +14101,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/component/accordion",
@@ -14625,8 +14631,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14723,8 +14729,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -14911,8 +14917,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/admin-announcements"
@@ -15155,8 +15161,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15322,8 +15328,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15611,8 +15617,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15770,8 +15776,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -15885,8 +15891,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16002,8 +16008,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/admin-flags"
@@ -16248,8 +16254,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/admin-job-requeue"
@@ -16449,8 +16455,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/admin-media"
@@ -16623,8 +16629,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -16764,8 +16770,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17003,8 +17009,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/admin-schedules"
@@ -17262,8 +17268,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17443,8 +17449,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17627,8 +17633,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17778,8 +17784,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -17979,8 +17985,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19023,8 +19029,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19171,8 +19177,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/docs",
@@ -19318,8 +19324,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19424,8 +19430,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/files"
@@ -19631,8 +19637,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -19883,8 +19889,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/notification-inbox"
@@ -20067,8 +20073,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20214,8 +20220,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20349,8 +20355,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20466,8 +20472,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20576,8 +20582,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -20829,8 +20835,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/account-delete"
@@ -21043,8 +21049,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/api-token-lifecycle"
@@ -21242,8 +21248,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/billing-checkout"
@@ -21478,8 +21484,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/notification-preferences"
@@ -21683,8 +21689,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -21865,8 +21871,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/outbound-webhooks"
@@ -22105,8 +22111,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -22240,8 +22246,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/analytics-noop",
@@ -22335,22 +22341,7 @@
           ]
         },
         "migrations": [],
-        "environment": [
-          {
-            "key": "POSTHOG_API_KEY",
-            "field": "PostHogAPIKey",
-            "type": "string",
-            "description": "PostHog project key. Empty disables capture entirely: no client script, no `/ingest` proxy, server capture no-ops",
-            "secret": true
-          },
-          {
-            "key": "POSTHOG_HOST",
-            "field": "PostHogHost",
-            "type": "string",
-            "description": "Target of the `/ingest` reverse proxy",
-            "default": "https://us.i.posthog.com"
-          }
-        ],
+        "environment": [],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -22390,8 +22381,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -22507,12 +22498,53 @@
       "migrations": []
     },
     {
+      "id": "ggg/system/analytics-posthog",
+      "revision": 1,
+      "contract": 1,
+      "registry_namespace": "ggg",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "ggg/system/analytics-posthog",
+        "kind": "system",
+        "name": "analytics-posthog",
+        "revision": 1,
+        "contract": 1,
+        "title": "analytics-posthog",
+        "description": "analytics-posthog adapter",
+        "requires": [],
+        "dependencies": {
+          "go": [
+            {
+              "module": "github.com/posthog/posthog-go",
+              "version": "v1.22.0"
+            }
+          ],
+          "tools": [],
+          "containers": []
+        },
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "ggg/system/announcements",
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-announcements",
@@ -22653,8 +22685,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/settings-api-tokens",
@@ -23130,8 +23162,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/analytics",
@@ -23244,8 +23276,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/activity",
@@ -23483,8 +23515,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/audit-export-noop",
@@ -23556,8 +23588,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -23676,8 +23708,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -23762,7 +23794,17 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "OTLP_AUDIT_EXPORT_URL",
+            "field": "OtlpAuditExportUrl",
+            "type": "string",
+            "description": "Otlp Audit Export Url",
+            "targets": [
+              "ggg/system/audit-export-otlp@otlp"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -23795,8 +23837,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-overview",
@@ -24300,8 +24342,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -24593,8 +24635,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -24782,8 +24824,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/cache-memory",
@@ -24855,8 +24897,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -24975,8 +25017,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -25075,7 +25117,27 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "CACHE_REDIS_TOKEN",
+            "field": "CacheRedisToken",
+            "type": "string",
+            "description": "Cache Redis Token",
+            "secret": true,
+            "targets": [
+              "ggg/system/cache-redis@upstash"
+            ]
+          },
+          {
+            "key": "CACHE_REDIS_URL",
+            "field": "CacheRedisUrl",
+            "type": "string",
+            "description": "Cache Redis Url",
+            "targets": [
+              "ggg/system/cache-redis@valkey"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -25108,8 +25170,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/analytics",
@@ -25295,8 +25357,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-content",
@@ -25830,8 +25892,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/blog",
@@ -26577,8 +26639,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/files",
@@ -26812,8 +26874,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -26977,8 +27039,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-flag-detail",
@@ -27308,12 +27370,48 @@
       ]
     },
     {
+      "id": "ggg/system/feature-flags-launchdarkly",
+      "revision": 1,
+      "contract": 1,
+      "registry_namespace": "ggg",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "ggg/system/feature-flags-launchdarkly",
+        "kind": "system",
+        "name": "feature-flags-launchdarkly",
+        "revision": 1,
+        "contract": 1,
+        "title": "Feature Flags Launchdarkly",
+        "description": "feature-flags-launchdarkly infrastructure capability.",
+        "requires": [],
+        "dependencies": {
+          "go": [],
+          "tools": [],
+          "containers": []
+        },
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "ggg/system/feature-flags-postgres",
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -27453,8 +27551,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/activity",
@@ -27642,8 +27740,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-overview",
@@ -29498,8 +29596,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -29697,8 +29795,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -29851,8 +29949,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -30036,8 +30134,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/account-delete",
@@ -30218,8 +30316,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-jobs",
@@ -30554,8 +30652,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/llm-fake",
@@ -30646,29 +30744,7 @@
           ]
         },
         "migrations": [],
-        "environment": [
-          {
-            "key": "LLM_API_KEY",
-            "field": "LLMAPIKey",
-            "type": "string",
-            "description": "With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured",
-            "secret": true
-          },
-          {
-            "key": "LLM_BASE_URL",
-            "field": "LLMBaseURL",
-            "type": "string",
-            "description": "Any OpenAI-compatible API base",
-            "default": "https://api.openai.com/v1",
-            "trim_slash": true
-          },
-          {
-            "key": "LLM_MODEL",
-            "field": "LLMModel",
-            "type": "string",
-            "description": "Forced server-side, so callers cannot pick a model"
-          }
-        ],
+        "environment": [],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -30708,8 +30784,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -30828,8 +30904,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -30914,7 +30990,36 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "LLM_API_KEY",
+            "field": "LlmApiKey",
+            "type": "string",
+            "description": "Llm Api Key",
+            "secret": true,
+            "targets": [
+              "ggg/system/llm-openai-compatible@openai"
+            ]
+          },
+          {
+            "key": "LLM_BASE_URL",
+            "field": "LlmBaseUrl",
+            "type": "string",
+            "description": "Llm Base Url",
+            "targets": [
+              "ggg/system/llm-openai-compatible@openai"
+            ]
+          },
+          {
+            "key": "LLM_MODEL",
+            "field": "LlmModel",
+            "type": "string",
+            "description": "Llm Model",
+            "targets": [
+              "ggg/system/llm-openai-compatible@openai"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -30947,8 +31052,8 @@
       "revision": 2,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/jobs",
@@ -31124,8 +31229,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -31284,8 +31389,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -31446,8 +31551,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -31564,8 +31669,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -32499,8 +32604,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/notifications",
@@ -32850,12 +32955,48 @@
       ]
     },
     {
+      "id": "ggg/system/notifications-knock",
+      "revision": 1,
+      "contract": 1,
+      "registry_namespace": "ggg",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "ggg/system/notifications-knock",
+        "kind": "system",
+        "name": "notifications-knock",
+        "revision": 1,
+        "contract": 1,
+        "title": "Notifications Knock",
+        "description": "notifications-knock infrastructure capability.",
+        "requires": [],
+        "dependencies": {
+          "go": [],
+          "tools": [],
+          "containers": []
+        },
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "ggg/system/notifications-postgres",
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -32983,8 +33124,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/jobs",
@@ -33087,15 +33228,7 @@
           ]
         },
         "migrations": [],
-        "environment": [
-          {
-            "key": "SENTRY_DSN",
-            "field": "SentryDSN",
-            "type": "string",
-            "description": "Sentry DSN. Empty selects the no-op reporter",
-            "secret": true
-          }
-        ],
+        "environment": [],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -33142,8 +33275,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -33262,8 +33395,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -33353,7 +33486,18 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "SENTRY_DSN",
+            "field": "SentryDsn",
+            "type": "string",
+            "description": "Sentry Dsn",
+            "secret": true,
+            "targets": [
+              "ggg/system/observability-sentry@sentry"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -33386,8 +33530,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-flag-detail",
@@ -33788,8 +33932,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/api",
@@ -33984,8 +34128,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -34109,8 +34253,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -34209,7 +34353,27 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "RATE_LIMIT_REDIS_TOKEN",
+            "field": "RateLimitRedisToken",
+            "type": "string",
+            "description": "Rate Limit Redis Token",
+            "secret": true,
+            "targets": [
+              "ggg/system/rate-limit-redis@upstash"
+            ]
+          },
+          {
+            "key": "RATE_LIMIT_REDIS_URL",
+            "field": "RateLimitRedisUrl",
+            "type": "string",
+            "description": "Rate Limit Redis Url",
+            "targets": [
+              "ggg/system/rate-limit-redis@valkey"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -34242,8 +34406,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/realtime-ably",
@@ -34330,8 +34494,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -34416,7 +34580,27 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "ABLY_API_KEY",
+            "field": "AblyApiKey",
+            "type": "string",
+            "description": "Ably Api Key",
+            "secret": true,
+            "targets": [
+              "ggg/system/realtime-ably@ably"
+            ]
+          },
+          {
+            "key": "ABLY_ENDPOINT",
+            "field": "AblyEndpoint",
+            "type": "string",
+            "description": "Ably Endpoint",
+            "targets": [
+              "ggg/system/realtime-ably@ably"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -34449,8 +34633,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -34605,8 +34789,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-schedules",
@@ -34787,8 +34971,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/search-postgres"
@@ -34933,8 +35117,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -35100,12 +35284,48 @@
       "migrations": []
     },
     {
+      "id": "ggg/system/search-typesense",
+      "revision": 1,
+      "contract": 1,
+      "registry_namespace": "ggg",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "ggg/system/search-typesense",
+        "kind": "system",
+        "name": "search-typesense",
+        "revision": 1,
+        "contract": 1,
+        "title": "Search Typesense",
+        "description": "search-typesense infrastructure capability.",
+        "requires": [],
+        "dependencies": {
+          "go": [],
+          "tools": [],
+          "containers": []
+        },
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "ggg/system/security",
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/activity",
@@ -35304,8 +35524,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -35374,8 +35594,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/seo-discovery"
@@ -35441,8 +35661,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/activity",
@@ -35790,7 +36010,7 @@
             "source": "internal/web/server.go",
             "target": "internal/web/server.go",
             "class": "go",
-            "sha256": "821392967e42f57921923e235b1978fa002470b7b9c1f0e956928e14fff20545",
+            "sha256": "0fa47a87b43ef496dc8d2faeb639e1f150df73d6497d786164bbf4ce696be8f8",
             "rewrite_module": true,
             "contract": true
           },
@@ -36516,8 +36736,8 @@
         {
           "path": "internal/web/server.go",
           "source": "internal/web/server.go",
-          "base_sha256": "821392967e42f57921923e235b1978fa002470b7b9c1f0e956928e14fff20545",
-          "local_sha256": "821392967e42f57921923e235b1978fa002470b7b9c1f0e956928e14fff20545",
+          "base_sha256": "0fa47a87b43ef496dc8d2faeb639e1f150df73d6497d786164bbf4ce696be8f8",
+          "local_sha256": "0fa47a87b43ef496dc8d2faeb639e1f150df73d6497d786164bbf4ce696be8f8",
           "state": "clean"
         },
         {
@@ -36647,8 +36867,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -37030,8 +37250,8 @@
       "revision": 2,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/jobs",
@@ -37179,8 +37399,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -37354,8 +37574,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -37646,8 +37866,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/system/telemetry-noop",
@@ -37747,8 +37967,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -37880,8 +38100,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -38007,7 +38227,27 @@
           }
         },
         "migrations": [],
-        "environment": [],
+        "environment": [
+          {
+            "key": "OTLP_API_KEY",
+            "field": "OtlpApiKey",
+            "type": "string",
+            "description": "Otlp Api Key",
+            "secret": true,
+            "targets": [
+              "ggg/system/telemetry-otlp@otlp"
+            ]
+          },
+          {
+            "key": "OTLP_ENDPOINT",
+            "field": "OtlpEndpoint",
+            "type": "string",
+            "description": "Otlp Endpoint",
+            "targets": [
+              "ggg/system/telemetry-otlp@collector"
+            ]
+          }
+        ],
         "docs": [],
         "tests": {
           "go_packages": [
@@ -38047,8 +38287,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -38136,8 +38376,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/settings-billing",
@@ -38366,12 +38606,48 @@
       ]
     },
     {
+      "id": "ggg/system/usage-openmeter",
+      "revision": 1,
+      "contract": 1,
+      "registry_namespace": "ggg",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "ggg/system/usage-openmeter",
+        "kind": "system",
+        "name": "usage-openmeter",
+        "revision": 1,
+        "contract": 1,
+        "title": "Usage Openmeter",
+        "description": "usage-openmeter infrastructure capability.",
+        "requires": [],
+        "dependencies": {
+          "go": [],
+          "tools": [],
+          "containers": []
+        },
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "ggg/system/usage-postgres",
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -38504,8 +38780,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/settings-webhooks",
@@ -38832,8 +39108,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "provider",
       "required_by": [],
       "manifest": {
@@ -38949,12 +39225,48 @@
       "migrations": []
     },
     {
+      "id": "ggg/system/webhooks-svix",
+      "revision": 1,
+      "contract": 1,
+      "registry_namespace": "ggg",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
+      "reason": "removed",
+      "required_by": [],
+      "manifest": {
+        "id": "ggg/system/webhooks-svix",
+        "kind": "system",
+        "name": "webhooks-svix",
+        "revision": 1,
+        "contract": 1,
+        "title": "Webhooks Svix",
+        "description": "webhooks-svix infrastructure capability.",
+        "requires": [],
+        "dependencies": {
+          "go": [],
+          "tools": [],
+          "containers": []
+        },
+        "files": [],
+        "claims": {},
+        "runtime": {},
+        "migrations": [],
+        "environment": [],
+        "docs": [],
+        "tests": {},
+        "data": [],
+        "removal_policy": "free"
+      },
+      "files": [],
+      "migrations": []
+    },
+    {
       "id": "ggg/workflow/account-delete",
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -39098,8 +39410,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -39246,8 +39558,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -39417,8 +39729,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/admin-content-editor",
@@ -39658,8 +39970,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -39879,8 +40191,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -39995,8 +40307,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -40176,8 +40488,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -40366,8 +40678,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -40506,8 +40818,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -40776,8 +41088,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -41142,8 +41454,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -41289,8 +41601,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -41452,8 +41764,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/settings-account",
@@ -41626,8 +41938,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -41808,8 +42120,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -41927,8 +42239,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/dev-gallery"
@@ -42079,8 +42391,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -42319,8 +42631,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -42479,8 +42791,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -42666,8 +42978,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -42844,8 +43156,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -42968,8 +43280,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/workflow/api-ai-chat",
@@ -43137,8 +43449,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/settings-organization"
@@ -43316,8 +43628,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -43540,8 +43852,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {
@@ -43706,8 +44018,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [
         "ggg/page/project-edit"
@@ -44028,8 +44340,8 @@
       "revision": 1,
       "contract": 1,
       "registry_namespace": "ggg",
-      "source_commit": "559c882c989d646c0c827c998889fd71ec2717f6db265af24db1c407da1f00e1",
-      "snapshot_sha256": "cfb4ec199f8ad0eb7f9e0030b5361ce44b455119012f4c0ea3e1095badf2ae9f",
+      "source_commit": "cba1800510d36812ef2cbdf7605b4ebf7667082cc4521d85323c72ad9e6856a2",
+      "snapshot_sha256": "8323bc589f0f95da8de117eaf636de6dc6fdd6ee426bcbe65b16595b997a1b44",
       "reason": "profile",
       "required_by": [],
       "manifest": {

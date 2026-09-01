@@ -82,7 +82,19 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "SVIX_API_KEY",
+        "field": "SvixApiKey",
+        "type": "string",
+        "description": "Svix Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/webhooks-svix@svix"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

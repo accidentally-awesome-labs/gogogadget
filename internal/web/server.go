@@ -225,8 +225,7 @@ func (s *Server) Handler() http.Handler {
 	h = s.accessLog(h)
 	h = s.requestID(h)
 	h = s.routeBodyLimit(h) // per-route declared cap, tighter than the global one
-	nextHandler := h
-	h = telemetry.HTTP(h, s.telemetry, "web")
+	nextHandler := telemetry.HTTP(h, s.telemetry, "web")
 	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next := r.WithContext(templates.WithProviderEnvironment(r.Context(), s.cfg.Env))
 		nextHandler.ServeHTTP(w, next)

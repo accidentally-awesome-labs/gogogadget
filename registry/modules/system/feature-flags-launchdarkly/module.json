@@ -82,7 +82,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "LAUNCHDARKLY_CONSOLE",
+        "field": "LaunchdarklyConsole",
+        "type": "string",
+        "description": "Launchdarkly Console",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/feature-flags-launchdarkly@launchdarkly"
+        ]
+      },
+      {
+        "key": "LAUNCHDARKLY_SDK_KEY",
+        "field": "LaunchdarklySdkKey",
+        "type": "string",
+        "description": "Launchdarkly Sdk Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/feature-flags-launchdarkly@launchdarkly"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

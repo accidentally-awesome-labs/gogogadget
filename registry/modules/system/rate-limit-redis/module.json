@@ -96,7 +96,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "RATE_LIMIT_REDIS_TOKEN",
+        "field": "RateLimitRedisToken",
+        "type": "string",
+        "description": "Rate Limit Redis Token",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/rate-limit-redis@upstash"
+        ]
+      },
+      {
+        "key": "RATE_LIMIT_REDIS_URL",
+        "field": "RateLimitRedisUrl",
+        "type": "string",
+        "description": "Rate Limit Redis Url",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/rate-limit-redis@valkey"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

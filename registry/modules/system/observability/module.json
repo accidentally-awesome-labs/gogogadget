@@ -95,15 +95,7 @@
       ]
     },
     "migrations": [],
-    "environment": [
-      {
-        "key": "SENTRY_DSN",
-        "field": "SentryDSN",
-        "type": "string",
-        "description": "Sentry DSN. Empty selects the no-op reporter",
-        "secret": true
-      }
-    ],
+    "environment": [],
     "docs": [],
     "tests": {
       "go_packages": [

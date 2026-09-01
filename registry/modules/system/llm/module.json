@@ -83,29 +83,7 @@
       ]
     },
     "migrations": [],
-    "environment": [
-      {
-        "key": "LLM_API_KEY",
-        "field": "LLMAPIKey",
-        "type": "string",
-        "description": "With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured",
-        "secret": true
-      },
-      {
-        "key": "LLM_BASE_URL",
-        "field": "LLMBaseURL",
-        "type": "string",
-        "description": "Any OpenAI-compatible API base",
-        "default": "https://api.openai.com/v1",
-        "trim_slash": true
-      },
-      {
-        "key": "LLM_MODEL",
-        "field": "LLMModel",
-        "type": "string",
-        "description": "Forced server-side, so callers cannot pick a model"
-      }
-    ],
+    "environment": [],
     "docs": [],
     "tests": {
       "go_packages": [

@@ -82,7 +82,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "ABLY_API_KEY",
+        "field": "AblyApiKey",
+        "type": "string",
+        "description": "Ably Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/realtime-ably@ably"
+        ]
+      },
+      {
+        "key": "ABLY_ENDPOINT",
+        "field": "AblyEndpoint",
+        "type": "string",
+        "description": "Ably Endpoint",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/realtime-ably@ably"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

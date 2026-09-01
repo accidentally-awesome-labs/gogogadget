@@ -82,7 +82,19 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "OTLP_AUDIT_EXPORT_URL",
+        "field": "OtlpAuditExportUrl",
+        "type": "string",
+        "description": "Otlp Audit Export Url",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/audit-export-otlp@otlp"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

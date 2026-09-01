@@ -816,11 +816,11 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "325abc06a1da840a2fe023acba4c42317e4caf6a3a3b0668b3a19c0004d3fca3"
+      "sha256": "124a05c994289bfa88c6a568d0b51d6bbadd5d5983323e249348e1e8192f57d8"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
-      "sha256": "36d7b3413427f41d41f4f45e7d8b89b9e9136520df5fc9b286c8d6413d55e8ae"
+      "sha256": "f56797eee6122f7381d9264dddad30b19a84c85f35ddc96160ab70110beaf006"
     },
     {
       "path": "registry/modules/system/announcements/module.json",
@@ -840,7 +840,7 @@
     },
     {
       "path": "registry/modules/system/audit-export-otlp/module.json",
-      "sha256": "88649a82e16ca49f1455ae8c49605bcfcc2c6aae0636376af94ebeb41dffc1ec"
+      "sha256": "1ac2f97d903ac7ae5db5edefcb81be86f169a51bbc55de88b069516e91a58230"
     },
     {
       "path": "registry/modules/system/audit-export/module.json",
@@ -868,7 +868,7 @@
     },
     {
       "path": "registry/modules/system/cache-redis/module.json",
-      "sha256": "dee24d39074b66b210d2465153df783f2cd8c0466ab72735aca7ebb3196d444d"
+      "sha256": "30719af7e743fd31e7afd19f358af47e5c781cd53cde86dda9031a89cd253b08"
     },
     {
       "path": "registry/modules/system/cache/module.json",
@@ -896,7 +896,7 @@
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
-      "sha256": "bbaa31fdee20a17d1269dad4cdaea77cfa77c8adcdbcf67a90206f25e3c2ee34"
+      "sha256": "d578693b1888e460bf8d9037967a2cde1740fd609730c38e64d102774ab821e5"
     },
     {
       "path": "registry/modules/system/feature-flags-postgres/module.json",
@@ -940,11 +940,11 @@
     },
     {
       "path": "registry/modules/system/llm-openai-compatible/module.json",
-      "sha256": "6bac70b68d52a9fd42b095c651b5bf383bfcd3ea4f54da7584f9f190078abf10"
+      "sha256": "e0d7942bf404622192e205f2a21b19fe9b4b6b7f00cb2f40fa863a3267ab539e"
     },
     {
       "path": "registry/modules/system/llm/module.json",
-      "sha256": "aa7858ffb91de2a36d5a3a7dbf21f1405877f6567adedd0b44a5f26d0b8c04da"
+      "sha256": "285e2d1cfcd9c75272a8617109fa5927f57aa7503fb30fe527e0a19d8eb1fbbe"
     },
     {
       "path": "registry/modules/system/mail-dev/module.json",
@@ -972,7 +972,7 @@
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
-      "sha256": "0ab3ec6b795a87198a011eb7cf8d68dc4e1ed31057f05e2fb74c1048545463fd"
+      "sha256": "52ec32362c1c4cf11bd15c688975c05d841e05048bfdab10c58704f9ad931f8c"
     },
     {
       "path": "registry/modules/system/notifications-postgres/module.json",
@@ -988,11 +988,11 @@
     },
     {
       "path": "registry/modules/system/observability-sentry/module.json",
-      "sha256": "0c439a38f0e34899c928df1fbf0d323acf5f62d0f7cfd40de72533397cd58e69"
+      "sha256": "bda9c2d2c4111636e95a291cb37facb7e0fd668f11867f7b3cc330605d1653eb"
     },
     {
       "path": "registry/modules/system/observability/module.json",
-      "sha256": "cf8f54b713b10033df67e764adbb1b72d867edbc7e9b2ec3895065a37720361e"
+      "sha256": "5a8fd768bf6e9921fc75da8b3ea600638892cd5d2c5e9655a8108968802c977b"
     },
     {
       "path": "registry/modules/system/organizations/module.json",
@@ -1004,7 +1004,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit-redis/module.json",
-      "sha256": "646a9519bb64600eab8143bed55eb5a36ef2cf797b63673fb8b7af9f9cabca05"
+      "sha256": "c217c7ff0360418b3b4e4394786ae22b72e1cd60943f0384d6fc8eceb462dc1a"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
@@ -1012,7 +1012,7 @@
     },
     {
       "path": "registry/modules/system/realtime-ably/module.json",
-      "sha256": "d76001f2d4db50e0bf5b133b7024a8782a94e397ed1efc13a8dd13332eabe507"
+      "sha256": "b8c40b81da4ecc740b21b866329b926e70b9131a3f585f7b7162d60f55d0d50b"
     },
     {
       "path": "registry/modules/system/realtime-postgres/module.json",
@@ -1032,7 +1032,7 @@
     },
     {
       "path": "registry/modules/system/search-typesense/module.json",
-      "sha256": "2d50e3481208f41f3148740c8b59e89358db2d05698d960df4f28e41f5b970de"
+      "sha256": "42b231c5ea8d87a59e0550cb59a9af04f0ffab45012a42b4520c51b2a7520223"
     },
     {
       "path": "registry/modules/system/search/module.json",
@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "b0104a6641bec0b261afedbc3676a14ef6d90916e94c9b187c8ed382299dc48d"
+      "sha256": "c2bda9bc14ac02ff6906246b41fa59fb3b51531d9586aece63dcb9a24eab3692"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1076,7 +1076,7 @@
     },
     {
       "path": "registry/modules/system/telemetry-otlp/module.json",
-      "sha256": "9846b4c9fa8dbf72156397d6bd179af5b6704e0f16228d649f46d15a56d52236"
+      "sha256": "2bc493ec9d99a51dd2f4e243042826344f1f491bae780c7f82ca3d876a0b5747"
     },
     {
       "path": "registry/modules/system/telemetry/module.json",
@@ -1088,7 +1088,7 @@
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",
-      "sha256": "d28196b3c53c4d1fe09e55909bd227224645797f6913a6de021c0780c544d156"
+      "sha256": "27c6ce006b3b48ad2e041ea15ca0c38b23c1cf4e7f5a61e8f8130225badf7f02"
     },
     {
       "path": "registry/modules/system/usage-postgres/module.json",
@@ -1104,7 +1104,7 @@
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",
-      "sha256": "8eff0ec4535a7c3ac5d04dcb15cc99597b6a7dd99e34be80ea0404fc31da2903"
+      "sha256": "6f2affa7bcae2bb081a9a632353213ea0094cd9b461daa7de994954c1a59c33d"
     },
     {
       "path": "registry/modules/system/webhooks/module.json",

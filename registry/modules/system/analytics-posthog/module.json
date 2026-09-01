@@ -87,7 +87,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "POSTHOG_API_KEY",
+        "field": "PosthogApiKey",
+        "type": "string",
+        "description": "Posthog Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/analytics-posthog@posthog"
+        ]
+      },
+      {
+        "key": "POSTHOG_HOST",
+        "field": "PosthogHost",
+        "type": "string",
+        "description": "Posthog Host",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/analytics-posthog@posthog"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

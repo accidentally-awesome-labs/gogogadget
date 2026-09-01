@@ -96,7 +96,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "CACHE_REDIS_TOKEN",
+        "field": "CacheRedisToken",
+        "type": "string",
+        "description": "Cache Redis Token",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/cache-redis@upstash"
+        ]
+      },
+      {
+        "key": "CACHE_REDIS_URL",
+        "field": "CacheRedisUrl",
+        "type": "string",
+        "description": "Cache Redis Url",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/cache-redis@valkey"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

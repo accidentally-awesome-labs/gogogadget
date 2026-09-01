@@ -82,7 +82,41 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "LLM_API_KEY",
+        "field": "LlmApiKey",
+        "type": "string",
+        "description": "Llm Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/llm-openai-compatible@openai"
+        ]
+      },
+      {
+        "key": "LLM_BASE_URL",
+        "field": "LlmBaseUrl",
+        "type": "string",
+        "description": "Llm Base Url",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/llm-openai-compatible@openai"
+        ]
+      },
+      {
+        "key": "LLM_MODEL",
+        "field": "LlmModel",
+        "type": "string",
+        "description": "Llm Model",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/llm-openai-compatible@openai"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

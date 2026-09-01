@@ -87,7 +87,19 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "SENTRY_DSN",
+        "field": "SentryDsn",
+        "type": "string",
+        "description": "Sentry Dsn",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/observability-sentry@sentry"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

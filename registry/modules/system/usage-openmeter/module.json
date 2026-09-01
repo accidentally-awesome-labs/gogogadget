@@ -82,7 +82,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "OPENMETER_API_KEY",
+        "field": "OpenmeterApiKey",
+        "type": "string",
+        "description": "Openmeter Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/usage-openmeter@openmeter"
+        ]
+      },
+      {
+        "key": "OPENMETER_URL",
+        "field": "OpenmeterUrl",
+        "type": "string",
+        "description": "Openmeter Url",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/usage-openmeter@openmeter"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

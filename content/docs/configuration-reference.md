@@ -16,19 +16,20 @@ degradation behave.
 
 | Key | Module | Required | Default | Notes |
 |---|---|---|---|---|
+| `OTLP_AUDIT_EXPORT_URL` | `ggg/system/audit-export-otlp` |  |  | Otlp Audit Export Url |
+| `CACHE_REDIS_TOKEN` | `ggg/system/cache-redis` |  |  | Cache Redis Token. Secret: ships blank in `.env.example` |
+| `CACHE_REDIS_URL` | `ggg/system/cache-redis` |  |  | Cache Redis Url |
 | `APP_ENV` | `ggg/system/config` |  | `development` | development \| test \| production |
 | `APP_URL` | `ggg/system/config` |  | `http://localhost:8080` | Public base URL; trailing slash trimmed. Feeds auth and checkout redirects, email links, and webhook targets |
 | `LOG_LEVEL` | `ggg/system/config` |  |  | debug \| info \| warn \| error. Defaults to debug in development and info otherwise |
 | `TEST_NOW` | `ggg/system/config` |  |  | RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic |
-| `POSTHOG_API_KEY` | `ggg/system/analytics` |  |  | PostHog project key. Empty disables capture entirely: no client script, no `/ingest` proxy, server capture no-ops. Secret: ships blank in `.env.example` |
-| `POSTHOG_HOST` | `ggg/system/analytics` |  | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
 | `DATABASE_URL` | `ggg/system/database` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
-| `LLM_API_KEY` | `ggg/system/llm` |  |  | With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured. Secret: ships blank in `.env.example` |
-| `LLM_BASE_URL` | `ggg/system/llm` |  | `https://api.openai.com/v1` | Any OpenAI-compatible API base |
-| `LLM_MODEL` | `ggg/system/llm` |  |  | Forced server-side, so callers cannot pick a model |
+| `LLM_API_KEY` | `ggg/system/llm-openai-compatible` |  |  | Llm Api Key. Secret: ships blank in `.env.example` |
+| `LLM_BASE_URL` | `ggg/system/llm-openai-compatible` |  |  | Llm Base Url |
+| `LLM_MODEL` | `ggg/system/llm-openai-compatible` |  |  | Llm Model |
 | `EMAIL_FROM` | `ggg/system/mail` |  | `GoGoGadget <hello@example.com>` | From header on outbound mail |
 | `RESEND_API_KEY` | `ggg/system/mail-resend` | **always** |  | Resend API key. Secret: ships blank in `.env.example` |
-| `SENTRY_DSN` | `ggg/system/observability` |  |  | Sentry DSN. Empty selects the no-op reporter. Secret: ships blank in `.env.example` |
+| `SENTRY_DSN` | `ggg/system/observability-sentry` |  |  | Sentry Dsn. Secret: ships blank in `.env.example` |
 | `AUDIT_RETENTION_DAYS` | `ggg/system/audit` |  |  | The daily janitor deletes audit rows older than this many days; 0 retains forever. Integer >= 0 |
 | `POLAR_ACCESS_TOKEN` | `ggg/system/billing-polar` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
 | `POLAR_PRODUCT_PRO` | `ggg/system/billing-polar` |  |  | Polar product id for the Pro plan |
@@ -44,6 +45,10 @@ degradation behave.
 | `DEV_AUTH_BYPASS` | `ggg/system/identity-dev` |  | `false` | Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error |
 | `RATE_LIMIT_RPM` | `ggg/system/rate-limit` |  | `100` | Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard. Integer >= 1 |
 | `API_RATE_LIMIT_RPM` | `ggg/system/api` |  | `60` | Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated. Integer >= 1 |
+| `RATE_LIMIT_REDIS_TOKEN` | `ggg/system/rate-limit-redis` |  |  | Rate Limit Redis Token. Secret: ships blank in `.env.example` |
+| `RATE_LIMIT_REDIS_URL` | `ggg/system/rate-limit-redis` |  |  | Rate Limit Redis Url |
+| `ABLY_API_KEY` | `ggg/system/realtime-ably` |  |  | Ably Api Key. Secret: ships blank in `.env.example` |
+| `ABLY_ENDPOINT` | `ggg/system/realtime-ably` |  |  | Ably Endpoint |
 | `PORT` | `ggg/system/server` |  | `8080` | HTTP listen port. Integer between 1 and 65535 |
 | `METRICS_TOKEN` | `ggg/system/metrics` |  |  | Bearer token for `GET /metrics`. Empty outside production leaves the scrape open; empty in production leaves the route unregistered, so internal stats are never public by default. Secret: ships blank in `.env.example` |
 | `MAINTENANCE_MODE` | `ggg/system/security` |  |  | true sheds everything except `/healthz`, `/readyz`, `/static/`, and `/favicon.ico` with a 503 page, and JSON 503 under `/api/` |
@@ -52,3 +57,5 @@ degradation behave.
 | `STORAGE_R2_BUCKET` | `ggg/system/storage-s3` | **always** |  | S3 bucket name |
 | `STORAGE_R2_SECRET_ACCESS_KEY` | `ggg/system/storage-s3` | **always** |  | S3 secret access key. Secret: ships blank in `.env.example` |
 | `STORAGE_S3_ENDPOINT` | `ggg/system/storage-s3` |  |  | S3-compatible endpoint override; empty uses the R2 account endpoint |
+| `OTLP_API_KEY` | `ggg/system/telemetry-otlp` |  |  | Otlp Api Key. Secret: ships blank in `.env.example` |
+| `OTLP_ENDPOINT` | `ggg/system/telemetry-otlp` |  |  | Otlp Endpoint |

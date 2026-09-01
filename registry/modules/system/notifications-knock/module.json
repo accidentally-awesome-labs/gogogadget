@@ -82,7 +82,19 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "KNOCK_API_KEY",
+        "field": "KnockApiKey",
+        "type": "string",
+        "description": "Knock Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/notifications-knock@knock"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [

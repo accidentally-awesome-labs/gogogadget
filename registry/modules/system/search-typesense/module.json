@@ -90,7 +90,30 @@
       }
     },
     "migrations": [],
-    "environment": [],
+    "environment": [
+      {
+        "key": "TYPESENSE_API_KEY",
+        "field": "TypesenseApiKey",
+        "type": "string",
+        "description": "Typesense Api Key",
+        "required": false,
+        "secret": true,
+        "targets": [
+          "ggg/system/search-typesense@typesense"
+        ]
+      },
+      {
+        "key": "TYPESENSE_URL",
+        "field": "TypesenseUrl",
+        "type": "string",
+        "description": "Typesense Url",
+        "required": false,
+        "secret": false,
+        "targets": [
+          "ggg/system/search-typesense@typesense"
+        ]
+      }
+    ],
     "docs": [],
     "tests": {
       "go_packages": [
