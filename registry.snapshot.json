@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "3d270633b1a9cc3437e7c1b82d4f7e08977827ca6764c5712a177e6d07abd196"
+      "sha256": "270e0bd14f9e8586356d5247773ac0231e428af17dd8cd766f5ccf5a934b37ef"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1216,7 +1216,7 @@
     },
     {
       "path": "registry/modules/workflow/projects/module.json",
-      "sha256": "ea587dd801abc9af1bbee91d3720a478c4788da064e310179ffe318ed8a08469"
+      "sha256": "404e2cdd9b9ead754a1cd56ba3c72058822a9d06f76845cf392af20bfbca948b"
     },
     {
       "path": "registry/modules/workflow/seo-discovery/module.json",

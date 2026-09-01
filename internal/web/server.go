@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
+	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -68,6 +69,7 @@ type Server struct {
 	billingWebhook  billing.BillingWebhook
 	webhookEmitter  webhooks.Emitter
 	usageRecorder   usage.Recorder
+	auditExporter   audit.Exporter
 	mux             *http.ServeMux
 
 	// metrics is the process-local Prometheus registry (see metrics.go).
@@ -124,6 +126,7 @@ type Deps struct {
 	BillingWebhook    billing.BillingWebhook
 	WebhookEmitter    webhooks.Emitter
 	UsageRecorder     usage.Recorder
+	AuditExporter     audit.Exporter
 }
 
 func NewServer(d Deps) (*Server, error) {
@@ -156,7 +159,7 @@ func NewServer(d Deps) (*Server, error) {
 		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
 		analytics: d.Analytics, store: d.Storage, llm: d.LLM, flags: d.Flags,
-		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, usageRecorder: d.UsageRecorder, mux: http.NewServeMux(),
+		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, usageRecorder: d.UsageRecorder, auditExporter: d.AuditExporter, mux: http.NewServeMux(),
 	}
 	reg, _ := content.NewRegistry(contentTypesOf(d))
 	s.types = reg
@@ -340,4 +343,11 @@ func (s *Server) emitWebhook(ctx context.Context, orgID, eventType string, data 
 		return
 	}
 	webhooks.Emit(ctx, s.q, orgID, eventType, data)
+}
+
+func (s *Server) logAudit(ctx context.Context, orgID, userID, action string, metadata map[string]any) {
+	audit.Log(ctx, s.q, orgID, userID, action, metadata)
+	if s.auditExporter != nil {
+		_ = s.auditExporter.Export(ctx, audit.Entry{OrgID: orgID, UserID: userID, Action: action, Metadata: metadata})
+	}
 }

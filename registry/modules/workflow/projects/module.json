@@ -119,7 +119,7 @@
         "source": "internal/web/workflow_projects.go",
         "target": "internal/web/workflow_projects.go",
         "class": "go",
-        "sha256": "78bc011fdadecbbcb2750a1ec0c4f6bc1aba9877d0a56bee7329bc3edec80a77",
+        "sha256": "9092ea951383b7dba377495113bc1dab1b085395226daaa8b6d3403d3563a427",
         "rewrite_module": true,
         "contract": false
       }

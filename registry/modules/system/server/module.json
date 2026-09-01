@@ -276,7 +276,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "80c4821d8bc657a91dc0067149a5956be3fc1eba059adf4998efa05222935658",
+        "sha256": "3a346c77f3df1b2593a442dc8e27957ff0749303b861e6a679bf7ae94cc62c7d",
         "rewrite_module": true,
         "contract": true
       },
@@ -440,6 +440,12 @@
             "field": "Analytics",
             "capability": "analytics.capturer",
             "type": "analytics.Capturer",
+            "optional": true
+          },
+          {
+            "field": "AuditExporter",
+            "capability": "audit.exporter",
+            "type": "audit.Exporter",
             "optional": true
           },
           {
