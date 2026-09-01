@@ -1028,7 +1028,7 @@
     },
     {
       "path": "registry/modules/system/search-postgres/module.json",
-      "sha256": "e0ddfab7c4916dcc8694688d34ce8c6bd1f95e848ce0c07e766e41cdbf12d69d"
+      "sha256": "57b2241d18760440dfad7546dcaaeb6d2ea9dfd8c68b7aa81a6097e0b943ea46"
     },
     {
       "path": "registry/modules/system/search-typesense/module.json",
@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/search/module.json",
-      "sha256": "a84504b5b9578a76e4c760302d5eeb7c12cf8793b9e8e8fa19f1aeeca7990ce6"
+      "sha256": "efc3b1cf84b42a1128b2ef2805fc9ce3a03723325a42630c0fde64209e0c9345"
     },
     {
       "path": "registry/modules/system/security/module.json",

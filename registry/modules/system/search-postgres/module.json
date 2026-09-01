@@ -127,7 +127,14 @@
         }
       }
     },
-    "migrations": [],
+    "migrations": [
+      {
+        "id": "0025_search_org_fk",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0025_search_org_fk.sql",
+        "sha256": "651ced78fef048a9ae8bd496488df7a3d313bc671b8228ce2b212954ce34d7a4"
+      }
+    ],
     "environment": [],
     "docs": [],
     "tests": {

@@ -100,14 +100,14 @@
         "scope": "org",
         "export": false,
         "account_delete": "retain",
-        "organization_delete": "retain"
+        "organization_delete": "cascade"
       },
       {
         "table": "search_outbox",
         "scope": "org",
         "export": false,
         "account_delete": "retain",
-        "organization_delete": "retain"
+        "organization_delete": "cascade"
       }
     ],
     "removal_policy": "replacement-required"
