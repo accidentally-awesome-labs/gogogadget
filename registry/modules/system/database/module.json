@@ -84,6 +84,14 @@
         "contract": false
       },
       {
+        "source": "internal/db/search_lifecycle_test.go",
+        "target": "internal/db/search_lifecycle_test.go",
+        "class": "test",
+        "sha256": "e615e4cd1ace079f08ebd7cfa0d48e0b74721a138e1c68a498fe28995fe899be",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/db/seed_registry_test.go",
         "target": "internal/db/seed_registry_test.go",
         "class": "test",

@@ -892,7 +892,7 @@
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "ecf85fc1609fd64ac15a0ee1cc261d19067a5cfa3a4a0fd5a2cb031cb52617fe"
+      "sha256": "3cdaefdb8612dc512a455625e5b09d6d7d5ed2775805f38c5deba3aff6c785c9"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
