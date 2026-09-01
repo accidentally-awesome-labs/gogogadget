@@ -37,6 +37,23 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+		if s.sessionLoader != nil {
+			session, loadErr := s.sessionLoader.Load(r.Context(), cookie.Value)
+			if loadErr != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+			ctx := identity.WithUser(r.Context(), &session.User)
+			ctx = identity.WithClaims(ctx, &session.Claims)
+			if session.Org != nil {
+				ctx = identity.WithOrg(ctx, session.Org)
+			}
+			ctx = s.applyStoredAppearance(w, r, ctx, session.User)
+			ctx = s.applyImpersonation(w, r, ctx)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
 		providerClaims, err := s.verifier.Verify(r.Context(), cookie.Value)
 		if err != nil {
 			// Invalid/expired token → treat as unauthenticated; RequireAuth redirects.

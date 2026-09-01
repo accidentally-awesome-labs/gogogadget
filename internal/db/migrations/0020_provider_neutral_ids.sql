@@ -21,8 +21,8 @@ BEGIN
   IF (SELECT count(*) FROM pg_constraint c WHERE c.contype='f' AND c.confdeltype='c' AND c.conrelid IN ('org_members'::regclass,'subscriptions'::regclass,'projects'::regclass,'api_tokens'::regclass,'files'::regclass,'schedules'::regclass,'notifications'::regclass,'webhook_endpoints'::regclass,'webhook_deliveries'::regclass,'usage_events'::regclass,'flag_overrides'::regclass,'notification_preferences'::regclass,'idempotency_keys'::regclass)) <> 17 THEN
     RAISE EXCEPTION 'provider_neutral_ids_legacy_foreign_keys_mismatch';
   END IF;
-  IF EXISTS (SELECT 1 FROM subscriptions WHERE polar_customer_id IS NOT NULL GROUP BY clerk_org_id HAVING count(DISTINCT polar_customer_id)>1) THEN RAISE EXCEPTION 'provider_neutral_ids_multiple_polar_customers_per_org'; END IF;
-  IF EXISTS (SELECT 1 FROM subscriptions WHERE polar_customer_id IS NOT NULL GROUP BY polar_customer_id HAVING count(DISTINCT clerk_org_id)>1) THEN RAISE EXCEPTION 'provider_neutral_ids_shared_polar_customer'; END IF;
+  IF EXISTS (SELECT 1 FROM subscriptions WHERE polar_customer_id <> '' GROUP BY clerk_org_id HAVING count(DISTINCT polar_customer_id)>1) THEN RAISE EXCEPTION 'provider_neutral_ids_multiple_polar_customers_per_org'; END IF;
+  IF EXISTS (SELECT 1 FROM subscriptions WHERE polar_customer_id <> '' GROUP BY polar_customer_id HAVING count(DISTINCT clerk_org_id)>1) THEN RAISE EXCEPTION 'provider_neutral_ids_shared_polar_customer'; END IF;
 END $$;
 -- +goose StatementEnd
 

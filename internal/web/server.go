@@ -19,6 +19,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
@@ -42,6 +43,7 @@ type Server struct {
 	types         *content.Registry
 	cms           *content.CMS
 	verifier      identity.Verifier
+	sessionLoader identitysession.Loader
 	fetcher       identity.UserFetcher
 	deleter       identity.Deleter // nil → local-only account deletion
 	billingClient billing.Client
@@ -88,6 +90,7 @@ type Deps struct {
 	TestOnlyModules bool
 
 	Verifier        identity.Verifier
+	SessionLoader   identitysession.Loader
 	Fetcher         identity.UserFetcher
 	IdentityDeleter identity.Deleter
 	Billing         billing.Client
@@ -108,6 +111,7 @@ func NewServer(d Deps) (*Server, error) {
 		testOnlyModules: d.TestOnlyModules,
 		docs:            d.Docs,
 		verifier:        d.Verifier,
+		sessionLoader:   d.SessionLoader,
 		fetcher:         d.Fetcher,
 		deleter:         d.IdentityDeleter,
 		billingClient:   d.Billing,
@@ -117,6 +121,9 @@ func NewServer(d Deps) (*Server, error) {
 		flags:           d.Flags,
 		reporter:        d.Reporter,
 		mux:             http.NewServeMux(),
+	}
+	if s.sessionLoader == nil && d.DB != nil && d.Verifier != nil && d.Fetcher != nil {
+		s.sessionLoader = &identitysession.SessionLoader{Pool: d.DB, Verify: d.Verifier, Fetch: d.Fetcher}
 	}
 	// A bad content-type declaration is a wiring bug, so it refuses here. There
 	// is deliberately no fallback to the defaults: silently serving a different

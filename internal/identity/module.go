@@ -20,11 +20,11 @@ type Deps struct {
 // all three are nil when nothing is configured, which makes /app answer 503
 // rather than trust a synthetic user.
 type Module struct {
-	Verifier Verifier
-	Fetcher  UserFetcher
-	Deleter  Deleter
+	Verifier  Verifier
+	Fetcher   UserFetcher
+	Deleter   Deleter
 	Navigator Navigator
-	Webhook Webhook
+	Webhook   Webhook
 }
 
 // NewModule resolves the identity triple by a single precedence rule: the dev
@@ -42,15 +42,19 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	case d.Config.DevAuthBypass:
 		log.Warn("DEV_AUTH_BYPASS enabled — synthetic e2e: tokens accepted")
 		return &Module{
-			Verifier: FakeVerifier{},
-			Fetcher:  DevUserFetcher{},
-			Deleter:  DevDeleter{},
+			Verifier:  FakeVerifier{},
+			Fetcher:   DevUserFetcher{},
+			Deleter:   DevDeleter{},
+			Navigator: LocalNavigator{BaseURL: ""},
+			Webhook:   ClerkWebhook{Secret: d.Config.ClerkWebhookSecret},
 		}, nil
 	case d.Config.ClerkConfigured():
 		return &Module{
-			Verifier: NewClerkVerifier(d.Config.ClerkSecretKey),
-			Fetcher:  NewClerkUserFetcher(d.Config.ClerkSecretKey),
-			Deleter:  NewClerkDeleter(d.Config.ClerkSecretKey),
+			Verifier:  NewClerkVerifier(d.Config.ClerkSecretKey),
+			Fetcher:   NewClerkUserFetcher(d.Config.ClerkSecretKey),
+			Deleter:   NewClerkDeleter(d.Config.ClerkSecretKey),
+			Navigator: LocalNavigator{},
+			Webhook:   ClerkWebhook{Secret: d.Config.ClerkWebhookSecret},
 		}, nil
 	default:
 		log.Warn("clerk not configured — /app routes will 503")

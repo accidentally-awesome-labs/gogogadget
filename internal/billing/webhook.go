@@ -75,7 +75,7 @@ type Processor struct {
 	Q            *sqlc.Queries
 	Log          *slog.Logger
 	ProductPlans map[string]string // provider product ID → plan key
-	Provider string
+	Provider     string
 	Emails       EmailSink
 	// Capture reports analytics events (nil = no-op until observability lands).
 	Capture func(userID, event string, props map[string]any)
@@ -87,7 +87,9 @@ type Processor struct {
 func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, sub SubscriptionPayload) error {
 	orgID := sub.OrgID()
 	provider := p.Provider
-	if provider == "" { provider = "polar" }
+	if provider == "" {
+		provider = "polar"
+	}
 	if orgID == "" {
 		p.Log.Warn("polar webhook: no org reference", "type", eventType, "sub", sub.ID)
 		return nil
@@ -100,13 +102,19 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 
 	if sub.CustomerID != "" {
 		account, accountErr := p.Q.GetBillingAccount(ctx, sqlc.GetBillingAccountParams{Provider: provider, ProviderCustomerID: sub.CustomerID})
-		if accountErr == nil && account.OrgID != orgID { return fmt.Errorf("billing customer %q is already linked to another organization", sub.CustomerID) }
-		if accountErr != nil && !errors.Is(accountErr, pgx.ErrNoRows) { return accountErr }
+		if accountErr == nil && account.OrgID != orgID {
+			return fmt.Errorf("billing customer %q is already linked to another organization", sub.CustomerID)
+		}
+		if accountErr != nil && !errors.Is(accountErr, pgx.ErrNoRows) {
+			return accountErr
+		}
 		if errors.Is(accountErr, pgx.ErrNoRows) {
 			if _, insertErr := p.Q.InsertBillingAccount(ctx, sqlc.InsertBillingAccountParams{Provider: provider, ProviderCustomerID: sub.CustomerID, OrgID: orgID}); insertErr != nil {
 				// A concurrent insert is safe only when it resolves to this org.
 				account, rereadErr := p.Q.GetBillingAccount(ctx, sqlc.GetBillingAccountParams{Provider: provider, ProviderCustomerID: sub.CustomerID})
-				if rereadErr != nil || account.OrgID != orgID { return fmt.Errorf("billing customer %q could not be linked", sub.CustomerID) }
+				if rereadErr != nil || account.OrgID != orgID {
+					return fmt.Errorf("billing customer %q could not be linked", sub.CustomerID)
+				}
 			}
 		}
 	}
@@ -131,14 +139,14 @@ func (p *Processor) ProcessSubscription(ctx context.Context, eventType string, s
 	}
 
 	if _, err := p.Q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		OrgID:          orgID,
-		Provider:             provider,
+		OrgID:                  orgID,
+		Provider:               provider,
 		ProviderSubscriptionID: pgtype.Text{String: sub.ID, Valid: true},
 		ProviderCustomerID:     sub.CustomerID,
-		ProductKey:          productKey,
-		Status:              sub.Status,
-		CurrentPeriodEnd:    periodEnd,
-		CancelAtPeriodEnd:   cancelAtEnd,
+		ProductKey:             productKey,
+		Status:                 sub.Status,
+		CurrentPeriodEnd:       periodEnd,
+		CancelAtPeriodEnd:      cancelAtEnd,
 	}); err != nil {
 		return err
 	}

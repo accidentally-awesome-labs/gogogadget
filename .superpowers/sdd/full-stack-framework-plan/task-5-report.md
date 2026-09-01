@@ -28,3 +28,15 @@ Implemented and committed the provider-neutral identity/billing slice in commit 
 - The repository's existing integration tests still encode pre-Task-5 assumptions in several full web flows (for example, direct seeded provider-shaped identities and legacy local billing expectations); focused migration, identity, billing, and web tests selected above pass. The full project suite was intentionally not run per assignment constraints.
 - The existing generated registry model remains broad and registry regeneration touched many dependent generated files because generic identifier names affect manifests, lock digests, OpenAPI, and generated metadata.
 - Provider-specific Clerk/Polar implementation code remains in its existing adapter-oriented packages for compatibility; generic callers now consume neutral contracts and events.
+
+## Review follow-up
+
+Review findings C2/C3/C4/C6/I2/I3 were addressed after the initial report: the migration excludes the empty legacy customer sentinel, session loading returns lookup errors and cleans loser rows on mapping races, web wiring can use the transactional session loader, identity/billing modules expose non-nil webhook/navigation capabilities, and catalog results deep-copy nested slices.
+
+Follow-up commands:
+
+- `gofmt -w internal/identity/session/*.go internal/identity/*.go internal/billing/*.go internal/billinglocal/*.go internal/web/auth.go internal/web/server.go` — passed.
+- `go test ./internal/identity ./internal/identity/session ./internal/billing ./internal/billinglocal ./internal/web -run '^$'` — passed.
+- `go test ./internal/db -run 'TestMigrateUpDown|TestRoundtripEveryTable' -count=1` — passed.
+
+Current implementation commit remains `b1cbf7d`; report/generated commits are `77c0bf4` and `b96107d`.

@@ -9,7 +9,7 @@ import "github.com/gogogadget/gogogadget/internal/db/sqlc"
 type Plan struct {
 	Key, Name, PriceDisplay string
 	PriceUSDMonthly         int
-	ProviderProductID          string   // provider product identifier; "" for free
+	ProviderProductID       string   // provider product identifier; "" for free
 	MaxProjects             int      // -1 = unlimited
 	MaxMembers              int      // informational only (invitations are Clerk-hosted)
 	MaxStorageMB            int      // -1 = unlimited
