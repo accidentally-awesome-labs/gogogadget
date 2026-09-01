@@ -668,7 +668,7 @@
     },
     {
       "path": "registry/modules/page/activity/module.json",
-      "sha256": "633855a66c6d11499eeb18e02c29b364a9fbef8e77f36ab929e0fbff0649d65c"
+      "sha256": "52751142456ec1008780ccca7c2198508b73c2415702e6884f5981358381740c"
     },
     {
       "path": "registry/modules/page/admin-announcements/module.json",
@@ -700,7 +700,7 @@
     },
     {
       "path": "registry/modules/page/admin-jobs/module.json",
-      "sha256": "5f0ceb5b28d26b3f7fdcbdb7368b05c651bb127a35bae9c68d60bfd857630ee8"
+      "sha256": "615dabfe4b9460d0c54cc8213e1fd86f0f94e3fdfc53fc737a91f2809bdd1b6d"
     },
     {
       "path": "registry/modules/page/admin-media/module.json",
@@ -712,7 +712,7 @@
     },
     {
       "path": "registry/modules/page/admin-overview/module.json",
-      "sha256": "e5795c6ca5d1df4889aa7ba4db00a26e91efd88d2add7c10d2413ae59ea5bd59"
+      "sha256": "1e6779dbdd62ab55eae7b682a452c8e26dc0494f7ad10f1761f1c1d0f96f0c2a"
     },
     {
       "path": "registry/modules/page/admin-schedules/module.json",
@@ -792,7 +792,7 @@
     },
     {
       "path": "registry/modules/page/settings-billing/module.json",
-      "sha256": "a8070cf14808a868ca38bebaa16efcb9bd1c1345854694a3780253606ada3ad9"
+      "sha256": "2aa1d2718347f4e437f2ca6454b3c0da477f061122e62c18241f4d33f3012df1"
     },
     {
       "path": "registry/modules/page/settings-notifications/module.json",
@@ -831,6 +831,10 @@
       "sha256": "1db838f3303267f37f6ef1961151d5387632027bad2e1ed0aca33466785fbd19"
     },
     {
+      "path": "registry/modules/system/billing-local/module.json",
+      "sha256": "020a310df4daebd8bf2aef371b314c5ff206425c5cedecaa3b83b6d5cba2ee9e"
+    },
+    {
       "path": "registry/modules/system/billing/module.json",
       "sha256": "b4e9c12d615b4b941ad8a6bfb1a9f71baedfb869d09747b2c6aa93e797f474cc"
     },
@@ -860,7 +864,7 @@
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "860a58c1f21a35d7ed262a70ef69de1f0bd2f3670c903b05c19f21e09a4d3c11"
+      "sha256": "bf87f656f8540cb4f9533eb9bf35703d60a439866650530a3c1b13648d31d4a7"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",
@@ -932,7 +936,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "8a6a64897b419d7bf483c1504495744a325e497261e6069b73918072301c35c1"
+      "sha256": "c1a56d76f95351036b3c612e37c22587b58a496d67b3cd48df916c54adc56dbc"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -968,7 +972,7 @@
     },
     {
       "path": "registry/modules/workflow/account-export/module.json",
-      "sha256": "9b99b1b29b2cec3e897ff57d60067c24187f6ecc9c92b893427803ba33079116"
+      "sha256": "9c9691b34139120f044791ae28dbd3de99893c3c6f662a95a6d37d49e949bb7f"
     },
     {
       "path": "registry/modules/workflow/admin-announcements/module.json",
@@ -992,7 +996,7 @@
     },
     {
       "path": "registry/modules/workflow/admin-schedules/module.json",
-      "sha256": "10e7193a43fbbd6497d4fa6d652493ac20888f679e547f98edf355a9cc3ed436"
+      "sha256": "d453ce0e2bd97971bfeb61591c90d76574fd959346b4bf2dd02f1a65f2baf539"
     },
     {
       "path": "registry/modules/workflow/admin-user-governance/module.json",
@@ -1024,7 +1028,7 @@
     },
     {
       "path": "registry/modules/workflow/billing-webhook/module.json",
-      "sha256": "f9d7aac5887193a06353bc731706fdf8e3922beee0e13d8da2ed045e980e344b"
+      "sha256": "423c71a8433cbccd978608438e2cefc01fe6cddccdbb151b1405699d4dce43c7"
     },
     {
       "path": "registry/modules/workflow/dev-session/module.json",
@@ -1036,7 +1040,7 @@
     },
     {
       "path": "registry/modules/workflow/identity-webhook-sync/module.json",
-      "sha256": "86e82c45a74d97e920c57e0926ba5789c4bfe1bd5d8071bf9707fd9ed54d5097"
+      "sha256": "66b22c0b48026274d72624cbf6cc24854cdd4d1961ec4f976ab4135badbaf763"
     },
     {
       "path": "registry/modules/workflow/impersonation/module.json",
@@ -1108,7 +1112,7 @@
     },
     {
       "path": "registry/systems.json",
-      "sha256": "f1efd9c7c34134132acc2fdb5f5744d77db73f827f5383df6b443643636be7ae"
+      "sha256": "e11685bab9490472b96a64e334368acac0fbb27f765335f4bad7f458035aaaa7"
     },
     {
       "path": "registry/testdata/registry.json",
