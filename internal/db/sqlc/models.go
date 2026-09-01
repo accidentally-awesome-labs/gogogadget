@@ -314,3 +314,13 @@ type WebhookEvent struct {
 	EventType   string             `json:"event_type"`
 	ProcessedAt pgtype.Timestamptz `json:"processed_at"`
 }
+
+type WebhookOutbox struct {
+	ID          int64              `json:"id"`
+	OrgID       string             `json:"org_id"`
+	EventType   string             `json:"event_type"`
+	Payload     []byte             `json:"payload"`
+	Attempts    int32              `json:"attempts"`
+	AvailableAt pgtype.Timestamptz `json:"available_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}

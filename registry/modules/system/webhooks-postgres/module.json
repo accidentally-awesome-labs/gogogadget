@@ -111,7 +111,15 @@
         "internal/webhooks/postgres"
       ]
     },
-    "data": [],
+    "data": [
+      {
+        "table": "webhook_outbox",
+        "scope": "org",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "cascade"
+      }
+    ],
     "removal_policy": "free"
   }
 }
