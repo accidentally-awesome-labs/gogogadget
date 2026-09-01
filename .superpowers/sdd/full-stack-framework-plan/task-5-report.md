@@ -145,3 +145,9 @@ Verification after review fixes:
 - `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed unfiltered.
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `5c4d67d7d48e257c05d7751593b18571b77957c9a12676328b0034c4eb437420`.
 - `make check` — passed fully (`gofmt`, registry drift, templ/sqlc, sync check, `go vet ./...`, and `go test ./...`).
+
+## Final repair verification
+
+- Account deletion selects the active provider session's upstream subject when available and otherwise resolves one from the identity mapping table; opaque `UserID` is never passed to provider deleters.
+- `go test ./internal/web -run 'TestAccountDelete' -count=1` — passed.
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `d95c819a12cc441195d63f245b0d17a4507698e65682ade396e0b40a6abc2f2f`.

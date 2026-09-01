@@ -984,7 +984,7 @@
     },
     {
       "path": "registry/modules/workflow/account-delete/module.json",
-      "sha256": "7ceec1a9252ea60fc8367f4272bd5a4c3718f32b69b73acf85db84d0eecd3b27"
+      "sha256": "599bba004718bcd127e064bf40e4509058a16feede3763ef6b44579244702ce3"
     },
     {
       "path": "registry/modules/workflow/account-export/module.json",

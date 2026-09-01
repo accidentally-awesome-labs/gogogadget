@@ -76,13 +76,19 @@ func (s *Server) handleAccountDelete(w http.ResponseWriter, r *http.Request) {
 
 	// Provider adapters receive upstream subjects, never opaque domain IDs.
 	if s.deleter != nil {
-		subject, err := s.q.GetIdentitySubjectByUser(ctx, user.UserID)
-		if err != nil {
-			s.log.Error("identity subject lookup failed", "user", user.UserID, "error", err)
-			s.renderError(w, r, err.Error())
-			return
+		subject := ""
+		if source, ok := identity.ProviderSessionFrom(ctx); ok && source.UserSubject != "" {
+			subject = source.UserSubject
+		} else {
+			mapped, err := s.q.GetIdentitySubjectByUser(ctx, user.UserID)
+			if err != nil {
+				s.log.Error("identity subject lookup failed", "user", user.UserID, "error", err)
+				s.renderError(w, r, err.Error())
+				return
+			}
+			subject = mapped.Subject
 		}
-		if err := s.deleter.DeleteUser(ctx, subject.Subject); err != nil {
+		if err := s.deleter.DeleteUser(ctx, subject); err != nil {
 			s.log.Error("identity user delete failed", "user", user.UserID, "error", err)
 			s.renderError(w, r, err.Error())
 			return
