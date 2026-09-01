@@ -28,6 +28,9 @@ func TestModuleStopFlushesQueuedEvent(t *testing.T) {
 	if err := m.Stop(ctx); err != nil {
 		t.Fatal(err)
 	}
+	if err := m.Stop(ctx); err != nil {
+		t.Fatalf("second Stop: %v", err)
+	}
 	select {
 	case body := <-events:
 		if !strings.Contains(body, "event_lifecycle") || !strings.Contains(body, "user_lifecycle") {

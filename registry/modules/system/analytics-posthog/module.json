@@ -40,7 +40,7 @@
         "source": "internal/analytics/posthog/posthog_test.go",
         "target": "internal/analytics/posthog/posthog_test.go",
         "class": "test",
-        "sha256": "7dc60a051372db8923c29118fd16f8bb9926aa5e1ff58591fe49872e880baf1b",
+        "sha256": "850cf35a5450079d960c7fd9a679c76073170742e8e396176aa9c019f39d8d62",
         "rewrite_module": true,
         "contract": false
       }

@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "3c97a5534e0e92a7ed86ad0332adccab177f884de2b4f060a173c6921712b0da"
+      "sha256": "8f07ec05989ad9bf300a976fe8f4003a1af3f19ff0e8b47dcc0d3d6a9abd1a5d"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
@@ -988,7 +988,7 @@
     },
     {
       "path": "registry/modules/system/observability-sentry/module.json",
-      "sha256": "491f450057bcf5d67fe577abe9d7dd819c1c6ba210fe51bf1b58ace6d56742fb"
+      "sha256": "486c578147019d6b88c16b64c5f25f409d24467236c8bafb2b3f140396ec049d"
     },
     {
       "path": "registry/modules/system/observability/module.json",

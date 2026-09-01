@@ -29,6 +29,9 @@ func TestModuleOwnedReporterFlushesOnStop(t *testing.T) {
 	if err := m.Stop(ctx); err != nil {
 		t.Fatal(err)
 	}
+	if err := m.Stop(ctx); err != nil {
+		t.Fatalf("second Stop: %v", err)
+	}
 	select {
 	case body := <-bodies:
 		if !strings.Contains(body, "sentry lifecycle") {

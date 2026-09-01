@@ -40,7 +40,7 @@
         "source": "internal/observability/sentryadapter/sentry_test.go",
         "target": "internal/observability/sentryadapter/sentry_test.go",
         "class": "test",
-        "sha256": "53241e759107fac3338b960a7962aa6aec41b01349c5b6676ae531b643893d2e",
+        "sha256": "e02b01f759cc63b632f2159ff93e02c6b478c31419f4396ccf68525e5d5bbad2",
         "rewrite_module": true,
         "contract": false
       }
