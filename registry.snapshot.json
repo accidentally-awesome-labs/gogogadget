@@ -668,7 +668,7 @@
     },
     {
       "path": "registry/modules/page/activity/module.json",
-      "sha256": "7ccaf0564288143d8ab0fbd6b3210c8511ee324353a478c1a1d97c256d72ab3e"
+      "sha256": "633855a66c6d11499eeb18e02c29b364a9fbef8e77f36ab929e0fbff0649d65c"
     },
     {
       "path": "registry/modules/page/admin-announcements/module.json",
@@ -676,7 +676,7 @@
     },
     {
       "path": "registry/modules/page/admin-audit/module.json",
-      "sha256": "68917490e2e1c03f986b0faa063db4076d7bcc0c33d99cef45e6d23e073e9526"
+      "sha256": "ce3477632ab18e113ffcc2c9cdc0cc6e4a2b754679606c4dc30730cd09e2afd6"
     },
     {
       "path": "registry/modules/page/admin-content-editor/module.json",
@@ -696,11 +696,11 @@
     },
     {
       "path": "registry/modules/page/admin-flags/module.json",
-      "sha256": "dac3f1a4f22e079ece27483a287d77075038cbfe63b9c188d916927fb5de5361"
+      "sha256": "6e5141fca9ffad88d9c0b84188f5d4038872f0b1a7e6d83dd2cc35f191f3bd81"
     },
     {
       "path": "registry/modules/page/admin-jobs/module.json",
-      "sha256": "06ae81b6a4bedfe46a0ec31f5c95845198e81a3fa9b0f247efcac4316a286e5a"
+      "sha256": "5f0ceb5b28d26b3f7fdcbdb7368b05c651bb127a35bae9c68d60bfd857630ee8"
     },
     {
       "path": "registry/modules/page/admin-media/module.json",
@@ -712,11 +712,11 @@
     },
     {
       "path": "registry/modules/page/admin-overview/module.json",
-      "sha256": "641fc0da9aaf63fe224a8504e31a3874cb8b9edb66364ba085dc8d53fb4b2110"
+      "sha256": "e5795c6ca5d1df4889aa7ba4db00a26e91efd88d2add7c10d2413ae59ea5bd59"
     },
     {
       "path": "registry/modules/page/admin-schedules/module.json",
-      "sha256": "2561cca239d4ad90c37c9e4e077a649b08848e49db83b5b0a1ec4e35c9f3c84b"
+      "sha256": "7177370d1ba652bb86ef663229605a871f4540c0ed4065e17c1e42bfc9898cea"
     },
     {
       "path": "registry/modules/page/admin-users/module.json",
@@ -732,7 +732,7 @@
     },
     {
       "path": "registry/modules/page/dashboard/module.json",
-      "sha256": "05fa68a8166ad53230eddf3f29e83852176c5a4286981ae9ba28983979e38ee4"
+      "sha256": "9f35eb550e8223a8660e68032a61c94687c8a5334cc5d3678fb19cb154e06f45"
     },
     {
       "path": "registry/modules/page/dev-gallery/module.json",
@@ -752,7 +752,7 @@
     },
     {
       "path": "registry/modules/page/files/module.json",
-      "sha256": "dc4536ccffd9e16e2e53abc4b940126aab300f817be5f5bee4514a94a57ccc08"
+      "sha256": "2c854250f5993c44c2053c026ebcd30545d1bb79f84fa86308e61b07a0869ba1"
     },
     {
       "path": "registry/modules/page/home/module.json",
@@ -760,11 +760,11 @@
     },
     {
       "path": "registry/modules/page/notifications/module.json",
-      "sha256": "daa25ee11961c575eb7e7a9f8f6a6d9ea79a3e6c1822254016bfacc1677e0303"
+      "sha256": "18c59eb3089cd9ad9573e98b60f1007577bae758bd71c20f2b5c759b70d76386"
     },
     {
       "path": "registry/modules/page/pricing/module.json",
-      "sha256": "f8efa0282ba05268e357aa9b095b07b6210f1b6b50dca8361699637dd4a51061"
+      "sha256": "ab0a523bef6593f3bfdd450fd578396ee7e0120965346c38a2cdd79202b9c639"
     },
     {
       "path": "registry/modules/page/privacy/module.json",
@@ -772,7 +772,7 @@
     },
     {
       "path": "registry/modules/page/project-edit/module.json",
-      "sha256": "8ff07fbe42fdbf9994769f3247811a67f32ca7ff199f7710ff123d920f34d76c"
+      "sha256": "97ce2a52cdaa8848c73db08512e689f20d65bb42942033369a248254e7520d2a"
     },
     {
       "path": "registry/modules/page/project-new/module.json",
@@ -780,31 +780,31 @@
     },
     {
       "path": "registry/modules/page/projects/module.json",
-      "sha256": "6d39dbf66a57375c144d7acd5914d4c9a53188f2e95b876648a40148b7fccd55"
+      "sha256": "f93ec97648b9d8ea76f7dc47a0d4db7936c4b754c6a4ce82dab709ce2c1f7b17"
     },
     {
       "path": "registry/modules/page/settings-account/module.json",
-      "sha256": "ffb2ae290b9aa953e9e6c5190150b6d48fa7e58bdd85758142fb14eb0fad7b2e"
+      "sha256": "a55947abc3d7a022fd6a386c242f9d1e29239841166cfe075ea56436df175269"
     },
     {
       "path": "registry/modules/page/settings-api-tokens/module.json",
-      "sha256": "b01ede2ea40e3ea395fd963a38b245dff6bc5c8f30b87f2daf0e3cac8d07dae7"
+      "sha256": "1ee354c429ce47d37781f1e8385929ee672e8b63465b6dbe31a49557ae34e980"
     },
     {
       "path": "registry/modules/page/settings-billing/module.json",
-      "sha256": "318eaba67de952d6097744209b20274074fccc7c04a6756bac20116804de2fdd"
+      "sha256": "a8070cf14808a868ca38bebaa16efcb9bd1c1345854694a3780253606ada3ad9"
     },
     {
       "path": "registry/modules/page/settings-notifications/module.json",
-      "sha256": "037097bfc8eb0c157967fb65ec17349146491f03711e01597f751c30aafafa0c"
+      "sha256": "29835508477cd154ef1f94be87ac186453bdb0a31da7db41f3b94bf9b7f838d5"
     },
     {
       "path": "registry/modules/page/settings-organization/module.json",
-      "sha256": "c827b1222d2ea161c5e9dcab95234da05d27b5d14b436621045d31f0aecea23a"
+      "sha256": "caf0c8faf1deb115f6a908c0208990dce354a028d7e0017a6d1ee9ef8e8f9d52"
     },
     {
       "path": "registry/modules/page/settings-webhooks/module.json",
-      "sha256": "690b29810c88c1c4b7c7e5c72aca57a723c757f7209e64c7264a7cee553799b0"
+      "sha256": "3633b366e27b31f62180b2ae57377c45970a8916e29e0ddc5fd627f5082e1ce8"
     },
     {
       "path": "registry/modules/page/terms/module.json",
@@ -820,7 +820,7 @@
     },
     {
       "path": "registry/modules/system/api/module.json",
-      "sha256": "aa0ec72104a22fafefb146cbb7770605b8e7857fc99e08d907897430f1962d61"
+      "sha256": "378870f536134aa24468f0085f97c48fcc61ff8ba6bbb914ec001dec1d47b35a"
     },
     {
       "path": "registry/modules/system/apphost/module.json",
@@ -828,11 +828,11 @@
     },
     {
       "path": "registry/modules/system/audit/module.json",
-      "sha256": "35d85bf56a8ade1f73ebf257b01f03d6cfafee15c10b9e340ec9aced441ee601"
+      "sha256": "1db838f3303267f37f6ef1961151d5387632027bad2e1ed0aca33466785fbd19"
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "4e6cb0641a33a6d83366166eaaa4c6fabbcae3cfab7c53465aea7ac788df0501"
+      "sha256": "6ac6d2a26fbe57e267fee88977631a81413ad8902eb17a5dec073faa0142186c"
     },
     {
       "path": "registry/modules/system/config/module.json",
@@ -848,11 +848,11 @@
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "a31c64424ae0dc14a2ac6f5d17793c64b07d1af100c2e5f6365feaeafd56af9b"
+      "sha256": "ce9fe8078fbfdf96655102d47e442ea7dbfd4be17b438ce4fa3b237054da0dff"
     },
     {
       "path": "registry/modules/system/feature-flags/module.json",
-      "sha256": "e4684e02763eb5123c660992e5776de8ef2e15b2f2ac7fc48446f3ce6f802fb5"
+      "sha256": "99c176e3647c04aea4610fcc95085ba67fd6eaa2f03b56595b14ea39e1ed4f3b"
     },
     {
       "path": "registry/modules/system/i18n/module.json",
@@ -860,15 +860,15 @@
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "3415624722f1dd44a13c7a0fd9ef85ea434a34676b8eec6aa798e98957b9428e"
+      "sha256": "46cb94ff792dd66db61c5ff4ff77155255394ac36b0914cb0af9ef1a8cfcaae6"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",
-      "sha256": "091bd41cae7a567495b6d9ee5259df841ebe432a16d51da80f739ca6741657e3"
+      "sha256": "eedddec1c728e1da98289e44708cef0ec30adec36759de6bae3d30655b95bf4b"
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "2aa11d950956742bcd3d949156e4c413974e1bc7411cf243ec5bde9a0a00d1bd"
+      "sha256": "9c27fe92fee36ab9ebd8222a3269c12bb12c2b90ad0b91dfabb2602649f990f3"
     },
     {
       "path": "registry/modules/system/llm/module.json",
@@ -900,15 +900,15 @@
     },
     {
       "path": "registry/modules/system/notifications/module.json",
-      "sha256": "9ec082a1898f87ff4106e737ad60118efd1adc85fffe4d2c49713863df4ab329"
+      "sha256": "a8ed66c79817a71bf38b7b9a23d6fd4e775de653676f12e75d43ef96c589cf0e"
     },
     {
       "path": "registry/modules/system/observability/module.json",
-      "sha256": "dab07d3c6756780eb9f7d5949d4995a2449c5bb0d80d901a841b37ebe3842cdc"
+      "sha256": "5d1869cc265c49d1bb5f44442ac6c41b8af1122ecea9f1d9a9b3a52fece6e277"
     },
     {
       "path": "registry/modules/system/organizations/module.json",
-      "sha256": "dd0a482fce5219987d6736ad2d0c93aeda496626acebf264bf720566202624a8"
+      "sha256": "59430133d7041db550fd98372485f3eac52037d18beb0d2195f056ac6c20d2c1"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
@@ -916,11 +916,11 @@
     },
     {
       "path": "registry/modules/system/schedules/module.json",
-      "sha256": "aca3b5bfe33ffae1c84081d772ce4e467f487788d7cb6ca5b169dde250c2045f"
+      "sha256": "0fe6300ff2d53951c83142171add38a225e98d05ce161a7a2e69960ad830d1e4"
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "3eaf9be39c16e269ba286c4f60f24166e5b864388fb41ac0a6a6af6a38c52791"
+      "sha256": "891de39ef3ca9703c8f5a29bca69819ad7a3a197fa39522e2f2bfdba143fd242"
     },
     {
       "path": "registry/modules/system/seed/module.json",
@@ -932,7 +932,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "1cdcb6ae69e6667b2900cd719570ee8eb3dd1753ce67f509c8bc3ef7ba8aacc5"
+      "sha256": "2044e6901d88952a0f19d82c2c928a638676627cf221ff16bbe9283182978c29"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -956,19 +956,19 @@
     },
     {
       "path": "registry/modules/system/usage/module.json",
-      "sha256": "f06f2b1f5884b300ba257c6006740bbf6181a637418a0351b0a74b7954d6e3ac"
+      "sha256": "5ca62608a018b1677764f834c0b662f265be61483e66cee7e8b591d5dc49cbec"
     },
     {
       "path": "registry/modules/system/webhooks/module.json",
-      "sha256": "2e01b147ffd2e5ba9ef7a56606601cedcfa83a8812e7c07f38d857954f7006cc"
+      "sha256": "f27c896c1041631b199f3cc34f2297c807ad57febedf667e09d6f6b18784dff9"
     },
     {
       "path": "registry/modules/workflow/account-delete/module.json",
-      "sha256": "b31619c9db5b4fd218152ea3f82f85ea2c86e252190b02150592d3f33406b080"
+      "sha256": "850cecb171f52c09f1cbb5d0c9772f22ea55d0920d054126248327f06fadbabd"
     },
     {
       "path": "registry/modules/workflow/account-export/module.json",
-      "sha256": "eb105e1c10689204d005d01d64b8d13f98361706f245aa502ef6f5e1d6daa522"
+      "sha256": "9b99b1b29b2cec3e897ff57d60067c24187f6ecc9c92b893427803ba33079116"
     },
     {
       "path": "registry/modules/workflow/admin-announcements/module.json",
@@ -976,11 +976,11 @@
     },
     {
       "path": "registry/modules/workflow/admin-content/module.json",
-      "sha256": "de9c76b98435d17187ad6b158c8e79136ddb165da60b9192a219ac3d1ff3d06a"
+      "sha256": "e92e0e48fa1fb2cf7181d353469ca1223062602c523ff0f1c3351deaeaeccfc5"
     },
     {
       "path": "registry/modules/workflow/admin-flags/module.json",
-      "sha256": "5b317e5253cd609b51bd23671f3857e80d507a064c2151f01bd2e7bbd359b3cd"
+      "sha256": "880220547b343b0e12a0854c68ea930873247a26e8cc85faf9310b1df13bd9be"
     },
     {
       "path": "registry/modules/workflow/admin-job-requeue/module.json",
@@ -988,87 +988,87 @@
     },
     {
       "path": "registry/modules/workflow/admin-media/module.json",
-      "sha256": "8d856d3c1c1644a154456b0be4e0036da23a1ad46d1576b22b55340f3e9a2c3c"
+      "sha256": "540f12c4ba490221bf9830e07a786a735658c7b3dd8ddd15eadc5eaab32043b9"
     },
     {
       "path": "registry/modules/workflow/admin-schedules/module.json",
-      "sha256": "16087ea736ec5973c927056dc0924932c59a4ff872f860937d8ff301f48c4f18"
+      "sha256": "10e7193a43fbbd6497d4fa6d652493ac20888f679e547f98edf355a9cc3ed436"
     },
     {
       "path": "registry/modules/workflow/admin-user-governance/module.json",
-      "sha256": "6f16cce6d3f1c7550c2409da4a1ed0bca12838c75c8fcbc7964a7f72514bff53"
+      "sha256": "98647fb27724231b6ed87efc847e2537d8c7935664bf8a9a408341528a187ccd"
     },
     {
       "path": "registry/modules/workflow/api-ai-chat/module.json",
-      "sha256": "99e3c9acc6c390aab369562a8226ef119653b2c2d9a95e21196da45793d3db25"
+      "sha256": "cb846de7b264dd0a6c434d8a1777afeefe8d2a9557f113539522f5081ade498f"
     },
     {
       "path": "registry/modules/workflow/api-projects/module.json",
-      "sha256": "191ccfd089d60d36655ebfa821ff636c93fb44ff91a502aa26ebf26fe2aa3a97"
+      "sha256": "4aa810252695d9e36759fbc84c3989182d1d9163ce3d179cb24683d153bf3cc9"
     },
     {
       "path": "registry/modules/workflow/api-token-lifecycle/module.json",
-      "sha256": "54c709bb2267227a6422ac4d01534c63f4c33163cead31498f11f09a2438bad9"
+      "sha256": "6db06db2f738662517e6c912d3b68f141dcd85e007c5dffcaa9ba53b7a555dc2"
     },
     {
       "path": "registry/modules/workflow/appearance/module.json",
-      "sha256": "96c17eb062dff3a41bb920ccf9aadf11e0f89487e9310bef683c78b7e296d421"
+      "sha256": "859fb3c0f828d0755ba086571a0bccb9d9f71add8f0af2ac3f6ec45c1b4ee062"
     },
     {
       "path": "registry/modules/workflow/auth-session/module.json",
-      "sha256": "10516c3075b2523bca9ba5c3034fb798bdd259b6a08ad77e6ccb1cc16e685690"
+      "sha256": "43fa0295efc2488a4b17e3000f233143d7634c5c13971b3f1495e9956ab29b81"
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",
-      "sha256": "ba40f693d38030cdecf95a2936defe00cd4e97af1dd6cbb4d860d7b3f0ad472f"
+      "sha256": "47b8eb994973724e384a7d5d7bf62712460197dfa945aa7c64cac148b651e0a2"
     },
     {
       "path": "registry/modules/workflow/billing-webhook/module.json",
-      "sha256": "f3b30e066917fc66871ca177801d81bd9546e24b3cd8ef1f77a809e9cde37744"
+      "sha256": "f9d7aac5887193a06353bc731706fdf8e3922beee0e13d8da2ed045e980e344b"
     },
     {
       "path": "registry/modules/workflow/dev-session/module.json",
-      "sha256": "e9eb2759aceee29c376f73f3fa14656c199fc35fc460b55073874f2d3e4645fb"
+      "sha256": "ec797aaf8a5472bb3787a059a1651368b82517a4ed20e9e4e2b11cd7e05d8c70"
     },
     {
       "path": "registry/modules/workflow/files/module.json",
-      "sha256": "0178a751ebd14ad6f130f3e40cd5cac58afb00c327df8a702647843508cad3b8"
+      "sha256": "062301532673c2fa787f0ba5c4f368ffda9d929f177431f6b311cb4b96e7f6a2"
     },
     {
       "path": "registry/modules/workflow/identity-webhook-sync/module.json",
-      "sha256": "dc0528358ee9e1168a881f1d47c77c4301ee8a2e8fa9ff5a4d544e5257b28e66"
+      "sha256": "86e82c45a74d97e920c57e0926ba5789c4bfe1bd5d8071bf9707fd9ed54d5097"
     },
     {
       "path": "registry/modules/workflow/impersonation/module.json",
-      "sha256": "3c02e3484e3f889ea8e0c4f51cbfdb42af283ae5aa075c267392975783a05de3"
+      "sha256": "746ede9b86968b98118c50c26eca38e53842e4f4caf452ce74a43212cbfba867"
     },
     {
       "path": "registry/modules/workflow/notification-inbox/module.json",
-      "sha256": "1e80316b286e1d26a719b0af640c53e91b0f00408e142d957308358182583bc6"
+      "sha256": "380728e029e6da08dc1f582abb4881564ec5ef3b69b11a02b0b5bb09fbba5cfa"
     },
     {
       "path": "registry/modules/workflow/notification-preferences/module.json",
-      "sha256": "f8c9f9a9610f4f71306ba9f76236ff9bb6d12e57ffb72d3933a7d46122ec780a"
+      "sha256": "97bddce53757b6c302606a91e897a00639656ae8c2006a66c4c838de47947639"
     },
     {
       "path": "registry/modules/workflow/openapi-contract/module.json",
-      "sha256": "030ebd32402ebafb1c3a89f1bbea90e090d9750c2a7aa77a864d876edaf6ab34"
+      "sha256": "8f334bdf9973fcdcd922759031c6521da11a5705cf0f97df74ab153c4ca5ae8b"
     },
     {
       "path": "registry/modules/workflow/organization-export/module.json",
-      "sha256": "c51b6f933404fa7cc9fd514e6cb668cf7e15b8c77bc0a0d0400afbe317258a76"
+      "sha256": "2d3b4f450870da55c5844dcaa80baa1c1b490822d73776e72cd06a60a5b329eb"
     },
     {
       "path": "registry/modules/workflow/outbound-webhooks/module.json",
-      "sha256": "765da1ce84cc5ef97ca6953b7217aa8ab1a7362e1319acf8e237a6c5bf57bf34"
+      "sha256": "af5405389ae06179e2c6e53ecc8ae1873f027d7bfc0e678c9a03fdeef7fd7907"
     },
     {
       "path": "registry/modules/workflow/project-export/module.json",
-      "sha256": "4a886059404dac0cf87c489e485c7326af2298d1804bf683f0ff010d5042ed45"
+      "sha256": "55a849ba6745c1fd01df24c97b055b936113832c882361065eab5d7a4449dc96"
     },
     {
       "path": "registry/modules/workflow/projects/module.json",
-      "sha256": "a41ea60a36fd1edab65cafa8e7348336b87e4cbcc080a44838ce2e0771562cc6"
+      "sha256": "bef50341dbb07e531b5fea2f4e3c9c0d977851773c392b7d1b46c834b6286477"
     },
     {
       "path": "registry/modules/workflow/seo-discovery/module.json",
