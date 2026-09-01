@@ -13,6 +13,7 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwks"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"github.com/clerk/clerk-sdk-go/v2/organization"
 	"github.com/clerk/clerk-sdk-go/v2/user"
 )
 
@@ -31,11 +32,12 @@ type Verifier interface {
 type ClerkVerifier struct {
 	jwksClient *jwks.Client
 	userClient *user.Client
+	orgClient  *organization.Client
 }
 
 func NewClerkVerifier(secretKey string) *ClerkVerifier {
 	cfg := &clerk.ClientConfig{BackendConfig: clerk.BackendConfig{Key: &secretKey}}
-	return &ClerkVerifier{jwksClient: jwks.NewClient(cfg), userClient: user.NewClient(cfg)}
+	return &ClerkVerifier{jwksClient: jwks.NewClient(cfg), userClient: user.NewClient(cfg), orgClient: organization.NewClient(cfg)}
 }
 func (v *ClerkVerifier) Verify(ctx context.Context, token string) (*ProviderClaims, error) {
 	claims, err := jwt.Verify(ctx, &jwt.VerifyParams{Token: token, JWKSClient: v.jwksClient, Leeway: 10 * time.Second})
@@ -75,4 +77,18 @@ func (v *ClerkVerifier) VerifySubject(ctx context.Context, subject string) (*Pro
 		return nil, fmt.Errorf("identity: verified subject mismatch")
 	}
 	return &ProviderClaims{Provider: "clerk", UserSubject: subject}, nil
+}
+
+func (v *ClerkVerifier) VerifyOrganizationSubject(ctx context.Context, subject string) (*ProviderClaims, error) {
+	if subject == "" || v == nil || v.orgClient == nil {
+		return nil, ErrInvalidToken
+	}
+	org, err := v.orgClient.Get(ctx, subject)
+	if err != nil {
+		return nil, err
+	}
+	if org.ID != subject {
+		return nil, fmt.Errorf("identity: verified organization subject mismatch")
+	}
+	return &ProviderClaims{Provider: "clerk", OrgSubject: subject, OrgSlug: org.Slug}, nil
 }

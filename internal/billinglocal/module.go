@@ -25,7 +25,7 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return &Module{Client: New(d.Config.AppURL), Catalog: billing.DefaultPlanCatalog(), Webhook: LocalWebhook{}}, nil
+	return &Module{Client: New(d.Config.AppURL), Catalog: LocalPlanCatalog(), Webhook: LocalWebhook{}}, nil
 }
 
 type LocalWebhook struct{}

@@ -25,15 +25,27 @@ func (l *Linker) Link(ctx context.Context, r LinkRequest) error {
 	}
 	// A subject is not a session token. Require the adapter's explicit
 	// subject-verification port instead of passing it to Verify.
-	sv, ok := l.Verify.(identity.SubjectVerifier)
-	if !ok {
-		return errors.New("identity: adapter does not support subject verification")
+	var claims *identity.ProviderClaims
+	var err error
+	if r.OrgID != "" {
+		ov, ok := l.Verify.(identity.OrganizationSubjectVerifier)
+		if !ok {
+			return errors.New("identity: adapter does not support organization subject verification")
+		}
+		claims, err = ov.VerifyOrganizationSubject(ctx, r.Subject)
+	} else {
+		sv, ok := l.Verify.(identity.SubjectVerifier)
+		if !ok {
+			return errors.New("identity: adapter does not support subject verification")
+		}
+		claims, err = sv.VerifySubject(ctx, r.Subject)
 	}
-	claims, err := sv.VerifySubject(ctx, r.Subject)
 	if err != nil {
 		return err
 	}
-	if claims == nil || claims.Provider != r.Provider || claims.UserSubject != r.Subject && claims.OrgSubject != r.Subject {
+	if claims == nil || claims.Provider != r.Provider ||
+		(r.UserID != "" && claims.UserSubject != r.Subject) ||
+		(r.OrgID != "" && claims.OrgSubject != r.Subject) {
 		return fmt.Errorf("identity: provider subject verification mismatch")
 	}
 	tx, err := l.Pool.Begin(ctx)

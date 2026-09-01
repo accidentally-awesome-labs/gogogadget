@@ -112,6 +112,13 @@ func (l *SessionLoader) Load(ctx context.Context, token string) (Session, error)
 		} else if !errors.Is(orgErr, pgx.ErrNoRows) {
 			return Session{}, orgErr
 		} else {
+			if pc.OrgSlug != "" {
+				if _, slugErr := q.GetOrgBySlug(ctx, pc.OrgSlug); slugErr == nil {
+					return Session{}, identity.ErrLinkRequired
+				} else if !errors.Is(slugErr, pgx.ErrNoRows) {
+					return Session{}, slugErr
+				}
+			}
 			orgID, genErr := opaqueID("org_")
 			if genErr != nil {
 				return Session{}, genErr

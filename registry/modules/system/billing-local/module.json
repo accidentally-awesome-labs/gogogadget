@@ -40,6 +40,10 @@
         {
           "module": "github.com/justinas/nosurf",
           "version": "v1.2.0"
+        },
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
         }
       ],
       "tools": [],
@@ -47,10 +51,18 @@
     },
     "files": [
       {
+        "source": "internal/billinglocal/catalog.go",
+        "target": "internal/billinglocal/catalog.go",
+        "class": "go",
+        "sha256": "1a821acf576a64f497ddeb0c72f624d7e54ebb5a053ab5802bf29067ec27c399",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",
-        "sha256": "17de4827881287c514b8094c910733f1581c5d452a743414e159379858394347",
+        "sha256": "5ab6f552f6a7ec69443a6c51f3abe0728a3d9fa994b8c8e488c75440d95c48f6",
         "rewrite_module": true,
         "contract": true
       },
@@ -66,15 +78,23 @@
         "source": "internal/billinglocal/module.go",
         "target": "internal/billinglocal/module.go",
         "class": "go",
-        "sha256": "87bef6f18a133bee76f47d3a0b070e45e39a1726375da7b27f45a38983ba8b0a",
+        "sha256": "f0aec1561f836b2a3947375f993dcb2b1d553390913869b94669dee55d4de2ea",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/web/billing_local_test.go",
+        "target": "internal/web/billing_local_test.go",
+        "class": "test",
+        "sha256": "6a0ab36a98c200ecc2d36b30c931a6e5c3d8e4a2577a3d5db173c6d0c664300d",
+        "rewrite_module": true,
+        "contract": false
       },
       {
         "source": "internal/web/workflow_billing_local.go",
         "target": "internal/web/workflow_billing_local.go",
         "class": "go",
-        "sha256": "2e13a278ba63764f4d0206aa68fef65d660247a63bde79a3a0c4b718e208af51",
+        "sha256": "c72c8d1d0b12ff5f9b751da2cc0c9f8e89a8c88fa19e4a3d175c2243df360287",
         "rewrite_module": true,
         "contract": true
       }

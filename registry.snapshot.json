@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
-      "sha256": "3e97bd95c74d896b22845d68ef9e2385c9363d822df702b6cc858822df391ccc"
+      "sha256": "49b472ec0963bdb88706fe8c50083af45d4def4c0af78052f1e046c5ad9977a6"
     },
     {
       "path": "registry/modules/system/billing-polar/module.json",
@@ -876,11 +876,11 @@
     },
     {
       "path": "registry/modules/system/identity-session/module.json",
-      "sha256": "e11e6a33b102f96d84110622f2621c13a0b7d7846f243b21f14821a83746d5f3"
+      "sha256": "5585b599499e76a9d5f772b4a45e86ccb5d199e1b73a025365162b08abdf8b8f"
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "7444cf417d9d5abfafde5a34e71f8136767002e38c8297aaa46500c46758d3e6"
+      "sha256": "69d073ac03731b1c0149558f319050d902e9d0c0f75e0b44ba60f5fd968db182"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",
@@ -1040,7 +1040,7 @@
     },
     {
       "path": "registry/modules/workflow/billing-checkout/module.json",
-      "sha256": "a97b2fcc730b18e02fe0304e3f9f0ede49a2cb94636096c7893ac443e6e9958e"
+      "sha256": "9c41db840f0ddd8ff42ab3b683967df5e0be53ffb6b40f753baba021d1671031"
     },
     {
       "path": "registry/modules/workflow/billing-webhook/module.json",

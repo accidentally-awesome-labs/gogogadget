@@ -131,6 +131,23 @@
           },
           "package": "internal/web",
           "handler": "handleBillingPortal"
+        },
+        {
+          "id": "billing-checkout.portal-screen",
+          "method": "GET",
+          "pattern": "/app/billing/portal",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "authenticated billing portal screen",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleBillingPortal"
         }
       ]
     },

@@ -72,7 +72,7 @@
         "source": "internal/identity/contracts.go",
         "target": "internal/identity/contracts.go",
         "class": "go",
-        "sha256": "577b318db691b904dfd60b56065102700eb2e8a44f4f5c1f985231fbf9d67e28",
+        "sha256": "68c3c2c5c7596242b5cac27aecac19fdbd325fd105f8d3a190e8c8c23cc16785",
         "rewrite_module": true,
         "contract": true
       },
@@ -136,7 +136,7 @@
         "source": "internal/identity/verifier.go",
         "target": "internal/identity/verifier.go",
         "class": "go",
-        "sha256": "93b8a77ecf53c52f585c469d2070da683ef822f97c8f2dd13b29b43d7049a33a",
+        "sha256": "a4657530cd9b5e162bd281e1c948b7de6d93895a06e769ae1906b730b5d69875",
         "rewrite_module": true,
         "contract": true
       },

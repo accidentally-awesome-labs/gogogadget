@@ -65,8 +65,11 @@ func (c *Client) ConfirmedEvent(product, customer, orgID string) billing.Subscri
 	return billing.SubscriptionEvent{Provider: "local", Type: "subscription.active", OrgIDHint: orgID, ProviderCustomerID: customer, ProviderProductID: product, Status: "active"}
 }
 func (c *Client) CanceledEvent(customer, orgID string) billing.SubscriptionEvent {
-	c.Cancel(customer)
-	return billing.SubscriptionEvent{Provider: "local", Type: "subscription.canceled", OrgIDHint: orgID, ProviderCustomerID: customer, Status: "canceled", CancelAtPeriodEnd: true}
+	c.mu.Lock()
+	product := c.confirmed[customer]
+	delete(c.confirmed, customer)
+	c.mu.Unlock()
+	return billing.SubscriptionEvent{Provider: "local", Type: "subscription.canceled", OrgIDHint: orgID, ProviderCustomerID: customer, ProviderProductID: product, Status: "canceled", CancelAtPeriodEnd: true}
 }
 
 var _ billing.Client = (*Client)(nil)

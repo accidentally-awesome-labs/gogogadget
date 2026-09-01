@@ -31,10 +31,6 @@ func (s *Server) handleBillingConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == http.MethodPost {
 		_ = r.ParseForm()
-		if token := nosurf.Token(r); token == "" || (r.Header.Get("X-CSRF-Token") != token && r.FormValue("csrf_token") != token) {
-			http.Error(w, "invalid csrf token", http.StatusForbidden)
-			return
-		}
 	}
 	product, customer, checkout := r.URL.Query().Get("product"), r.URL.Query().Get("customer"), r.URL.Query().Get("checkout")
 	if product == "" {
@@ -84,10 +80,6 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == http.MethodPost {
 		_ = r.ParseForm()
-		if token := nosurf.Token(r); token == "" || (r.Header.Get("X-CSRF-Token") != token && r.FormValue("csrf_token") != token) {
-			http.Error(w, "invalid csrf token", http.StatusForbidden)
-			return
-		}
 	}
 	customer := r.URL.Query().Get("customer")
 	if customer == "" {

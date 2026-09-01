@@ -161,4 +161,12 @@ Verification after review fixes:
 - Final registry digest: `f5d0662b45f77455bb39868e8d854ef45e205681398b9199cb95b750732956ad`.
 
 - Post-commit `make check` — passed fully with no ownership, formatting, generation, vet, or test failures.
+
+## Round 3 repair verification
+
+- Local billing now uses stable local product IDs (`pro`/`team`) via an adapter-owned catalog; cancellation preserves the current product, and distinct checkout IDs permit cancel→reconfirm reactivation.
+- Local confirmation/cancellation forms include nosurf tokens and `/app`-mounted actions; the existing generic GET portal route is registered and local portal URLs target it.
+- Session context carries provider provenance for subject-correct deletion and dev org switching. Slug collisions return `identity.ErrLinkRequired`; hosted organization linking uses the Clerk organization API, not the user API.
+- Added and passed `TestLocalBillingConfirmCancelReactivates` (authenticated GET screen, CSRF-protected POST, ledger write, cancel, and reactivation).
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `c8f6dbcb489ccc9920b04529dd8143c71c233627a11f785caedf9d3402c9f52f`.
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `d95c819a12cc441195d63f245b0d17a4507698e65682ade396e0b40a6abc2f2f`.
