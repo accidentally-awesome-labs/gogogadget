@@ -848,7 +848,7 @@
     },
     {
       "path": "registry/modules/system/audit/module.json",
-      "sha256": "5da42f17464e19ee861ce7bbf0b62784906781754c6c06d454fd1c345c0f6064"
+      "sha256": "6a58d662103ebf0d23f152ad53538b81a93f9eecb34c2793c18599e7e47b47bb"
     },
     {
       "path": "registry/modules/system/billing-local/module.json",

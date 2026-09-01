@@ -64,6 +64,14 @@
         "contract": true
       },
       {
+        "source": "internal/audit/postgres.go",
+        "target": "internal/audit/postgres.go",
+        "class": "go",
+        "sha256": "8046a5e2bbdc8f889d0d2083dccd0a05fe1df0f0d007295ed956f9b402617ac4",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/db/queries/audit.sql",
         "target": "internal/db/queries/audit.sql",
         "class": "query",
@@ -139,7 +147,14 @@
         }
       ]
     },
-    "migrations": [],
+    "migrations": [
+      {
+        "id": "0026_audit_export_outbox",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0026_audit_export_outbox.sql",
+        "sha256": "a9bec99ccdd0d075463dc0eeb9b87fb7c179b37a9106db4e9fef65d8712ff34e"
+      }
+    ],
     "environment": [
       {
         "key": "AUDIT_RETENTION_DAYS",
@@ -156,6 +171,13 @@
       ]
     },
     "data": [
+      {
+        "table": "audit_export_outbox",
+        "scope": "platform",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      },
       {
         "table": "audit_log",
         "scope": "org",
