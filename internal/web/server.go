@@ -34,24 +34,26 @@ type Server struct {
 	db  *pgxpool.Pool
 	// Active-announcement cache: one banner at a time, 30s TTL, refreshed
 	// eagerly by invalidateAnnouncementCache() on every admin mutation.
-	annMu         sync.Mutex
-	ann           *sqlc.Announcement
-	annExpires    time.Time
-	q             *sqlc.Queries
-	version       string
-	docs          *content.Docs // embedded markdown; versions with the binary
-	types         *content.Registry
-	cms           *content.CMS
-	verifier      identity.Verifier
-	sessionLoader identitysession.Loader
-	fetcher       identity.UserFetcher
-	deleter       identity.Deleter // nil → local-only account deletion
-	billingClient billing.Client
-	analytics     analytics.Capturer
-	store         storage.Store
-	llm           llm.Completer // nil when unconfigured → 503
-	flags         flags.Evaluator
-	reporter      observability.Reporter
+	annMu           sync.Mutex
+	ann             *sqlc.Announcement
+	annExpires      time.Time
+	q               *sqlc.Queries
+	version         string
+	docs            *content.Docs // embedded markdown; versions with the binary
+	types           *content.Registry
+	cms             *content.CMS
+	verifier        identity.Verifier
+	sessionLoader   identitysession.Loader
+	fetcher         identity.UserFetcher
+	deleter         identity.Deleter // nil → local-only account deletion
+	billingClient   billing.Client
+	analytics       analytics.Capturer
+	store           storage.Store
+	llm             llm.Completer // nil when unconfigured → 503
+	flags           flags.Evaluator
+	reporter        observability.Reporter
+	identityWebhook identity.Webhook
+	billingWebhook  billing.BillingWebhook
 
 	mux *http.ServeMux
 
@@ -99,6 +101,8 @@ type Deps struct {
 	LLM             llm.Completer // nil when unconfigured → AI routes 503
 	Flags           flags.Evaluator
 	Reporter        observability.Reporter
+	IdentityWebhook identity.Webhook
+	BillingWebhook  billing.BillingWebhook
 }
 
 func NewServer(d Deps) (*Server, error) {
@@ -112,6 +116,8 @@ func NewServer(d Deps) (*Server, error) {
 		docs:            d.Docs,
 		verifier:        d.Verifier,
 		sessionLoader:   d.SessionLoader,
+		identityWebhook: d.IdentityWebhook,
+		billingWebhook:  d.BillingWebhook,
 		fetcher:         d.Fetcher,
 		deleter:         d.IdentityDeleter,
 		billingClient:   d.Billing,
@@ -121,6 +127,12 @@ func NewServer(d Deps) (*Server, error) {
 		flags:           d.Flags,
 		reporter:        d.Reporter,
 		mux:             http.NewServeMux(),
+	}
+	if s.identityWebhook == nil {
+		s.identityWebhook = identity.ClerkWebhook{Secret: d.Config.ClerkWebhookSecret}
+	}
+	if s.billingWebhook == nil {
+		s.billingWebhook = billing.PolarWebhook{Secret: d.Config.PolarWebhookSecret}
 	}
 	if s.sessionLoader == nil && d.DB != nil && d.Verifier != nil && d.Fetcher != nil {
 		s.sessionLoader = &identitysession.SessionLoader{Pool: d.DB, Verify: d.Verifier, Fetch: d.Fetcher}

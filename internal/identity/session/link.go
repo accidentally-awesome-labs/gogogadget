@@ -23,12 +23,17 @@ func (l *Linker) Link(ctx context.Context, r LinkRequest) error {
 	if r.Provider == "" || r.Subject == "" || (r.UserID == "") == (r.OrgID == "") {
 		return errors.New("identity: exactly one user or organization destination is required")
 	}
-	// Verify the subject through the selected provider adapter before writing.
-	claims, err := l.Verify.Verify(ctx, r.Subject)
+	// A subject is not a session token. Require the adapter's explicit
+	// subject-verification port instead of passing it to Verify.
+	sv, ok := l.Verify.(identity.SubjectVerifier)
+	if !ok {
+		return errors.New("identity: adapter does not support subject verification")
+	}
+	claims, err := sv.VerifySubject(ctx, r.Subject)
 	if err != nil {
 		return err
 	}
-	if claims == nil || claims.Provider != r.Provider {
+	if claims == nil || claims.Provider != r.Provider || claims.UserSubject != r.Subject && claims.OrgSubject != r.Subject {
 		return fmt.Errorf("identity: provider subject verification mismatch")
 	}
 	tx, err := l.Pool.Begin(ctx)

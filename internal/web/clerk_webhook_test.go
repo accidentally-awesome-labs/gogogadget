@@ -111,7 +111,7 @@ func TestOrgDeletedRevokesBilling(t *testing.T) {
 
 	_, err := s.q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_del", ProviderSubscriptionID: pgtype.Text{String: "sub_del", Valid: true},
+		OrgID:    "org_del", ProviderSubscriptionID: pgtype.Text{String: "sub_del", Valid: true},
 		ProviderCustomerID: "cust_del", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)
@@ -133,7 +133,7 @@ func TestOrgDeletedRevokeFailureMeans500(t *testing.T) {
 
 	_, err := s.q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_del2", ProviderSubscriptionID: pgtype.Text{String: "sub_del2", Valid: true},
+		OrgID:    "org_del2", ProviderSubscriptionID: pgtype.Text{String: "sub_del2", Valid: true},
 		ProviderCustomerID: "cust_del2", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)

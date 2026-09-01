@@ -65,7 +65,7 @@ func (s *Server) handleAdminScheduleCreate(w http.ResponseWriter, r *http.Reques
 	every, _ := strconv.Atoi(strings.TrimSpace(input.EverySeconds))
 	row, err := s.q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
 		Name: input.Name, Kind: input.Kind, Payload: raw,
-		OrgID:   pgtype.Text{String: input.OrgID, Valid: input.OrgID != ""},
+		OrgID:        pgtype.Text{String: input.OrgID, Valid: input.OrgID != ""},
 		EverySeconds: int32(every),
 	})
 	if err != nil {

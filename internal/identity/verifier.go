@@ -52,3 +52,13 @@ func (FakeVerifier) Verify(_ context.Context, token string) (*ProviderClaims, er
 	}
 	return &ProviderClaims{Provider: "dev", UserSubject: parts[1], OrgSubject: parts[2], OrgRole: parts[3], OrgSlug: parts[2]}, nil
 }
+
+func (FakeVerifier) VerifySubject(_ context.Context, subject string) (*ProviderClaims, error) {
+	if subject == "" {
+		return nil, ErrInvalidToken
+	}
+	return &ProviderClaims{Provider: "dev", UserSubject: subject}, nil
+}
+func (v *ClerkVerifier) VerifySubject(ctx context.Context, subject string) (*ProviderClaims, error) {
+	return &ProviderClaims{Provider: "clerk", UserSubject: subject}, nil
+}

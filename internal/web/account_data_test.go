@@ -20,7 +20,7 @@ type exportShape struct {
 	ExportedAt string `json:"exported_at"`
 	User       struct {
 		UserID string `json:"user_id"`
-		Email       string `json:"email"`
+		Email  string `json:"email"`
 	} `json:"user"`
 	Memberships []struct {
 		OrgID   string `json:"org_id"`

@@ -247,7 +247,7 @@ func TestEntitledGateInCurrentPlan(t *testing.T) {
 	// Canceled sub PAST period end → plan resolves to free → 4th project 422s.
 	_, err := s.q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_eg", ProviderSubscriptionID: pgtype.Text{String: "sub_eg", Valid: true},
+		OrgID:    "org_eg", ProviderSubscriptionID: pgtype.Text{String: "sub_eg", Valid: true},
 		ProviderCustomerID: "cust_eg", ProductKey: "pro", Status: "canceled",
 		CurrentPeriodEnd: pgtype.Timestamptz{Time: time.Now().Add(-24 * time.Hour), Valid: true},
 	})
@@ -284,7 +284,7 @@ func TestSettingsBillingPage(t *testing.T) {
 	// Fragment endpoint with a row → the card without polling.
 	_, err := s.q.UpsertSubscription(t.Context(), sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_sb", ProviderSubscriptionID: pgtype.Text{String: "sub_sb", Valid: true},
+		OrgID:    "org_sb", ProviderSubscriptionID: pgtype.Text{String: "sub_sb", Valid: true},
 		ProviderCustomerID: "cust_sb", ProductKey: "pro", Status: "active",
 		CurrentPeriodEnd: pgtype.Timestamptz{Time: time.Now().Add(30 * 24 * time.Hour), Valid: true},
 	})

@@ -30,9 +30,9 @@ func (s *Server) handleActivity(w http.ResponseWriter, r *http.Request) {
 	totalPages := max(int(math.Ceil(float64(total)/activityPageSize)), 1)
 
 	rows, err := s.q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{
-		OrgID: orgParam,
-		Limit:      activityPageSize,
-		Offset:     int32((page - 1) * activityPageSize),
+		OrgID:  orgParam,
+		Limit:  activityPageSize,
+		Offset: int32((page - 1) * activityPageSize),
 	})
 	if err != nil {
 		s.renderError(w, r, err.Error())

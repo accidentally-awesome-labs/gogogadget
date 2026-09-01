@@ -8,6 +8,11 @@ import (
 
 var ErrLinkRequired = errors.New("identity: explicit account link required")
 
+// SubjectVerifier proves that an upstream subject belongs to the selected adapter.
+type SubjectVerifier interface {
+	VerifySubject(context.Context, string) (*ProviderClaims, error)
+}
+
 type Navigator interface {
 	LoginURL(returnTo string) string
 	SignupURL(returnTo string) string

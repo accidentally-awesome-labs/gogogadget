@@ -79,7 +79,7 @@ func TestAdminOrgsPlanBadges(t *testing.T) {
 	// Give root3's org a pro subscription so the badge shows.
 	_, err := s.q.UpsertSubscription(t.Context(), sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_root3", ProviderSubscriptionID: pgtype.Text{String: "sub_root3", Valid: true},
+		OrgID:    "org_root3", ProviderSubscriptionID: pgtype.Text{String: "sub_root3", Valid: true},
 		ProviderCustomerID: "cust_root3", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)

@@ -50,16 +50,16 @@ func TestAdminAuditPageRendersAndFilters(t *testing.T) {
 	adminUser(t, s, "user_av", "org_av")
 	seedMembership(t, s, "user_av2", "org_av2", "org:member")
 	s.q.InsertAuditLog(t.Context(), sqlc.InsertAuditLogParams{
-		OrgID:  nullText("org_av"),
-		UserID: nullText("user_av"),
-		Action:      "project.created",
-		Metadata:    []byte(`{}`),
+		OrgID:    nullText("org_av"),
+		UserID:   nullText("user_av"),
+		Action:   "project.created",
+		Metadata: []byte(`{}`),
 	})
 	s.q.InsertAuditLog(t.Context(), sqlc.InsertAuditLogParams{
-		OrgID:  nullText("org_av2"),
-		UserID: nullText("user_av2"),
-		Action:      "account.exported",
-		Metadata:    []byte(`{}`),
+		OrgID:    nullText("org_av2"),
+		UserID:   nullText("user_av2"),
+		Action:   "account.exported",
+		Metadata: []byte(`{}`),
 	})
 
 	cookie := sessionCookie("user_av", "org_av", "org:admin")
