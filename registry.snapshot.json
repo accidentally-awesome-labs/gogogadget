@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
-      "sha256": "bef30067cb402d7b589a68cdfe2411d1d685ddf717e63d25a56593b601b7ae30"
+      "sha256": "3e97bd95c74d896b22845d68ef9e2385c9363d822df702b6cc858822df391ccc"
     },
     {
       "path": "registry/modules/system/billing-polar/module.json",

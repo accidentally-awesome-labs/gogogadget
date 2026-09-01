@@ -9,7 +9,7 @@ import (
 func TestLocalBillingContract(t *testing.T) {
 	c := New("http://app.test")
 	u, err := c.CreateCheckout(context.Background(), billing.CheckoutParams{ProductID: "pro", CustomerExternalID: "org_1"})
-	if err != nil || u != "http://app.test/billing/confirm?product=pro&customer=org_1" {
+	if err != nil || u != "http://app.test/app/billing/confirm?product=pro&customer=org_1" {
 		t.Fatalf("checkout=%q err=%v", u, err)
 	}
 	e := c.ConfirmedEvent("pro", "cust_1", "org_1")

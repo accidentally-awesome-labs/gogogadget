@@ -52,7 +52,7 @@ func (s *Server) handleBillingConfirm(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == http.MethodGet {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = fmt.Fprintf(w, `<main><h1>Confirm billing</h1><form method="post" action="/billing/confirm"><input type="hidden" name="product" value="%s"><input type="hidden" name="customer" value="%s"><input type="hidden" name="checkout" value="%s"><button type="submit">Confirm</button></form></main>`, html.EscapeString(product), html.EscapeString(customer), html.EscapeString(checkout))
+		_, _ = fmt.Fprintf(w, `<main><h1>Confirm billing</h1><form method="post" action="/app/billing/confirm"><input type="hidden" name="product" value="%s"><input type="hidden" name="customer" value="%s"><input type="hidden" name="checkout" value="%s"><input type="hidden" name="csrf_token" value="%s"><button type="submit">Confirm</button></form></main>`, html.EscapeString(product), html.EscapeString(customer), html.EscapeString(checkout), html.EscapeString(nosurf.Token(r)))
 		return
 	}
 	eventID := "confirm:" + customer + ":" + product
@@ -99,7 +99,7 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Method == http.MethodGet {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = fmt.Fprintf(w, `<main><h1>Cancel billing</h1><form method="post" action="/billing/cancel"><input type="hidden" name="customer" value="%s"><button type="submit">Cancel</button></form></main>`, html.EscapeString(customer))
+		_, _ = fmt.Fprintf(w, `<main><h1>Cancel billing</h1><form method="post" action="/app/billing/cancel"><input type="hidden" name="customer" value="%s"><input type="hidden" name="csrf_token" value="%s"><button type="submit">Cancel</button></form></main>`, html.EscapeString(customer), html.EscapeString(nosurf.Token(r)))
 		return
 	}
 	evt := client.CanceledEvent(customer, org.OrgID)

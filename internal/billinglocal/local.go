@@ -30,14 +30,15 @@ func (c *Client) CreateCheckout(_ context.Context, p billing.CheckoutParams) (st
 	if p.Metadata != nil {
 		orgID = p.Metadata["org_id"]
 	}
-	u := c.BaseURL + "/billing/confirm?product=" + url.QueryEscape(p.ProductID) + "&customer=" + url.QueryEscape(p.CustomerExternalID)
+	u := c.BaseURL + "/app/billing/confirm?product=" + url.QueryEscape(p.ProductID) + "&customer=" + url.QueryEscape(p.CustomerExternalID)
 	if orgID != "" {
 		u += "&org=" + url.QueryEscape(orgID) + "&checkout=" + url.QueryEscape(fmt.Sprintf("%d", time.Now().UnixNano()))
 	}
 	return u, nil
 }
+
 func (c *Client) CreatePortalSession(_ context.Context, customer string) (string, error) {
-	return c.BaseURL + "/billing/portal?customer=" + url.QueryEscape(customer), nil
+	return c.BaseURL + "/app/billing/portal?customer=" + url.QueryEscape(customer), nil
 }
 func (c *Client) RevokeSubscription(_ context.Context, sub string) error {
 	c.mu.Lock()

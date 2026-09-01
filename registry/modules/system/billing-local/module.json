@@ -50,7 +50,7 @@
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",
-        "sha256": "049fa1eb159358de8406d6da07185b9802edbe236cbf9e3b77ed6754b4071ef1",
+        "sha256": "17de4827881287c514b8094c910733f1581c5d452a743414e159379858394347",
         "rewrite_module": true,
         "contract": true
       },
@@ -58,7 +58,7 @@
         "source": "internal/billinglocal/local_test.go",
         "target": "internal/billinglocal/local_test.go",
         "class": "test",
-        "sha256": "1f4db469c2c698bf121002bb2242845aa63fcf7851539ea02ec60d98ae9bf76d",
+        "sha256": "98195e090337029140de7def99b28bcb39f5ac1d02b248ee18510350f454b9c7",
         "rewrite_module": true,
         "contract": false
       },
@@ -74,15 +74,7 @@
         "source": "internal/web/workflow_billing_local.go",
         "target": "internal/web/workflow_billing_local.go",
         "class": "go",
-        "sha256": "25643e7c9b9298c8fd08d0805fcb066727244f5ce7621b54729d67ff9a18b5b4",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/web/workflow_billing_portal_local.go",
-        "target": "internal/web/workflow_billing_portal_local.go",
-        "class": "go",
-        "sha256": "6ea2325432c57ee8f484b4664292a1db08102936537673408048d54ca0d0dd4d",
+        "sha256": "2e13a278ba63764f4d0206aa68fef65d660247a63bde79a3a0c4b718e208af51",
         "rewrite_module": true,
         "contract": true
       }
@@ -148,11 +140,11 @@
         {
           "id": "billing.local.cancel",
           "method": "POST",
-          "pattern": "/billing/cancel",
+          "pattern": "/app/billing/cancel",
           "scope": "app",
           "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
+            "csrf_exempt": false,
+            "csrf_reason": "",
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 4096,
@@ -165,11 +157,11 @@
         {
           "id": "billing.local.cancel-screen",
           "method": "GET",
-          "pattern": "/billing/cancel",
+          "pattern": "/app/billing/cancel",
           "scope": "app",
           "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
+            "csrf_exempt": false,
+            "csrf_reason": "",
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 4096,
@@ -182,11 +174,11 @@
         {
           "id": "billing.local.confirm",
           "method": "POST",
-          "pattern": "/billing/confirm",
+          "pattern": "/app/billing/confirm",
           "scope": "app",
           "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
+            "csrf_exempt": false,
+            "csrf_reason": "",
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 4096,
@@ -199,11 +191,11 @@
         {
           "id": "billing.local.confirm-screen",
           "method": "GET",
-          "pattern": "/billing/confirm",
+          "pattern": "/app/billing/confirm",
           "scope": "app",
           "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
+            "csrf_exempt": false,
+            "csrf_reason": "",
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 4096,
@@ -212,23 +204,6 @@
           },
           "package": "internal/web",
           "handler": "handleBillingConfirm"
-        },
-        {
-          "id": "billing.local.portal",
-          "method": "GET",
-          "pattern": "/billing/portal",
-          "scope": "app",
-          "policy": {
-            "csrf_exempt": true,
-            "csrf_reason": "authenticated local billing portal screen",
-            "rate_exempt": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 4096,
-            "idempotent": false,
-            "admin_write": false
-          },
-          "package": "internal/web",
-          "handler": "handleBillingPortalLocal"
         }
       ]
     },
