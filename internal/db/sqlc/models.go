@@ -30,6 +30,14 @@ type ApiToken struct {
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
+type AuditExportOutbox struct {
+	ID          int64              `json:"id"`
+	Entry       []byte             `json:"entry"`
+	Attempts    int32              `json:"attempts"`
+	AvailableAt pgtype.Timestamptz `json:"available_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type AuditLog struct {
 	ID        int64              `json:"id"`
 	OrgID     pgtype.Text        `json:"org_id"`
