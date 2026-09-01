@@ -27,6 +27,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/realtime"
+	"github.com/gogogadget/gogogadget/internal/search"
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/gogogadget/gogogadget/internal/usage"
@@ -69,6 +70,7 @@ type Server struct {
 	billingWebhook  billing.BillingWebhook
 	webhookEmitter  webhooks.Emitter
 	usageRecorder   usage.Recorder
+	searchIndex     search.Index
 	auditExporter   audit.Exporter
 	mux             *http.ServeMux
 
@@ -126,6 +128,7 @@ type Deps struct {
 	BillingWebhook    billing.BillingWebhook
 	WebhookEmitter    webhooks.Emitter
 	UsageRecorder     usage.Recorder
+	SearchIndex       search.Index
 	AuditExporter     audit.Exporter
 }
 
@@ -159,7 +162,7 @@ func NewServer(d Deps) (*Server, error) {
 		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
 		analytics: d.Analytics, store: d.Storage, llm: d.LLM, flags: d.Flags,
-		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, usageRecorder: d.UsageRecorder, auditExporter: d.AuditExporter, mux: http.NewServeMux(),
+		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, usageRecorder: d.UsageRecorder, auditExporter: d.AuditExporter, searchIndex: d.SearchIndex, mux: http.NewServeMux(),
 	}
 	reg, _ := content.NewRegistry(contentTypesOf(d))
 	s.types = reg
@@ -349,5 +352,17 @@ func (s *Server) logAudit(ctx context.Context, orgID, userID, action string, met
 	audit.Log(ctx, s.q, orgID, userID, action, metadata)
 	if s.auditExporter != nil {
 		_ = s.auditExporter.Export(ctx, audit.Entry{OrgID: orgID, UserID: userID, Action: action, Metadata: metadata})
+	}
+}
+
+func (s *Server) indexProject(ctx context.Context, orgID, id, name, status string) {
+	if s.searchIndex == nil {
+		return
+	}
+	_ = s.searchIndex.Upsert(ctx, search.Document{TenantID: orgID, Collection: "projects", ID: id, Text: name, Fields: map[string]string{"status": status}})
+}
+func (s *Server) deleteProjectIndex(ctx context.Context, orgID, id string) {
+	if s.searchIndex != nil {
+		_ = s.searchIndex.Delete(ctx, orgID, "projects", id)
 	}
 }

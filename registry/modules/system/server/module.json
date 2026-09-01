@@ -284,7 +284,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "3a346c77f3df1b2593a442dc8e27957ff0749303b861e6a679bf7ae94cc62c7d",
+        "sha256": "503f1865b64340d538e57eee9685a73f164754b1c117f3deac6c51c385646add",
         "rewrite_module": true,
         "contract": true
       },
@@ -547,6 +547,12 @@
             "optional": true
           },
           {
+            "field": "SearchIndex",
+            "capability": "search.index",
+            "type": "search.Index",
+            "optional": true
+          },
+          {
             "field": "SessionLoader",
             "capability": "identity.session",
             "type": "session.Loader",
@@ -595,6 +601,7 @@
           "internal/db/sqlc",
           "internal/ratelimit",
           "internal/realtime",
+          "internal/search",
           "net/http"
         ],
         "start": false,
