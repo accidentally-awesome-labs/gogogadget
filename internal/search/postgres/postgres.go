@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -63,7 +64,13 @@ func (i *Index) Query(ctx context.Context, q search.Query) (search.Result, error
 	}
 	args := []any{q.TenantID, q.Collection, q.Text}
 	where := []string{"tenant_id=$1", "collection=$2", "search_vector @@ plainto_tsquery('simple',$3)"}
-	for key, value := range q.Filters {
+	filterKeys := make([]string, 0, len(q.Filters))
+	for key := range q.Filters {
+		filterKeys = append(filterKeys, key)
+	}
+	sort.Strings(filterKeys)
+	for _, key := range filterKeys {
+		value := q.Filters[key]
 		if key == "" || strings.ContainsAny(key, "'\";-") {
 			return search.Result{}, fmt.Errorf("search postgres: invalid filter key %q", key)
 		}

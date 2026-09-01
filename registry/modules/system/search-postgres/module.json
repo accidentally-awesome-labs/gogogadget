@@ -63,7 +63,7 @@
         "source": "internal/search/postgres/postgres.go",
         "target": "internal/search/postgres/postgres.go",
         "class": "go",
-        "sha256": "cc6a59ee84b4aa23e54d1955183f549f0b00a5f6a7ef106708907d47cd07017b",
+        "sha256": "31480ce96253122e6916bda4dac27b8ccf149f441e4f9d44799d03058322ca9e",
         "rewrite_module": true,
         "contract": true
       },

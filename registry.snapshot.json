@@ -1028,7 +1028,7 @@
     },
     {
       "path": "registry/modules/system/search-postgres/module.json",
-      "sha256": "57b2241d18760440dfad7546dcaaeb6d2ea9dfd8c68b7aa81a6097e0b943ea46"
+      "sha256": "5564adafaf83add1ac4e1fe2b3296269b5323578c469591e315777e3021795ec"
     },
     {
       "path": "registry/modules/system/search-typesense/module.json",
