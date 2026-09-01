@@ -1028,7 +1028,7 @@
     },
     {
       "path": "registry/modules/system/search-postgres/module.json",
-      "sha256": "0cf8813adb17e49527471b1a895ff84be23dcb62ff3187a1441bc05d38022fe3"
+      "sha256": "e0ddfab7c4916dcc8694688d34ce8c6bd1f95e848ce0c07e766e41cdbf12d69d"
     },
     {
       "path": "registry/modules/system/search-typesense/module.json",
@@ -1100,7 +1100,7 @@
     },
     {
       "path": "registry/modules/system/webhooks-postgres/module.json",
-      "sha256": "b8af454dd24060e7f4b3007e2ec049dce6f7d492b81ca40119ee0c1585c00878"
+      "sha256": "65a1ff229c9cc844586be88f9a519bfa2f70b6648ba2c272637341c37f7fd085"
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",

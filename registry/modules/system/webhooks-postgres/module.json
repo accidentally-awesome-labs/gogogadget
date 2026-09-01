@@ -29,14 +29,6 @@
     },
     "files": [
       {
-        "source": "internal/db/migrations/0023_webhook_outbox.sql",
-        "target": "internal/db/migrations/0023_webhook_outbox.sql",
-        "class": "migration",
-        "sha256": "9eda271e30602886dc16b37f0b3fa3f6ed423d37f326a479efd4c6538e82b77d",
-        "rewrite_module": false,
-        "contract": false
-      },
-      {
         "source": "internal/webhooks/postgres/postgres.go",
         "target": "internal/webhooks/postgres/postgres.go",
         "class": "go",

@@ -36,6 +36,14 @@
     },
     "files": [
       {
+        "source": "internal/search/postgres/job.go",
+        "target": "internal/search/postgres/job.go",
+        "class": "go",
+        "sha256": "1e4f75dacd9991d8ca6e5915e00c313ee27a8324f4ab3a952a55e656421a8aa1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/search/postgres/module.go",
         "target": "internal/search/postgres/module.go",
         "class": "go",
