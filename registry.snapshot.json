@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
-      "sha256": "0a1ce4fca79c442484ce13a1e5981c8b5d28d2b7ab6231fe50869f067ea12287"
+      "sha256": "f579604f4786cf0654bbf5888db0a419ee0d58d1e34da435c66e4e0927f069b2"
     },
     {
       "path": "registry/modules/system/rate-limit-redis/module.json",

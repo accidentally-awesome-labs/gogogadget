@@ -4,6 +4,7 @@ package memory
 import (
 	"context"
 	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/config"
 	"sync"
 	"time"
 
@@ -52,11 +53,18 @@ func (l *Limiter) Allow(ctx context.Context, key string) (ratelimit.Decision, er
 
 func (l *Limiter) Health(ctx context.Context) error { return ctx.Err() }
 
-type Deps struct{}
+type Deps struct{ Config *config.Config }
 type Module struct{ Value *Limiter }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(100, 200)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	rpm := 100
+	if d.Config != nil && d.Config.RateLimitPerMinute > 0 {
+		rpm = d.Config.RateLimitPerMinute
+	}
+	return &Module{Value: New(rpm, rpm*2)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return ctx.Err() }

@@ -296,7 +296,7 @@ transitive closure itself.
 | `ggg/system/observability-sentry` | observability-sentry | `ggg/system/observability` | `free` |
 | `ggg/system/organizations` | Users, organizations, and membership | `ggg/system/database` | `replacement-required` |
 | `ggg/system/rate-limit` | Request rate limiting | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
-| `ggg/system/rate-limit-memory` | Rate Limit Memory | `ggg/system/rate-limit` | `free` |
+| `ggg/system/rate-limit-memory` | Rate Limit Memory | `ggg/system/config` `ggg/system/rate-limit` | `free` |
 | `ggg/system/rate-limit-redis` | Rate Limit Redis | `ggg/system/rate-limit` | `free` |
 | `ggg/system/realtime` | Realtime | — | `replacement-required` |
 | `ggg/system/realtime-ably` | Realtime Ably | `ggg/system/realtime` | `free` |

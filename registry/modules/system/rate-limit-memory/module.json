@@ -10,6 +10,13 @@
     "description": "rate-limit-memory infrastructure capability.",
     "requires": [
       {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/rate-limit",
         "contract": {
           "min": 1,
@@ -32,7 +39,7 @@
         "source": "internal/ratelimit/memory/memory.go",
         "target": "internal/ratelimit/memory/memory.go",
         "class": "go",
-        "sha256": "2b336bc85fe04d874117fec520c7ab2ce17672b884f7a492824e6d4d8a0a8b56",
+        "sha256": "6b182add0362aa5c4db3c42c5c430e002db52be77b032c3efa0f779215e9e67c",
         "rewrite_module": true,
         "contract": true
       },
@@ -54,7 +61,14 @@
       "system": {
         "package": "internal/ratelimit/memory",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": true
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -63,6 +77,7 @@
           }
         ],
         "type_imports": [
+          "internal/config",
           "internal/ratelimit"
         ],
         "start": false,
