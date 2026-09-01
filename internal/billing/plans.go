@@ -56,7 +56,7 @@ func PlanByKey(key string) Plan { return DefaultPlanCatalog().ByKey(key) }
 
 func MRRWithCatalog(rows []sqlc.ListRevenueSubscriptionsRow, catalog PlanCatalog) int {
 	if catalog == nil {
-		catalog = DefaultPlanCatalog()
+		return 0
 	}
 	total := 0
 	for _, r := range rows {

@@ -29,7 +29,7 @@ func Entitled(sub *sqlc.Subscription, now time.Time) bool {
 // immutable catalog. Database failures conservatively return free.
 func CurrentPlanWithCatalog(ctx context.Context, q *sqlc.Queries, orgID string, now time.Time, catalog PlanCatalog) Plan {
 	if catalog == nil {
-		catalog = DefaultPlanCatalog()
+		return FreePlan()
 	}
 	sub, err := q.GetSubscriptionByOrg(ctx, orgID)
 	if errors.Is(err, pgx.ErrNoRows) {

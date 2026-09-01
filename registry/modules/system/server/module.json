@@ -161,6 +161,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/deletion_subject_test.go",
+        "target": "internal/web/deletion_subject_test.go",
+        "class": "test",
+        "sha256": "3ffe0e431c82f09619d6ac256369de3bd643a9cca4647a805baa1637c2ed660d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/email_sink.go",
         "target": "internal/web/email_sink.go",
         "class": "go",

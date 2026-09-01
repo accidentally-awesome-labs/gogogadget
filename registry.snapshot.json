@@ -840,7 +840,7 @@
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "7328093932620d3f1cb4dcb2fa8d6af60ef3b7f5facf0b6b3aa01e2df46cbdac"
+      "sha256": "c162a9358cd4f21e0e8a7115ba46782155ee6b9ee5101079fa7c03f6c7211b70"
     },
     {
       "path": "registry/modules/system/config/module.json",
@@ -880,7 +880,7 @@
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "5d0529af1be6d0650f5e882a53b0f184a1c132014bd66136b99f0e6656c44ba4"
+      "sha256": "76f9e9fe71b5b67539706fb1abf7ca49c905d66b9abe48203be35a89c7b8531b"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",
@@ -952,7 +952,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "bcd6498e8ba1fce94e0b5d398803ae31d18e1b1d2b86acfd7140cfd9da20a431"
+      "sha256": "23ddb98a2f2f9688f4d2090fc335f6d4b7df281a5e1af0acf13f71839f2cbb50"
     },
     {
       "path": "registry/modules/system/static/module.json",

@@ -80,7 +80,7 @@
         "source": "internal/billing/entitlements.go",
         "target": "internal/billing/entitlements.go",
         "class": "go",
-        "sha256": "3b79299a09ca9547b6e4e53953fba169ff1a90648df363198a45426820be4a95",
+        "sha256": "c4fc403510aa9352369433939aa445c9f96ba8fa2407c25488a10fe1e825dc1f",
         "rewrite_module": true,
         "contract": true
       },
@@ -128,7 +128,7 @@
         "source": "internal/billing/plans.go",
         "target": "internal/billing/plans.go",
         "class": "go",
-        "sha256": "6f6b98ac72d0a26cf1792d6a7bcd8ca566ee2e051c5efa92afa7ee812cfcded8",
+        "sha256": "573bebebf008382692b6e47c0bd19095038514aebba0c88b4f6737f21e247532",
         "rewrite_module": true,
         "contract": true
       },
