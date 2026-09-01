@@ -27,7 +27,15 @@
         "source": "internal/notifications/knock/knock.go",
         "target": "internal/notifications/knock/knock.go",
         "class": "go",
-        "sha256": "f9cb8f981031b0e11fab196ad17350ba52d5de6c0b9bee44795a79948f6413e3",
+        "sha256": "5b3b24a5637a828c2df226901fba2e38a76d27350754055bbef01524281b4c3e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/notifications/knock/knock_test.go",
+        "target": "internal/notifications/knock/knock_test.go",
+        "class": "test",
+        "sha256": "0cde9d07af5bfa3187fe79226587e87083aec0b4b6a82ee39a238992263121d4",
         "rewrite_module": true,
         "contract": true
       }

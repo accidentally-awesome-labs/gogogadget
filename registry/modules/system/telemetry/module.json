@@ -29,6 +29,14 @@
     },
     "files": [
       {
+        "source": "internal/telemetry/instrument.go",
+        "target": "internal/telemetry/instrument.go",
+        "class": "go",
+        "sha256": "cabaa27bdbeda38f5d3ba5f8bdd4f70d4cb6b8adf607fa5f894ca25da9c940e1",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/telemetry/telemetry.go",
         "target": "internal/telemetry/telemetry.go",
         "class": "go",
@@ -38,7 +46,6 @@
       }
     ],
     "claims": {
-      "packages": [],
       "provider_slots": [
         "ggg/telemetry"
       ]
@@ -60,9 +67,7 @@
     "migrations": [],
     "environment": [],
     "docs": [],
-    "tests": {
-      "go_packages": []
-    },
+    "tests": {},
     "data": [],
     "removal_policy": "replacement-required"
   }

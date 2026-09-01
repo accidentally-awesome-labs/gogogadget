@@ -30,6 +30,14 @@
         "sha256": "38f1aa06912f46a6cfe7f7a9736357e28eedba8954e05d28a7d92c9890e29e45",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/webhooks/postgres/postgres_test.go",
+        "target": "internal/webhooks/postgres/postgres_test.go",
+        "class": "test",
+        "sha256": "74235a58437419b1dabd5f0133a45c0525e47b13923ea7fd496b84f63183413f",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

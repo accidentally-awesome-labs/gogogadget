@@ -32,9 +32,17 @@
         "source": "internal/observability/sentryadapter/sentry.go",
         "target": "internal/observability/sentryadapter/sentry.go",
         "class": "go",
-        "sha256": "1cb8d84d847b8c8cf0bba57a20c1ccb9cf4018341fd9aea77314d436dcff29b1",
+        "sha256": "08b217f7df50774f886c35bee7fa234dc8f4662ed816a9c7fe3fd156140adbea",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/observability/sentryadapter/sentry_test.go",
+        "target": "internal/observability/sentryadapter/sentry_test.go",
+        "class": "test",
+        "sha256": "597fcc0ae3f86d775c828fa9f54f4137163c65c9aa76900fe81dab0b3967b61a",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

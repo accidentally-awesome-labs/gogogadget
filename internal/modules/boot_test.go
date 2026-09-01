@@ -7,11 +7,11 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
 	"github.com/gogogadget/gogogadget/internal/llm/fake"
 	"github.com/gogogadget/gogogadget/internal/mail/dev"
-	"github.com/gogogadget/gogogadget/internal/mail/resend"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
@@ -114,16 +114,12 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
 		"SENTRY_DSN":                   "https://public@example.com/1",
 	})
-	runtime, err := Boot(context.Background(), host, Options{})
-	if err != nil {
-		t.Fatalf("Boot: %v", err)
+	_, err := Boot(context.Background(), host, Options{})
+	if err == nil {
+		t.Fatal("production boot without managed clients succeeded")
 	}
-	t.Cleanup(func() { closeRuntime(t, runtime) })
-	if _, ok := runtime.MailSender.(*resend.ResendSender); !ok {
-		t.Fatalf("MailSender = %T, want *resend.ResendSender", runtime.MailSender)
-	}
-	if runtime.IdentityVerifier == nil || runtime.BillingClient == nil || runtime.BillingCatalog == nil {
-		t.Fatal("production provider capabilities are nil")
+	if !strings.Contains(err.Error(), "cache") {
+		t.Fatalf("production boot error = %v, want selected managed dependency", err)
 	}
 }
 

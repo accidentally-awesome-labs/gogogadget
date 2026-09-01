@@ -372,7 +372,7 @@
         "source": "internal/modkit/resolve.go",
         "target": "internal/modkit/resolve.go",
         "class": "go",
-        "sha256": "58de0635b7bd5f5af1e5a86e34544ee966b31367ee1df58c2eaf6d35c8da4b8f",
+        "sha256": "c02e6e30a86878fc7a75e1d9f12e24aa9ea1edb26c6ffd57f7a1ea4a1310c755",
         "rewrite_module": true,
         "contract": false
       },

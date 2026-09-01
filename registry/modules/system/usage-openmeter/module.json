@@ -27,7 +27,15 @@
         "source": "internal/usage/openmeter/openmeter.go",
         "target": "internal/usage/openmeter/openmeter.go",
         "class": "go",
-        "sha256": "31f0304643bb4355976e97c45412ab8f42e283e5970e7b00bfb8c36e2885ce6a",
+        "sha256": "57beebfb8dcd93b04e4bf3d938867659db348f0180380bc67856f0bca0f6e357",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/usage/openmeter/openmeter_test.go",
+        "target": "internal/usage/openmeter/openmeter_test.go",
+        "class": "test",
+        "sha256": "7d04bf9ac26a990209597dae432dc7305fd824720b3a88525d666226fae290f0",
         "rewrite_module": true,
         "contract": true
       }

@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 )
 
@@ -97,16 +98,21 @@ type kindSnapshot struct {
 
 // CMS is the database-backed read path for every registered type: published
 // entries mapped to view models, cached per (kind, locale) for 30s and
-// invalidated on every admin mutation (the currentAnnouncement pattern).
 type CMS struct {
-	q     *sqlc.Queries
-	reg   *Registry
-	mu    sync.Mutex
-	cache map[string]kindSnapshot // "<kind>|<locale>" → entries + expiry
+	q      *sqlc.Queries
+	reg    *Registry
+	store  cache.Store
+	report func(context.Context, error)
+	mu     sync.Mutex
+	cache  map[string]kindSnapshot // local stale-if-error fallback
 }
 
 func NewCMS(q *sqlc.Queries, reg *Registry) *CMS {
-	return &CMS{q: q, reg: reg, cache: map[string]kindSnapshot{}}
+	return NewCMSWithCache(q, reg, nil, nil)
+}
+
+func NewCMSWithCache(q *sqlc.Queries, reg *Registry, store cache.Store, report func(context.Context, error)) *CMS {
+	return &CMS{q: q, reg: reg, store: store, report: report, cache: map[string]kindSnapshot{}}
 }
 
 // List returns every live entry of a kind, newest first, for a locale. An
@@ -122,13 +128,23 @@ func (c *CMS) List(ctx context.Context, kind, locale string) ([]Entry, error) {
 	if cached && time.Now().Before(snap.expires) {
 		return snap.entries, nil
 	}
+	if c.store != nil {
+		if raw, ok, err := c.store.Get(ctx, "content:"+key); err == nil && ok {
+			var entries []Entry
+			if json.Unmarshal(raw, &entries) == nil {
+				snap = kindSnapshot{entries: entries, expires: time.Now().Add(cmsTTL)}
+				c.cache[key] = snap
+				return entries, nil
+			}
+		} else if err != nil && c.report != nil {
+			c.report(ctx, fmt.Errorf("content cache read: %w", err))
+		}
+	}
 	rows, err := c.q.ListLiveEntries(ctx, sqlc.ListLiveEntriesParams{
 		Kind: kind, Locale: locale, Lim: liveCap,
 	})
 	if err != nil {
 		if cached {
-			// Stale-if-error: keep the last good slice and leave expires in
-			// the past so the next request retries immediately.
 			return snap.entries, nil
 		}
 		return nil, err
@@ -137,12 +153,17 @@ func (c *CMS) List(ctx context.Context, kind, locale string) ([]Entry, error) {
 	for _, row := range rows {
 		entries = append(entries, EntryFrom(row))
 	}
-	// ListLiveEntries orders by slug (DISTINCT ON requires it); every caller
-	// renders newest-first.
 	sort.SliceStable(entries, func(i, j int) bool {
 		return entries[i].PublishedAt.After(entries[j].PublishedAt)
 	})
 	c.cache[key] = kindSnapshot{entries: entries, expires: time.Now().Add(cmsTTL)}
+	if c.store != nil {
+		if raw, marshalErr := json.Marshal(entries); marshalErr == nil {
+			if err := c.store.Set(ctx, "content:"+key, raw, cmsTTL); err != nil && c.report != nil {
+				c.report(ctx, fmt.Errorf("content cache write: %w", err))
+			}
+		}
+	}
 	return entries, nil
 }
 

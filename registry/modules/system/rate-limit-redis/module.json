@@ -27,9 +27,17 @@
         "source": "internal/ratelimit/redis/redis.go",
         "target": "internal/ratelimit/redis/redis.go",
         "class": "go",
-        "sha256": "2e82ef3bda225d9d4da15cbcfd4c0390b16af93b229d534daad85c2006a17a6e",
+        "sha256": "d728926305c8d77b1ced2383919886685875124deacf99464e72f9d1a4809ce6",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/ratelimit/redis/redis_test.go",
+        "target": "internal/ratelimit/redis/redis_test.go",
+        "class": "test",
+        "sha256": "65e7ff81724e04ba6bc04dd8b7658af06d78265c0b174f5d45961455caf1277f",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

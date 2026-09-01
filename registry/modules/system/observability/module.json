@@ -43,23 +43,7 @@
         "source": "internal/observability/contract_test.go",
         "target": "internal/observability/contract_test.go",
         "class": "test",
-        "sha256": "0e494fd00030f46e503b7461c48db473825b7f19f7a7179fd7b154c8a7941044",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/observability/module.go",
-        "target": "internal/observability/module.go",
-        "class": "go",
-        "sha256": "c6fd2f8837c6fcebaeaa37ccbe5738d6ff39e17a165dfbe8835c7b90a6b289e5",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/observability/module_test.go",
-        "target": "internal/observability/module_test.go",
-        "class": "test",
-        "sha256": "a3cf466c4f71efae447055d59faeae47c0e4ee7be7bfc7f377072d6d65f31209",
+        "sha256": "32e0d7a86581335a239f1a6236bc08bfb0412155111fb305e1102f71d499f170",
         "rewrite_module": true,
         "contract": false
       },
@@ -67,7 +51,7 @@
         "source": "internal/observability/observability.go",
         "target": "internal/observability/observability.go",
         "class": "go",
-        "sha256": "3759c52ea2d19aab634f651b5537d14814d289a472d5fc5a2dd8109f8ff041ec",
+        "sha256": "e55dd55fe771651ac471adee71bb03ec3e138ce586b1b8ee3979e91f363b63f7",
         "rewrite_module": true,
         "contract": true
       },
@@ -76,14 +60,6 @@
         "target": "internal/observability/observability_test.go",
         "class": "test",
         "sha256": "2e0e5bedde730c37e022c0aa2d0efcaabeb3857f85edfad4e4229e0dc1a69707",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/observability/sentry.go",
-        "target": "internal/observability/sentry.go",
-        "class": "go",
-        "sha256": "509412e2fc5b2b12a5adf864716b3d6c1a5523ecd4127b2cc7015d82781a2bad",
         "rewrite_module": true,
         "contract": false
       },

@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/billinglocal"
@@ -17,7 +18,10 @@ import (
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
+	llmfake "github.com/gogogadget/gogogadget/internal/llm/fake"
 	"github.com/gogogadget/gogogadget/internal/observability"
+	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
+	"github.com/gogogadget/gogogadget/internal/realtime"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -37,6 +41,7 @@ func TestNewModuleProvidesServableHandler(t *testing.T) {
 		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
 		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
+		Analytics: analytics.NoopCapturer{}, LLM: llmfake.Completer{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
 		SessionLoader: &identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}},
 	})
 	if err != nil {

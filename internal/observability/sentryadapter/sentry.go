@@ -1,12 +1,39 @@
+// Package sentryadapter contains all Sentry SDK integration. The observability
+// seam remains vendor-free.
 package sentryadapter
 
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/observability"
 )
+
+type Reporter struct{ hub *sentry.Hub }
+
+func newReporter(client *sentry.Client) *Reporter {
+	return &Reporter{hub: sentry.NewHub(client, sentry.NewScope())}
+}
+func (r *Reporter) Capture(err error) {
+	if r != nil && r.hub != nil {
+		r.hub.CaptureException(err)
+	}
+}
+func (r *Reporter) CaptureRequest(req *http.Request, err error) {
+	if r == nil || r.hub == nil || req == nil {
+		return
+	}
+	r.hub.WithScope(func(scope *sentry.Scope) {
+		scope.SetTag("path", req.URL.Path)
+		scope.SetContext("request", sentry.Context{"url": req.URL.String(), "method": req.Method})
+		r.hub.CaptureException(err)
+	})
+}
+
+var _ observability.Reporter = (*Reporter)(nil)
 
 type Module struct {
 	Value  observability.Reporter
@@ -18,10 +45,10 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	if d.DSN == "" {
+	if d.DSN == "" && h != nil {
 		d.DSN = h.Env("SENTRY_DSN")
 	}
-	if d.Environment == "" {
+	if d.Environment == "" && h != nil {
 		d.Environment = h.Env("APP_ENV")
 	}
 	if d.DSN == "" {
@@ -31,7 +58,7 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Module{Value: observability.NewSentryReporter(c), client: c}, nil
+	return &Module{Value: newReporter(c), client: c}, nil
 }
 func (m *Module) Stop(ctx context.Context) error {
 	if m == nil || m.client == nil {
@@ -50,5 +77,5 @@ func (m *Module) Health(ctx context.Context) error {
 	if m == nil || m.client == nil {
 		return fmt.Errorf("sentry: client is required")
 	}
-	return nil
+	return ctx.Err()
 }

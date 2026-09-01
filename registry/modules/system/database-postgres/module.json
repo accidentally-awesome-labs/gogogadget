@@ -46,9 +46,17 @@
         "source": "internal/database/postgres/postgres.go",
         "target": "internal/database/postgres/postgres.go",
         "class": "go",
-        "sha256": "5675e0754ad3f9bed62aab6de2825d219df4f2de2b234a4c37937ac96967ed44",
+        "sha256": "05ca40d26888a57ab91790126b6a951842039c59ef1ef852c3c5d8547324a76b",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/database/postgres/postgres_test.go",
+        "target": "internal/database/postgres/postgres_test.go",
+        "class": "test",
+        "sha256": "57f337dc5a7308e9e0c84200f73909009daff82c0e31bab19623737d959ae6fa",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

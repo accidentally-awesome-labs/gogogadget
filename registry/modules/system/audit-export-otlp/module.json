@@ -30,6 +30,14 @@
         "sha256": "2fc1873a7ba02105ce36e6d741fccef0e0a2b772078c27d3f72a378f6886bc62",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/audit_export/otlp/otlp_test.go",
+        "target": "internal/audit_export/otlp/otlp_test.go",
+        "class": "test",
+        "sha256": "2419ac7b8369b40fdadb090eb9bf71f892972f2f36a024388ab6570a2d350ef8",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

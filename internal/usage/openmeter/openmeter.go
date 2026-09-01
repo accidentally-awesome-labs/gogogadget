@@ -29,7 +29,9 @@ func (r *Recorder) Record(c context.Context, o, n string, v int64, e string, m m
 		if r.Report != nil {
 			r.Report(c, err)
 		}
-		return err
+		// Usage is recorded by the product transaction; forwarding is
+		// eventually consistent and must not fail that transaction.
+		return nil
 	}
 	if r.Deliver != nil {
 		if err := r.Deliver(c, o, n, v, e, m); err != nil && r.Report != nil {
@@ -48,11 +50,17 @@ func (r *Recorder) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct{ Queue Queue }
 type Module struct{ Value *Recorder }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(nil, nil, nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if d.Queue == nil {
+		return nil, fmt.Errorf("openmeter: queue is required")
+	}
+	return &Module{Value: New(d.Queue, nil, nil)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

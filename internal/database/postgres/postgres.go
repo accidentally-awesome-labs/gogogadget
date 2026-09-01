@@ -44,4 +44,3 @@ func Queries(m *Module) *sqlc.Queries {
 
 var _ apphost.Lifecycle = (*Module)(nil)
 var _ apphost.HealthChecker = (*Module)(nil)
-

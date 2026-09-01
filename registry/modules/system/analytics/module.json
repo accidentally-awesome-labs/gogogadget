@@ -43,7 +43,7 @@
         "source": "internal/analytics/analytics.go",
         "target": "internal/analytics/analytics.go",
         "class": "go",
-        "sha256": "4e5fb3b45f459528389577e916830b81d517cc0a7d1627540b913fa6d47b60e9",
+        "sha256": "bca2404eba882276b4807738a47bc2fb104e12a1f710e541f8549917f84ecc73",
         "rewrite_module": true,
         "contract": true
       },
@@ -59,23 +59,7 @@
         "source": "internal/analytics/contract_test.go",
         "target": "internal/analytics/contract_test.go",
         "class": "test",
-        "sha256": "35cfe7da2c02c1a9623456d292e1515d243300225788a72a644e5cae969a11a1",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/analytics/module.go",
-        "target": "internal/analytics/module.go",
-        "class": "go",
-        "sha256": "3bf04d581aa12d20e98cbcb9cd2719842a5a129112ebe16577fcb3d673a4011b",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/analytics/module_test.go",
-        "target": "internal/analytics/module_test.go",
-        "class": "test",
-        "sha256": "2483f2c2add5f4f927bd4703dc7ed165e6f7855857db92a9b69e10787271348a",
+        "sha256": "b50cc6dc1b8cb67342d45c2f21622157e9512819a92ebece6d821dcf13d6cbd0",
         "rewrite_module": true,
         "contract": false
       }

@@ -27,7 +27,7 @@
         "source": "internal/flags/launchdarkly/launchdarkly.go",
         "target": "internal/flags/launchdarkly/launchdarkly.go",
         "class": "go",
-        "sha256": "581c608a5c50b65a4b442c68af83ccd6c346746d305ef537463315cf91fb9043",
+        "sha256": "d93c9b484a98839fa31100e5903a5a9bfec2f645f828b4db67062f0b09eaf535",
         "rewrite_module": true,
         "contract": true
       },
@@ -35,7 +35,7 @@
         "source": "internal/flags/launchdarkly/launchdarkly_test.go",
         "target": "internal/flags/launchdarkly/launchdarkly_test.go",
         "class": "test",
-        "sha256": "76dbc67d0d6ab946889d04383aea65e685f95970636ae4f64e2b981096fafe1e",
+        "sha256": "8ed7ea280394e5fa3065e7fb4449ade186f9852fc64a06ebcbd467bbd4945c7f",
         "rewrite_module": true,
         "contract": false
       }

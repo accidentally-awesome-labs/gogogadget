@@ -15,3 +15,10 @@ func TestMutationsAreReadOnly(t *testing.T) {
 		}
 	}
 }
+
+func TestNewModuleRejectsMissingClient(t *testing.T) {
+	_, err := NewModule(context.Background(), nil, Deps{})
+	if err == nil {
+		t.Fatal("NewModule accepted missing client")
+	}
+}

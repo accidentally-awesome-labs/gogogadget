@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"net/http"
@@ -10,18 +11,28 @@ import (
 	"time"
 
 	"github.com/a-h/templ"
+	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/flags"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
+	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
+	"github.com/gogogadget/gogogadget/internal/realtime"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type unavailableCompleter struct{}
+
+func (unavailableCompleter) Chat(context.Context, llm.ChatRequest) (llm.ChatResponse, error) {
+	return llm.ChatResponse{}, llm.ErrNotConfigured
+}
 
 func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 	t.Helper()
@@ -42,6 +53,7 @@ func testServer(t *testing.T, mutate func(*config.Config)) *Server {
 		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{},
 		IdentityWebhook: identity.DevWebhook{}, Billing: &billing.MockClient{},
 		BillingCatalog: billing.DefaultPlanCatalog(), BillingWebhook: billinglocal.LocalWebhook{},
+		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
 		SessionLoader: testSessionLoader{},
 	})
 	if err != nil {

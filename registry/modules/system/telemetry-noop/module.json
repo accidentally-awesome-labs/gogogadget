@@ -43,6 +43,14 @@
         "sha256": "f4b54e8eb555a3ca07935f8c51ca02dae2267cc9623d748912dd019dcaabffbc",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/telemetry/noop/noop_test.go",
+        "target": "internal/telemetry/noop/noop_test.go",
+        "class": "test",
+        "sha256": "8499722cbaf30161bb604a04d0c24eedd6b0d9c0b07f72ca3f082abf72c3e0d7",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -61,6 +69,9 @@
             "capability": "telemetry.providers",
             "type": "telemetry.Providers"
           }
+        ],
+        "type_imports": [
+          "internal/telemetry"
         ],
         "start": false,
         "stop": false,
@@ -81,10 +92,7 @@
               "inputs": []
             }
           ]
-        },
-        "type_imports": [
-          "internal/telemetry"
-        ]
+        }
       }
     },
     "migrations": [],

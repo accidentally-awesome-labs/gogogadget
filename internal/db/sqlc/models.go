@@ -217,6 +217,28 @@ type Schedule struct {
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 }
 
+type SearchDocument struct {
+	TenantID     string             `json:"tenant_id"`
+	Collection   string             `json:"collection"`
+	DocumentID   string             `json:"document_id"`
+	Text         string             `json:"text"`
+	Fields       []byte             `json:"fields"`
+	SearchVector interface{}        `json:"search_vector"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
+type SearchOutbox struct {
+	TenantID    string             `json:"tenant_id"`
+	Collection  string             `json:"collection"`
+	DocumentID  string             `json:"document_id"`
+	Operation   string             `json:"operation"`
+	Payload     []byte             `json:"payload"`
+	Attempts    int32              `json:"attempts"`
+	AvailableAt pgtype.Timestamptz `json:"available_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Subscription struct {
 	ID                     int64              `json:"id"`
 	OrgID                  string             `json:"org_id"`

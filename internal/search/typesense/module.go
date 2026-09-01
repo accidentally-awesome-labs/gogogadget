@@ -15,10 +15,14 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 		return nil, err
 	}
 	endpoint := h.Env("TYPESENSE_URL")
+	apiKey := h.Env("TYPESENSE_API_KEY")
 	if endpoint == "" {
 		return nil, fmt.Errorf("typesense: TYPESENSE_URL is required")
 	}
-	return &Module{Value: New(endpoint, h.Env("TYPESENSE_API_KEY"))}, nil
+	if apiKey == "" {
+		return nil, fmt.Errorf("typesense: TYPESENSE_API_KEY is required")
+	}
+	return &Module{Value: New(endpoint, apiKey)}, nil
 }
 func (m *Module) Health(ctx context.Context) error {
 	if m == nil || m.Value == nil {

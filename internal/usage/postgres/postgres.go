@@ -36,11 +36,17 @@ func (r *Recorder) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct{ Queries Queries }
 type Module struct{ Value *Recorder }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if d.Queries == nil {
+		return nil, fmt.Errorf("usage postgres: queries are required")
+	}
+	return &Module{Value: New(d.Queries)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

@@ -47,7 +47,7 @@
         "source": "internal/llm/llm.go",
         "target": "internal/llm/llm.go",
         "class": "go",
-        "sha256": "c8384605ba42b0897c7317df8d7c1764fb82a16fd8bc3537c6dad18dce1f64fb",
+        "sha256": "07f5b6646429a82ebeac43fd8ba1c7e4a158e3af8cc0021e7884a78629165dae",
         "rewrite_module": true,
         "contract": true
       },
@@ -56,22 +56,6 @@
         "target": "internal/llm/llm_test.go",
         "class": "test",
         "sha256": "fa6000179335fa2211ccb0b222873c5689113d3c061b185df2cc4bbd9a546601",
-        "rewrite_module": true,
-        "contract": false
-      },
-      {
-        "source": "internal/llm/module.go",
-        "target": "internal/llm/module.go",
-        "class": "go",
-        "sha256": "dcf749c873dbf4f7893bac96d0a7a588b3decac36c5cd9597c43af88dd6237da",
-        "rewrite_module": true,
-        "contract": true
-      },
-      {
-        "source": "internal/llm/module_test.go",
-        "target": "internal/llm/module_test.go",
-        "class": "test",
-        "sha256": "89eeb2d0c81c8b45c052d2f831c06b9bef04f7af487ecd4f1c472f3ff9f8b28e",
         "rewrite_module": true,
         "contract": false
       }

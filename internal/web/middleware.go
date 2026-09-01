@@ -162,11 +162,6 @@ func (w *statusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 // horizontally (fly scale count > 1), swap this for a shared store
 // (e.g. Upstash) — that is the documented upgrade trigger.
 func (s *Server) rateLimit(next http.Handler) http.Handler {
-	rpm := s.cfg.RateLimitPerMinute
-	if rpm < 1 {
-		rpm = 100 // zero-value Config (tests constructing Server directly)
-	}
-	rl := ratelimit.PerMinute(rpm)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if policy, declared := s.policies.policyFor(r); declared && policy.RateExempt {
 			next.ServeHTTP(w, r)
@@ -178,7 +173,29 @@ func (s *Server) rateLimit(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		if !rl.Allow(clientIP(r)) {
+		var decision ratelimit.Decision
+		var err error
+		if s.limiter != nil {
+			decision, err = s.limiter.Allow(r.Context(), clientIP(r))
+			if err != nil {
+				s.log.ErrorContext(r.Context(), "rate limit unavailable", "error", err)
+				if strings.HasPrefix(r.URL.Path, "/api/") {
+					api.WriteError(w, http.StatusServiceUnavailable, "rate_limit_unavailable", "Rate limiting is temporarily unavailable.")
+				} else {
+					s.renderStatus(w, r, http.StatusServiceUnavailable, "Service unavailable", "Rate limiting is temporarily unavailable.")
+				}
+				return
+			}
+		} else {
+			s.log.ErrorContext(r.Context(), "rate limit unavailable", "error", "limiter capability is missing")
+			if strings.HasPrefix(r.URL.Path, "/api/") {
+				api.WriteError(w, http.StatusServiceUnavailable, "rate_limit_unavailable", "Rate limiting is temporarily unavailable.")
+			} else {
+				s.renderStatus(w, r, http.StatusServiceUnavailable, "Service unavailable", "Rate limiting is temporarily unavailable.")
+			}
+			return
+		}
+		if !decision.Allowed {
 			w.Header().Set("Retry-After", "1")
 			s.renderStatus(w, r, http.StatusTooManyRequests, "Too many requests", "Slow down and try again in a moment.")
 			return

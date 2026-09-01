@@ -50,7 +50,7 @@
         "source": "internal/api/ai.go",
         "target": "internal/api/ai.go",
         "class": "go",
-        "sha256": "3d3c2efd7417f68213b1930d2869e86ce92c7fada36754bf1ccb6bae9b8b1230",
+        "sha256": "c05af99de039b7e6e35a5b73800abf4783ca4b29f15fe9226f6d938a82c52546",
         "rewrite_module": true,
         "contract": false
       },

@@ -5,6 +5,7 @@ package flags
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"hash/fnv"
 	"sync"
 	"time"
@@ -24,6 +25,9 @@ type DBEvaluator struct {
 	q     *sqlc.Queries
 	ttl   time.Duration
 	cache cache.Store
+	// Report receives cache/database failures that cannot be returned through
+	// the historical bool Evaluator API. Callers may wire observability here.
+	Report func(context.Context, error)
 
 	mu      sync.Mutex
 	cached  map[string]sqlc.FeatureFlag
@@ -64,10 +68,15 @@ func (e *DBEvaluator) flags(ctx context.Context) map[string]sqlc.FeatureFlag {
 				e.cached, e.expires = m, time.Now().Add(e.ttl)
 				return m
 			}
+		} else if err != nil && e.Report != nil {
+			e.Report(ctx, fmt.Errorf("flags cache read: %w", err))
 		}
 	}
 	rows, err := e.q.ListFeatureFlags(ctx)
 	if err != nil {
+		if e.Report != nil {
+			e.Report(ctx, fmt.Errorf("flags database read: %w", err))
+		}
 		if e.cached == nil {
 			e.cached = map[string]sqlc.FeatureFlag{}
 		}
@@ -92,10 +101,19 @@ func (e *DBEvaluator) flags(ctx context.Context) map[string]sqlc.FeatureFlag {
 // Bucketing is FNV over "org|key" — deterministic per org, stable across
 // rollout increases (50% is a subset of 60%).
 func (e *DBEvaluator) Enabled(ctx context.Context, orgID, key string) bool {
+	if e == nil || e.q == nil {
+		if e != nil && e.Report != nil {
+			e.Report(ctx, fmt.Errorf("flags database is unavailable"))
+		}
+		return false
+	}
 	// Per-org override wins.
 	ov, err := e.q.GetFlagOverride(ctx, sqlc.GetFlagOverrideParams{FlagKey: key, OrgID: orgID})
 	if err == nil {
 		return ov.Enabled
+	}
+	if e.Report != nil {
+		e.Report(ctx, fmt.Errorf("flags override read: %w", err))
 	}
 	f, ok := e.flags(ctx)[key]
 	if !ok || !f.Enabled {

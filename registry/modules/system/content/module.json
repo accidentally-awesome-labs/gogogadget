@@ -67,7 +67,7 @@
         "source": "internal/content/cms.go",
         "target": "internal/content/cms.go",
         "class": "go",
-        "sha256": "fef4dc1ed4da83175dd20bae251493c786199f365442ae24962af094ddd3c95d",
+        "sha256": "bd8cffb069088d1e720b7b1623802cb2b9522bf5bee272fc219ffdc935e6abfc",
         "rewrite_module": true,
         "contract": true
       },

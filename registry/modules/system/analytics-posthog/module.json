@@ -32,9 +32,17 @@
         "source": "internal/analytics/posthog/posthog.go",
         "target": "internal/analytics/posthog/posthog.go",
         "class": "go",
-        "sha256": "03e754f5c86bb796e521708619c1b93c136ed39daa3c00a3e6b150b1972635b4",
+        "sha256": "be47a92640c8f6f77ab42226c50bae5b5abe74fbefa7cf8f4700486431eea5e9",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/analytics/posthog/posthog_test.go",
+        "target": "internal/analytics/posthog/posthog_test.go",
+        "class": "test",
+        "sha256": "c71aa9ebe9f68a6eabb54e793065daf85914e7bf3bee1f3e0de0f1574e5802ab",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

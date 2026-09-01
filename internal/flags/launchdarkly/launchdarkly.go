@@ -9,11 +9,23 @@ import (
 	"github.com/gogogadget/gogogadget/internal/flags"
 )
 
+type Client interface {
+	Enabled(context.Context, string, string) bool
+	List(context.Context) ([]flags.Flag, error)
+	ListOverrides(context.Context, string) ([]flags.Override, error)
+}
 type Service struct {
 	ProviderConsole string
 	EnabledFn       func(context.Context, string, string) bool
 	ListFn          func(context.Context) ([]flags.Flag, error)
 	OverridesFn     func(context.Context, string) ([]flags.Override, error)
+}
+
+func NewWithClient(console string, c Client) *Service {
+	if c == nil {
+		return nil
+	}
+	return New(console, c.Enabled, c.List, c.ListOverrides)
 }
 
 func New(console string, enabled func(context.Context, string, string) bool, list func(context.Context) ([]flags.Flag, error), overrides func(context.Context, string) ([]flags.Override, error)) *Service {
@@ -49,11 +61,24 @@ func (s *Service) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct {
+	Client  Client
+	Console string
+}
 type Module struct{ Value *Service }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(h.Env("LAUNCHDARKLY_CONSOLE"), nil, nil, nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if d.Client == nil {
+		return nil, fmt.Errorf("launchdarkly: client is required")
+	}
+	console := d.Console
+	if console == "" && h != nil {
+		console = h.Env("LAUNCHDARKLY_CONSOLE")
+	}
+	return &Module{Value: NewWithClient(console, d.Client)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

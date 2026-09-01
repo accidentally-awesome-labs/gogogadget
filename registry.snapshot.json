@@ -812,15 +812,15 @@
     },
     {
       "path": "registry/modules/system/analytics-noop/module.json",
-      "sha256": "715b35e463bd10ce9b74d8588906bc1adacd606b09166172fa0dded13c1f50fd"
+      "sha256": "1a58ce9d4b33d1538cb827d93c0fc24697b6b73c5a66eff435138e01f32ade3b"
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "afe66efe5c4bbb86565cb7e887f4fa929e53ef836b7fb7b8a02c9c68b44ba7ac"
+      "sha256": "325abc06a1da840a2fe023acba4c42317e4caf6a3a3b0668b3a19c0004d3fca3"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
-      "sha256": "0cf28864fad323bac8fea664feb50509affdf580ddaacf7a254b18dd127d02e2"
+      "sha256": "36d7b3413427f41d41f4f45e7d8b89b9e9136520df5fc9b286c8d6413d55e8ae"
     },
     {
       "path": "registry/modules/system/announcements/module.json",
@@ -828,19 +828,19 @@
     },
     {
       "path": "registry/modules/system/api/module.json",
-      "sha256": "79e14a685968b7da731e6790aeda68f20a507f74d22c63be234b57ae63e060bb"
+      "sha256": "d50ad374ee119a2c8a3dbcb62242884bb0f1f876d4236d057ff619505e4e4fdd"
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "54ab6620883d006c9f4284a2946c409ac136841985dc03a0c10393aaf27ee9b8"
+      "sha256": "24bb4c4a1e832652328f27665c6934759db9725226394671718458a3bf210f35"
     },
     {
       "path": "registry/modules/system/audit-export-noop/module.json",
-      "sha256": "4902781b0b01221738932c926c9846a11cc2b3103a7e138d4e00264804dde293"
+      "sha256": "45af9136a9f8e6c7322dffb0813c475ebc7e661136ef0063cb4e3971081a83d0"
     },
     {
       "path": "registry/modules/system/audit-export-otlp/module.json",
-      "sha256": "48aae0ff2a1098e30535968ba63e479d26697c0411ae5443e66a51728d53738e"
+      "sha256": "88649a82e16ca49f1455ae8c49605bcfcc2c6aae0636376af94ebeb41dffc1ec"
     },
     {
       "path": "registry/modules/system/audit-export/module.json",
@@ -848,7 +848,7 @@
     },
     {
       "path": "registry/modules/system/audit/module.json",
-      "sha256": "aacac0b803e4108059137b5cb3970d5d7378585367a04c124c4099d424c30e73"
+      "sha256": "5da42f17464e19ee861ce7bbf0b62784906781754c6c06d454fd1c345c0f6064"
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
@@ -868,7 +868,7 @@
     },
     {
       "path": "registry/modules/system/cache-redis/module.json",
-      "sha256": "d2b27dee2352d5319e509c6bd36bec4f47ef0b04e6e62db3c2c893a1c6d9396e"
+      "sha256": "dee24d39074b66b210d2465153df783f2cd8c0466ab72735aca7ebb3196d444d"
     },
     {
       "path": "registry/modules/system/cache/module.json",
@@ -884,11 +884,11 @@
     },
     {
       "path": "registry/modules/system/content/module.json",
-      "sha256": "80d00f5d3f02be4393e2ea97fa19b7e02e1992c2db60bcb1e07babb066ecc99d"
+      "sha256": "1283abd4b054cda477ef6d7666f3c8a1e0ac2f46e214fe6fbb4577d7ad103d91"
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "77b86cc6dff6d75e65f4fd1492e5e22411b73cc0418d5014a9d95f53b00a698f"
+      "sha256": "41d46d912e0ecf22c901c29bb63f0f9bd8381a6ccaf520ca0e42649d9b5c86fd"
     },
     {
       "path": "registry/modules/system/database/module.json",
@@ -896,15 +896,15 @@
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
-      "sha256": "57f3b7d834c477d1af1fdd26e64e882910eaa513a0ef45294b2f24a96c28fcaf"
+      "sha256": "bbaa31fdee20a17d1269dad4cdaea77cfa77c8adcdbcf67a90206f25e3c2ee34"
     },
     {
       "path": "registry/modules/system/feature-flags-postgres/module.json",
-      "sha256": "dab56418becf91ac523072aab1b8e1c3981316c3a692e514e7a8c897ba3c6dea"
+      "sha256": "04f93cc2f8976c0e1416ae16f9028b9547e3e6ae85c4a5860fc562f1f1f0a49a"
     },
     {
       "path": "registry/modules/system/feature-flags/module.json",
-      "sha256": "e2ee7f3d6a434093c1904c108f9715d5928056b6ee97e36023dace24b2beae12"
+      "sha256": "3bde9e77b9254a660ef5913c7fbc13fb6138692d7b351cca9cda2c3d3c0e82de"
     },
     {
       "path": "registry/modules/system/i18n/module.json",
@@ -936,15 +936,15 @@
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
-      "sha256": "3d6654540b1fac67c35c770f828d345680a46c1f4a6796ce724036cb15284dc2"
+      "sha256": "6cbd03fc2759ca62b40f4b22c54b3d071abb643de0480874720669e1ff131279"
     },
     {
       "path": "registry/modules/system/llm-openai-compatible/module.json",
-      "sha256": "71021847ad4ed78cfe7ba07888e6c66c6e5e5091660a40c2e20ce90c13537539"
+      "sha256": "6bac70b68d52a9fd42b095c651b5bf383bfcd3ea4f54da7584f9f190078abf10"
     },
     {
       "path": "registry/modules/system/llm/module.json",
-      "sha256": "4861b18e98aa6a5e8134188af217f33c3edcb8cd02679b2cdc7b306b99c686e9"
+      "sha256": "aa7858ffb91de2a36d5a3a7dbf21f1405877f6567adedd0b44a5f26d0b8c04da"
     },
     {
       "path": "registry/modules/system/mail-dev/module.json",
@@ -968,15 +968,15 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "c89cd856295a47733d11f36e1d0656f2db53bd84654540609a75b8d1b663facc"
+      "sha256": "cbf3d6c59e738fe99b394a946c912226f125faa3cd9766f1c470f41e3455f98b"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
-      "sha256": "cff6ae0e21bc2f24b20e03c57fb8064ecbc823bd1056a930c80c387f93ca47eb"
+      "sha256": "0ab3ec6b795a87198a011eb7cf8d68dc4e1ed31057f05e2fb74c1048545463fd"
     },
     {
       "path": "registry/modules/system/notifications-postgres/module.json",
-      "sha256": "ef63366abc2f430ed826d30f57010cb9c7aeb63f53a3ed23268dd6600ae80f42"
+      "sha256": "427e00423ff42e00d697c63a1012fdd0ab6558cfc032e7a50bc195abc03c5fc4"
     },
     {
       "path": "registry/modules/system/notifications/module.json",
@@ -984,15 +984,15 @@
     },
     {
       "path": "registry/modules/system/observability-log/module.json",
-      "sha256": "1ec48e8131f6f2fb65873675170baa21162106800eeaf557501849c97f7fcb8b"
+      "sha256": "c2167ad21fd9b3b45894ced918f0b8791f0aef4c44deefeb5e77c8ad624e2a37"
     },
     {
       "path": "registry/modules/system/observability-sentry/module.json",
-      "sha256": "d7c2375c55e45c5a4dc65e66918c7d39d14c3d42da85acc2b8542e6312fa6ebb"
+      "sha256": "0c439a38f0e34899c928df1fbf0d323acf5f62d0f7cfd40de72533397cd58e69"
     },
     {
       "path": "registry/modules/system/observability/module.json",
-      "sha256": "a40a8e394d748b81d66df5a0fca855f67c5d4978ff67d81681a775e0c3c40fa4"
+      "sha256": "cf8f54b713b10033df67e764adbb1b72d867edbc7e9b2ec3895065a37720361e"
     },
     {
       "path": "registry/modules/system/organizations/module.json",
@@ -1004,7 +1004,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit-redis/module.json",
-      "sha256": "253cb0be0cef21fc98de2df53ed72cf17fa40af11503f30f80a253cc307aac1a"
+      "sha256": "646a9519bb64600eab8143bed55eb5a36ef2cf797b63673fb8b7af9f9cabca05"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
@@ -1012,11 +1012,11 @@
     },
     {
       "path": "registry/modules/system/realtime-ably/module.json",
-      "sha256": "97e13ff6d8c14a7cbf7b4e5064a7b208a300ce14aa9193660c7cdcd082c35b9e"
+      "sha256": "d76001f2d4db50e0bf5b133b7024a8782a94e397ed1efc13a8dd13332eabe507"
     },
     {
       "path": "registry/modules/system/realtime-postgres/module.json",
-      "sha256": "258da09c4fd5a1a922debef2ea23c74bb14df392f36bd853e3953dd05620b475"
+      "sha256": "68ad1e41578659955c20158ae861b595479b464af7f41b2a3d4b5df5b2af4d84"
     },
     {
       "path": "registry/modules/system/realtime/module.json",
@@ -1028,11 +1028,11 @@
     },
     {
       "path": "registry/modules/system/search-postgres/module.json",
-      "sha256": "3dfe9437a7e2026c88405cf94ad8b9f7dbbe1aa67af15e176587b00e340eb3cb"
+      "sha256": "0cf8813adb17e49527471b1a895ff84be23dcb62ff3187a1441bc05d38022fe3"
     },
     {
       "path": "registry/modules/system/search-typesense/module.json",
-      "sha256": "42ff832ec5469bf73588900ab1a2de91c3e5b37320dec24092ba2594a6ef15bb"
+      "sha256": "2d50e3481208f41f3148740c8b59e89358db2d05698d960df4f28e41f5b970de"
     },
     {
       "path": "registry/modules/system/search/module.json",
@@ -1040,7 +1040,7 @@
     },
     {
       "path": "registry/modules/system/security/module.json",
-      "sha256": "87a517871f0b00b19d41c99fc210441deade2ecfa2417341fa2a78ef2eb3a9ca"
+      "sha256": "55f526755d9590e0866f6a725454846604bbd43e39dbaa2922d6bad33b9018e7"
     },
     {
       "path": "registry/modules/system/seed/module.json",
@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "2d98c13a7e1884f5373167cd6e6d2d5cc7cc84987ffbdd517b874c5a9f837fad"
+      "sha256": "b0104a6641bec0b261afedbc3676a14ef6d90916e94c9b187c8ed382299dc48d"
     },
     {
       "path": "registry/modules/system/static/module.json",
@@ -1072,15 +1072,15 @@
     },
     {
       "path": "registry/modules/system/telemetry-noop/module.json",
-      "sha256": "7c5174bf11ac907ebc6d2eec4391d0cd6cac804363aceef3a737fa2d528c0b83"
+      "sha256": "4679a98fb2d685beccd33325d8b413de22992a70ba5b5494c9be648684733277"
     },
     {
       "path": "registry/modules/system/telemetry-otlp/module.json",
-      "sha256": "3cf437af425ddf4e34d19bcc574ca699be245d40ce12b22bea7541983df7a439"
+      "sha256": "9846b4c9fa8dbf72156397d6bd179af5b6704e0f16228d649f46d15a56d52236"
     },
     {
       "path": "registry/modules/system/telemetry/module.json",
-      "sha256": "1de0ed426c052088467cab7720154f1a95748750da2ab18046527809703e45b5"
+      "sha256": "b4961650ef455fce65b82ade0ad3a9dcee1e980b381037c2330e31b2bb7b7eca"
     },
     {
       "path": "registry/modules/system/testdb/module.json",
@@ -1088,11 +1088,11 @@
     },
     {
       "path": "registry/modules/system/usage-openmeter/module.json",
-      "sha256": "b4fdaebcce96f0d5e134d57f770da9161a7b669c10c5a26e69914efffc9b9727"
+      "sha256": "d28196b3c53c4d1fe09e55909bd227224645797f6913a6de021c0780c544d156"
     },
     {
       "path": "registry/modules/system/usage-postgres/module.json",
-      "sha256": "5d1ecc90cba84b76ca2645399dcc58254cf70d300658de59a2f45e3c6625a928"
+      "sha256": "dbabeeb583e56518edc85c0a0f7f041302bcf6a6c6fcfedd8817ee12ab48e23e"
     },
     {
       "path": "registry/modules/system/usage/module.json",
@@ -1100,11 +1100,11 @@
     },
     {
       "path": "registry/modules/system/webhooks-postgres/module.json",
-      "sha256": "e2ec348833ee1c68fd79dad4850dacc68331dd996fc57dc45d31b684771c7442"
+      "sha256": "bc4749bb2809c161fd9a953a98da6827bdaf44e95e8f4d31d8ab20e6264433e9"
     },
     {
       "path": "registry/modules/system/webhooks-svix/module.json",
-      "sha256": "de7236de89d03710e4edb25f4277be792873816f09a04158deb58929e72bf40d"
+      "sha256": "8eff0ec4535a7c3ac5d04dcb15cc99597b6a7dd99e34be80ea0404fc31da2903"
     },
     {
       "path": "registry/modules/system/webhooks/module.json",

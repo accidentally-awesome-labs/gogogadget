@@ -3,6 +3,7 @@ package openai
 import (
 	"context"
 	"fmt"
+
 	"github.com/gogogadget/gogogadget/internal/llm"
 )
 
@@ -12,6 +13,9 @@ type Deps struct{ Endpoint, APIKey, Model string }
 func NewModule(ctx context.Context, _ any, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	if d.Endpoint == "" || d.APIKey == "" || d.Model == "" {
+		return nil, fmt.Errorf("openai: endpoint, api key, and model are required")
 	}
 	return &Module{Value: llm.NewOpenAICompat(d.Endpoint, d.APIKey, d.Model)}, nil
 }

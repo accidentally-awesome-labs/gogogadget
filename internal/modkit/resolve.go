@@ -185,6 +185,13 @@ func resolveSelectedGraph(ctx context.Context, project Project, catalog Catalog)
 			if !exists {
 				return selectedGraph{}, fmt.Errorf("profile %s references missing module %q", profile.ID, member)
 			}
+			// Profiles publish candidate adapters for discoverability, but adapter
+			// activation is exclusively controlled by Project.Providers. Treating
+			// every candidate as a profile member makes an unselected adapter an
+			// explicit module and prevents registry closure validation.
+			if module.Runtime.System != nil && module.Runtime.System.Adapter != nil {
+				continue
+			}
 			_, omitted := excluded[member]
 			if omitted && module.RemovalPolicy != RemovalReplacementRequired {
 				continue

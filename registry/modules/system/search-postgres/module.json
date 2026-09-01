@@ -47,7 +47,7 @@
         "source": "internal/search/postgres/outbox.go",
         "target": "internal/search/postgres/outbox.go",
         "class": "go",
-        "sha256": "600d54f2987184ae85e47d516ce7a0b47be392a52f344aeb1b3948ebacf23ec3",
+        "sha256": "00c1a509c706a1e70c14e057f7f17bb5e392581abe1b310181698fa759167448",
         "rewrite_module": true,
         "contract": true
       },
@@ -55,9 +55,17 @@
         "source": "internal/search/postgres/postgres.go",
         "target": "internal/search/postgres/postgres.go",
         "class": "go",
-        "sha256": "a612f6d83d4eaaf4c642cece71ba7a1002d8c2e0ca88d5647a23334c415f139f",
+        "sha256": "cc6a59ee84b4aa23e54d1955183f549f0b00a5f6a7ef106708907d47cd07017b",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/search/postgres/postgres_test.go",
+        "target": "internal/search/postgres/postgres_test.go",
+        "class": "test",
+        "sha256": "4db5c32c3b132292fafde81786d4c9b3233b9d6a035485e12bcc07d367250b36",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

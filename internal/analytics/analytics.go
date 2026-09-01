@@ -1,6 +1,4 @@
-// Package analytics is the PostHog seam: server-side capture (no-op without
-// a key) plus the /ingest reverse proxy that lets the client SDK load under
-// script-src 'self'.
+// Package analytics contains the provider-neutral analytics capability.
 package analytics
 
 import (
@@ -8,60 +6,29 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
-
-	"github.com/posthog/posthog-go"
 )
 
-// Capturer records product events. The no-op implementation means every call
-// site is unconditional.
 type Capturer interface {
 	Capture(userID, event string, props map[string]any)
 }
-
-// BufferingCapturer is the lifecycle contract for capturers that queue events.
-// No-op capturers intentionally implement only Capturer.
 type BufferingCapturer interface {
 	Capturer
 	Close()
 }
-
-// NoopCapturer discards events (POSTHOG_API_KEY empty).
 type NoopCapturer struct{}
 
 func (NoopCapturer) Capture(string, string, map[string]any) {}
 
-// PostHogCapturer queues events via posthog-go.
-type PostHogCapturer struct {
-	client posthog.Client
-}
-
-func NewPostHog(apiKey, host string) (*PostHogCapturer, error) {
-	client, err := posthog.NewWithConfig(apiKey, posthog.Config{Endpoint: host})
-	if err != nil {
-		return nil, err
-	}
-	return &PostHogCapturer{client: client}, nil
-}
-
-func (c *PostHogCapturer) Capture(userID, event string, props map[string]any) {
-	p := posthog.NewProperties()
-	for k, v := range props {
-		p.Set(k, v)
-	}
-	// Fire-and-forget: queueing failure must never affect the request.
-	_ = c.client.Enqueue(posthog.Capture{DistinctId: userID, Event: event, Properties: p})
-}
-
-// Close flushes queued events (called on shutdown).
-func (c *PostHogCapturer) Close() { _ = c.client.Close() }
-
-// IngestProxy reverse-proxies /ingest/* to the PostHog host (PostHog's
-// recommended proxy pattern): the client SDK and event posts stay same-origin,
-// so CSP remains script-src 'self' and ad-blockers don't matter.
+// IngestProxy reverse-proxies /ingest/* to the configured provider endpoint.
+// The endpoint is intentionally represented by a URL, keeping provider SDKs
+// out of this seam while preserving same-origin browser telemetry.
 func IngestProxy(host string) (http.Handler, error) {
 	target, err := url.Parse(host)
 	if err != nil {
 		return nil, err
+	}
+	if target.Scheme == "" || target.Host == "" {
+		return nil, &url.Error{Op: "parse", URL: host, Err: errInvalidEndpoint}
 	}
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	base := proxy.Director
@@ -73,3 +40,9 @@ func IngestProxy(host string) (http.Handler, error) {
 	}
 	return proxy, nil
 }
+
+type endpointError string
+
+func (e endpointError) Error() string { return string(e) }
+
+var errInvalidEndpoint error = endpointError("analytics: endpoint must include scheme and host")

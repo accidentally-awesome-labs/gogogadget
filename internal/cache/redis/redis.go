@@ -4,9 +4,11 @@ package redis
 
 import (
 	"context"
+	"fmt"
+	"time"
+
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/cache"
-	"time"
 )
 
 type Client interface {
@@ -16,7 +18,12 @@ type Client interface {
 }
 type Store struct{ client Client }
 
-func New(client Client) *Store { return &Store{client: client} }
+func New(client Client) (*Store, error) {
+	if client == nil {
+		return nil, fmt.Errorf("redis cache: client is required")
+	}
+	return &Store{client: client}, nil
+}
 
 var _ cache.Store = (*Store)(nil)
 
@@ -46,11 +53,18 @@ func (s *Store) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct{ Client Client }
 type Module struct{ Value *Store }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	v, err := New(d.Client)
+	if err != nil {
+		return nil, err
+	}
+	return &Module{Value: v}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

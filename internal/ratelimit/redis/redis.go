@@ -55,20 +55,14 @@ type Deps struct{ Client Client }
 type Module struct{ Value *Limiter }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	if d.Client == nil {
-		d.Client = unavailableClient{}
+	if err := ctx.Err(); err != nil {
+		return nil, err
 	}
 	v, err := New(d.Client, 100)
 	if err != nil {
 		return nil, err
 	}
-	return &Module{Value: v}, ctx.Err()
-}
-
-type unavailableClient struct{}
-
-func (unavailableClient) Allow(context.Context, string, int, time.Duration) (int, bool, error) {
-	return 0, false, fmt.Errorf("redis rate limit: REDIS_URL is not configured")
+	return &Module{Value: v}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error {

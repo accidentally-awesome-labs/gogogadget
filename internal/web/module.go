@@ -25,6 +25,11 @@ type Module struct {
 // (logger, version) come from the host rather than the dependency graph, so no
 // module has to provide them.
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
+	if d.ContentTypes != nil {
+		if _, err := content.NewRegistry(contentTypesOf(d)); err != nil {
+			return nil, fmt.Errorf("content type declaration: %w", err)
+		}
+	}
 	switch {
 	case d.Config == nil:
 		return nil, fmt.Errorf("server: config dependency is required")

@@ -78,7 +78,7 @@
         "source": "internal/flags/flags.go",
         "target": "internal/flags/flags.go",
         "class": "go",
-        "sha256": "7797575140a9a468b07d8b9ff84fad5dc8b8869ec1b8243dd4718804fe04fb0c",
+        "sha256": "f5cd21efcac19647a62cde7f360f2eb8b590733d87651608b47cdf2251d4fd07",
         "rewrite_module": true,
         "contract": true
       },

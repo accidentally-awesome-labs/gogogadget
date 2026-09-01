@@ -27,9 +27,17 @@
         "source": "internal/realtime/ably/ably.go",
         "target": "internal/realtime/ably/ably.go",
         "class": "go",
-        "sha256": "30a2402c441df0c9a69b29883bd1017591cf7da7ae4ef288fa22cf5e19a99267",
+        "sha256": "d9d02328a68bd56390d500ee5aeecfb4807a030d8c1e7d2e58f2c248ed21c3ce",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/realtime/ably/ably_test.go",
+        "target": "internal/realtime/ably/ably_test.go",
+        "class": "test",
+        "sha256": "5b2207cee6a5c0e1cad90391b2cdc8ad9d5d18ca5238baa513daaf7844a96d30",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

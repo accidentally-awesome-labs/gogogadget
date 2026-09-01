@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
@@ -22,6 +23,8 @@ import (
 	"github.com/gogogadget/gogogadget/internal/identity"
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/observability"
+	ratelimitmemory "github.com/gogogadget/gogogadget/internal/ratelimit/memory"
+	"github.com/gogogadget/gogogadget/internal/realtime"
 	storagefs "github.com/gogogadget/gogogadget/internal/storage/filesystem"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -62,6 +65,7 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 		IdentityWebhook: identity.DevWebhook{}, BillingWebhook: billinglocal.LocalWebhook{},
 		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
 		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second), Reporter: observability.NoopReporter{},
+		Analytics: analytics.NoopCapturer{}, LLM: unavailableCompleter{}, Realtime: realtime.NewMemory(), RateLimiter: ratelimitmemory.New(100, 200),
 		SessionLoader: identitysession.Loader(&identitysession.SessionLoader{Pool: pool, Verify: identity.FakeVerifier{}, Fetch: identity.DevUserFetcher{}, AdminEmail: cfg.AdminEmail}),
 	}
 	if mutate != nil {

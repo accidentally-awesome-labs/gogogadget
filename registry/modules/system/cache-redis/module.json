@@ -27,9 +27,17 @@
         "source": "internal/cache/redis/redis.go",
         "target": "internal/cache/redis/redis.go",
         "class": "go",
-        "sha256": "7c0d4e3e725de44b8d6d74854c3b4acc978f850c7ccb991098146046672b3e29",
+        "sha256": "7289ee071ea73ef8f5a44229a82fdb78bf9f4a5565b80d8000c37d3449451e12",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/cache/redis/redis_test.go",
+        "target": "internal/cache/redis/redis_test.go",
+        "class": "test",
+        "sha256": "69da683ebdd1a979307f52f0d2b431062dc38c8b7d8489f60b70ad3c9bc58a7c",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

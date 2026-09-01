@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -22,8 +24,10 @@ import (
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
+	"github.com/gogogadget/gogogadget/internal/ratelimit"
 	"github.com/gogogadget/gogogadget/internal/realtime"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -56,6 +60,8 @@ type Server struct {
 	flags           flags.Evaluator
 	reporter        observability.Reporter
 	realtime        realtime.Broker
+	limiter         ratelimit.Limiter
+	telemetry       telemetry.Providers
 	identityWebhook identity.Webhook
 	billingWebhook  billing.BillingWebhook
 	mux             *http.ServeMux
@@ -89,6 +95,7 @@ type Deps struct {
 	// (blog posts and changelog releases). Appending one Type is all it takes
 	// to add a collection: no migration, no table, no handler, no template.
 	ContentTypes []content.Type
+	Cache        cache.Store
 	// TestOnlyModules enables surfaces owned by test-only modules under
 	// registry/testdata. web.NewModule — the constructor the generated bootstrap
 	// calls — never sets it, so a booted production runtime cannot reach them.
@@ -107,6 +114,8 @@ type Deps struct {
 	Flags             flags.Evaluator
 	Reporter          observability.Reporter
 	Realtime          realtime.Broker
+	RateLimiter       ratelimit.Limiter
+	Telemetry         telemetry.Providers
 	IdentityWebhook   identity.Webhook
 	BillingWebhook    billing.BillingWebhook
 }
@@ -115,12 +124,19 @@ func NewServer(d Deps) (*Server, error) {
 	if d.Config == nil {
 		return nil, errors.New("web: config capability is required")
 	}
+	if _, err := content.NewRegistry(contentTypesOf(d)); err != nil {
+		return nil, fmt.Errorf("content types: %w", err)
+	}
 	for name, value := range map[string]any{
 		"identity.verifier": d.Verifier, "identity.fetcher": d.Fetcher,
 		"identity.deleter": d.IdentityDeleter, "identity.navigator": d.IdentityNavigator,
 		"identity.webhook": d.IdentityWebhook, "billing.client": d.Billing,
 		"billing.catalog": d.BillingCatalog, "billing.webhook": d.BillingWebhook,
 		"identity.session": d.SessionLoader,
+		"storage.store":    d.Storage, "flags.evaluator": d.Flags,
+		"observability.reporter": d.Reporter, "analytics.capturer": d.Analytics,
+		"llm.completer": d.LLM, "realtime.broker": d.Realtime,
+		"rate_limit.limiter": d.RateLimiter,
 	} {
 		if value == nil {
 			return nil, fmt.Errorf("web: required capability %s is missing", name)
@@ -133,18 +149,12 @@ func NewServer(d Deps) (*Server, error) {
 		billingWebhook: d.BillingWebhook, fetcher: d.Fetcher,
 		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
-		analytics: analytics.NoopCapturer{}, store: d.Storage, llm: d.LLM,
-		flags: d.Flags, reporter: d.Reporter, realtime: d.Realtime, mux: http.NewServeMux(),
+		analytics: d.Analytics, store: d.Storage, llm: d.LLM, flags: d.Flags,
+		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, mux: http.NewServeMux(),
 	}
-	reg, err := content.NewRegistry(contentTypesOf(d))
-	if err != nil {
-		return nil, fmt.Errorf("content types: %w", err)
-	}
+	reg, _ := content.NewRegistry(contentTypesOf(d))
 	s.types = reg
-	s.cms = content.NewCMS(s.q, s.types)
-	if d.Analytics != nil {
-		s.analytics = d.Analytics
-	}
+	s.cms = content.NewCMSWithCache(s.q, s.types, d.Cache, func(ctx context.Context, err error) { s.reporter.Capture(err) })
 	s.api = newAPISurface(s)
 	s.staticAssets = s.serveStatic()
 	if err := s.routes(); err != nil {
@@ -216,6 +226,7 @@ func (s *Server) Handler() http.Handler {
 	h = s.requestID(h)
 	h = s.routeBodyLimit(h) // per-route declared cap, tighter than the global one
 	nextHandler := h
+	h = telemetry.HTTP(h, s.telemetry, "web")
 	h = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next := r.WithContext(templates.WithProviderEnvironment(r.Context(), s.cfg.Env))
 		nextHandler.ServeHTTP(w, next)
@@ -270,6 +281,44 @@ func (s *Server) handleReadyz(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (s *Server) serveRealtime(w http.ResponseWriter, r *http.Request) {
+	if s.realtime == nil {
+		http.Error(w, "realtime_unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	topic := strings.TrimPrefix(r.URL.Path, "/events/")
+	if topic == "" || strings.ContainsAny(topic, "\r\n") {
+		http.Error(w, "invalid realtime topic", http.StatusBadRequest)
+		return
+	}
+	sub, err := s.realtime.Subscribe(r.Context(), topic)
+	if err != nil {
+		s.log.ErrorContext(r.Context(), "realtime subscribe failed", "topic", topic, "error", err)
+		http.Error(w, "realtime_unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	defer sub.Close()
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+	for {
+		payload, err := sub.Next(r.Context())
+		if err != nil {
+			if r.Context().Err() == nil {
+				s.log.ErrorContext(r.Context(), "realtime stream closed", "topic", topic, "error", err)
+			}
+			return
+		}
+		_, _ = fmt.Fprintf(w, "data: %s\n\n", payload)
+		flusher.Flush()
+	}
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

@@ -32,9 +32,17 @@
         "source": "internal/flags/postgres/postgres.go",
         "target": "internal/flags/postgres/postgres.go",
         "class": "go",
-        "sha256": "c749bbfa9b5ecfb2bfafc07333df904da02547c4e6c3d256a1c089aef52b8099",
+        "sha256": "2ec57befedac13b858c492bce217e418230bf41fc2e216ba80ef5c188fe00952",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/flags/postgres/postgres_test.go",
+        "target": "internal/flags/postgres/postgres_test.go",
+        "class": "test",
+        "sha256": "3bd56d69ba94358272acbaad2a54821f148135b36eeeffbf9d61e8712e9ab9f1",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -46,7 +54,20 @@
       "system": {
         "package": "internal/flags/postgres",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Cache",
+            "capability": "cache.store",
+            "type": "cache.Store",
+            "optional": false
+          },
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -55,6 +76,8 @@
           }
         ],
         "type_imports": [
+          "internal/cache",
+          "internal/db/sqlc",
           "internal/flags"
         ],
         "start": false,

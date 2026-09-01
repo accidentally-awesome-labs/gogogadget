@@ -10,6 +10,13 @@
     "description": "realtime-postgres infrastructure capability.",
     "requires": [
       {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
         "id": "ggg/system/realtime",
         "contract": {
           "min": 1,
@@ -18,7 +25,12 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -27,7 +39,7 @@
         "source": "internal/realtime/postgres/module.go",
         "target": "internal/realtime/postgres/module.go",
         "class": "go",
-        "sha256": "564a2aa00f86f0563ab9332d341d1d5f770c4deb808821420f130e9be1b98707",
+        "sha256": "2e5f8814b6e7ae16ce3d65a7e37a76a3aae6c86caaa1e1b55350a483c5c5d173",
         "rewrite_module": true,
         "contract": true
       },
@@ -38,6 +50,14 @@
         "sha256": "7c61ad96ae4710987f0163aa8b4ef1572f0592e1476ba82438b3102d042da956",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/realtime/postgres/postgres_test.go",
+        "target": "internal/realtime/postgres/postgres_test.go",
+        "class": "test",
+        "sha256": "4fde52cee29f7f8228477c1f8145c47602f463b2a9e73a7ccb025cf9fdc7acc0",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -49,7 +69,14 @@
       "system": {
         "package": "internal/realtime/postgres",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -58,6 +85,7 @@
           }
         ],
         "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
           "internal/realtime"
         ],
         "start": false,

@@ -30,6 +30,14 @@
         "sha256": "4a02fd42c0d4258c9e914eb5dc4f30b079de5f2e2c33db3a5a6363f5966b8282",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/llm/fake/fake_test.go",
+        "target": "internal/llm/fake/fake_test.go",
+        "class": "test",
+        "sha256": "0fd9a65dc5b80f03a26cc543682d0ae9e47ebc47e02974b5451b00f4d52aaec2",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

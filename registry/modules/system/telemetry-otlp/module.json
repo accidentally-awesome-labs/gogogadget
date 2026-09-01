@@ -30,6 +30,14 @@
         {
           "module": "go.opentelemetry.io/otel/trace",
           "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/sdk",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/sdk/metric",
+          "version": "v1.44.0"
         }
       ],
       "tools": [],
@@ -37,12 +45,28 @@
     },
     "files": [
       {
+        "source": "internal/telemetry/otlp/exporter.go",
+        "target": "internal/telemetry/otlp/exporter.go",
+        "class": "go",
+        "sha256": "1ee823935ec35e5f7b5501a7d43c35cc49e0b4c9f9762d97c21114b06af45c8c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/telemetry/otlp/otlp.go",
         "target": "internal/telemetry/otlp/otlp.go",
         "class": "go",
-        "sha256": "88426570e28c71feaff3dee2d1ec16077b0ee54645f8430b5d0b58a209469e14",
+        "sha256": "767511233ccacca21fab1baa49ce9dd0bbc358c11d7044b088648e610ba0b910",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/telemetry/otlp/otlp_test.go",
+        "target": "internal/telemetry/otlp/otlp_test.go",
+        "class": "test",
+        "sha256": "ee11af66d5845cc6a2997bd43466f56ad20e2fb05c2200b1968b5d94cecea014",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -66,7 +90,7 @@
           "internal/telemetry"
         ],
         "start": false,
-        "stop": false,
+        "stop": true,
         "health": true,
         "adapter": {
           "slot": "ggg/telemetry",

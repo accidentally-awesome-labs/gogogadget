@@ -4,15 +4,22 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log/slog"
+
 	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/flags"
-	"log/slog"
 )
 
-type Service struct{ DB *sqlc.Queries }
+type Service struct {
+	DB    *sqlc.Queries
+	Cache cache.Store
+}
 
-func New(db *sqlc.Queries) *Service { return &Service{DB: db} }
+func New(db *sqlc.Queries, c cache.Store) *Service {
+	return &Service{DB: db, Cache: c}
+}
 
 var _ flags.Service = (*Service)(nil)
 
@@ -20,7 +27,7 @@ func (s *Service) impl() (*flags.DBEvaluator, error) {
 	if s == nil || s.DB == nil {
 		return nil, fmt.Errorf("postgres flags: queries are required")
 	}
-	return flags.NewDBEvaluator(s.DB, 0), nil
+	return flags.NewDBEvaluatorWithCache(s.DB, 0, s.Cache), nil
 }
 func (s *Service) Enabled(c context.Context, o, k string) bool {
 	e, err := s.impl()
@@ -80,11 +87,20 @@ func (s *Service) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct {
+	Queries *sqlc.Queries
+	Cache   cache.Store
+}
 type Module struct{ Value *Service }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if d.Queries == nil {
+		return nil, fmt.Errorf("postgres flags: queries are required")
+	}
+	return &Module{Value: New(d.Queries, d.Cache)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

@@ -29,7 +29,9 @@ func (e *Emitter) Emit(c context.Context, o, t string, d any) error {
 		if e.Report != nil {
 			e.Report(c, err)
 		}
-		return err
+		// The product mutation is already durable; delivery enqueue is
+		// observable best effort and must not roll the mutation back.
+		return nil
 	}
 	if e.Deliver != nil {
 		if err := e.Deliver(c, o, t, d); err != nil && e.Report != nil {
@@ -48,11 +50,17 @@ func (e *Emitter) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct{ Queue Queue }
 type Module struct{ Value *Emitter }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(nil, nil, nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if d.Queue == nil {
+		return nil, fmt.Errorf("svix: queue is required")
+	}
+	return &Module{Value: New(d.Queue, nil, nil)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

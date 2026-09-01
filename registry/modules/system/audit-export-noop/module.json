@@ -30,6 +30,14 @@
         "sha256": "530ae3148aa1278bfab67ef2f4706502bc989219024a65662cbe3738d1a11de7",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/audit_export/noop/noop_test.go",
+        "target": "internal/audit_export/noop/noop_test.go",
+        "class": "test",
+        "sha256": "9d5d1571354bd4bf0411ff3d40726b771becbba562d46da3529d5a62c4c4208e",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

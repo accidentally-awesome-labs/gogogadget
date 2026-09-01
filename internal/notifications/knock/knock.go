@@ -30,7 +30,9 @@ func (n *Notifier) send(c context.Context, m notifications.Message) error {
 		if n.Report != nil {
 			n.Report(c, err)
 		}
-		return err
+		// Notification delivery is best effort. The owning product
+		// transaction must not fail because the outbox is temporarily down.
+		return nil
 	}
 	if n.Deliver != nil {
 		if err := n.Deliver(c, m); err != nil {
@@ -58,11 +60,17 @@ func (n *Notifier) Health(ctx context.Context) error {
 	return nil
 }
 
-type Deps struct{}
+type Deps struct{ Queue Queue }
 type Module struct{ Value *Notifier }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(nil, nil, nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if d.Queue == nil {
+		return nil, fmt.Errorf("knock: queue is required")
+	}
+	return &Module{Value: New(d.Queue, nil, nil)}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

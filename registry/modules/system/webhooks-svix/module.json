@@ -27,7 +27,15 @@
         "source": "internal/webhooks/svix/svix.go",
         "target": "internal/webhooks/svix/svix.go",
         "class": "go",
-        "sha256": "6705f4f1e9cfbce5305f626eeb1c1f1fa4838867513d23fbf0ebbf19c8bdc0ea",
+        "sha256": "3e605c03384425bea026563623bad7df717f0d2b7949a8bb005dfbdaffece1ff",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/webhooks/svix/svix_test.go",
+        "target": "internal/webhooks/svix/svix_test.go",
+        "class": "test",
+        "sha256": "24cb9ad62b502b1027320ec27e76d8c1c34867234984a03d9f83b9a456c9a415",
         "rewrite_module": true,
         "contract": true
       }

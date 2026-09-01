@@ -32,9 +32,17 @@
         "source": "internal/usage/postgres/postgres.go",
         "target": "internal/usage/postgres/postgres.go",
         "class": "go",
-        "sha256": "f537b5a4d37e9cd9035ef56bec5c18ead4739732e22638a85c64f29f3274a757",
+        "sha256": "19a1d59b0655cf55ddee839dfcf1daa06ac104f9f41a994da886fa29fa9ae485",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/usage/postgres/postgres_test.go",
+        "target": "internal/usage/postgres/postgres_test.go",
+        "class": "test",
+        "sha256": "52ba3303fa6d3e6cfb5f2831380411b79ae8fa918a352309238bfa35be9b00ce",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {
@@ -46,7 +54,14 @@
       "system": {
         "package": "internal/usage/postgres",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -55,6 +70,7 @@
           }
         ],
         "type_imports": [
+          "internal/db/sqlc",
           "internal/usage"
         ],
         "start": false,

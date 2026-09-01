@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -84,6 +85,10 @@ func (h *AI) Chat(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := h.LLM.Chat(ctx, llm.ChatRequest{Messages: req.Messages, MaxTokens: req.MaxTokens})
 	if err != nil {
+		if errors.Is(err, llm.ErrNotConfigured) {
+			WriteError(w, http.StatusServiceUnavailable, "not_configured", "AI is not configured — set LLM_API_KEY + LLM_MODEL. See /docs/ai.")
+			return
+		}
 		WriteError(w, http.StatusBadGateway, "upstream_error", "The AI backend failed: "+err.Error())
 		return
 	}

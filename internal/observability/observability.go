@@ -4,6 +4,7 @@
 package observability
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -19,3 +20,5 @@ type NoopReporter struct{}
 
 func (NoopReporter) Capture(error)                       {}
 func (NoopReporter) CaptureRequest(*http.Request, error) {}
+
+func PanicError(rec any) error { return fmt.Errorf("panic: %v", rec) }

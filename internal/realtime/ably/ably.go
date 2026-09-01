@@ -55,17 +55,43 @@ func (b *Broker) Subscribe(ctx context.Context, t string) (realtime.Subscription
 var _ realtime.Broker = (*Broker)(nil)
 
 func (b *Broker) Health(ctx context.Context) error {
-	if b == nil || b.Endpoint == "" {
-		return fmt.Errorf("ably: endpoint is required")
+	if b == nil || b.Endpoint == "" || b.APIKey == "" || b.Client == nil || b.Subscriber == nil {
+		return fmt.Errorf("ably: endpoint, api key, client, and subscriber are required")
 	}
-	return nil
+	return ctx.Err()
 }
 
-type Deps struct{}
+type Deps struct {
+	Endpoint   string
+	APIKey     string
+	Client     *http.Client
+	Subscriber Subscriber
+}
 type Module struct{ Value *Broker }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	return &Module{Value: New(h.Env("ABLY_ENDPOINT"), h.Env("ABLY_API_KEY"), nil)}, ctx.Err()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	endpoint, key := d.Endpoint, d.APIKey
+	if h != nil {
+		if endpoint == "" {
+			endpoint = h.Env("ABLY_ENDPOINT")
+		}
+		if key == "" {
+			key = h.Env("ABLY_API_KEY")
+		}
+	}
+	if endpoint == "" || key == "" || d.Subscriber == nil {
+		return nil, fmt.Errorf("ably: endpoint, api key, and subscriber are required")
+	}
+	client := d.Client
+	if client == nil {
+		client = http.DefaultClient
+	}
+	v := New(endpoint, key, d.Subscriber)
+	v.Client = client
+	return &Module{Value: v}, nil
 }
 
 func (m *Module) Health(ctx context.Context) error { return m.Value.Health(ctx) }

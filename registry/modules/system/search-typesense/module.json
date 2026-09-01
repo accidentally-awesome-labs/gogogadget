@@ -27,7 +27,7 @@
         "source": "internal/search/typesense/module.go",
         "target": "internal/search/typesense/module.go",
         "class": "go",
-        "sha256": "fbd66e2703088900b2df5c9fd2e7f66cbfee5cdb9e127990787ec88de43f87a1",
+        "sha256": "3f86391b9b73648633b16d9fa79492e0bd429c8b0b963ab49a39e34bcea90bfb",
         "rewrite_module": true,
         "contract": true
       },
@@ -35,9 +35,17 @@
         "source": "internal/search/typesense/typesense.go",
         "target": "internal/search/typesense/typesense.go",
         "class": "go",
-        "sha256": "e77c88a5af289a27bed16a518289a772b2b985f5977aefddfb6055657d5022d0",
+        "sha256": "48f21bfc0117b5ee5ad19ff95aba38539c8788e9e46c06a13549d4f2a5f5fade",
         "rewrite_module": true,
         "contract": true
+      },
+      {
+        "source": "internal/search/typesense/typesense_test.go",
+        "target": "internal/search/typesense/typesense_test.go",
+        "class": "test",
+        "sha256": "48337126518a26f3b02efd6004230cb560489cd16f067ad21e140c78f266a3f1",
+        "rewrite_module": true,
+        "contract": false
       }
     ],
     "claims": {

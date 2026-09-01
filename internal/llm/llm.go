@@ -8,11 +8,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 )
+
+var ErrNotConfigured = errors.New("llm not configured")
 
 // Message is one chat turn.
 type Message struct {
