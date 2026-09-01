@@ -35,7 +35,7 @@
         "source": "internal/modules/boot_test.go",
         "target": "internal/modules/boot_test.go",
         "class": "test",
-        "sha256": "83e9ea96cdf24604c973eddef61dfc0eae1851d66ad9fb2e8d69ef7c4d09d427",
+        "sha256": "aa7f3c9e20480d1503de5f573aaeaad95a2244b25e081c2277a364c1dcae9065",
         "rewrite_module": true,
         "contract": false
       }

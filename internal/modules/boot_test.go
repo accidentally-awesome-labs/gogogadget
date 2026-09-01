@@ -97,6 +97,8 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 // Configuration reaches the modules through the host, so APP_ENV chooses the
 // production adapter set rather than credentials selecting it.
 func TestBootSelectsConfiguredAdapters(t *testing.T) {
+	collector := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) }))
+	defer collector.Close()
 	host := bootHost(t, "boot_configured", map[string]string{
 		"APP_ENV":                      "production",
 		"CLERK_PORTAL_URL":             "https://accounts.example.com",
@@ -115,15 +117,26 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"SENTRY_DSN":                   "https://public@example.com/1",
 		"POSTHOG_API_KEY":              "phc_live_fixture",
 		"POSTHOG_HOST":                 "https://us.i.posthog.com",
-		"OTLP_AUDIT_EXPORT_URL":        "https://otlp.example.com/audit",
+		"OTLP_AUDIT_EXPORT_URL":        collector.URL + "/audit",
+		"CACHE_REDIS_URL":              "https://cache.example",
+		"CACHE_REDIS_TOKEN":            "cache-token",
+		"RATE_LIMIT_REDIS_URL":         "https://rate.example",
+		"RATE_LIMIT_REDIS_TOKEN":       "rate-token",
+		"ABLY_ENDPOINT":                "https://ably.example",
+		"ABLY_API_KEY":                 "ably-token",
+		"OTLP_ENDPOINT":                collector.URL,
+		"LLM_API_KEY":                  "llm-token",
+		"LLM_BASE_URL":                 "https://llm.example/v1",
+		"LLM_MODEL":                    "test-model",
 	})
-	_, err := Boot(context.Background(), host, Options{})
-	if err == nil {
-		t.Fatal("production boot without managed clients succeeded")
+	runtime, err := Boot(context.Background(), host, Options{})
+	if err != nil {
+		t.Fatalf("configured production boot: %v", err)
 	}
-	if !strings.Contains(err.Error(), "cache") {
-		t.Fatalf("production boot error = %v, want selected managed dependency", err)
+	if runtime == nil || runtime.CacheStore == nil || runtime.RateLimitLimiter == nil || runtime.RealtimeBroker == nil {
+		t.Fatal("configured managed capabilities are nil")
 	}
+	closeRuntime(t, runtime)
 }
 
 // A configuration error must abort the boot naming the module that refused,
@@ -226,6 +239,19 @@ func TestBootedRuntimeCannotReachTestOnlySurfaces(t *testing.T) {
 		if recorder.Code != http.StatusNotFound {
 			t.Fatalf("GET %s = %d on a production runtime, want %d; a test-only surface is reachable",
 				path, recorder.Code, http.StatusNotFound)
+		}
+	}
+}
+
+func TestProductionBootAggregatesSelectedProviderKeys(t *testing.T) {
+	host := apphost.Map(map[string]string{"APP_ENV": "production", "DATABASE_URL": "postgres://127.0.0.1:1/db"}, time.Now(), "v-test")
+	_, err := Boot(context.Background(), host, Options{})
+	if err == nil {
+		t.Fatal("missing production provider keys accepted")
+	}
+	for _, key := range []string{"RESEND_API_KEY", "STORAGE_R2_ACCESS_KEY_ID", "CLERK_SECRET_KEY", "CLERK_PORTAL_URL"} {
+		if !strings.Contains(err.Error(), key) {
+			t.Errorf("error missing %s: %v", key, err)
 		}
 	}
 }

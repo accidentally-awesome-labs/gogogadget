@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "461ef9a51c28d5ef262765caa086a7c9f96cf2389dc6aefef14ccdf0a7f2e445"
+      "sha256": "2799436cb4ce94a8a47a295ad8855371421ffdce1c1e9b3e42ddcfa8864af15d"
     },
     {
       "path": "registry/modules/system/audit-export-noop/module.json",
