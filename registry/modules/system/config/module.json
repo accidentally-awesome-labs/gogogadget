@@ -32,7 +32,7 @@
         "source": "internal/config/config.go",
         "target": "internal/config/config.go",
         "class": "go",
-        "sha256": "afeebcb02557321a0abb0cb5636bf1219285973046ace148d8cee6c9cadd2e0d",
+        "sha256": "67594d70469947d2b8cb33fb9b61cc0f4e919031b212ad352f32ca89495ff11f",
         "rewrite_module": true,
         "contract": true
       },

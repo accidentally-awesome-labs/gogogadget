@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "a289d8a3a889323d956196bb3874897fc31a83b1d17891ffaad76ad61e35a0d4"
+      "sha256": "f6c79c1d71a2a91c61d0a1a1ff60e859cfaf3b06e0377b3f30b7c6b1f5cb9281"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
