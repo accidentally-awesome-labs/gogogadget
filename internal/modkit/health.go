@@ -147,7 +147,7 @@ func inspectCandidateArtifact(root, module, path, wantDigest string, report *Hea
 		})
 		return
 	}
-	_, digest, missing, err := currentTargetState(root, path)
+	_, digest, missing, err := CurrentTargetState(root, path)
 	switch {
 	case err != nil:
 		report.Findings = append(report.Findings, HealthFinding{
@@ -181,7 +181,7 @@ func inspectDiffArtifact(root, module, path string, report *HealthReport) {
 		})
 		return
 	}
-	_, _, missing, err := currentTargetState(root, path)
+	_, _, missing, err := CurrentTargetState(root, path)
 	if err != nil || missing {
 		report.Findings = append(report.Findings, HealthFinding{
 			Code: "diff_missing", Severity: "warn", Module: module, Path: path,
@@ -197,7 +197,7 @@ func inspectConflictedTarget(root, module string, file LockedFile, report *Healt
 	if file.Path == "" {
 		return
 	}
-	_, digest, missing, err := currentTargetState(root, file.Path)
+	_, digest, missing, err := CurrentTargetState(root, file.Path)
 	switch {
 	case err != nil:
 		report.Findings = append(report.Findings, HealthFinding{

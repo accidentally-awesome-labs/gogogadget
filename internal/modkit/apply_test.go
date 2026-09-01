@@ -377,9 +377,9 @@ func TestApplyDeletesAggregatesTheGraphNoLongerOwns(t *testing.T) {
 	}
 
 	// And the gate agrees: nothing is left for `sync --check` to complain about.
-	drift, err := generatedDriftDiagnostics(ctx, engine, remove)
+	drift, err := engine.GeneratedDrift(ctx, remove)
 	if err != nil {
-		t.Fatalf("generatedDriftDiagnostics: %v", err)
+		t.Fatalf("GeneratedDrift: %v", err)
 	}
 	if len(drift) != 0 {
 		t.Fatalf("generated drift after removal: %#v", drift)

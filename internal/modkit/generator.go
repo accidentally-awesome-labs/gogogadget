@@ -150,7 +150,7 @@ func (g RegistryGenerator) inputs(plan Plan) (Lock, []Manifest, string) {
 
 	graph := make([]Manifest, 0, len(lock.Modules))
 	for _, module := range lock.Modules {
-		if module.Reason == removalTombstoneReason {
+		if module.Reason == TombstoneReason {
 			continue
 		}
 		graph = append(graph, module.Manifest)

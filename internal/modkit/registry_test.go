@@ -628,6 +628,7 @@ func TestPublishedSchemasMatchModels(t *testing.T) {
 		reflect.TypeOf(JobContribution{}), reflect.TypeOf(ContentTypeContribution{}),
 		reflect.TypeOf(NavigationContribution{}), reflect.TypeOf(SlotContribution{}),
 		reflect.TypeOf(UIContribution{}), reflect.TypeOf(AssetContribution{}),
+		reflect.TypeOf(CLIContribution{}),
 		reflect.TypeOf(ManifestMigration{}), reflect.TypeOf(EnvironmentVariable{}),
 		reflect.TypeOf(DocumentationRef{}), reflect.TypeOf(TestMetadata{}), reflect.TypeOf(DataDeclaration{}),
 		reflect.TypeOf(Lock{}), reflect.TypeOf(LockedModule{}), reflect.TypeOf(LockedFile{}),

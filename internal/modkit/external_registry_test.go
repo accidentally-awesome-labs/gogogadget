@@ -449,7 +449,14 @@ func TestPlanEnvelopeRegistryCommitMatchesRealEnginePlan(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Engine.Plan: %v", err)
 	}
-	envelope := planEnvelope(plan, exitOK)
+	envelope := Envelope{
+		RegistryCommit: plan.RegistryCommit,
+		Resolved:       plan.Resolved,
+		Changes:        plan.Changes,
+		Conflicts:      plan.Conflicts,
+		Diagnostics:    plan.Diagnostics,
+		Exit:           ExitOK,
+	}
 	if envelope.RegistryCommit != registryCommitForModules(plan.Lock.Modules) {
 		t.Fatalf("envelope registry commit = %q, want tuple hash %q", envelope.RegistryCommit, registryCommitForModules(plan.Lock.Modules))
 	}

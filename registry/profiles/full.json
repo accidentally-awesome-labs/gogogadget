@@ -201,6 +201,7 @@
       "ggg/system/cache",
       "ggg/system/cache-memory",
       "ggg/system/cache-redis",
+      "ggg/system/cli-ui",
       "ggg/system/config",
       "ggg/system/content",
       "ggg/system/content-assets",

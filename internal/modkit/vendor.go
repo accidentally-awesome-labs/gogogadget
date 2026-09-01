@@ -200,12 +200,12 @@ func VerifyVendorArtifacts(root string, items []VendorArtifact) error {
 	return nil
 }
 
-// verifyCatalogVendors checks every artifact declared anywhere in the catalog.
+// VerifyCatalogVendors checks every artifact declared anywhere in the catalog.
 //
 // It walks the catalog rather than the directory so an undeclared file is not
 // silently skipped: TestEveryVendoredFileIsDeclared covers the other direction,
 // because a vendored file with no owner is also a file no removal cleans up.
-func verifyCatalogVendors(root string) error {
+func VerifyCatalogVendors(root string) error {
 	catalog, err := LoadCatalog(os.DirFS(root))
 	if err != nil {
 		return err

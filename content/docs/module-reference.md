@@ -248,7 +248,7 @@ transitive closure itself.
 | `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (69)
+## Systems (70)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
@@ -268,6 +268,7 @@ transitive closure itself.
 | `ggg/system/cache` | Cache | — | `replacement-required` |
 | `ggg/system/cache-memory` | Cache Memory | `ggg/system/cache` | `free` |
 | `ggg/system/cache-redis` | Cache Redis | `ggg/system/cache` | `free` |
+| `ggg/system/cli-ui` | Interactive ggg console | `ggg/system/modkit` | `replacement-required` |
 | `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
 | `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |

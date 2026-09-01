@@ -434,7 +434,7 @@ func prepareTemplateDerivative(ctx context.Context, root, template string, log i
 	// to report. Refusing here would make the example lifecycle proof hostage to
 	// somebody else's unrelated in-flight edit, so the derivative rebuilds its
 	// own digests and says how many it touched. This never writes to root.
-	refreshed, err := refreshManifestDigests(template)
+	refreshed, err := RefreshManifestDigests(template)
 	if err != nil {
 		return fmt.Errorf("rebuild derivative manifest digests: %w", err)
 	}
@@ -504,7 +504,7 @@ func applyDerivativeOperation(ctx context.Context, derivative string, op Operati
 	if err != nil {
 		return plan, err
 	}
-	if result.Exit != exitOK || result.RolledBack {
+	if result.Exit != ExitOK || result.RolledBack {
 		return plan, fmt.Errorf("%s applied with exit %d (rolled back %t)", op.Kind, result.Exit, result.RolledBack)
 	}
 	return plan, nil
@@ -1119,7 +1119,7 @@ func catalogItemPath(m Manifest) (string, error) {
 		}
 		return "registry/modules/" + kind + "/" + name + "/module.json", nil
 	}
-	if err := validateInstallableModuleID(m.ID); err != nil {
+	if err := ValidateInstallableModuleID(m.ID); err != nil {
 		return "", err
 	}
 	return "registry/modules/" + string(m.Kind) + "/" + m.Name + "/module.json", nil
@@ -1307,8 +1307,8 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 		if !ok {
 			return fmt.Errorf("lock has no record of removed module %s; removal must leave a tombstone", id)
 		}
-		if module.Reason != removalTombstoneReason {
-			return fmt.Errorf("lock record for removed module %s has reason %q, want %q", id, module.Reason, removalTombstoneReason)
+		if module.Reason != TombstoneReason {
+			return fmt.Errorf("lock record for removed module %s has reason %q, want %q", id, module.Reason, TombstoneReason)
 		}
 		if len(module.Files) != 0 || len(module.Manifest.Files) != 0 {
 			return fmt.Errorf("tombstone for %s still claims authored files", id)
@@ -1367,7 +1367,7 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 		}
 	}
 	for _, module := range final.Modules {
-		if module.Reason == removalTombstoneReason {
+		if module.Reason == TombstoneReason {
 			continue
 		}
 		snapshot, ok := finalSnapshots[module.RegistryNamespace]

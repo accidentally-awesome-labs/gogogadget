@@ -10,9 +10,9 @@ import (
 	"strings"
 )
 
-// removalTombstoneReason marks a lock module whose authored files were removed
+// TombstoneReason marks a lock module whose authored files were removed
 // but whose immutable migration ledger is retained forever.
-const removalTombstoneReason = "removed"
+const TombstoneReason = "removed"
 
 func (e *Engine) planRemove(
 	ctx context.Context,
@@ -34,7 +34,7 @@ func (e *Engine) planRemove(
 
 	installed := make(map[string]LockedModule, len(currentLock.Modules))
 	for _, module := range currentLock.Modules {
-		if module.Reason == removalTombstoneReason {
+		if module.Reason == TombstoneReason {
 			continue
 		}
 		installed[module.ID] = module
@@ -57,7 +57,7 @@ func (e *Engine) planRemove(
 
 	for _, id := range requested {
 		for _, other := range currentLock.Modules {
-			if other.ID == id || other.Reason == removalTombstoneReason {
+			if other.ID == id || other.Reason == TombstoneReason {
 				continue
 			}
 			if _, alsoRemoved := requestSet[other.ID]; alsoRemoved {
@@ -101,7 +101,7 @@ func (e *Engine) planRemove(
 			if err := ctx.Err(); err != nil {
 				return Plan{}, err
 			}
-			_, digest, missing, err := currentTargetState(canonicalRoot, file.Path)
+			_, digest, missing, err := CurrentTargetState(canonicalRoot, file.Path)
 			if err != nil {
 				return Plan{}, err
 			}
@@ -141,7 +141,7 @@ func (e *Engine) planRemove(
 			if slices.Contains(declared, path) {
 				continue
 			}
-			_, digest, missing, err := currentTargetState(canonicalRoot, path)
+			_, digest, missing, err := CurrentTargetState(canonicalRoot, path)
 			if err != nil {
 				return Plan{}, err
 			}
@@ -298,7 +298,7 @@ func (e *Engine) planRemove(
 							return Plan{}, fmt.Errorf("drain migration target %q collides with the immutable ledger", path)
 						}
 					}
-					if _, removedAlso := requestSet[other.ID]; !removedAlso && other.Reason != removalTombstoneReason {
+					if _, removedAlso := requestSet[other.ID]; !removedAlso && other.Reason != TombstoneReason {
 						for _, file := range other.Manifest.Files {
 							if file.Target == path {
 								return Plan{}, fmt.Errorf("drain migration target %q collides with an authored target of %s", path, other.ID)
@@ -323,7 +323,7 @@ func (e *Engine) planRemove(
 
 	remaining := make(map[string]Manifest, len(currentLock.Modules))
 	for _, module := range currentLock.Modules {
-		if module.Reason != removalTombstoneReason {
+		if module.Reason != TombstoneReason {
 			if _, removed := requestSet[module.ID]; !removed {
 				remaining[module.ID] = module.Manifest
 			}
@@ -339,7 +339,7 @@ func (e *Engine) planRemove(
 	}
 	resolved := append([]string{}, order...)
 	for _, module := range currentLock.Modules {
-		if module.Reason == removalTombstoneReason {
+		if module.Reason == TombstoneReason {
 			order = append(order, module.ID)
 		}
 	}
@@ -352,7 +352,7 @@ func (e *Engine) planRemove(
 		requiredBy[module.ID] = []string{}
 	}
 	for _, module := range currentLock.Modules {
-		if _, removed := requestSet[module.ID]; removed || module.Reason == removalTombstoneReason {
+		if _, removed := requestSet[module.ID]; removed || module.Reason == TombstoneReason {
 			continue
 		}
 		for _, requirement := range module.Manifest.Requires {
@@ -380,7 +380,7 @@ func (e *Engine) planRemove(
 			tombstone.Manifest.Tests = TestMetadata{}
 			tombstone.Files = []LockedFile{}
 			tombstone.Pending = nil
-			tombstone.Reason = removalTombstoneReason
+			tombstone.Reason = TombstoneReason
 			tombstone.RequiredBy = []string{}
 			ledger := append([]LockedMigration{}, module.Migrations...)
 			known := make(map[string]struct{}, len(ledger))

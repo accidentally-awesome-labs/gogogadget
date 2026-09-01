@@ -241,7 +241,7 @@ func validateProfile(profile Profile) error {
 	if profile.Members == nil || profile.RequiredProviderSlots == nil || profile.ProviderDefaults == nil {
 		return fmt.Errorf("profile members, required_provider_slots, and provider_defaults are required")
 	}
-	if err := validateStringSet("profile members", profile.Members, true, validateScopedProjectModuleID); err != nil {
+	if err := validateStringSet("profile members", profile.Members, true, ValidateScopedProjectModuleID); err != nil {
 		return err
 	}
 	if err := validateStringSet("profile required_provider_slots", profile.RequiredProviderSlots, true, func(id string) error {

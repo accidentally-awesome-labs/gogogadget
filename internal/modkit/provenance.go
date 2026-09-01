@@ -67,7 +67,7 @@ func registryProvenance(sources []resolvedRegistry, catalog Catalog, modules []M
 func registryCommitForModules(modules []LockedModule) string {
 	pairs := make([]string, 0, len(modules))
 	for _, module := range modules {
-		if module.Reason == removalTombstoneReason {
+		if module.Reason == TombstoneReason {
 			continue
 		}
 		digest := module.SnapshotSHA256

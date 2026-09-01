@@ -1156,6 +1156,30 @@
         }
       ]
     },
+    "CLIContribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "package": {
+          "type": "string"
+        },
+        "handler": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "summary",
+        "package",
+        "handler"
+      ]
+    },
     "CapabilityContribution": {
       "type": "object",
       "additionalProperties": false,
@@ -1304,6 +1328,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/ProviderSlotContribution"
+          }
+        },
+        "cli": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CLIContribution"
           }
         },
         "content_types": {

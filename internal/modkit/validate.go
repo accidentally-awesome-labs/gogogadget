@@ -4,6 +4,7 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -36,10 +37,10 @@ func validateProject(p Project, canonical bool) error {
 	if p.Deployment != "" && strings.TrimSpace(p.Deployment) != p.Deployment {
 		return fmt.Errorf("project deployment must be trimmed")
 	}
-	if err := validateStringSet("project modules", p.Modules, canonical, validateScopedProjectModuleID); err != nil {
+	if err := validateStringSet("project modules", p.Modules, canonical, ValidateScopedProjectModuleID); err != nil {
 		return err
 	}
-	if err := validateStringSet("project exclude", p.Exclude, canonical, validateScopedProjectModuleID); err != nil {
+	if err := validateStringSet("project exclude", p.Exclude, canonical, ValidateScopedProjectModuleID); err != nil {
 		return err
 	}
 	selected := make(map[string]struct{}, len(p.Modules))
@@ -67,7 +68,7 @@ func validateProject(p Project, canonical bool) error {
 		}
 	}
 	if p.Deployment != "" {
-		if err := validateScopedProjectModuleID(p.Deployment); err != nil {
+		if err := ValidateScopedProjectModuleID(p.Deployment); err != nil {
 			return fmt.Errorf("project deployment: %w", err)
 		}
 	}
@@ -127,7 +128,7 @@ func splitScopedModuleID(id string) (namespace, kind, name string, ok bool) {
 	return parts[0], parts[1], parts[2], true
 }
 
-func validateScopedProjectModuleID(id string) error {
+func ValidateScopedProjectModuleID(id string) error {
 	namespace, kind, _, ok := splitScopedModuleID(id)
 	if !ok || !validNamespace(namespace) {
 		return fmt.Errorf("module id %q is invalid", id)
@@ -155,7 +156,7 @@ func validateRequirements(owner string, reqs []Requirement, canonical bool) erro
 	seen := map[string]struct{}{}
 	last := ""
 	for i, req := range reqs {
-		if err := validateScopedProjectModuleID(req.ID); err != nil {
+		if err := ValidateScopedProjectModuleID(req.ID); err != nil {
 			return fmt.Errorf("manifest requires[%d] id: %w", i, err)
 		}
 		if strings.HasSuffix(req.ID, "/profile") {
@@ -291,6 +292,11 @@ func validateManifest(m Manifest, canonical bool) error {
 	}
 	if err := validateRuntime(m.Runtime, canonical); err != nil {
 		return err
+	}
+	for _, command := range m.Runtime.CLI {
+		if !slices.Contains(m.Claims.CLI, command.Name) {
+			return fmt.Errorf("manifest runtime cli %q requires a claims.cli entry", command.Name)
+		}
 	}
 	if err := validateAdapterEnvironment(m.Environment, m.Runtime.System); err != nil {
 		return err
@@ -468,6 +474,9 @@ func validateRuntime(runtime RuntimeContributions, canonical bool) error {
 			return fmt.Errorf("runtime deployer %q is invalid", contribution.ID)
 		}
 	}
+	if err := validateCLIContributions(runtime.CLI, canonical); err != nil {
+		return err
+	}
 	if err := validateRoutes(runtime.Routes, canonical); err != nil {
 		return err
 	}
@@ -527,6 +536,39 @@ func validateProviderSlots(slots []ProviderSlotContribution, canonical bool) err
 				return fmt.Errorf("provider slots must be sorted by id")
 			}
 		}
+	}
+	return nil
+}
+
+// validateCLIContributions checks the declared project-local ggg commands.
+// Names are Go identifiers claimed under claims.cli and unique across the
+// manifest; the package and handler name the contributed command handler.
+// Reservation of the built-in command names is enforced when gggcli assembles
+// the command registry, because that table — not the schema — owns them.
+func validateCLIContributions(commands []CLIContribution, canonical bool) error {
+	seen := make(map[string]struct{}, len(commands))
+	last := ""
+	for i, command := range commands {
+		if !validIdentifier(command.Name) {
+			return fmt.Errorf("manifest runtime cli[%d] name is invalid", i)
+		}
+		if strings.TrimSpace(command.Summary) == "" {
+			return fmt.Errorf("manifest runtime cli[%d] summary is required", i)
+		}
+		if !validPackagePath(command.Package) {
+			return fmt.Errorf("manifest runtime cli[%d] package is invalid", i)
+		}
+		if !validIdentifier(command.Handler) {
+			return fmt.Errorf("manifest runtime cli[%d] handler is invalid", i)
+		}
+		if _, ok := seen[command.Name]; ok {
+			return fmt.Errorf("manifest runtime cli contain duplicate name %q", command.Name)
+		}
+		seen[command.Name] = struct{}{}
+		if canonical && i > 0 && last > command.Name {
+			return fmt.Errorf("manifest runtime cli must be sorted by name")
+		}
+		last = command.Name
 	}
 	return nil
 }
@@ -1129,7 +1171,7 @@ func validateData(items []DataDeclaration, canonical bool) error {
 			return fmt.Errorf("manifest data[%d] organization_delete is invalid", i)
 		}
 		if item.SecretRedactionOwner != "" {
-			if err := validateInstallableModuleID(item.SecretRedactionOwner); err != nil {
+			if err := ValidateInstallableModuleID(item.SecretRedactionOwner); err != nil {
 				return fmt.Errorf("manifest data[%d] secret_redaction_owner: %w", i, err)
 			}
 		}
@@ -1163,7 +1205,7 @@ func validateLock(lock Lock, canonical bool) error {
 		lock.RuntimeOrders.Test == nil || lock.RuntimeOrders.Production == nil || lock.Dependencies == nil || lock.Modules == nil {
 		return fmt.Errorf("lock registries, snapshots, order, runtime_orders, dependencies, and modules are required")
 	}
-	if err := validateStringSet("lock order", lock.Order, false, validateScopedProjectModuleID); err != nil {
+	if err := validateStringSet("lock order", lock.Order, false, ValidateScopedProjectModuleID); err != nil {
 		return err
 	}
 
@@ -1248,7 +1290,7 @@ func validateLock(lock Lock, canonical bool) error {
 }
 
 func validateLockedModule(module *LockedModule, canonical bool) error {
-	if err := validateScopedProjectModuleID(module.ID); err != nil {
+	if err := ValidateScopedProjectModuleID(module.ID); err != nil {
 		return fmt.Errorf("id: %w", err)
 	}
 	if module.Revision <= 0 {
@@ -1266,7 +1308,7 @@ func validateLockedModule(module *LockedModule, canonical bool) error {
 	if module.RequiredBy == nil {
 		return fmt.Errorf("required_by array is required")
 	}
-	if err := validateStringSet("required_by", module.RequiredBy, canonical, validateScopedProjectModuleID); err != nil {
+	if err := validateStringSet("required_by", module.RequiredBy, canonical, ValidateScopedProjectModuleID); err != nil {
 		return err
 	}
 	if err := validateManifest(module.Manifest, canonical); err != nil {
@@ -1546,7 +1588,7 @@ func validateProjectModuleID(id string) error {
 	}
 }
 
-func validateInstallableModuleID(id string) error {
+func ValidateInstallableModuleID(id string) error {
 	kind, _, ok := splitModuleID(id)
 	if !ok || !validModuleKind(ModuleKind(kind)) {
 		return fmt.Errorf("module id %q is invalid", id)

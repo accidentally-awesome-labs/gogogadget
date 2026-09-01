@@ -1,0 +1,105 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/cli-ui",
+    "kind": "system",
+    "name": "cli-ui",
+    "revision": 1,
+    "contract": 1,
+    "title": "Interactive ggg console",
+    "description": "The Bubble Tea console screens and Huh guided forms over the gggcli controller: Home, Catalog, Providers, Plan, Conflicts, Tasks, and Diagnostics, with linear accessible rendering and no mouse requirement.",
+    "requires": [
+      {
+        "id": "ggg/system/modkit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "charm.land/bubbletea/v2",
+          "version": "v2.0.0"
+        },
+        {
+          "module": "charm.land/bubbles/v2",
+          "version": "v2.0.0"
+        },
+        {
+          "module": "charm.land/huh/v2",
+          "version": "v2.0.0"
+        },
+        {
+          "module": "charm.land/lipgloss/v2",
+          "version": "v2.0.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/gggcli/ui/data.go",
+        "target": "internal/gggcli/ui/data.go",
+        "class": "go",
+        "sha256": "7437c6eaf2705ef055f09a7f24a5b039fa2a77f48037b0fcfb360f51f6883058",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/gggcli/ui/model.go",
+        "target": "internal/gggcli/ui/model.go",
+        "class": "go",
+        "sha256": "a3a7394853490cd2cd2d67ce38dde9edfe682478368d26d79e50c8c3dfd9460d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/gggcli/ui/run.go",
+        "target": "internal/gggcli/ui/run.go",
+        "class": "go",
+        "sha256": "b690f3f84a68175a00029015fdad981bb0379634ea8621e3d9d24ed3465e024d",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/gggcli/ui/ui_test.go",
+        "target": "internal/gggcli/ui/ui_test.go",
+        "class": "test",
+        "sha256": "6acd00c03ebc5367fb6563846cfb20019b1ac055814e17bc11a04316582e552c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/gggcli/ui"
+      ],
+      "cli": [
+        "ui"
+      ]
+    },
+    "runtime": {
+      "cli": [
+        {
+          "name": "ui",
+          "summary": "Open the interactive console",
+          "package": "internal/gggcli/ui",
+          "handler": "Run"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/gggcli/ui"
+      ]
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

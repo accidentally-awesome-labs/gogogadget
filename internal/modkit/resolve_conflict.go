@@ -60,7 +60,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		return Plan{}, fmt.Errorf("module %s has no pending conflict for %s", moduleID, targetPath)
 	}
 
-	candidate, candidateDigest, candidateMissing, err := currentTargetState(canonicalRoot, pendingConflict.CandidatePath)
+	candidate, candidateDigest, candidateMissing, err := CurrentTargetState(canonicalRoot, pendingConflict.CandidatePath)
 	if err != nil {
 		return Plan{}, fmt.Errorf("read conflict candidate: %w", err)
 	}
@@ -73,7 +73,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	if candidateDigest != pendingConflict.CandidateSHA256 {
 		return Plan{}, fmt.Errorf("conflict candidate %s sha256 mismatch", pendingConflict.CandidatePath)
 	}
-	_, localDigest, localMissing, err := currentTargetState(canonicalRoot, targetPath)
+	_, localDigest, localMissing, err := CurrentTargetState(canonicalRoot, targetPath)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -181,7 +181,7 @@ func liveModuleOrder(lock Lock) []string {
 	}
 	order := make([]string, 0, len(lock.Order))
 	for _, id := range lock.Order {
-		if reasons[id] != removalTombstoneReason {
+		if reasons[id] != TombstoneReason {
 			order = append(order, id)
 		}
 	}
@@ -257,7 +257,7 @@ func resolveModuleFiles(
 		if _, exists := payloadByPath[oldFile.Path]; exists {
 			continue
 		}
-		_, digest, missing, err := currentTargetState(root, oldFile.Path)
+		_, digest, missing, err := CurrentTargetState(root, oldFile.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -318,7 +318,7 @@ func resolveModuleFiles(
 			})
 			continue
 		}
-		_, currentDigest, missing, err := currentTargetState(root, payload.file.Target)
+		_, currentDigest, missing, err := CurrentTargetState(root, payload.file.Target)
 		if err != nil {
 			return nil, err
 		}

@@ -286,7 +286,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 			syncedTombstone = &synced.Lock.Modules[i]
 		}
 	}
-	if syncedTombstone == nil || syncedTombstone.Reason != removalTombstoneReason ||
+	if syncedTombstone == nil || syncedTombstone.Reason != TombstoneReason ||
 		len(syncedTombstone.Migrations) != 1 || syncedTombstone.Migrations[0].Number != 1 {
 		t.Fatalf("sync dropped or damaged the tombstone: %#v", syncedTombstone)
 	}

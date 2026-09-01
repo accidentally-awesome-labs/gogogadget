@@ -327,6 +327,7 @@ type RuntimeContributions struct {
 	Provisioners  []ProvisionerContribution  `json:"provisioners,omitempty"`
 	DatabaseOps   []DatabaseOpsContribution  `json:"database_ops,omitempty"`
 	Deploy        []DeployContribution       `json:"deploy,omitempty"`
+	CLI           []CLIContribution          `json:"cli,omitempty"`
 	Routes        []RouteContribution        `json:"routes,omitempty"`
 	Jobs          []JobContribution          `json:"jobs,omitempty"`
 	Janitors      []JanitorContribution      `json:"janitors,omitempty"`
@@ -356,6 +357,18 @@ type DeployContribution struct {
 	ID          string `json:"id"`
 	Package     string `json:"package"`
 	Constructor string `json:"constructor"`
+}
+
+// CLIContribution declares one project-local ggg command. Installation
+// executes nothing: the declared handler runs only when the operator invokes
+// the command by name, and it reaches the project exclusively through the
+// gggcli controller. A contributed name must be claimed under claims.cli; the
+// reserved built-in names are refused when the command registry is assembled.
+type CLIContribution struct {
+	Name    string `json:"name"`
+	Summary string `json:"summary"`
+	Package string `json:"package"`
+	Handler string `json:"handler"`
 }
 
 // CapabilityContribution names one typed value exported by a provider slot.

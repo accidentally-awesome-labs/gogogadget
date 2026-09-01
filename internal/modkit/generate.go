@@ -110,6 +110,7 @@ func GenerateAll(ctx context.Context, modulePath string, lock Lock, graph []Mani
 		{"scenarios", one(emitScenarioRegistry)},
 		{"surfaces", one(emitVisualSurfaces)},
 		{"smoke-cases", one(emitSmokeCases)},
+		{"commands", one(emitCommandsRegistry)},
 	}
 	files := make([]GeneratedFile, 0, len(emitters))
 	for _, emitter := range emitters {
@@ -3386,4 +3387,62 @@ func registerRoutePattern(mux *http.ServeMux, p routePattern) (err error) {
 	}()
 	mux.Handle(p.method+" "+p.pattern, http.NotFoundHandler())
 	return nil
+}
+
+// emitCommandsRegistry renders internal/modules/commands_registry_gen.go, the
+// project-local ggg command registry. One entry per RuntimeContributions.CLI
+// declaration across the installed graph, in canonical (sorted by name) order.
+//
+// The registry is data, not behavior: installation executes nothing, and a
+// contributed handler runs only when the operator explicitly invokes its
+// command. The handler receives a gggcli.CommandContext whose only route back
+// into the project is the gggcli.Controller, so contributed code cannot build a
+// second engine or bypass planning. The built-in command names are reserved;
+// gggcli refuses a contributed command that collides with one when the command
+// table is assembled.
+func emitCommandsRegistry(ctx context.Context, modulePath string, lock Lock, graph []Manifest) (*GeneratedFile, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	type entry struct {
+		command CLIContribution
+		source  string
+		ref     string
+	}
+	entries := make([]entry, 0)
+	imports := make([]string, 0, 1)
+	used := make(map[string]string, 1)
+	used["gggcli"] = modulePath + "/internal/gggcli"
+	for _, module := range orderedModules(lock, graph) {
+		for _, command := range module.Runtime.CLI {
+			pkg := resolveTypeImport(modulePath, command.Package)
+			name := uniqueImportName(pkg, used)
+			imports = append(imports, fmt.Sprintf("\t%s %s", name, goString(pkg)))
+			entries = append(entries, entry{command: command, source: module.ID, ref: name + "." + command.Handler})
+		}
+	}
+	sort.Strings(imports)
+	sort.Slice(entries, func(i, j int) bool { return entries[i].command.Name < entries[j].command.Name })
+
+	var b strings.Builder
+	b.WriteString(genHeader(modulePath, lock))
+	b.WriteString("package modules\n\n")
+	b.WriteString("import (\n")
+	b.WriteString(fmt.Sprintf("\tgggcli %s\n", goString(modulePath+"/internal/gggcli")))
+	for _, line := range imports {
+		b.WriteString(line + "\n")
+	}
+	b.WriteString(")\n\n")
+	fmt.Fprintf(&b, "// CLICommands returns the project-local command registry contributed by the\n// installed modules, in canonical name order.\nfunc CLICommands() []gggcli.ContributedCommand {\n")
+	if len(entries) == 0 {
+		b.WriteString("\treturn []gggcli.ContributedCommand{}\n}\n")
+	} else {
+		b.WriteString("\treturn []gggcli.ContributedCommand{\n")
+		for _, e := range entries {
+			fmt.Fprintf(&b, "\t\t{\n\t\t\tSpec: gggcli.CommandSpec{Name: %s, Summary: %s, Usage: %s, SourceModule: %s},\n\t\t\tHandler: %s,\n\t\t},\n",
+				goString(e.command.Name), goString(e.command.Summary), goString("ggg "+e.command.Name), goString(e.source), e.ref)
+		}
+		b.WriteString("\t}\n}\n")
+	}
+	return &GeneratedFile{Path: "internal/modules/commands_registry_gen.go", Content: b.String()}, nil
 }

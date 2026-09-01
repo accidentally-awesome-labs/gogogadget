@@ -207,7 +207,7 @@ func reconcilePlannedState(
 			// work that predates adoption, and recording it as clean would lie
 			// about what is installed, so a claim is required before the
 			// ownership classifier ever sees it.
-			_, localDigest, missing, stateErr := currentTargetState(root, payload.file.Target)
+			_, localDigest, missing, stateErr := CurrentTargetState(root, payload.file.Target)
 			if stateErr != nil {
 				return Lock{}, nil, nil, nil, nil, stateErr
 			}
@@ -261,7 +261,7 @@ func reconcilePlannedState(
 		newModules[module.ID] = module
 	}
 	for id, module := range oldModules {
-		if module.Reason == removalTombstoneReason {
+		if module.Reason == TombstoneReason {
 			continue
 		}
 		if _, selected := newModules[id]; !selected {
@@ -289,7 +289,7 @@ func reconcilePlannedState(
 			if !ok {
 				continue
 			}
-			local, localDigest, missing, err := currentTargetState(root, payload.file.Target)
+			local, localDigest, missing, err := CurrentTargetState(root, payload.file.Target)
 			if err != nil {
 				return Lock{}, nil, nil, nil, nil, err
 			}
@@ -339,7 +339,7 @@ func reconcilePlannedState(
 		} else if held {
 			lockedFiles := make([]LockedFile, 0, len(oldModule.Files))
 			for _, oldFile := range oldModule.Files {
-				_, localDigest, missing, err := currentTargetState(root, oldFile.Path)
+				_, localDigest, missing, err := CurrentTargetState(root, oldFile.Path)
 				if err != nil {
 					return Lock{}, nil, nil, nil, nil, err
 				}
@@ -397,7 +397,7 @@ func reconcilePlannedState(
 				if _, exists := newTargets[oldFile.Path]; exists {
 					continue
 				}
-				_, digest, missing, err := currentTargetState(root, oldFile.Path)
+				_, digest, missing, err := CurrentTargetState(root, oldFile.Path)
 				if err != nil {
 					return Lock{}, nil, nil, nil, nil, err
 				}
@@ -428,7 +428,7 @@ func reconcilePlannedState(
 		for _, payload := range payloadsForModule(payloadByModule, module.ID) {
 			newDigest := digestBytes(payload.content)
 			if oldFile, ok := oldFiles[payload.file.Target]; ok {
-				_, localDigest, missing, err := currentTargetState(root, payload.file.Target)
+				_, localDigest, missing, err := CurrentTargetState(root, payload.file.Target)
 				if err != nil {
 					return Lock{}, nil, nil, nil, nil, err
 				}
@@ -490,7 +490,7 @@ func reconcilePlannedState(
 	// carry them forward verbatim so their immutable migration mappings are
 	// never lost and re-adds reuse the retained numbers.
 	for _, module := range existing.Modules {
-		if module.Reason != removalTombstoneReason {
+		if module.Reason != TombstoneReason {
 			continue
 		}
 		if _, selectedAgain := newModules[module.ID]; selectedAgain {
@@ -522,7 +522,7 @@ func payloadsForModule(payloads map[string]map[string]plannedAuthoredPayload, mo
 }
 
 func readCurrentTarget(root, target string) ([]byte, string, error) {
-	content, digest, missing, err := currentTargetState(root, target)
+	content, digest, missing, err := CurrentTargetState(root, target)
 	if err != nil {
 		return nil, "", err
 	}
@@ -532,7 +532,7 @@ func readCurrentTarget(root, target string) ([]byte, string, error) {
 	return content, digest, nil
 }
 
-func currentTargetState(root, target string) (content []byte, digest string, missing bool, err error) {
+func CurrentTargetState(root, target string) (content []byte, digest string, missing bool, err error) {
 	info, isMissing, err := lstatProjectPath(root, target)
 	if err != nil {
 		return nil, "", false, fmt.Errorf("target %s: %w", target, err)

@@ -352,6 +352,7 @@ func canonicalizeRuntime(runtime *RuntimeContributions) {
 	sort.Slice(runtime.Slots, func(i, j int) bool { return runtime.Slots[i].ID < runtime.Slots[j].ID })
 	sort.Slice(runtime.UI, func(i, j int) bool { return runtime.UI[i].Name < runtime.UI[j].Name })
 	sort.Slice(runtime.Assets, func(i, j int) bool { return runtime.Assets[i].ID < runtime.Assets[j].ID })
+	sort.Slice(runtime.CLI, func(i, j int) bool { return runtime.CLI[i].Name < runtime.CLI[j].Name })
 	for i := range runtime.ContentTypes {
 		sort.Strings(runtime.ContentTypes[i].Paths)
 	}

@@ -48,5 +48,5 @@ func TestNoVendoredFileExecutesStrings(t *testing.T) {
 // a stale pin fails here as well as at the CLI.
 func TestDeclaredVendorsMatchTheTree(t *testing.T) {
 	root := treeRoot(t)
-	require.NoError(t, verifyCatalogVendors(root))
+	require.NoError(t, VerifyCatalogVendors(root))
 }

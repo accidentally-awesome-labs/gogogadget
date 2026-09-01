@@ -18,6 +18,7 @@
     "registry/modules/system/cache-memory/module.json",
     "registry/modules/system/cache-redis/module.json",
     "registry/modules/system/cache/module.json",
+    "registry/modules/system/cli-ui/module.json",
     "registry/modules/system/config/module.json",
     "registry/modules/system/content-assets/module.json",
     "registry/modules/system/content/module.json",

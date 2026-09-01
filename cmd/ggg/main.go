@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 
-	"github.com/gogogadget/gogogadget/internal/modkit"
+	"github.com/gogogadget/gogogadget/internal/gggcli"
+	"github.com/gogogadget/gogogadget/internal/modules"
 )
 
 var version = "dev"
@@ -19,13 +19,15 @@ func main() {
 }
 
 func run(args []string) error {
-	return (modkit.CLI{Out: os.Stdout, Err: os.Stderr, Version: version}).Run(context.Background(), args)
+	app := gggcli.App{
+		Out:         os.Stdout,
+		Err:         os.Stderr,
+		Version:     version,
+		Contributed: modules.CLICommands(),
+	}
+	return app.Run(context.Background(), args)
 }
 
 func exitCode(err error) int {
-	var coded interface{ ExitCode() int }
-	if errors.As(err, &coded) {
-		return coded.ExitCode()
-	}
-	return 1
+	return gggcli.ExitCode(err)
 }
