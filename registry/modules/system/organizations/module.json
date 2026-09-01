@@ -20,6 +20,14 @@
     "dependencies": {
       "go": [
         {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        },
+        {
+          "module": "github.com/pressly/goose/v3",
+          "version": "v3.27.3"
+        },
+        {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
@@ -28,6 +36,14 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "internal/db/provider_neutral_migration_test.go",
+        "target": "internal/db/provider_neutral_migration_test.go",
+        "class": "test",
+        "sha256": "858599eb0d62c70629385530cb1628c13e90be36ff65c59c4a1b480c96f3632d",
+        "rewrite_module": true,
+        "contract": false
+      },
       {
         "source": "internal/db/queries/identity.sql",
         "target": "internal/db/queries/identity.sql",
@@ -227,7 +243,7 @@
       },
       {
         "id": "0020_provider_neutral_ids",
-        "kind": "neutralize",
+        "kind": "immutable",
         "source": "internal/db/migrations/0020_provider_neutral_ids.sql",
         "sha256": "028cd83f25f7e3c85ef76ef7b4923d2c87b22381947cf92be07d9d1d1e27d8d6"
       }

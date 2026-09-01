@@ -74,13 +74,13 @@ func TestRoundtripEveryTable(t *testing.T) {
 	// subscriptions (upsert conflict target is org_id)
 	sub, err := q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_rt1", ProviderSubscriptionID: pgtype.Text{String: "sub_1", Valid: true},
+		OrgID:    "org_rt1", ProviderSubscriptionID: pgtype.Text{String: "sub_1", Valid: true},
 		ProviderCustomerID: "cust_1", ProductKey: "pro", Status: "active",
 	})
 	require.NoError(t, err)
 	sub2, err := q.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
 		Provider: "polar",
-		OrgID: "org_rt1", ProviderSubscriptionID: pgtype.Text{String: "sub_2", Valid: true},
+		OrgID:    "org_rt1", ProviderSubscriptionID: pgtype.Text{String: "sub_2", Valid: true},
 		ProviderCustomerID: "cust_1", ProductKey: "team", Status: "trialing",
 	})
 	require.NoError(t, err)
@@ -96,10 +96,10 @@ func TestRoundtripEveryTable(t *testing.T) {
 
 	// audit
 	_, err = q.InsertAuditLog(ctx, sqlc.InsertAuditLogParams{
-		OrgID:  pgtype.Text{String: "org_rt1", Valid: true},
-		UserID: pgtype.Text{String: "user_rt1", Valid: true},
-		Action:      "project.created",
-		Metadata:    []byte(`{"name":"x"}`),
+		OrgID:    pgtype.Text{String: "org_rt1", Valid: true},
+		UserID:   pgtype.Text{String: "user_rt1", Valid: true},
+		Action:   "project.created",
+		Metadata: []byte(`{"name":"x"}`),
 	})
 	require.NoError(t, err)
 	rows, err := q.ListAuditByOrg(ctx, sqlc.ListAuditByOrgParams{OrgID: pgtype.Text{String: "org_rt1", Valid: true}, Limit: 10, Offset: 0})

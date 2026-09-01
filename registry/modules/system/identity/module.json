@@ -26,12 +26,32 @@
         {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
+        },
+        {
+          "module": "github.com/svix/svix-webhooks",
+          "version": "v1.99.1"
         }
       ],
       "tools": [],
       "containers": []
     },
     "files": [
+      {
+        "source": "internal/identity/clerk_event.go",
+        "target": "internal/identity/clerk_event.go",
+        "class": "go",
+        "sha256": "87b529837378cfee970f59ca45c4995d3c295268b34ef18774513b47eef6045e",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/clerk_webhook.go",
+        "target": "internal/identity/clerk_webhook.go",
+        "class": "go",
+        "sha256": "a2c6d546348da060c42b9673df41d44e5ca194e0d1371a266f45c4d2b5647794",
+        "rewrite_module": true,
+        "contract": true
+      },
       {
         "source": "internal/identity/context.go",
         "target": "internal/identity/context.go",
@@ -47,6 +67,14 @@
         "sha256": "4fc1f906614da6f0170e556f88f61a7e7f0eaccd42204e1df51a493b78db4f6c",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/identity/contracts.go",
+        "target": "internal/identity/contracts.go",
+        "class": "go",
+        "sha256": "577b318db691b904dfd60b56065102700eb2e8a44f4f5c1f985231fbf9d67e28",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/identity/deleter.go",
@@ -87,6 +115,14 @@
         "sha256": "a3c6a8bf4bcc4167154a308f2df06c16f5cfd20b0ef6af81ac455770747c6f45",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/identity/navigator.go",
+        "target": "internal/identity/navigator.go",
+        "class": "go",
+        "sha256": "193a322a44bf91c459a63a601f339a07a76aae112bfc6934815a8ddecff14c63",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/identity/sync.go",

@@ -83,16 +83,14 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 		t.Fatalf("AnalyticsCapturer = %T, want analytics.NoopCapturer", runtime.AnalyticsCapturer)
 	}
 
-	// Ports with no local stand-in must stay nil so their routes answer 503
-	// rather than pretending a provider exists.
-	if runtime.BillingClient != nil {
-		t.Fatalf("BillingClient = %T, want nil when unconfigured", runtime.BillingClient)
+	if runtime.BillingClient == nil || runtime.BillingCatalog == nil || runtime.BillingWebhook == nil {
+		t.Fatal("billing capabilities must be provided by the selected local adapter")
+	}
+	if runtime.IdentityVerifier == nil || runtime.IdentityFetcher == nil || runtime.IdentityDeleter == nil || runtime.IdentityNavigator == nil || runtime.IdentityWebhook == nil {
+		t.Fatal("identity capabilities must be provided by the selected local adapter")
 	}
 	if runtime.LLMCompleter != nil {
 		t.Fatalf("LlmCompleter = %T, want nil when unconfigured", runtime.LLMCompleter)
-	}
-	if runtime.IdentityVerifier != nil {
-		t.Fatalf("IdentityVerifier = %T, want nil when unconfigured", runtime.IdentityVerifier)
 	}
 }
 
@@ -105,6 +103,10 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"CLERK_PUBLISHABLE_KEY":        "pk_live_fixture",
 		"CLERK_SECRET_KEY":             "sk_live_fixture",
 		"CLERK_WEBHOOK_SECRET":         "whsec_fixture",
+		"POLAR_ACCESS_TOKEN":           "polar_fixture",
+		"POLAR_WEBHOOK_SECRET":         "polar_wh_fixture",
+		"POLAR_PRODUCT_PRO":            "prod_pro",
+		"POLAR_PRODUCT_TEAM":           "prod_team",
 		"RESEND_API_KEY":               "re_test",
 		"STORAGE_R2_ACCESS_KEY_ID":     "ak_fixture",
 		"STORAGE_R2_ACCOUNT_ID":        "acct_fixture",
@@ -112,7 +114,6 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
 		"EMAIL_FROM":                   "hello@example.com",
 	})
-
 	runtime, err := Boot(context.Background(), host, Options{})
 	if err != nil {
 		t.Fatalf("Boot: %v", err)
@@ -121,8 +122,8 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 	if _, ok := runtime.MailSender.(*resend.ResendSender); !ok {
 		t.Fatalf("MailSender = %T, want *resend.ResendSender", runtime.MailSender)
 	}
-	if runtime.IdentityVerifier == nil {
-		t.Fatal("IdentityVerifier = nil, want the dev bypass verifier")
+	if runtime.IdentityVerifier == nil || runtime.BillingClient == nil || runtime.BillingCatalog == nil {
+		t.Fatal("production provider capabilities are nil")
 	}
 }
 

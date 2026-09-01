@@ -113,3 +113,9 @@ Verification after review fixes:
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `3bde3ad737f5ab27b86b4c95816ce4224651dce62e83bf8602bdb8d8a6ddc5fb`.
 - Focused `go vet` over CLI, modkit, identity, billing, session, web, API, and config — passed.
 - `make check` reached its formatting gate but reports five pre-existing unrelated files (`internal/audit/audit.go`, `internal/db/db_test.go`, `internal/jobs/digest.go`, `internal/schedules/schedules.go`, `internal/schedules/schedules_test.go`); all Task 5 changed authored files are gofmt-clean.
+
+## Final repository gate
+
+- Formatted the five tracked files previously blocking the repository gate: `internal/audit/audit.go`, `internal/db/db_test.go`, `internal/jobs/digest.go`, `internal/schedules/schedules.go`, and `internal/schedules/schedules_test.go`.
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `9569d62f9089ab2e39b142551b41219fe68d6dc94decc4c4e9a65c028ae2bca9`.
+- `make check` — passed, including registry drift, templ/sqlc generation, gofmt, sync check, `go vet ./...`, and `go test ./...`.

@@ -52,7 +52,7 @@
         "source": "internal/schedules/schedules.go",
         "target": "internal/schedules/schedules.go",
         "class": "go",
-        "sha256": "7c013a95d92752c1ab2e46248adcd6ddd123a6587c725224ce1da0388c535ebc",
+        "sha256": "3024e750f038509af400f1aad8caa336c8e934dcd621bf6308af2025989ae10f",
         "rewrite_module": true,
         "contract": true
       },
@@ -60,7 +60,7 @@
         "source": "internal/schedules/schedules_test.go",
         "target": "internal/schedules/schedules_test.go",
         "class": "test",
-        "sha256": "7a534e3cb6f523f03b632b08621d5f7c0f3733d8260ac9d1db37fb40fb682a42",
+        "sha256": "41b9f85a444bea4745a0bbbd064990e4214461122ee53f2a924dca2ecaca9f0f",
         "rewrite_module": true,
         "contract": false
       }

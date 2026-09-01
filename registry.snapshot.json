@@ -824,11 +824,11 @@
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "ad4677ed6696797b07b82abe1aac334b74cb12ef19d510bf4e609c2f54bd758e"
+      "sha256": "62169d6d6fa93a2402b6889ef953dd497b0ad80017eaf51be7afda52a5104cd6"
     },
     {
       "path": "registry/modules/system/audit/module.json",
-      "sha256": "1db838f3303267f37f6ef1961151d5387632027bad2e1ed0aca33466785fbd19"
+      "sha256": "8e6986cabca8e2a41cdc79f29a9585b8ef59fe23593d8a262609f4a334a9a947"
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
@@ -840,7 +840,7 @@
     },
     {
       "path": "registry/modules/system/billing/module.json",
-      "sha256": "45c844e42444121043ec3429867384f1192c873c2c51798b5b71282d6b8905ea"
+      "sha256": "68d41d1da9714ae6437b52e6e622fb0b90f1176aeb96a4ac1315b625d38fc910"
     },
     {
       "path": "registry/modules/system/config/module.json",
@@ -856,7 +856,7 @@
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "ce9fe8078fbfdf96655102d47e442ea7dbfd4be17b438ce4fa3b237054da0dff"
+      "sha256": "7252ff67634d307cc4a64d584d09f57b3043ae713eab10c1d395a5ee008317fd"
     },
     {
       "path": "registry/modules/system/feature-flags/module.json",
@@ -880,7 +880,7 @@
     },
     {
       "path": "registry/modules/system/identity/module.json",
-      "sha256": "d06aefe24a74962c256711e9133613919e93cfe167e11a45b3b1955deb283034"
+      "sha256": "d147ec4c4a83c039ccc5bc924780fb392f915f2d28f80d8467f898bf8bf7faa3"
     },
     {
       "path": "registry/modules/system/impersonation/module.json",
@@ -920,7 +920,7 @@
     },
     {
       "path": "registry/modules/system/notifications/module.json",
-      "sha256": "a8ed66c79817a71bf38b7b9a23d6fd4e775de653676f12e75d43ef96c589cf0e"
+      "sha256": "ab108ab13a293cecbd8954bd0ad25f83b3f6d5440adeb299d426bc92fdf133e8"
     },
     {
       "path": "registry/modules/system/observability/module.json",
@@ -928,7 +928,7 @@
     },
     {
       "path": "registry/modules/system/organizations/module.json",
-      "sha256": "0735bbb3a2b841794572d94ed49f0fbfc8ba04b4de9830ff1094e5df585a35ef"
+      "sha256": "852a0886291647ea305a9097a138379f332b6dac095f899c76d0306d70ec4185"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
@@ -936,7 +936,7 @@
     },
     {
       "path": "registry/modules/system/schedules/module.json",
-      "sha256": "0fe6300ff2d53951c83142171add38a225e98d05ce161a7a2e69960ad830d1e4"
+      "sha256": "1b08513d1dd51b7290ae95e9b0d2a8472bb157e751214b5ca22675b9f731a124"
     },
     {
       "path": "registry/modules/system/security/module.json",

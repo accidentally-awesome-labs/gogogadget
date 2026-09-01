@@ -45,9 +45,9 @@ func (w *Worker) sendDigests(ctx context.Context, _ SchedulePayload) error {
 			since = u.LastDigestAt.Time
 		}
 		rows, err := w.q.ListNotificationsSince(ctx, sqlc.ListNotificationsSinceParams{
-			UserID: u.UserID,
-			CreatedAt:   pgtype.Timestamptz{Time: since, Valid: true},
-			Limit:       digestMaxItems,
+			UserID:    u.UserID,
+			CreatedAt: pgtype.Timestamptz{Time: since, Valid: true},
+			Limit:     digestMaxItems,
 		})
 		if err != nil {
 			return err

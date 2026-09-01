@@ -18,10 +18,10 @@ func Log(ctx context.Context, q *sqlc.Queries, orgID, userID, action string, met
 		raw = []byte(`{}`)
 	}
 	_, err = q.InsertAuditLog(ctx, sqlc.InsertAuditLogParams{
-		OrgID:  pgtype.Text{String: orgID, Valid: orgID != ""},
-		UserID: pgtype.Text{String: userID, Valid: userID != ""},
-		Action:      action,
-		Metadata:    raw,
+		OrgID:    pgtype.Text{String: orgID, Valid: orgID != ""},
+		UserID:   pgtype.Text{String: userID, Valid: userID != ""},
+		Action:   action,
+		Metadata: raw,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "audit log failed", "action", action, "error", err)

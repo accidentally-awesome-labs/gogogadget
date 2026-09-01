@@ -26,7 +26,7 @@ func TestCreateRoundtrip(t *testing.T) {
 		Name:         "org-digest",
 		Kind:         "email.digest",
 		Payload:      map[string]any{"filter": "unread"},
-		OrgID:   "org_sched",
+		OrgID:        "org_sched",
 		EverySeconds: 3600,
 	})
 	require.NoError(t, err)

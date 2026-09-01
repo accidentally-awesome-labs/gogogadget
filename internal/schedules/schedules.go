@@ -17,7 +17,7 @@ import (
 type Schedule struct {
 	Name, Kind   string
 	Payload      map[string]any
-	OrgID   string // "" = system-wide
+	OrgID        string // "" = system-wide
 	EverySeconds int
 	NextRunAt    time.Time
 }
@@ -34,7 +34,7 @@ func Create(ctx context.Context, q *sqlc.Queries, s Schedule) (sqlc.Schedule, er
 	}
 	return q.CreateSchedule(ctx, sqlc.CreateScheduleParams{
 		Name: s.Name, Kind: s.Kind, Payload: raw,
-		OrgID:   pgtype.Text{String: s.OrgID, Valid: s.OrgID != ""},
+		OrgID:        pgtype.Text{String: s.OrgID, Valid: s.OrgID != ""},
 		EverySeconds: int32(s.EverySeconds), NextRunAt: at,
 	})
 }

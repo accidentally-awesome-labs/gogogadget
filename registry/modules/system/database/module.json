@@ -55,7 +55,7 @@
         "source": "internal/db/db_test.go",
         "target": "internal/db/db_test.go",
         "class": "test",
-        "sha256": "35ae94d9d15e99cf8b928c5d0536ceb9c7acc70a8b067bf23f69ed51e47a52b7",
+        "sha256": "5133a784b26f310182a6e73f4fb7878d914a0cac2e8090b3aa920617af577fa5",
         "rewrite_module": true,
         "contract": false
       },

@@ -24,6 +24,10 @@
           "version": "v5.10.0"
         },
         {
+          "module": "github.com/standard-webhooks/standard-webhooks/libraries",
+          "version": "v0.0.1"
+        },
+        {
           "module": "github.com/stretchr/testify",
           "version": "v1.11.1"
         }
@@ -32,6 +36,22 @@
       "containers": []
     },
     "files": [
+      {
+        "source": "internal/billing/catalog.go",
+        "target": "internal/billing/catalog.go",
+        "class": "go",
+        "sha256": "b56836656221d8f07d0187675a15234ceb526dc87213af22d508742e4f51dab9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/billing/catalog_test.go",
+        "target": "internal/billing/catalog_test.go",
+        "class": "test",
+        "sha256": "5340231e2a250d6d53aa26e58cbcb2f73f0e15ab5ee667ede7030a90c97d6d90",
+        "rewrite_module": true,
+        "contract": false
+      },
       {
         "source": "internal/billing/client.go",
         "target": "internal/billing/client.go",
@@ -47,6 +67,14 @@
         "sha256": "b7185ead1766bcfc3f966d4fe3dbcf3a099a5d9c03afc664f356d211ed9d6210",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/billing/contracts.go",
+        "target": "internal/billing/contracts.go",
+        "class": "go",
+        "sha256": "c2940c2b30a7ae3562af9ce5bda18d93f87d6b4f1bf24b44cd1687dc0053fca9",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/billing/entitlements.go",
@@ -119,6 +147,14 @@
         "sha256": "6ed4e0476d2fafd74267ff6e55625f2a1be69e7f8edc40b3e463a2a2ff672404",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/billing/polar_webhook.go",
+        "target": "internal/billing/polar_webhook.go",
+        "class": "go",
+        "sha256": "640807b02a2989dc9da4f2f77e3ad4456b88fa1b751c97859e1c2741a57ae92f",
+        "rewrite_module": true,
+        "contract": true
       },
       {
         "source": "internal/billing/webhook.go",

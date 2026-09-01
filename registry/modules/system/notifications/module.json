@@ -75,7 +75,7 @@
         "source": "internal/jobs/digest.go",
         "target": "internal/jobs/digest.go",
         "class": "go",
-        "sha256": "d25f6c4fa050e6bd4d0786e30b552ba87a9b925bb136200e95bafa73df625f78",
+        "sha256": "5c01d5f47ee9a7895ec2ca6be81e7280576ce67bab0fd5d6f6329a1a5e9032da",
         "rewrite_module": true,
         "contract": false
       },

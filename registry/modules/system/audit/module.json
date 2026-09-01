@@ -43,7 +43,7 @@
         "source": "internal/audit/audit.go",
         "target": "internal/audit/audit.go",
         "class": "go",
-        "sha256": "8f33299c7cd4d449acdfb91e5e9a5102dd9ed31f4b8b039f341f0c426962ad63",
+        "sha256": "2100f3212b7e79111206651901a964a3457ee5db636c9bd6f7f0d79dd0817cb3",
         "rewrite_module": true,
         "contract": true
       },
