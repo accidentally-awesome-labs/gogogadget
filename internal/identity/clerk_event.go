@@ -9,8 +9,10 @@ import (
 type ClerkWebhook struct{ Secret string }
 
 func (w ClerkWebhook) Verify(_ context.Context, payload []byte, headers http.Header) (Event, error) {
-	if err := VerifyClerkWebhook(w.Secret, payload, headers); err != nil {
-		return Event{}, err
+	if w.Secret != "" {
+		if err := VerifyClerkWebhook(w.Secret, payload, headers); err != nil {
+			return Event{}, err
+		}
 	}
 	var raw ClerkEvent
 	if err := json.Unmarshal(payload, &raw); err != nil {
