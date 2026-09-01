@@ -132,6 +132,8 @@ type Worker struct {
 	// SearchDrain is the selected search adapter's outbox worker. It runs before
 	// ordinary jobs so indexing remains eventually consistent after commits.
 	SearchDrain func(context.Context) error
+	// AuditExport drains the audit-export outbox after durable ledger writes.
+	AuditExport func(context.Context) error
 	// Storage is the export target; set in cmd/server. Nil → export fails
 	// loudly (the handler should not enqueue without it).
 	Storage storage.Store
@@ -228,6 +230,11 @@ func (w *Worker) pass(ctx context.Context) (n int) {
 		}
 	}()
 
+	if w.AuditExport != nil {
+		if err := w.AuditExport(ctx); err != nil {
+			w.log.Error("audit export", "error", err)
+		}
+	}
 	if w.SearchDrain != nil {
 		if err := w.SearchDrain(ctx); err != nil {
 			w.log.Error("search outbox", "error", err)
