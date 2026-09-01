@@ -45,7 +45,7 @@ func TestSpanExporterUsesOTLPProtobuf(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(msg.ResourceSpans) == 0 || len(msg.ResourceSpans[0].ScopeSpans) == 0 || msg.ResourceSpans[0].ScopeSpans[0].Spans[0].Name != "protocol-span" {
-			t.Fatalf("decoded OTLP=%v", msg)
+			t.Fatalf("decoded OTLP has %d resource spans", len(msg.ResourceSpans))
 		}
 	}
 }

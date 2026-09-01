@@ -72,7 +72,7 @@
         "source": "internal/telemetry/otlp/otlp_test.go",
         "target": "internal/telemetry/otlp/otlp_test.go",
         "class": "test",
-        "sha256": "db9be08de25cd4d656e4227b1e9ed1193e17e7be6d22844a2e43453d9bda4a55",
+        "sha256": "6cfc4c5608cafb866b8e8bf35417f7c18f4ffab68172b4bca01a53dcf31351f2",
         "rewrite_module": true,
         "contract": false
       }
