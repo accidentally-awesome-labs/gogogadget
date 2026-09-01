@@ -159,4 +159,6 @@ Verification after review fixes:
 - Account deletion selects the active provider-session subject before invoking the adapter deleter.
 - `make check` was rerun after formatting and generated sync; it reached all compile/test checks and reported only the stale tracked portal file, which is removed in this commit.
 - Final registry digest: `f5d0662b45f77455bb39868e8d854ef45e205681398b9199cb95b750732956ad`.
+
+- Post-commit `make check` — passed fully with no ownership, formatting, generation, vet, or test failures.
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `d95c819a12cc441195d63f245b0d17a4507698e65682ade396e0b40a6abc2f2f`.
