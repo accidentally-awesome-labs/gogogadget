@@ -235,8 +235,8 @@
         "target": "local"
       },
       "production": {
-        "adapter": "ggg/system/analytics-noop",
-        "target": "local"
+        "adapter": "ggg/system/analytics-posthog",
+        "target": "posthog"
       }
     },
     "ggg/observability": {

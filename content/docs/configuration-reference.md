@@ -23,6 +23,8 @@ degradation behave.
 | `APP_URL` | `ggg/system/config` |  | `http://localhost:8080` | Public base URL; trailing slash trimmed. Feeds auth and checkout redirects, email links, and webhook targets |
 | `LOG_LEVEL` | `ggg/system/config` |  |  | debug \| info \| warn \| error. Defaults to debug in development and info otherwise |
 | `TEST_NOW` | `ggg/system/config` |  |  | RFC3339 instant that freezes the render clock, honored only when APP_ENV=test so visual baselines stay deterministic |
+| `POSTHOG_API_KEY` | `ggg/system/analytics-posthog` |  |  | Posthog Api Key. Secret: ships blank in `.env.example` |
+| `POSTHOG_HOST` | `ggg/system/analytics-posthog` |  |  | Posthog Host |
 | `DATABASE_URL` | `ggg/system/database` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
 | `LLM_API_KEY` | `ggg/system/llm-openai-compatible` |  |  | Llm Api Key. Secret: ships blank in `.env.example` |
 | `LLM_BASE_URL` | `ggg/system/llm-openai-compatible` |  |  | Llm Base Url |

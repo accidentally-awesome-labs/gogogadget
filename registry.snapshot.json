@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "24bb4c4a1e832652328f27665c6934759db9725226394671718458a3bf210f35"
+      "sha256": "e26ed1d96eb9eb3a82ea43148016f673fa05ff3e2aa286845221de7417a609a7"
     },
     {
       "path": "registry/modules/system/audit-export-noop/module.json",
@@ -1232,7 +1232,7 @@
     },
     {
       "path": "registry/profiles/full.json",
-      "sha256": "a1f9de9971713746866b2e608f45bbdda05210162b175009f2ef9ab8a5e5e90d"
+      "sha256": "523d2cf325b67755e93e67d8102fab9425397db71ec6b1230ab42f5e6cd063d0"
     },
     {
       "path": "registry/schema/lock.schema.json",

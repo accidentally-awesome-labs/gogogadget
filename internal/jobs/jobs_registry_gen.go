@@ -173,7 +173,7 @@ func providerActive(env, slot, adapter string) bool {
 			return true
 		}
 	case "production":
-		if slot == "ggg/analytics" && adapter == "ggg/system/analytics-noop" {
+		if slot == "ggg/analytics" && adapter == "ggg/system/analytics-posthog" {
 			return true
 		}
 		if slot == "ggg/audit-export" && adapter == "ggg/system/audit-export-otlp" {

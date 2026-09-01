@@ -113,6 +113,8 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"STORAGE_R2_BUCKET":            "bucket_fixture",
 		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
 		"SENTRY_DSN":                   "https://public@example.com/1",
+		"POSTHOG_API_KEY":              "phc_live_fixture",
+		"POSTHOG_HOST":                 "https://us.i.posthog.com",
 	})
 	_, err := Boot(context.Background(), host, Options{})
 	if err == nil {

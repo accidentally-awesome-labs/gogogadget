@@ -248,12 +248,13 @@ transitive closure itself.
 | `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (68)
+## Systems (69)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
 | `ggg/system/analytics` | Product analytics | `ggg/system/apphost` `ggg/system/config` | `free` |
 | `ggg/system/analytics-noop` | analytics-noop | `ggg/system/analytics` | `free` |
+| `ggg/system/analytics-posthog` | analytics-posthog | `ggg/system/analytics` | `free` |
 | `ggg/system/announcements` | Product announcements | `ggg/system/database` | `retain-data` |
 | `ggg/system/api` | JSON API | `ggg/system/database` `ggg/system/organizations` `ggg/system/rate-limit` | `major-version-only` |
 | `ggg/system/apphost` | Application host seam | — | `replacement-required` |
