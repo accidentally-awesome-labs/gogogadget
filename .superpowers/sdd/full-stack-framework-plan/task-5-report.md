@@ -52,3 +52,5 @@ Latest verification:
 - `go test ./internal/billing ./internal/billinglocal ./internal/identity ./internal/identity/session ./internal/web ./internal/db -run 'TestLocalBillingContract|TestPlanCatalogDeepCopies|TestFakeVerifier|TestMigrateUpDown|TestRoundtripEveryTable' -count=1` — passed.
 
 Remaining known gaps are the full constructor-free provider-slot manifest cutover, removal of legacy global plan compatibility API, a wired top-level `ggg identity link` command, and a dedicated pre-0020 fixture migration integration test.
+
+- `go test ./internal/db -run TestProviderNeutralMigrationPreservesLegacyRows -count=1` — passed; dedicated up-to-19 seeded fixture verifies user/org/membership/subscription/projects/audit/files/notifications/API-token rows plus identity and billing mappings survive 0020.
