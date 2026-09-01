@@ -268,7 +268,7 @@ transitive closure itself.
 | `ggg/system/cache` | Cache | — | `replacement-required` |
 | `ggg/system/cache-memory` | Cache Memory | `ggg/system/cache` | `free` |
 | `ggg/system/cache-redis` | Cache Redis | `ggg/system/cache` | `free` |
-| `ggg/system/cli-ui` | Interactive ggg console | `ggg/system/modkit` | `replacement-required` |
+| `ggg/system/cli-ui` | Interactive ggg console | `ggg/system/modkit` | `free` |
 | `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
 | `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |

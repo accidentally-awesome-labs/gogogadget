@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/cli-ui/module.json",
-      "sha256": "dd18b157d0e10fca953d6105004552351994899ff74c3348adf0d030c7e88cef"
+      "sha256": "0e1456f10bce3335b05e810e5aa53edb791f3e7a45ce3d3cdf838b1a2161f6d9"
     },
     {
       "path": "registry/modules/system/config/module.json",
@@ -972,7 +972,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "5b5f13e64b7f05eef548831d38eaf1fd7e5d5af89e2473b4e75b1bad3289dc27"
+      "sha256": "861e5431824349526e9b53d2b66f7d468f67f6a9a3059e2fe13f0fdede3f424d"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1244,7 +1244,7 @@
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "dcb37856213419355aed9a81296e4ba4f0f3782b0fa84cd0660698fbfd3556b8"
+      "sha256": "f51b4026ab28f664ac6e6166339883bb22df18568147ed3da61dc1924ad1d9fa"
     },
     {
       "path": "registry/schema/project.schema.json",

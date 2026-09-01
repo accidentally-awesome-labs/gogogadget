@@ -338,8 +338,9 @@ func (c *Controller) executeDoctor(ctx context.Context, _ DoctorRequest) (Result
 }
 
 // executeRegistryValidate loads the shipped catalog and exercises the example
-// closures. Progress goes to the human stream even under --json, because this
-// takes minutes and a silent command that long reads as a hang.
+// closures. Progress goes to the sink the caller injected into the context —
+// the human stream for flag runs, io.Discard under --json (the envelope is
+// the machine output), a TUI buffer for the console — never os.Stdout.
 func (c *Controller) executeRegistryValidate(ctx context.Context, request RegistryReadRequest) (Result, error) {
 	catalog, err := modkit.LoadCatalog(os.DirFS(c.rootDir()))
 	if err != nil {

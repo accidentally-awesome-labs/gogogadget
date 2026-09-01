@@ -4,7 +4,7 @@
     "id": "ggg/system/cli-ui",
     "kind": "system",
     "name": "cli-ui",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Interactive ggg console",
     "description": "The Bubble Tea console screens and Huh guided forms over the gggcli controller: Home, Catalog, Providers, Plan, Conflicts, Tasks, and Diagnostics, with linear accessible rendering and no mouse requirement.",
@@ -44,7 +44,7 @@
         "source": "internal/gggcli/ui/data.go",
         "target": "internal/gggcli/ui/data.go",
         "class": "go",
-        "sha256": "7437c6eaf2705ef055f09a7f24a5b039fa2a77f48037b0fcfb360f51f6883058",
+        "sha256": "9ece0ebd139b719d1a47567818b93930235cb665f9bae15db8ed0b9491b88ed8",
         "rewrite_module": true,
         "contract": false
       },
@@ -52,7 +52,7 @@
         "source": "internal/gggcli/ui/model.go",
         "target": "internal/gggcli/ui/model.go",
         "class": "go",
-        "sha256": "a3a7394853490cd2cd2d67ce38dde9edfe682478368d26d79e50c8c3dfd9460d",
+        "sha256": "f25c5c45fc3d45acdc7231d79f41e7fe76016fc43189f5103873d27f423e27b1",
         "rewrite_module": true,
         "contract": false
       },
@@ -60,7 +60,15 @@
         "source": "internal/gggcli/ui/run.go",
         "target": "internal/gggcli/ui/run.go",
         "class": "go",
-        "sha256": "b690f3f84a68175a00029015fdad981bb0379634ea8621e3d9d24ed3465e024d",
+        "sha256": "37cb534d49eae94f9d66b6eba14645d6e29040957bf87a9b0c883ca63dce6ffe",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/gggcli/ui/screens_integration_test.go",
+        "target": "internal/gggcli/ui/screens_integration_test.go",
+        "class": "test",
+        "sha256": "3ad5fc04af1741824864b6bfcb920ed7838e49ce5cfc6bdfde09badff7488041",
         "rewrite_module": true,
         "contract": false
       },
@@ -68,7 +76,7 @@
         "source": "internal/gggcli/ui/ui_test.go",
         "target": "internal/gggcli/ui/ui_test.go",
         "class": "test",
-        "sha256": "6acd00c03ebc5367fb6563846cfb20019b1ac055814e17bc11a04316582e552c",
+        "sha256": "01473c90c071e592782eae74422447febc40a64f39116bcd11464d91eaff5f92",
         "rewrite_module": true,
         "contract": false
       }

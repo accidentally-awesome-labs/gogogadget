@@ -11,6 +11,9 @@ tool (
 )
 
 require (
+	charm.land/bubbletea/v2 v2.0.0
+	charm.land/huh/v2 v2.0.0
+	charm.land/lipgloss/v2 v2.0.0
 	github.com/a-h/templ v0.3.1020
 	github.com/clerk/clerk-sdk-go/v2 v2.7.0
 	github.com/getsentry/sentry-go v0.48.0
@@ -35,9 +38,6 @@ require (
 
 require (
 	charm.land/bubbles/v2 v2.0.0 // indirect
-	charm.land/bubbletea/v2 v2.0.0 // indirect
-	charm.land/huh/v2 v2.0.0 // indirect
-	charm.land/lipgloss/v2 v2.0.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/catppuccin/go v0.2.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.2 // indirect

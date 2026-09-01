@@ -70,6 +70,44 @@ func genFixtureLock(t *testing.T) (Lock, []Manifest) {
 	return lock, []Manifest{config, system, page}
 }
 
+// Two modules contributing the same command name cannot share the one
+// dispatch table: generation refuses rather than emitting a registry where
+// one declaration silently shadows the other.
+func TestCommandsRegistryRefusesDuplicateNames(t *testing.T) {
+	cli := CLIContribution{Name: "ui", Summary: "console", Package: "internal/console", Handler: "Run"}
+	one := Manifest{ID: "ggg/system/one", Kind: ModuleSystem, Name: "one", Runtime: RuntimeContributions{CLI: []CLIContribution{cli}}}
+	two := Manifest{ID: "ggg/system/two", Kind: ModuleSystem, Name: "two", Runtime: RuntimeContributions{CLI: []CLIContribution{cli}}}
+	lock := Lock{Schema: 2, RegistryCommit: testCommitA, Order: []string{one.ID, two.ID}}
+	if _, err := emitCommandsRegistry(context.Background(), "example.com/acme", lock, []Manifest{one, two}); err == nil ||
+		!strings.Contains(err.Error(), `contributed command "ui" is declared by both`) {
+		t.Fatalf("duplicate contributed name = %v, want generation refusal", err)
+	}
+}
+
+// The command registry renders into the leaf commands package: one entry per
+// declaration, canonical order, so cmd/ggg never imports internal/modules.
+func TestCommandsRegistryRendersLeafPackage(t *testing.T) {
+	module := Manifest{ID: "ggg/system/console", Kind: ModuleSystem, Name: "console", Runtime: RuntimeContributions{
+		CLI: []CLIContribution{{Name: "ui", Summary: "Open the interactive console", Package: "internal/gggcli/ui", Handler: "Run"}},
+	}}
+	lock := Lock{Schema: 2, RegistryCommit: testCommitA, Order: []string{module.ID}}
+	file, err := emitCommandsRegistry(context.Background(), "example.com/acme", lock, []Manifest{module})
+	if err != nil {
+		t.Fatalf("emitCommandsRegistry: %v", err)
+	}
+	if file.Path != "internal/gggcli/commands/commands_registry_gen.go" {
+		t.Fatalf("path = %s", file.Path)
+	}
+	for _, want := range []string{"package commands", "func CLICommands() []gggcli.ContributedCommand", `Name: "ui"`, "ui.Run"} {
+		if !strings.Contains(file.Content, want) {
+			t.Fatalf("registry missing %q:\n%s", want, file.Content)
+		}
+	}
+	if strings.Contains(file.Content, "internal/modules") {
+		t.Fatalf("registry references internal/modules:\n%s", file.Content)
+	}
+}
+
 func TestGenerateAllIsDeterministic(t *testing.T) {
 	lock, graph := genFixtureLock(t)
 	a, err := GenerateAll(context.Background(), "example.com/acme", lock, graph)

@@ -20,6 +20,9 @@ func TestCLIRejectsUnknownAndMalformedCommands(t *testing.T) {
 	cases := [][]string{
 		nil,
 		{"frobnicate"},
+		// --help on an unknown command stays a usage failure: a machine
+		// consumer must never read help as a successful run of nothing.
+		{"frobnicate", "--help"},
 		{"version", "extra"},
 		{"info"},
 		{"info", "element/button", "element/card"},
@@ -349,6 +352,34 @@ func TestUICommandNonTTYRefuses(t *testing.T) {
 	_, _, err := runAppWith(t, app, "ui")
 	if err == nil || exitOf(t, err) != 2 {
 		t.Fatalf("ui non-TTY = %v, want exit 2", err)
+	}
+}
+
+// A contributed command that collides with a reserved built-in name is a
+// diagnostic, not a crash: it is skipped with a warning and every other
+// command still serves.
+func TestContributedNameCollisionSkipsWithDiagnostic(t *testing.T) {
+	invoked := false
+	app := App{Out: &bytes.Buffer{}, Contributed: []ContributedCommand{
+		{Spec: CommandSpec{Name: "sync", Summary: "reserved collision"}, Handler: func(context.Context, CommandContext, []string) (Result, error) { return Result{}, nil }},
+		{Spec: CommandSpec{Name: "custom", Summary: "a real contribution"}, Handler: func(context.Context, CommandContext, []string) (Result, error) { invoked = true; return Result{}, nil }},
+	}}
+	_, errOut, err := runAppWith(t, app, "custom")
+	if err != nil {
+		t.Fatalf("custom command failed: %v", err)
+	}
+	if !invoked {
+		t.Fatal("the non-colliding contributed command did not run")
+	}
+	if !strings.Contains(errOut, `"sync" collides with a reserved built-in name`) {
+		t.Fatalf("no collision diagnostic on stderr: %q", errOut)
+	}
+	table, conflicts := commandTable(app.Contributed)
+	if len(conflicts) != 1 || conflicts[0] != "sync" {
+		t.Fatalf("conflicts = %v, want [sync]", conflicts)
+	}
+	if _, found := lookupSpec(table, "sync"); !found {
+		t.Fatal("the reserved built-in sync must still resolve")
 	}
 }
 
