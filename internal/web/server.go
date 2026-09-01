@@ -57,7 +57,7 @@ type Server struct {
 	analytics       analytics.Capturer
 	store           storage.Store
 	llm             llm.Completer
-	flags           flags.Evaluator
+	flags           flags.Service
 	reporter        observability.Reporter
 	realtime        realtime.Broker
 	limiter         ratelimit.Limiter
@@ -111,7 +111,7 @@ type Deps struct {
 	Analytics         analytics.Capturer
 	Storage           storage.Store
 	LLM               llm.Completer
-	Flags             flags.Evaluator
+	Flags             flags.Service
 	Reporter          observability.Reporter
 	Realtime          realtime.Broker
 	RateLimiter       ratelimit.Limiter

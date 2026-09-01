@@ -276,7 +276,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "0fa47a87b43ef496dc8d2faeb639e1f150df73d6497d786164bbf4ce696be8f8",
+        "sha256": "278af0348cb0dfcc0b0687f9665ac9c416ef3cd6b7d98743fdf53ac536a7cc8b",
         "rewrite_module": true,
         "contract": true
       },
@@ -480,9 +480,9 @@
           },
           {
             "field": "Flags",
-            "capability": "flags.evaluator",
-            "type": "flags.Evaluator",
-            "optional": true
+            "capability": "flags.service",
+            "type": "flags.Service",
+            "optional": false
           },
           {
             "field": "IdentityDeleter",

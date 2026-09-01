@@ -127,37 +127,6 @@
       ]
     },
     "runtime": {
-      "system": {
-        "package": "internal/flags",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Cache",
-            "capability": "cache.store",
-            "type": "cache.Store",
-            "optional": false
-          },
-          {
-            "field": "Queries",
-            "capability": "database.queries",
-            "type": "*sqlc.Queries",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Evaluator",
-            "capability": "flags.evaluator",
-            "type": "flags.Evaluator"
-          }
-        ],
-        "type_imports": [
-          "internal/cache",
-          "internal/db/sqlc"
-        ],
-        "start": false,
-        "stop": false
-      },
       "provider_slots": [
         {
           "id": "ggg/feature-flags",

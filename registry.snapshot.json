@@ -904,7 +904,7 @@
     },
     {
       "path": "registry/modules/system/feature-flags/module.json",
-      "sha256": "3bde9e77b9254a660ef5913c7fbc13fb6138692d7b351cca9cda2c3d3c0e82de"
+      "sha256": "11c833f9345d0d37d77503bbf395ce7260211afbec2437c49db939c76ef994b6"
     },
     {
       "path": "registry/modules/system/i18n/module.json",
@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "9ce8df8322832b9ba40cb9479f48b3d0ef566f58a4f250cbb5f646c29505785d"
+      "sha256": "1f4fcb4de96347b3f4ed80249497d93d344f745e88945761338c7ca50125d3a8"
     },
     {
       "path": "registry/modules/system/static/module.json",
