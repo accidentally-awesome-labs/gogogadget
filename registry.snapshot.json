@@ -868,7 +868,7 @@
     },
     {
       "path": "registry/modules/system/cache-redis/module.json",
-      "sha256": "30719af7e743fd31e7afd19f358af47e5c781cd53cde86dda9031a89cd253b08"
+      "sha256": "9880d930fd91bcd7d7368549032a0eff6a55395e100991101341fdab82fc6930"
     },
     {
       "path": "registry/modules/system/cache/module.json",
@@ -1004,7 +1004,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit-redis/module.json",
-      "sha256": "c217c7ff0360418b3b4e4394786ae22b72e1cd60943f0384d6fc8eceb462dc1a"
+      "sha256": "d3011e3a66015313c4b18cdb6f7136ba70feaf7652f5fc2e729a2aee5c9a40dd"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
@@ -1012,7 +1012,7 @@
     },
     {
       "path": "registry/modules/system/realtime-ably/module.json",
-      "sha256": "b8c40b81da4ecc740b21b866329b926e70b9131a3f585f7b7162d60f55d0d50b"
+      "sha256": "6caa509d65140669f96ccc9e9481bc61204f68999a2067afbe1603de538909b9"
     },
     {
       "path": "registry/modules/system/realtime-postgres/module.json",

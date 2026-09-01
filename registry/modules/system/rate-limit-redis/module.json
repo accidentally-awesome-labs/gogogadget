@@ -27,7 +27,7 @@
         "source": "internal/ratelimit/redis/redis.go",
         "target": "internal/ratelimit/redis/redis.go",
         "class": "go",
-        "sha256": "d728926305c8d77b1ced2383919886685875124deacf99464e72f9d1a4809ce6",
+        "sha256": "6ac6c31150ec7a32d48d96d3f512289173129cbdfbcd6c950fdd6c0e72cd4702",
         "rewrite_module": true,
         "contract": true
       },
@@ -102,7 +102,6 @@
         "field": "RateLimitRedisToken",
         "type": "string",
         "description": "Rate Limit Redis Token",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/rate-limit-redis@upstash"
@@ -113,8 +112,6 @@
         "field": "RateLimitRedisUrl",
         "type": "string",
         "description": "Rate Limit Redis Url",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/rate-limit-redis@valkey"
         ]

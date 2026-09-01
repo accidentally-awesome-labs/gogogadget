@@ -27,7 +27,7 @@
         "source": "internal/realtime/ably/ably.go",
         "target": "internal/realtime/ably/ably.go",
         "class": "go",
-        "sha256": "d9d02328a68bd56390d500ee5aeecfb4807a030d8c1e7d2e58f2c248ed21c3ce",
+        "sha256": "8a3bf9a4bf9a5424f853aae11e6dbcd26a64f3449a0e53093d6dbd369ae42d82",
         "rewrite_module": true,
         "contract": true
       },
@@ -35,7 +35,7 @@
         "source": "internal/realtime/ably/ably_test.go",
         "target": "internal/realtime/ably/ably_test.go",
         "class": "test",
-        "sha256": "5b2207cee6a5c0e1cad90391b2cdc8ad9d5d18ca5238baa513daaf7844a96d30",
+        "sha256": "cd1c5017581bfbc3668a56af93a76038e27dcdffd693f00fe4af1faf2e83abd2",
         "rewrite_module": true,
         "contract": false
       }
@@ -88,7 +88,6 @@
         "field": "AblyApiKey",
         "type": "string",
         "description": "Ably Api Key",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/realtime-ably@ably"
@@ -99,8 +98,6 @@
         "field": "AblyEndpoint",
         "type": "string",
         "description": "Ably Endpoint",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/realtime-ably@ably"
         ]

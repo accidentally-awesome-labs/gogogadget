@@ -27,7 +27,7 @@
         "source": "internal/cache/redis/redis.go",
         "target": "internal/cache/redis/redis.go",
         "class": "go",
-        "sha256": "7289ee071ea73ef8f5a44229a82fdb78bf9f4a5565b80d8000c37d3449451e12",
+        "sha256": "39ad0985bcb5d2e78b747bd900566917afccfdeeab99c7ac23ea3d4c4f4c9ebc",
         "rewrite_module": true,
         "contract": true
       },
@@ -102,7 +102,6 @@
         "field": "CacheRedisToken",
         "type": "string",
         "description": "Cache Redis Token",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/cache-redis@upstash"
@@ -113,8 +112,6 @@
         "field": "CacheRedisUrl",
         "type": "string",
         "description": "Cache Redis Url",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/cache-redis@valkey"
         ]

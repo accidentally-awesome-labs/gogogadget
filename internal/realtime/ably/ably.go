@@ -15,6 +15,12 @@ import (
 type Subscriber interface {
 	Subscribe(context.Context, string) (realtime.Subscription, error)
 }
+type httpSubscriber struct{}
+
+func (httpSubscriber) Subscribe(context.Context, string) (realtime.Subscription, error) {
+	return nil, fmt.Errorf("ably: realtime subscription requires websocket transport")
+}
+
 type Broker struct {
 	Endpoint, APIKey string
 	Client           *http.Client
@@ -82,8 +88,11 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 			key = h.Env("ABLY_API_KEY")
 		}
 	}
-	if endpoint == "" || key == "" || d.Subscriber == nil {
-		return nil, fmt.Errorf("ably: endpoint, api key, and subscriber are required")
+	if endpoint == "" || key == "" {
+		return nil, fmt.Errorf("ably: endpoint and api key are required")
+	}
+	if d.Subscriber == nil {
+		d.Subscriber = httpSubscriber{}
 	}
 	client := d.Client
 	if client == nil {
