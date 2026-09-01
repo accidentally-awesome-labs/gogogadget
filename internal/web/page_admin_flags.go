@@ -18,7 +18,7 @@ func (s *Server) handleAdminFlags(w http.ResponseWriter, r *http.Request) {
 	}
 	flags := flagRows(provided)
 	s.Render(w, r, Page{Title: i18n.T(r.Context(), "flags.title"), Layout: templates.LayoutAdmin},
-		templates.AdminFlagsPage(templates.FlagsData{Flags: flags}))
+		templates.AdminFlagsPage(templates.FlagsData{Flags: flags, ProviderConsole: s.cfg.Value("LAUNCHDARKLY_CONSOLE")}))
 }
 
 func flagRows(in []flags.Flag) []sqlc.FeatureFlag {

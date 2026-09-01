@@ -16,6 +16,7 @@ type FlagsData struct {
 	CreateKey         string
 	CreateDescription string
 	CreateErr         string
+	ProviderConsole   string
 }
 
 // onOffKind is the shared on/off badge colour: a live flag or schedule reads
@@ -32,6 +33,9 @@ func onOffKind(on bool) ui.Kind {
 // The key cell links to the per-org override detail page.
 templ AdminFlagsPage(d FlagsData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "flags.title")})
+	if d.ProviderConsole != "" {
+		<p class="text-sm text-fg-muted"><a class="link" href={ d.ProviderConsole }>Manage flags in provider console</a></p>
+	}
 	if AdminWrite(ctx) {
 		@flagCreateCard(d)
 	}

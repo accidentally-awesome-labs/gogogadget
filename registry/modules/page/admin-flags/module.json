@@ -61,7 +61,7 @@
         "source": "internal/web/page_admin_flags.go",
         "target": "internal/web/page_admin_flags.go",
         "class": "go",
-        "sha256": "17dc35d81d7164a44996b12eac4bf3f0562628f7498f6768160dfe6975e68c2b",
+        "sha256": "de2cec4d9ebeb9c363dab58f749595e714bb816bdc3f99c1596d6bc8fcba6a6a",
         "rewrite_module": true,
         "contract": false
       },
@@ -69,7 +69,7 @@
         "source": "internal/web/templates/admin_flags.templ",
         "target": "internal/web/templates/admin_flags.templ",
         "class": "templ",
-        "sha256": "35ae8350d99801f9121b913a224b4560502ea622225396e7aaa993fe80deaaee",
+        "sha256": "df628675ab3cbe3a3711dbbfe558b41ad05d40af83cfa9ff8ca33a229317f6c0",
         "rewrite_module": true,
         "contract": false
       }

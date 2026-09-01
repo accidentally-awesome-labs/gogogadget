@@ -192,6 +192,6 @@ func (s *Server) renderFlagFormError(w http.ResponseWriter, r *http.Request, inp
 	w.WriteHeader(http.StatusUnprocessableEntity)
 	s.Render(w, r, Page{Title: i18n.T(ctx, "flags.title"), Layout: templates.LayoutAdmin},
 		templates.AdminFlagsPage(templates.FlagsData{
-			Flags: flags, CreateKey: input.Key, CreateDescription: input.Description, CreateErr: msg,
+			Flags: flags, CreateKey: input.Key, CreateDescription: input.Description, CreateErr: msg, ProviderConsole: s.cfg.Value("LAUNCHDARKLY_CONSOLE"),
 		}))
 }
