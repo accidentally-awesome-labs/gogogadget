@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -156,7 +155,7 @@ func (w *Worker) exportOrgJSON(ctx context.Context, p ExportProjectsPayload) err
 		_ = w.Storage.Delete(ctx, key) // no dangling object without a row
 		return err
 	}
-	notify.Send(ctx, w.q, p.OrgID, p.UserID, "export.ready",
+	w.send(ctx, p.OrgID, p.UserID, "export.ready",
 		"Organization export ready", filename, "/app/files/"+strconv.FormatInt(f.ID, 10))
 	return nil
 }

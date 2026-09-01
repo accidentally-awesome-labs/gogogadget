@@ -18,6 +18,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/notifications"
 	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/jackc/pgx/v5"
@@ -132,6 +133,7 @@ type Worker struct {
 	// SearchDrain is the selected search adapter's outbox worker. It runs before
 	// ordinary jobs so indexing remains eventually consistent after commits.
 	SearchDrain func(context.Context) error
+	Notifier    notifications.Notifier
 	// AuditExport drains the audit-export outbox after durable ledger writes.
 	AuditExport func(context.Context) error
 	// Storage is the export target; set in cmd/server. Nil → export fails
@@ -449,7 +451,7 @@ func (w *Worker) sendTransactionalEmail(ctx context.Context, kind string, p Emai
 		if kind == KindDunningFinal {
 			// The day-0 notification is a week stale by now; the last
 			// notice is the one worth putting back in front of them.
-			notify.SendOrg(ctx, w.q, p.OrgID, "payment_failed", "Final notice: payment still failing",
+			w.sendOrg(ctx, p.OrgID, "payment_failed", "Final notice: payment still failing",
 				"Update your card to keep your plan active.", "/app/settings/billing")
 		}
 	}
@@ -506,4 +508,23 @@ func (w *Worker) trialNoLongerActive(ctx context.Context, orgID string) (bool, e
 		return false, err
 	}
 	return sub.Status != "trialing", nil
+}
+
+func (w *Worker) send(ctx context.Context, orgID, userID, kind, title, body, url string) {
+	if w.Notifier != nil {
+		if err := w.Notifier.Send(ctx, orgID, userID, kind, title, body, url); err != nil {
+			w.log.Error("notification", "error", err)
+		}
+		return
+	}
+	notify.Send(ctx, w.q, orgID, userID, kind, title, body, url)
+}
+func (w *Worker) sendOrg(ctx context.Context, orgID, kind, title, body, url string) {
+	if w.Notifier != nil {
+		if err := w.Notifier.SendOrg(ctx, orgID, kind, title, body, url); err != nil {
+			w.log.Error("notification", "error", err)
+		}
+		return
+	}
+	notify.SendOrg(ctx, w.q, orgID, kind, title, body, url)
 }

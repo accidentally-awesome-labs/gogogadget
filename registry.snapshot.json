@@ -932,7 +932,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "1419cffedbfa6b8f6c95158a21797fed1606f016ed0845e426fe7d323a6b50ef"
+      "sha256": "aaf0b3c7f8aa0e815b8fd2d0cca25a3567b42dc16f606cc31b5a5b71e8b19b9c"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
@@ -1204,7 +1204,7 @@
     },
     {
       "path": "registry/modules/workflow/organization-export/module.json",
-      "sha256": "5aeb4c625e8b7030e7f21957b9aad54042edb8d4be2d2cc86d1c9d69e32fc69b"
+      "sha256": "6c87c75e1a8c7ab52373b56598edeaea7315b771745c27620eaeebd2c4123136"
     },
     {
       "path": "registry/modules/workflow/outbound-webhooks/module.json",
@@ -1212,7 +1212,7 @@
     },
     {
       "path": "registry/modules/workflow/project-export/module.json",
-      "sha256": "55a849ba6745c1fd01df24c97b055b936113832c882361065eab5d7a4449dc96"
+      "sha256": "46c7b2d5e223f08d977e96d50ae260e01d5c7b8e1826057722559ad17a4de4c5"
     },
     {
       "path": "registry/modules/workflow/projects/module.json",

@@ -107,7 +107,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "d62f484ba9510cd6950336c0f8a75922c0579598e5edbadcb4b249045f2aeedd",
+        "sha256": "d40e6cdf51892cb6182fc783a2345a07207ad7e967a83be68270725f56e8fff9",
         "rewrite_module": true,
         "contract": true
       },
@@ -123,7 +123,7 @@
         "source": "internal/jobs/module.go",
         "target": "internal/jobs/module.go",
         "class": "go",
-        "sha256": "8da6a80ad3077c241f52a031f34307df7122a26112976757c4328c581883d055",
+        "sha256": "9ed4170417ce2f1ba0dd5621958511c8c34637c556f958d9f236e657277b6435",
         "rewrite_module": true,
         "contract": true
       },
@@ -160,6 +160,12 @@
             "capability": "config",
             "type": "*config.Config",
             "optional": false
+          },
+          {
+            "field": "Notifier",
+            "capability": "notifications.notifier",
+            "type": "notifications.Notifier",
+            "optional": true
           },
           {
             "field": "Queries",

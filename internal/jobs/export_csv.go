@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
-	"github.com/gogogadget/gogogadget/internal/notify"
 )
 
 // exportProjectsCSV renders the org's projects to CSV through the storage
@@ -57,6 +56,6 @@ func (w *Worker) exportProjectsCSV(ctx context.Context, p ExportProjectsPayload)
 		_ = w.Storage.Delete(ctx, key)
 		return err
 	}
-	notify.Send(ctx, w.q, p.OrgID, p.UserID, "export.ready", "Projects export ready", filename, "/app/files/"+strconv.FormatInt(f.ID, 10))
+	w.send(ctx, p.OrgID, p.UserID, "export.ready", "Projects export ready", filename, "/app/files/"+strconv.FormatInt(f.ID, 10))
 	return nil
 }

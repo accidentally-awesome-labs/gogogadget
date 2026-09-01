@@ -67,7 +67,7 @@
         "source": "internal/jobs/export_csv.go",
         "target": "internal/jobs/export_csv.go",
         "class": "go",
-        "sha256": "7f3a557e8c29545bac6fe01ab68a7c5d3f08fad0408c8eaec1bffd513306f94d",
+        "sha256": "882b6a87961c0987a96aa150e3352143325640fdbb0acd41b81ed952d2abb456",
         "rewrite_module": true,
         "contract": false
       },

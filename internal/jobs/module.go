@@ -14,6 +14,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/gogogadget/gogogadget/internal/notifications"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
 )
@@ -28,6 +29,7 @@ type Deps struct {
 	Billing  billing.Client
 	Storage  storage.Store
 	Reporter observability.Reporter
+	Notifier notifications.Notifier
 }
 
 // Module is the constructed background-worker closure.
@@ -57,6 +59,7 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	worker := NewWorkerWithEnvironment(d.Queries, d.Sender, h.Log(), d.Config.Env)
 	worker.Billing = d.Billing
 	worker.Storage = d.Storage
+	worker.Notifier = d.Notifier
 	worker.AppURL = d.Config.AppURL
 	worker.AuditRetentionDays = d.Config.AuditRetentionDays
 
