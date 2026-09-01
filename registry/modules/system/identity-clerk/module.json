@@ -1,0 +1,182 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/identity-clerk",
+    "kind": "system",
+    "name": "identity-clerk",
+    "revision": 1,
+    "contract": 1,
+    "title": "Clerk identity",
+    "description": "Hosted Clerk identity provider",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/identity/clerk/module.go",
+        "target": "internal/identity/clerk/module.go",
+        "class": "go",
+        "sha256": "95541e42215db1a76705f02ebe285786b3ed6e2b457604955b87a825a87b386a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/identity/clerk"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/identity/clerk",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Deleter",
+            "capability": "identity.deleter",
+            "type": "identity.Deleter"
+          },
+          {
+            "field": "Fetcher",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher"
+          },
+          {
+            "field": "Navigator",
+            "capability": "identity.navigator",
+            "type": "identity.Navigator"
+          },
+          {
+            "field": "Verifier",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier"
+          },
+          {
+            "field": "Webhook",
+            "capability": "identity.webhook",
+            "type": "identity.Webhook"
+          }
+        ],
+        "type_imports": [
+          "internal/identity"
+        ],
+        "start": false,
+        "stop": false,
+        "adapter": {
+          "slot": "ggg/identity",
+          "targets": [
+            {
+              "id": "clerk",
+              "title": "Clerk",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers",
+              "inputs": [
+                {
+                  "key": "CLERK_SECRET_KEY",
+                  "env_key": "CLERK_SECRET_KEY",
+                  "label": "Clerk secret key",
+                  "type": "string",
+                  "required": true,
+                  "secret": true
+                },
+                {
+                  "key": "CLERK_WEBHOOK_SECRET",
+                  "env_key": "CLERK_WEBHOOK_SECRET",
+                  "label": "Clerk webhook secret",
+                  "type": "string",
+                  "required": true,
+                  "secret": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "CLERK_FRONTEND_API_URL",
+        "field": "ClerkFrontendAPIURL",
+        "type": "string",
+        "description": "Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.\u003chost\u003e` in production, the Clerk dev wildcard otherwise"
+      },
+      {
+        "key": "CLERK_PORTAL_URL",
+        "field": "ClerkPortalURL",
+        "type": "string",
+        "description": "Hosted Account Portal base, e.g. `https://accounts.your-app.com`",
+        "trim_slash": true,
+        "production_required": true
+      },
+      {
+        "key": "CLERK_PUBLISHABLE_KEY",
+        "field": "ClerkPublishableKey",
+        "type": "string",
+        "description": "Drives the vendored clerk-js that keeps the `__session` JWT fresh",
+        "production_required": true
+      },
+      {
+        "key": "CLERK_SECRET_KEY",
+        "field": "ClerkSecretKey",
+        "type": "string",
+        "description": "Clerk API secret. Empty means auth is not configured and `/app` renders 503 (unless the dev bypass is on)",
+        "production_required": true,
+        "secret": true
+      },
+      {
+        "key": "CLERK_WEBHOOK_SECRET",
+        "field": "ClerkWebhookSecret",
+        "type": "string",
+        "description": "Verifies `svix-*` signatures on `/webhooks/clerk`",
+        "production_required": true,
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/identity/clerk"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

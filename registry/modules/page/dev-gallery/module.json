@@ -72,7 +72,7 @@
         "source": "internal/web/dev_routes_test.go",
         "target": "internal/web/dev_routes_test.go",
         "class": "test",
-        "sha256": "fb83dbe27354a9e0ed6555386b92db927f9bfdb4bb004dcaae92249130c7a46f",
+        "sha256": "18cdf3ae2b5b006f5b332c1e34510de00c90f19f96cb1fa484c2afaf335d0a09",
         "rewrite_module": true,
         "contract": false
       },

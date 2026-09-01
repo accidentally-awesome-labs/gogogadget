@@ -75,7 +75,7 @@
         "source": "internal/web/billing_test.go",
         "target": "internal/web/billing_test.go",
         "class": "test",
-        "sha256": "326db84bbe8e9a158c0e74ecfa60af235df173012fcfd0f10ad65209306d143f",
+        "sha256": "ffa23d8d6a7a00c8afe1a87802518cb16a3048407b30010c745c2e5c36e10ca5",
         "rewrite_module": true,
         "contract": false
       },
@@ -83,7 +83,7 @@
         "source": "internal/web/page_settings_billing.go",
         "target": "internal/web/page_settings_billing.go",
         "class": "go",
-        "sha256": "2f8e4004508206e9ff60054203250b555fe165c36e81c7aa9371039891ce5666",
+        "sha256": "195587742ab5e5edeb0703ee7de5c510f7d374e6769395f0483cdabfd6b47e73",
         "rewrite_module": true,
         "contract": false
       },

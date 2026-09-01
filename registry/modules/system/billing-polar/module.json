@@ -1,0 +1,172 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/billing-polar",
+    "kind": "system",
+    "name": "billing-polar",
+    "revision": 1,
+    "contract": 1,
+    "title": "Polar billing",
+    "description": "Hosted Polar billing provider",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/billing",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/billing/polar/module.go",
+        "target": "internal/billing/polar/module.go",
+        "class": "go",
+        "sha256": "b25324eeeda42a1c65e56e8749b243a3e6c126b5beed661741b335a7bb8871ab",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/billing/polar"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/billing/polar",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Catalog",
+            "capability": "billing.catalog",
+            "type": "billing.PlanCatalog"
+          },
+          {
+            "field": "Client",
+            "capability": "billing.client",
+            "type": "billing.Client"
+          },
+          {
+            "field": "Webhook",
+            "capability": "billing.webhook",
+            "type": "billing.BillingWebhook"
+          }
+        ],
+        "type_imports": [
+          "internal/billing"
+        ],
+        "start": false,
+        "stop": false,
+        "adapter": {
+          "slot": "ggg/billing",
+          "targets": [
+            {
+              "id": "polar",
+              "title": "Polar",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers",
+              "inputs": [
+                {
+                  "key": "POLAR_ACCESS_TOKEN",
+                  "env_key": "POLAR_ACCESS_TOKEN",
+                  "label": "Polar access token",
+                  "type": "string",
+                  "required": true,
+                  "secret": true
+                },
+                {
+                  "key": "POLAR_WEBHOOK_SECRET",
+                  "env_key": "POLAR_WEBHOOK_SECRET",
+                  "label": "Polar webhook secret",
+                  "type": "string",
+                  "required": true,
+                  "secret": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "POLAR_ACCESS_TOKEN",
+        "field": "PolarAccessToken",
+        "type": "string",
+        "description": "Polar API token. Empty means billing routes render 503 not-configured",
+        "secret": true
+      },
+      {
+        "key": "POLAR_PRODUCT_PRO",
+        "field": "PolarProductPro",
+        "type": "string",
+        "description": "Polar product id for the Pro plan"
+      },
+      {
+        "key": "POLAR_PRODUCT_TEAM",
+        "field": "PolarProductTeam",
+        "type": "string",
+        "description": "Polar product id for the Team plan"
+      },
+      {
+        "key": "POLAR_SERVER",
+        "field": "PolarServer",
+        "type": "string",
+        "description": "sandbox | production",
+        "default": "sandbox",
+        "enum": [
+          "sandbox",
+          "production"
+        ]
+      },
+      {
+        "key": "POLAR_WEBHOOK_SECRET",
+        "field": "PolarWebhookSecret",
+        "type": "string",
+        "description": "Verifies `webhook-*` signatures on `/webhooks/polar`",
+        "secret": true
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/billing/polar"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -34,7 +34,7 @@
         "source": "internal/web/page_pricing.go",
         "target": "internal/web/page_pricing.go",
         "class": "go",
-        "sha256": "b55318a5be11c728e605fa90ee6e8e0ef20212bf1e2739045067fc286817aa49",
+        "sha256": "3ad97bed2e098b6f72076c49b58d22a0dd6e64ed447bbc4636eb054dbc1394de",
         "rewrite_module": true,
         "contract": false
       },

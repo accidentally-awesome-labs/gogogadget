@@ -10,20 +10,6 @@
     "description": "Plan truth, entitlement checks, the provider client port, and subscription webhook state machine.",
     "requires": [
       {
-        "id": "ggg/system/apphost",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
-        "id": "ggg/system/config",
-        "contract": {
-          "min": 1,
-          "max": 1
-        }
-      },
-      {
         "id": "ggg/system/organizations",
         "contract": {
           "min": 1,
@@ -66,7 +52,7 @@
         "source": "internal/billing/entitlements.go",
         "target": "internal/billing/entitlements.go",
         "class": "go",
-        "sha256": "86aa1bac756aae2507f1ed32e23524da514c5f3d1e8c8e2fbb785fb1e1398f7f",
+        "sha256": "3b79299a09ca9547b6e4e53953fba169ff1a90648df363198a45426820be4a95",
         "rewrite_module": true,
         "contract": true
       },
@@ -90,7 +76,7 @@
         "source": "internal/billing/module.go",
         "target": "internal/billing/module.go",
         "class": "go",
-        "sha256": "f0295be345fde6f9f23d99754019a31bd0ad42457f4e7f7a36a53e2c8c551f5e",
+        "sha256": "6507a702317c8e7562bca2add2bb1a271d8a35a2d85db27a7474a64ae0fdf29a",
         "rewrite_module": true,
         "contract": true
       },
@@ -98,7 +84,7 @@
         "source": "internal/billing/module_test.go",
         "target": "internal/billing/module_test.go",
         "class": "test",
-        "sha256": "a5be8956ffa8b77f2869c2640a5fe5a61c31ebad51c9854dfef9a8af87c47c63",
+        "sha256": "b220471bf50273c1fbaf3109f145959f39ef16499d6b57b5222104cbbdbe57d0",
         "rewrite_module": true,
         "contract": false
       },
@@ -114,7 +100,7 @@
         "source": "internal/billing/plans.go",
         "target": "internal/billing/plans.go",
         "class": "go",
-        "sha256": "a939b6ec15000564a0217314e914b3c4f8c0fb67b1a2b97b08ad143c6b9b8b12",
+        "sha256": "54e6f74faaa0c0553920dcba9655acd2a2f1f1d29af4609ccf18ae933c7c23c1",
         "rewrite_module": true,
         "contract": true
       },
@@ -170,30 +156,32 @@
     "claims": {
       "packages": [
         "internal/billing"
+      ],
+      "provider_slots": [
+        "ggg/billing"
       ]
     },
     "runtime": {
-      "system": {
-        "package": "internal/billing",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Config",
-            "capability": "config",
-            "type": "*config.Config",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Client",
-            "capability": "billing.client",
-            "type": "billing.Client"
-          }
-        ],
-        "start": false,
-        "stop": false
-      },
+      "provider_slots": [
+        {
+          "id": "ggg/billing",
+          "critical": true,
+          "capabilities": [
+            {
+              "capability": "billing.client",
+              "type": "billing.Client"
+            },
+            {
+              "capability": "billing.catalog",
+              "type": "billing.PlanCatalog"
+            },
+            {
+              "capability": "billing.webhook",
+              "type": "billing.BillingWebhook"
+            }
+          ]
+        }
+      ],
       "jobs": [
         {
           "kind": "email.dunning_final",
@@ -241,45 +229,7 @@
       ]
     },
     "migrations": [],
-    "environment": [
-      {
-        "key": "POLAR_ACCESS_TOKEN",
-        "field": "PolarAccessToken",
-        "type": "string",
-        "description": "Polar API token. Empty means billing routes render 503 not-configured",
-        "secret": true
-      },
-      {
-        "key": "POLAR_PRODUCT_PRO",
-        "field": "PolarProductPro",
-        "type": "string",
-        "description": "Polar product id for the Pro plan"
-      },
-      {
-        "key": "POLAR_PRODUCT_TEAM",
-        "field": "PolarProductTeam",
-        "type": "string",
-        "description": "Polar product id for the Team plan"
-      },
-      {
-        "key": "POLAR_SERVER",
-        "field": "PolarServer",
-        "type": "string",
-        "description": "sandbox | production",
-        "default": "sandbox",
-        "enum": [
-          "sandbox",
-          "production"
-        ]
-      },
-      {
-        "key": "POLAR_WEBHOOK_SECRET",
-        "field": "PolarWebhookSecret",
-        "type": "string",
-        "description": "Verifies `webhook-*` signatures on `/webhooks/polar`",
-        "secret": true
-      }
-    ],
+    "environment": [],
     "locales": {
       "en": {
         "email.canceled.body_a": "Your plan remains active until",

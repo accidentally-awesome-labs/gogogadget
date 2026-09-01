@@ -9,6 +9,8 @@
 # assertion for.
 home.show /
 api.openapi /api/v1/openapi.yaml
+billing.local.cancel /billing/cancel
+billing.local.confirm /billing/confirm
 content.post.index /blog
 content.release.index /changelog
 docs.index /docs

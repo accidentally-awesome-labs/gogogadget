@@ -45,11 +45,13 @@ type Server struct {
 	verifier        identity.Verifier
 	sessionLoader   identitysession.Loader
 	fetcher         identity.UserFetcher
-	deleter         identity.Deleter // nil → local-only account deletion
+	deleter         identity.Deleter
+	navigator       identity.Navigator
 	billingClient   billing.Client
+	billingCatalog  billing.PlanCatalog
 	analytics       analytics.Capturer
 	store           storage.Store
-	llm             llm.Completer // nil when unconfigured → 503
+	llm             llm.Completer
 	flags           flags.Evaluator
 	reporter        observability.Reporter
 	identityWebhook identity.Webhook
@@ -91,56 +93,52 @@ type Deps struct {
 	// calls — never sets it, so a booted production runtime cannot reach them.
 	TestOnlyModules bool
 
-	Verifier        identity.Verifier
-	SessionLoader   identitysession.Loader
-	Fetcher         identity.UserFetcher
-	IdentityDeleter identity.Deleter
-	Billing         billing.Client
-	Analytics       analytics.Capturer
-	Storage         storage.Store
-	LLM             llm.Completer // nil when unconfigured → AI routes 503
-	Flags           flags.Evaluator
-	Reporter        observability.Reporter
-	IdentityWebhook identity.Webhook
-	BillingWebhook  billing.BillingWebhook
+	Verifier          identity.Verifier
+	SessionLoader     identitysession.Loader
+	Fetcher           identity.UserFetcher
+	IdentityDeleter   identity.Deleter
+	IdentityNavigator identity.Navigator
+	Billing           billing.Client
+	BillingCatalog    billing.PlanCatalog
+	Analytics         analytics.Capturer
+	Storage           storage.Store
+	LLM               llm.Completer
+	Flags             flags.Evaluator
+	Reporter          observability.Reporter
+	IdentityWebhook   identity.Webhook
+	BillingWebhook    billing.BillingWebhook
 }
 
 func NewServer(d Deps) (*Server, error) {
+	if d.Config == nil {
+		return nil, errors.New("web: config capability is required")
+	}
+	for name, value := range map[string]any{
+		"identity.verifier": d.Verifier, "identity.fetcher": d.Fetcher,
+		"identity.deleter": d.IdentityDeleter, "identity.navigator": d.IdentityNavigator,
+		"identity.webhook": d.IdentityWebhook, "billing.client": d.Billing,
+		"billing.catalog": d.BillingCatalog, "billing.webhook": d.BillingWebhook,
+	} {
+		if value == nil {
+			return nil, fmt.Errorf("web: required capability %s is missing", name)
+		}
+	}
 	s := &Server{
-		cfg:             *d.Config,
-		log:             d.Log,
-		db:              d.DB,
-		q:               d.Queries,
-		version:         d.Version,
-		testOnlyModules: d.TestOnlyModules,
-		docs:            d.Docs,
-		verifier:        d.Verifier,
-		sessionLoader:   d.SessionLoader,
-		identityWebhook: d.IdentityWebhook,
-		billingWebhook:  d.BillingWebhook,
-		fetcher:         d.Fetcher,
-		deleter:         d.IdentityDeleter,
-		billingClient:   d.Billing,
-		analytics:       analytics.NoopCapturer{},
-		store:           d.Storage,
-		llm:             d.LLM,
-		flags:           d.Flags,
-		reporter:        d.Reporter,
-		mux:             http.NewServeMux(),
+		cfg: *d.Config, log: d.Log, db: d.DB, q: d.Queries, version: d.Version,
+		testOnlyModules: d.TestOnlyModules, docs: d.Docs, verifier: d.Verifier,
+		sessionLoader: d.SessionLoader, identityWebhook: d.IdentityWebhook,
+		billingWebhook: d.BillingWebhook, fetcher: d.Fetcher,
+		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
+		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
+		analytics: analytics.NoopCapturer{}, store: d.Storage, llm: d.LLM,
+		flags: d.Flags, reporter: d.Reporter, mux: http.NewServeMux(),
 	}
-	if s.identityWebhook == nil {
-		s.identityWebhook = identity.ClerkWebhook{Secret: d.Config.ClerkWebhookSecret}
-	}
-	if s.billingWebhook == nil {
-		s.billingWebhook = billing.PolarWebhook{Secret: d.Config.PolarWebhookSecret}
-	}
-	if s.sessionLoader == nil && d.DB != nil && d.Verifier != nil && d.Fetcher != nil {
+	if s.sessionLoader == nil {
+		if d.DB == nil {
+			return nil, errors.New("web: session loader or database capability is required")
+		}
 		s.sessionLoader = &identitysession.SessionLoader{Pool: d.DB, Verify: d.Verifier, Fetch: d.Fetcher}
 	}
-	// A bad content-type declaration is a wiring bug, so it refuses here. There
-	// is deliberately no fallback to the defaults: silently serving a different
-	// set of collections than the one declared hides the mistake until a reader
-	// notices a missing page.
 	reg, err := content.NewRegistry(contentTypesOf(d))
 	if err != nil {
 		return nil, fmt.Errorf("content types: %w", err)

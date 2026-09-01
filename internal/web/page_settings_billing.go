@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
@@ -48,7 +47,7 @@ func (s *Server) handleSettingsBilling(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Render(w, r, Page{Title: "Billing", Layout: templates.LayoutApp}, templates.SettingsBilling(templates.BillingData{
 		Plan: plan, Sub: sub, ProjectCount: count, UsedStorageBytes: usedBytes, MeterUsage: meterUsage,
-		Plans: billing.Plans, Processing: processing,
+		Plans: s.billingCatalog.All(), Processing: processing,
 		Success: r.URL.Query().Get("success") == "1",
 	}))
 }

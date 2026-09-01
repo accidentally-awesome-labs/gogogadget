@@ -67,7 +67,7 @@
         "source": "internal/web/workflow_billing_checkout.go",
         "target": "internal/web/workflow_billing_checkout.go",
         "class": "go",
-        "sha256": "f90a0d9de5b90d17c9fb2d15b99df639a6e42dae488c50e2533fedbd4f3328fc",
+        "sha256": "39e9c344c263dc5f851283c7880cb2f01fd21a7eacd4a67fb4ec9fcaa33ca1bc",
         "rewrite_module": true,
         "contract": false
       }

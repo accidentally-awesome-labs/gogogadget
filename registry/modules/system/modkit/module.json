@@ -92,7 +92,7 @@
         "source": "internal/modkit/cli.go",
         "target": "internal/modkit/cli.go",
         "class": "go",
-        "sha256": "2f4e0328186442e7d9015f449f118f44368d025fdd881d94cc51fb18e67518af",
+        "sha256": "b185eb6d07dfb46d454b8cb5df623723b7b11c0eca4594120585131e0ba700b0",
         "rewrite_module": true,
         "contract": true
       },

@@ -23,9 +23,9 @@ type Meter struct {
 	LimitPerMonth int64 // -1 = unlimited
 }
 
-// Ordered slice, rendered in this order — a Go map would shuffle pricing
-// cards per run.
-var Plans = []Plan{
+// defaultPlans is immutable source data. Callers receive plans only through a
+// PlanCatalog, whose accessors deep-copy nested slices.
+var defaultPlans = []Plan{
 	{Key: "free", Name: "Free", PriceDisplay: "$0", MaxProjects: 3, MaxMembers: 1, MaxStorageMB: 50,
 		Meters:   []Meter{{Key: "ai_tokens", Label: "AI tokens", LimitPerMonth: 100_000}},
 		Features: []string{"3 projects", "1 team member", "50 MB storage", "100k AI tokens/mo", "Community support"}},
@@ -37,34 +37,25 @@ var Plans = []Plan{
 		Features: []string{"Unlimited everything", "Unlimited members", "Unlimited storage", "Unlimited AI tokens", "SSO via Clerk"}},
 }
 
-// MRR sums monthly recurring revenue in USD over revenue subscriptions
-// (active, trialing, past_due), priced from the plan truth.
+func DefaultPlanCatalog() PlanCatalog {
+	plans := make([]Plan, len(defaultPlans))
+	for i, p := range defaultPlans {
+		plans[i] = clonePlan(p)
+	}
+	catalog, _ := NewPlanCatalog(plans)
+	return catalog
+}
+
+// PlanByKey is retained as a read-only compatibility helper. New request
+// paths must carry the selected immutable PlanCatalog.
+func PlanByKey(key string) Plan { return DefaultPlanCatalog().ByKey(key) }
+
+// MRR sums monthly recurring revenue in USD over revenue subscriptions.
 func MRR(rows []sqlc.ListRevenueSubscriptionsRow) int {
+	catalog := DefaultPlanCatalog()
 	total := 0
 	for _, r := range rows {
-		total += PlanByKey(r.ProductKey).PriceUSDMonthly * int(r.N)
+		total += catalog.ByKey(r.ProductKey).PriceUSDMonthly * int(r.N)
 	}
 	return total
-}
-
-// PlanByKey looks up a plan; unknown keys fall back to free.
-func PlanByKey(key string) Plan {
-	for _, p := range Plans {
-		if p.Key == key {
-			return p
-		}
-	}
-	return Plans[0]
-}
-
-// SetProviderProductIDs injects product IDs from config at boot. The catalog API is preferred for new code.
-func SetProviderProductIDs(pro, team string) {
-	for i := range Plans {
-		switch Plans[i].Key {
-		case "pro":
-			Plans[i].ProviderProductID = pro
-		case "team":
-			Plans[i].ProviderProductID = team
-		}
-	}
 }

@@ -33,12 +33,12 @@ func ValidateProjectName(name string) (string, string) {
 // business in a public payload, and pinning the fields here means adding a
 // column can never silently change the API.
 type projectResponse struct {
-	ID         int64  `json:"id"`
-	OrgID string `json:"org_id"`
-	Name       string `json:"name"`
-	Status     string `json:"status"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
+	ID        int64  `json:"id"`
+	OrgID     string `json:"org_id"`
+	Name      string `json:"name"`
+	Status    string `json:"status"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func newProjectResponse(p sqlc.Project) projectResponse {
@@ -49,9 +49,9 @@ func newProjectResponse(p sqlc.Project) projectResponse {
 	}
 }
 
-// Projects serves /api/v1/projects — the same rules as the HTML transport.
 type Projects struct {
-	Q *sqlc.Queries
+	Q       *sqlc.Queries
+	Catalog billing.PlanCatalog
 }
 
 // ListProjects handles GET /api/v1/projects (scope read).
@@ -143,7 +143,7 @@ func (h *Projects) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan := billing.CurrentPlan(ctx, h.Q, org.OrgID, time.Now())
+	plan := billing.CurrentPlanWithCatalog(ctx, h.Q, org.OrgID, time.Now(), h.Catalog)
 	if plan.MaxProjects > 0 {
 		count, err := h.Q.CountProjectsByOrg(ctx, org.OrgID)
 		if err != nil {

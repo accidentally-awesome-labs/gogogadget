@@ -13,7 +13,7 @@ import (
 // POST /app/billing/checkout {plan}
 func (s *Server) handleBillingCheckout(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
-	if !s.cfg.PolarConfigured() || s.billingClient == nil {
+	if s.billingClient == nil || s.billingCatalog == nil {
 		s.renderBillingNotConfigured(w, r)
 		return
 	}
@@ -21,7 +21,7 @@ func (s *Server) handleBillingCheckout(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	plan := billing.PlanByKey(r.FormValue("plan"))
+	plan := s.billingCatalog.ByKey(r.FormValue("plan"))
 	if plan.ProviderProductID == "" {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		s.Render(w, r, Page{Title: "Billing", Layout: templates.LayoutApp},
@@ -47,7 +47,7 @@ func (s *Server) handleBillingCheckout(w http.ResponseWriter, r *http.Request) {
 // POST /app/billing/portal
 func (s *Server) handleBillingPortal(w http.ResponseWriter, r *http.Request) {
 	org := identity.OrgFrom(r.Context())
-	if !s.cfg.PolarConfigured() || s.billingClient == nil {
+	if s.billingClient == nil {
 		s.renderBillingNotConfigured(w, r)
 		return
 	}

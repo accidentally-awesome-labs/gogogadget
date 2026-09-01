@@ -90,7 +90,7 @@
         "source": "internal/api/projects.go",
         "target": "internal/api/projects.go",
         "class": "go",
-        "sha256": "f1633c507e261f98b27bbc40ab1cee8371389a93f8a38889573cb8c15d9c6e46",
+        "sha256": "247c71867a4fb5780174d700bc140b042c5c1f2ee59d9a3e14fe7e4ca349f996",
         "rewrite_module": true,
         "contract": false
       },

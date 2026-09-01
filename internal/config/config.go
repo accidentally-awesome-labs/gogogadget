@@ -100,11 +100,9 @@ func (c Config) IntValue(key string) (int, error) {
 	}
 	return value, nil
 }
-func (c Config) Test() bool            { return c.Env == "test" }
-func (c Config) ClerkConfigured() bool { return c.ClerkSecretKey != "" }
-func (c Config) PolarConfigured() bool { return c.PolarAccessToken != "" }
-func (c Config) PostHogEnabled() bool  { return c.PostHogAPIKey != "" }
-func (c Config) SentryEnabled() bool   { return c.SentryDSN != "" }
+func (c Config) Test() bool           { return c.Env == "test" }
+func (c Config) PostHogEnabled() bool { return c.PostHogAPIKey != "" }
+func (c Config) SentryEnabled() bool  { return c.SentryDSN != "" }
 
 // LLMConfigured reports whether an OpenAI-compatible backend is set. Empty →
 // the AI route renders a 503 not-configured (same degrade as billing).

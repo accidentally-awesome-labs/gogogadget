@@ -32,7 +32,7 @@
         "source": "internal/config/config.go",
         "target": "internal/config/config.go",
         "class": "go",
-        "sha256": "7a3705c43bc0c463af750f2833e3743317ff8d888aa7324475baf4614878da97",
+        "sha256": "aae04fbe87d8c42ff5a22ed820feb309ca9a6a46034e8843924db1bfb6b7b78b",
         "rewrite_module": true,
         "contract": true
       },
@@ -40,7 +40,7 @@
         "source": "internal/config/config_test.go",
         "target": "internal/config/config_test.go",
         "class": "test",
-        "sha256": "bec2af89acb62cfa871ef7175587561d03c182c662079291c6533f59df3e394c",
+        "sha256": "12bd4322316af91712d45e28bc5afd790e72564a28de8c12058ca509543f08b7",
         "rewrite_module": true,
         "contract": false
       },
@@ -56,7 +56,7 @@
         "source": "internal/config/module_test.go",
         "target": "internal/config/module_test.go",
         "class": "test",
-        "sha256": "49cd770d015455b9b93cb4b0ab16399e5fb54e451582f2f05da2d1d8cf8301f9",
+        "sha256": "ec0e9ddac5185cb27d1351ebcff923fd23f1a6ccf763c3f62135c59e6ab5bc58",
         "rewrite_module": true,
         "contract": false
       }

@@ -1,40 +1,117 @@
 {
+  "schema": 2,
   "module": {
+    "id": "ggg/page/home",
+    "kind": "page",
+    "name": "home",
+    "revision": 1,
+    "contract": 1,
+    "title": "Home page",
+    "description": "The marketing home page: hero, feature grid, plan comparison, and call-to-action band.",
+    "requires": [
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/web/page_home.go",
+        "target": "internal/web/page_home.go",
+        "class": "go",
+        "sha256": "dbb7362f2ad178f2636b88103d1edb3d23256495fc709656abb068aabeb0a5df",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/web/templates/home.templ",
+        "target": "internal/web/templates/home.templ",
+        "class": "templ",
+        "sha256": "f7d3172bbe4fca8a1a5feff1fce40a4161781e9c21cf950b6712f6829496f80f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
     "claims": {
       "routes": [
         "home.show"
       ]
     },
-    "contract": 1,
-    "data": [],
-    "dependencies": {
-      "containers": [],
-      "go": [],
-      "tools": []
+    "runtime": {
+      "routes": [
+        {
+          "id": "home.show",
+          "method": "GET",
+          "pattern": "/{$}",
+          "scope": "public",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleHome"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "footer.company.about",
+          "area": "footer",
+          "href": "/#about",
+          "label_key": "footer.about",
+          "group": "footer.company"
+        },
+        {
+          "id": "footer.product.features",
+          "area": "footer",
+          "href": "/#features",
+          "label_key": "footer.features",
+          "group": "footer.product"
+        },
+        {
+          "id": "nav.public.features",
+          "area": "public",
+          "href": "/#features",
+          "label_key": "nav.features"
+        }
+      ],
+      "visual": [
+        {
+          "id": "home",
+          "path": "/",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]",
+            "img[alt*=\"avatar\" i]"
+          ]
+        }
+      ]
     },
-    "description": "The marketing home page: hero, feature grid, plan comparison, and call-to-action band.",
-    "docs": [],
+    "migrations": [],
     "environment": [],
-    "files": [
-      {
-        "class": "go",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "26ffb3d8306416938a710e4c2507ccafb4ee7198886b9173f22833392501b0e7",
-        "source": "internal/web/page_home.go",
-        "target": "internal/web/page_home.go"
-      },
-      {
-        "class": "templ",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "f7d3172bbe4fca8a1a5feff1fce40a4161781e9c21cf950b6712f6829496f80f",
-        "source": "internal/web/templates/home.templ",
-        "target": "internal/web/templates/home.templ"
-      }
-    ],
-    "id": "ggg/page/home",
-    "kind": "page",
     "locales": {
       "en": {
         "home.cta.docs": "Read the docs",
@@ -42,11 +119,11 @@
         "home.cta_band.body": "Auth, billing, and email are solved problems. Ship the part that makes you money.",
         "home.cta_band.button": "Get started free",
         "home.cta_band.title": "Stop rebuilding the same 40%%",
-        "home.f1.body": "Clerk powers sign-in, social OAuth, 2FA, orgs, roles, and invitations \u2014 mirrored locally for fast queries.",
-        "home.f1.title": "Auth & teams, hosted",
+        "home.f1.body": "Clerk powers sign-in, social OAuth, 2FA, orgs, roles, and invitations — mirrored locally for fast queries.",
+        "home.f1.title": "Auth \u0026 teams, hosted",
         "home.f2.body": "Polar.sh is your merchant of record. Checkout, customer portal, webhooks, and entitlements included.",
         "home.f2.title": "Billing without tax pain",
-        "home.f3.body": "templ templates, sqlc queries, and Go handlers \u2014 the compiler catches what templates usually hide.",
+        "home.f3.body": "templ templates, sqlc queries, and Go handlers — the compiler catches what templates usually hide.",
         "home.f3.title": "Type-safe end to end",
         "home.f4.body": "No SPA weight. Fragments, toasts, inline validation, and optimistic-feeling tables at ~14 KB.",
         "home.f4.title": "HTMX interactivity",
@@ -56,9 +133,9 @@
         "home.f6.title": "Operable from day one",
         "home.faq.a1": "One static binary, no node in production, no hydration cost. HTMX + Alpine cover the interactivity a SaaS dashboard actually needs.",
         "home.faq.a2": "Not to evaluate: DEV_AUTH_BYPASS runs the full app locally with zero SaaS accounts. Connect real services when you are ready to ship.",
-        "home.faq.a3": "Yes. Every external service sits behind one narrow Go interface \u2014 swapping a provider means replacing one file.",
+        "home.faq.a3": "Yes. Every external service sits behind one narrow Go interface — swapping a provider means replacing one file.",
         "home.faq.a4": "Strict CSP, CSRF, rate limiting, migrations on boot, background jobs, audit log, tests, CI, and a Dockerfile ship in the box.",
-        "home.faq.a5": "Tailwind v4 standalone CLI and vendored JS \u2014 there is no node_modules anywhere in the shipped artifact.",
+        "home.faq.a5": "Tailwind v4 standalone CLI and vendored JS — there is no node_modules anywhere in the shipped artifact.",
         "home.faq.q1": "Why Go + HTMX instead of a JS framework?",
         "home.faq.q2": "Do I need accounts with Clerk, Polar, and Resend?",
         "home.faq.q3": "Can I swap a managed service?",
@@ -66,7 +143,7 @@
         "home.faq.q5": "What about the frontend build?",
         "home.faq.title": "Frequently asked questions",
         "home.features.title": "Everything a SaaS needs, nothing it doesn't",
-        "home.hero.subtitle": "The production-grade Go + HTMX boilerplate. Auth, teams, billing, email, admin, blog, and docs \u2014 wired to best-in-class managed services so you own the product, not the plumbing.",
+        "home.hero.subtitle": "The production-grade Go + HTMX boilerplate. Auth, teams, billing, email, admin, blog, and docs — wired to best-in-class managed services so you own the product, not the plumbing.",
         "home.hero.title1": "Ship your SaaS this weekend, ",
         "home.hero.title2": "not next quarter",
         "home.how.title": "How it works",
@@ -81,46 +158,46 @@
         "home.screenshot": "Product screenshot",
         "home.stack": "Built on a curated value stack",
         "home.step1.body": "make setup, add your Clerk and Polar keys, make dev. Zero to running SaaS in ten minutes.",
-        "home.step1.title": "Clone & configure",
+        "home.step1.title": "Clone \u0026 configure",
         "home.step2.body": "Your pages, your domain model, your pricing. Undifferentiated heavy lifting stays delegated.",
         "home.step2.title": "Own the product surface",
-        "home.step3.body": "One static binary. Docker, fly.io, or any VM \u2014 migrations run on boot, scaling is horizontal.",
+        "home.step3.body": "One static binary. Docker, fly.io, or any VM — migrations run on boot, scaling is horizontal.",
         "home.step3.title": "Deploy anywhere"
       },
       "es": {
-        "home.cta.docs": "Lee la documentaci\u00f3n",
+        "home.cta.docs": "Lee la documentación",
         "home.cta.start": "Empieza a construir",
-        "home.cta_band.body": "La autenticaci\u00f3n, la facturaci\u00f3n y el correo son problemas resueltos. Lanza la parte que te genera dinero.",
+        "home.cta_band.body": "La autenticación, la facturación y el correo son problemas resueltos. Lanza la parte que te genera dinero.",
         "home.cta_band.button": "Empieza gratis",
         "home.cta_band.title": "Deja de reconstruir el mismo 40%%",
-        "home.f1.body": "Clerk proporciona inicio de sesi\u00f3n, OAuth social, 2FA, organizaciones, roles e invitaciones \u2014 replicados localmente para consultas r\u00e1pidas.",
-        "home.f1.title": "Autenticaci\u00f3n y equipos, gestionados",
+        "home.f1.body": "Clerk proporciona inicio de sesión, OAuth social, 2FA, organizaciones, roles e invitaciones — replicados localmente para consultas rápidas.",
+        "home.f1.title": "Autenticación y equipos, gestionados",
         "home.f2.body": "Polar.sh es tu comerciante de registro. Checkout, portal de clientes, webhooks y derechos incluidos.",
-        "home.f2.title": "Facturaci\u00f3n sin dolores fiscales",
-        "home.f3.body": "Plantillas templ, consultas sqlc y handlers en Go \u2014 el compilador detecta lo que las plantillas suelen ocultar.",
+        "home.f2.title": "Facturación sin dolores fiscales",
+        "home.f3.body": "Plantillas templ, consultas sqlc y handlers en Go — el compilador detecta lo que las plantillas suelen ocultar.",
         "home.f3.title": "Tipado seguro de extremo a extremo",
-        "home.f4.body": "Sin el peso de un SPA. Fragmentos, toasts, validaci\u00f3n en l\u00ednea y tablas con sensaci\u00f3n optimista en ~14 KB.",
+        "home.f4.body": "Sin el peso de un SPA. Fragmentos, toasts, validación en línea y tablas con sensación optimista en ~14 KB.",
         "home.f4.title": "Interactividad con HTMX",
-        "home.f5.body": "CSP estricto, CSRF, l\u00edmite de peticiones por IP, tokens de API con hash y plantillas con escape autom\u00e1tico.",
+        "home.f5.body": "CSP estricto, CSRF, límite de peticiones por IP, tokens de API con hash y plantillas con escape automático.",
         "home.f5.title": "Seguro por defecto",
-        "home.f6.body": "Cola de trabajos en Postgres, registro de auditor\u00eda, logs estructurados, hooks de Sentry + PostHog, /healthz y /readyz.",
-        "home.f6.title": "Operativo desde el primer d\u00eda",
-        "home.faq.a1": "Un solo binario est\u00e1tico, sin node en producci\u00f3n, sin coste de hidrataci\u00f3n. HTMX + Alpine cubren la interactividad que un panel de SaaS realmente necesita.",
-        "home.faq.a2": "No para evaluarlo: DEV_AUTH_BYPASS ejecuta la app completa en local sin ninguna cuenta SaaS. Conecta los servicios reales cuando est\u00e9s listo para lanzar.",
-        "home.faq.a3": "S\u00ed. Cada servicio externo est\u00e1 detr\u00e1s de una interfaz Go bien delimitada \u2014 cambiar de proveedor significa reemplazar un archivo.",
-        "home.faq.a4": "CSP estricto, CSRF, l\u00edmite de peticiones, migraciones al arrancar, trabajos en segundo plano, registro de auditor\u00eda, tests, CI y un Dockerfile incluidos de serie.",
-        "home.faq.a5": "CLI independiente de Tailwind v4 y JS vendored \u2014 no hay ning\u00fan node_modules en el artefacto final.",
-        "home.faq.q1": "\u00bfPor qu\u00e9 Go + HTMX en lugar de un framework de JS?",
-        "home.faq.q2": "\u00bfNecesito cuentas con Clerk, Polar y Resend?",
-        "home.faq.q3": "\u00bfPuedo cambiar un servicio gestionado?",
-        "home.faq.q4": "\u00bfEst\u00e1 listo para producci\u00f3n?",
-        "home.faq.q5": "\u00bfY la compilaci\u00f3n del frontend?",
+        "home.f6.body": "Cola de trabajos en Postgres, registro de auditoría, logs estructurados, hooks de Sentry + PostHog, /healthz y /readyz.",
+        "home.f6.title": "Operativo desde el primer día",
+        "home.faq.a1": "Un solo binario estático, sin node en producción, sin coste de hidratación. HTMX + Alpine cubren la interactividad que un panel de SaaS realmente necesita.",
+        "home.faq.a2": "No para evaluarlo: DEV_AUTH_BYPASS ejecuta la app completa en local sin ninguna cuenta SaaS. Conecta los servicios reales cuando estés listo para lanzar.",
+        "home.faq.a3": "Sí. Cada servicio externo está detrás de una interfaz Go bien delimitada — cambiar de proveedor significa reemplazar un archivo.",
+        "home.faq.a4": "CSP estricto, CSRF, límite de peticiones, migraciones al arrancar, trabajos en segundo plano, registro de auditoría, tests, CI y un Dockerfile incluidos de serie.",
+        "home.faq.a5": "CLI independiente de Tailwind v4 y JS vendored — no hay ningún node_modules en el artefacto final.",
+        "home.faq.q1": "¿Por qué Go + HTMX en lugar de un framework de JS?",
+        "home.faq.q2": "¿Necesito cuentas con Clerk, Polar y Resend?",
+        "home.faq.q3": "¿Puedo cambiar un servicio gestionado?",
+        "home.faq.q4": "¿Está listo para producción?",
+        "home.faq.q5": "¿Y la compilación del frontend?",
         "home.faq.title": "Preguntas frecuentes",
         "home.features.title": "Todo lo que un SaaS necesita, nada de lo que no",
-        "home.hero.subtitle": "El boilerplate de Go + HTMX listo para producci\u00f3n. Autenticaci\u00f3n, equipos, facturaci\u00f3n, correo, administraci\u00f3n, blog y documentaci\u00f3n \u2014 conectados a servicios gestionados de primera clase para que seas due\u00f1o del producto, no de la infraestructura.",
+        "home.hero.subtitle": "El boilerplate de Go + HTMX listo para producción. Autenticación, equipos, facturación, correo, administración, blog y documentación — conectados a servicios gestionados de primera clase para que seas dueño del producto, no de la infraestructura.",
         "home.hero.title1": "Lanza tu SaaS este fin de semana, ",
-        "home.hero.title2": "no el pr\u00f3ximo trimestre",
-        "home.how.title": "C\u00f3mo funciona",
+        "home.hero.title2": "no el próximo trimestre",
+        "home.how.title": "Cómo funciona",
         "home.pricing.choose": "Elegir %s",
         "home.pricing.current": "Plan actual",
         "home.pricing.get_started": "Comenzar",
@@ -131,98 +208,21 @@
         "home.pricing.upgrade": "Mejorar a %s",
         "home.screenshot": "Captura del producto",
         "home.stack": "Construido sobre una pila de valor cuidadosamente elegida",
-        "home.step1.body": "make setup, a\u00f1ade tus claves de Clerk y Polar, make dev. De cero a un SaaS funcionando en diez minutos.",
+        "home.step1.body": "make setup, añade tus claves de Clerk y Polar, make dev. De cero a un SaaS funcionando en diez minutos.",
         "home.step1.title": "Clona y configura",
-        "home.step2.body": "Tus p\u00e1ginas, tu modelo de dominio, tus precios. El trabajo pesado sin diferenciaci\u00f3n sigue delegado.",
-        "home.step2.title": "S\u00e9 due\u00f1o de la superficie del producto",
-        "home.step3.body": "Un solo binario est\u00e1tico. Docker, fly.io o cualquier VM \u2014 las migraciones se ejecutan al arrancar, el escalado es horizontal.",
+        "home.step2.body": "Tus páginas, tu modelo de dominio, tus precios. El trabajo pesado sin diferenciación sigue delegado.",
+        "home.step2.title": "Sé dueño de la superficie del producto",
+        "home.step3.body": "Un solo binario estático. Docker, fly.io o cualquier VM — las migraciones se ejecutan al arrancar, el escalado es horizontal.",
         "home.step3.title": "Despliega donde quieras"
       }
     },
-    "migrations": [],
-    "name": "home",
-    "removal_policy": "free",
-    "requires": [
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/i18n"
-      },
-      {
-        "contract": {
-          "max": 1,
-          "min": 1
-        },
-        "id": "ggg/system/server"
-      }
-    ],
-    "revision": 1,
-    "runtime": {
-      "navigation": [
-        {
-          "area": "footer",
-          "group": "footer.company",
-          "href": "/#about",
-          "id": "footer.company.about",
-          "label_key": "footer.about"
-        },
-        {
-          "area": "footer",
-          "group": "footer.product",
-          "href": "/#features",
-          "id": "footer.product.features",
-          "label_key": "footer.features"
-        },
-        {
-          "area": "public",
-          "href": "/#features",
-          "id": "nav.public.features",
-          "label_key": "nav.features"
-        }
-      ],
-      "routes": [
-        {
-          "handler": "handleHome",
-          "id": "home.show",
-          "method": "GET",
-          "package": "internal/web",
-          "pattern": "/{$}",
-          "policy": {
-            "admin_write": false,
-            "csrf_exempt": false,
-            "csrf_reason": "",
-            "idempotent": false,
-            "maintenance_exempt": false,
-            "max_body_bytes": 0,
-            "rate_exempt": false
-          },
-          "scope": "public"
-        }
-      ],
-      "visual": [
-        {
-          "id": "home",
-          "masks": [
-            "[data-testid=\"relative-time\"]",
-            "img[alt*=\"avatar\" i]"
-          ],
-          "path": "/",
-          "viewports": [
-            "desktop",
-            "tablet",
-            "mobile"
-          ]
-        }
-      ]
-    },
+    "docs": [],
     "tests": {
       "go_packages": [
         "internal/web"
       ]
     },
-    "title": "Home page"
-  },
-  "schema": 2
+    "data": [],
+    "removal_policy": "free"
+  }
 }

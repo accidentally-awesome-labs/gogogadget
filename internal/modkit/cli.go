@@ -8,6 +8,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/db"
+	"github.com/gogogadget/gogogadget/internal/identity"
+	identityclerk "github.com/gogogadget/gogogadget/internal/identity/clerk"
+	identitydev "github.com/gogogadget/gogogadget/internal/identity/devadapter"
+	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"io"
 	"io/fs"
 	"net/http"
@@ -15,6 +22,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 // Project and lock file names. These are a public contract: operators and
@@ -120,6 +128,8 @@ func (c CLI) Run(ctx context.Context, args []string) error {
 		return c.runDiff(ctx, rest)
 	case "resolve":
 		return c.runResolve(ctx, rest)
+	case "identity":
+		return c.runIdentity(ctx, rest)
 	case "doctor":
 		return c.runDoctor(ctx, rest)
 	case "migrate":
@@ -183,6 +193,92 @@ func (c CLI) runVersion(args []string) error {
 	}
 	_, err := fmt.Fprintf(c.out(), "ggg %s\n", version)
 	return err
+}
+func (c CLI) runIdentity(ctx context.Context, args []string) error {
+	if len(args) == 0 || args[0] != "link" {
+		return usageError("usage: ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)")
+	}
+	linkArgs := args[1:]
+	var environment, provider, subject, userID, orgID string
+	set := c.flagSet("identity link")
+	set.StringVar(&environment, "environment", "", "")
+	set.StringVar(&provider, "provider", "", "")
+	set.StringVar(&subject, "subject", "", "")
+	set.StringVar(&userID, "user", "", "")
+	set.StringVar(&orgID, "org", "", "")
+	positional, err := parseFlags(set, linkArgs)
+	if err != nil || len(positional) != 0 || environment == "" || provider == "" || subject == "" || (userID == "") == (orgID == "") {
+		return usageError("usage: ggg identity link --environment ENV --provider PROVIDER --subject SUBJECT (--user USER_ID|--org ORG_ID)")
+	}
+	if environment != "development" && environment != "test" && environment != "production" {
+		return usageError("identity link: environment must be development, test, or production")
+	}
+	project, err := c.loadProject()
+	if err != nil {
+		return err
+	}
+	choices, ok := project.Providers["ggg/identity"]
+	if !ok {
+		return refusalError(errors.New("identity provider slot is not selected"))
+	}
+	choice := choices.Development
+	switch environment {
+	case "test":
+		choice = choices.Test
+	case "production":
+		choice = choices.Production
+	}
+	if choice.Adapter == "" || choice.Target == "" {
+		return refusalError(fmt.Errorf("identity provider selection is incomplete for %s", environment))
+	}
+	if (strings.HasSuffix(choice.Adapter, "/identity-dev") && provider != "dev") ||
+		(strings.HasSuffix(choice.Adapter, "/identity-clerk") && provider != "clerk") {
+		return refusalError(fmt.Errorf("provider %q does not match selected adapter %q", provider, choice.Adapter))
+	}
+	lookup := func(key string) string {
+		if key == "APP_ENV" {
+			return environment
+		}
+		return os.Getenv(key)
+	}
+	cfg, err := config.LoadFrom(lookup)
+	if err != nil {
+		return refusalError(err)
+	}
+	h := apphost.Map(nil, time.Now(), c.Version)
+	var verifier identity.Verifier
+	switch {
+	case strings.HasSuffix(choice.Adapter, "/identity-dev"):
+		adapter, createErr := identitydev.NewModule(ctx, h, identitydev.Deps{Config: &cfg})
+		if createErr != nil {
+			return runtimeError(createErr)
+		}
+		verifier = adapter.Verifier
+	case strings.HasSuffix(choice.Adapter, "/identity-clerk"):
+		adapter, createErr := identityclerk.NewModule(ctx, h, identityclerk.Deps{Config: &cfg})
+		if createErr != nil {
+			return runtimeError(createErr)
+		}
+		verifier = adapter.Verifier
+	default:
+		return refusalError(fmt.Errorf("unsupported identity adapter %q", choice.Adapter))
+	}
+	pool, err := db.Open(ctx, cfg.DatabaseURL)
+	if err != nil {
+		return runtimeError(err)
+	}
+	defer pool.Close()
+	linker := &identitysession.Linker{Pool: pool, Verify: verifier}
+	argsForLink := []string{"--environment", environment, "--provider", provider, "--subject", subject}
+	if userID != "" {
+		argsForLink = append(argsForLink, "--user", userID)
+	} else {
+		argsForLink = append(argsForLink, "--org", orgID)
+	}
+	if err := identitysession.RunLinkCommand(ctx, linker, argsForLink); err != nil {
+		return runtimeError(err)
+	}
+	return nil
 }
 
 // engine returns the engine to plan with. A caller-supplied engine wins so

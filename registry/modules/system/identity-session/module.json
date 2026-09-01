@@ -1,0 +1,139 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/identity-session",
+    "kind": "system",
+    "name": "identity-session",
+    "revision": 1,
+    "contract": 1,
+    "title": "Identity sessions",
+    "description": "Transactional provider-subject to opaque domain session mapping",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/identity/session/link.go",
+        "target": "internal/identity/session/link.go",
+        "class": "go",
+        "sha256": "313dd2c6f9c335dee6f644c6170355388d6c858c11d0b407b0e35d62eeffb8a2",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/session/module.go",
+        "target": "internal/identity/session/module.go",
+        "class": "go",
+        "sha256": "6d120d96ea35b5d37b1bb872c9fdc7e46bad5c959d49de6e15f24d3b2fc72c21",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/identity/session/session.go",
+        "target": "internal/identity/session/session.go",
+        "class": "go",
+        "sha256": "a49e537c8f3eac6e8bbab3fa62fc947ebdfe7e954a7986d4c648c96e5b160d93",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/identity/session"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/identity/session",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          },
+          {
+            "field": "Fetch",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher",
+            "optional": false
+          },
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          },
+          {
+            "field": "Verify",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Loader",
+            "capability": "identity.session",
+            "type": "session.Loader"
+          }
+        ],
+        "type_imports": [
+          "internal/identity",
+          "internal/identity/session",
+          "github.com/jackc/pgx/v5/pgxpool"
+        ],
+        "start": false,
+        "stop": false
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/identity/session"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

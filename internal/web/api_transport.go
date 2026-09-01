@@ -25,7 +25,7 @@ type apiSurface struct {
 // newAPISurface composes the API transport for this server.
 func newAPISurface(s *Server) apiSurface {
 	middleware := api.NewMiddleware(s.q, s.cfg.APIRateLimitPerMinute)
-	projects := &api.Projects{Q: s.q}
+	projects := &api.Projects{Q: s.q, Catalog: s.billingCatalog}
 	ai := &api.AI{Q: s.q, LLM: s.llm}
 	return apiSurface{
 		middleware:    middleware,

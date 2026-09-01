@@ -12,11 +12,11 @@ func (s *Server) handlePricing(w http.ResponseWriter, r *http.Request) {
 	authed := identity.UserFrom(r.Context()) != nil && identity.OrgFrom(r.Context()) != nil
 	currentPlan := ""
 	if authed {
-		currentPlan = billing.CurrentPlan(r.Context(), s.q, identity.OrgFrom(r.Context()).OrgID, s.cfg.Now()).Key
+		currentPlan = billing.CurrentPlanWithCatalog(r.Context(), s.q, identity.OrgFrom(r.Context()).OrgID, s.cfg.Now(), s.billingCatalog).Key
 	}
 	s.Render(w, r, Page{
 		Title:       "Pricing",
-		Description: "Simple pricing that scales with you. Start free, upgrade when you outgrow it.",
+		Description: "Simple plans that scale with your work.",
 		Layout:      templates.LayoutPublic,
-	}, templates.Pricing(billing.Plans, authed, currentPlan))
+	}, templates.Pricing(s.billingCatalog.All(), authed, currentPlan))
 }

@@ -24,12 +24,12 @@ degradation behave.
 | `POSTHOG_HOST` | `ggg/system/analytics` |  | `https://us.i.posthog.com` | Target of the `/ingest` reverse proxy |
 | `DATABASE_URL` | `ggg/system/database` | **production** | `postgres://postgres:postgres@localhost:5432/gogogadget?sslmode=disable` | Postgres connection string. The dev default matches `docker compose up -d db`; production has no fallback because booting into the wrong database is worse than not booting. Secret: ships blank in `.env.example` |
 | `ADMIN_EMAIL` | `ggg/system/identity` |  |  | First sign-in with this address is granted the full admin role. Empty means nobody is staff |
-| `CLERK_FRONTEND_API_URL` | `ggg/system/identity` |  |  | Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise |
-| `CLERK_PORTAL_URL` | `ggg/system/identity` | **production** |  | Hosted Account Portal base, e.g. `https://accounts.your-app.com` |
-| `CLERK_PUBLISHABLE_KEY` | `ggg/system/identity` | **production** |  | Drives the vendored clerk-js that keeps the `__session` JWT fresh |
-| `CLERK_SECRET_KEY` | `ggg/system/identity` | **production** |  | Clerk API secret. Empty means auth is not configured and `/app` renders 503 (unless the dev bypass is on). Secret: ships blank in `.env.example` |
-| `CLERK_WEBHOOK_SECRET` | `ggg/system/identity` | **production** |  | Verifies `svix-*` signatures on `/webhooks/clerk`. Secret: ships blank in `.env.example` |
-| `DEV_AUTH_BYPASS` | `ggg/system/identity` |  | `false` | Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error |
+| `CLERK_FRONTEND_API_URL` | `ggg/system/identity-clerk` |  |  | Clerk Frontend API origin, which feeds the CSP `connect-src`. Derived from APP_URL when unset: `https://clerk.<host>` in production, the Clerk dev wildcard otherwise |
+| `CLERK_PORTAL_URL` | `ggg/system/identity-clerk` | **production** |  | Hosted Account Portal base, e.g. `https://accounts.your-app.com` |
+| `CLERK_PUBLISHABLE_KEY` | `ggg/system/identity-clerk` | **production** |  | Drives the vendored clerk-js that keeps the `__session` JWT fresh |
+| `CLERK_SECRET_KEY` | `ggg/system/identity-clerk` | **production** |  | Clerk API secret. Empty means auth is not configured and `/app` renders 503 (unless the dev bypass is on). Secret: ships blank in `.env.example` |
+| `CLERK_WEBHOOK_SECRET` | `ggg/system/identity-clerk` | **production** |  | Verifies `svix-*` signatures on `/webhooks/clerk`. Secret: ships blank in `.env.example` |
+| `DEV_AUTH_BYPASS` | `ggg/system/identity-dev` |  | `false` | Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error |
 | `LLM_API_KEY` | `ggg/system/llm` |  |  | With LLM_MODEL this enables `/api/v1/ai/chat`; empty returns 503 not_configured. Secret: ships blank in `.env.example` |
 | `LLM_BASE_URL` | `ggg/system/llm` |  | `https://api.openai.com/v1` | Any OpenAI-compatible API base |
 | `LLM_MODEL` | `ggg/system/llm` |  |  | Forced server-side, so callers cannot pick a model |
@@ -37,11 +37,11 @@ degradation behave.
 | `RESEND_API_KEY` | `ggg/system/mail-resend` | **always** |  | Resend API key. Secret: ships blank in `.env.example` |
 | `SENTRY_DSN` | `ggg/system/observability` |  |  | Sentry DSN. Empty selects the no-op reporter. Secret: ships blank in `.env.example` |
 | `AUDIT_RETENTION_DAYS` | `ggg/system/audit` |  |  | The daily janitor deletes audit rows older than this many days; 0 retains forever. Integer >= 0 |
-| `POLAR_ACCESS_TOKEN` | `ggg/system/billing` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
-| `POLAR_PRODUCT_PRO` | `ggg/system/billing` |  |  | Polar product id for the Pro plan |
-| `POLAR_PRODUCT_TEAM` | `ggg/system/billing` |  |  | Polar product id for the Team plan |
-| `POLAR_SERVER` | `ggg/system/billing` |  | `sandbox` | sandbox \| production |
-| `POLAR_WEBHOOK_SECRET` | `ggg/system/billing` |  |  | Verifies `webhook-*` signatures on `/webhooks/polar`. Secret: ships blank in `.env.example` |
+| `POLAR_ACCESS_TOKEN` | `ggg/system/billing-polar` |  |  | Polar API token. Empty means billing routes render 503 not-configured. Secret: ships blank in `.env.example` |
+| `POLAR_PRODUCT_PRO` | `ggg/system/billing-polar` |  |  | Polar product id for the Pro plan |
+| `POLAR_PRODUCT_TEAM` | `ggg/system/billing-polar` |  |  | Polar product id for the Team plan |
+| `POLAR_SERVER` | `ggg/system/billing-polar` |  | `sandbox` | sandbox \| production |
+| `POLAR_WEBHOOK_SECRET` | `ggg/system/billing-polar` |  |  | Verifies `webhook-*` signatures on `/webhooks/polar`. Secret: ships blank in `.env.example` |
 | `RATE_LIMIT_RPM` | `ggg/system/rate-limit` |  | `100` | Per-IP request budget per minute (burst is 2x). Raise it for load tests and e2e harnesses, which drive a single IP hard. Integer >= 1 |
 | `API_RATE_LIMIT_RPM` | `ggg/system/api` |  | `60` | Per-API-token request budget per minute (burst is 2x) on `/api/v1`. Independent of the per-IP shield because a token survives NAT and roaming, and can be rotated. Integer >= 1 |
 | `PORT` | `ggg/system/server` |  | `8080` | HTTP listen port. Integer between 1 and 65535 |

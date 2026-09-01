@@ -3,10 +3,8 @@ package web
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
-	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/i18n"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
@@ -19,7 +17,7 @@ const sessionCookieName = "__session"
 // authEnabled reports whether any real auth path exists (Clerk configured, or
 // the dev/test bypass). When false, /app routes 503 "not configured".
 func (s *Server) authEnabled() bool {
-	return s.cfg.ClerkConfigured() || s.cfg.DevAuthBypass
+	return s.verifier != nil && s.sessionLoader != nil
 }
 
 // sessionLoad is the chain's identity step: extract the __session cookie
@@ -37,95 +35,21 @@ func (s *Server) sessionLoad(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		if s.sessionLoader != nil {
-			session, loadErr := s.sessionLoader.Load(r.Context(), cookie.Value)
-			if loadErr != nil {
-				next.ServeHTTP(w, r)
-				return
-			}
-			ctx := identity.WithUser(r.Context(), &session.User)
-			ctx = identity.WithClaims(ctx, &session.Claims)
-			if session.Org != nil {
-				ctx = identity.WithOrg(ctx, session.Org)
-			}
-			ctx = s.applyStoredAppearance(w, r, ctx, session.User)
-			ctx = s.applyImpersonation(w, r, ctx)
-			next.ServeHTTP(w, r.WithContext(ctx))
-			return
-		}
-
-		providerClaims, err := s.verifier.Verify(r.Context(), cookie.Value)
-		if err != nil {
-			// Invalid/expired token → treat as unauthenticated; RequireAuth redirects.
+		if s.sessionLoader == nil {
 			next.ServeHTTP(w, r)
 			return
 		}
-
-		claims := &identity.Claims{UserID: providerClaims.UserSubject, OrgID: providerClaims.OrgSubject, OrgRole: providerClaims.OrgRole, OrgSlug: providerClaims.OrgSlug}
-		ctx := r.Context()
-		user, err := s.q.GetUserByID(ctx, claims.UserID)
-		switch {
-		case errors.Is(err, pgx.ErrNoRows):
-			profile, ferr := s.fetcher.Fetch(ctx, claims.UserID)
-			if ferr != nil {
-				s.log.Error("identity sync fetch", "error", ferr, "user_id", claims.UserID)
-				s.renderStatus(w, r, http.StatusServiceUnavailable, "Identity sync in progress", "We hit a snag syncing your account — refresh to retry.")
-				return
-			}
-			user, err = s.q.UpsertUser(ctx, sqlc.UpsertUserParams{
-				UserID: claims.UserID, Email: profile.Email, Name: profile.Name, AvatarUrl: profile.AvatarURL,
-			})
-			if err != nil {
-				s.log.Error("identity sync upsert", "error", err)
-				s.renderStatus(w, r, http.StatusServiceUnavailable, "Identity sync in progress", "We hit a snag syncing your account — refresh to retry.")
-				return
-			}
-			// ADMIN_EMAIL grant on first sight of the configured address.
-			if s.cfg.AdminEmail != "" && strings.EqualFold(profile.Email, s.cfg.AdminEmail) {
-				if err := s.q.SetUserAdminRoleByEmail(ctx, sqlc.SetUserAdminRoleByEmailParams{
-					Email: profile.Email, AdminRole: identity.RoleAdmin,
-				}); err == nil {
-					user.AdminRole = identity.RoleAdmin
-				}
-			}
-		case err != nil:
-			s.log.Error("identity load user", "error", err)
-			s.renderStatus(w, r, http.StatusServiceUnavailable, "Identity sync in progress", "We hit a snag syncing your account — refresh to retry.")
+		session, loadErr := s.sessionLoader.Load(r.Context(), cookie.Value)
+		if loadErr != nil {
+			next.ServeHTTP(w, r)
 			return
 		}
-
-		ctx = identity.WithUser(ctx, &user)
-		ctx = s.applyStoredAppearance(w, r, ctx, user)
-		ctx = identity.WithClaims(ctx, claims)
-		if claims.OrgID != "" {
-			org, oerr := s.q.GetOrgByID(ctx, claims.OrgID)
-			switch {
-			case oerr == nil:
-				ctx = identity.WithOrg(ctx, &org)
-			case errors.Is(oerr, pgx.ErrNoRows):
-				// Webhook lag/failure self-heal: claims carry org_id/slug/role,
-				// enough to seed the mirror. The organization.created webhook
-				// corrects the name on arrival (UpsertOrg overwrites).
-				org, oerr = s.q.UpsertOrg(ctx, sqlc.UpsertOrgParams{
-					OrgID: claims.OrgID, Name: claims.OrgSlug, Slug: claims.OrgSlug,
-				})
-				if oerr == nil {
-					if err := s.q.UpsertMembership(ctx, sqlc.UpsertMembershipParams{
-						OrgID: claims.OrgID, UserID: claims.UserID, Role: claims.OrgRole,
-					}); err != nil {
-						s.log.Warn("lazy membership sync", "error", err)
-					}
-					ctx = identity.WithOrg(ctx, &org)
-				} else {
-					s.log.Error("lazy org sync", "error", oerr)
-				}
-			default:
-				s.log.Error("identity load org", "error", oerr)
-			}
+		ctx := identity.WithUser(r.Context(), &session.User)
+		ctx = identity.WithClaims(ctx, &session.Claims)
+		if session.Org != nil {
+			ctx = identity.WithOrg(ctx, session.Org)
 		}
-		// Impersonation override: AFTER the real JWT verify + mirror upsert.
-		// Never bypasses Clerk — an expired/absent admin session means this
-		// code is never even reached.
+		ctx = s.applyStoredAppearance(w, r, ctx, session.User)
 		ctx = s.applyImpersonation(w, r, ctx)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -191,7 +115,7 @@ func (s *Server) requireOrg(next http.Handler) http.Handler {
 				return
 			}
 			s.Render(w, r, Page{Title: "Choose an organization", Layout: templates.LayoutPublic},
-				templates.SelectOrg(orgs, s.cfg.DevAuthBypass && !s.cfg.ClerkConfigured()))
+				templates.SelectOrg(orgs, false))
 			return
 		}
 		if identity.OrgFrom(r.Context()) == nil {
@@ -223,7 +147,7 @@ func (s *Server) loadPlan(next http.Handler) http.Handler {
 			s.renderError(w, r, err.Error())
 			return
 		}
-		plan := billing.CurrentPlan(ctx, s.q, org.OrgID, s.cfg.Now())
+		plan := billing.CurrentPlanWithCatalog(ctx, s.q, org.OrgID, s.cfg.Now(), s.billingCatalog)
 		next.ServeHTTP(w, r.WithContext(identity.WithPlan(ctx, plan)))
 	})
 }

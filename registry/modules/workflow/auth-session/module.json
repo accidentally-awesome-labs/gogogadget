@@ -65,7 +65,7 @@
         "source": "internal/web/workflow_auth_session.go",
         "target": "internal/web/workflow_auth_session.go",
         "class": "go",
-        "sha256": "82d4ea68777e506ca9cf93dce7e9b9b617f2dbdf1db399ea1efab9f5e1ade18b",
+        "sha256": "2158ba8d97c0249a634f93e157cac613a3d90fd2421fb3d060565817facfd333",
         "rewrite_module": true,
         "contract": true
       }

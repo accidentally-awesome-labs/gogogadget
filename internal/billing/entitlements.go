@@ -25,20 +25,25 @@ func Entitled(sub *sqlc.Subscription, now time.Time) bool {
 	}
 }
 
-// CurrentPlan resolves the org's effective plan: a subscription row confers
-// its product's plan only while Entitled; anything else is free. The Entitled
-// gate inside CurrentPlan is the fix for the canonical bug (expired/revoked
-// sub silently keeping paid limits).
-func CurrentPlan(ctx context.Context, q *sqlc.Queries, orgID string, now time.Time) Plan {
+// CurrentPlanWithCatalog resolves the org's effective plan using the selected
+// immutable catalog. Database failures conservatively return free.
+func CurrentPlanWithCatalog(ctx context.Context, q *sqlc.Queries, orgID string, now time.Time, catalog PlanCatalog) Plan {
+	if catalog == nil {
+		catalog = DefaultPlanCatalog()
+	}
 	sub, err := q.GetSubscriptionByOrg(ctx, orgID)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return PlanByKey("free")
+		return catalog.ByKey("free")
 	}
 	if err != nil {
-		return PlanByKey("free") // DB hiccup must never widen entitlements
+		return catalog.ByKey("free")
 	}
 	if Entitled(&sub, now) {
-		return PlanByKey(sub.ProductKey)
+		return catalog.ByKey(sub.ProductKey)
 	}
-	return PlanByKey("free")
+	return catalog.ByKey("free")
+}
+
+func CurrentPlan(ctx context.Context, q *sqlc.Queries, orgID string, now time.Time) Plan {
+	return CurrentPlanWithCatalog(ctx, q, orgID, now, DefaultPlanCatalog())
 }

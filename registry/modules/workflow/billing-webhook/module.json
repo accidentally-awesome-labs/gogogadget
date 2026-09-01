@@ -57,7 +57,7 @@
         "source": "internal/web/workflow_billing_webhook.go",
         "target": "internal/web/workflow_billing_webhook.go",
         "class": "go",
-        "sha256": "6c0726ec26b8f1184c24179037e5aff60126f5b7723867b04b6669afbdbc0c92",
+        "sha256": "783446d8c76bb8109ab5f742671cdd97618cfe8a5b46fa6926c6e68f15eb6f8f",
         "rewrite_module": true,
         "contract": true
       }

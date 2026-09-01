@@ -10,30 +10,29 @@ import (
 	"strings"
 )
 
-// POST /webhooks/polar. Signature parsing belongs to billing's Polar adapter;
-// this handler only records idempotency and dispatches neutral events.
+// POST /webhooks/polar. Signature parsing belongs to the selected billing
+// adapter; this handler only records idempotency and dispatches neutral events.
 func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
-	if s.cfg.PolarWebhookSecret == "" {
-		http.Error(w, "polar webhooks not configured", http.StatusServiceUnavailable)
-		return
-	}
 	payload, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "read body", http.StatusBadRequest)
 		return
 	}
-	evt, err := (billing.PolarWebhook{Secret: s.cfg.PolarWebhookSecret}).Verify(r.Context(), payload, r.Header)
+	evt, err := s.billingWebhook.Verify(r.Context(), payload, r.Header)
 	if err != nil {
 		http.Error(w, "invalid signature", http.StatusBadRequest)
 		return
 	}
-	msgID := r.Header.Get("webhook-id")
+	msgID := evt.ID
 	if msgID == "" {
-		http.Error(w, "missing webhook-id", http.StatusBadRequest)
+		msgID = r.Header.Get("webhook-id")
+	}
+	if msgID == "" {
+		http.Error(w, "missing webhook id", http.StatusBadRequest)
 		return
 	}
 	ctx := r.Context()
-	if _, err = s.q.InsertWebhookEvent(ctx, sqlc.InsertWebhookEventParams{ID: msgID, Provider: "polar", EventType: evt.Type}); errors.Is(err, pgx.ErrNoRows) {
+	if _, err = s.q.InsertWebhookEvent(ctx, sqlc.InsertWebhookEventParams{ID: msgID, Provider: evt.Provider, EventType: evt.Type}); errors.Is(err, pgx.ErrNoRows) {
 		w.WriteHeader(http.StatusOK)
 		return
 	} else if err != nil {
@@ -45,9 +44,9 @@ func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	payloadData := billing.SubscriptionPayload{ID: evt.ProviderSubscriptionID, CustomerID: evt.ProviderCustomerID, ProductID: evt.ProviderProductID, Status: evt.Status, CurrentPeriodEnd: evt.CurrentPeriodEnd, CancelAtPeriodEnd: evt.CancelAtPeriodEnd, Metadata: map[string]string{"org_id": evt.OrgIDHint}}
-	processor := &billing.Processor{Q: s.q, Log: s.log, ProductPlans: s.productPlans(), Provider: "polar", Emails: emailSink{s}, Capture: s.captureEvent}
+	processor := &billing.Processor{Q: s.q, Log: s.log, ProductPlans: s.productPlans(), Provider: evt.Provider, Emails: emailSink{s}, Capture: s.captureEvent}
 	if err := processor.ProcessSubscription(ctx, evt.Type, payloadData); err != nil {
-		s.log.Error("polar webhook process", "type", evt.Type, "error", err)
+		s.log.Error("billing webhook process", "type", evt.Type, "error", err)
 		http.Error(w, "processing failed", http.StatusInternalServerError)
 		return
 	}
@@ -55,7 +54,7 @@ func (s *Server) handlePolarWebhook(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) productPlans() map[string]string {
 	m := map[string]string{}
-	for _, p := range billing.Plans {
+	for _, p := range s.billingCatalog.All() {
 		if p.ProviderProductID != "" {
 			m[p.ProviderProductID] = p.Key
 		}

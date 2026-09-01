@@ -15,6 +15,16 @@
     "ggg/element/divider"
   ],
   "providers": {
+    "ggg/billing": {
+      "development": {"adapter": "ggg/system/billing-local", "target": "local"},
+      "test": {"adapter": "ggg/system/billing-local", "target": "local"},
+      "production": {"adapter": "ggg/system/billing-polar", "target": "polar"}
+    },
+    "ggg/identity": {
+      "development": {"adapter": "ggg/system/identity-dev", "target": "local"},
+      "test": {"adapter": "ggg/system/identity-dev", "target": "local"},
+      "production": {"adapter": "ggg/system/identity-clerk", "target": "clerk"}
+    },
     "ggg/mail": {
       "development": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
       "test": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},

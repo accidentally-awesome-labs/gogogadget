@@ -55,7 +55,10 @@ func polarServer(t *testing.T, mutate func(*Deps)) *Server {
 		d.Config.PolarAccessToken = "polar_test"
 		d.Config.PolarWebhookSecret = testPolarWebhookSecret
 		d.Config.PolarServer = "sandbox"
-		billing.SetProviderProductIDs("prod_pro", "prod_team")
+		plans := billing.DefaultPlanCatalog().All()
+		plans[1].ProviderProductID, plans[2].ProviderProductID = "prod_pro", "prod_team"
+		d.BillingCatalog, _ = billing.NewPlanCatalog(plans)
+		d.BillingWebhook = billing.PolarWebhook{Secret: testPolarWebhookSecret}
 		if mutate != nil {
 			mutate(d)
 		}

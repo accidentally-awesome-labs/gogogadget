@@ -1,0 +1,137 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/identity-dev",
+    "kind": "system",
+    "name": "identity-dev",
+    "revision": 1,
+    "contract": 1,
+    "title": "Development identity",
+    "description": "Synthetic identity for development and tests",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/identity/devadapter/module.go",
+        "target": "internal/identity/devadapter/module.go",
+        "class": "go",
+        "sha256": "fe705490e79139db0744e2e238b418733d11fb19cf3c34c101c6e3eb53de038d",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/identity/devadapter"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/identity/devadapter",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Deleter",
+            "capability": "identity.deleter",
+            "type": "identity.Deleter"
+          },
+          {
+            "field": "Fetcher",
+            "capability": "identity.fetcher",
+            "type": "identity.UserFetcher"
+          },
+          {
+            "field": "Navigator",
+            "capability": "identity.navigator",
+            "type": "identity.Navigator"
+          },
+          {
+            "field": "Verifier",
+            "capability": "identity.verifier",
+            "type": "identity.Verifier"
+          },
+          {
+            "field": "Webhook",
+            "capability": "identity.webhook",
+            "type": "identity.Webhook"
+          }
+        ],
+        "type_imports": [
+          "internal/identity"
+        ],
+        "start": false,
+        "stop": false,
+        "adapter": {
+          "slot": "ggg/identity",
+          "targets": [
+            {
+              "id": "local",
+              "title": "Local identity",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "DEV_AUTH_BYPASS",
+        "field": "DevAuthBypass",
+        "type": "bool",
+        "description": "Enables synthetic `e2e:` session tokens. true with APP_ENV=production is a hard boot error",
+        "default": "false",
+        "example": "true"
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/identity/devadapter"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

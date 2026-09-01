@@ -200,6 +200,7 @@
       "ggg/system/feature-flags",
       "ggg/system/i18n",
       "ggg/system/identity",
+      "ggg/system/identity-session",
       "ggg/system/impersonation",
       "ggg/system/jobs",
       "ggg/system/llm",
@@ -252,17 +253,68 @@
     "name": "full",
     "provider_defaults": {
       "ggg/mail": {
-        "development": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
-        "test": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
-        "production": {"adapter": "ggg/system/mail-resend", "target": "resend"}
+        "development": {
+          "adapter": "ggg/system/mail-dev",
+          "target": "filesystem"
+        },
+        "test": {
+          "adapter": "ggg/system/mail-dev",
+          "target": "filesystem"
+        },
+        "production": {
+          "adapter": "ggg/system/mail-resend",
+          "target": "resend"
+        }
       },
       "ggg/storage": {
-        "development": {"adapter": "ggg/system/storage-filesystem", "target": "filesystem"},
-        "test": {"adapter": "ggg/system/storage-filesystem", "target": "filesystem"},
-        "production": {"adapter": "ggg/system/storage-s3", "target": "r2"}
+        "development": {
+          "adapter": "ggg/system/storage-filesystem",
+          "target": "filesystem"
+        },
+        "test": {
+          "adapter": "ggg/system/storage-filesystem",
+          "target": "filesystem"
+        },
+        "production": {
+          "adapter": "ggg/system/storage-s3",
+          "target": "r2"
+        }
+      },
+      "ggg/billing": {
+        "development": {
+          "adapter": "ggg/system/billing-local",
+          "target": "local"
+        },
+        "test": {
+          "adapter": "ggg/system/billing-local",
+          "target": "local"
+        },
+        "production": {
+          "adapter": "ggg/system/billing-polar",
+          "target": "polar"
+        }
+      },
+      "ggg/identity": {
+        "development": {
+          "adapter": "ggg/system/identity-dev",
+          "target": "local"
+        },
+        "test": {
+          "adapter": "ggg/system/identity-dev",
+          "target": "local"
+        },
+        "production": {
+          "adapter": "ggg/system/identity-clerk",
+          "target": "clerk"
+        }
       }
     },
-    "required_provider_slots": ["ggg/mail", "ggg/storage"],
+    "required_provider_slots": [
+      "ggg/billing",
+      "ggg/identity",
+      "ggg/mail",
+      "ggg/storage"
+    ],
     "revision": 1,
     "title": "Full GoGoGadget"
   },

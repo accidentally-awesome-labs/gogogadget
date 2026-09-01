@@ -54,3 +54,25 @@ Latest verification:
 Remaining known gaps are the full constructor-free provider-slot manifest cutover, removal of legacy global plan compatibility API, a wired top-level `ggg identity link` command, and a dedicated pre-0020 fixture migration integration test.
 
 - `go test ./internal/db -run TestProviderNeutralMigrationPreservesLegacyRows -count=1` — passed; dedicated up-to-19 seeded fixture verifies user/org/membership/subscription/projects/audit/files/notifications/API-token rows plus identity and billing mappings survive 0020.
+
+## Final cutover
+
+The remaining Task 5 binding work is complete in this worktree:
+
+- `ggg/system/identity` and `ggg/system/billing` now expose constructor-free provider slots with complete non-nil capability sets. `identity-dev`, `identity-clerk`, `billing-local`, and `billing-polar` are selected by explicit development/test/production provider choices; credential checks live in the hosted adapters.
+- `identity-session` is a registry-owned runtime consumer. Generated boot wiring supplies its transactional `SessionLoader` to web middleware; middleware no longer writes provider subjects into domain IDs. Local identity/session creation uses opaque `usr_<32 hex>` and `org_<32 hex>` IDs and conflict rereads.
+- Added the real `ggg identity link --environment ... --provider ... --subject ... (--user ...|--org ...)` CLI path. It validates the selected project adapter/target, loads environment configuration, constructs that adapter, verifies the subject-aware port, and writes the audited mapping transaction.
+- Removed package-global mutable billing plans and `SetProviderProductIDs`. Plan catalogs are immutable and all accessors deep-copy nested meters/features. Web/API billing consumers use the selected catalog.
+- Added local billing confirmation/cancellation routes and neutral event processing through the shared webhook/idempotency workflow. Generic identity/billing handlers now consume only injected neutral webhook capabilities.
+- Added `identity-session` profile ownership and updated full-profile/project provider defaults for identity and billing.
+
+Final focused verification:
+
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; generated registry `47fccef6f072d6dd95438d084a2cb2776f16a3b128fd8083f0197dec52de3be1`.
+- `go tool sqlc generate` — passed (`updates=0`).
+- `go tool templ generate` — passed (`updates=0`).
+- `go test ./cmd/ggg ./internal/modules ./internal/modkit ./internal/config ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/api ./internal/web -run '^$'` — passed (9 packages; 4 packages had no tests).
+- `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal -count=1` — passed.
+- `go test ./internal/db -run TestProviderNeutralMigrationPreservesLegacyRows -count=1` — passed.
+
+The migration guard retains the empty Polar-customer sentinel exclusion (`polar_customer_id <> ''`) and the pre-DDL legacy-column/index/FK/customer invariants. Changes and generated outputs are committed with the final worktree clean.

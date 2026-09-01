@@ -26,10 +26,6 @@ func (s *Server) handleClerkWebhook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "read body", http.StatusBadRequest)
 		return
 	}
-	if s.cfg.ClerkWebhookSecret == "" && !s.cfg.DevAuthBypass {
-		http.Error(w, "clerk webhooks not configured", http.StatusServiceUnavailable)
-		return
-	}
 	evt, err := s.identityWebhook.Verify(r.Context(), payload, r.Header)
 	if err != nil {
 		http.Error(w, "invalid signature", http.StatusBadRequest)

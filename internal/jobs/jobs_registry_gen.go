@@ -63,6 +63,12 @@ var declaredAttempts = map[string]int{
 func providerActive(env, slot, adapter string) bool {
 	switch env {
 	case "development":
+		if slot == "ggg/billing" && adapter == "ggg/system/billing-local" {
+			return true
+		}
+		if slot == "ggg/identity" && adapter == "ggg/system/identity-dev" {
+			return true
+		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
 			return true
 		}
@@ -70,6 +76,12 @@ func providerActive(env, slot, adapter string) bool {
 			return true
 		}
 	case "test":
+		if slot == "ggg/billing" && adapter == "ggg/system/billing-local" {
+			return true
+		}
+		if slot == "ggg/identity" && adapter == "ggg/system/identity-dev" {
+			return true
+		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
 			return true
 		}
@@ -77,6 +89,12 @@ func providerActive(env, slot, adapter string) bool {
 			return true
 		}
 	case "production":
+		if slot == "ggg/billing" && adapter == "ggg/system/billing-polar" {
+			return true
+		}
+		if slot == "ggg/identity" && adapter == "ggg/system/identity-clerk" {
+			return true
+		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-resend" {
 			return true
 		}

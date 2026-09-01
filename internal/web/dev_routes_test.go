@@ -9,6 +9,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/identity"
+	identityclerk "github.com/gogogadget/gogogadget/internal/identity/clerk"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -167,10 +168,10 @@ func productionServer(t *testing.T) *Server {
 	require.True(t, cfg.Production(), "fixture must resolve to APP_ENV=production")
 	require.False(t, cfg.DevAuthBypass, "fixture must not carry the dev bypass")
 
-	ident, err := identity.NewModule(
+	ident, err := identityclerk.NewModule(
 		context.Background(),
 		apphost.Map(env, cfg.Now(), "test"),
-		identity.Deps{Config: &cfg},
+		identityclerk.Deps{Config: &cfg},
 	)
 	require.NoError(t, err)
 	require.IsType(t, &identity.ClerkVerifier{}, ident.Verifier,

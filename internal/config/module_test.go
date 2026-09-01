@@ -106,9 +106,6 @@ func TestNewModuleLoadsDotEnvInDevelopment(t *testing.T) {
 	if got := m.Config.AppURL; got != "https://from-dotenv.test" {
 		t.Fatalf("AppURL = %q, want the .env value", got)
 	}
-	if !m.Config.PolarConfigured() {
-		t.Fatal("POLAR_ACCESS_TOKEN from .env was ignored")
-	}
 }
 
 // Outside development .env is not consulted: a stray file in a deployment

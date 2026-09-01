@@ -2,61 +2,27 @@ package billing
 
 import (
 	"context"
+	"net/http"
 	"testing"
-	"time"
-
-	"github.com/gogogadget/gogogadget/internal/apphost"
-	"github.com/gogogadget/gogogadget/internal/config"
 )
 
-// Billing has no local stand-in: unconfigured must yield a nil Client so
-// billing routes answer 503 rather than charging against a fake provider.
-func TestNewModuleLeavesClientNilWhenUnconfigured(t *testing.T) {
-	h := apphost.Map(nil, time.Now(), "test")
+type testWebhook struct{}
 
-	m, err := NewModule(context.Background(), h, Deps{Config: &config.Config{}})
-	if err != nil {
-		t.Fatalf("NewModule(unconfigured): %v", err)
-	}
-	if m.Client != nil {
-		t.Fatalf("unconfigured client = %T, want nil", m.Client)
-	}
-
-	configured, err := NewModule(context.Background(), h, Deps{Config: &config.Config{
-		PolarAccessToken: "polar_test",
-		PolarServer:      "sandbox",
-	}})
-	if err != nil {
-		t.Fatalf("NewModule(configured): %v", err)
-	}
-	if configured.Client == nil {
-		t.Fatal("configured client = nil, want a client")
-	}
+func (testWebhook) Verify(context.Context, []byte, http.Header) (SubscriptionEvent, error) {
+	return SubscriptionEvent{}, nil
 }
 
-// Product IDs are package-level billing truth; the module constructor is the
-// one place that installs them, so plan lookup works after boot.
-func TestNewModuleInstallsProductIDs(t *testing.T) {
-	pro, team := PlanByKey("pro").ProviderProductID, PlanByKey("team").ProviderProductID
-	t.Cleanup(func() { SetProviderProductIDs(pro, team) })
-
-	h := apphost.Map(nil, time.Now(), "test")
-	if _, err := NewModule(context.Background(), h, Deps{Config: &config.Config{
-		PolarProductPro:  "prod_pro_module",
-		PolarProductTeam: "prod_team_module",
-	}}); err != nil {
-		t.Fatalf("NewModule: %v", err)
+func TestNewModuleRequiresCompleteCapabilities(t *testing.T) {
+	_, err := NewModule(context.Background(), Deps{})
+	if err == nil {
+		t.Fatal("NewModule(empty) = nil error, want refusal")
 	}
-	if got := PlanByKey("pro").ProviderProductID; got != "prod_pro_module" {
-		t.Fatalf("pro product id = %q, want %q", got, "prod_pro_module")
+	catalog := DefaultPlanCatalog()
+	m, err := NewModule(context.Background(), Deps{Client: &MockClient{}, Catalog: catalog, Webhook: testWebhook{}})
+	if err != nil {
+		t.Fatalf("NewModule(complete): %v", err)
 	}
-	if got := PlanByKey("team").ProviderProductID; got != "prod_team_module" {
-		t.Fatalf("team product id = %q, want %q", got, "prod_team_module")
-	}
-}
-func TestNewModuleRejectsMissingConfig(t *testing.T) {
-	h := apphost.Map(nil, time.Now(), "test")
-	if _, err := NewModule(context.Background(), h, Deps{}); err == nil {
-		t.Fatal("NewModule(nil config) = nil error, want failure")
+	if m.Client == nil || m.Catalog == nil || m.Webhook == nil {
+		t.Fatal("complete capability set was not retained")
 	}
 }

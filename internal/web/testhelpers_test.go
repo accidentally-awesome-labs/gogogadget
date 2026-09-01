@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/billing"
+	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/content"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -54,15 +56,12 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 	}
 	deps := Deps{
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
-		Docs:     &content.Docs{},
-		Verifier: identity.FakeVerifier{},
-		Fetcher:  identity.DevUserFetcher{},
-		Storage:  storagefs.NewDevStore(t.TempDir()),
-		Flags:    flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second),
+		Docs: &content.Docs{}, Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
+		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{BaseURL: cfg.AppURL},
+		IdentityWebhook: identity.ClerkWebhook{}, BillingWebhook: billinglocal.LocalWebhook{},
+		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
+		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second),
 		Reporter: observability.NoopReporter{},
-	}
-	if mutate != nil {
-		mutate(&deps)
 	}
 	server, err := NewServer(deps)
 	if err != nil {

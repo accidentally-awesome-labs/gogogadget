@@ -248,7 +248,7 @@ transitive closure itself.
 | `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (37)
+## Systems (42)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
@@ -257,14 +257,19 @@ transitive closure itself.
 | `ggg/system/api` | JSON API | `ggg/system/database` `ggg/system/organizations` `ggg/system/rate-limit` | `major-version-only` |
 | `ggg/system/apphost` | Application host seam | — | `replacement-required` |
 | `ggg/system/audit` | Audit log | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/billing` | Billing | `ggg/system/apphost` `ggg/system/config` `ggg/system/organizations` | `major-version-only` |
+| `ggg/system/billing` | Billing | `ggg/system/organizations` | `major-version-only` |
+| `ggg/system/billing-local` | Local billing | `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` | `free` |
+| `ggg/system/billing-polar` | Polar billing | `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` | `free` |
 | `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
 | `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |
 | `ggg/system/database` | Database | `ggg/system/apphost` `ggg/system/config` | `replacement-required` |
 | `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |
-| `ggg/system/identity` | Identity | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
+| `ggg/system/identity` | Identity | — | `major-version-only` |
+| `ggg/system/identity-clerk` | Clerk identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
+| `ggg/system/identity-dev` | Development identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
+| `ggg/system/identity-session` | Identity sessions | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/identity` | `free` |
 | `ggg/system/impersonation` | Support impersonation | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/jobs` | Background job queue | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/mail` `ggg/system/observability` `ggg/system/storage` | `drain-required` |
 | `ggg/system/llm` | Language model | `ggg/system/apphost` `ggg/system/config` | `free` |
