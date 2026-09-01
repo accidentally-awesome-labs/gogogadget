@@ -18,8 +18,9 @@ import (
 // AI serves POST /api/v1/ai/chat — the metered LLM endpoint. Unconfigured
 // (nil Completer) → 503 not_configured; over the plan meter → 402 plan_limit.
 type AI struct {
-	Q   *sqlc.Queries
-	LLM llm.Completer
+	Q       *sqlc.Queries
+	LLM     llm.Completer
+	Catalog billing.PlanCatalog
 }
 
 type chatRequest struct {
@@ -60,8 +61,7 @@ func (h *AI) Chat(w http.ResponseWriter, r *http.Request) {
 		est += int64(len(m.Content)) / 4 // rough prompt-token estimate
 	}
 
-	// Plan meter: current-month usage + the estimate vs the cap.
-	plan := billing.CurrentPlan(ctx, h.Q, org.OrgID, time.Now())
+	plan := billing.CurrentPlanWithCatalog(ctx, h.Q, org.OrgID, time.Now(), h.Catalog)
 	for _, m := range plan.Meters {
 		if m.Key != "ai_tokens" || m.LimitPerMonth <= 0 {
 			continue

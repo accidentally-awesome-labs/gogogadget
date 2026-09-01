@@ -43,7 +43,7 @@
         "source": "internal/web/api_transport.go",
         "target": "internal/web/api_transport.go",
         "class": "go",
-        "sha256": "607bdab7b60857d5771444747f2cf6994e03208cf538d74f4dbcdb400c845b81",
+        "sha256": "7534a2f64374e0966d3a17b5f1c8df6c944e9a0afd093df4884bd9cd1fe30382",
         "rewrite_module": true,
         "contract": false
       },

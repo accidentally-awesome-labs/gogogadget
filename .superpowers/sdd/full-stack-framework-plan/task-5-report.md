@@ -119,3 +119,12 @@ Verification after review fixes:
 - Formatted the five tracked files previously blocking the repository gate: `internal/audit/audit.go`, `internal/db/db_test.go`, `internal/jobs/digest.go`, `internal/schedules/schedules.go`, and `internal/schedules/schedules_test.go`.
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `9569d62f9089ab2e39b142551b41219fe68d6dc94decc4c4e9a65c028ae2bca9`.
 - `make check` — passed, including registry drift, templ/sqlc generation, gofmt, sync check, `go vet ./...`, and `go test ./...`.
+
+## Round 2 review acceptance
+
+- Declared all generated sqlc ownership (`GetUserByEmail`, `GetOrgBySlug`, identity mappings, billing accounts), corrected lifecycle semantics for mapping tables, and owned every Task 5 source file without migration target collisions.
+- Added explicit hosted/development navigator behavior, session error logging and invalid-token distinction, and provider-aware webhook organization updates and subscription revocation.
+- Updated generated boot tests for explicit provider selections and non-nil neutral capabilities. The complete affected suite is green unfiltered.
+- `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed.
+- `make check` — passed fully; this includes `go vet ./...` and `go test ./...`.
+- Final registry digest: `b2c546cb07d61941cff82ed4a4c59e2ae3105bd97a177c3f881069949307f683`.
