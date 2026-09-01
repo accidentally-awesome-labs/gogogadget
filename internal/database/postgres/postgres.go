@@ -10,14 +10,18 @@ import (
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Deps struct{ Config *config.Config }
+type Deps struct {
+	Config    *config.Config
+	Telemetry telemetry.Providers
+}
 type Module struct{ *db.Module }
 
 func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
-	m, err := db.NewModule(ctx, h, db.Deps{Config: d.Config})
+	m, err := db.NewModule(ctx, h, db.Deps{Config: d.Config, Telemetry: d.Telemetry})
 	if err != nil {
 		return nil, err
 	}

@@ -71,7 +71,7 @@
         "source": "internal/db/module.go",
         "target": "internal/db/module.go",
         "class": "go",
-        "sha256": "6407c2a0f111cecb1e4a74e28d707c6767e6eafd07fbc7368288b51bfcfc7424",
+        "sha256": "a6e94fead6343d68a765a3b9e96bd21f44bc0e27107e3dd2d4942057a39ec8fd",
         "rewrite_module": true,
         "contract": true
       },

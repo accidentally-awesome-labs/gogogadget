@@ -12,12 +12,14 @@ import (
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Deps is the typed dependency set the generated bootstrap supplies.
 type Deps struct {
-	Config *config.Config
+	Config    *config.Config
+	Telemetry telemetry.Providers
 }
 
 // Module is the constructed database closure.
@@ -44,7 +46,7 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}
-	if err := Migrate(ctx, pool); err != nil {
+	if err := telemetry.PGX(ctx, d.Telemetry, "migrate", func(ctx context.Context) error { return Migrate(ctx, pool) }); err != nil {
 		// The pool is ours and nothing else can reach it yet, so close it here
 		// rather than leaking it on a failed boot.
 		pool.Close()

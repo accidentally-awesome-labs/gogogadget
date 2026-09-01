@@ -888,11 +888,11 @@
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "981db5aed401be27c5d70d350baa1891014256fcbce4bba5a6484cf7c47d7413"
+      "sha256": "b9eb26b0f0ef4081ae8593e89b7212f478bc12da2722fd7e9467fa321ea83ce2"
     },
     {
       "path": "registry/modules/system/database/module.json",
-      "sha256": "ec075b67d8d1ae5f85141c72338ba6093178d4f6880ca8440ca267fcfedb7e24"
+      "sha256": "ecf85fc1609fd64ac15a0ee1cc261d19067a5cfa3a4a0fd5a2cb031cb52617fe"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",

@@ -46,7 +46,7 @@
         "source": "internal/database/postgres/postgres.go",
         "target": "internal/database/postgres/postgres.go",
         "class": "go",
-        "sha256": "05ca40d26888a57ab91790126b6a951842039c59ef1ef852c3c5d8547324a76b",
+        "sha256": "8acee4aeb12ac3f1f9b3361e0f5a14ff4fe878dea2168ddd9a179e511299bc8e",
         "rewrite_module": true,
         "contract": true
       },
@@ -74,6 +74,12 @@
             "capability": "config",
             "type": "*config.Config",
             "optional": false
+          },
+          {
+            "field": "Telemetry",
+            "capability": "telemetry.providers",
+            "type": "telemetry.Providers",
+            "optional": true
           }
         ],
         "provides": [
@@ -90,8 +96,9 @@
         ],
         "type_imports": [
           "github.com/jackc/pgx/v5/pgxpool",
+          "internal/config",
           "internal/db/sqlc",
-          "internal/config"
+          "internal/telemetry"
         ],
         "start": false,
         "stop": true,

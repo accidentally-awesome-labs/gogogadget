@@ -75,12 +75,6 @@ func providerActive(env, slot, adapter string) bool {
 		if slot == "ggg/billing" && adapter == "ggg/system/billing-local" {
 			return true
 		}
-		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
-			return true
-		}
-		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
-			return true
-		}
 		if slot == "ggg/identity" && adapter == "ggg/system/identity-dev" {
 			return true
 		}
@@ -90,25 +84,31 @@ func providerActive(env, slot, adapter string) bool {
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
 			return true
 		}
-		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
-			return true
-		}
 		if slot == "ggg/observability" && adapter == "ggg/system/observability-log" {
 			return true
 		}
 		if slot == "ggg/rate-limit" && adapter == "ggg/system/rate-limit-memory" {
 			return true
 		}
-		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-postgres" {
-			return true
-		}
-		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
-			return true
-		}
 		if slot == "ggg/storage" && adapter == "ggg/system/storage-filesystem" {
 			return true
 		}
 		if slot == "ggg/telemetry" && adapter == "ggg/system/telemetry-noop" {
+			return true
+		}
+		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
+			return true
+		}
+		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
+			return true
+		}
+		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
+			return true
+		}
+		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-postgres" {
+			return true
+		}
+		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
 			return true
 		}
 		if slot == "ggg/usage" && adapter == "ggg/system/usage-postgres" {
@@ -130,12 +130,6 @@ func providerActive(env, slot, adapter string) bool {
 		if slot == "ggg/billing" && adapter == "ggg/system/billing-local" {
 			return true
 		}
-		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
-			return true
-		}
-		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
-			return true
-		}
 		if slot == "ggg/identity" && adapter == "ggg/system/identity-dev" {
 			return true
 		}
@@ -145,25 +139,31 @@ func providerActive(env, slot, adapter string) bool {
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
 			return true
 		}
-		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
-			return true
-		}
 		if slot == "ggg/observability" && adapter == "ggg/system/observability-log" {
 			return true
 		}
 		if slot == "ggg/rate-limit" && adapter == "ggg/system/rate-limit-memory" {
 			return true
 		}
-		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-postgres" {
-			return true
-		}
-		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
-			return true
-		}
 		if slot == "ggg/storage" && adapter == "ggg/system/storage-filesystem" {
 			return true
 		}
 		if slot == "ggg/telemetry" && adapter == "ggg/system/telemetry-noop" {
+			return true
+		}
+		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
+			return true
+		}
+		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
+			return true
+		}
+		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
+			return true
+		}
+		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-postgres" {
+			return true
+		}
+		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
 			return true
 		}
 		if slot == "ggg/usage" && adapter == "ggg/system/usage-postgres" {
@@ -185,12 +185,6 @@ func providerActive(env, slot, adapter string) bool {
 		if slot == "ggg/billing" && adapter == "ggg/system/billing-polar" {
 			return true
 		}
-		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
-			return true
-		}
-		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
-			return true
-		}
 		if slot == "ggg/identity" && adapter == "ggg/system/identity-clerk" {
 			return true
 		}
@@ -198,9 +192,6 @@ func providerActive(env, slot, adapter string) bool {
 			return true
 		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-resend" {
-			return true
-		}
-		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
 			return true
 		}
 		if slot == "ggg/observability" && adapter == "ggg/system/observability-sentry" {
@@ -212,13 +203,22 @@ func providerActive(env, slot, adapter string) bool {
 		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-ably" {
 			return true
 		}
-		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
-			return true
-		}
 		if slot == "ggg/storage" && adapter == "ggg/system/storage-s3" {
 			return true
 		}
 		if slot == "ggg/telemetry" && adapter == "ggg/system/telemetry-otlp" {
+			return true
+		}
+		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
+			return true
+		}
+		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
+			return true
+		}
+		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
+			return true
+		}
+		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
 			return true
 		}
 		if slot == "ggg/usage" && adapter == "ggg/system/usage-postgres" {
