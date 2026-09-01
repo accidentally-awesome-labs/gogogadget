@@ -3,8 +3,13 @@ package smtp
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -34,14 +39,52 @@ func TestSMTPModuleContract(t *testing.T) {
 	require.NotContains(t, body, "\r\r\n")
 }
 
-func TestSMTPModuleUsesTypedDefaultsAndRejectsInvalidPort(t *testing.T) {
-	module, err := NewModule(context.Background(), apphost.Map(nil, time.Now(), "test"), Deps{Config: &config.Config{Values: map[string]string{}}})
+func TestSMTPModuleUsesDeclaredDefaultsAndRejectsInvalidPort(t *testing.T) {
+	defaults := smtpManifestDefaults(t)
+	cfg := &config.Config{Values: defaults}
+	module, err := NewModule(context.Background(), apphost.Map(nil, time.Now(), "test"), Deps{Config: cfg})
 	require.NoError(t, err)
 	s := module.Sender.(*SMTPSender)
-	require.Equal(t, "localhost", s.host)
-	require.Equal(t, 1025, s.port)
-	_, err = NewModule(context.Background(), apphost.Map(nil, time.Now(), "test"), Deps{Config: &config.Config{Values: map[string]string{"SMTP_PORT": "bad"}}})
+	require.Equal(t, defaults["SMTP_HOST"], s.host)
+	declaredPort, err := strconv.Atoi(defaults["SMTP_PORT"])
+	require.NoError(t, err)
+	require.Equal(t, declaredPort, s.port)
+
+	_, err = NewModule(context.Background(), apphost.Map(nil, time.Now(), "test"), Deps{Config: &config.Config{Values: map[string]string{}}})
+	require.ErrorContains(t, err, "SMTP_HOST")
+
+	_, err = NewModule(context.Background(), apphost.Map(nil, time.Now(), "test"), Deps{Config: &config.Config{Values: map[string]string{
+		"SMTP_HOST": defaults["SMTP_HOST"],
+		"SMTP_PORT": "bad",
+	}}})
 	require.Error(t, err)
+}
+
+func smtpManifestDefaults(t *testing.T) map[string]string {
+	t.Helper()
+	_, filename, _, ok := runtime.Caller(0)
+	require.True(t, ok)
+	raw, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "../../../registry/modules/system/mail-smtp/module.json"))
+	require.NoError(t, err)
+	var document struct {
+		Module struct {
+			Environment []struct {
+				Key     string `json:"key"`
+				Default string `json:"default"`
+			} `json:"environment"`
+		} `json:"module"`
+	}
+	require.NoError(t, json.Unmarshal(raw, &document))
+	defaults := make(map[string]string)
+	for _, declaration := range document.Module.Environment {
+		if declaration.Key == "SMTP_HOST" || declaration.Key == "SMTP_PORT" {
+			require.NotEmpty(t, declaration.Default, declaration.Key+" must declare an adapter default")
+			defaults[declaration.Key] = declaration.Default
+		}
+	}
+	require.Contains(t, defaults, "SMTP_HOST")
+	require.Contains(t, defaults, "SMTP_PORT")
+	return defaults
 }
 
 func fakeSMTP(t *testing.T, ln net.Listener, payload chan<- string) {

@@ -30,15 +30,11 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	}
 	host := d.Config.Value("SMTP_HOST")
 	if host == "" {
-		host = "localhost"
+		return nil, fmt.Errorf("mail smtp: SMTP_HOST is not configured")
 	}
-	port := 1025
-	if rawPort := d.Config.Value("SMTP_PORT"); rawPort != "" {
-		var err error
-		port, err = d.Config.IntValue("SMTP_PORT")
-		if err != nil {
-			return nil, fmt.Errorf("mail smtp: SMTP_PORT is invalid: %w", err)
-		}
+	port, err := d.Config.IntValue("SMTP_PORT")
+	if err != nil {
+		return nil, fmt.Errorf("mail smtp: SMTP_PORT is invalid: %w", err)
 	}
 	username := d.Config.Value("SMTP_USERNAME")
 	password := d.Config.Value("SMTP_PASSWORD")

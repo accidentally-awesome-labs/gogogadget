@@ -74,7 +74,7 @@
         "source": "internal/storage/s3/protocol_test.go",
         "target": "internal/storage/s3/protocol_test.go",
         "class": "test",
-        "sha256": "eeba00193fd52e02391a7091d9ff8a0c3d8be2aa73677159e58a35eafe0aa500",
+        "sha256": "23b4c4c961ec08fd847ddd4baf19452cc0f3453ce2ae03a04bba93deeadbecfa",
         "rewrite_module": true,
         "contract": false
       },
