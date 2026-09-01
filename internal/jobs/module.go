@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/audit"
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
@@ -17,20 +18,23 @@ import (
 	"github.com/gogogadget/gogogadget/internal/notifications"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Deps is the typed dependency set the generated bootstrap supplies. Billing and
 // Storage are optional: unconfigured billing makes the usage flush no-op, and an
 // absent store makes export jobs fail loudly rather than silently succeed.
 type Deps struct {
-	Config       *config.Config
-	Queries      *sqlc.Queries
-	Sender       mail.Sender
-	Billing      billing.Client
-	Storage      storage.Store
-	Reporter     observability.Reporter
-	Notifier     notifications.Notifier
-	WebhookDrain func(context.Context) error
+	Config        *config.Config
+	Queries       *sqlc.Queries
+	Sender        mail.Sender
+	Billing       billing.Client
+	Storage       storage.Store
+	Reporter      observability.Reporter
+	Notifier      notifications.Notifier
+	WebhookDrain  func(context.Context) error
+	AuditExporter audit.Exporter
+	AuditDB       *pgxpool.Pool
 }
 
 // Module is the constructed background-worker closure.
@@ -62,6 +66,10 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	worker.Storage = d.Storage
 	worker.Notifier = d.Notifier
 	worker.WebhookDrain = d.WebhookDrain
+	if d.AuditExporter != nil && d.AuditDB != nil {
+		outbox := &audit.PostgresOutbox{DB: d.AuditDB}
+		worker.AuditExport = func(ctx context.Context) error { return outbox.Drain(ctx, d.AuditExporter, 50) }
+	}
 	worker.AppURL = d.Config.AppURL
 	worker.AuditRetentionDays = d.Config.AuditRetentionDays
 

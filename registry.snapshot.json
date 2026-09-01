@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/apphost/module.json",
-      "sha256": "e26ed1d96eb9eb3a82ea43148016f673fa05ff3e2aa286845221de7417a609a7"
+      "sha256": "461ef9a51c28d5ef262765caa086a7c9f96cf2389dc6aefef14ccdf0a7f2e445"
     },
     {
       "path": "registry/modules/system/audit-export-noop/module.json",
@@ -932,7 +932,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "639103299b3b0d20d27a0f7a076e20bee83a96556f9220934201b828f822abe9"
+      "sha256": "ad1b652c46220b5680b371f11a572723a6b09816d2fb783e2a7180f7213bad03"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",

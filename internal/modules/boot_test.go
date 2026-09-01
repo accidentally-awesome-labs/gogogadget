@@ -115,6 +115,7 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"SENTRY_DSN":                   "https://public@example.com/1",
 		"POSTHOG_API_KEY":              "phc_live_fixture",
 		"POSTHOG_HOST":                 "https://us.i.posthog.com",
+		"OTLP_AUDIT_EXPORT_URL":        "https://otlp.example.com/audit",
 	})
 	_, err := Boot(context.Background(), host, Options{})
 	if err == nil {
