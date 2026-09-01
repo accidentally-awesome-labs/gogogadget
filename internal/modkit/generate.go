@@ -234,21 +234,34 @@ func goImportName(pkg string) string {
 	base := pkg
 	if i := strings.LastIndex(pkg, "/"); i >= 0 {
 		base = pkg[i+1:]
-		// Adapter packages commonly use the target name (for example,
-		// database/postgres and search/postgres). Include their seam in the
-		// generated alias so two selected adapters remain valid Go imports.
-		if base == "postgres" || base == "memory" || base == "redis" || base == "noop" || base == "otlp" {
-			parent := pkg[:i]
-			if j := strings.LastIndex(parent, "/"); j >= 0 {
-				parent = parent[j+1:]
-			}
-			base = parent + base
-		}
 	}
 	if i := strings.LastIndex(base, "-"); i >= 0 {
 		base = base[:i]
 	}
 	return base
+}
+
+func uniqueImportName(pkg string, used map[string]string) string {
+	name := goImportName(pkg)
+	if prior, ok := used[name]; !ok || prior == pkg {
+		used[name] = pkg
+		return name
+	}
+	parts := strings.Split(pkg, "/")
+	for i := len(parts) - 2; i >= 0; i-- {
+		candidate := strings.ReplaceAll(parts[i], "-", "_") + "_" + name
+		if prior, ok := used[candidate]; !ok || prior == pkg {
+			used[candidate] = pkg
+			return candidate
+		}
+	}
+	for n := 2; ; n++ {
+		candidate := fmt.Sprintf("%s_%d", name, n)
+		if prior, ok := used[candidate]; !ok || prior == pkg {
+			used[candidate] = pkg
+			return candidate
+		}
+	}
 }
 
 // goVar returns a deterministic Go variable name for a module ID.
@@ -379,6 +392,7 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		}()
 	}
 	seenImports := map[string]struct{}{}
+	importAliases := map[string]string{}
 	for _, module := range modules {
 		sys := module.Runtime.System
 		if !adapterSelected(module) {
@@ -397,7 +411,8 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 				return
 			}
 			seenImports[path] = struct{}{}
-			imports = append(imports, "\t"+goImportName(path)+" \""+path+"\"\n")
+			alias := uniqueImportName(path, importAliases)
+			imports = append(imports, "\t"+alias+" \""+path+"\"\n")
 		}
 		addImport(sys.Package)
 		for _, extra := range sys.TypeImports {
@@ -438,7 +453,11 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 		if err := validateIdentifiers(sys); err != nil {
 			return fmt.Errorf("module %s: %w", module.ID, err)
 		}
-		pkg := goImportName(resolveTypeImport(modulePath, sys.Package))
+		pkgPath := resolveTypeImport(modulePath, sys.Package)
+		pkg := importAliases[pkgPath]
+		if pkg == "" {
+			pkg = uniqueImportName(pkgPath, importAliases)
+		}
 		if target == "_" {
 			fmt.Fprintf(&b, "\t_, err = %s.%s(ctx, h, %s.Deps{\n", pkg, sys.Constructor, pkg)
 		} else {
