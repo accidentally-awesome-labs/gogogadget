@@ -1076,7 +1076,7 @@
     },
     {
       "path": "registry/modules/system/telemetry-otlp/module.json",
-      "sha256": "2bc493ec9d99a51dd2f4e243042826344f1f491bae780c7f82ca3d876a0b5747"
+      "sha256": "35f1c4163e1abc459481dfcd22c278826150332683a714b8bc3fb59cca2ff25d"
     },
     {
       "path": "registry/modules/system/telemetry/module.json",

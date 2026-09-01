@@ -28,16 +28,24 @@
           "version": "v1.44.0"
         },
         {
-          "module": "go.opentelemetry.io/otel/trace",
-          "version": "v1.44.0"
-        },
-        {
           "module": "go.opentelemetry.io/otel/sdk",
           "version": "v1.44.0"
         },
         {
           "module": "go.opentelemetry.io/otel/sdk/metric",
           "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/trace",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/proto/otlp",
+          "version": "v1.8.0"
+        },
+        {
+          "module": "google.golang.org/protobuf",
+          "version": "v1.36.11"
         }
       ],
       "tools": [],
@@ -48,7 +56,7 @@
         "source": "internal/telemetry/otlp/exporter.go",
         "target": "internal/telemetry/otlp/exporter.go",
         "class": "go",
-        "sha256": "1ee823935ec35e5f7b5501a7d43c35cc49e0b4c9f9762d97c21114b06af45c8c",
+        "sha256": "430686eb3f346169174a92eb5791ae2cfe30d2b8da24868a4dc1003ce14a5eb4",
         "rewrite_module": true,
         "contract": false
       },
@@ -64,7 +72,7 @@
         "source": "internal/telemetry/otlp/otlp_test.go",
         "target": "internal/telemetry/otlp/otlp_test.go",
         "class": "test",
-        "sha256": "ee11af66d5845cc6a2997bd43466f56ad20e2fb05c2200b1968b5d94cecea014",
+        "sha256": "db9be08de25cd4d656e4227b1e9ed1193e17e7be6d22844a2e43453d9bda4a55",
         "rewrite_module": true,
         "contract": false
       }
@@ -129,7 +137,6 @@
         "field": "OtlpApiKey",
         "type": "string",
         "description": "Otlp Api Key",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/telemetry-otlp@otlp"
@@ -140,8 +147,6 @@
         "field": "OtlpEndpoint",
         "type": "string",
         "description": "Otlp Endpoint",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/telemetry-otlp@collector"
         ]

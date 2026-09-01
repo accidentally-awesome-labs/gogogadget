@@ -36,9 +36,11 @@ require (
 	github.com/dmarkham/enumer v1.6.3 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.2 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/pascaldekloe/name v1.0.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
+	go.opentelemetry.io/proto/otlp v1.8.0 // indirect
 )
 
 require (
