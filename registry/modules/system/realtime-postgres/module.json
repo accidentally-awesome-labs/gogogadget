@@ -1,0 +1,97 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/realtime-postgres",
+    "kind": "system",
+    "name": "realtime-postgres",
+    "revision": 1,
+    "contract": 1,
+    "title": "Realtime Postgres",
+    "description": "realtime-postgres infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/realtime",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/realtime/postgres/module.go",
+        "target": "internal/realtime/postgres/module.go",
+        "class": "go",
+        "sha256": "564a2aa00f86f0563ab9332d341d1d5f770c4deb808821420f130e9be1b98707",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/realtime/postgres/postgres.go",
+        "target": "internal/realtime/postgres/postgres.go",
+        "class": "go",
+        "sha256": "7c61ad96ae4710987f0163aa8b4ef1572f0592e1476ba82438b3102d042da956",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/realtime/postgres"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/realtime/postgres",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "realtime.broker",
+            "type": "realtime.Broker"
+          }
+        ],
+        "type_imports": [
+          "internal/realtime"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/realtime",
+          "targets": [
+            {
+              "id": "postgres",
+              "title": "Postgres LISTEN/NOTIFY",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/postgres",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/realtime/postgres"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -83,30 +83,24 @@
     "claims": {
       "packages": [
         "internal/analytics"
+      ],
+      "provider_slots": [
+        "ggg/analytics"
       ]
     },
     "runtime": {
-      "system": {
-        "package": "internal/analytics",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Config",
-            "capability": "config",
-            "type": "*config.Config",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Capturer",
-            "capability": "analytics.capturer",
-            "type": "analytics.Capturer"
-          }
-        ],
-        "start": false,
-        "stop": true
-      }
+      "provider_slots": [
+        {
+          "id": "ggg/analytics",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "analytics.capturer",
+              "type": "analytics.Capturer"
+            }
+          ]
+        }
+      ]
     },
     "migrations": [],
     "environment": [

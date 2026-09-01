@@ -1,0 +1,101 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/rate-limit-redis",
+    "kind": "system",
+    "name": "rate-limit-redis",
+    "revision": 1,
+    "contract": 1,
+    "title": "Rate Limit Redis",
+    "description": "rate-limit-redis infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/rate-limit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/ratelimit/redis/redis.go",
+        "target": "internal/ratelimit/redis/redis.go",
+        "class": "go",
+        "sha256": "2e82ef3bda225d9d4da15cbcfd4c0390b16af93b229d534daad85c2006a17a6e",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/ratelimit/redis"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/ratelimit/redis",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "rate_limit.limiter",
+            "type": "ratelimit.Limiter"
+          }
+        ],
+        "type_imports": [
+          "internal/ratelimit"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/rate-limit",
+          "targets": [
+            {
+              "id": "valkey",
+              "title": "Valkey",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/valkey",
+              "inputs": []
+            },
+            {
+              "id": "upstash",
+              "title": "Upstash",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/upstash",
+              "console_url": "https://console.upstash.com",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/ratelimit/redis"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

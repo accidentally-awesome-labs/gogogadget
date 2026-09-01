@@ -1,0 +1,112 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/telemetry-otlp",
+    "kind": "system",
+    "name": "telemetry-otlp",
+    "revision": 1,
+    "contract": 1,
+    "title": "Telemetry Otlp",
+    "description": "telemetry-otlp infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/telemetry",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "go.opentelemetry.io/otel",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/metric",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/trace",
+          "version": "v1.44.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/telemetry/otlp/otlp.go",
+        "target": "internal/telemetry/otlp/otlp.go",
+        "class": "go",
+        "sha256": "88426570e28c71feaff3dee2d1ec16077b0ee54645f8430b5d0b58a209469e14",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/telemetry/otlp"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/telemetry/otlp",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "telemetry.providers",
+            "type": "telemetry.Providers"
+          }
+        ],
+        "type_imports": [
+          "internal/telemetry"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/telemetry",
+          "targets": [
+            {
+              "id": "collector",
+              "title": "Local Collector",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/collector",
+              "inputs": []
+            },
+            {
+              "id": "otlp",
+              "title": "Managed OTLP",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/otlp",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/telemetry/otlp"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

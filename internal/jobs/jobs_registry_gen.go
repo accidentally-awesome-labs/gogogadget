@@ -63,42 +63,168 @@ var declaredAttempts = map[string]int{
 func providerActive(env, slot, adapter string) bool {
 	switch env {
 	case "development":
+		if slot == "ggg/analytics" && adapter == "ggg/system/analytics-noop" {
+			return true
+		}
+		if slot == "ggg/audit-export" && adapter == "ggg/system/audit-export-noop" {
+			return true
+		}
+		if slot == "ggg/cache" && adapter == "ggg/system/cache-memory" {
+			return true
+		}
 		if slot == "ggg/billing" && adapter == "ggg/system/billing-local" {
+			return true
+		}
+		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
+			return true
+		}
+		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
 			return true
 		}
 		if slot == "ggg/identity" && adapter == "ggg/system/identity-dev" {
 			return true
 		}
+		if slot == "ggg/llm" && adapter == "ggg/system/llm-fake" {
+			return true
+		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
 			return true
 		}
+		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
+			return true
+		}
+		if slot == "ggg/observability" && adapter == "ggg/system/observability-log" {
+			return true
+		}
+		if slot == "ggg/rate-limit" && adapter == "ggg/system/rate-limit-memory" {
+			return true
+		}
+		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-postgres" {
+			return true
+		}
+		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
+			return true
+		}
 		if slot == "ggg/storage" && adapter == "ggg/system/storage-filesystem" {
+			return true
+		}
+		if slot == "ggg/telemetry" && adapter == "ggg/system/telemetry-noop" {
+			return true
+		}
+		if slot == "ggg/usage" && adapter == "ggg/system/usage-postgres" {
+			return true
+		}
+		if slot == "ggg/webhooks" && adapter == "ggg/system/webhooks-postgres" {
 			return true
 		}
 	case "test":
+		if slot == "ggg/analytics" && adapter == "ggg/system/analytics-noop" {
+			return true
+		}
+		if slot == "ggg/audit-export" && adapter == "ggg/system/audit-export-noop" {
+			return true
+		}
+		if slot == "ggg/cache" && adapter == "ggg/system/cache-memory" {
+			return true
+		}
 		if slot == "ggg/billing" && adapter == "ggg/system/billing-local" {
+			return true
+		}
+		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
+			return true
+		}
+		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
 			return true
 		}
 		if slot == "ggg/identity" && adapter == "ggg/system/identity-dev" {
 			return true
 		}
+		if slot == "ggg/llm" && adapter == "ggg/system/llm-fake" {
+			return true
+		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-dev" {
+			return true
+		}
+		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
+			return true
+		}
+		if slot == "ggg/observability" && adapter == "ggg/system/observability-log" {
+			return true
+		}
+		if slot == "ggg/rate-limit" && adapter == "ggg/system/rate-limit-memory" {
+			return true
+		}
+		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-postgres" {
+			return true
+		}
+		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
 			return true
 		}
 		if slot == "ggg/storage" && adapter == "ggg/system/storage-filesystem" {
 			return true
 		}
+		if slot == "ggg/telemetry" && adapter == "ggg/system/telemetry-noop" {
+			return true
+		}
+		if slot == "ggg/usage" && adapter == "ggg/system/usage-postgres" {
+			return true
+		}
+		if slot == "ggg/webhooks" && adapter == "ggg/system/webhooks-postgres" {
+			return true
+		}
 	case "production":
+		if slot == "ggg/analytics" && adapter == "ggg/system/analytics-noop" {
+			return true
+		}
+		if slot == "ggg/audit-export" && adapter == "ggg/system/audit-export-otlp" {
+			return true
+		}
+		if slot == "ggg/cache" && adapter == "ggg/system/cache-redis" {
+			return true
+		}
 		if slot == "ggg/billing" && adapter == "ggg/system/billing-polar" {
+			return true
+		}
+		if slot == "ggg/database" && adapter == "ggg/system/database-postgres" {
+			return true
+		}
+		if slot == "ggg/feature-flags" && adapter == "ggg/system/feature-flags-postgres" {
 			return true
 		}
 		if slot == "ggg/identity" && adapter == "ggg/system/identity-clerk" {
 			return true
 		}
+		if slot == "ggg/llm" && adapter == "ggg/system/llm-openai-compatible" {
+			return true
+		}
 		if slot == "ggg/mail" && adapter == "ggg/system/mail-resend" {
 			return true
 		}
+		if slot == "ggg/notifications" && adapter == "ggg/system/notifications-postgres" {
+			return true
+		}
+		if slot == "ggg/observability" && adapter == "ggg/system/observability-sentry" {
+			return true
+		}
+		if slot == "ggg/rate-limit" && adapter == "ggg/system/rate-limit-redis" {
+			return true
+		}
+		if slot == "ggg/realtime" && adapter == "ggg/system/realtime-ably" {
+			return true
+		}
+		if slot == "ggg/search" && adapter == "ggg/system/search-postgres" {
+			return true
+		}
 		if slot == "ggg/storage" && adapter == "ggg/system/storage-s3" {
+			return true
+		}
+		if slot == "ggg/telemetry" && adapter == "ggg/system/telemetry-otlp" {
+			return true
+		}
+		if slot == "ggg/usage" && adapter == "ggg/system/usage-postgres" {
+			return true
+		}
+		if slot == "ggg/webhooks" && adapter == "ggg/system/webhooks-postgres" {
 			return true
 		}
 	}

@@ -4,10 +4,12 @@ package flags
 
 import (
 	"context"
+	"encoding/json"
 	"hash/fnv"
 	"sync"
 	"time"
 
+	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 )
 
@@ -19,8 +21,9 @@ type Evaluator interface {
 // DBEvaluator evaluates against the database with a 30s in-process cache of
 // the flag rows (overrides are read per call — they are PK lookups).
 type DBEvaluator struct {
-	q   *sqlc.Queries
-	ttl time.Duration
+	q     *sqlc.Queries
+	ttl   time.Duration
+	cache cache.Store
 
 	mu      sync.Mutex
 	cached  map[string]sqlc.FeatureFlag
@@ -29,6 +32,9 @@ type DBEvaluator struct {
 
 func NewDBEvaluator(q *sqlc.Queries, ttl time.Duration) *DBEvaluator {
 	return &DBEvaluator{q: q, ttl: ttl}
+}
+func NewDBEvaluatorWithCache(q *sqlc.Queries, ttl time.Duration, c cache.Store) *DBEvaluator {
+	return &DBEvaluator{q: q, ttl: ttl, cache: c}
 }
 
 // Invalidate drops the flag-row cache so the next evaluation re-reads the
@@ -47,9 +53,21 @@ func (e *DBEvaluator) flags(ctx context.Context) map[string]sqlc.FeatureFlag {
 	if time.Now().Before(e.expires) && e.cached != nil {
 		return e.cached
 	}
+	if e.cache != nil {
+		if raw, ok, err := e.cache.Get(ctx, "flags:all"); err == nil && ok {
+			var rows []sqlc.FeatureFlag
+			if json.Unmarshal(raw, &rows) == nil {
+				m := make(map[string]sqlc.FeatureFlag, len(rows))
+				for _, r := range rows {
+					m[r.Key] = r
+				}
+				e.cached, e.expires = m, time.Now().Add(e.ttl)
+				return m
+			}
+		}
+	}
 	rows, err := e.q.ListFeatureFlags(ctx)
 	if err != nil {
-		// Cache the empty map briefly: a hiccup must never widen features.
 		if e.cached == nil {
 			e.cached = map[string]sqlc.FeatureFlag{}
 		}
@@ -61,6 +79,11 @@ func (e *DBEvaluator) flags(ctx context.Context) map[string]sqlc.FeatureFlag {
 	}
 	e.cached = m
 	e.expires = time.Now().Add(e.ttl)
+	if e.cache != nil {
+		if raw, marshalErr := json.Marshal(rows); marshalErr == nil {
+			_ = e.cache.Set(ctx, "flags:all", raw, e.ttl)
+		}
+	}
 	return m
 }
 

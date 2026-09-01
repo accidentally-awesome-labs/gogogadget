@@ -5,10 +5,10 @@ package flags
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/cache"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"time"
 )
 
 // cacheTTL is how stale a flag decision may be. It is fixed by the module rather
@@ -16,9 +16,9 @@ import (
 // Invalidate, so a change is visible immediately rather than after the TTL.
 const cacheTTL = 30 * time.Second
 
-// Deps is the typed dependency set the generated bootstrap supplies.
 type Deps struct {
 	Queries *sqlc.Queries
+	Cache   cache.Store
 }
 
 // Module is the constructed feature-flag closure.
@@ -40,6 +40,6 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 		return nil, err
 	}
 	_ = h
-	evaluator := NewDBEvaluator(d.Queries, cacheTTL)
+	evaluator := NewDBEvaluatorWithCache(d.Queries, cacheTTL, d.Cache)
 	return &Module{Evaluator: evaluator, DB: evaluator}, nil
 }

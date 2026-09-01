@@ -1,0 +1,87 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/usage-openmeter",
+    "kind": "system",
+    "name": "usage-openmeter",
+    "revision": 1,
+    "contract": 1,
+    "title": "Usage Openmeter",
+    "description": "usage-openmeter infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/usage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/usage/openmeter/openmeter.go",
+        "target": "internal/usage/openmeter/openmeter.go",
+        "class": "go",
+        "sha256": "31f0304643bb4355976e97c45412ab8f42e283e5970e7b00bfb8c36e2885ce6a",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/usage/openmeter"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/usage/openmeter",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "usage.recorder",
+            "type": "usage.Recorder"
+          }
+        ],
+        "type_imports": [
+          "internal/usage"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/usage",
+          "targets": [
+            {
+              "id": "openmeter",
+              "title": "OpenMeter",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/openmeter",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/usage/openmeter"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

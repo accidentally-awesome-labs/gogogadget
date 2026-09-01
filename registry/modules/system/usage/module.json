@@ -64,6 +64,14 @@
         "contract": false
       },
       {
+        "source": "internal/usage/contract.go",
+        "target": "internal/usage/contract.go",
+        "class": "go",
+        "sha256": "9ec86ee10b66f65ce406ccae0fcd486f629e09698fd6a8cde2fc13792ee82ad0",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/usage/usage.go",
         "target": "internal/usage/usage.go",
         "class": "go",
@@ -86,6 +94,9 @@
       ],
       "queries": [
         "usage_events"
+      ],
+      "provider_slots": [
+        "ggg/usage"
       ]
     },
     "runtime": {
@@ -117,6 +128,18 @@
         {
           "name": "UnflushUsageBatch",
           "table": "usage_events"
+        }
+      ],
+      "provider_slots": [
+        {
+          "id": "ggg/usage",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "usage.recorder",
+              "type": "usage.Recorder"
+            }
+          ]
         }
       ]
     },

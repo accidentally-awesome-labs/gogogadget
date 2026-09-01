@@ -1,0 +1,125 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/search-postgres",
+    "kind": "system",
+    "name": "search-postgres",
+    "revision": 1,
+    "contract": 1,
+    "title": "Search Postgres",
+    "description": "search-postgres infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/search",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/search/postgres/module.go",
+        "target": "internal/search/postgres/module.go",
+        "class": "go",
+        "sha256": "7d9de06566ab29d331a0626e8d8bfbab6c6ce1ce437f6ed9504f53773b4cb297",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/postgres/outbox.go",
+        "target": "internal/search/postgres/outbox.go",
+        "class": "go",
+        "sha256": "600d54f2987184ae85e47d516ce7a0b47be392a52f344aeb1b3948ebacf23ec3",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/postgres/postgres.go",
+        "target": "internal/search/postgres/postgres.go",
+        "class": "go",
+        "sha256": "a612f6d83d4eaaf4c642cece71ba7a1002d8c2e0ca88d5647a23334c415f139f",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/search/postgres"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/search/postgres",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "search.index",
+            "type": "search.Index"
+          }
+        ],
+        "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
+          "internal/search"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/search",
+          "targets": [
+            {
+              "id": "postgres",
+              "title": "Postgres FTS",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/postgres",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/search/postgres"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

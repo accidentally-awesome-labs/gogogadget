@@ -1,0 +1,94 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/usage-postgres",
+    "kind": "system",
+    "name": "usage-postgres",
+    "revision": 1,
+    "contract": 1,
+    "title": "Usage Postgres",
+    "description": "usage-postgres infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/usage",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/usage/postgres/postgres.go",
+        "target": "internal/usage/postgres/postgres.go",
+        "class": "go",
+        "sha256": "f537b5a4d37e9cd9035ef56bec5c18ead4739732e22638a85c64f29f3274a757",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/usage/postgres"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/usage/postgres",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "usage.recorder",
+            "type": "usage.Recorder"
+          }
+        ],
+        "type_imports": [
+          "internal/usage"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/usage",
+          "targets": [
+            {
+              "id": "postgres",
+              "title": "Postgres usage",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/postgres",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/usage/postgres"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

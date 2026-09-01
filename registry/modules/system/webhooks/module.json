@@ -72,6 +72,14 @@
         "contract": false
       },
       {
+        "source": "internal/webhooks/contract.go",
+        "target": "internal/webhooks/contract.go",
+        "class": "go",
+        "sha256": "72b16352af0a9e2f6be95160624ed9c442b7ef5a42a810d55ac42107fc762f88",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/webhooks/webhooks.go",
         "target": "internal/webhooks/webhooks.go",
         "class": "go",
@@ -96,6 +104,9 @@
         "webhook_deliveries",
         "webhook_endpoints",
         "webhook_events"
+      ],
+      "provider_slots": [
+        "ggg/webhooks"
       ]
     },
     "runtime": {
@@ -175,6 +186,18 @@
         {
           "name": "SetWebhookEndpointDisabled",
           "table": "webhook_endpoints"
+        }
+      ],
+      "provider_slots": [
+        {
+          "id": "ggg/webhooks",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "webhooks.emitter",
+              "type": "webhooks.Emitter"
+            }
+          ]
         }
       ]
     },

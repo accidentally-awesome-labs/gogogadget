@@ -1,0 +1,87 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/llm-openai-compatible",
+    "kind": "system",
+    "name": "llm-openai-compatible",
+    "revision": 1,
+    "contract": 1,
+    "title": "llm-openai-compatible",
+    "description": "llm-openai-compatible adapter",
+    "requires": [
+      {
+        "id": "ggg/system/llm",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/llm/openai/openai.go",
+        "target": "internal/llm/openai/openai.go",
+        "class": "go",
+        "sha256": "a785b4f45cd9507643bb499d7d12269c988c3e2ee13433c30bc76299745e6e37",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/llm/openai"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/llm/openai",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "llm.completer",
+            "type": "llm.Completer"
+          }
+        ],
+        "type_imports": [
+          "internal/llm"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/llm",
+          "targets": [
+            {
+              "id": "openai",
+              "title": "openai",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/llm-openai-compatible",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/llm/openai"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

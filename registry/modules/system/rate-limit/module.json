@@ -3,6 +3,9 @@
     "claims": {
       "packages": [
         "internal/ratelimit"
+      ],
+      "provider_slots": [
+        "ggg/rate-limit"
       ]
     },
     "contract": 1,
@@ -34,6 +37,14 @@
       }
     ],
     "files": [
+      {
+        "source": "internal/ratelimit/contract.go",
+        "target": "internal/ratelimit/contract.go",
+        "class": "go",
+        "sha256": "ff8a95e3d900ac656f6dd0f7515af7fda1ce28311a5d40677cb6b298e3b0c092",
+        "rewrite_module": true,
+        "contract": true
+      },
       {
         "class": "go",
         "contract": true,
@@ -110,7 +121,19 @@
         ],
         "start": false,
         "stop": false
-      }
+      },
+      "provider_slots": [
+        {
+          "id": "ggg/rate-limit",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "rate_limit.limiter",
+              "type": "ratelimit.Limiter"
+            }
+          ]
+        }
+      ]
     },
     "tests": {
       "go_packages": [

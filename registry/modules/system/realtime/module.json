@@ -1,0 +1,64 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/realtime",
+    "kind": "system",
+    "name": "realtime",
+    "revision": 1,
+    "contract": 1,
+    "title": "Realtime",
+    "description": "realtime infrastructure capability.",
+    "requires": [],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/realtime/realtime.go",
+        "target": "internal/realtime/realtime.go",
+        "class": "go",
+        "sha256": "9d3b487aaa206ddbacc16831e8fb2bfdcd84dd0d8e431e1a4442eed748efc6f1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/realtime/realtime_test.go",
+        "target": "internal/realtime/realtime_test.go",
+        "class": "test",
+        "sha256": "921d4f19c71740893ca12d46e359079721e476873ef76def1a19d0a333cf5537",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [],
+      "provider_slots": [
+        "ggg/realtime"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/realtime",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "realtime.broker",
+              "type": "realtime.Broker"
+            }
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": []
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

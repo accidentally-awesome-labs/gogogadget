@@ -1,0 +1,101 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/rate-limit-memory",
+    "kind": "system",
+    "name": "rate-limit-memory",
+    "revision": 1,
+    "contract": 1,
+    "title": "Rate Limit Memory",
+    "description": "rate-limit-memory infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/rate-limit",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "golang.org/x/time",
+          "version": "v0.15.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/ratelimit/memory/memory.go",
+        "target": "internal/ratelimit/memory/memory.go",
+        "class": "go",
+        "sha256": "2b336bc85fe04d874117fec520c7ab2ce17672b884f7a492824e6d4d8a0a8b56",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/ratelimit/memory/memory_test.go",
+        "target": "internal/ratelimit/memory/memory_test.go",
+        "class": "test",
+        "sha256": "6e4bb3d32f820f1f49e74411590d35e8dd9ff7789fe3faf9ca207d05c1e3162d",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/ratelimit/memory"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/ratelimit/memory",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "rate_limit.limiter",
+            "type": "ratelimit.Limiter"
+          }
+        ],
+        "type_imports": [
+          "internal/ratelimit"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/rate-limit",
+          "targets": [
+            {
+              "id": "memory",
+              "title": "In-memory",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/memory",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/ratelimit/memory"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

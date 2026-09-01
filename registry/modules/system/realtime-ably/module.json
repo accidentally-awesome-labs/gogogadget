@@ -1,0 +1,87 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/realtime-ably",
+    "kind": "system",
+    "name": "realtime-ably",
+    "revision": 1,
+    "contract": 1,
+    "title": "Realtime Ably",
+    "description": "realtime-ably infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/realtime",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/realtime/ably/ably.go",
+        "target": "internal/realtime/ably/ably.go",
+        "class": "go",
+        "sha256": "30a2402c441df0c9a69b29883bd1017591cf7da7ae4ef288fa22cf5e19a99267",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/realtime/ably"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/realtime/ably",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "realtime.broker",
+            "type": "realtime.Broker"
+          }
+        ],
+        "type_imports": [
+          "internal/realtime"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/realtime",
+          "targets": [
+            {
+              "id": "ably",
+              "title": "Ably",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/ably",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/realtime/ably"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

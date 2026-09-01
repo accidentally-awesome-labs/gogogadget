@@ -62,7 +62,7 @@
         "source": "internal/web/workflow_notification_inbox.go",
         "target": "internal/web/workflow_notification_inbox.go",
         "class": "go",
-        "sha256": "a212401096c84f5832310e20cd30a810b8939934e4054d4d5cb3bf24d421aa05",
+        "sha256": "273cc9fe55a05f8574b4becedc080eefbbccc7829e01bd7ebd247a734ce4e54b",
         "rewrite_module": true,
         "contract": false
       }

@@ -1,0 +1,99 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/search",
+    "kind": "system",
+    "name": "search",
+    "revision": 1,
+    "contract": 1,
+    "title": "Search",
+    "description": "search infrastructure capability.",
+    "requires": [],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/search/memory.go",
+        "target": "internal/search/memory.go",
+        "class": "go",
+        "sha256": "ad90e3f6f78ecd733cd0943291aea7c45a784a3a41f2d6b7ccf27428410333bb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/outbox.go",
+        "target": "internal/search/outbox.go",
+        "class": "go",
+        "sha256": "9d2be6df70315663256cbac3ab877e871b54e818d38ddb64c179cb9856ba74bc",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/search.go",
+        "target": "internal/search/search.go",
+        "class": "go",
+        "sha256": "c5131a149803eae7be4ba7850c77a7353ca48b8b5cb3bd02f4b15e7972571a43",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/search_test.go",
+        "target": "internal/search/search_test.go",
+        "class": "test",
+        "sha256": "04aa92abbff79e624b65c3d1fb98768c41b544cc55b82479ccc57ad72a2cfe8c",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "provider_slots": [
+        "ggg/search"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/search",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "search.index",
+              "type": "search.Index"
+            }
+          ]
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "0022_search_outbox",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0022_search_outbox.sql",
+        "sha256": "8de950ef6d74fcb0e58a1e0b1040dc6691d3d802fa3a48934521ae55a51dd84e"
+      }
+    ],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [
+      {
+        "table": "search_documents",
+        "scope": "org",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      },
+      {
+        "table": "search_outbox",
+        "scope": "org",
+        "export": false,
+        "account_delete": "retain",
+        "organization_delete": "retain"
+      }
+    ],
+    "removal_policy": "replacement-required"
+  }
+}

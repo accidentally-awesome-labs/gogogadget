@@ -1,0 +1,87 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/webhooks-svix",
+    "kind": "system",
+    "name": "webhooks-svix",
+    "revision": 1,
+    "contract": 1,
+    "title": "Webhooks Svix",
+    "description": "webhooks-svix infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/webhooks",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/webhooks/svix/svix.go",
+        "target": "internal/webhooks/svix/svix.go",
+        "class": "go",
+        "sha256": "6705f4f1e9cfbce5305f626eeb1c1f1fa4838867513d23fbf0ebbf19c8bdc0ea",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/webhooks/svix"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/webhooks/svix",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "webhooks.emitter",
+            "type": "webhooks.Emitter"
+          }
+        ],
+        "type_imports": [
+          "internal/webhooks"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/webhooks",
+          "targets": [
+            {
+              "id": "svix",
+              "title": "Svix",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/svix",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/webhooks/svix"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

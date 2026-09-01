@@ -248,23 +248,34 @@ transitive closure itself.
 | `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (42)
+## Systems (74)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
 | `ggg/system/analytics` | Product analytics | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/analytics-noop` | analytics-noop | `ggg/system/analytics` | `free` |
+| `ggg/system/analytics-posthog` | analytics-posthog | `ggg/system/analytics` | `free` |
 | `ggg/system/announcements` | Product announcements | `ggg/system/database` | `retain-data` |
 | `ggg/system/api` | JSON API | `ggg/system/database` `ggg/system/organizations` `ggg/system/rate-limit` | `major-version-only` |
 | `ggg/system/apphost` | Application host seam | — | `replacement-required` |
 | `ggg/system/audit` | Audit log | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/audit-export` | Audit Export | — | `replacement-required` |
+| `ggg/system/audit-export-noop` | Audit Export Noop | `ggg/system/audit-export` | `free` |
+| `ggg/system/audit-export-otlp` | Audit Export Otlp | `ggg/system/audit-export` | `free` |
 | `ggg/system/billing` | Billing | `ggg/system/organizations` | `major-version-only` |
 | `ggg/system/billing-local` | Local billing | `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` | `free` |
 | `ggg/system/billing-polar` | Polar billing | `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` | `free` |
+| `ggg/system/cache` | Cache | — | `replacement-required` |
+| `ggg/system/cache-memory` | Cache Memory | `ggg/system/cache` | `free` |
+| `ggg/system/cache-redis` | Cache Redis | `ggg/system/cache` | `free` |
 | `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
 | `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |
 | `ggg/system/database` | Database | `ggg/system/apphost` `ggg/system/config` | `replacement-required` |
+| `ggg/system/database-postgres` | Database Postgres | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` | `free` |
 | `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/feature-flags-launchdarkly` | Feature Flags Launchdarkly | `ggg/system/feature-flags` | `free` |
+| `ggg/system/feature-flags-postgres` | Feature Flags Postgres | `ggg/system/feature-flags` | `free` |
 | `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |
 | `ggg/system/identity` | Identity | `ggg/system/organizations` | `major-version-only` |
 | `ggg/system/identity-clerk` | Clerk identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
@@ -273,16 +284,30 @@ transitive closure itself.
 | `ggg/system/impersonation` | Support impersonation | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/jobs` | Background job queue | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/mail` `ggg/system/observability` `ggg/system/storage` | `drain-required` |
 | `ggg/system/llm` | Language model | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/llm-fake` | llm-fake | `ggg/system/llm` | `free` |
+| `ggg/system/llm-openai-compatible` | llm-openai-compatible | `ggg/system/llm` | `free` |
 | `ggg/system/mail` | Transactional mail seam | `ggg/system/apphost` `ggg/system/config` | `free` |
 | `ggg/system/mail-dev` | Filesystem mail | `ggg/system/apphost` `ggg/system/config` `ggg/system/mail` | `free` |
 | `ggg/system/mail-resend` | Resend mail | `ggg/system/apphost` `ggg/system/config` `ggg/system/mail` | `free` |
 | `ggg/system/metrics` | Runtime metrics endpoint | `ggg/system/server` | `free` |
 | `ggg/system/modkit` | Module registry engine | — | `replacement-required` |
 | `ggg/system/notifications` | In-app notifications | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/notifications-knock` | Notifications Knock | `ggg/system/notifications` | `free` |
+| `ggg/system/notifications-postgres` | Notifications Postgres | `ggg/system/notifications` | `free` |
 | `ggg/system/observability` | Error reporting | `ggg/system/apphost` `ggg/system/config` | `free` |
+| `ggg/system/observability-log` | observability-log | `ggg/system/observability` | `free` |
+| `ggg/system/observability-sentry` | observability-sentry | `ggg/system/observability` | `free` |
 | `ggg/system/organizations` | Users, organizations, and membership | `ggg/system/database` | `replacement-required` |
 | `ggg/system/rate-limit` | Request rate limiting | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
+| `ggg/system/rate-limit-memory` | Rate Limit Memory | `ggg/system/rate-limit` | `free` |
+| `ggg/system/rate-limit-redis` | Rate Limit Redis | `ggg/system/rate-limit` | `free` |
+| `ggg/system/realtime` | Realtime | — | `replacement-required` |
+| `ggg/system/realtime-ably` | Realtime Ably | `ggg/system/realtime` | `free` |
+| `ggg/system/realtime-postgres` | Realtime Postgres | `ggg/system/realtime` | `free` |
 | `ggg/system/schedules` | Recurring work | `ggg/system/database` | `retain-data` |
+| `ggg/system/search` | Search | — | `replacement-required` |
+| `ggg/system/search-postgres` | Search Postgres | `ggg/system/database` `ggg/system/search` | `free` |
+| `ggg/system/search-typesense` | Search Typesense | `ggg/system/search` | `free` |
 | `ggg/system/security` | Middleware and request security | `ggg/system/identity` `ggg/system/organizations` `ggg/system/rate-limit` `ggg/system/server` | `replacement-required` |
 | `ggg/system/seed` | Fixture loader | `ggg/system/database` | `free` |
 | `ggg/system/seo` | Discovery surfaces | `ggg/system/server` | `free` |
@@ -291,6 +316,13 @@ transitive closure itself.
 | `ggg/system/storage` | Object storage seam | `ggg/system/apphost` `ggg/system/config` | `retain-data` |
 | `ggg/system/storage-filesystem` | Filesystem storage | `ggg/system/apphost` `ggg/system/config` `ggg/system/storage` | `free` |
 | `ggg/system/storage-s3` | S3-compatible storage | `ggg/system/apphost` `ggg/system/config` `ggg/system/storage` | `retain-data` |
+| `ggg/system/telemetry` | Telemetry | — | `replacement-required` |
+| `ggg/system/telemetry-noop` | Telemetry Noop | `ggg/system/telemetry` | `free` |
+| `ggg/system/telemetry-otlp` | Telemetry Otlp | `ggg/system/telemetry` | `free` |
 | `ggg/system/testdb` | Per-package test databases | `ggg/system/database` | `free` |
 | `ggg/system/usage` | Usage metering | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/usage-openmeter` | Usage Openmeter | `ggg/system/usage` | `free` |
+| `ggg/system/usage-postgres` | Usage Postgres | `ggg/system/usage` | `free` |
 | `ggg/system/webhooks` | Outbound webhooks | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
+| `ggg/system/webhooks-postgres` | Webhooks Postgres | `ggg/system/webhooks` | `free` |
+| `ggg/system/webhooks-svix` | Webhooks Svix | `ggg/system/webhooks` | `free` |

@@ -1,0 +1,89 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/webhooks-postgres",
+    "kind": "system",
+    "name": "webhooks-postgres",
+    "revision": 1,
+    "contract": 1,
+    "title": "Webhooks Postgres",
+    "description": "webhooks-postgres infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/webhooks",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/webhooks/postgres/postgres.go",
+        "target": "internal/webhooks/postgres/postgres.go",
+        "class": "go",
+        "sha256": "38f1aa06912f46a6cfe7f7a9736357e28eedba8954e05d28a7d92c9890e29e45",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/webhooks/postgres"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/webhooks/postgres",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "webhooks.emitter",
+            "type": "webhooks.Emitter"
+          }
+        ],
+        "type_imports": [
+          "internal/webhooks"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/webhooks",
+          "targets": [
+            {
+              "id": "postgres",
+              "title": "Postgres webhooks",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/postgres",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/webhooks/postgres"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -79,30 +79,24 @@
     "claims": {
       "packages": [
         "internal/llm"
+      ],
+      "provider_slots": [
+        "ggg/llm"
       ]
     },
     "runtime": {
-      "system": {
-        "package": "internal/llm",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Config",
-            "capability": "config",
-            "type": "*config.Config",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Completer",
-            "capability": "llm.completer",
-            "type": "llm.Completer"
-          }
-        ],
-        "start": false,
-        "stop": false
-      }
+      "provider_slots": [
+        {
+          "id": "ggg/llm",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "llm.completer",
+              "type": "llm.Completer"
+            }
+          ]
+        }
+      ]
     },
     "migrations": [],
     "environment": [

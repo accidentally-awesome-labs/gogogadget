@@ -1,0 +1,95 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/search-typesense",
+    "kind": "system",
+    "name": "search-typesense",
+    "revision": 1,
+    "contract": 1,
+    "title": "Search Typesense",
+    "description": "search-typesense infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/search",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/search/typesense/module.go",
+        "target": "internal/search/typesense/module.go",
+        "class": "go",
+        "sha256": "fbd66e2703088900b2df5c9fd2e7f66cbfee5cdb9e127990787ec88de43f87a1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/typesense/typesense.go",
+        "target": "internal/search/typesense/typesense.go",
+        "class": "go",
+        "sha256": "e77c88a5af289a27bed16a518289a772b2b985f5977aefddfb6055657d5022d0",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/search/typesense"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/search/typesense",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "search.index",
+            "type": "search.Index"
+          }
+        ],
+        "type_imports": [
+          "internal/search"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/search",
+          "targets": [
+            {
+              "id": "typesense",
+              "title": "Typesense",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/typesense",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/search/typesense"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -88,6 +88,14 @@
         "contract": false
       },
       {
+        "source": "internal/notifications/notifications.go",
+        "target": "internal/notifications/notifications.go",
+        "class": "go",
+        "sha256": "5841dcbbd69591218d41c40814929f4a3d597d0cc2ececfbe367fc43399df5c3",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/notify/notify.go",
         "target": "internal/notify/notify.go",
         "class": "go",
@@ -111,6 +119,9 @@
       "queries": [
         "notification_preferences",
         "notifications"
+      ],
+      "provider_slots": [
+        "ggg/notifications"
       ]
     },
     "runtime": {
@@ -167,6 +178,18 @@
           "name": "UpsertNotificationPreference",
           "table": "notification_preferences"
         }
+      ],
+      "provider_slots": [
+        {
+          "id": "ggg/notifications",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "notifications.notifier",
+              "type": "notifications.Notifier"
+            }
+          ]
+        }
       ]
     },
     "migrations": [
@@ -200,10 +223,10 @@
       },
       "es": {
         "email.digest.cta": "Ver todas las notificaciones:",
-        "email.digest.intro": "Un resumen de tus notificaciones desde el último envío.",
+        "email.digest.intro": "Un resumen de tus notificaciones desde el \u00faltimo env\u00edo.",
         "email.digest.manage": "Cambia la frecuencia de estos correos:",
         "email.digest.subject": "Tu resumen de GoGoGadget",
-        "email.digest.title": "Esto es lo que pasó%s"
+        "email.digest.title": "Esto es lo que pas\u00f3%s"
       }
     },
     "docs": [],

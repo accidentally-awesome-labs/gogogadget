@@ -1,0 +1,101 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/cache-redis",
+    "kind": "system",
+    "name": "cache-redis",
+    "revision": 1,
+    "contract": 1,
+    "title": "Cache Redis",
+    "description": "cache-redis infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/cache",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/cache/redis/redis.go",
+        "target": "internal/cache/redis/redis.go",
+        "class": "go",
+        "sha256": "7c0d4e3e725de44b8d6d74854c3b4acc978f850c7ccb991098146046672b3e29",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/cache/redis"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/cache/redis",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "cache.store",
+            "type": "cache.Store"
+          }
+        ],
+        "type_imports": [
+          "internal/cache"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/cache",
+          "targets": [
+            {
+              "id": "valkey",
+              "title": "Valkey",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/valkey",
+              "inputs": []
+            },
+            {
+              "id": "upstash",
+              "title": "Upstash",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/upstash",
+              "console_url": "https://console.upstash.com",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/cache/redis"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

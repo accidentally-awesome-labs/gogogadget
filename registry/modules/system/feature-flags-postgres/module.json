@@ -1,0 +1,94 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/feature-flags-postgres",
+    "kind": "system",
+    "name": "feature-flags-postgres",
+    "revision": 1,
+    "contract": 1,
+    "title": "Feature Flags Postgres",
+    "description": "feature-flags-postgres infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/feature-flags",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/flags/postgres/postgres.go",
+        "target": "internal/flags/postgres/postgres.go",
+        "class": "go",
+        "sha256": "c749bbfa9b5ecfb2bfafc07333df904da02547c4e6c3d256a1c089aef52b8099",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/flags/postgres"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/flags/postgres",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "flags.service",
+            "type": "flags.Service"
+          }
+        ],
+        "type_imports": [
+          "internal/flags"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/feature-flags",
+          "targets": [
+            {
+              "id": "postgres",
+              "title": "Postgres flags",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test",
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/postgres",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/flags/postgres"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/cache",
+    "kind": "system",
+    "name": "cache",
+    "revision": 1,
+    "contract": 1,
+    "title": "Cache",
+    "description": "cache infrastructure capability.",
+    "requires": [],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/cache/cache.go",
+        "target": "internal/cache/cache.go",
+        "class": "go",
+        "sha256": "899acc25889a7692c2f773dea155faf68bc75c4f90fbb17c72f74e3db393d778",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [],
+      "provider_slots": [
+        "ggg/cache"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/cache",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "cache.store",
+              "type": "cache.Store"
+            }
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": []
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

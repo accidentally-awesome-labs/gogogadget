@@ -1,0 +1,56 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/audit-export",
+    "kind": "system",
+    "name": "audit-export",
+    "revision": 1,
+    "contract": 1,
+    "title": "Audit Export",
+    "description": "audit-export infrastructure capability.",
+    "requires": [],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/audit/export.go",
+        "target": "internal/audit/export.go",
+        "class": "go",
+        "sha256": "8dc3f323965b13640e70fc1d5fd742fa9c27842417db76ff7e4867a96a6cf719",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [],
+      "provider_slots": [
+        "ggg/audit-export"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/audit-export",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "audit.exporter",
+              "type": "audit.Exporter"
+            }
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": []
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

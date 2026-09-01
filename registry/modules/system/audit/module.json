@@ -56,6 +56,14 @@
         "contract": false
       },
       {
+        "source": "internal/audit/outbox.go",
+        "target": "internal/audit/outbox.go",
+        "class": "go",
+        "sha256": "0d342d446b142a7e10846712c71b0cef50781942dd0d8ba10561d3e12a8971d9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/db/queries/audit.sql",
         "target": "internal/db/queries/audit.sql",
         "class": "query",

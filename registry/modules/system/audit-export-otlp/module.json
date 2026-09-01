@@ -1,0 +1,87 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/audit-export-otlp",
+    "kind": "system",
+    "name": "audit-export-otlp",
+    "revision": 1,
+    "contract": 1,
+    "title": "Audit Export Otlp",
+    "description": "audit-export-otlp infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/audit-export",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/audit_export/otlp/otlp.go",
+        "target": "internal/audit_export/otlp/otlp.go",
+        "class": "go",
+        "sha256": "2fc1873a7ba02105ce36e6d741fccef0e0a2b772078c27d3f72a378f6886bc62",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/audit_export/otlp"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/audit_export/otlp",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "audit.exporter",
+            "type": "audit.Exporter"
+          }
+        ],
+        "type_imports": [
+          "internal/audit"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/audit-export",
+          "targets": [
+            {
+              "id": "otlp",
+              "title": "OTLP",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/otlp",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/audit_export/otlp"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

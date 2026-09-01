@@ -107,6 +107,31 @@ func (s *Server) handleNotificationsStream(w http.ResponseWriter, r *http.Reques
 	heartbeat := time.NewTicker(15 * time.Second)
 	defer poll.Stop()
 	defer heartbeat.Stop()
+	var events <-chan []byte
+	if s.realtime != nil {
+		sub, err := s.realtime.Subscribe(ctx, "notifications:"+org.OrgID)
+		if err == nil {
+			ch := make(chan []byte, 8)
+			events = ch
+			go func() {
+				defer close(ch)
+				defer sub.Close()
+				for {
+					payload, err := sub.Next(ctx)
+					if err != nil {
+						return
+					}
+					select {
+					case ch <- payload:
+					case <-ctx.Done():
+						return
+					}
+				}
+			}()
+		} else {
+			s.log.Error("sse realtime subscribe", "error", err)
+		}
+	}
 
 	for {
 		if n := unread(); n >= 0 && n != last {
@@ -119,6 +144,15 @@ func (s *Server) handleNotificationsStream(w http.ResponseWriter, r *http.Reques
 		select {
 		case <-ctx.Done():
 			return
+		case payload, ok := <-events:
+			if !ok {
+				events = nil
+				continue
+			}
+			if _, err := fmt.Fprintf(w, "event: notifications\ndata: %s\n\n", payload); err != nil {
+				return
+			}
+			flusher.Flush()
 		case <-poll.C:
 		case <-heartbeat.C:
 			if _, err := fmt.Fprint(w, ": ping\n\n"); err != nil {

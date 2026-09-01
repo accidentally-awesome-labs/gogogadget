@@ -234,6 +234,16 @@ func goImportName(pkg string) string {
 	base := pkg
 	if i := strings.LastIndex(pkg, "/"); i >= 0 {
 		base = pkg[i+1:]
+		// Adapter packages commonly use the target name (for example,
+		// database/postgres and search/postgres). Include their seam in the
+		// generated alias so two selected adapters remain valid Go imports.
+		if base == "postgres" || base == "memory" || base == "redis" || base == "noop" || base == "otlp" {
+			parent := pkg[:i]
+			if j := strings.LastIndex(parent, "/"); j >= 0 {
+				parent = parent[j+1:]
+			}
+			base = parent + base
+		}
 	}
 	if i := strings.LastIndex(base, "-"); i >= 0 {
 		base = base[:i]
@@ -358,9 +368,22 @@ func emitBootstrapRegistry(ctx context.Context, modulePath string, lock Lock, gr
 	b.WriteString("package modules\n\n")
 	b.WriteString("import (\n\t\"context\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n")
 	imports := []string{"\tapphost \"" + modulePath + "/internal/apphost\"\n"}
+	selectedAdapters := map[string]struct{}{}
+	for _, id := range append(append(append([]string{}, lock.RuntimeOrders.Development...), lock.RuntimeOrders.Test...), lock.RuntimeOrders.Production...) {
+		selectedAdapters[id] = struct{}{}
+	}
+	adapterSelected := func(module Manifest) bool {
+		return module.Runtime.System == nil || module.Runtime.System.Adapter == nil || func() bool {
+			_, ok := selectedAdapters[module.ID]
+			return ok
+		}()
+	}
 	seenImports := map[string]struct{}{}
 	for _, module := range modules {
 		sys := module.Runtime.System
+		if !adapterSelected(module) {
+			continue
+		}
 		if sys == nil || sys.Package == "" {
 			continue
 		}

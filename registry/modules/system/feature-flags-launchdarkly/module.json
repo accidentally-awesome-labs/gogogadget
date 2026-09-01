@@ -1,0 +1,95 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/feature-flags-launchdarkly",
+    "kind": "system",
+    "name": "feature-flags-launchdarkly",
+    "revision": 1,
+    "contract": 1,
+    "title": "Feature Flags Launchdarkly",
+    "description": "feature-flags-launchdarkly infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/feature-flags",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/flags/launchdarkly/launchdarkly.go",
+        "target": "internal/flags/launchdarkly/launchdarkly.go",
+        "class": "go",
+        "sha256": "581c608a5c50b65a4b442c68af83ccd6c346746d305ef537463315cf91fb9043",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/flags/launchdarkly/launchdarkly_test.go",
+        "target": "internal/flags/launchdarkly/launchdarkly_test.go",
+        "class": "test",
+        "sha256": "76dbc67d0d6ab946889d04383aea65e685f95970636ae4f64e2b981096fafe1e",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/flags/launchdarkly"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/flags/launchdarkly",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "flags.service",
+            "type": "flags.Service"
+          }
+        ],
+        "type_imports": [
+          "internal/flags"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/feature-flags",
+          "targets": [
+            {
+              "id": "launchdarkly",
+              "title": "LaunchDarkly",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/launchdarkly",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/flags/launchdarkly"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

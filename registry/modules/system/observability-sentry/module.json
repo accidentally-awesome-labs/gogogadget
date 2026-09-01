@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/observability-sentry",
+    "kind": "system",
+    "name": "observability-sentry",
+    "revision": 1,
+    "contract": 1,
+    "title": "observability-sentry",
+    "description": "observability-sentry adapter",
+    "requires": [
+      {
+        "id": "ggg/system/observability",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/getsentry/sentry-go",
+          "version": "v0.48.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/observability/sentryadapter/sentry.go",
+        "target": "internal/observability/sentryadapter/sentry.go",
+        "class": "go",
+        "sha256": "1cb8d84d847b8c8cf0bba57a20c1ccb9cf4018341fd9aea77314d436dcff29b1",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/observability/sentryadapter"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/observability/sentryadapter",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "observability.reporter",
+            "type": "observability.Reporter"
+          }
+        ],
+        "type_imports": [
+          "internal/observability"
+        ],
+        "start": false,
+        "stop": true,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/observability",
+          "targets": [
+            {
+              "id": "sentry",
+              "title": "sentry",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/observability-sentry",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/observability/sentryadapter"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

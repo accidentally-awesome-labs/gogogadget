@@ -67,10 +67,18 @@
         "contract": false
       },
       {
+        "source": "internal/flags/contract.go",
+        "target": "internal/flags/contract.go",
+        "class": "go",
+        "sha256": "a0497f2ea139626257df18c2ebafe23842c0e2a21aa535720c43c4dffbb75af7",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/flags/flags.go",
         "target": "internal/flags/flags.go",
         "class": "go",
-        "sha256": "8da3b06db52f86dbd394c3e280969b89f047dc8db0fa5cdd03748dedb6419ac8",
+        "sha256": "7797575140a9a468b07d8b9ff84fad5dc8b8869ec1b8243dd4718804fe04fb0c",
         "rewrite_module": true,
         "contract": true
       },
@@ -86,7 +94,7 @@
         "source": "internal/flags/module.go",
         "target": "internal/flags/module.go",
         "class": "go",
-        "sha256": "342737e6eb83fd24d9921e3d3fbe4d24ad0da23cf4d1b7223774429350ff7c19",
+        "sha256": "42584485a6e3684369dc63c057cbee5484c6bc73ddc81345b9fa9dff234962ea",
         "rewrite_module": true,
         "contract": true
       },
@@ -97,6 +105,14 @@
         "sha256": "4eeaf068b1ec26a857f6e9b247945da5cf7be8ab6dbd5dfe28eba507256e93f0",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "internal/flags/service.go",
+        "target": "internal/flags/service.go",
+        "class": "go",
+        "sha256": "63798250330c0ca57a0f7d8905520fd158196199a234d1987319e59df813fec1",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
     "claims": {
@@ -105,6 +121,9 @@
       ],
       "queries": [
         "feature_flags"
+      ],
+      "provider_slots": [
+        "ggg/feature-flags"
       ]
     },
     "runtime": {
@@ -112,6 +131,12 @@
         "package": "internal/flags",
         "constructor": "NewModule",
         "needs": [
+          {
+            "field": "Cache",
+            "capability": "cache.store",
+            "type": "cache.Store",
+            "optional": false
+          },
           {
             "field": "Queries",
             "capability": "database.queries",
@@ -127,11 +152,24 @@
           }
         ],
         "type_imports": [
+          "internal/cache",
           "internal/db/sqlc"
         ],
         "start": false,
         "stop": false
       },
+      "provider_slots": [
+        {
+          "id": "ggg/feature-flags",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "flags.service",
+              "type": "flags.Service"
+            }
+          ]
+        }
+      ],
       "queries": [
         {
           "name": "DeleteFeatureFlag",

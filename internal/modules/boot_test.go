@@ -2,18 +2,18 @@ package modules
 
 import (
 	"context"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
-
 	"github.com/gogogadget/gogogadget/internal/analytics"
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/db/testdb"
+	"github.com/gogogadget/gogogadget/internal/llm/fake"
 	"github.com/gogogadget/gogogadget/internal/mail/dev"
 	"github.com/gogogadget/gogogadget/internal/mail/resend"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage/filesystem"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
 )
 
 // bootHost is an otherwise unconfigured environment pointed at an empty scratch
@@ -89,8 +89,8 @@ func TestBootWiresUnconfiguredFallbacks(t *testing.T) {
 	if runtime.IdentityVerifier == nil || runtime.IdentityFetcher == nil || runtime.IdentityDeleter == nil || runtime.IdentityNavigator == nil || runtime.IdentityWebhook == nil {
 		t.Fatal("identity capabilities must be provided by the selected local adapter")
 	}
-	if runtime.LLMCompleter != nil {
-		t.Fatalf("LlmCompleter = %T, want nil when unconfigured", runtime.LLMCompleter)
+	if _, ok := runtime.LLMCompleter.(fake.Completer); !ok {
+		t.Fatalf("LlmCompleter = %T, want fake.Completer", runtime.LLMCompleter)
 	}
 }
 
@@ -112,7 +112,7 @@ func TestBootSelectsConfiguredAdapters(t *testing.T) {
 		"STORAGE_R2_ACCOUNT_ID":        "acct_fixture",
 		"STORAGE_R2_BUCKET":            "bucket_fixture",
 		"STORAGE_R2_SECRET_ACCESS_KEY": "secret_fixture",
-		"EMAIL_FROM":                   "hello@example.com",
+		"SENTRY_DSN":                   "https://public@example.com/1",
 	})
 	runtime, err := Boot(context.Background(), host, Options{})
 	if err != nil {

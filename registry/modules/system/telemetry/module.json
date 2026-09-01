@@ -1,0 +1,69 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/telemetry",
+    "kind": "system",
+    "name": "telemetry",
+    "revision": 1,
+    "contract": 1,
+    "title": "Telemetry",
+    "description": "telemetry infrastructure capability.",
+    "requires": [],
+    "dependencies": {
+      "go": [
+        {
+          "module": "go.opentelemetry.io/otel",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/metric",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/trace",
+          "version": "v1.44.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/telemetry/telemetry.go",
+        "target": "internal/telemetry/telemetry.go",
+        "class": "go",
+        "sha256": "a5776a39327477d557b5352f364d2d2ceeb719003d169949ceb1255daf282197",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [],
+      "provider_slots": [
+        "ggg/telemetry"
+      ]
+    },
+    "runtime": {
+      "provider_slots": [
+        {
+          "id": "ggg/telemetry",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "telemetry.providers",
+              "type": "telemetry.Providers"
+            }
+          ]
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": []
+    },
+    "data": [],
+    "removal_policy": "replacement-required"
+  }
+}

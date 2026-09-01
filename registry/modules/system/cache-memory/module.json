@@ -1,0 +1,96 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/cache-memory",
+    "kind": "system",
+    "name": "cache-memory",
+    "revision": 1,
+    "contract": 1,
+    "title": "Cache Memory",
+    "description": "cache-memory infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/cache",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/cache/memory/memory.go",
+        "target": "internal/cache/memory/memory.go",
+        "class": "go",
+        "sha256": "feea6e2cdc1cfb4d4ab6932dec0eb314ea46a161d16073946189f91f4ea238a9",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/cache/memory/memory_test.go",
+        "target": "internal/cache/memory/memory_test.go",
+        "class": "test",
+        "sha256": "515f7431de271a67def7eaf03428034b37fa3c11f0dee880309212c04c2aa77f",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/cache/memory"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/cache/memory",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "cache.store",
+            "type": "cache.Store"
+          }
+        ],
+        "type_imports": [
+          "internal/cache"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/cache",
+          "targets": [
+            {
+              "id": "memory",
+              "title": "In-memory",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/memory",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/cache/memory"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

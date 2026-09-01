@@ -1,0 +1,92 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/analytics-posthog",
+    "kind": "system",
+    "name": "analytics-posthog",
+    "revision": 1,
+    "contract": 1,
+    "title": "analytics-posthog",
+    "description": "analytics-posthog adapter",
+    "requires": [
+      {
+        "id": "ggg/system/analytics",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/posthog/posthog-go",
+          "version": "v1.22.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/analytics/posthog/posthog.go",
+        "target": "internal/analytics/posthog/posthog.go",
+        "class": "go",
+        "sha256": "03e754f5c86bb796e521708619c1b93c136ed39daa3c00a3e6b150b1972635b4",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/analytics/posthog"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/analytics/posthog",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "analytics.capturer",
+            "type": "analytics.Capturer"
+          }
+        ],
+        "type_imports": [
+          "internal/analytics"
+        ],
+        "start": false,
+        "stop": true,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/analytics",
+          "targets": [
+            {
+              "id": "posthog",
+              "title": "posthog",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/analytics-posthog",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/analytics/posthog"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/observability-log",
+    "kind": "system",
+    "name": "observability-log",
+    "revision": 1,
+    "contract": 1,
+    "title": "observability-log",
+    "description": "observability-log adapter",
+    "requires": [
+      {
+        "id": "ggg/system/observability",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/observability/log/log.go",
+        "target": "internal/observability/log/log.go",
+        "class": "go",
+        "sha256": "182800603e2af16aadf1b39758f9f08b472b3e41733b07c9c8de574d22c77197",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/observability/log"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/observability/log",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "observability.reporter",
+            "type": "observability.Reporter"
+          }
+        ],
+        "type_imports": [
+          "internal/observability"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/observability",
+          "targets": [
+            {
+              "id": "log",
+              "title": "log",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/observability-log",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/observability/log"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

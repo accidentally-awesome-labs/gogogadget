@@ -44,6 +44,14 @@
     },
     "files": [
       {
+        "source": "internal/database/database.go",
+        "target": "internal/database/database.go",
+        "class": "go",
+        "sha256": "ec296a79592319f7ad70fc75993f56ea4a8994ff7e5f346a2b65bad940fc73a6",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
         "source": "internal/db/db.go",
         "target": "internal/db/db.go",
         "class": "go",
@@ -95,39 +103,28 @@
     "claims": {
       "packages": [
         "internal/db"
+      ],
+      "provider_slots": [
+        "ggg/database"
       ]
     },
     "runtime": {
-      "system": {
-        "package": "internal/db",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Config",
-            "capability": "config",
-            "type": "*config.Config",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Pool",
-            "capability": "database.pool",
-            "type": "*pgxpool.Pool"
-          },
-          {
-            "field": "Queries",
-            "capability": "database.queries",
-            "type": "*sqlc.Queries"
-          }
-        ],
-        "type_imports": [
-          "github.com/jackc/pgx/v5/pgxpool",
-          "internal/db/sqlc"
-        ],
-        "start": false,
-        "stop": true
-      }
+      "provider_slots": [
+        {
+          "id": "ggg/database",
+          "critical": true,
+          "capabilities": [
+            {
+              "capability": "database.pool",
+              "type": "*pgxpool.Pool"
+            },
+            {
+              "capability": "database.queries",
+              "type": "*sqlc.Queries"
+            }
+          ]
+        }
+      ]
     },
     "migrations": [],
     "environment": [

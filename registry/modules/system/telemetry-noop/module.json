@@ -1,0 +1,101 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/telemetry-noop",
+    "kind": "system",
+    "name": "telemetry-noop",
+    "revision": 1,
+    "contract": 1,
+    "title": "Telemetry Noop",
+    "description": "telemetry-noop infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/telemetry",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "go.opentelemetry.io/otel",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/metric",
+          "version": "v1.44.0"
+        },
+        {
+          "module": "go.opentelemetry.io/otel/trace",
+          "version": "v1.44.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/telemetry/noop/noop.go",
+        "target": "internal/telemetry/noop/noop.go",
+        "class": "go",
+        "sha256": "f4b54e8eb555a3ca07935f8c51ca02dae2267cc9623d748912dd019dcaabffbc",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/telemetry/noop"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/telemetry/noop",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "telemetry.providers",
+            "type": "telemetry.Providers"
+          }
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/telemetry",
+          "targets": [
+            {
+              "id": "stdout",
+              "title": "Stdout",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/stdout",
+              "inputs": []
+            }
+          ]
+        },
+        "type_imports": [
+          "internal/telemetry"
+        ]
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/telemetry/noop"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

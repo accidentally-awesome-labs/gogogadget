@@ -99,30 +99,24 @@
     "claims": {
       "packages": [
         "internal/observability"
+      ],
+      "provider_slots": [
+        "ggg/observability"
       ]
     },
     "runtime": {
-      "system": {
-        "package": "internal/observability",
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "field": "Config",
-            "capability": "config",
-            "type": "*config.Config",
-            "optional": false
-          }
-        ],
-        "provides": [
-          {
-            "field": "Reporter",
-            "capability": "observability.reporter",
-            "type": "observability.Reporter"
-          }
-        ],
-        "start": false,
-        "stop": true
-      }
+      "provider_slots": [
+        {
+          "id": "ggg/observability",
+          "critical": false,
+          "capabilities": [
+            {
+              "capability": "observability.reporter",
+              "type": "observability.Reporter"
+            }
+          ]
+        }
+      ]
     },
     "migrations": [],
     "environment": [

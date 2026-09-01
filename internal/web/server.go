@@ -22,6 +22,7 @@ import (
 	identitysession "github.com/gogogadget/gogogadget/internal/identity/session"
 	"github.com/gogogadget/gogogadget/internal/llm"
 	"github.com/gogogadget/gogogadget/internal/observability"
+	"github.com/gogogadget/gogogadget/internal/realtime"
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
 	"github.com/jackc/pgx/v5"
@@ -54,10 +55,10 @@ type Server struct {
 	llm             llm.Completer
 	flags           flags.Evaluator
 	reporter        observability.Reporter
+	realtime        realtime.Broker
 	identityWebhook identity.Webhook
 	billingWebhook  billing.BillingWebhook
-
-	mux *http.ServeMux
+	mux             *http.ServeMux
 
 	// metrics is the process-local Prometheus registry (see metrics.go).
 	metrics metricsRegistry
@@ -105,6 +106,7 @@ type Deps struct {
 	LLM               llm.Completer
 	Flags             flags.Evaluator
 	Reporter          observability.Reporter
+	Realtime          realtime.Broker
 	IdentityWebhook   identity.Webhook
 	BillingWebhook    billing.BillingWebhook
 }
@@ -132,7 +134,7 @@ func NewServer(d Deps) (*Server, error) {
 		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
 		analytics: analytics.NoopCapturer{}, store: d.Storage, llm: d.LLM,
-		flags: d.Flags, reporter: d.Reporter, mux: http.NewServeMux(),
+		flags: d.Flags, reporter: d.Reporter, realtime: d.Realtime, mux: http.NewServeMux(),
 	}
 	reg, err := content.NewRegistry(contentTypesOf(d))
 	if err != nil {

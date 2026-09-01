@@ -1,0 +1,88 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/llm-fake",
+    "kind": "system",
+    "name": "llm-fake",
+    "revision": 1,
+    "contract": 1,
+    "title": "llm-fake",
+    "description": "llm-fake adapter",
+    "requires": [
+      {
+        "id": "ggg/system/llm",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/llm/fake/fake.go",
+        "target": "internal/llm/fake/fake.go",
+        "class": "go",
+        "sha256": "4a02fd42c0d4258c9e914eb5dc4f30b079de5f2e2c33db3a5a6363f5966b8282",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/llm/fake"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/llm/fake",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "llm.completer",
+            "type": "llm.Completer"
+          }
+        ],
+        "type_imports": [
+          "internal/llm"
+        ],
+        "start": false,
+        "stop": false,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/llm",
+          "targets": [
+            {
+              "id": "fake",
+              "title": "fake",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/llm-fake",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/llm/fake"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

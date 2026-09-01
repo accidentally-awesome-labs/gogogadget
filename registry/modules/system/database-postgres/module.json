@@ -1,0 +1,133 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/database-postgres",
+    "kind": "system",
+    "name": "database-postgres",
+    "revision": 1,
+    "contract": 1,
+    "title": "Database Postgres",
+    "description": "database-postgres infrastructure capability.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/database/postgres/postgres.go",
+        "target": "internal/database/postgres/postgres.go",
+        "class": "go",
+        "sha256": "5675e0754ad3f9bed62aab6de2825d219df4f2de2b234a4c37937ac96967ed44",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/database/postgres"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/database/postgres",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool"
+          },
+          {
+            "field": "Queries",
+            "capability": "database.queries",
+            "type": "*sqlc.Queries"
+          }
+        ],
+        "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
+          "internal/db/sqlc",
+          "internal/config"
+        ],
+        "start": false,
+        "stop": true,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/database",
+          "targets": [
+            {
+              "id": "docker-postgres",
+              "title": "Docker Postgres",
+              "mode": "self-hosted",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/docker-postgres",
+              "inputs": []
+            },
+            {
+              "id": "neon",
+              "title": "Neon",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gogogadget.dev/docs/providers/neon",
+              "console_url": "https://console.neon.tech",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/database/postgres"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}
