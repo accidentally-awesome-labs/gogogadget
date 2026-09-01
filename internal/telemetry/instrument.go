@@ -45,3 +45,18 @@ func Call(ctx context.Context, providers Providers, name string, fn func(context
 	RecordError(span, err)
 	return err
 }
+
+// PGX instruments a database operation without coupling the seam to pgx.
+func PGX(ctx context.Context, providers Providers, operation string, fn func(context.Context) error) error {
+	return Call(ctx, providers, "db."+operation, fn)
+}
+
+// Job instruments a background job execution.
+func Job(ctx context.Context, providers Providers, kind string, fn func(context.Context) error) error {
+	return Call(ctx, providers, "job."+kind, fn)
+}
+
+// Provider instruments an adapter call and records failures on the span.
+func ProviderCall(ctx context.Context, providers Providers, name string, fn func(context.Context) error) error {
+	return Call(ctx, providers, "provider."+name, fn)
+}

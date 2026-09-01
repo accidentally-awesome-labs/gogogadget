@@ -1080,7 +1080,7 @@
     },
     {
       "path": "registry/modules/system/telemetry/module.json",
-      "sha256": "b4961650ef455fce65b82ade0ad3a9dcee1e980b381037c2330e31b2bb7b7eca"
+      "sha256": "4866cda6e11ea5164027a6574253fbedd5cb6822fdb254530218bf1965353066"
     },
     {
       "path": "registry/modules/system/testdb/module.json",

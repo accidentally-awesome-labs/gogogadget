@@ -32,7 +32,15 @@
         "source": "internal/telemetry/instrument.go",
         "target": "internal/telemetry/instrument.go",
         "class": "go",
-        "sha256": "cabaa27bdbeda38f5d3ba5f8bdd4f70d4cb6b8adf607fa5f894ca25da9c940e1",
+        "sha256": "0c39cdd17d055512554617071f53ec976dac34bf56a38cea9d9ef77488a98fd8",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/telemetry/instrument_test.go",
+        "target": "internal/telemetry/instrument_test.go",
+        "class": "test",
+        "sha256": "c6cc87f48d1ce2b21ce14e4d9ff93a7c7c2d2dbebfb815ff8bd08ab0330005cd",
         "rewrite_module": true,
         "contract": false
       },
