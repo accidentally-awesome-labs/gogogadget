@@ -3,15 +3,15 @@ package web
 import (
 	"errors"
 	"fmt"
-	"html"
-	"net/http"
-
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5"
 	"github.com/justinas/nosurf"
+	"html"
+	"net/http"
+	"time"
 )
 
 func (s *Server) handleBillingConfirm(w http.ResponseWriter, r *http.Request) {
@@ -94,17 +94,25 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 		_, _ = fmt.Fprintf(w, `<main><h1>Cancel billing</h1><form method="post" action="/app/billing/cancel"><input type="hidden" name="customer" value="%s"><input type="hidden" name="csrf_token" value="%s"><button type="submit">Cancel</button></form></main>`, html.EscapeString(customer), html.EscapeString(nosurf.Token(r)))
 		return
 	}
-	evt := client.CanceledEvent(customer, org.OrgID)
-	if evt.ProviderProductID == "" {
-		if sub, err := s.q.GetSubscriptionByOrg(r.Context(), org.OrgID); err == nil {
-			evt.ProviderProductID = sub.ProductKey
+	sub, subErr := s.q.GetSubscriptionByOrg(r.Context(), org.OrgID)
+	eventID := "cancel:" + customer
+	if subErr == nil {
+		product := sub.ProductKey
+		eventID = "cancel:" + customer + ":" + sub.ProviderSubscriptionID.String + ":" + sub.CurrentPeriodEnd.Time.UTC().Format(time.RFC3339Nano)
+		evt := client.CanceledEvent(customer, org.OrgID)
+		evt.ProviderProductID = product
+		if err := s.processLocalBillingEvent(r, evt, eventID); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-	}
-	if err := s.processLocalBillingEvent(r, evt, "cancel:"+customer); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Redirect(w, r, "/app/settings/billing", http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, "/app/settings/billing", http.StatusSeeOther)
+	if !errors.Is(subErr, pgx.ErrNoRows) {
+		http.Error(w, subErr.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Error(w, "no active local subscription", http.StatusNotFound)
 }
 
 func (s *Server) processLocalBillingEvent(r *http.Request, evt billing.SubscriptionEvent, id string) error {

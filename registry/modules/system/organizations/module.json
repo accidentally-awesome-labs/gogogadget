@@ -88,7 +88,7 @@
         "source": "internal/db/testdata/seed/e2e/organizations.sql",
         "target": "internal/db/testdata/seed/e2e/organizations.sql",
         "class": "seed",
-        "sha256": "2db4c9fc721b285c77a63d4015398d6e010bfd3414be1ae86b8660ac14c12d01",
+        "sha256": "0d4b4d37688255fbbde1ac390143625c44fe3ab2c61b18649ad22e68a347bae0",
         "rewrite_module": false,
         "contract": false
       },

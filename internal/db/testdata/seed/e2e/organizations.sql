@@ -38,4 +38,3 @@ INSERT INTO identity_organizations (provider, subject, org_id) VALUES
   ('dev', 'org_free', 'org_free'), ('dev', 'org_pro', 'org_pro'),
   ('dev', 'org_deleteme', 'org_deleteme')
 ON CONFLICT DO NOTHING;
-ON CONFLICT DO NOTHING;

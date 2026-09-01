@@ -832,7 +832,7 @@
     },
     {
       "path": "registry/modules/system/billing-local/module.json",
-      "sha256": "8e53d0b271e31a8e65d7cb7abdc5600b329a03ebedb989ac27d33b5159d3394f"
+      "sha256": "afd75c07b300b0deea31a317b9334491eafcaa36013588bd9a9232534abf2fbd"
     },
     {
       "path": "registry/modules/system/billing-polar/module.json",
@@ -928,7 +928,7 @@
     },
     {
       "path": "registry/modules/system/organizations/module.json",
-      "sha256": "a850234b50cd4456753228d73fb48e31f12c672ea2b5a9d299fe8b1cc938000e"
+      "sha256": "6b860db8c9b5ccfa303027b8f8066f7adb32e31773f42887b95120d05c87c836"
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
