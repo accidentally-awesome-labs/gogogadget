@@ -18,16 +18,29 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.7.6"
+        }
+      ],
       "tools": [],
       "containers": []
     },
     "files": [
       {
+        "source": "internal/db/migrations/0023_webhook_outbox.sql",
+        "target": "internal/db/migrations/0023_webhook_outbox.sql",
+        "class": "migration",
+        "sha256": "9eda271e30602886dc16b37f0b3fa3f6ed423d37f326a479efd4c6538e82b77d",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
         "source": "internal/webhooks/postgres/postgres.go",
         "target": "internal/webhooks/postgres/postgres.go",
         "class": "go",
-        "sha256": "38f1aa06912f46a6cfe7f7a9736357e28eedba8954e05d28a7d92c9890e29e45",
+        "sha256": "eeea57dc450b1cf90e0141f79e02b721fe7681ee2ca02f35936684227e93eb30",
         "rewrite_module": true,
         "contract": true
       },
@@ -49,7 +62,14 @@
       "system": {
         "package": "internal/webhooks/postgres",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Pool",
+            "capability": "database.pool",
+            "type": "*pgxpool.Pool",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -58,6 +78,7 @@
           }
         ],
         "type_imports": [
+          "github.com/jackc/pgx/v5/pgxpool",
           "internal/webhooks"
         ],
         "start": false,
@@ -83,7 +104,14 @@
         }
       }
     },
-    "migrations": [],
+    "migrations": [
+      {
+        "id": "0023_webhook_outbox",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0023_webhook_outbox.sql",
+        "sha256": "9eda271e30602886dc16b37f0b3fa3f6ed423d37f326a479efd4c6538e82b77d"
+      }
+    ],
     "environment": [],
     "docs": [],
     "tests": {
