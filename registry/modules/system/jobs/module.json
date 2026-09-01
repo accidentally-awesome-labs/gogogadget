@@ -107,7 +107,7 @@
         "source": "internal/jobs/jobs.go",
         "target": "internal/jobs/jobs.go",
         "class": "go",
-        "sha256": "2ea668a1c6797087898bd10095ba11f47eb8cb710c3aaf8f4390168171bc6dc4",
+        "sha256": "fabbd61d8ad32cd9c1b273d5574d910060288fdc53544e77a63a7416b7fd36fb",
         "rewrite_module": true,
         "contract": true
       },
@@ -123,7 +123,7 @@
         "source": "internal/jobs/module.go",
         "target": "internal/jobs/module.go",
         "class": "go",
-        "sha256": "519b86ac91f1e5c3c3b84bb8e9ed14a5e5e45ec8e8d9a1c679c2d54675b72982",
+        "sha256": "4bf89b4bb288250085652607a6e0437aeb41db68bf4267112e44b609fb900a2c",
         "rewrite_module": true,
         "contract": true
       },
@@ -202,6 +202,12 @@
             "capability": "storage.store",
             "type": "storage.Store",
             "optional": true
+          },
+          {
+            "field": "Telemetry",
+            "capability": "telemetry.providers",
+            "type": "telemetry.Providers",
+            "optional": true
           }
         ],
         "provides": [
@@ -213,7 +219,8 @@
         ],
         "type_imports": [
           "github.com/jackc/pgx/v5/pgxpool",
-          "internal/audit"
+          "internal/audit",
+          "internal/telemetry"
         ],
         "start": true,
         "stop": true

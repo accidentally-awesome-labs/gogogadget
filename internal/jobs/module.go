@@ -18,6 +18,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/notifications"
 	"github.com/gogogadget/gogogadget/internal/observability"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -35,6 +36,7 @@ type Deps struct {
 	WebhookDrain  func(context.Context) error
 	AuditExporter audit.Exporter
 	AuditDB       *pgxpool.Pool
+	Telemetry     telemetry.Providers
 }
 
 // Module is the constructed background-worker closure.
@@ -66,6 +68,7 @@ func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	worker.Storage = d.Storage
 	worker.Notifier = d.Notifier
 	worker.WebhookDrain = d.WebhookDrain
+	worker.Telemetry = d.Telemetry
 	if d.AuditExporter != nil && d.AuditDB != nil {
 		outbox := &audit.PostgresOutbox{DB: d.AuditDB}
 		worker.AuditExport = func(ctx context.Context) error { return outbox.Drain(ctx, d.AuditExporter, 50) }

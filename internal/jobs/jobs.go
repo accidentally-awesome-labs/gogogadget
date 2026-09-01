@@ -21,6 +21,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/notifications"
 	"github.com/gogogadget/gogogadget/internal/notify"
 	"github.com/gogogadget/gogogadget/internal/storage"
+	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/text/language"
@@ -135,6 +136,7 @@ type Worker struct {
 	SearchDrain  func(context.Context) error
 	Notifier     notifications.Notifier
 	WebhookDrain func(context.Context) error
+	Telemetry    telemetry.Providers
 	// AuditExport drains the audit-export outbox after durable ledger writes.
 	AuditExport func(context.Context) error
 	// Storage is the export target; set in cmd/server. Nil → export fails
@@ -387,7 +389,7 @@ func (w *Worker) dispatchSafely(ctx context.Context, job sqlc.Job) (err error) {
 			err = fmt.Errorf("handler panicked: %v", r)
 		}
 	}()
-	return w.dispatch(ctx, job)
+	return telemetry.Job(ctx, w.Telemetry, job.Kind, func(callCtx context.Context) error { return w.dispatch(callCtx, job) })
 }
 
 // schedulerPass claims due schedules (next_run_at advanced in the same

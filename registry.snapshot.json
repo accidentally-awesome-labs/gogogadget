@@ -932,7 +932,7 @@
     },
     {
       "path": "registry/modules/system/jobs/module.json",
-      "sha256": "ad1b652c46220b5680b371f11a572723a6b09816d2fb783e2a7180f7213bad03"
+      "sha256": "767421899a6e357ed8d69777f7c63f5b47f96d9c908c6bca468c20d7a02fe717"
     },
     {
       "path": "registry/modules/system/llm-fake/module.json",
