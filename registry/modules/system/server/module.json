@@ -260,7 +260,7 @@
         "source": "internal/web/server.go",
         "target": "internal/web/server.go",
         "class": "go",
-        "sha256": "33288fb54dc1be047df8905bd329dbb5e8196107594169dfd28e7d5982be873e",
+        "sha256": "e995f86b962e7776baa0ac9440d0a2a414106584bcb4d8d7492d652f605fc853",
         "rewrite_module": true,
         "contract": true
       },

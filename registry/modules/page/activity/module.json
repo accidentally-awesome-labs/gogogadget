@@ -61,7 +61,7 @@
         "source": "internal/web/handlers_activity.go",
         "target": "internal/web/handlers_activity.go",
         "class": "go",
-        "sha256": "180e54ba88dca344680820f0cfc69f6a95030ccb58023d47a6b150a747895ea1",
+        "sha256": "2884120bd1405cd9355d89f295b490c95d0b9afc31824ea5b43601c134a6dd8d",
         "rewrite_module": true,
         "contract": false
       },

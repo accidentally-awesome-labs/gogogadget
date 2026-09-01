@@ -107,7 +107,7 @@
         "source": "internal/identity/verifier.go",
         "target": "internal/identity/verifier.go",
         "class": "go",
-        "sha256": "0ab3c8f82195cb823aac832c1e3b45b33d0bf4b2fb47d1d7877d74016e8f0e37",
+        "sha256": "bfbbb624716717e220107ed89827522986e841dcdc4d2d9fd671dbeae3a40fe4",
         "rewrite_module": true,
         "contract": true
       },

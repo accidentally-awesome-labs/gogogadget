@@ -74,7 +74,7 @@
         "source": "internal/web/workflow_admin_schedules.go",
         "target": "internal/web/workflow_admin_schedules.go",
         "class": "go",
-        "sha256": "fad927eb16b1ba69c3442a79738b8677f6596a8bb82c8fe292ebf850195177a7",
+        "sha256": "9e2700be86971a800f8b659fdd5bcb031902071359f372bfb3faedb607b05234",
         "rewrite_module": true,
         "contract": false
       }

@@ -50,7 +50,7 @@
         "source": "internal/web/admin_viewers_test.go",
         "target": "internal/web/admin_viewers_test.go",
         "class": "test",
-        "sha256": "0d3e18227668c602e7bc8dd448d42c6dcf766c6f803563721a91ad0130e18372",
+        "sha256": "f1d9ce4f0514d2e177eac1f55e364a778205f285277fa7a6a63a3966aeb47017",
         "rewrite_module": true,
         "contract": false
       },

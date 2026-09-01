@@ -54,7 +54,7 @@
         "source": "internal/web/clerk_webhook_test.go",
         "target": "internal/web/clerk_webhook_test.go",
         "class": "test",
-        "sha256": "d982b600af2455ed5794ecc5ac4b4865dbf042afa3132f494ddd9695c58b7d66",
+        "sha256": "545fab44fae49fd5be7d33515ccb9aae9af238f6fa01c0828d9c23fc0b391401",
         "rewrite_module": true,
         "contract": false
       },
@@ -62,7 +62,7 @@
         "source": "internal/web/handlers_webhooks.go",
         "target": "internal/web/handlers_webhooks.go",
         "class": "go",
-        "sha256": "864b5862b9a2d00599b0b7ef58f74ea460f9f06d1d7d60d0c913efd497b22bfd",
+        "sha256": "321f195621898a56b56bcba6ab2cf509df1069828f234d88f6d426b4f1acdd33",
         "rewrite_module": true,
         "contract": false
       },

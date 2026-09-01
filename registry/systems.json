@@ -7,6 +7,7 @@
     "registry/modules/system/api/module.json",
     "registry/modules/system/apphost/module.json",
     "registry/modules/system/audit/module.json",
+    "registry/modules/system/billing-local/module.json",
     "registry/modules/system/billing/module.json",
     "registry/modules/system/config/module.json",
     "registry/modules/system/content-assets/module.json",

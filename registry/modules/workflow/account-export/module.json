@@ -71,7 +71,7 @@
         "source": "internal/web/account_data_test.go",
         "target": "internal/web/account_data_test.go",
         "class": "test",
-        "sha256": "6c9bbc26b2787d9f2bae83bd7d556c574b656f3eedc237bc6b09f292343135db",
+        "sha256": "f32e6827e7d9cbdee0e5e24929358270ca0526b6c0655681b90686f6c6f6b6f1",
         "rewrite_module": true,
         "contract": false
       },

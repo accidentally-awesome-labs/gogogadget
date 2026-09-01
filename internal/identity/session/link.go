@@ -67,3 +67,34 @@ func (l *Linker) Link(ctx context.Context, r LinkRequest) error {
 	}
 	return tx.Commit(ctx)
 }
+
+// RunLinkCommand is the noninteractive command core used by ggg identity link.
+// It accepts exactly --environment, --provider, --subject, and one destination.
+func RunLinkCommand(ctx context.Context, linker *Linker, args []string) error {
+	var r LinkRequest
+	var environment string
+	for i := 0; i < len(args); i++ {
+		if i+1 >= len(args) {
+			return errors.New("identity link: missing flag value")
+		}
+		switch args[i] {
+		case "--environment":
+			environment = args[i+1]
+		case "--provider":
+			r.Provider = args[i+1]
+		case "--subject":
+			r.Subject = args[i+1]
+		case "--user":
+			r.UserID = args[i+1]
+		case "--org":
+			r.OrgID = args[i+1]
+		default:
+			return fmt.Errorf("identity link: unknown flag %s", args[i])
+		}
+		i++
+	}
+	if environment != "development" && environment != "test" && environment != "production" {
+		return errors.New("identity link: environment must be development, test, or production")
+	}
+	return linker.Link(ctx, r)
+}
