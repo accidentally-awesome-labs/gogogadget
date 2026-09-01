@@ -46,16 +46,24 @@ func DefaultPlanCatalog() PlanCatalog {
 	return catalog
 }
 
-// PlanByKey is retained as a read-only compatibility helper. New request
-// paths must carry the selected immutable PlanCatalog.
+// FreePlan returns a copy of the catalog's free plan for contexts that have no
+// subscription loaded yet.
+func FreePlan() Plan { return clonePlan(defaultPlans[0]) }
+
+// PlanByKey is retained as a read-only compatibility helper for non-request
+// callers. Request handlers use their injected PlanCatalog.
 func PlanByKey(key string) Plan { return DefaultPlanCatalog().ByKey(key) }
 
-// MRR sums monthly recurring revenue in USD over revenue subscriptions.
-func MRR(rows []sqlc.ListRevenueSubscriptionsRow) int {
-	catalog := DefaultPlanCatalog()
+func MRRWithCatalog(rows []sqlc.ListRevenueSubscriptionsRow, catalog PlanCatalog) int {
+	if catalog == nil {
+		catalog = DefaultPlanCatalog()
+	}
 	total := 0
 	for _, r := range rows {
 		total += catalog.ByKey(r.ProductKey).PriceUSDMonthly * int(r.N)
 	}
 	return total
+}
+func MRR(rows []sqlc.ListRevenueSubscriptionsRow) int {
+	return MRRWithCatalog(rows, DefaultPlanCatalog())
 }

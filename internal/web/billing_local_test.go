@@ -48,6 +48,11 @@ func TestLocalBillingConfirmCancelReactivates(t *testing.T) {
 	sub, err = s.q.GetSubscriptionByOrg(t.Context(), "org_local_bill")
 	require.NoError(t, err)
 	require.Equal(t, "active", sub.Status)
+	cancel()
+	sub, err = s.q.GetSubscriptionByOrg(t.Context(), "org_local_bill")
+	require.NoError(t, err)
+	require.Equal(t, "canceled", sub.Status)
+
 }
 
 var _ billing.Client = (*billinglocal.Client)(nil)

@@ -101,6 +101,7 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 		eventID = "cancel:" + customer + ":" + sub.ProviderSubscriptionID.String + ":" + sub.CurrentPeriodEnd.Time.UTC().Format(time.RFC3339Nano)
 		evt := client.CanceledEvent(customer, org.OrgID)
 		evt.ProviderProductID = product
+		evt.ProviderSubscriptionID = sub.ProviderSubscriptionID.String
 		if err := s.processLocalBillingEvent(r, evt, eventID); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

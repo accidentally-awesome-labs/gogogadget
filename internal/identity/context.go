@@ -70,7 +70,7 @@ func OrgFrom(ctx context.Context) *sqlc.Org {
 func PlanFrom(ctx context.Context) billing.Plan {
 	p, ok := ctx.Value(ctxPlan).(billing.Plan)
 	if !ok {
-		return billing.PlanByKey("free")
+		return billing.FreePlan()
 	}
 	return p
 }

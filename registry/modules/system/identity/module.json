@@ -56,7 +56,7 @@
         "source": "internal/identity/context.go",
         "target": "internal/identity/context.go",
         "class": "go",
-        "sha256": "e346334353e94eb12371ab7db920a1f44c79ce2ccf749d910d0fadc2019bbf2f",
+        "sha256": "a1dd0337389e114a5ab6a994fb1758cc417f8dff85d7da1e065453d9abf765dd",
         "rewrite_module": true,
         "contract": true
       },

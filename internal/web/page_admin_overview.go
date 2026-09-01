@@ -38,6 +38,6 @@ func (s *Server) handleAdminHome(w http.ResponseWriter, r *http.Request) {
 	}
 	s.Render(w, r, Page{Title: "Admin", Layout: templates.LayoutAdmin}, templates.AdminHome(templates.AdminHomeData{
 		TotalUsers: users, TotalOrgs: orgs, ActiveSubs: activeSubs,
-		MRR: billing.MRR(revRows), RecentSignups: signups, Now: s.cfg.Now(),
+		MRR: billing.MRRWithCatalog(revRows, s.billingCatalog), RecentSignups: signups, Now: s.cfg.Now(),
 	}))
 }

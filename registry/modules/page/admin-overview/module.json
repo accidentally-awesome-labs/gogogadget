@@ -79,7 +79,7 @@
         "source": "internal/web/page_admin_overview.go",
         "target": "internal/web/page_admin_overview.go",
         "class": "go",
-        "sha256": "52d96e62a315985b1a8266b8a4c5ec9a63ab9bae1185fb465d67f5212ee5d95a",
+        "sha256": "04b180e811bd5ec84e52e417ef50d524e958b19af5c342e8160753af53d5cd94",
         "rewrite_module": true,
         "contract": false
       },

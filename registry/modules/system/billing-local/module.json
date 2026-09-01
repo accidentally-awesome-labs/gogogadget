@@ -62,7 +62,7 @@
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",
-        "sha256": "5c2678d8fc04da7f2d53fe4366aee0c4e17e19c6896befe9c26e49ac16e5557b",
+        "sha256": "62fcc89947a1fe043bba320d1f4667e0d57456a0a72e96739e057a9cc9beb765",
         "rewrite_module": true,
         "contract": true
       },
@@ -70,7 +70,7 @@
         "source": "internal/billinglocal/local_test.go",
         "target": "internal/billinglocal/local_test.go",
         "class": "test",
-        "sha256": "98195e090337029140de7def99b28bcb39f5ac1d02b248ee18510350f454b9c7",
+        "sha256": "89e95e8388b904d999931976d7feaa27713bd6aa7637ac4afcfaa685a853cf2f",
         "rewrite_module": true,
         "contract": false
       },
@@ -86,7 +86,7 @@
         "source": "internal/web/billing_local_test.go",
         "target": "internal/web/billing_local_test.go",
         "class": "test",
-        "sha256": "6a0ab36a98c200ecc2d36b30c931a6e5c3d8e4a2577a3d5db173c6d0c664300d",
+        "sha256": "c79d01b75581aa0c4ca1274b93428707218a2397299c78c58cb1c6e521e3a132",
         "rewrite_module": true,
         "contract": false
       },
@@ -94,7 +94,7 @@
         "source": "internal/web/workflow_billing_local.go",
         "target": "internal/web/workflow_billing_local.go",
         "class": "go",
-        "sha256": "bf4b94ff44f576c073e1d1d5f0121a66d804a8532785365ff2a6cfbd570638d5",
+        "sha256": "0043af2ed6d93de3a75d6647b09b9b3135f447c60fdc90d49573da6d4597ceda",
         "rewrite_module": true,
         "contract": true
       }

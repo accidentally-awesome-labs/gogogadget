@@ -21,3 +21,12 @@ func TestLocalBillingContract(t *testing.T) {
 		t.Fatalf("cancel=%+v", e)
 	}
 }
+
+func TestLocalBillingSubscriptionIDsAreUniqueAcrossOrganizations(t *testing.T) {
+	c := New("http://app.test")
+	first := c.ConfirmedEvent("pro", "org_1", "org_1")
+	second := c.ConfirmedEvent("pro", "org_2", "org_2")
+	if first.ProviderSubscriptionID == "" || second.ProviderSubscriptionID == "" || first.ProviderSubscriptionID == second.ProviderSubscriptionID {
+		t.Fatalf("subscription IDs are not unique: %q and %q", first.ProviderSubscriptionID, second.ProviderSubscriptionID)
+	}
+}

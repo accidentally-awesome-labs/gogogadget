@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
@@ -17,6 +18,7 @@ type Client struct {
 	BaseURL   string
 	mu        sync.Mutex
 	confirmed map[string]string
+	nextID    uint64
 }
 
 func New(baseURL string) *Client {
@@ -62,7 +64,8 @@ func (c *Client) Cancel(customer string) {
 // hosted webhook workflow. Callers persist it through billing.Processor.
 func (c *Client) ConfirmedEvent(product, customer, orgID string) billing.SubscriptionEvent {
 	c.Confirm(product, customer)
-	return billing.SubscriptionEvent{Provider: "local", Type: "subscription.active", OrgIDHint: orgID, ProviderCustomerID: customer, ProviderProductID: product, Status: "active"}
+	id := fmt.Sprintf("local_sub_%d_%d", time.Now().UnixNano(), atomic.AddUint64(&c.nextID, 1))
+	return billing.SubscriptionEvent{ID: id, Provider: "local", Type: "subscription.active", OrgIDHint: orgID, ProviderSubscriptionID: id, ProviderCustomerID: customer, ProviderProductID: product, Status: "active"}
 }
 func (c *Client) CanceledEvent(customer, orgID string) billing.SubscriptionEvent {
 	c.mu.Lock()

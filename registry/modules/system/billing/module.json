@@ -128,7 +128,7 @@
         "source": "internal/billing/plans.go",
         "target": "internal/billing/plans.go",
         "class": "go",
-        "sha256": "54e6f74faaa0c0553920dcba9655acd2a2f1f1d29af4609ccf18ae933c7c23c1",
+        "sha256": "6f6b98ac72d0a26cf1792d6a7bcd8ca566ee2e051c5efa92afa7ee812cfcded8",
         "rewrite_module": true,
         "contract": true
       },
