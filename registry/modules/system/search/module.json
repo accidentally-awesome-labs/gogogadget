@@ -16,6 +16,22 @@
     },
     "files": [
       {
+        "source": "internal/search/http.go",
+        "target": "internal/search/http.go",
+        "class": "go",
+        "sha256": "c4cce4457a2789ecc283025cf2fa137ee57ada52727be209ca7ea607bfe889bb",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/search/http_test.go",
+        "target": "internal/search/http_test.go",
+        "class": "test",
+        "sha256": "06c25c03740065842d2a08de2db4f8016bbf0139f65aafa7f17e8d5cf9474ea5",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/search/memory.go",
         "target": "internal/search/memory.go",
         "class": "go",

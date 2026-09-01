@@ -1036,7 +1036,7 @@
     },
     {
       "path": "registry/modules/system/search/module.json",
-      "sha256": "628fd5f112a1621094bd2cd8ca4374e19faa317b6f00cf7f0cb519aac9cc6ae7"
+      "sha256": "a84504b5b9578a76e4c760302d5eeb7c12cf8793b9e8e8fa19f1aeeca7990ce6"
     },
     {
       "path": "registry/modules/system/security/module.json",
