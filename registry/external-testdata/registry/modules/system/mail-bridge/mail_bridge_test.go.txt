@@ -1,0 +1,14 @@
+package mailbridge
+
+import (
+	"context"
+	"testing"
+
+	"github.com/gogogadget/gogogadget/internal/mail"
+	"github.com/stretchr/testify/require"
+)
+
+func TestSenderSatisfiesCoreContract(t *testing.T) {
+	var sender mail.Sender = sender{}
+	require.NoError(t, sender.Send(context.Background(), mail.Message{To: "fixture@example.com"}))
+}

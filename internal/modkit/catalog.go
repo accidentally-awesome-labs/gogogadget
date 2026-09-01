@@ -5,23 +5,33 @@ import (
 	"fmt"
 )
 
-// Catalog resolves one registry commit and loads its validated catalog. It is
-// the read-only entry point behind `ggg catalog` and `ggg info`: no planning, no
-// project state, and no writes to the target tree.
-func (e *Engine) Catalog(ctx context.Context, repository, ref string) (Catalog, string, error) {
+// Catalog resolves every configured registry through the typed source resolver
+// and merges their globally namespaced catalogs without precedence.
+func (e *Engine) Catalog(ctx context.Context, registries []ProjectRegistry) (Catalog, string, error) {
 	if err := ctx.Err(); err != nil {
 		return Catalog{}, "", err
 	}
 	if e.source == nil {
 		return Catalog{}, "", fmt.Errorf("catalog: engine has no registry source")
 	}
-	snapshot, err := resolveSnapshot(ctx, e.source, ProjectRegistry{Repository: repository, Ref: ref, Source: "github"}, repository, ref)
-	if err != nil {
-		return Catalog{}, "", fmt.Errorf("resolve registry: %w", err)
+	if len(registries) == 0 {
+		return Catalog{}, "", fmt.Errorf("catalog: no registries configured")
 	}
-	catalog, err := LoadCatalog(snapshot.FS)
-	if err != nil {
-		return Catalog{}, "", fmt.Errorf("load catalog at %s: %w", snapshot.Commit, err)
+	resolved := make([]resolvedRegistry, 0, len(registries))
+	for _, registry := range registries {
+		snapshot, err := e.source.Resolve(ctx, registry)
+		if err != nil {
+			return Catalog{}, "", fmt.Errorf("resolve registry %s: %w", registry.Namespace, err)
+		}
+		if snapshot.FS == nil || snapshot.Commit == "" {
+			return Catalog{}, "", fmt.Errorf("resolved registry %s is incomplete", registry.Namespace)
+		}
+		resolved = append(resolved, resolvedRegistry{config: registry, snapshot: snapshot})
 	}
-	return catalog, snapshot.Commit, nil
+	catalog, err := mergeResolvedCatalogs(ctx, resolved)
+	if err != nil {
+		return Catalog{}, "", err
+	}
+	commit, _, _ := registryProvenance(resolved, catalog, catalog.Modules)
+	return catalog, commit, nil
 }

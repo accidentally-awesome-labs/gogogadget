@@ -155,7 +155,7 @@ func pendingTestLock() Lock {
 func TestMarshalProjectPreservesEmptyArrays(t *testing.T) {
 	project := Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/profile/full"},
 		Exclude: []string{},
 	}

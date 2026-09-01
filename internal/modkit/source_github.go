@@ -40,18 +40,11 @@ type GitHubSource struct {
 	Offline         bool
 }
 
-func (s GitHubSource) Resolve(ctx context.Context, args ...any) (Snapshot, error) {
-	registry := ProjectRegistry{Source: "github"}
-	legacy := len(args) >= 2
-	if len(args) == 1 {
-		if requested, ok := args[0].(ProjectRegistry); ok {
-			registry = requested
-		}
-	} else if len(args) >= 2 {
-		registry.Repository, _ = args[0].(string)
-		registry.Ref, _ = args[1].(string)
-	}
+func (s GitHubSource) Resolve(ctx context.Context, registry ProjectRegistry) (Snapshot, error) {
 	repository, ref := registry.Repository, registry.Ref
+	if registry.Source != "github" {
+		return Snapshot{}, fmt.Errorf("resolve GitHub source: source must be github")
+	}
 	if err := ctx.Err(); err != nil {
 		return Snapshot{}, fmt.Errorf("resolve GitHub source: %w", err)
 	}
@@ -89,13 +82,7 @@ func (s GitHubSource) Resolve(ctx context.Context, args ...any) (Snapshot, error
 		if !found {
 			return Snapshot{}, fmt.Errorf("resolve GitHub source %q at %s offline: verified cache entry not found", repository, ref)
 		}
-		if !legacy {
-			snapshot, err = validateGitHubSnapshot(snapshot, registry)
-			if err != nil {
-				return Snapshot{}, err
-			}
-		}
-		return snapshot, nil
+		return validateGitHubSnapshot(snapshot, registry)
 	}
 
 	client := s.Client
@@ -121,25 +108,13 @@ func (s GitHubSource) Resolve(ctx context.Context, args ...any) (Snapshot, error
 	if snapshot, found, err := githubCachedSnapshot(ctx, cacheDir, commit); err != nil {
 		return Snapshot{}, fmt.Errorf("open GitHub cache for %q at %s: %w", repository, commit, err)
 	} else if found {
-		if !legacy {
-			snapshot, err = validateGitHubSnapshot(snapshot, registry)
-			if err != nil {
-				return Snapshot{}, err
-			}
-		}
-		return snapshot, nil
+		return validateGitHubSnapshot(snapshot, registry)
 	}
-	snapshot, err := s.populateGitHubCache(ctx, client, codeloadBaseURL, cacheDir, repository, commit)
+	snapshot, err := s.populateGitHubCache(ctx, client, codeloadBaseURL, cacheDir, repository, commit, registry)
 	if err != nil {
 		return Snapshot{}, err
 	}
-	if !legacy {
-		snapshot, err = validateGitHubSnapshot(snapshot, registry)
-		if err != nil {
-			return Snapshot{}, err
-		}
-	}
-	return snapshot, nil
+	return validateGitHubSnapshot(snapshot, registry)
 }
 func validateGitHubSnapshot(snapshot Snapshot, registry ProjectRegistry) (Snapshot, error) {
 	if snapshot.FS == nil {
@@ -197,7 +172,7 @@ func (s GitHubSource) resolveGitHubCommit(ctx context.Context, client *http.Clie
 	return payload.SHA, nil
 }
 
-func (s GitHubSource) populateGitHubCache(ctx context.Context, client *http.Client, codeloadBaseURL, cacheDir, repository, commit string) (snapshot Snapshot, err error) {
+func (s GitHubSource) populateGitHubCache(ctx context.Context, client *http.Client, codeloadBaseURL, cacheDir, repository, commit string, registry ProjectRegistry) (snapshot Snapshot, err error) {
 	stage, err := os.MkdirTemp(cacheDir, "."+commit+"-")
 	if err != nil {
 		return Snapshot{}, fmt.Errorf("create staged GitHub cache in %q: %w", cacheDir, err)
@@ -221,6 +196,9 @@ func (s GitHubSource) populateGitHubCache(ctx context.Context, client *http.Clie
 	}
 	if err := verifyGitHubTree(ctx, treePath); err != nil {
 		return Snapshot{}, fmt.Errorf("verify staged GitHub cache for %q at %s: %w", repository, commit, err)
+	}
+	if _, err := verifySnapshotFiles(os.DirFS(treePath), registry.PublicKey, false); err != nil {
+		return Snapshot{}, fmt.Errorf("verify staged signed GitHub registry for %q at %s: %w", repository, commit, err)
 	}
 
 	finalPath := filepath.Join(cacheDir, commit)

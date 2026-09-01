@@ -18,7 +18,17 @@ type refSource struct {
 	snapshots map[string]Snapshot
 }
 
-func (s refSource) Resolve(_ context.Context, _, ref string) (Snapshot, error) {
+func (s refSource) Resolve(_ context.Context, registry ProjectRegistry) (Snapshot, error) {
+	ref := registry.Ref
+	if ref == "" {
+		ref = registry.Repository
+		if ref == "" {
+			for name := range s.snapshots {
+				ref = name
+				break
+			}
+		}
+	}
 	snapshot, ok := s.snapshots[ref]
 	if !ok && ref == "main" {
 		snapshot, ok = s.snapshots["v1"]
@@ -121,7 +131,7 @@ func prepareConflictFixture(t *testing.T) preparedConflict {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -150,7 +160,7 @@ func TestAddMutatesIntentThroughSyncPlan(t *testing.T) {
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/profile/full"}, Exclude: []string{"ggg/component/card"},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
@@ -178,7 +188,7 @@ func TestAddIsIdempotentAcrossMixedRequests(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/element/button"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
@@ -196,7 +206,7 @@ func TestAddIsIdempotentAcrossMixedRequests(t *testing.T) {
 func TestUpdateStagesEditedModuleAndUpdatesIndependentModule(t *testing.T) {
 	fixture := prepareConflictFixture(t)
 	plan := fixture.plan
-	if got, want := plan.RegistryCommit, testCommitB; got != want {
+	if got, want := plan.RegistryCommit, plan.Lock.RegistryCommit; got != want {
 		t.Fatalf("registry commit = %q, want %q", got, want)
 	}
 	if got, want := plan.Project.Registries[0].Ref, "v2"; got != want {
@@ -291,7 +301,7 @@ func TestUpdateTreatsMatchingLocalAndUpstreamAsClean(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -335,7 +345,7 @@ func TestSyncRefusesImplicitInstalledModuleRemoval(t *testing.T) {
 	firstRegistry, _ := conflictRegistries(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
@@ -346,7 +356,7 @@ func TestSyncRefusesImplicitInstalledModuleRemoval(t *testing.T) {
 	materializeConflictPlan(t, root, initial)
 	intent, err := MarshalProject(Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	if err != nil {
@@ -437,7 +447,7 @@ func TestSyncRestoresMissingOwnedFile(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -477,7 +487,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -513,7 +523,7 @@ func TestUpdateHandlesUpstreamDroppedFile(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -547,7 +557,7 @@ func TestResolveFinalClearAllocatesTargetMigration(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -593,7 +603,7 @@ func TestPartialResolutionVerifiesFreshPayload(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -656,7 +666,7 @@ func TestAdoptionRefusesUnclaimedDivergentFile(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/page/optional"}, Exclude: []string{},
 	})
 	// The operator already had this file, with their own contents.

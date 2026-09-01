@@ -23,7 +23,7 @@ func TestLocalArtifactsDoNotChangeTheRegistryCommit(t *testing.T) {
 	writeTestFile(t, root, "registry/modules/element/x/module.json", []byte(`{"id":"ggg/element/x"}`))
 	writeTestFile(t, root, "internal/web/real.go", []byte("package web\n"))
 
-	baseline, err := DirectorySource{Root: root}.Resolve(context.Background(), "", "")
+	baseline, err := DirectorySource{Root: root}.Resolve(context.Background(), ProjectRegistry{})
 	require.NoError(t, err)
 	require.NotEmpty(t, baseline.Commit)
 
@@ -43,7 +43,7 @@ func TestLocalArtifactsDoNotChangeTheRegistryCommit(t *testing.T) {
 		writeTestFile(t, root, rel, []byte(body))
 	}
 
-	withArtifacts, err := DirectorySource{Root: root}.Resolve(context.Background(), "", "")
+	withArtifacts, err := DirectorySource{Root: root}.Resolve(context.Background(), ProjectRegistry{})
 	require.NoError(t, err)
 	assert.Equal(t, baseline.Commit, withArtifacts.Commit,
 		"a local artifact changed the registry commit, so a working tree and a fresh checkout will disagree about generated output")
@@ -56,11 +56,11 @@ func TestRealSourceStillChangesTheRegistryCommit(t *testing.T) {
 	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[]}`))
 	writeTestFile(t, root, "internal/web/real.go", []byte("package web\n"))
 
-	before, err := DirectorySource{Root: root}.Resolve(context.Background(), "", "")
+	before, err := DirectorySource{Root: root}.Resolve(context.Background(), ProjectRegistry{})
 	require.NoError(t, err)
 
 	writeTestFile(t, root, "internal/web/real.go", []byte("package web\n\nvar Added = 1\n"))
-	after, err := DirectorySource{Root: root}.Resolve(context.Background(), "", "")
+	after, err := DirectorySource{Root: root}.Resolve(context.Background(), ProjectRegistry{})
 	require.NoError(t, err)
 
 	assert.NotEqual(t, before.Commit, after.Commit,

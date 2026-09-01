@@ -124,6 +124,8 @@ func (c CLI) Run(ctx context.Context, args []string) error {
 		return c.runDoctor(ctx, rest)
 	case "migrate":
 		return c.runMigrate(ctx, rest)
+	case "cache":
+		return c.runCache(ctx, rest)
 	case "registry":
 		return c.runRegistry(ctx, rest)
 	default:
@@ -209,6 +211,7 @@ func (c CLI) engine(offline bool) (*Engine, error) {
 		Source: GitHubSource{
 			CacheDir: filepath.Join(cache, "ggg", "registry"),
 			Offline:  offline,
+			Token:    os.Getenv("GITHUB_TOKEN"),
 		},
 		Generator: RegistryGenerator{}, ToolRunner: OSCommandRunner{},
 	}), nil
@@ -403,6 +406,7 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 	set := c.flagSet("init")
 	ref := set.String("ref", "main", "registry ref to pin")
 	repository := set.String("repository", DefaultRegistryRepository, "registry repository")
+	publicKey := set.String("public-key", "", "base64 raw Ed25519 registry public key")
 	adopt := set.Bool("adopt", false, "produce the initial lock from what is already installed")
 	offline := set.Bool("offline", false, "resolve only from a self-hosted or cached registry")
 	var claims claimList
@@ -413,7 +417,7 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 		return usageError(err.Error())
 	}
 	if len(positional) != 0 {
-		return usageError("usage: ggg init [--ref REF] [--repository REPO] [--adopt] [--claim PATH]... [--offline] [--json]")
+		return usageError("usage: ggg init [--ref REF] [--repository REPO] [--public-key BASE64] [--adopt] [--claim PATH]... [--offline] [--json]")
 	}
 
 	path := filepath.Join(c.root(), ProjectFileName)
@@ -423,7 +427,13 @@ func (c CLI) runInit(ctx context.Context, args []string) error {
 		return runtimeError(err)
 	}
 
-	project := Project{Schema: 2, Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: *repository, Ref: *ref, PublicKey: "core"}}, Modules: []string{}, Exclude: []string{}, Providers: map[string]ProviderSelections{}, Deployment: ""}
+	registry := ProjectRegistry{Namespace: "ggg", Source: "github", Repository: *repository, Ref: *ref, PublicKey: *publicKey}
+	if c.Engine != nil {
+		registry = ProjectRegistry{Namespace: "ggg", Source: "directory", Path: "."}
+	} else if _, statErr := os.Stat(filepath.Join(c.root(), "registry.json")); statErr == nil {
+		registry = ProjectRegistry{Namespace: "ggg", Source: "directory", Path: "."}
+	}
+	project := Project{Schema: 2, Registries: []ProjectRegistry{registry}, Modules: []string{}, Exclude: []string{}, Providers: map[string]ProviderSelections{}, Deployment: ""}
 	data, err := MarshalProject(project)
 	if err != nil {
 		return usageError(err.Error())
@@ -840,7 +850,7 @@ func (c CLI) readCatalog(ctx context.Context, latest bool) (Catalog, string, Loc
 		if !errors.As(err, &coder) || coder.ExitCode() != exitRefusal {
 			return Catalog{}, "", Lock{}, err
 		}
-		project = Project{Schema: 2, Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: DefaultRegistryRepository, Ref: "main", PublicKey: "core"}}, Modules: []string{}, Exclude: []string{}, Providers: map[string]ProviderSelections{}, Deployment: ""}
+		project = Project{Schema: 2, Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: DefaultRegistryRepository, Ref: "main", PublicKey: ""}}, Modules: []string{}, Exclude: []string{}, Providers: map[string]ProviderSelections{}, Deployment: ""}
 	}
 	engine, err := c.engine(false)
 	if err != nil {
@@ -857,12 +867,17 @@ func (c CLI) readCatalog(ctx context.Context, latest bool) (Catalog, string, Loc
 	if len(project.Registries) == 0 {
 		return Catalog{}, "", Lock{}, runtimeError(fmt.Errorf("project has no registries"))
 	}
-	registry := project.Registries[0]
-	ref := registry.Ref
-	if hasLock && !latest && lock.RegistryCommit != "" {
-		ref = lock.RegistryCommit
+	registry := append([]ProjectRegistry(nil), project.Registries...)
+	if hasLock && !latest && len(lock.Snapshots) > 0 {
+		for i := range registry {
+			for _, snapshot := range lock.Snapshots {
+				if snapshot.Namespace == registry[i].Namespace {
+					registry[i].Ref = snapshot.Commit
+				}
+			}
+		}
 	}
-	catalog, commit, err := engine.Catalog(ctx, registry.Repository, ref)
+	catalog, commit, err := engine.Catalog(ctx, registry)
 	if err != nil {
 		return Catalog{}, "", Lock{}, runtimeError(err)
 	}
@@ -1102,6 +1117,41 @@ func (c CLI) runDoctor(ctx context.Context, args []string) error {
 		return refusalError(fmt.Errorf("doctor: %d finding(s)", len(diagnostics)))
 	}
 	return nil
+}
+func (c CLI) runCache(ctx context.Context, args []string) error {
+	if len(args) != 1 || args[0] != "prune" {
+		return usageError("usage: ggg cache prune")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	cacheRoot, err := os.UserCacheDir()
+	if err != nil {
+		return runtimeError(err)
+	}
+	cacheDir := filepath.Join(cacheRoot, "ggg", "registry")
+	data, err := os.ReadFile(filepath.Join(c.root(), LockFileName))
+	if err != nil {
+		return refusalError(fmt.Errorf("cache prune requires a valid lock: %w", err))
+	}
+	lock, err := ParseLock(data)
+	if err != nil {
+		return refusalError(fmt.Errorf("cache prune requires a valid lock: %w", err))
+	}
+	referenced := make([]string, 0, len(lock.Snapshots))
+	for _, snapshot := range lock.Snapshots {
+		referenced = append(referenced, snapshot.CacheKey)
+	}
+	removed, err := PruneRegistryCache(cacheDir, referenced)
+	if err != nil {
+		return runtimeError(err)
+	}
+	suffix := "ies"
+	if removed == 1 {
+		suffix = "y"
+	}
+	_, err = fmt.Fprintf(c.out(), "removed %d registry cache entr%s\n", removed, suffix)
+	return err
 }
 
 func (c CLI) runRegistry(ctx context.Context, args []string) error {

@@ -1,0 +1,13 @@
+{
+  "canonical_module": "example.com/acme/gadget-registry",
+  "includes": [
+    "registry/elements.json",
+    "registry/components.json",
+    "registry/pages.json",
+    "registry/workflows.json",
+    "registry/systems.json",
+    "registry/profiles.json"
+  ],
+  "namespace": "acme",
+  "schema": 2
+}

@@ -1,0 +1,119 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "acme/system/mail-bridge",
+    "kind": "system",
+    "name": "mail-bridge",
+    "revision": 1,
+    "contract": 1,
+    "title": "Acme mail bridge",
+    "description": "A signed external adapter implementing the core mail provider slot.",
+    "requires": [
+      {
+        "id": "ggg/system/mail",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "registry/modules/system/mail-bridge/mail_bridge.go.txt",
+        "target": "internal/fixture/mailbridge/mail_bridge.go",
+        "class": "go",
+        "sha256": "66089419fe4827beb425ceac7975f0c996874fe6d225f6dcf7913cbc1053f211",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/system/mail-bridge/mail_bridge_test.go.txt",
+        "target": "internal/fixture/mailbridge/mail_bridge_test.go",
+        "class": "test",
+        "sha256": "aef6415996d765fb6f27fc79d492fffc98c10f032d1c7e5a1f0d11f6385c7b9f",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "registry/modules/system/mail-bridge/contracts.go.txt",
+        "target": "internal/fixture/mailcontracts/contracts.go",
+        "class": "go",
+        "sha256": "6648b5e7833601a07a0223ef9fe6144cb9534e89e29637d08c16e8f660282544",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/fixture/mailbridge",
+        "internal/fixture/mailcontracts"
+      ],
+      "provider_slots": [
+        "ggg/mail"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/fixture/mailbridge",
+        "constructor": "NewModule",
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
+        "provides": [
+          {
+            "field": "Sender",
+            "capability": "mail.sender",
+            "type": "mail.Sender"
+          }
+        ],
+        "type_imports": [
+          "internal/config",
+          "internal/mail"
+        ],
+        "start": false,
+        "stop": false,
+        "adapter": {
+          "slot": "ggg/mail",
+          "targets": [
+            {
+              "id": "bridge",
+              "title": "Acme Mail Bridge",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://acme.example/docs/mail-bridge",
+              "inputs": []
+            }
+          ]
+        }
+      }
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/fixture/mailbridge"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

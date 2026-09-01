@@ -163,14 +163,17 @@ func (e *Engine) planRemove(
 		if op.Offline {
 			return Plan{}, fmt.Errorf("drain-required removal needs the registry at commit %s; offline removal cannot materialize it", currentLock.RegistryCommit)
 		}
-		snapshot, err := resolveSnapshot(ctx, e.source, project.Registries[0], project.Registries[0].Repository, currentLock.RegistryCommit)
+		snapshot, err := e.source.Resolve(ctx, project.Registries[0])
 		if err != nil {
 			return Plan{}, fmt.Errorf("resolve registry %s at %s for drain migrations: %w",
 				project.Registries[0].Repository, currentLock.RegistryCommit, err)
 		}
-		if snapshot.Commit != currentLock.RegistryCommit {
-			return Plan{}, fmt.Errorf("drain registry resolved commit %s, want lock commit %s",
-				snapshot.Commit, currentLock.RegistryCommit)
+		if len(currentLock.Snapshots) > 0 {
+			wantCommit := currentLock.Snapshots[0].Commit
+			if snapshot.Commit != wantCommit {
+				return Plan{}, fmt.Errorf("drain registry resolved commit %s, want lock snapshot commit %s",
+					snapshot.Commit, wantCommit)
+			}
 		}
 		drainSnapshot = &snapshot
 	}

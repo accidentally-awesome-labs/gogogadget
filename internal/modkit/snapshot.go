@@ -57,7 +57,22 @@ func BuildRegistrySnapshot(fsys fs.FS) ([]byte, error) {
 		if walkErr != nil {
 			return walkErr
 		}
-		if entry.IsDir() || name == "." || name == RegistrySnapshotPath || name == RegistrySignaturePath || isExcludedSourcePath(name, false) {
+		if name == "." || name == RegistrySnapshotPath || name == RegistrySignaturePath {
+			return nil
+		}
+		if name != "registry.json" && name != "registry" && !strings.HasPrefix(name, "registry/") {
+			if entry.IsDir() {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if isExcludedSourcePath(name, entry.IsDir()) {
+			if entry.IsDir() {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if entry.IsDir() {
 			return nil
 		}
 		data, err := fs.ReadFile(fsys, name)

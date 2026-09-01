@@ -187,7 +187,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}
 	registrySources := make([]resolvedRegistry, 0, len(desiredProject.Registries))
 	for _, configured := range desiredProject.Registries {
-		snapshot, resolveErr := resolveSnapshot(ctx, e.source, configured, configured.Repository, configured.Ref)
+		snapshot, resolveErr := e.source.Resolve(ctx, configured)
 		if resolveErr != nil {
 			return Plan{}, fmt.Errorf("resolve registry %s at %s: %w", configured.Namespace, configured.Ref, resolveErr)
 		}
@@ -286,7 +286,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	}
 	finalLock.Dependencies = plannedDependencies(canonicalRoot, existingLock.Dependencies, graph.modules, effective.Go)
 	if e.generator != nil {
-		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: snapshot.Commit, ModulePath: modulePath,
+		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
 			Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...)}
 		generated, renderErr := e.generator.Render(ctx, preview)
 		if renderErr != nil {
@@ -331,7 +331,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	operation.Modules = append([]string{}, op.Modules...)
 	order := append([]string{}, finalLock.Order...)
 	return Plan{
-		Operation: operation, Root: canonicalRoot, RegistryCommit: snapshot.Commit, ModulePath: modulePath,
+		Operation: operation, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
 		Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...), Order: order,
 		Changes: changes, Diagnostics: diagnostics, Conflicts: conflicts, Staged: staged,
 		previousDependencies: append([]LockedDependency{}, existingLock.Dependencies...),

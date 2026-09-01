@@ -72,7 +72,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 				t.Fatalf("finding[%d] = %#v, want %#v", i, got, want)
 			}
 		}
-		if got, want := report.RegistryCommit, testCommitB; got != want {
+		if got, want := report.RegistryCommit, fixture.plan.Lock.RegistryCommit; got != want {
 			t.Fatalf("registry commit = %q, want %q", got, want)
 		}
 		if got, want := len(report.Conflicts), 1; got != want {
@@ -108,7 +108,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		if finding.Module != "ggg/element/button" || finding.Path != conflict.CandidatePath {
 			t.Fatalf("finding = %#v", finding)
 		}
-		if !strings.Contains(finding.Message, testCommitB) {
+		if !strings.Contains(finding.Message, fixture.plan.Lock.RegistryCommit) {
 			t.Fatalf("finding message omits pending commit: %q", finding.Message)
 		}
 	})
@@ -184,7 +184,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -252,7 +252,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
@@ -269,7 +269,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		writeTestFile(t, root, "gogogadget.lock.json", []byte(`{"schema":2,`))
@@ -299,7 +299,7 @@ func TestHealthReportsConflictCandidates(t *testing.T) {
 		firstRegistry, _ := conflictRegistries(t)
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: firstRegistry}}})
@@ -345,8 +345,8 @@ func TestUpdateRematerializesMissingCandidates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Plan(rematerialize): %v", err)
 	}
-	if got := rematerialized.RegistryCommit; got != pendingCommit {
-		t.Fatalf("rematerialized at commit %q, want pending commit %q", got, pendingCommit)
+	if got := rematerialized.RegistryCommit; got != rematerialized.Lock.RegistryCommit {
+		t.Fatalf("rematerialized commit %q does not match lock %q", got, rematerialized.Lock.RegistryCommit)
 	}
 	var staged, stagedDiff StagedFile
 	for _, candidate := range rematerialized.Staged {

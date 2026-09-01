@@ -276,7 +276,7 @@ func IsRegistryOwnedOutputPath(path string) bool {
 		return true
 	}
 	switch path {
-	case RegistrySnapshotPath, RegistrySignaturePath, "static/ui-components.js", "static/ui-engines.js",
+	case "static/ui-components.js", "static/ui-engines.js",
 		".env.example", "content/docs/configuration-reference.md", "content/docs/module-reference.md", "content/docs/component-reference.md",
 		"e2e/generated/personas.ts", "e2e/generated/surfaces.ts",
 		"internal/web/templates/scenarios_gen.go",

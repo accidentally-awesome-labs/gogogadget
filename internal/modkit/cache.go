@@ -1,7 +1,11 @@
 package modkit
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -33,6 +37,15 @@ func PruneRegistryCache(cacheDir string, referenced []string) (int, error) {
 		}
 		if _, ok := keep[entry.Name()]; ok {
 			continue
+		}
+		snapshotPath := filepath.Join(cacheDir, entry.Name(), "tree", RegistrySnapshotPath)
+		if data, readErr := os.ReadFile(snapshotPath); readErr == nil {
+			digest := sha256.Sum256(data)
+			if _, ok := keep[hex.EncodeToString(digest[:])]; ok {
+				continue
+			}
+		} else if !os.IsNotExist(readErr) && !errors.Is(readErr, fs.ErrNotExist) {
+			return removed, readErr
 		}
 		if err := os.RemoveAll(filepath.Join(cacheDir, entry.Name())); err != nil {
 			return removed, err

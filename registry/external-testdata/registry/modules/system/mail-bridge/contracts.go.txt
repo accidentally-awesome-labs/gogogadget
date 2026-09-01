@@ -1,0 +1,4 @@
+package mailcontracts
+
+// Version is an external-registry symbol used to prove canonical import rewriting.
+const Version = 1

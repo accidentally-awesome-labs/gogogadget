@@ -19,7 +19,7 @@ type staticSource struct {
 	err      error
 }
 
-func (s staticSource) Resolve(context.Context, string, string) (Snapshot, error) {
+func (s staticSource) Resolve(context.Context, ProjectRegistry) (Snapshot, error) {
 	return s.snapshot, s.err
 }
 
@@ -153,7 +153,7 @@ func TestEnginePlanResolvesClosureAndRewritesImportsWithoutWriting(t *testing.T)
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"},
 		Exclude: []string{},
 	})
@@ -163,7 +163,7 @@ func TestEnginePlanResolvesClosureAndRewritesImportsWithoutWriting(t *testing.T)
 	if err != nil {
 		t.Fatalf("Plan(first): %v", err)
 	}
-	if got, want := first.RegistryCommit, testCommitA; got != want {
+	if got, want := first.RegistryCommit, first.Lock.RegistryCommit; got != want {
 		t.Fatalf("registry commit = %q, want %q", got, want)
 	}
 	if got, want := first.ModulePath, "example.com/acme/app"; got != want {
@@ -317,7 +317,7 @@ func TestEnginePlanRejectsInvalidGraphsPayloadsAndNamespaces(t *testing.T) {
 			tt.mutate(t, registry)
 			root := writeTargetProject(t, "example.com/acme/app", Project{
 				Schema:     2,
-				Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+				Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 				Modules: []string{"ggg/component/card"}, Exclude: []string{},
 			})
 			engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
@@ -341,7 +341,7 @@ func TestEnginePlanAllocatesMigrationNumbers(t *testing.T) {
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	writeTestFile(t, root, "internal/db/migrations/0007_existing.sql", []byte("-- existing\n"))
@@ -404,7 +404,7 @@ func TestEnginePlanProfileExclusionsAndReasons(t *testing.T) {
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/profile/full"},
 		Exclude: []string{"ggg/element/button", "ggg/page/optional", "ggg/system/core"},
 	})
@@ -439,7 +439,7 @@ func TestEnginePlanProfileExclusionsAndReasons(t *testing.T) {
 func TestEnginePlanClassifiesDestinationStates(t *testing.T) {
 	project := Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"}, Exclude: []string{},
 	}
 
@@ -550,7 +550,7 @@ func TestEnginePlanPreservesImmutableMigrationMapping(t *testing.T) {
 	})
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	writeTestFile(t, root, "internal/db/migrations/0007_existing.sql", []byte("-- existing\n"))
@@ -588,7 +588,7 @@ func TestEnginePlanRejectsRetainedMigrationTargetCollision(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})
@@ -620,7 +620,7 @@ func TestEnginePlanRejectsRetainedMigrationReservedTarget(t *testing.T) {
 	registry := plannerRegistry(t)
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: staticSource{snapshot: Snapshot{Commit: testCommitA, FS: registry}}})

@@ -1,0 +1,22 @@
+package mailbridge
+
+import (
+	"context"
+
+	"github.com/gogogadget/gogogadget/internal/config"
+	"github.com/gogogadget/gogogadget/internal/mail"
+	"example.com/acme/gadget-registry/internal/fixture/mailcontracts"
+)
+
+type sender struct{}
+
+func (sender) Send(context.Context, mail.Message) error {
+	if mailcontracts.Version != 1 {
+		return context.Canceled
+	}
+	return nil
+}
+
+func NewModule(*config.Config) (mail.Sender, error) {
+	return sender{}, nil
+}

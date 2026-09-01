@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"crypto/ed25519"
 	"encoding/json"
 	"errors"
 	"io"
@@ -63,14 +64,43 @@ func testArchive(t *testing.T, files map[string]string) []byte {
 	}
 	return compressed.Bytes()
 }
+func signedGitHubArchive(t *testing.T, prefix string, files map[string]string) []byte {
+	t.Helper()
+	root := t.TempDir()
+	for name, data := range files {
+		writeTestFile(t, root, name, []byte(data))
+	}
+	private := ed25519.NewKeyFromSeed(make([]byte, ed25519.SeedSize))
+	if _, err := WriteSignedRegistrySnapshot(root, private); err != nil {
+		t.Fatalf("WriteSignedRegistrySnapshot: %v", err)
+	}
+	published := map[string]string{}
+	if err := fs.WalkDir(os.DirFS(root), ".", func(name string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || name == "." {
+			return nil
+		}
+		data, err := fs.ReadFile(os.DirFS(root), name)
+		if err != nil {
+			return err
+		}
+		published[filepath.ToSlash(filepath.Join(prefix, name))] = string(data)
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	return testArchive(t, published)
+}
 
 func TestDirectorySourceResolvesContentAddressedSnapshot(t *testing.T) {
 	root := t.TempDir()
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2}`))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[]}`))
 	writeTestFile(t, root, "registry/file.txt", []byte("alpha"))
 
 	source := DirectorySource{Root: root}
-	first, err := source.Resolve(context.Background(), "ignored/repository", "ignored-ref")
+	first, err := source.Resolve(context.Background(), ProjectRegistry{})
 	if err != nil {
 		t.Fatalf("Resolve(first): %v", err)
 	}
@@ -104,7 +134,7 @@ func TestDirectorySourceResolvesContentAddressedSnapshot(t *testing.T) {
 	if err := os.Chtimes(filepath.Join(root, "registry/file.txt"), future, future); err != nil {
 		t.Fatalf("chtimes: %v", err)
 	}
-	second, err := source.Resolve(context.Background(), "ignored/repository", "ignored-ref")
+	second, err := source.Resolve(context.Background(), ProjectRegistry{})
 	if err != nil {
 		t.Fatalf("Resolve(second): %v", err)
 	}
@@ -113,7 +143,7 @@ func TestDirectorySourceResolvesContentAddressedSnapshot(t *testing.T) {
 	}
 
 	writeTestFile(t, root, "registry/file.txt", []byte("beta"))
-	third, err := source.Resolve(context.Background(), "ignored/repository", "ignored-ref")
+	third, err := source.Resolve(context.Background(), ProjectRegistry{})
 	if err != nil {
 		t.Fatalf("Resolve(third): %v", err)
 	}
@@ -124,21 +154,22 @@ func TestDirectorySourceResolvesContentAddressedSnapshot(t *testing.T) {
 	if err := os.Symlink(filepath.Join(root, "registry/file.txt"), filepath.Join(root, "unsafe-link")); err != nil {
 		t.Fatalf("symlink: %v", err)
 	}
-	if _, err := source.Resolve(context.Background(), "ignored/repository", "ignored-ref"); err == nil || !strings.Contains(err.Error(), "symlink") {
+	if _, err := source.Resolve(context.Background(), ProjectRegistry{}); err == nil || !strings.Contains(err.Error(), "symlink") {
 		t.Fatalf("Resolve(symlink) error = %v, want symlink rejection", err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := source.Resolve(ctx, "ignored/repository", "ignored-ref"); !errors.Is(err, context.Canceled) {
+	if _, err := source.Resolve(ctx, ProjectRegistry{}); !errors.Is(err, context.Canceled) {
 		t.Fatalf("Resolve(cancelled) error = %v, want context cancellation", err)
 	}
 }
 
 func TestGitHubSourceResolvesAndCachesArchive(t *testing.T) {
-	archive := testArchive(t, map[string]string{
-		"widgets-" + testCommitA + "/registry.json": `{"schema":2}`,
-		"widgets-" + testCommitA + "/registry/file": "payload",
+	archive := signedGitHubArchive(t, "widgets-"+testCommitA, map[string]string{
+		"registry.json": `{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[]}`,
+		"registry/file": "payload",
 	})
+	registry := ProjectRegistry{Source: "github", Namespace: "ggg", PublicKey: "O2onvM62pC1io6jQKm8Nc2UyFXcd4kOmOsBIoYtZ2ik=", Repository: "acme/widgets", Ref: "main"}
 	var apiRequests atomic.Int32
 	var archiveRequests atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -164,11 +195,11 @@ func TestGitHubSourceResolvesAndCachesArchive(t *testing.T) {
 		APIBaseURL:      server.URL,
 		CodeloadBaseURL: server.URL,
 	}
-	first, err := source.Resolve(context.Background(), "acme/widgets", "main")
+	first, err := source.Resolve(context.Background(), registry)
 	if err != nil {
 		t.Fatalf("Resolve(first): %v", err)
 	}
-	second, err := source.Resolve(context.Background(), "acme/widgets", "main")
+	second, err := source.Resolve(context.Background(), registry)
 	if err != nil {
 		t.Fatalf("Resolve(second): %v", err)
 	}
@@ -190,7 +221,9 @@ func TestGitHubSourceResolvesAndCachesArchive(t *testing.T) {
 	}
 
 	offline := GitHubSource{CacheDir: cache, Offline: true}
-	cached, err := offline.Resolve(context.Background(), "acme/widgets", testCommitA)
+	offlineRegistry := registry
+	offlineRegistry.Ref = testCommitA
+	cached, err := offline.Resolve(context.Background(), offlineRegistry)
 	if err != nil {
 		t.Fatalf("Resolve(offline): %v", err)
 	}
@@ -219,7 +252,7 @@ func TestGitHubSourceRejectsUnsafeArchive(t *testing.T) {
 		Client: server.Client(), CacheDir: t.TempDir(),
 		APIBaseURL: server.URL, CodeloadBaseURL: server.URL,
 	}
-	_, err := source.Resolve(context.Background(), "acme/widgets", "main")
+	_, err := source.Resolve(context.Background(), ProjectRegistry{Source: "github", Repository: "acme/widgets", Ref: "main"})
 	if err == nil || !strings.Contains(err.Error(), "archive path") {
 		t.Fatalf("Resolve error = %v, want unsafe archive path rejection", err)
 	}
@@ -232,7 +265,7 @@ func TestGitHubSourceRejectsInvalidResponsesAndOfflineMisses(t *testing.T) {
 		}))
 		defer server.Close()
 		source := GitHubSource{Client: server.Client(), CacheDir: t.TempDir(), APIBaseURL: server.URL, CodeloadBaseURL: server.URL}
-		_, err := source.Resolve(context.Background(), "acme/widgets", "main")
+		_, err := source.Resolve(context.Background(), ProjectRegistry{Source: "github", Repository: "acme/widgets", Ref: "main"})
 		if err == nil || !strings.Contains(err.Error(), "lowercase commit") {
 			t.Fatalf("Resolve error = %v, want invalid commit rejection", err)
 		}
@@ -251,7 +284,7 @@ func TestGitHubSourceRejectsInvalidResponsesAndOfflineMisses(t *testing.T) {
 		}))
 		defer server.Close()
 		source := GitHubSource{Client: server.Client(), CacheDir: t.TempDir(), APIBaseURL: server.URL, CodeloadBaseURL: server.URL}
-		_, err := source.Resolve(context.Background(), "acme/widgets", "main")
+		_, err := source.Resolve(context.Background(), ProjectRegistry{Source: "github", Repository: "acme/widgets", Ref: "main"})
 		if err == nil || !strings.Contains(err.Error(), "registry.json") {
 			t.Fatalf("Resolve error = %v, want missing registry.json rejection", err)
 		}
@@ -259,10 +292,10 @@ func TestGitHubSourceRejectsInvalidResponsesAndOfflineMisses(t *testing.T) {
 
 	t.Run("offline requires full cached commit", func(t *testing.T) {
 		source := GitHubSource{CacheDir: t.TempDir(), Offline: true}
-		if _, err := source.Resolve(context.Background(), "acme/widgets", "main"); err == nil || !strings.Contains(err.Error(), "full 40") {
+		if _, err := source.Resolve(context.Background(), ProjectRegistry{Source: "github", Repository: "acme/widgets", Ref: "main"}); err == nil || !strings.Contains(err.Error(), "full 40") {
 			t.Fatalf("Resolve(symbolic offline) error = %v, want full commit rejection", err)
 		}
-		if _, err := source.Resolve(context.Background(), "acme/widgets", testCommitA); err == nil || !strings.Contains(err.Error(), "cache") {
+		if _, err := source.Resolve(context.Background(), ProjectRegistry{Source: "github", Repository: "acme/widgets", Ref: testCommitA}); err == nil || !strings.Contains(err.Error(), "cache") {
 			t.Fatalf("Resolve(missing offline cache) error = %v, want cache miss", err)
 		}
 	})
@@ -275,12 +308,12 @@ func TestGitHubSourceRejectsInvalidResponsesAndOfflineMisses(t *testing.T) {
 // clean.
 func TestDirectorySourceCommitIgnoresProjectStateAndGeneratedOutput(t *testing.T) {
 	root := t.TempDir()
-	writeTestFile(t, root, "registry.json", []byte(`{"schema":2}`))
+	writeTestFile(t, root, "registry.json", []byte(`{"schema":2,"namespace":"ggg","canonical_module":"github.com/gogogadget/gogogadget","includes":[]}`))
 	writeTestFile(t, root, "registry/modules/system/widget/module.json", []byte(`{"schema":2}`))
 	writeTestFile(t, root, "internal/widget/widget.go", []byte("package widget\n"))
 
 	source := DirectorySource{Root: root}
-	before, err := source.Resolve(context.Background(), "", "")
+	before, err := source.Resolve(context.Background(), ProjectRegistry{})
 	if err != nil {
 		t.Fatalf("Resolve(before): %v", err)
 	}
@@ -292,7 +325,7 @@ func TestDirectorySourceCommitIgnoresProjectStateAndGeneratedOutput(t *testing.T
 	writeTestFile(t, root, "internal/web/templates/page_templ.go", []byte("package templates\n"))
 	writeTestFile(t, root, "static/app.css", []byte(".a{}\n"))
 
-	after, err := source.Resolve(context.Background(), "", "")
+	after, err := source.Resolve(context.Background(), ProjectRegistry{})
 	if err != nil {
 		t.Fatalf("Resolve(after): %v", err)
 	}
@@ -302,7 +335,7 @@ func TestDirectorySourceCommitIgnoresProjectStateAndGeneratedOutput(t *testing.T
 
 	// A real module payload change must still move the commit.
 	writeTestFile(t, root, "internal/widget/widget.go", []byte("package widget\n\nconst V = 2\n"))
-	changed, err := source.Resolve(context.Background(), "", "")
+	changed, err := source.Resolve(context.Background(), ProjectRegistry{})
 	if err != nil {
 		t.Fatalf("Resolve(changed): %v", err)
 	}

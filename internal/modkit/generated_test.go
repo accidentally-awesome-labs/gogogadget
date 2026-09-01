@@ -43,7 +43,7 @@ func TestNewMigrationStartsAfterAdoptedBaseline(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	// Adopted immutable ledger: 0001..0019 already present on disk.
@@ -112,7 +112,7 @@ func TestImmutableMigrationNeverRewritten(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -160,7 +160,7 @@ func TestAuthoredTargetCannotClaimGeneratedOutputs(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	_, err := New(Options{Source: source}).Plan(context.Background(), root, Operation{Kind: OpSync})
@@ -196,7 +196,7 @@ func TestMigrationAdoptionKeepsExistingNumbers(t *testing.T) {
 
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/system/legacy"}, Exclude: []string{},
 	})
 	// The migration already shipped as 0007 and is applied in production.

@@ -44,6 +44,7 @@ var directorySourceExclusions = map[string]struct{}{
 // and coverage output lands wherever it was invoked, so anchoring these to the
 // root would leave the same class of divergence one directory down.
 var excludedSourceBases = map[string]struct{}{
+	".superpowers": {},
 	"tmp":          {},
 	"node_modules": {},
 }
@@ -82,22 +83,9 @@ type DirectorySource struct {
 	Root string
 }
 
-func (s DirectorySource) Resolve(ctx context.Context, args ...any) (Snapshot, error) {
-	legacy := len(args) >= 2
-	registry := ProjectRegistry{Source: "directory", Path: s.Root}
-	if len(args) == 1 {
-		if requested, ok := args[0].(ProjectRegistry); ok {
-			registry = requested
-		}
-	} else if len(args) >= 2 {
-		// Legacy Resolve(ctx, repository, ref) calls intentionally ignore the
-		// repository/ref: a directory's bytes are its immutable identity.
-		if requested, ok := args[0].(string); ok && requested != "" {
-			registry.Repository = requested
-		}
-		if requested, ok := args[1].(string); ok {
-			registry.Ref = requested
-		}
+func (s DirectorySource) Resolve(ctx context.Context, registry ProjectRegistry) (Snapshot, error) {
+	if registry.Source == "" {
+		registry.Source = "directory"
 	}
 	if err := ctx.Err(); err != nil {
 		return Snapshot{}, fmt.Errorf("resolve directory source: %w", err)
@@ -235,17 +223,16 @@ func (s DirectorySource) Resolve(ctx context.Context, args ...any) (Snapshot, er
 		return Snapshot{}, fmt.Errorf("resolve directory source %q: %w", s.Root, err)
 	}
 	commit := hex.EncodeToString(treeHash.Sum(nil))
-
 	rootMetadata, metadataErr := loadRegistryRoot(rootFS)
-	if metadataErr != nil && !legacy {
+	if metadataErr != nil {
 		return Snapshot{}, metadataErr
 	}
 	snapshotDigest := commit
-	if metadataErr == nil && rootMetadata.Schema == 2 {
+	if registry.Source == "directory" {
 		verifyKey := registry.PublicKey
 		if verifyKey != "" {
 			if _, keyErr := RegistryKeyFingerprint(verifyKey); keyErr != nil {
-				verifyKey = ""
+				return Snapshot{}, keyErr
 			}
 		}
 		digest, signedErr := verifySnapshotFiles(rootFS, verifyKey, true)

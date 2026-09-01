@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"sort"
+	"strings"
 )
 
 type resolvedRegistry struct {
@@ -32,6 +33,11 @@ func mergeResolvedCatalogs(ctx context.Context, sources []resolvedRegistry) (Cat
 			return Catalog{}, fmt.Errorf("canonical module %q is claimed by registries %q and %q", catalog.CanonicalModule, previous, catalog.Namespace)
 		}
 		canonicalSeen[catalog.CanonicalModule] = catalog.Namespace
+		for previous, previousNamespace := range canonicalSeen {
+			if previousNamespace != catalog.Namespace && (strings.HasPrefix(catalog.CanonicalModule, previous+"/") || strings.HasPrefix(previous, catalog.CanonicalModule+"/")) {
+				return Catalog{}, fmt.Errorf("canonical module prefix %q collides with %q", catalog.CanonicalModule, previous)
+			}
+		}
 		merged.CanonicalModules = append(merged.CanonicalModules, catalog.CanonicalModule)
 		for _, module := range catalog.Modules {
 			if previous := moduleSeen[module.ID]; previous != "" {

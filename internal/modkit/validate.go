@@ -1,6 +1,8 @@
 package modkit
 
 import (
+	"crypto/ed25519"
+	"encoding/base64"
 	"fmt"
 	"strings"
 )
@@ -86,6 +88,10 @@ func validateProjectRegistry(registry ProjectRegistry) error {
 		}
 		if strings.TrimSpace(registry.PublicKey) == "" {
 			return fmt.Errorf("public_key is required")
+		}
+		key, err := base64.StdEncoding.DecodeString(registry.PublicKey)
+		if err != nil || len(key) != ed25519.PublicKeySize {
+			return fmt.Errorf("public_key must be base64 raw %d bytes", ed25519.PublicKeySize)
 		}
 		if registry.Path != "" {
 			return fmt.Errorf("path is forbidden for github source")

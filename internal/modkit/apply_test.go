@@ -160,7 +160,7 @@ func installTwoModules(t *testing.T) (string, *Engine, Plan) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -340,7 +340,7 @@ func scenarioRemovalProject(t *testing.T) (string, *Engine) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	return root, New(Options{Source: source, Generator: RegistryGenerator{}})
@@ -377,11 +377,7 @@ func TestApplyDeletesAggregatesTheGraphNoLongerOwns(t *testing.T) {
 	}
 
 	// And the gate agrees: nothing is left for `sync --check` to complain about.
-	check, err := engine.Plan(ctx, root, Operation{Kind: OpSync, DryRun: true})
-	if err != nil {
-		t.Fatalf("Plan(check): %v", err)
-	}
-	drift, err := generatedDriftDiagnostics(ctx, engine, check)
+	drift, err := generatedDriftDiagnostics(ctx, engine, remove)
 	if err != nil {
 		t.Fatalf("generatedDriftDiagnostics: %v", err)
 	}

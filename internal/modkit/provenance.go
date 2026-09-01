@@ -39,16 +39,6 @@ func registryProvenance(sources []resolvedRegistry, catalog Catalog, modules []M
 	}
 	sort.Slice(registries, func(i, j int) bool { return registries[i].Namespace < registries[j].Namespace })
 	sort.Slice(snapshots, func(i, j int) bool { return snapshots[i].Namespace < snapshots[j].Namespace })
-	allLegacy := true
-	for _, source := range sources {
-		if source.snapshot.SnapshotSHA256 != "" {
-			allLegacy = false
-			break
-		}
-	}
-	if allLegacy && len(sources) == 1 {
-		return sources[0].snapshot.Commit, registries, snapshots
-	}
 	pairs := make([]string, 0, len(modules))
 	for _, module := range modules {
 		namespace := catalog.ModuleRegistries[module.ID]

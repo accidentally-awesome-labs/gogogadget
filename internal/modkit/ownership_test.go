@@ -46,7 +46,7 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 		"Dockerfile": true, "LICENSE": true, "Makefile": true, "compose.yaml": true,
 		"fly.toml": true, "go.mod": true, "go.sum": true,
 		"gogogadget.json": true, "gogogadget.lock.json": true,
-		".env.example": true, "registry.json": true,
+		".env.example": true, "registry.json": true, "registry.snapshot.json": true, "registry.snapshot.sig": true,
 		"internal/modkit/task2_followup_test.go": true,
 	}
 

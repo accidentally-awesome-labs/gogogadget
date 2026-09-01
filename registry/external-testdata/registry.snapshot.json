@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "registry": {
+    "schema": 2,
+    "namespace": "acme",
+    "canonical_module": "example.com/acme/gadget-registry",
+    "includes": [
+      "registry/elements.json",
+      "registry/components.json",
+      "registry/pages.json",
+      "registry/workflows.json",
+      "registry/systems.json",
+      "registry/profiles.json"
+    ]
+  },
+  "files": [
+    {
+      "path": "registry.json",
+      "sha256": "8f57d53e1fe02e810ea8493da7eef3e43399c8daaccedf39fb0ab71cf2620652"
+    },
+    {
+      "path": "registry/components.json",
+      "sha256": "868e6d1b3739b42dc41264fcb7596375d1b87f8b2067508295fd5245bfcb7260"
+    },
+    {
+      "path": "registry/elements.json",
+      "sha256": "4410b5de1aa3fa828cd4bdcf0e3d08c80c41a51223df8ce1d7dff43c8ceec752"
+    },
+    {
+      "path": "registry/modules/system/mail-bridge.json",
+      "sha256": "e13e56a40a3abc9b5afd0657760897bf9d48991eb1e9ea750f47619da3620d65"
+    },
+    {
+      "path": "registry/modules/system/mail-bridge/contracts.go.txt",
+      "sha256": "6648b5e7833601a07a0223ef9fe6144cb9534e89e29637d08c16e8f660282544"
+    },
+    {
+      "path": "registry/modules/system/mail-bridge/mail_bridge.go.txt",
+      "sha256": "66089419fe4827beb425ceac7975f0c996874fe6d225f6dcf7913cbc1053f211"
+    },
+    {
+      "path": "registry/modules/system/mail-bridge/mail_bridge_test.go.txt",
+      "sha256": "aef6415996d765fb6f27fc79d492fffc98c10f032d1c7e5a1f0d11f6385c7b9f"
+    },
+    {
+      "path": "registry/pages.json",
+      "sha256": "23b431de213c81a5e80d102e1335e139269fd10b78ecd31eb8a638fd7c655e7f"
+    },
+    {
+      "path": "registry/profiles.json",
+      "sha256": "f53c6f8d4b96e378521144529487321a556607e4ab7443bf2cf399f1c3197b98"
+    },
+    {
+      "path": "registry/systems.json",
+      "sha256": "71ab5b523c7b4ae9a8927aef548269b0c6529da386a176dd2d47a646e3986733"
+    },
+    {
+      "path": "registry/workflows.json",
+      "sha256": "1a7b45961befe210e9df0cbda4ebd99873f6d34bf219de73394410b3146e0bcc"
+    }
+  ]
+}

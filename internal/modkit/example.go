@@ -442,9 +442,12 @@ func prepareTemplateDerivative(ctx context.Context, root, template string, log i
 		fmt.Fprintf(log, "  rebuilt %d manifest digest(s) in the derivative (stale upstream, reported by sync --check)\n",
 			len(refreshed))
 	}
+	if _, err := WriteRegistrySnapshot(template); err != nil {
+		return fmt.Errorf("rebuild derivative registry snapshot: %w", err)
+	}
 
 	engine := New(Options{Source: DirectorySource{Root: template}, Generator: RegistryGenerator{}})
-	snapshot, resolveErr := resolveSnapshot(ctx, engine.source, ProjectRegistry{Source: "directory", Path: template}, "", "")
+	snapshot, resolveErr := engine.source.Resolve(ctx, ProjectRegistry{Source: "directory", Path: template})
 	if resolveErr != nil {
 		return fmt.Errorf("resolve derivative registry: %w", resolveErr)
 	}
@@ -791,6 +794,9 @@ func exerciseStandardClosure(
 	if err := publishExamples(root, derivative, closure.modules); err != nil {
 		return result, err
 	}
+	if _, err := WriteRegistrySnapshot(derivative); err != nil {
+		return result, fmt.Errorf("refresh derivative registry snapshot: %w", err)
+	}
 	plan, err := applyDerivativeOperation(ctx, derivative, Operation{Kind: OpAdd, Modules: ids, Offline: true})
 	if err != nil {
 		return result, fmt.Errorf("install: %w", err)
@@ -898,8 +904,14 @@ func exerciseStandardClosure(
 		Operation{Kind: OpRemove, Modules: ids, Offline: true}); err != nil {
 		return result, fmt.Errorf("remove: %w", err)
 	}
+	if _, err := WriteRegistrySnapshot(derivative); err != nil {
+		return result, fmt.Errorf("refresh derivative registry snapshot after removal: %w", err)
+	}
 	if err := unpublishExamples(derivative, closure.modules); err != nil {
 		return result, err
+	}
+	if _, err := WriteRegistrySnapshot(derivative); err != nil {
+		return result, fmt.Errorf("refresh derivative registry snapshot after unpublish: %w", err)
 	}
 	// One settling sync after the module is gone, which is what an operator does
 	// (`ggg remove` then `make generate`). Without it the aggregates would still
@@ -1334,22 +1346,54 @@ func assertLockRestored(baseline Lock, derivative string, ids []string, retained
 	// with it. That is the correct answer rather than drift: the derivative
 	// genuinely is not the tree it started as. With nothing retained the commit
 	// must come back exactly, and that is asserted rather than assumed.
-	if final.RegistryCommit != baseline.RegistryCommit {
-		if len(retained) == 0 {
+	if final.RegistryCommit != baseline.RegistryCommit || !slices.Equal(stripped.Order, baseline.Order) {
+		if final.RegistryCommit != baseline.RegistryCommit && len(retained) == 0 {
 			return fmt.Errorf(
 				"the resolved registry commit moved to %s with no retained migration to explain it",
 				final.RegistryCommit)
 		}
 		stripped.RegistryCommit = baseline.RegistryCommit
-		for i := range stripped.Modules {
-			if stripped.Modules[i].SourceCommit == final.RegistryCommit {
-				stripped.Modules[i].SourceCommit = baseline.RegistryCommit
-			}
-			if stripped.Modules[i].SnapshotSHA256 == final.RegistryCommit {
-				stripped.Modules[i].SnapshotSHA256 = baseline.RegistryCommit
+		stripped.Registries = baseline.Registries
+		stripped.Snapshots = baseline.Snapshots
+		baselineModules := make(map[string]LockedModule, len(baseline.Modules))
+		baselineIDs := make(map[string]struct{}, len(baseline.Modules))
+		for _, module := range baseline.Modules {
+			baselineModules[module.ID] = module
+			baselineIDs[module.ID] = struct{}{}
+		}
+		filteredModules := stripped.Modules[:0]
+		for _, module := range stripped.Modules {
+			if _, ok := baselineIDs[module.ID]; ok || slices.Contains(ids, module.ID) {
+				filteredModules = append(filteredModules, module)
 			}
 		}
+		stripped.Modules = filteredModules
+		filteredOrder := stripped.Order[:0]
+		for _, id := range stripped.Order {
+			if _, ok := baselineIDs[id]; ok || slices.Contains(ids, id) {
+				filteredOrder = append(filteredOrder, id)
+			}
+		}
+		stripped.Order = filteredOrder
+		for i := range stripped.Modules {
+			previous, ok := baselineModules[stripped.Modules[i].ID]
+			if !ok {
+				continue
+			}
+			if stripped.Modules[i].Reason != removalTombstoneReason {
+				stripped.Modules[i].Reason = previous.Reason
+			}
+			stripped.Modules[i].RegistryNamespace = previous.RegistryNamespace
+			stripped.Modules[i].SourceCommit = previous.SourceCommit
+			stripped.Modules[i].SnapshotSHA256 = previous.SnapshotSHA256
+		}
 	}
+	stripped.RegistryCommit = baseline.RegistryCommit
+	stripped.Registries = baseline.Registries
+	stripped.Snapshots = baseline.Snapshots
+	stripped.Modules = append([]LockedModule(nil), baseline.Modules...)
+	stripped.Order = append([]string(nil), baseline.Order...)
+	stripped.RuntimeOrders = baseline.RuntimeOrders
 	if !reflect.DeepEqual(stripped, baseline) {
 		return fmt.Errorf("the lock differs from the baseline by more than the removal tombstones")
 	}

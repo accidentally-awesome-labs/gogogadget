@@ -82,14 +82,18 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	}
 
 	pending := currentLock.Modules[moduleIndex].Pending
-	snapshot, err := resolveSnapshot(ctx, e.source, project.Registries[0], project.Registries[0].Repository, pending.RegistryCommit)
-	if err != nil {
-		return Plan{}, fmt.Errorf("resolve pending registry commit %s: %w", pending.RegistryCommit, err)
+	resolved := make([]resolvedRegistry, 0, len(project.Registries))
+	for _, registry := range project.Registries {
+		if registry.Namespace == currentLock.Modules[moduleIndex].RegistryNamespace && pending.SourceCommit != "" {
+			registry.Ref = pending.SourceCommit
+		}
+		snapshot, err := e.source.Resolve(ctx, registry)
+		if err != nil {
+			return Plan{}, fmt.Errorf("resolve pending registry commit %s: %w", pending.RegistryCommit, err)
+		}
+		resolved = append(resolved, resolvedRegistry{config: registry, snapshot: snapshot})
 	}
-	if snapshot.Commit != pending.RegistryCommit {
-		return Plan{}, fmt.Errorf("pending registry resolved commit %s, want %s", snapshot.Commit, pending.RegistryCommit)
-	}
-	catalog, err := LoadCatalog(snapshot.FS)
+	catalog, err := mergeResolvedCatalogs(ctx, resolved)
 	if err != nil {
 		return Plan{}, fmt.Errorf("load pending registry catalog: %w", err)
 	}
@@ -108,11 +112,15 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 	if err != nil {
 		return Plan{}, fmt.Errorf("clone conflict lock: %w", err)
 	}
+	targetFS := catalog.ModuleSources[moduleID]
+	if targetFS == nil {
+		return Plan{}, fmt.Errorf("pending module %s has no source filesystem", moduleID)
+	}
 	module := &finalLock.Modules[moduleIndex]
 	remaining := append([]PendingConflict{}, module.Pending.Conflicts[:conflictIndex]...)
 	remaining = append(remaining, module.Pending.Conflicts[conflictIndex+1:]...)
-	targetPayloads, err := readPlannedPayloads(
-		ctx, snapshot.FS, []Manifest{targetManifest}, e.canonicalModule, modulePath,
+	targetPayloads, err := readPlannedPayloadsFromCatalog(
+		ctx, catalog, []Manifest{targetManifest}, canonicalPrefixes(catalog), modulePath,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -131,7 +139,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		module.SourceCommit = pending.SourceCommit
 		module.Pending = nil
 		migrationFiles, migrationChanges, err := planMigrations(
-			ctx, canonicalRoot, snapshot.FS, []Manifest{targetManifest}, currentLock, true,
+			ctx, canonicalRoot, targetFS, []Manifest{targetManifest}, currentLock, true,
 		)
 		if err != nil {
 			return Plan{}, fmt.Errorf("plan resolved migrations: %w", err)

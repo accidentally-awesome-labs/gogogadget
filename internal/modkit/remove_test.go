@@ -35,7 +35,7 @@ func installedRemovalProject(t *testing.T) (string, *Engine, fstest.MapFS) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -116,7 +116,7 @@ func TestRemoveDeletesPristineModuleThroughPlan(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/profile/full"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -216,7 +216,7 @@ func TestRemoveRefusesUnsafeRemovals(t *testing.T) {
 		}
 		bare := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card"}, Exclude: []string{},
 		})
 		if _, err := engine.Plan(context.Background(), bare, Operation{Kind: OpRemove, Modules: []string{"ggg/component/card"}}); err == nil || !strings.Contains(err.Error(), "existing gogogadget.lock.json") {
@@ -241,7 +241,7 @@ func TestRemoveRetainsMigrationLedger(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
@@ -348,7 +348,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -371,7 +371,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -422,7 +422,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -445,7 +445,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -488,7 +488,7 @@ func TestRemoveDrainRequiredMaterializesMigrations(t *testing.T) {
 		}}
 		root := writeTargetProject(t, "example.com/acme/app", Project{
 			Schema:     2,
-			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+			Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 			Modules: []string{"ggg/component/card", "ggg/workflow/drain"}, Exclude: []string{},
 		})
 		engine := New(Options{Source: source})
@@ -536,7 +536,7 @@ func TestResolveConflictKeepsTombstonesOutOfResolved(t *testing.T) {
 	}}
 	root := writeTargetProject(t, "example.com/acme/app", Project{
 		Schema:     2,
-		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "core"}}, Providers: map[string]ProviderSelections{}, Deployment: "",
+		Registries: []ProjectRegistry{{Namespace: "ggg", Source: "github", Repository: "local/registry", Ref: "main", PublicKey: "A6EHv/POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg="}}, Providers: map[string]ProviderSelections{}, Deployment: "",
 		Modules: []string{"ggg/component/card", "ggg/element/button", "ggg/page/optional"}, Exclude: []string{},
 	})
 	engine := New(Options{Source: source})
