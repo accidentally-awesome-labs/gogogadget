@@ -1008,7 +1008,7 @@
     },
     {
       "path": "registry/modules/system/rate-limit/module.json",
-      "sha256": "1279b252137e8850688b844d5f4f90fb5f25d3e142c4df8835ec861ee0b48da8"
+      "sha256": "26aa9ae22b047e702a9af6d9668f038b0d3039b9dfa9acdf07a126c48d5e0230"
     },
     {
       "path": "registry/modules/system/realtime-ably/module.json",

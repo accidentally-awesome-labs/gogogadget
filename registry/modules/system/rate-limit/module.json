@@ -49,22 +49,6 @@
         "class": "go",
         "contract": true,
         "rewrite_module": true,
-        "sha256": "b8299f03a416b9a885920aa8354f46be5974fce17cbe38ac7ac05e7c14438b2d",
-        "source": "internal/ratelimit/module.go",
-        "target": "internal/ratelimit/module.go"
-      },
-      {
-        "class": "test",
-        "contract": false,
-        "rewrite_module": true,
-        "sha256": "58430e389219fde41f1381d777c38f485100e0ebf0765e5309d17f5aedc37da7",
-        "source": "internal/ratelimit/module_test.go",
-        "target": "internal/ratelimit/module_test.go"
-      },
-      {
-        "class": "go",
-        "contract": true,
-        "rewrite_module": true,
         "sha256": "786354e555e17e93bc0559011f1f3509caf77d915a8ebf4a212148b9c72f131e",
         "source": "internal/ratelimit/ratelimit.go",
         "target": "internal/ratelimit/ratelimit.go"
@@ -101,27 +85,6 @@
     ],
     "revision": 1,
     "runtime": {
-      "system": {
-        "constructor": "NewModule",
-        "needs": [
-          {
-            "capability": "config",
-            "field": "Config",
-            "optional": false,
-            "type": "*config.Config"
-          }
-        ],
-        "package": "internal/ratelimit",
-        "provides": [
-          {
-            "capability": "ratelimit.keyed",
-            "field": "Limiter",
-            "type": "*ratelimit.Keyed"
-          }
-        ],
-        "start": false,
-        "stop": false
-      },
       "provider_slots": [
         {
           "id": "ggg/rate-limit",
