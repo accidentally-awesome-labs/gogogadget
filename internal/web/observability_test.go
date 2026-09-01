@@ -55,8 +55,7 @@ func TestIngestProxiedThroughFullStack(t *testing.T) {
 	defer upstream.Close()
 
 	s := integrationServer(t, func(d *Deps) {
-		d.Config.PostHogAPIKey = "phc_test"
-		d.Config.PostHogHost = upstream.URL
+		d.Config.Values = map[string]string{"POSTHOG_API_KEY": "phc_test", "POSTHOG_HOST": upstream.URL}
 	})
 
 	// Through the FULL middleware stack: not 403 (nosurf exempt), not 429

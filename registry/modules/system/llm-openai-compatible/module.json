@@ -27,7 +27,7 @@
         "source": "internal/llm/openai/openai.go",
         "target": "internal/llm/openai/openai.go",
         "class": "go",
-        "sha256": "27aee76602363c4a818b82745115827c588ea0379eb5aefe070469dc8fbee586",
+        "sha256": "92a8c0469c6acbaebc2467eab1ff3ee466a679cd5f935c8f878eed664753d399",
         "rewrite_module": true,
         "contract": true
       },
@@ -85,10 +85,9 @@
     "environment": [
       {
         "key": "LLM_API_KEY",
-        "field": "LlmApiKey",
+        "field": "LLMAPIKey",
         "type": "string",
         "description": "Llm Api Key",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/llm-openai-compatible@openai"
@@ -96,22 +95,18 @@
       },
       {
         "key": "LLM_BASE_URL",
-        "field": "LlmBaseUrl",
+        "field": "LLMBaseURL",
         "type": "string",
         "description": "Llm Base Url",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/llm-openai-compatible@openai"
         ]
       },
       {
         "key": "LLM_MODEL",
-        "field": "LlmModel",
+        "field": "LLMModel",
         "type": "string",
         "description": "Llm Model",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/llm-openai-compatible@openai"
         ]

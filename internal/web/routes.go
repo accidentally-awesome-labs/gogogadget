@@ -34,7 +34,7 @@ func (s *Server) routes() error {
 	// PostHog reverse proxy (registered only when configured; CSRF- and
 	// rate-limit-exempt in the chain).
 	if s.cfg.PostHogEnabled() {
-		if proxy, err := analytics.IngestProxy(s.cfg.PostHogHost); err == nil {
+		if proxy, err := analytics.IngestProxy(s.cfg.Value("POSTHOG_HOST")); err == nil {
 			s.mux.Handle("/ingest/", proxy)
 		} else {
 			s.log.Error("posthog proxy", "error", err)

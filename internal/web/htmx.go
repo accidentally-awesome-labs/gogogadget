@@ -102,7 +102,7 @@ func (s *Server) Render(w http.ResponseWriter, r *http.Request, page Page, conte
 	page.CSRFToken = nosurf.Token(r)
 	page.Path = r.URL.Path
 	page.AppURL = s.cfg.AppURL
-	page.PostHogKey = s.cfg.PostHogAPIKey
+	page.PostHogKey = s.cfg.Value("POSTHOG_API_KEY")
 	page.ClerkPublishableKey = s.cfg.ClerkPublishableKey
 	page.ClerkFrontendAPIURL = s.cfg.ClerkFrontendAPIURL
 	// Active platform banner for the authed shells (nil-safe elsewhere).

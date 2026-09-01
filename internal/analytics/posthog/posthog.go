@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/gogogadget/gogogadget/internal/analytics"
+	"github.com/gogogadget/gogogadget/internal/apphost"
 	posthoggo "github.com/posthog/posthog-go"
 )
 
@@ -44,9 +45,17 @@ var _ analytics.BufferingCapturer = (*Capturer)(nil)
 type Module struct{ Value *Capturer }
 type Deps struct{ APIKey, Host string }
 
-func NewModule(ctx context.Context, _ any, d Deps) (*Module, error) {
+func NewModule(ctx context.Context, h apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
+	}
+	if h != nil {
+		if d.APIKey == "" {
+			d.APIKey = h.Env("POSTHOG_API_KEY")
+		}
+		if d.Host == "" {
+			d.Host = h.Env("POSTHOG_HOST")
+		}
 	}
 	v, err := New(d.APIKey, d.Host)
 	if err != nil {

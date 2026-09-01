@@ -90,7 +90,7 @@
     "environment": [
       {
         "key": "SENTRY_DSN",
-        "field": "SentryDsn",
+        "field": "SentryDSN",
         "type": "string",
         "description": "Sentry Dsn",
         "required": false,

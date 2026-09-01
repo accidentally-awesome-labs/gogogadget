@@ -816,7 +816,7 @@
     },
     {
       "path": "registry/modules/system/analytics-posthog/module.json",
-      "sha256": "124a05c994289bfa88c6a568d0b51d6bbadd5d5983323e249348e1e8192f57d8"
+      "sha256": "987088630ffa0c79c4ec7ef082937693a6b5b1d1b871b31069abbc27bb4eb0ab"
     },
     {
       "path": "registry/modules/system/analytics/module.json",
@@ -876,7 +876,7 @@
     },
     {
       "path": "registry/modules/system/config/module.json",
-      "sha256": "324727704c88cd2f411839c267e30c44fb90ad216c810c3fa60da3ba87e383ba"
+      "sha256": "2708f19f84855e97eea710964af5eba740bf2a106f6483d3d33450394c4adf58"
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
@@ -940,7 +940,7 @@
     },
     {
       "path": "registry/modules/system/llm-openai-compatible/module.json",
-      "sha256": "e0d7942bf404622192e205f2a21b19fe9b4b6b7f00cb2f40fa863a3267ab539e"
+      "sha256": "444fcffe92355924fba180e4c6e113e05e600e20a0417898b64bd5ee1896481a"
     },
     {
       "path": "registry/modules/system/llm/module.json",
@@ -988,11 +988,11 @@
     },
     {
       "path": "registry/modules/system/observability-sentry/module.json",
-      "sha256": "bda9c2d2c4111636e95a291cb37facb7e0fd668f11867f7b3cc330605d1653eb"
+      "sha256": "ac036f3802db0c8c2f5b29a09dcce577780379ac1fd6b14746d0a4286fe4a104"
     },
     {
       "path": "registry/modules/system/observability/module.json",
-      "sha256": "5a8fd768bf6e9921fc75da8b3ea600638892cd5d2c5e9655a8108968802c977b"
+      "sha256": "b957f6295946fd417561a02154ffd1a0470c2ecc03fd66b1c4df09b7d34060b0"
     },
     {
       "path": "registry/modules/system/organizations/module.json",
@@ -1052,7 +1052,7 @@
     },
     {
       "path": "registry/modules/system/server/module.json",
-      "sha256": "c2bda9bc14ac02ff6906246b41fa59fb3b51531d9586aece63dcb9a24eab3692"
+      "sha256": "9ce8df8322832b9ba40cb9479f48b3d0ef566f58a4f250cbb5f646c29505785d"
     },
     {
       "path": "registry/modules/system/static/module.json",

@@ -32,7 +32,7 @@
         "source": "internal/analytics/posthog/posthog.go",
         "target": "internal/analytics/posthog/posthog.go",
         "class": "go",
-        "sha256": "be47a92640c8f6f77ab42226c50bae5b5abe74fbefa7cf8f4700486431eea5e9",
+        "sha256": "6e41d9bfb3ccce0f162f6a631afcdb48dff815c5a44236bb79cb04ca1cb51475",
         "rewrite_module": true,
         "contract": true
       },
@@ -90,10 +90,9 @@
     "environment": [
       {
         "key": "POSTHOG_API_KEY",
-        "field": "PosthogApiKey",
+        "field": "PostHogAPIKey",
         "type": "string",
         "description": "Posthog Api Key",
-        "required": false,
         "secret": true,
         "targets": [
           "ggg/system/analytics-posthog@posthog"
@@ -101,11 +100,9 @@
       },
       {
         "key": "POSTHOG_HOST",
-        "field": "PosthogHost",
+        "field": "PostHogHost",
         "type": "string",
         "description": "Posthog Host",
-        "required": false,
-        "secret": false,
         "targets": [
           "ggg/system/analytics-posthog@posthog"
         ]

@@ -26,6 +26,13 @@ import (
 // without touching the process.
 func LoadFrom(lookup func(string) string) (Config, error) {
 	cfg, errs := parseDeclared(lookup)
+	// Provider adapters own these keys, but the shared Config carries their
+	// values so selected adapters can consume one parsed snapshot. Keep this
+	// lookup isolated from generated fields; unselected adapters remain absent
+	// from the typed struct while Value stays available to their constructors.
+	for _, key := range []string{"POSTHOG_API_KEY", "POSTHOG_HOST", "SENTRY_DSN", "LLM_API_KEY", "LLM_BASE_URL", "LLM_MODEL"} {
+		cfg.Values[key] = lookup(key)
+	}
 
 	// Cross-field behaviour, which is not expressible as a per-key declaration.
 
@@ -101,13 +108,13 @@ func (c Config) IntValue(key string) (int, error) {
 	return value, nil
 }
 func (c Config) Test() bool           { return c.Env == "test" }
-func (c Config) PostHogEnabled() bool { return c.PostHogAPIKey != "" }
-func (c Config) SentryEnabled() bool  { return c.SentryDSN != "" }
+func (c Config) PostHogEnabled() bool { return c.Value("POSTHOG_API_KEY") != "" }
+func (c Config) SentryEnabled() bool  { return c.Value("SENTRY_DSN") != "" }
 
 // LLMConfigured reports whether an OpenAI-compatible backend is set. Empty →
 // the AI route renders a 503 not-configured (same degrade as billing).
 func (c Config) LLMConfigured() bool {
-	return c.LLMAPIKey != "" && c.LLMModel != ""
+	return c.Value("LLM_API_KEY") != "" && c.Value("LLM_MODEL") != ""
 }
 
 // Now returns the render clock: frozen at TEST_NOW under APP_ENV=test,
