@@ -183,11 +183,12 @@ func (s *Server) handleAdminFlagOverrideDelete(w http.ResponseWriter, r *http.Re
 // form and its values stay on screen (project-form convention).
 func (s *Server) renderFlagFormError(w http.ResponseWriter, r *http.Request, input flagCreateInput, msg string) {
 	ctx := r.Context()
-	flags, err := s.q.ListFeatureFlags(r.Context())
+	provided, err := s.flags.List(r.Context())
 	if err != nil {
 		s.renderError(w, r, err.Error())
 		return
 	}
+	flags := flagRows(provided)
 	w.WriteHeader(http.StatusUnprocessableEntity)
 	s.Render(w, r, Page{Title: i18n.T(ctx, "flags.title"), Layout: templates.LayoutAdmin},
 		templates.AdminFlagsPage(templates.FlagsData{

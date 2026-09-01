@@ -61,7 +61,7 @@
         "source": "internal/web/page_admin_flags.go",
         "target": "internal/web/page_admin_flags.go",
         "class": "go",
-        "sha256": "02bf92c93e5c082ea3091fef11370ec85787ae118a15cd2b25d4fd7c2ace168c",
+        "sha256": "17dc35d81d7164a44996b12eac4bf3f0562628f7498f6768160dfe6975e68c2b",
         "rewrite_module": true,
         "contract": false
       },
