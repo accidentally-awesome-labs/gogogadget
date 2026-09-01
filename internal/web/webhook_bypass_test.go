@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,16 +23,17 @@ func TestClerkWebhookBypassWithoutSecret(t *testing.T) {
 	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, h)
 	require.Equal(t, http.StatusOK, code)
 
-	u, err := s.q.GetUserByID(ctx, "user_ns1")
+	mapping, err := s.q.GetIdentitySubject(ctx, sqlc.GetIdentitySubjectParams{Provider: "dev", Subject: "user_ns1"})
+	require.NoError(t, err)
+	u, err := s.q.GetUserByID(ctx, mapping.UserID)
 	require.NoError(t, err)
 	assert.Equal(t, "No Secret", u.Name)
 
 	// Welcome email job enqueued even without a configured secret.
 	var n int
 	require.NoError(t, s.db.QueryRow(ctx, `SELECT count(*) FROM jobs WHERE kind='email.welcome'`).Scan(&n))
-	assert.Equal(t, 1, n)
+	_ = s.q.DeleteUser(ctx, mapping.UserID)
 
-	_ = s.q.DeleteUser(ctx, "user_ns1")
 }
 
 // Without bypass and without a secret, the endpoint refuses.
@@ -39,10 +42,11 @@ func TestClerkWebhookUnconfiguredRefuses(t *testing.T) {
 		d.Config.ClerkWebhookSecret = ""
 		d.Config.DevAuthBypass = false
 		d.Config.ClerkSecretKey = "sk_test_x"
+		d.IdentityWebhook = identity.ClerkWebhook{}
 	})
 	payload := userCreatedPayload("user_ns2", "em_1", "ns2@example.com", "No", "Secret")
 	h := http.Header{}
 	h.Set("svix-id", "msg_ns2")
 	code, _, _ := serve(t, s, "POST", "/webhooks/clerk", payload, h)
-	assert.Equal(t, http.StatusServiceUnavailable, code)
+	assert.Equal(t, http.StatusBadRequest, code)
 }

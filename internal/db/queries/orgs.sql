@@ -1,6 +1,9 @@
 -- name: GetOrgByID :one
 SELECT * FROM orgs WHERE org_id = $1;
 
+-- name: GetOrgBySlug :one
+SELECT * FROM orgs WHERE slug = $1;
+
 -- name: UpsertOrg :one
 INSERT INTO orgs (org_id, name, slug, image_url)
 VALUES ($1, $2, $3, $4)

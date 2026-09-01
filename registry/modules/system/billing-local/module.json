@@ -32,7 +32,12 @@
       }
     ],
     "dependencies": {
-      "go": [],
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
       "tools": [],
       "containers": []
     },
@@ -41,7 +46,7 @@
         "source": "internal/billinglocal/local.go",
         "target": "internal/billinglocal/local.go",
         "class": "go",
-        "sha256": "def51c8c6f0716043d6a625d91021c29a6c380f3f3988dca98842cf60de523ab",
+        "sha256": "9fcd8bd087cfd1d98c9995393b223c02f8a7e4cbebe2dad49f98b00af5bf2199",
         "rewrite_module": true,
         "contract": true
       },
@@ -58,6 +63,14 @@
         "target": "internal/billinglocal/module.go",
         "class": "go",
         "sha256": "87bef6f18a133bee76f47d3a0b070e45e39a1726375da7b27f45a38983ba8b0a",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/web/workflow_billing_local.go",
+        "target": "internal/web/workflow_billing_local.go",
+        "class": "go",
+        "sha256": "eb622c3dc47fa4c6ff90533f91c5e496352ca4fe95b67dbbc4c0d7799fa2c0ec",
         "rewrite_module": true,
         "contract": true
       }
@@ -122,12 +135,29 @@
       "routes": [
         {
           "id": "billing.local.cancel",
-          "method": "GET",
+          "method": "POST",
           "pattern": "/billing/cancel",
-          "scope": "public",
+          "scope": "app",
           "policy": {
             "csrf_exempt": true,
-            "csrf_reason": "local billing confirmation endpoint",
+            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 4096,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleBillingCancel"
+        },
+        {
+          "id": "billing.local.cancel-screen",
+          "method": "GET",
+          "pattern": "/billing/cancel",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 4096,
@@ -139,12 +169,29 @@
         },
         {
           "id": "billing.local.confirm",
-          "method": "GET",
+          "method": "POST",
           "pattern": "/billing/confirm",
-          "scope": "public",
+          "scope": "app",
           "policy": {
             "csrf_exempt": true,
-            "csrf_reason": "local billing confirmation endpoint",
+            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 4096,
+            "idempotent": true,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleBillingConfirm"
+        },
+        {
+          "id": "billing.local.confirm-screen",
+          "method": "GET",
+          "pattern": "/billing/confirm",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "authenticated local billing confirmation is same-origin protected",
             "rate_exempt": false,
             "maintenance_exempt": false,
             "max_body_bytes": 4096,

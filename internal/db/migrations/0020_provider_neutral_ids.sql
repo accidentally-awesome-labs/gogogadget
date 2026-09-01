@@ -18,7 +18,22 @@ BEGIN
   IF EXISTS (SELECT 1 FROM (VALUES ('org_members_user_idx'),('audit_log_org_idx'),('projects_org_idx'),('files_org_idx'),('notifications_unread_idx'),('webhook_endpoints_org_idx'),('webhook_deliveries_org_idx'),('usage_events_org_idx')) AS expected(name) WHERE to_regclass('public.'||expected.name) IS NULL) THEN
     RAISE EXCEPTION 'provider_neutral_ids_legacy_indexes_mismatch';
   END IF;
-  IF (SELECT count(*) FROM pg_constraint c WHERE c.contype='f' AND c.confdeltype='c' AND c.conrelid IN ('org_members'::regclass,'subscriptions'::regclass,'projects'::regclass,'api_tokens'::regclass,'files'::regclass,'schedules'::regclass,'notifications'::regclass,'webhook_endpoints'::regclass,'webhook_deliveries'::regclass,'usage_events'::regclass,'flag_overrides'::regclass,'notification_preferences'::regclass,'idempotency_keys'::regclass)) <> 17 THEN
+  IF EXISTS (
+    SELECT 1 FROM (VALUES
+      ('org_members','org_members_clerk_org_id_fkey'),('org_members','org_members_clerk_user_id_fkey'),
+      ('subscriptions','subscriptions_clerk_org_id_fkey'),('projects','projects_clerk_org_id_fkey'),
+      ('api_tokens','api_tokens_clerk_org_id_fkey'),('files','files_clerk_org_id_fkey'),
+      ('schedules','schedules_clerk_org_id_fkey'),('notifications','notifications_clerk_org_id_fkey'),
+      ('notifications','notifications_clerk_user_id_fkey'),('webhook_endpoints','webhook_endpoints_clerk_org_id_fkey'),
+      ('webhook_deliveries','webhook_deliveries_endpoint_id_fkey'),('webhook_deliveries','webhook_deliveries_clerk_org_id_fkey'),
+      ('usage_events','usage_events_clerk_org_id_fkey'),('flag_overrides','flag_overrides_flag_key_fkey'),
+      ('flag_overrides','flag_overrides_clerk_org_id_fkey'),('notification_preferences','notification_preferences_clerk_user_id_fkey'),
+      ('idempotency_keys','idempotency_keys_clerk_org_id_fkey')
+    ) AS expected(table_name,constraint_name)
+    LEFT JOIN pg_constraint c ON c.conrelid=to_regclass('public.'||expected.table_name)
+      AND c.conname=expected.constraint_name AND c.contype='f' AND c.confdeltype='c'
+    WHERE c.oid IS NULL
+  ) THEN
     RAISE EXCEPTION 'provider_neutral_ids_legacy_foreign_keys_mismatch';
   END IF;
   IF EXISTS (SELECT 1 FROM subscriptions WHERE polar_customer_id <> '' GROUP BY clerk_org_id HAVING count(DISTINCT polar_customer_id)>1) THEN RAISE EXCEPTION 'provider_neutral_ids_multiple_polar_customers_per_org'; END IF;
@@ -47,7 +62,8 @@ ALTER TABLE usage_events RENAME COLUMN clerk_org_id TO org_id;
 ALTER TABLE flag_overrides RENAME COLUMN clerk_org_id TO org_id;
 ALTER TABLE notification_preferences RENAME COLUMN clerk_user_id TO user_id;
 ALTER TABLE idempotency_keys RENAME COLUMN clerk_org_id TO org_id;
-
+ALTER TABLE webhook_events DROP CONSTRAINT webhook_events_provider_check;
+ALTER TABLE webhook_events ADD CONSTRAINT webhook_events_provider_check CHECK (provider IN ('clerk','polar','local'));
 ALTER TABLE subscriptions ADD COLUMN provider TEXT DEFAULT 'polar';
 UPDATE subscriptions SET provider='polar' WHERE provider IS NULL;
 ALTER TABLE subscriptions ALTER COLUMN provider SET NOT NULL;
@@ -77,6 +93,8 @@ DROP TABLE IF EXISTS identity_organizations;
 DROP TABLE IF EXISTS identity_subjects;
 ALTER TABLE subscriptions DROP CONSTRAINT subscriptions_provider_not_empty;
 ALTER TABLE subscriptions DROP COLUMN provider;
+ALTER TABLE webhook_events DROP CONSTRAINT webhook_events_provider_check;
+ALTER TABLE webhook_events ADD CONSTRAINT webhook_events_provider_check CHECK (provider IN ('clerk','polar'));
 ALTER TABLE idempotency_keys RENAME COLUMN org_id TO clerk_org_id;
 ALTER TABLE notification_preferences RENAME COLUMN user_id TO clerk_user_id;
 ALTER TABLE flag_overrides RENAME COLUMN org_id TO clerk_org_id;

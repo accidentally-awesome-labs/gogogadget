@@ -76,3 +76,32 @@ Final focused verification:
 - `go test ./internal/db -run TestProviderNeutralMigrationPreservesLegacyRows -count=1` — passed.
 
 The migration guard retains the empty Polar-customer sentinel exclusion (`polar_customer_id <> ''`) and the pre-DDL legacy-column/index/FK/customer invariants. Changes and generated outputs are committed with the final worktree clean.
+
+## Review fix round
+
+- Hardened Clerk webhook verification to fail closed when its hosted secret is absent; unsigned parsing is now an explicit `identity.DevWebhook` selected only by the development adapter.
+- Routed identity webhook lifecycle through provider mappings: user/org events create or resolve opaque domain IDs, membership events resolve both mappings, and deletion resolves the mapped domain row before cascading.
+- Seeded web test identities with provider mappings and corrected local billing URLs to carry org context without trusting caller-supplied org IDs. Local confirmation/cancellation now has authenticated screen (GET) and action (POST) paths with same-origin route policy and idempotent neutral ledger processing.
+- Added `GetOrgBySlug` sqlc query and declared identity/session and billing mapping table ownership in manifests; regenerated sqlc and all registry outputs.
+
+Review-round verification:
+
+- `gofmt -w internal/identity internal/billing internal/billinglocal internal/web internal/modkit internal/api internal/config` — passed.
+- `go tool sqlc generate` — passed.
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; generated registry `4d945ab1a5732d5a782c96c702d4deb727b8c054db7265c859de773cd3d7df77`.
+- Focused unfiltered identity/billing/billing-local tests — passed.
+- Focused compile tests for CLI, generated modules, config, identity/session, billing, API, web, and DB — passed.
+
+## Final review fix round
+
+- Migration `0020_provider_neutral_ids.sql` now checks the explicit named legacy foreign-key set and cascade actions (no FK-count sentinel), retains the empty Polar customer exclusion, and expands the shared webhook ledger provider check to include `local` with a reversible down path.
+- Identity webhook processing now resolves all user/org/membership subjects through `identity_subjects`/`identity_organizations`, creates opaque IDs for first-seen entities, and resolves mapped domain IDs for deletion. Development uses an explicit unsigned `DevWebhook`; hosted Clerk verification fails closed without its secret.
+- Local billing checkout now carries org context, renders authenticated GET confirmation/cancellation screens, and mutates state only via POST neutral events with ledger idempotency. New session/billing tables and `GetOrgBySlug` are manifest/query-owned and regenerated.
+
+Verification after review fixes:
+
+- `gofmt -w internal/identity internal/billing internal/billinglocal internal/web internal/modkit internal/api internal/config` — passed.
+- `go tool sqlc generate` — passed.
+- `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `f4af69b8cb8fa1d8bc0995088c0e9bfb0de5e9137a06f4ac0442fc39c7e16457`.
+- `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal -count=1` — passed.
+- `go test ./internal/db -run 'TestProviderNeutralMigrationPreservesLegacyRows|TestMigrateUpDown' -count=1` — passed.

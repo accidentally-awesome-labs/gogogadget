@@ -62,7 +62,7 @@
         "source": "internal/web/handlers_webhooks.go",
         "target": "internal/web/handlers_webhooks.go",
         "class": "go",
-        "sha256": "321f195621898a56b56bcba6ab2cf509df1069828f234d88f6d426b4f1acdd33",
+        "sha256": "e82594c63d8221aba2dbd5afaa41de07b911f4a91d2edfb20826792c88a50746",
         "rewrite_module": true,
         "contract": false
       },
@@ -70,7 +70,7 @@
         "source": "internal/web/webhook_bypass_test.go",
         "target": "internal/web/webhook_bypass_test.go",
         "class": "test",
-        "sha256": "fea34378c24cf6dbec8506ba5c6efd2305f3f008293b6f84c916e2886c6aa0d5",
+        "sha256": "e2c4dfc75f1a68f524252fd6ee5f595c50c2f1dfaf75b3b26b604f33a695d40a",
         "rewrite_module": true,
         "contract": false
       }

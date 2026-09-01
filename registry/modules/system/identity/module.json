@@ -1165,7 +1165,7 @@
         "settings.disabled_title": "Account disabled"
       },
       "es": {
-        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organización si crees que esto es un error.",
+        "settings.disabled_body": "Tu cuenta ha sido deshabilitada por un administrador. Contacta al administrador de tu organizaci\u00f3n si crees que esto es un error.",
         "settings.disabled_title": "Cuenta deshabilitada"
       }
     },
@@ -1231,7 +1231,22 @@
         "internal/identity"
       ]
     },
-    "data": [],
+    "data": [
+      {
+        "table": "identity_organizations",
+        "scope": "org",
+        "export": false,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      },
+      {
+        "table": "identity_subjects",
+        "scope": "user",
+        "export": false,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      }
+    ],
     "removal_policy": "major-version-only"
   }
 }

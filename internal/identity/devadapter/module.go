@@ -32,7 +32,7 @@ func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 		Fetcher:   identity.DevUserFetcher{},
 		Deleter:   identity.DevDeleter{},
 		Navigator: identity.LocalNavigator{BaseURL: d.Config.AppURL},
-		Webhook:   identity.ClerkWebhook{},
+		Webhook:   identity.DevWebhook{},
 	}, nil
 }
 

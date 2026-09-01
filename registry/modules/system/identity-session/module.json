@@ -61,7 +61,7 @@
         "source": "internal/identity/session/module.go",
         "target": "internal/identity/session/module.go",
         "class": "go",
-        "sha256": "6d120d96ea35b5d37b1bb872c9fdc7e46bad5c959d49de6e15f24d3b2fc72c21",
+        "sha256": "b25022c09576682c93fc13b94e08fdc07f2e832140cf916641da2ed00f6e35c2",
         "rewrite_module": true,
         "contract": true
       },

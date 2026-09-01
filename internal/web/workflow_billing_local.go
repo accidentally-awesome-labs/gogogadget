@@ -2,11 +2,14 @@ package web
 
 import (
 	"errors"
+	"fmt"
+	"html"
 	"net/http"
 
 	"github.com/gogogadget/gogogadget/internal/billing"
 	"github.com/gogogadget/gogogadget/internal/billinglocal"
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -16,18 +19,27 @@ func (s *Server) handleBillingConfirm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "local billing is not selected", http.StatusNotFound)
 		return
 	}
-	product, customer, orgID := r.URL.Query().Get("product"), r.URL.Query().Get("customer"), r.URL.Query().Get("org")
-	if product == "" || customer == "" {
-		http.Error(w, "product and customer are required", http.StatusBadRequest)
+	org := identity.OrgFrom(r.Context())
+	if org == nil {
+		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
-	evt := client.ConfirmedEvent(product, customer, orgID)
+	product, customer := r.URL.Query().Get("product"), r.URL.Query().Get("customer")
+	if product == "" || customer == "" || customer != org.OrgID {
+		http.Error(w, "invalid billing confirmation", http.StatusBadRequest)
+		return
+	}
+	if r.Method == http.MethodGet {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = fmt.Fprintf(w, `<main><h1>Confirm billing</h1><form method="post" action="/billing/confirm"><input type="hidden" name="product" value="%s"><button type="submit">Confirm</button></form></main>`, html.EscapeString(product))
+		return
+	}
+	evt := client.ConfirmedEvent(product, customer, org.OrgID)
 	if err := s.processLocalBillingEvent(r, evt, "confirm:"+customer+":"+product); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = w.Write([]byte("<main><h1>Billing confirmed</h1><p>Your subscription is active.</p></main>"))
+	http.Redirect(w, r, "/app/settings/billing?success=1", http.StatusSeeOther)
 }
 
 func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
@@ -36,18 +48,27 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "local billing is not selected", http.StatusNotFound)
 		return
 	}
-	customer, orgID := r.URL.Query().Get("customer"), r.URL.Query().Get("org")
-	if customer == "" {
-		http.Error(w, "customer is required", http.StatusBadRequest)
+	org := identity.OrgFrom(r.Context())
+	if org == nil {
+		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
-	evt := client.CanceledEvent(customer, orgID)
+	customer := r.URL.Query().Get("customer")
+	if customer == "" || customer != org.OrgID {
+		http.Error(w, "invalid billing cancellation", http.StatusBadRequest)
+		return
+	}
+	if r.Method == http.MethodGet {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(`<main><h1>Cancel billing</h1><form method="post" action="/billing/cancel"><button type="submit">Cancel</button></form></main>`))
+		return
+	}
+	evt := client.CanceledEvent(customer, org.OrgID)
 	if err := s.processLocalBillingEvent(r, evt, "cancel:"+customer); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = w.Write([]byte("<main><h1>Billing canceled</h1></main>"))
+	http.Redirect(w, r, "/app/settings/billing", http.StatusSeeOther)
 }
 
 func (s *Server) processLocalBillingEvent(r *http.Request, evt billing.SubscriptionEvent, id string) error {

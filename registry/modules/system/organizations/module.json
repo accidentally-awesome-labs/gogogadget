@@ -48,7 +48,7 @@
         "source": "internal/db/queries/orgs.sql",
         "target": "internal/db/queries/orgs.sql",
         "class": "query",
-        "sha256": "c759b504ab548d77c05c1e6f3ca3e2824b8c2604b5e9b7a2e35c46f7dcd77fe7",
+        "sha256": "6f03c8eedc9ebcc555944388434d62505d0c1e937eb63500d6170395fe2393bf",
         "rewrite_module": false,
         "contract": false
       },
@@ -225,7 +225,7 @@
         "id": "0020_provider_neutral_ids",
         "kind": "neutralize",
         "source": "internal/db/migrations/0020_provider_neutral_ids.sql",
-        "sha256": "c59ea5ed477bc0cccf51d6cd1dc65ce65eeec56527b80eff9187791941db7a65"
+        "sha256": "e7d20602971a082e1e099ed1ee060b17510dd69a745b90049677c7b9f89cb4bf"
       }
     ],
     "environment": [],

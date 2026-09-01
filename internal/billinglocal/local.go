@@ -25,7 +25,14 @@ func (c *Client) CreateCheckout(_ context.Context, p billing.CheckoutParams) (st
 	if c == nil {
 		return "", fmt.Errorf("billing-local: nil client")
 	}
+	orgID := ""
+	if p.Metadata != nil {
+		orgID = p.Metadata["org_id"]
+	}
 	u := c.BaseURL + "/billing/confirm?product=" + url.QueryEscape(p.ProductID) + "&customer=" + url.QueryEscape(p.CustomerExternalID)
+	if orgID != "" {
+		u += "&org=" + url.QueryEscape(orgID)
+	}
 	return u, nil
 }
 func (c *Client) CreatePortalSession(_ context.Context, customer string) (string, error) {

@@ -66,7 +66,7 @@ func (m *Middleware) Idempotent(next http.Handler) http.Handler {
 		org := identity.OrgFrom(r.Context())
 		sum := sha256.Sum256(body)
 		claim := sqlc.ClaimIdempotencyKeyParams{
-			OrgID:  org.OrgID,
+			OrgID:       org.OrgID,
 			Key:         key,
 			Endpoint:    r.Method + " " + r.URL.Path,
 			RequestHash: hex.EncodeToString(sum[:]),

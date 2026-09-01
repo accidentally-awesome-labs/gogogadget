@@ -3,17 +3,36 @@ package identity
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
 type ClerkWebhook struct{ Secret string }
 
 func (w ClerkWebhook) Verify(_ context.Context, payload []byte, headers http.Header) (Event, error) {
-	if w.Secret != "" {
-		if err := VerifyClerkWebhook(w.Secret, payload, headers); err != nil {
-			return Event{}, err
-		}
+	if w.Secret == "" {
+		return Event{}, errors.New("identity: webhook secret is required")
 	}
+	if err := VerifyClerkWebhook(w.Secret, payload, headers); err != nil {
+		return Event{}, err
+	}
+	return parseClerkEvent(payload, headers)
+}
+
+// DevWebhook is the explicit development-only webhook parser. It performs no
+// hosted signature verification and is never selected by the Clerk adapter.
+type DevWebhook struct{}
+
+func (DevWebhook) Verify(_ context.Context, payload []byte, headers http.Header) (Event, error) {
+	event, err := parseClerkEvent(payload, headers)
+	if err != nil {
+		return Event{}, err
+	}
+	event.Provider = "dev"
+	return event, nil
+}
+
+func parseClerkEvent(payload []byte, headers http.Header) (Event, error) {
 	var raw ClerkEvent
 	if err := json.Unmarshal(payload, &raw); err != nil {
 		return Event{}, err

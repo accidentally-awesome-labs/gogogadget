@@ -58,10 +58,13 @@ func integrationServer(t *testing.T, mutate func(*Deps)) *Server {
 		Config: &cfg, Log: testLogger(), DB: pool, Queries: sqlc.New(pool), Version: "test",
 		Docs: &content.Docs{}, Verifier: identity.FakeVerifier{}, Fetcher: identity.DevUserFetcher{},
 		IdentityDeleter: identity.DevDeleter{}, IdentityNavigator: identity.LocalNavigator{BaseURL: cfg.AppURL},
-		IdentityWebhook: identity.ClerkWebhook{}, BillingWebhook: billinglocal.LocalWebhook{},
+		IdentityWebhook: identity.DevWebhook{}, BillingWebhook: billinglocal.LocalWebhook{},
 		Billing: &billing.MockClient{}, BillingCatalog: billing.DefaultPlanCatalog(),
 		Storage: storagefs.NewDevStore(t.TempDir()), Flags: flags.NewDBEvaluator(sqlc.New(pool), 30*time.Second),
 		Reporter: observability.NoopReporter{},
+	}
+	if mutate != nil {
+		mutate(&deps)
 	}
 	server, err := NewServer(deps)
 	if err != nil {

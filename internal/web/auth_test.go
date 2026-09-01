@@ -18,13 +18,14 @@ func seedUser(t *testing.T, s *Server, id, email, name string) {
 	t.Helper()
 	_, err := s.q.UpsertUser(t.Context(), sqlc.UpsertUserParams{UserID: id, Email: email, Name: name})
 	require.NoError(t, err)
+	_, _ = s.q.InsertIdentitySubject(t.Context(), sqlc.InsertIdentitySubjectParams{Provider: "dev", Subject: id, UserID: id})
 	t.Cleanup(func() { _ = s.q.DeleteUser(context.Background(), id) })
 }
 
 func seedOrg(t *testing.T, s *Server, id, slug string) {
-	t.Helper()
 	_, err := s.q.UpsertOrg(t.Context(), sqlc.UpsertOrgParams{OrgID: id, Name: slug + " Org", Slug: slug})
 	require.NoError(t, err)
+	_, _ = s.q.InsertIdentityOrganization(t.Context(), sqlc.InsertIdentityOrganizationParams{Provider: "dev", Subject: id, OrgID: id})
 	t.Cleanup(func() { _ = s.q.DeleteOrg(context.Background(), id) })
 }
 
