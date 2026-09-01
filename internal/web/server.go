@@ -29,6 +29,7 @@ import (
 	"github.com/gogogadget/gogogadget/internal/storage"
 	"github.com/gogogadget/gogogadget/internal/telemetry"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
+	"github.com/gogogadget/gogogadget/internal/webhooks"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -64,6 +65,7 @@ type Server struct {
 	telemetry       telemetry.Providers
 	identityWebhook identity.Webhook
 	billingWebhook  billing.BillingWebhook
+	webhookEmitter  webhooks.Emitter
 	mux             *http.ServeMux
 
 	// metrics is the process-local Prometheus registry (see metrics.go).
@@ -118,6 +120,7 @@ type Deps struct {
 	Telemetry         telemetry.Providers
 	IdentityWebhook   identity.Webhook
 	BillingWebhook    billing.BillingWebhook
+	WebhookEmitter    webhooks.Emitter
 }
 
 func NewServer(d Deps) (*Server, error) {
@@ -150,7 +153,7 @@ func NewServer(d Deps) (*Server, error) {
 		deleter: d.IdentityDeleter, navigator: d.IdentityNavigator,
 		billingClient: d.Billing, billingCatalog: d.BillingCatalog,
 		analytics: d.Analytics, store: d.Storage, llm: d.LLM, flags: d.Flags,
-		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, mux: http.NewServeMux(),
+		reporter: d.Reporter, realtime: d.Realtime, limiter: d.RateLimiter, telemetry: d.Telemetry, webhookEmitter: d.WebhookEmitter, mux: http.NewServeMux(),
 	}
 	reg, _ := content.NewRegistry(contentTypesOf(d))
 	s.types = reg
@@ -324,4 +327,14 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+func (s *Server) emitWebhook(ctx context.Context, orgID, eventType string, data any) {
+	if s.webhookEmitter != nil {
+		if err := s.webhookEmitter.Emit(ctx, orgID, eventType, data); err != nil {
+			s.reporter.Capture(err)
+		}
+		return
+	}
+	webhooks.Emit(ctx, s.q, orgID, eventType, data)
 }

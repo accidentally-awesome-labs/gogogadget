@@ -10,7 +10,6 @@ import (
 	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/gogogadget/gogogadget/internal/identity"
 	"github.com/gogogadget/gogogadget/internal/web/templates"
-	"github.com/gogogadget/gogogadget/internal/webhooks"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -73,7 +72,7 @@ func (s *Server) handleProjectCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.created", map[string]any{"id": project.ID, "name": project.Name})
-	webhooks.Emit(ctx, s.q, org.OrgID, "project.created", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.OrgID})
+	s.emitWebhook(ctx, org.OrgID, "project.created", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.OrgID})
 	s.analytics.Capture(user.UserID, "project_created", map[string]any{"org_id": org.OrgID, "project_id": project.ID})
 	Toast(w, "success", "Project created")
 	Navigate(w, r, "/app/projects")
@@ -125,7 +124,7 @@ func (s *Server) handleProjectUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.updated", map[string]any{"id": project.ID, "name": name})
-	webhooks.Emit(ctx, s.q, org.OrgID, "project.updated", map[string]any{"id": project.ID, "name": name, "status": project.Status, "org_id": org.OrgID})
+	s.emitWebhook(ctx, org.OrgID, "project.updated", map[string]any{"id": project.ID, "name": name, "status": project.Status, "org_id": org.OrgID})
 	Toast(w, "success", "Project updated")
 	Navigate(w, r, "/app/projects")
 }
@@ -144,7 +143,7 @@ func (s *Server) handleProjectArchive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.updated", map[string]any{"id": project.ID, "status": "archived"})
-	webhooks.Emit(ctx, s.q, org.OrgID, "project.archived", map[string]any{"id": project.ID, "name": project.Name, "status": "archived", "org_id": org.OrgID})
+	s.emitWebhook(ctx, org.OrgID, "project.archived", map[string]any{"id": project.ID, "name": project.Name, "status": "archived", "org_id": org.OrgID})
 	Toast(w, "success", "Project archived")
 	Navigate(w, r, "/app/projects")
 }
@@ -163,7 +162,7 @@ func (s *Server) handleProjectDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	audit.Log(ctx, s.q, org.OrgID, user.UserID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name})
-	webhooks.Emit(ctx, s.q, org.OrgID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.OrgID})
+	s.emitWebhook(ctx, org.OrgID, "project.deleted", map[string]any{"id": project.ID, "name": project.Name, "status": project.Status, "org_id": org.OrgID})
 	Toast(w, "success", "Project deleted")
 	w.WriteHeader(http.StatusOK)
 }
