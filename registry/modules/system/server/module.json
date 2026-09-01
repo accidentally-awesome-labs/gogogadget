@@ -145,6 +145,14 @@
         "contract": false
       },
       {
+        "source": "internal/web/admin_email_test.go",
+        "target": "internal/web/admin_email_test.go",
+        "class": "test",
+        "sha256": "0aeeb27bf96fd15affa150eee38bda6d0b19b37087c853a0bb11fe9e15c1f55c",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/web/admin_shared.go",
         "target": "internal/web/admin_shared.go",
         "class": "go",

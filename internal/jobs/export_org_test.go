@@ -46,8 +46,8 @@ func seedExportOrg(t *testing.T, pool poolExec, q *sqlc.Queries, orgID string) {
 		{`INSERT INTO webhook_endpoints (org_id, created_by, url, secret, event_types)
 		  VALUES ($1, 'user_exp', 'https://example.test/hook', $2, ARRAY['project.created'])`, []any{orgID, exportSecret}},
 		{`INSERT INTO audit_log (org_id, user_id, action, metadata) VALUES ($1, 'user_exp', 'project.created', '{"id":1}')`, []any{orgID}},
-		{`INSERT INTO subscriptions (org_id, provider_customer_id, product_key, status)
-		  VALUES ($1, 'cus_x', 'pro', 'active') ON CONFLICT DO NOTHING`, []any{orgID}},
+		{`INSERT INTO subscriptions (org_id, provider, provider_customer_id, product_key, status)
+		  VALUES ($1, 'local', 'cus_x', 'pro', 'active') ON CONFLICT DO NOTHING`, []any{orgID}},
 	} {
 		_, err := pool.Exec(ctx, stmt.sql, stmt.args...)
 		require.NoError(t, err, stmt.sql)

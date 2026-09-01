@@ -94,7 +94,7 @@
         "source": "internal/web/workflow_billing_local.go",
         "target": "internal/web/workflow_billing_local.go",
         "class": "go",
-        "sha256": "c72c8d1d0b12ff5f9b751da2cc0c9f8e89a8c88fa19e4a3d175c2243df360287",
+        "sha256": "fd35b04ac16015f4a837d1a508196fb0215740ba43577d1a1fe24eb83cc3796c",
         "rewrite_module": true,
         "contract": true
       }

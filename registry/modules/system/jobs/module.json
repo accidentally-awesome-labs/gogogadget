@@ -115,7 +115,7 @@
         "source": "internal/jobs/jobs_test.go",
         "target": "internal/jobs/jobs_test.go",
         "class": "test",
-        "sha256": "1ad0b232e50e9d1f77289a09394a9b8b4bc5d9488a51165c5804e9a693149fef",
+        "sha256": "bcde472e08b3c3a3d7ef96ce969b920301ebf683928660fd10247c1953862ff2",
         "rewrite_module": true,
         "contract": false
       },

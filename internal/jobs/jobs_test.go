@@ -133,8 +133,8 @@ func TestTrialEndingGuardSkipsNonTrialing(t *testing.T) {
 	require.NoError(t, err)
 	_, err = pool.Exec(ctx, `INSERT INTO orgs (org_id, name, slug) VALUES ('org_g', 'G', 'g') ON CONFLICT DO NOTHING`)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (org_id, provider_customer_id, product_key, status)
-		VALUES ('org_g', 'cust_g', 'pro', 'active') ON CONFLICT (org_id) DO UPDATE SET status = 'active'`)
+	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (org_id, provider, provider_customer_id, product_key, status)
+		VALUES ('org_g', 'local', 'cust_g', 'pro', 'active') ON CONFLICT (org_id) DO UPDATE SET status = 'active'`)
 	require.NoError(t, err)
 	defer func() {
 		_, _ = pool.Exec(context.Background(), `DELETE FROM subscriptions WHERE org_id = 'org_g'`)
@@ -304,8 +304,8 @@ func seedDunningSub(t *testing.T, pool poolExec, orgID, status string) {
 	require.NoError(t, err)
 	_, err = pool.Exec(ctx, `INSERT INTO org_members (org_id, user_id, role) VALUES ($1, $2, 'org:admin') ON CONFLICT DO NOTHING`, orgID, "u_"+orgID)
 	require.NoError(t, err)
-	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (org_id, provider_customer_id, product_key, status)
-		VALUES ($1, 'cus', 'pro', $2)
+	_, err = pool.Exec(ctx, `INSERT INTO subscriptions (org_id, provider, provider_customer_id, product_key, status)
+		VALUES ($1, 'local', 'cus', 'pro', $2)
 		ON CONFLICT (org_id) DO UPDATE SET status = EXCLUDED.status`, orgID, status)
 	require.NoError(t, err)
 }

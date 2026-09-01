@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,13 +21,19 @@ func TestDevLoginSetsCookieAndRedirects(t *testing.T) {
 	code, header, _ := serve(t, s, "GET", "/dev/login", nil, nil)
 	assert.Equal(t, http.StatusSeeOther, code)
 	assert.Contains(t, header.Get("Location"), "/app")
-	var set bool
+	var set string
 	for _, c := range header.Values("Set-Cookie") {
 		if strings.HasPrefix(c, "__session=") {
-			set = true
+			set = strings.SplitN(strings.TrimPrefix(c, "__session="), ";", 2)[0]
 		}
 	}
-	assert.True(t, set, "dev login sets the synthetic session cookie")
+	require.NotEmpty(t, set, "dev login sets the synthetic session cookie")
+	code, _, _ = serve(t, s, "GET", "/app", nil, nil, &http.Cookie{Name: sessionCookieName, Value: set})
+	require.Equal(t, http.StatusOK, code)
+	_, err := s.q.GetIdentitySubject(t.Context(), sqlc.GetIdentitySubjectParams{Provider: "dev", Subject: "user_demo"})
+	require.NoError(t, err)
+	_, err = s.q.GetIdentityOrganization(t.Context(), sqlc.GetIdentityOrganizationParams{Provider: "dev", Subject: "org_demo"})
+	require.NoError(t, err)
 }
 
 func TestDevSwitchOrgRewritesRole(t *testing.T) {

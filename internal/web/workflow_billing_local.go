@@ -95,6 +95,11 @@ func (s *Server) handleBillingCancel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	evt := client.CanceledEvent(customer, org.OrgID)
+	if evt.ProviderProductID == "" {
+		if sub, err := s.q.GetSubscriptionByOrg(r.Context(), org.OrgID); err == nil {
+			evt.ProviderProductID = sub.ProductKey
+		}
+	}
 	if err := s.processLocalBillingEvent(r, evt, "cancel:"+customer); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

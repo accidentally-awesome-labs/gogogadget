@@ -40,7 +40,7 @@
         "source": "internal/db/provider_neutral_migration_test.go",
         "target": "internal/db/provider_neutral_migration_test.go",
         "class": "test",
-        "sha256": "858599eb0d62c70629385530cb1628c13e90be36ff65c59c4a1b480c96f3632d",
+        "sha256": "47e0ac26c245c04cc9d6066d590d6f12d1aa6377d32ca8206888bc9b38f4f05b",
         "rewrite_module": true,
         "contract": false
       },
@@ -80,7 +80,7 @@
         "source": "internal/db/testdata/seed/dev/organizations.sql",
         "target": "internal/db/testdata/seed/dev/organizations.sql",
         "class": "seed",
-        "sha256": "19497879c07da32b2f1a8f7f9d81e66e0fc35c1e1c9354ceb2eca821c26a1030",
+        "sha256": "90f8ea512cdd24b3df8ac925cf58520cb4ee9e45ad85a67980414a2961bb48e4",
         "rewrite_module": false,
         "contract": false
       },
@@ -88,7 +88,7 @@
         "source": "internal/db/testdata/seed/e2e/organizations.sql",
         "target": "internal/db/testdata/seed/e2e/organizations.sql",
         "class": "seed",
-        "sha256": "3c8be9d4050ee38de07eb7dc6244280c1eda4033e02fea6cd2925f7163b4f508",
+        "sha256": "2db4c9fc721b285c77a63d4015398d6e010bfd3414be1ae86b8660ac14c12d01",
         "rewrite_module": false,
         "contract": false
       },
@@ -246,6 +246,12 @@
         "kind": "immutable",
         "source": "internal/db/migrations/0020_provider_neutral_ids.sql",
         "sha256": "028cd83f25f7e3c85ef76ef7b4923d2c87b22381947cf92be07d9d1d1e27d8d6"
+      },
+      {
+        "id": "0021_provider_explicit",
+        "kind": "immutable",
+        "source": "internal/db/migrations/0021_provider_explicit.sql",
+        "sha256": "39dfd091cd3f60cf7c89c29b7ad0ea0ce514a36426f90dce42b2757c39238f90"
       }
     ],
     "environment": [],

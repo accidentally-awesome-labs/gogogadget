@@ -27,3 +27,15 @@ INSERT INTO org_members (org_id, user_id, role, created_at) VALUES
   ('org_pro',  'user_pro',      'org:admin',  '2026-01-15T00:00:00Z'),
   ('org_deleteme', 'user_deleteme', 'org:admin', '2026-01-15T00:00:00Z')
 ON CONFLICT DO NOTHING;
+INSERT INTO identity_subjects (provider, subject, user_id) VALUES
+  ('dev', 'user_free', 'user_free'), ('dev', 'user_pro', 'user_pro'),
+  ('dev', 'user_admin', 'user_admin'), ('dev', 'user_disabled', 'user_disabled'),
+  ('dev', 'user_noorg', 'user_noorg'), ('dev', 'user_noactive', 'user_noactive'),
+  ('dev', 'user_toggle', 'user_toggle'), ('dev', 'user_deleteme', 'user_deleteme'),
+  ('dev', 'user_support', 'user_support')
+ON CONFLICT DO NOTHING;
+INSERT INTO identity_organizations (provider, subject, org_id) VALUES
+  ('dev', 'org_free', 'org_free'), ('dev', 'org_pro', 'org_pro'),
+  ('dev', 'org_deleteme', 'org_deleteme')
+ON CONFLICT DO NOTHING;
+ON CONFLICT DO NOTHING;

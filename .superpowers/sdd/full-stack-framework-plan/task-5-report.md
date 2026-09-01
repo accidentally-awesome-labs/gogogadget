@@ -178,4 +178,13 @@ Verification after review fixes:
 - `go test ./internal/identity/... ./internal/billing/... ./internal/billinglocal ./internal/identity/session ./internal/db ./internal/api ./internal/jobs ./internal/web` — passed unfiltered.
 - `make check` — passed fully, including generated drift, templ/sqlc, gofmt, `go vet ./...`, and `go test ./...`.
 - Final registry digest: `56e888ed68c0f0b0df792331391382fe2bdc2e4c563e6f02553d48433b7de109`.
+
+## Final repair completion
+
+- Removed hidden SessionLoader construction fallback; generated identity-session is now required by web wiring and carries provider provenance.
+- Added active-provider subject selection for account deletion, explicit dev/e2e seed mappings, `/dev/login` mapping coverage, ADMIN_EMAIL first-sight coverage, org-slug collision refusal, and org-aware hosted subject verification.
+- Local billing has adapter-owned `pro`/`team` product IDs, authenticated `/app` confirmation/cancellation screens with nosurf tokens, a registered terminating portal destination, durable current-product cancellation, and confirm→cancel→reconfirm route integration coverage.
+- Migration fixture now reads memberships, subscriptions/provider/provider_subscription_id, and API tokens; job fixtures explicitly set neutral provider values after the provider default was removed by forward migration `0021_provider_explicit`.
+- `make check` — passed fully; all unfiltered repository tests, ownership, generated drift, gofmt, `go vet ./...`, and sqlc/templ checks passed.
+- Final registry digest: `222720c49a83c4f2a97be4941b40ab0c475d32a55058dec73ec3b7c8ebbfc223`.
 - `go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline` — passed; registry `d95c819a12cc441195d63f245b0d17a4507698e65682ade396e0b40a6abc2f2f`.

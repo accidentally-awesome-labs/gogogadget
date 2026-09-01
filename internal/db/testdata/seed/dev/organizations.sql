@@ -14,3 +14,8 @@ ON CONFLICT (org_id) DO NOTHING;
 INSERT INTO org_members (org_id, user_id, role) VALUES
   ('org_demo', 'user_demo', 'org:admin')
 ON CONFLICT DO NOTHING;
+
+INSERT INTO identity_subjects (provider, subject, user_id) VALUES ('dev', 'user_demo', 'user_demo')
+ON CONFLICT DO NOTHING;
+INSERT INTO identity_organizations (provider, subject, org_id) VALUES ('dev', 'org_demo', 'org_demo')
+ON CONFLICT DO NOTHING;
