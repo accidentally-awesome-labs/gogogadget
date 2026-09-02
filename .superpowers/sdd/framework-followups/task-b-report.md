@@ -275,7 +275,9 @@ specs into trees with no `playwright.config.ts`, no `helpers.ts` and no
   `e2e/package.json`, `e2e/package-lock.json` and requires only
   `ggg/system/project-base`. `tests` is empty. Title/description updated to say so.
 - **`ggg/system/e2e-sweeps`** (new, `registry/modules/system/e2e-sweeps/module.json`)
-  owns the nine cross-cutting suites plus all 204 `e2e/visual.spec.ts-snapshots/*.png`,
+  owns the nine cross-cutting suites, the four `scripts/{smoke,visual,visual-run,visual-update}.sh`
+  harness scripts, and all 200 `e2e/visual.spec.ts-snapshots/*.png` (9 + 4 + 200 = the
+  213 transferred files),
   and carries `tests.e2e` (9), `tests.visual` (1) and `tests.accessibility` (2).
   Its `requires` are `ggg/system/e2e` plus the pages its sweeps navigate:
   `page/blog`, `page/changelog`, `page/dashboard`, `page/docs`, `page/docs-index`,
