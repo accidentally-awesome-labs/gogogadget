@@ -189,9 +189,20 @@ templ exampleResourcesEmpty(d ExampleResourcesListData) {
 		@ui.EmptyState(ui.EmptyStateOpts{
 			Level: 2, Variant: ui.EmptyInline,
 			Title: i18n.T(ctx, "example-resource.empty_title"),
-			Body:  i18n.T(ctx, "example-resource.empty_body"),
+			Body:  exampleResourcesEmptyBody(ctx, d),
 		})
 	}
+}
+
+// exampleResourcesEmptyBody says what to do next, which depends on whether this surface
+// has the form. Pointing at a control that is not rendered here — the app page
+// of a platform table, or the staff page of a tenant-scoped one — is worse
+// than saying nothing.
+func exampleResourcesEmptyBody(ctx context.Context, d ExampleResourcesListData) string {
+	if exampleResourcesWritable(ctx, d) {
+		return i18n.T(ctx, "example-resource.empty_body")
+	}
+	return i18n.T(ctx, "example-resource.empty_body_readonly")
 }
 
 templ exampleResourcesPager(d ExampleResourcesListData) {

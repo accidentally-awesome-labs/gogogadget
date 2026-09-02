@@ -259,15 +259,32 @@ func validate$Exp$Name(name string) (string, string) {
 
 // identityDeclarations emits the identity lookups a handler body reads. Only
 // those: an unused local is a compile error, so this cannot be generous.
+//
+// A mutation always reads the acting user, for the audit actor. It reads the
+// organization only when the row belongs to one — see auditOrg.
 func (r resourceSpec) identityDeclarations(audits, tenanted bool) string {
 	var b strings.Builder
-	if audits || (tenanted && r.scope == "org") {
+	if (audits && r.tenantColumn != "") || (tenanted && r.scope == "org") {
 		b.WriteString("\torg := identity.OrgFrom(ctx)\n")
 	}
 	if audits || (tenanted && r.scope == "user") {
 		b.WriteString("\tuser := identity.UserFrom(ctx)\n")
 	}
 	return b.String()
+}
+
+// auditOrg is the organization a browser mutation is attributed to.
+//
+// A platform row belongs to no organization, and /app/activity reads the audit
+// table scoped to the viewer's organization — so attributing a global change
+// to the acting staff member's own organization would publish it into that one
+// tenant's activity feed. Every shipped platform-scoped admin mutation passes
+// an empty org id for exactly that reason; this follows them.
+func (r resourceSpec) auditOrg() string {
+	if r.tenantColumn == "" {
+		return `""`
+	}
+	return "org.OrgID"
 }
 
 // tenantValue is the Go expression for the tenant column's value on a browser
@@ -472,7 +489,7 @@ func (s *Server) handle$Exp$Create(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.logAudit(ctx, org.OrgID, user.UserID, "$snake$.created", map[string]any{"id": row.ID, "name": row.Name})
+	s.logAudit(ctx, ` + r.auditOrg() + `, user.UserID, "$snake$.created", map[string]any{"id": row.ID, "name": row.Name})
 ` + r.indexCall("row.ID", "row.Name") + `	Toast(w, "success", "$HumanSingular$ created")
 	Navigate(w, r, "$writeBase$")
 }
@@ -510,7 +527,7 @@ func (s *Server) handle$Exp$Update(w http.ResponseWriter, r *http.Request) {
 		s.renderError(w, r, err.Error())
 		return
 	}
-	s.logAudit(ctx, org.OrgID, user.UserID, "$snake$.updated", map[string]any{"id": row.ID, "name": row.Name})
+	s.logAudit(ctx, ` + r.auditOrg() + `, user.UserID, "$snake$.updated", map[string]any{"id": row.ID, "name": row.Name})
 ` + r.indexCall("row.ID", "row.Name") + `	Toast(w, "success", "$HumanSingular$ updated")
 	Navigate(w, r, "$writeBase$")
 }
@@ -538,7 +555,7 @@ func (s *Server) handle$Exp$Delete(w http.ResponseWriter, r *http.Request) {
 		s.handleNotFound(w, r)
 		return
 	}
-	s.logAudit(ctx, org.OrgID, user.UserID, "$snake$.deleted", map[string]any{"id": id})
+	s.logAudit(ctx, ` + r.auditOrg() + `, user.UserID, "$snake$.deleted", map[string]any{"id": id})
 ` + r.deleteIndexCall("id") + `	Toast(w, "success", "$HumanSingular$ deleted")
 	w.WriteHeader(http.StatusOK)
 }
@@ -1028,9 +1045,20 @@ templ $lows$Empty(d $Exps$ListData) {
 		@ui.EmptyState(ui.EmptyStateOpts{
 			Level: 2, Variant: ui.EmptyInline,
 			Title: i18n.T(ctx, "$slug$.empty_title"),
-			Body:  i18n.T(ctx, "$slug$.empty_body"),
+			Body:  $lows$EmptyBody(ctx, d),
 		})
 	}
+}
+
+// $lows$EmptyBody says what to do next, which depends on whether this surface
+// has the form. Pointing at a control that is not rendered here — the app page
+// of a platform table, or the staff page of a tenant-scoped one — is worse
+// than saying nothing.
+func $lows$EmptyBody(ctx context.Context, d $Exps$ListData) string {
+	if $lows$Writable(ctx, d) {
+		return i18n.T(ctx, "$slug$.empty_body")
+	}
+	return i18n.T(ctx, "$slug$.empty_body_readonly")
 }
 
 templ $lows$Pager(d $Exps$ListData) {
@@ -1135,6 +1163,8 @@ func (r resourceSpec) locales() map[string]map[string]string {
 		{"edit", "Edit", "Editar"},
 		{"empty_body", "Add your first $humanSingular$ with the form above.",
 			"Añade tu primer $humanSingular$ con el formulario de arriba."},
+		{"empty_body_readonly", "No $humanPlural$ have been created yet.",
+			"Todavía no se ha creado ningún $humanSingular$."},
 		{"empty_title", "No $humanPlural$ yet", "Todavía no hay $humanPlural$"},
 		{"field_name", "Name", "Nombre"},
 		{"field_placeholder", "Name", "Nombre"},

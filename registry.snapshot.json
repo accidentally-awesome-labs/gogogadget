@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "f4a600c2ebd3f74050262d50b5755a29fb49c9a8d9938f04bd335f3bdf4c8dd9"
+      "sha256": "917b1b68653a61b0754e23cf5bcd77d72c883551106a6f444dcb69ccaed81b9e"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1468,11 +1468,11 @@
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/module.json",
-      "sha256": "fe40c427d27ef7c1c158dacc0929d7f204af458498b0f587365c8046cc7890f9"
+      "sha256": "59629aa946a438e74c7f7f75e26845f1a6dc823cb4b680550433f199efa0ca5d"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example-resource.templ.txt",
-      "sha256": "3f2c71f5f523fd9942719b13531b588f872486ff30f3df319944a8513b6150e4"
+      "sha256": "5774181a9f91ec66b246df23ca446c9b848712b90c01b7eb22ad171c09b9d422"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example_resource.sql",

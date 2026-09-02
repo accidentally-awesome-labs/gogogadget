@@ -3,6 +3,7 @@ package gggcli
 import (
 	"context"
 	"encoding/json"
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"os"
@@ -26,7 +27,7 @@ func buildResource(t *testing.T, mutation CreateMutation) (map[string][]byte, mo
 	t.Helper()
 	mutation.Kind = "resource"
 	registry := modkit.ProjectRegistry{Namespace: "ggg", Source: "directory", Path: resourceFixtureRegistry}
-	files, manifest, err := (&Controller{}).buildCreateFiles(context.Background(), registry, "", mutation)
+	files, manifest, _, err := (&Controller{}).buildCreateFiles(context.Background(), registry, "", mutation)
 	if err != nil {
 		t.Fatalf("buildCreateFiles(%+v): %v", mutation, err)
 	}
@@ -36,11 +37,22 @@ func buildResource(t *testing.T, mutation CreateMutation) (map[string][]byte, mo
 	return files, *manifest
 }
 
+func buildResourceDiagnostics(t *testing.T, mutation CreateMutation) []modkit.Diagnostic {
+	t.Helper()
+	mutation.Kind = "resource"
+	registry := modkit.ProjectRegistry{Namespace: "ggg", Source: "directory", Path: resourceFixtureRegistry}
+	_, _, diagnostics, err := (&Controller{}).buildCreateFiles(context.Background(), registry, "", mutation)
+	if err != nil {
+		t.Fatalf("buildCreateFiles(%+v): %v", mutation, err)
+	}
+	return diagnostics
+}
+
 func buildResourceError(t *testing.T, mutation CreateMutation) error {
 	t.Helper()
 	mutation.Kind = "resource"
 	registry := modkit.ProjectRegistry{Namespace: "ggg", Source: "directory", Path: resourceFixtureRegistry}
-	_, _, err := (&Controller{}).buildCreateFiles(context.Background(), registry, "", mutation)
+	_, _, _, err := (&Controller{}).buildCreateFiles(context.Background(), registry, "", mutation)
 	if err == nil {
 		t.Fatalf("buildCreateFiles(%+v) was accepted, want a refusal", mutation)
 	}
@@ -88,11 +100,6 @@ func reachableResourceShape(mutation CreateMutation) bool {
 		return false
 	}
 	return true
-}
-
-func payloadOf(t *testing.T, files map[string][]byte, base string) string {
-	t.Helper()
-	return payload(t, files, base)
 }
 
 func payload(t *testing.T, files map[string][]byte, base string) string {
@@ -265,7 +272,7 @@ func TestCreateResourceLocalesCoverEveryUsedKey(t *testing.T) {
 				continue
 			}
 			files, manifest := buildResource(t, mutation)
-			used := templateKeys(payloadOf(t, files, "widget.templ.txt"))
+			used := templateKeys(payload(t, files, "widget.templ.txt"))
 			if len(used) == 0 {
 				t.Fatalf("%s %+v: the template reads no i18n keys", scope, flags)
 			}
@@ -571,10 +578,11 @@ func TestCreateResourceRefusesUnknownScope(t *testing.T) {
 	}
 }
 
-// Every reachable flag combination must emit Go that parses and is already
-// gofmt-canonical. The example closure compiles exactly one of these shapes for
-// real; this is what keeps the other eleven honest.
-func TestCreateResourceEmitsCanonicalGo(t *testing.T) {
+// resourceShapes is every reachable flag combination, across every scope. The
+// example closure compiles exactly one of them for real; these are what keep
+// the rest honest.
+func resourceShapes() []CreateMutation {
+	var out []CreateMutation
 	for _, scope := range []string{"user", "org", "platform"} {
 		for _, flags := range []CreateMutation{
 			{},
@@ -591,30 +599,220 @@ func TestCreateResourceEmitsCanonicalGo(t *testing.T) {
 			if !reachableResourceShape(mutation) {
 				continue
 			}
-			files, _ := buildResource(t, mutation)
-			emitted := 0
-			for name, body := range files {
-				if !strings.HasSuffix(name, ".go.txt") {
-					continue
-				}
-				emitted++
-				if _, err := parser.ParseFile(token.NewFileSet(), name, body, parser.SkipObjectResolution); err != nil {
-					t.Fatalf("%s %+v does not parse: %v\n%s", scope, flags, err, body)
-				}
-				if formatted := formatGo(string(body)); formatted != string(body) {
-					t.Fatalf("%s %+v is not gofmt-canonical: %s", scope, flags, name)
-				}
-			}
-			if mutation.NoUI && !mutation.API && !mutation.Search {
-				if emitted != 0 {
-					t.Fatalf("%s %+v emitted Go with no transport to serve", scope, flags)
-				}
+			out = append(out, mutation)
+		}
+	}
+	return out
+}
+
+// goPayloads is the emitted Go of one shape, parsed, keyed by payload path.
+func goPayloads(t *testing.T, files map[string][]byte) map[string]*ast.File {
+	t.Helper()
+	out := map[string]*ast.File{}
+	for name, body := range files {
+		if !strings.HasSuffix(name, ".go.txt") {
+			continue
+		}
+		parsed, err := parser.ParseFile(token.NewFileSet(), name, body, parser.SkipObjectResolution)
+		if err != nil {
+			t.Fatalf("%s does not parse: %v\n%s", name, err, body)
+		}
+		out[name] = parsed
+	}
+	return out
+}
+
+// Every reachable flag combination must emit Go that parses and is already
+// gofmt-canonical.
+func TestCreateResourceEmitsCanonicalGo(t *testing.T) {
+	for _, mutation := range resourceShapes() {
+		files, _ := buildResource(t, mutation)
+		emitted := goPayloads(t, files)
+		for name, body := range files {
+			if _, isGo := emitted[name]; !isGo {
 				continue
 			}
-			if emitted == 0 {
-				t.Fatalf("%s %+v emitted no Go", scope, flags)
+			if formatted := formatGo(string(body)); formatted != string(body) {
+				t.Fatalf("%s %+v is not gofmt-canonical: %s", mutation.Scope, mutation, name)
 			}
 		}
+		if mutation.NoUI && !mutation.API && !mutation.Search {
+			if len(emitted) != 0 {
+				t.Fatalf("%s %+v emitted Go with no transport to serve", mutation.Scope, mutation)
+			}
+			continue
+		}
+		if len(emitted) == 0 {
+			t.Fatalf("%s %+v emitted no Go", mutation.Scope, mutation)
+		}
+	}
+}
+
+// Parsing is not enough: an emitted file that calls a function the slice no
+// longer emits parses cleanly and fails to compile. That is exactly what
+// happened when the unit-test payload and the validator ended up on different
+// gates, and `registry validate` only compiles one shape. So every name the
+// slice invents and then uses must also be declared by the slice, and every
+// handler the manifest declares must exist as a method.
+func TestCreateResourceResolvesEverySymbolItEmits(t *testing.T) {
+	for _, mutation := range resourceShapes() {
+		files, manifest := buildResource(t, mutation)
+		emitted := goPayloads(t, files)
+
+		declared := map[string]struct{}{}
+		for _, file := range emitted {
+			for _, decl := range file.Decls {
+				switch node := decl.(type) {
+				case *ast.FuncDecl:
+					declared[node.Name.Name] = struct{}{}
+				case *ast.GenDecl:
+					for _, spec := range node.Specs {
+						switch named := spec.(type) {
+						case *ast.TypeSpec:
+							declared[named.Name.Name] = struct{}{}
+						case *ast.ValueSpec:
+							for _, name := range named.Names {
+								declared[name.Name] = struct{}{}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// The slice's own vocabulary is everything carrying its singular or
+		// plural Go identifier. A qualified name (sqlc.…, templates.…) belongs
+		// to another package and is excluded; s.<name> is this slice's own
+		// method, so it is not.
+		owns := func(name string) bool {
+			return strings.Contains(name, "Widget") || strings.Contains(name, "widget")
+		}
+		for path, file := range emitted {
+			ast.Inspect(file, func(node ast.Node) bool {
+				switch expression := node.(type) {
+				case *ast.SelectorExpr:
+					receiver, isIdent := expression.X.(*ast.Ident)
+					if !isIdent || receiver.Name != "s" {
+						// Not a call on this slice's server value, so the name
+						// belongs to whatever package or value qualifies it.
+						return false
+					}
+					if owns(expression.Sel.Name) {
+						if _, ok := declared[expression.Sel.Name]; !ok {
+							t.Fatalf("%s %+v: %s calls s.%s, which the slice never declares",
+								mutation.Scope, mutation, path, expression.Sel.Name)
+						}
+					}
+					return false
+				case *ast.Ident:
+					if owns(expression.Name) {
+						if _, ok := declared[expression.Name]; !ok {
+							t.Fatalf("%s %+v: %s references %s, which the slice never declares",
+								mutation.Scope, mutation, path, expression.Name)
+						}
+					}
+				}
+				return true
+			})
+		}
+
+		for _, route := range manifest.Runtime.Routes {
+			if _, ok := declared[route.Handler]; !ok {
+				t.Fatalf("%s %+v: route %s declares handler %s, which the slice never emits",
+					mutation.Scope, mutation, route.ID, route.Handler)
+			}
+		}
+		// And the reverse: a test payload with nothing to test, or a declared
+		// test package the slice contributes no test to, is dead weight.
+		_, hasTest := files[resourceFixtureRegistry+
+			"/registry/modules/workflow/widget/payload/workflow_widget_test.go.txt"]
+		if hasTest != (len(manifest.Tests.GoPackages) != 0) {
+			t.Fatalf("%s %+v: test payload present = %v but tests.go_packages = %v",
+				mutation.Scope, mutation, hasTest, manifest.Tests.GoPackages)
+		}
+	}
+}
+
+// N2 regression. /app/activity reads the audit table scoped to the viewer's
+// organization, so attributing a global change to the acting staff member's
+// own organization would publish it into that one tenant's feed. Every shipped
+// platform-scoped admin mutation passes an empty org id; these must too.
+func TestCreateResourceAuditsPlatformWritesWithoutATenant(t *testing.T) {
+	files, _ := buildResource(t, CreateMutation{Name: "Banner", Scope: "platform"})
+	transport := string(files[resourceFixtureRegistry+"/registry/modules/workflow/banner/payload/workflow_banner.go.txt"])
+
+	for _, action := range []string{"created", "updated", "deleted"} {
+		want := `s.logAudit(ctx, "", user.UserID, "banner.` + action + `"`
+		if !strings.Contains(transport, want) {
+			t.Fatalf("platform audit is missing %q:\n%s", want, transport)
+		}
+	}
+	if strings.Contains(transport, "org.OrgID") {
+		t.Fatalf("a platform mutation still attributes itself to an organization:\n%s", transport)
+	}
+	if strings.Contains(transport, "org := identity.OrgFrom(ctx)") {
+		t.Fatal("a platform mutation still reads an organization it must not use")
+	}
+
+	// A tenant-scoped row does belong to an organization, so it keeps it.
+	orgFiles, _ := buildResource(t, CreateMutation{Name: "Widget", Scope: "org"})
+	orgTransport := payload(t, orgFiles, "workflow_widget.go.txt")
+	if !strings.Contains(orgTransport, `s.logAudit(ctx, org.OrgID, user.UserID, "widget.created"`) {
+		t.Fatalf("an org-scoped mutation lost its audit organization:\n%s", orgTransport)
+	}
+}
+
+// N4 regression. The narrowing is right, but three of the four routes --api
+// implies are dropped, so the plan has to say so.
+func TestCreateResourcePlatformAPINarrowingIsReported(t *testing.T) {
+	diagnostics := buildResourceDiagnostics(t, CreateMutation{Name: "Banner", Scope: "platform", API: true})
+	if len(diagnostics) != 1 {
+		t.Fatalf("diagnostics = %+v, want exactly one", diagnostics)
+	}
+	got := diagnostics[0]
+	if got.Code != "resource_api_read_only" || got.Severity != "info" {
+		t.Fatalf("diagnostic = %+v, want an info resource_api_read_only", got)
+	}
+	if got.Module != "ggg/workflow/banner" || got.Path != "/api/v1/banners" {
+		t.Fatalf("diagnostic names %q at %q, want the module and its API path", got.Module, got.Path)
+	}
+	for _, want := range []string{"read route only", "/admin/banners"} {
+		if !strings.Contains(got.Message, want) {
+			t.Fatalf("diagnostic message %q does not mention %q", got.Message, want)
+		}
+	}
+
+	// Nothing was narrowed for a tenant-scoped table, so nothing is said.
+	if got := buildResourceDiagnostics(t, CreateMutation{Name: "Widget", Scope: "org", API: true}); len(got) != 0 {
+		t.Fatalf("org --api reported %+v, want no diagnostic", got)
+	}
+	if got := buildResourceDiagnostics(t, CreateMutation{Name: "Banner", Scope: "platform"}); len(got) != 0 {
+		t.Fatalf("platform without --api reported %+v, want no diagnostic", got)
+	}
+}
+
+// N5 regression. The empty state must not tell the reader to use a form that
+// this surface does not render — the app page of a platform table and the
+// staff page of a tenant-scoped one both lack it.
+func TestCreateResourceEmptyStateMatchesTheSurface(t *testing.T) {
+	files, manifest := buildResource(t, CreateMutation{Name: "Widget", Scope: "org", Admin: true})
+	body := payload(t, files, "widget.templ.txt")
+
+	if !strings.Contains(body, "func widgetsEmptyBody(ctx context.Context, d WidgetsListData) string {") {
+		t.Fatalf("the empty state does not choose its copy by surface:\n%s", body)
+	}
+	if !strings.Contains(body, `Body:  widgetsEmptyBody(ctx, d),`) {
+		t.Fatal("the empty state still hardcodes one body")
+	}
+	writable, readOnly := manifest.Locales["en"]["widget.empty_body"], manifest.Locales["en"]["widget.empty_body_readonly"]
+	if !strings.Contains(writable, "form above") {
+		t.Fatalf("writable empty body = %q, want it to point at the form", writable)
+	}
+	if readOnly == "" || strings.Contains(readOnly, "form") {
+		t.Fatalf("read-only empty body = %q, want copy that names no form", readOnly)
+	}
+	if manifest.Locales["es"]["widget.empty_body_readonly"] == "" {
+		t.Fatal("the read-only empty body has no Spanish translation")
 	}
 }
 

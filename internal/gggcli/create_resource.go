@@ -73,9 +73,18 @@ func (r resourceSpec) apiWrite() bool { return r.api && r.tenantColumn != "" }
 
 // needsValidator covers both transports; needsFormInput covers only the HTML
 // one, so `--no-ui --api` does not carry a form:"name" struct that nothing
-// decodes.
+// decodes. The emitted unit test exercises the validator, so it travels with
+// the validator rather than with the handlers: a shape that serves requests
+// but writes nothing has no validator for that test to call.
 func (r resourceSpec) needsValidator() bool { return r.uiWrite() || r.apiWrite() }
 func (r resourceSpec) needsFormInput() bool { return r.uiWrite() }
+
+// usesIdentity is read by the import list AND by the module requirement, which
+// is the point: two gates on one predicate cannot drift into declaring a
+// dependency the source never imports.
+func (r resourceSpec) usesIdentity() bool {
+	return r.uiWrite() || r.apiWrite() || (r.apiRead() && r.tenantColumn != "")
+}
 
 // hasHandlers reports whether any request handler is emitted.
 func (r resourceSpec) hasHandlers() bool { return r.uiRead() || r.apiRead() }
@@ -228,16 +237,26 @@ func (r resourceSpec) expand(body string) string {
 	).Replace(body)
 }
 
+// resourceSlice is everything one resolved invocation produces: the module,
+// its payloads keyed by installed target, its migration payloads keyed by
+// registry source, and the diagnostics the operator should see on the plan.
+type resourceSlice struct {
+	manifest    modkit.Manifest
+	payloads    map[string][]byte
+	migrations  map[string][]byte
+	diagnostics []modkit.Diagnostic
+}
+
 // buildResourceModule renders one complete resource slice: the sqlc query file,
 // the immutable migration, the transport, the templates, the test, and every
 // declaration that binds them into the generated route table, navigation,
 // locale catalogs, visual matrix, OpenAPI document and data ledger.
 func buildResourceModule(
 	registry modkit.ProjectRegistry, kind modkit.ModuleKind, name string, mutation CreateMutation, base modkit.Manifest,
-) (modkit.Manifest, map[string][]byte, map[string][]byte, error) {
+) (resourceSlice, error) {
 	spec, err := resolveResourceSpec(registry.Namespace, name, mutation)
 	if err != nil {
-		return base, nil, nil, err
+		return resourceSlice{manifest: base}, err
 	}
 	manifest := base
 	manifest.Title = spec.HumanPlural
@@ -250,7 +269,7 @@ func buildResourceModule(
 	if spec.hasGo() {
 		payloads["internal/web/workflow_"+spec.snake+".go"] = []byte(spec.transportGo())
 	}
-	if spec.hasHandlers() {
+	if spec.needsValidator() {
 		payloads["internal/web/workflow_"+spec.snake+"_test.go"] = []byte(spec.transportTestGo())
 	}
 	if !spec.noUI {
@@ -284,7 +303,31 @@ func buildResourceModule(
 	manifest.Tests = spec.tests()
 	manifest.Claims = spec.claims()
 
-	return manifest, payloads, map[string][]byte{migrationSource: migrationBody}, nil
+	return resourceSlice{
+		manifest:    manifest,
+		payloads:    payloads,
+		migrations:  map[string][]byte{migrationSource: migrationBody},
+		diagnostics: spec.diagnostics(),
+	}, nil
+}
+
+// diagnostics reports what the flags asked for and the slice deliberately did
+// not emit. A narrowing that is right but invisible is a narrowing the
+// operator discovers from a 404, so it is said on the plan instead.
+func (r resourceSpec) diagnostics() []modkit.Diagnostic {
+	out := make([]modkit.Diagnostic, 0, 1)
+	if r.api && !r.apiWrite() {
+		out = append(out, modkit.Diagnostic{
+			Code: "resource_api_read_only", Severity: "info",
+			Module: r.namespace + "/workflow/" + r.slug,
+			Path:   "/api/v1/" + r.plural,
+			Message: "--api on a platform-scoped resource emits the read route only; " +
+				"create, update and delete are omitted because a token-authenticated write " +
+				"has no tenant predicate and no route scope that can require staff. " +
+				"The mutations are served from /admin/" + r.plural + ".",
+		})
+	}
+	return out
 }
 
 // requirements names every module the emitted source actually imports or
@@ -294,7 +337,11 @@ func buildResourceModule(
 func (r resourceSpec) requirements() []modkit.Requirement {
 	ids := []string{"ggg/system/database"}
 	if r.hasHandlers() {
-		ids = append(ids, "ggg/system/identity", "ggg/system/security", "ggg/system/server")
+		// Any route at all needs the mux and the middleware chain.
+		ids = append(ids, "ggg/system/security", "ggg/system/server")
+	}
+	if r.usesIdentity() {
+		ids = append(ids, "ggg/system/identity")
 	}
 	if !r.noUI {
 		ids = append(ids, "ggg/system/i18n")
@@ -323,8 +370,10 @@ func (r resourceSpec) requirements() []modkit.Requirement {
 
 func (r resourceSpec) dependencies() modkit.Dependencies {
 	deps := emptyDependencies()
-	if r.hasHandlers() {
-		// pgx.ErrNoRows is the 404 discriminator in every row lookup.
+	if r.needsRowLookup() {
+		// pgx.ErrNoRows is the 404 discriminator in every row lookup — the
+		// same predicate the import list uses, so the declaration cannot name
+		// a module the source never imports.
 		deps.Go = []modkit.GoDependency{{Module: "github.com/jackc/pgx/v5", Version: pgxDependencyVersion}}
 	}
 	return deps
@@ -464,8 +513,11 @@ func (r resourceSpec) data() []modkit.DataDeclaration {
 	return []modkit.DataDeclaration{declaration}
 }
 
+// tests declares internal/web only when the slice actually contributes a test
+// to it, which is exactly when the validator — the one piece of pure logic
+// here — is emitted.
 func (r resourceSpec) tests() modkit.TestMetadata {
-	if !r.hasHandlers() {
+	if !r.needsValidator() {
 		return modkit.TestMetadata{}
 	}
 	return modkit.TestMetadata{GoPackages: []string{"internal/web"}}

@@ -362,3 +362,154 @@ $ go run ./cmd/ggg registry validate
    effect depends on the scope.
 4. Items 3–5 of the original concern list (visual baseline, no `content/docs` page for `ggg
    create`, `materializeManifest` now returning the completed manifest) are unchanged.
+
+
+---
+
+# Fix round 2 — response to the re-review's `new_breakage`
+
+Round 1 addressed all six original findings but introduced six new ones. All six are fixed:
+N1 (Critical), N2 (Important), N3, N4, N5, N6.
+
+## N1 — `--no-ui --api --scope platform` emitted a slice that did not compile
+
+Correct, and it was mine: the M1 split moved the validator onto `needsValidator()` and left the
+emitted `_test.go` payload on `hasHandlers()`. For that one shape they disagree
+(`hasHandlers()=true`, `needsValidator()=false`), so the emitted test called
+`validate<Exp>Name` and nothing defined it.
+
+- The test payload and `tests()` are both gated on `needsValidator()` now. The unit test exercises
+  the validator, so it travels with the validator, not with the handlers.
+- **The gate that let it through is closed.** `TestCreateResourceEmitsCanonicalGo` only parsed and
+  gofmt-checked, and an undefined identifier is a type error. New
+  `TestCreateResourceResolvesEverySymbolItEmits` walks the AST of every emitted Go payload for
+  every reachable shape (8 flag combinations × 3 scopes minus the four refused) and asserts:
+  - every identifier carrying the slice's own vocabulary — bare, or `s.<name>` on the server
+    value — is declared by the slice; qualified names (`sqlc.…`, `templates.…`, `s.q.…`) belong to
+    other packages and are excluded;
+  - every `runtime.routes[].Handler` the manifest declares exists as an emitted method;
+  - the `_test.go` payload and `tests.go_packages` are present together or absent together.
+
+  Verified non-tautological: reverting only the gate reproduces the exact defect —
+  `platform {…NoUI:true API:true}: …/workflow_widget_test.go.txt references validateWidgetName,
+  which the slice never declares` — and it passes with the fix restored.
+- **And the shape is now on a compile-checked path by hand:** installed into the repo, `sqlc
+  generate`, `go build ./internal/...`, `go vet ./internal/web/...` — all clean. Its emitted
+  transport imports exactly `net/http`, `strconv`, `time`, `internal/api`, `internal/db/sqlc`,
+  declares no test package, no identity requirement and no pgx dependency.
+
+## N2 — platform writes audited under the acting staff member's organization
+
+Correct, and the reviewer's tracing of *why* the shipped convention exists (`/app/activity` is
+org-scoped and reads the audit table, so a global action would land in one tenant's feed) is the
+part I had missed.
+
+- `auditOrg()` returns `""` when `tenantColumn == ""`, so the three platform mutations emit
+  `s.logAudit(ctx, "", user.UserID, …)` — matching `workflow_admin_flags.go`,
+  `workflow_admin_content.go`, `workflow_admin_media.go`, `workflow_admin_schedules.go` and
+  `workflow_admin_user_governance.go`.
+- `identityDeclarations` no longer declares `org` for an audit on a table with no tenant, so the
+  now-unused local is gone rather than left to a compile error.
+- A tenant-scoped row still audits under its organization, which is correct there.
+- `TestCreateResourceAuditsPlatformWritesWithoutATenant` pins both directions and asserts the
+  platform transport contains no `org.OrgID` and no `org := identity.OrgFrom(ctx)` at all.
+
+## N3 — over-declared dependency and requirement on the same shape
+
+Fixed at the root the finding named: the declaration and the import now read the *same*
+predicate rather than two that can drift.
+
+- New `usesIdentity() = uiWrite() || apiWrite() || (apiRead() && tenanted)` is read by both the
+  import list and the `ggg/system/identity` requirement.
+- The pgx dependency moved onto `needsRowLookup()`, which is what gates the `errors`/`pgx`
+  imports.
+- `ggg/system/security` and `ggg/system/server` stay on `hasHandlers()`, which is accurate: any
+  route needs the mux and the middleware chain.
+
+## N4 — the `--api --scope platform` narrowing is now visible
+
+`resourceSpec.diagnostics()` emits one info `modkit.Diagnostic`
+(`code: resource_api_read_only`, module id, `path: /api/v1/<plural>`) naming the dropped create,
+update and delete, why they are dropped, and where the mutations are served instead. It rides the
+planner's own `Plan.Diagnostics` slot, so it shows in the preview and in the JSON envelope.
+`buildCreateFiles` gained a diagnostics return and `buildResourceModule` now returns a
+`resourceSlice` bundle rather than four positional values.
+
+## N5 — empty-state copy told the reader to use a form that is not there
+
+The finding named the platform app page; the same string was also wrong on a tenant-scoped
+table's read-only staff page, so the fix is render-time rather than scope-time.
+
+- New `<lows>EmptyBody(ctx, d)` picks `<slug>.empty_body` when the surface is writable and
+  `<slug>.empty_body_readonly` ("No <things> have been created yet." / "Todavía no se ha creado
+  ningún <thing>.") when it is not.
+- Both keys are in both catalogs and both are read by the template, so the locale test's exact
+  used-vs-declared check still holds.
+
+## N6 — dead wrapper
+
+`payloadOf` deleted; all callers use `payload`.
+
+## Report correction
+
+The reviewer is right that round 1's report listed "search comment" among the org fixture's
+changes. That change was generator-only; the org fixture's emitted search section was
+byte-identical. Round 2's fixture diff is the templ payload (the empty-body helper) plus its
+digest in `module.json` — the org transport is byte-identical again, since the audit change
+affects platform only.
+
+## Commands run
+
+```
+# the shape N1 broke, compiled for real
+$ go tool sqlc generate && go build ./internal/... && go vet ./internal/web/...
+N1_SHAPE_BUILD_OK                      # --no-ui --api --scope platform
+   tests=[] diagnostics=1
+   requires ['ggg/system/api','ggg/system/database','ggg/system/security','ggg/system/server','ggg/workflow/openapi-contract']
+   deps []                             # pgx no longer declared
+
+# platform and user scope re-probed after the audit and empty-body changes
+$ ... --scope platform --api           → PLATFORM_BUILD_OK, vet clean, templates test ok
+$ ... --scope user --search --admin    → USER_BUILD_OK, vet clean, templates test ok,
+                                         go test -run TestNoteNameValidation ok
+# every probe reverted, sqlc regenerated, tree clean
+
+# the new gate reproduces N1 when the fix is reverted
+$ (revert the test-payload gate) go test -run TestCreateResourceResolvesEverySymbolItEmits
+--- FAIL: platform {…NoUI:true API:true}: …/workflow_widget_test.go.txt references
+    validateWidgetName, which the slice never declares
+$ (restore) → ok
+
+$ GGG_UPDATE_RESOURCE_FIXTURE=1 go test ./internal/gggcli -run TestCreateResourceMatchesExampleFixture
+ok    # templ payload + its digest only; org transport byte-identical
+
+$ go test ./internal/gggcli ./internal/modkit -count=1
+ok  github.com/gogogadget/gogogadget/internal/gggcli   0.429s
+ok  github.com/gogogadget/gogogadget/internal/modkit   6.577s
+$ go vet ./internal/gggcli ./internal/modkit; gofmt -l internal/gggcli internal/modkit   → clean
+
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline
+registry 67888f4461e5e495f129de36fac62c56b044ddf10d893071c7fd0e9024da8ceb   # no drift
+
+$ go run ./cmd/ggg registry validate
+  info  example_closure_verified workflow closure ggg/workflow/example-resource: installed 5 file(s),
+        regenerated 30, compiled, 1844 tree entries restored byte for byte,
+        retained migration(s) internal/db/migrations/0027_ggg_example_resource.sql
+  ... all 8 closures verified, exit 0
+```
+
+## Remaining concerns after round 2
+
+1. **Type checking is still structural, not a real type check.** `TestCreateResourceResolvesEvery`
+   `SymbolItEmits` catches the undefined-symbol and missing-handler classes across all 20
+   reachable shapes, and it catches the exact defect that shipped — but it is an AST cross-check,
+   not `go/types`. A wrong argument count or a wrong type on a call it can resolve would still
+   need a compiler. Standing compiler coverage remains the org closure plus the by-hand probes
+   recorded above; a second example closure at `--scope platform` is what would make it automatic.
+2. **`--scope platform` implies `--admin`**, so passing `--admin` there is a no-op. Unchanged from
+   round 1.
+3. The `assertSQLCOutputDir` check is substring-based, as the reviewer noted, so a cosmetic
+   `sqlc.yaml` requoting would false-positive. It fails closed, which is the right direction.
+4. Unchanged from round 1: a generated resource declares a `runtime.visual` baseline nobody has
+   captured; no `content/docs/` page describes `ggg create` yet; `materializeManifest` returning
+   the completed manifest changes what every `ggg create` kind reports in its plan.

@@ -43,7 +43,7 @@ func (c *Controller) previewCreate(ctx context.Context, mutation CreateMutation)
 		return Plan{}, refusalError(fmt.Errorf("project has no mutable directory registry"))
 	}
 	registryRoot := filepath.Join(c.rootDir(), filepath.FromSlash(registry.Path))
-	files, manifest, err := c.buildCreateFiles(ctx, registry, registryRoot, mutation)
+	files, manifest, diagnostics, err := c.buildCreateFiles(ctx, registry, registryRoot, mutation)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -66,7 +66,13 @@ func (c *Controller) previewCreate(ctx context.Context, mutation CreateMutation)
 		sum := sha256.Sum256(files[name])
 		changes = append(changes, modkit.Change{Path: name, Module: registry.Namespace + "/" + mutation.Kind + "/" + mutation.Name, Kind: kind, Class: modkit.DestinationAuthored, SHA256: hex.EncodeToString(sum[:]), Content: files[name]})
 	}
-	local := &modkit.Plan{Root: c.rootDir(), Project: project, RegistryCommit: "local", Changes: changes}
+	// The planner's own diagnostics slot carries what the generator chose not
+	// to emit, so a deliberate narrowing shows up in the preview and in the
+	// JSON envelope rather than only in a comment.
+	local := &modkit.Plan{
+		Root: c.rootDir(), Project: project, RegistryCommit: "local",
+		Changes: changes, Diagnostics: diagnostics,
+	}
 	plan := c.planFor("create", local, true)
 	plan.mutation = mutation
 	plan.create = &createPlan{registryRoot: registryRoot, files: files}
@@ -93,16 +99,16 @@ func (c *Controller) mutableProjectRegistry(project modkit.Project) (modkit.Proj
 	return modkit.ProjectRegistry{}, false
 }
 
-func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.ProjectRegistry, registryRoot string, mutation CreateMutation) (map[string][]byte, *modkit.Manifest, error) {
+func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.ProjectRegistry, registryRoot string, mutation CreateMutation) (map[string][]byte, *modkit.Manifest, []modkit.Diagnostic, error) {
 	if mutation.Name == "" {
-		return nil, nil, usageError("create name is required")
+		return nil, nil, nil, usageError("create name is required")
 	}
 	kind, name := mutation.Kind, mutation.Name
 	if kind == "module" {
 		var ok bool
 		kind, name, ok = strings.Cut(mutation.Name, "/")
 		if !ok {
-			return nil, nil, usageError("create module requires KIND/NAME")
+			return nil, nil, nil, usageError("create module requires KIND/NAME")
 		}
 	}
 	moduleKind := modkit.ModuleKind(kind)
@@ -112,18 +118,22 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 	case "provider":
 		moduleKind = modkit.ModuleSystem
 	case "migration":
-		return c.buildMigrationFiles(registry, registryRoot, mutation)
+		migrationFiles, migrationManifest, migrationErr := c.buildMigrationFiles(registry, registryRoot, mutation)
+		return migrationFiles, migrationManifest, nil, migrationErr
 	case "element", "component", "page", "workflow", "system":
 	default:
-		return nil, nil, usageError("create kind must be module, resource, page, workflow, job, migration, component, or provider")
+		return nil, nil, nil, usageError("create kind must be module, resource, page, workflow, job, migration, component, or provider")
 	}
 	slug := kebab(name)
 	if slug == "" {
-		return nil, nil, usageError("create name must contain letters or digits")
+		return nil, nil, nil, usageError("create name must contain letters or digits")
 	}
 	// Migration payloads live outside the files list; they are written beside
 	// the manifest after materialization.
 	migrationBodies := map[string][]byte{}
+	// diagnostics carries what a kind deliberately did not emit, so a
+	// narrowing reaches the plan instead of surprising the operator later.
+	var diagnostics []modkit.Diagnostic
 	manifest := modkit.Manifest{
 		ID: registry.Namespace + "/" + string(moduleKind) + "/" + slug, Kind: moduleKind, Name: slug,
 		Revision: 1, Contract: 1, Title: titleWords(name), Description: "Project-local " + kind + " " + titleWords(name) + ".",
@@ -136,25 +146,25 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 	switch kind {
 	case "page":
 		if mutation.Scope != "public" && mutation.Scope != "app" && mutation.Scope != "admin" && mutation.Scope != "dev" {
-			return nil, nil, usageError("create page --scope must be public, app, admin, or dev")
+			return nil, nil, nil, usageError("create page --scope must be public, app, admin, or dev")
 		}
 		target := "internal/web/templates/pages/" + snake(slug) + ".templ"
 		payloads[target] = []byte("package pages\n\ntempl " + exported(name) + "() {\n\t<main data-testid=\"" + slug + "-page\"><h1>" + titleWords(name) + "</h1></main>\n}\n")
 		manifest.Claims.Packages = []string{"internal/web/templates/pages"}
 	case "component":
 		if mutation.Family == "" {
-			return nil, nil, usageError("create component requires --family")
+			return nil, nil, nil, usageError("create component requires --family")
 		}
 		target := "internal/web/templates/ui/" + snake(slug) + ".templ"
 		payloads[target] = []byte("package ui\n\ntempl " + exported(name) + "() {\n\t<div class=\"" + slug + "\"></div>\n}\n")
 		manifest.Claims.Packages = []string{"internal/web/templates/ui"}
 	case "resource":
-		resourceManifest, resourcePayloads, resourceMigrations, resourceErr :=
-			buildResourceModule(registry, moduleKind, name, mutation, manifest)
+		slice, resourceErr := buildResourceModule(registry, moduleKind, name, mutation, manifest)
 		if resourceErr != nil {
-			return nil, nil, resourceErr
+			return nil, nil, nil, resourceErr
 		}
-		manifest, payloads, migrationBodies = resourceManifest, resourcePayloads, resourceMigrations
+		manifest, payloads, migrationBodies = slice.manifest, slice.payloads, slice.migrations
+		diagnostics = slice.diagnostics
 	case "job":
 		if mutation.MaxAttempts == 0 {
 			mutation.MaxAttempts = 10
@@ -167,7 +177,7 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 	case "provider":
 		providerManifest, providerPayloads, err := c.buildProviderManifest(ctx, registry, manifest, mutation)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		manifest, payloads = providerManifest, providerPayloads
 	default:
@@ -179,12 +189,12 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 	// returns — not the one handed to it — is the module the plan describes.
 	files, materialized, err := materializeManifest(registry.Path, manifest, payloads)
 	if err != nil {
-		return nil, nil, runtimeError(err)
+		return nil, nil, nil, runtimeError(err)
 	}
 	for source, body := range migrationBodies {
 		files[filepath.ToSlash(filepath.Join(registry.Path, source))] = body
 	}
-	return files, &materialized, nil
+	return files, &materialized, diagnostics, nil
 }
 
 func (c *Controller) buildProviderManifest(ctx context.Context, registry modkit.ProjectRegistry, manifest modkit.Manifest, mutation CreateMutation) (modkit.Manifest, map[string][]byte, error) {
