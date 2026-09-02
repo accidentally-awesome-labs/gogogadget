@@ -16,7 +16,7 @@ require (
 	charm.land/lipgloss/v2 v2.0.0
 	github.com/a-h/templ v0.3.1020
 	github.com/clerk/clerk-sdk-go/v2 v2.7.0
-	github.com/getsentry/sentry-go v0.48.0
+	github.com/getsentry/sentry-go v0.49.0
 	github.com/go-playground/form/v4 v4.3.0
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/justinas/nosurf v1.2.0
