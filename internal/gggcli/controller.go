@@ -251,7 +251,12 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 		return c.planFor("resolve", &local, true), nil
 
 	case RegistryMutation:
-		return Plan{Command: "registry build"}, nil
+		if mutation.SetRegistries != nil {
+			return c.previewOperation(ctx, "registry", modkit.Operation{
+				Kind: modkit.OpSync, SetRegistries: mutation.SetRegistries,
+			}, false)
+		}
+		return Plan{Command: "registry build", mutation: mutation}, nil
 
 	case TaskMutation:
 		if err := c.previewTask(mutation); err != nil {

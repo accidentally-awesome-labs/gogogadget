@@ -165,6 +165,18 @@ func RegistryPrivateKeyFromSeed(seed []byte) (ed25519.PrivateKey, error) {
 }
 
 func verifySnapshotFiles(fsys fs.FS, publicKey string, allowUnsigned bool) (string, error) {
+	// A key-rotation record, when present, re-binds trust: both rotation
+	// signatures must verify before either key is honored, and the effective
+	// key switches from the pinned key to the declared key only once the
+	// wall clock reaches not_before. During the transition the detached
+	// signature for the effective key carries verification, because the
+	// primary signature stays under whichever key signed the published
+	// snapshot. Without a record this is a no-op.
+	effectiveKey, fallbackSig, err := registryRotationEffectiveKey(fsys, publicKey)
+	if err != nil {
+		return "", err
+	}
+	publicKey = effectiveKey
 	data, err := fs.ReadFile(fsys, RegistrySnapshotPath)
 	if errors.Is(err, fs.ErrNotExist) {
 		if allowUnsigned {
@@ -190,7 +202,20 @@ func verifySnapshotFiles(fsys fs.FS, publicKey string, allowUnsigned bool) (stri
 		}
 		sig, e := base64.StdEncoding.DecodeString(strings.TrimSpace(string(sigData)))
 		if e != nil || len(sig) != ed25519.SignatureSize || !ed25519.Verify(ed25519.PublicKey(key), data, sig) {
-			return "", fmt.Errorf("registry snapshot signature verification failed")
+			// A rotation in flight verifies through its detached transition
+			// signature for the effective key; without one the primary
+			// signature is the only proof.
+			if fallbackSig == "" {
+				return "", fmt.Errorf("registry snapshot signature verification failed")
+			}
+			sigData, e = fs.ReadFile(fsys, fallbackSig)
+			if e != nil {
+				return "", fmt.Errorf("read %s: %w", fallbackSig, e)
+			}
+			sig, e = base64.StdEncoding.DecodeString(strings.TrimSpace(string(sigData)))
+			if e != nil || len(sig) != ed25519.SignatureSize || !ed25519.Verify(ed25519.PublicKey(key), data, sig) {
+				return "", fmt.Errorf("registry snapshot signature verification failed")
+			}
 		}
 	}
 	var snap RegistrySnapshot

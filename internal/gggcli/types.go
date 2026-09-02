@@ -123,9 +123,12 @@ type (
 	// GraphMutation is one add/remove/update intent edit converged on the same
 	// reconciler.
 	GraphMutation struct {
-		Kind      modkit.OperationKind
-		Modules   []string
-		Ref       string
+		Kind    modkit.OperationKind
+		Modules []string
+		Ref     string
+		// Registry names the one registry whose ref a targeted update moves.
+		// It requires Ref and refuses module operands.
+		Registry  string
 		DryRun    bool
 		PurgeData bool
 	}
@@ -235,13 +238,13 @@ type (
 	}
 
 	// RegistryMutation authors the self-hosting registry: digest refresh,
-	// index build, vendor verification.
+	// index build, vendor verification — or, with SetRegistries, replaces
+	// the project's registry sources through the same planned transaction
+	// the `ggg registry add|remove|update` flows preview and apply.
 	RegistryMutation struct {
-		Build bool
+		Build         bool
+		SetRegistries []modkit.ProjectRegistry
 	}
-
-	// TaskMutation is one trusted task command. Task and Action are closed
-	// enumerations; Arguments never carry an executable or a shell fragment.
 	TaskMutation struct {
 		Task        string
 		Action      string

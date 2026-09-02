@@ -16,9 +16,13 @@ type Operation struct {
 	Kind        OperationKind
 	Modules     []string
 	RegistryRef string
-	DryRun      bool
-	Offline     bool
-	PurgeData   bool
+	// TargetedRegistry names the one registry whose ref a targeted update
+	// changes. It requires RegistryRef and refuses module operands: changing
+	// a ref permits exactly one registry and no named modules.
+	TargetedRegistry string
+	DryRun           bool
+	Offline          bool
+	PurgeData        bool
 	// Claims are project paths the operator explicitly claims during adoption.
 	// A pre-existing file that diverges from its registry payload is unowned and
 	// blocks adoption; claiming it adopts the local bytes as a recorded
@@ -34,4 +38,7 @@ type Operation struct {
 	// planned transaction. Adapters the new selections stop selecting are
 	// retired exactly like a replaced deployment module.
 	SetProviders map[string]ProviderSelections
+	// SetRegistries replaces the project's registry sources in the same
+	// planned transaction the `ggg registry add|remove|update` flows use.
+	SetRegistries []ProjectRegistry
 }

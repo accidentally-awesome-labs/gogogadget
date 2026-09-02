@@ -18,10 +18,21 @@ import (
 const conflictArtifactPrefix = "tmp/ggg/conflicts/"
 
 type reconciledModule struct {
-	manifest     Manifest
-	sourceCommit string
-	files        []LockedFile
-	pending      *PendingUpdate
+	manifest       Manifest
+	sourceCommit   string
+	snapshotSHA256 string
+	files          []LockedFile
+	pending        *PendingUpdate
+}
+
+// snapshotDigest is the per-module snapshot provenance: a retained module
+// keeps the snapshot it was installed from, everything else is pinned to the
+// snapshot this plan resolved.
+func (m reconciledModule) snapshotDigest(fallback string) string {
+	if m.snapshotSHA256 != "" {
+		return m.snapshotSHA256
+	}
+	return fallback
 }
 
 type detectedConflict struct {
@@ -170,6 +181,7 @@ func reconcilePlannedState(
 	hasLock bool,
 	claims map[string]struct{},
 	retire map[string]struct{},
+	retained map[string]struct{},
 ) (Lock, []Change, []Conflict, []StagedFile, []Diagnostic, error) {
 	// Generated outputs are tool-owned: authored module targets must never
 	// claim them, so a manifest that points at a registry-owned artifact is a
@@ -246,7 +258,7 @@ func reconcilePlannedState(
 		for module := range files {
 			sort.Slice(files[module], func(i, j int) bool { return files[module][i].Path < files[module][j].Path })
 		}
-		migrations, migrationChanges, err := planMigrations(ctx, root, snapshot.FS, graph.modules, Lock{}, false)
+		migrations, migrationChanges, err := planMigrations(ctx, root, snapshot.FS, graph.modules, Lock{}, false, nil)
 		if err != nil {
 			return Lock{}, nil, nil, nil, nil, err
 		}
@@ -343,6 +355,19 @@ func reconcilePlannedState(
 	for _, module := range graph.modules {
 		if err := ctx.Err(); err != nil {
 			return Lock{}, nil, nil, nil, nil, err
+		}
+		if _, keep := retained[module.ID]; keep {
+			// A targeted update leaves this module at its prior per-module
+			// snapshot: the lock row — manifest, file digests, source
+			// provenance — carries forward verbatim and no payload is read,
+			// so no byte of its tree can move. Its migrations were already
+			// applied and are carried by planMigrations from the lock.
+			oldModule := oldModules[module.ID]
+			states[module.ID] = reconciledModule{
+				manifest: oldModule.Manifest, sourceCommit: oldModule.SourceCommit,
+				snapshotSHA256: oldModule.SnapshotSHA256, files: append([]LockedFile{}, oldModule.Files...),
+			}
+			continue
 		}
 		oldModule, hadOld := oldModules[module.ID]
 		if _, held := hold[module.ID]; held && !hadOld {
@@ -491,7 +516,7 @@ func reconcilePlannedState(
 	for _, id := range order {
 		effectiveList = append(effectiveList, effectiveModules[id])
 	}
-	migrationFiles, migrationChanges, err := planMigrations(ctx, root, snapshot.FS, effectiveList, existing, true)
+	migrationFiles, migrationChanges, err := planMigrations(ctx, root, snapshot.FS, effectiveList, existing, true, retained)
 	if err != nil {
 		return Lock{}, nil, nil, nil, nil, err
 	}
@@ -728,7 +753,7 @@ func buildReconciledLock(commit string, graph selectedGraph, states map[string]r
 		locked = append(locked, LockedModule{
 			ID: module.ID, Revision: state.manifest.Revision, Contract: state.manifest.Contract,
 			RegistryNamespace: moduleNamespace(module.ID), SourceCommit: state.sourceCommit,
-			SnapshotSHA256: commit, Reason: graph.reasons[module.ID],
+			SnapshotSHA256: state.snapshotDigest(commit), Reason: graph.reasons[module.ID],
 			RequiredBy: append([]string{}, requiredBy[module.ID]...), Manifest: state.manifest,
 			Files: append([]LockedFile{}, state.files...), Migrations: append([]LockedMigration{}, migrations[module.ID]...),
 			Pending: state.pending,

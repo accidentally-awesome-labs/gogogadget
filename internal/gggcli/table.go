@@ -127,7 +127,20 @@ func builtInCommands() []CommandSpec {
 			{Name: "ref", Help: "GitHub registry ref", Value: true}, {Name: "answers", Help: "JSON answers file", Value: true},
 			{Name: "non-interactive", Help: "refuse missing answers instead of prompting"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
-		{Name: "registry", Summary: "Author and verify the self-hosting registry", Usage: "ggg registry build|validate [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
+		{Name: "registry", Summary: "Author, verify, and manage registry sources", Usage: "ggg registry build|validate|init|keygen|sign|verify|rotate|add|remove|update", Flags: []FlagSpec{
+			{Name: "json", Help: "emit the machine envelope"},
+			{Name: "namespace", Help: "registry namespace (init, add, remove)", Value: true},
+			{Name: "canonical-module", Help: "canonical Go module path of the registry (init)", Value: true},
+			{Name: "dir", Help: "registry tree directory", Value: true},
+			{Name: "private", Help: "private key output path (keygen)", Value: true},
+			{Name: "public", Help: "public key output path (keygen)", Value: true},
+			{Name: "key-file", Help: "base64 Ed25519 private key file (sign)", Value: true},
+			{Name: "public-key", Help: "base64 raw Ed25519 public key (verify, add)", Value: true},
+			{Name: "old-key-file", Help: "outgoing private key file (rotate)", Value: true},
+			{Name: "new-key-file", Help: "incoming private key file (rotate)", Value: true},
+			{Name: "not-before", Help: "RFC3339 UTC instant the new key activates (rotate)", Value: true},
+			{Name: "ref", Help: "registry ref to pin (add, update)", Value: true, Default: "main"},
+		}},
 		{Name: "remove", Summary: "Remove modules from the project", Usage: "ggg remove KIND/NAME... [--purge-data] [--dry-run] [--json]", Flags: []FlagSpec{
 			{Name: "purge-data", Help: "run the module's reviewed teardown migration"}, {Name: "dry-run", Help: "resolve and report without writing"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
@@ -147,7 +160,8 @@ func builtInCommands() []CommandSpec {
 			{Name: "json", Help: "emit the machine envelope"},
 		}},
 		{Name: "test", Summary: "Run one test layer", Usage: "ggg test unit|integration|e2e|visual|smoke|all [--json]", Flags: []FlagSpec{{Name: "json", Help: "emit the machine envelope"}}},
-		{Name: "update", Summary: "Advance the project to newer module revisions", Usage: "ggg update [--ref REF] [--dry-run] [--json]", Flags: []FlagSpec{
+		{Name: "update", Summary: "Advance named modules, or one registry's ref", Usage: "ggg update [MODULES...] [--registry NAMESPACE --ref REF] [--dry-run] [--json]", Flags: []FlagSpec{
+			{Name: "registry", Help: "registry whose ref moves (requires --ref)", Value: true},
 			{Name: "ref", Help: "registry ref to advance to", Value: true}, {Name: "dry-run", Help: "resolve and report without writing"}, {Name: "json", Help: "emit the machine envelope"},
 		}},
 		{Name: "version", Summary: "Print the ggg version", Usage: "ggg version"},

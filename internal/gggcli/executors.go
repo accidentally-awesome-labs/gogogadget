@@ -19,11 +19,12 @@ import (
 // plans with.
 func (m GraphMutation) operation() modkit.Operation {
 	return modkit.Operation{
-		Kind:        m.Kind,
-		Modules:     m.Modules,
-		RegistryRef: m.Ref,
-		DryRun:      m.DryRun,
-		PurgeData:   m.PurgeData,
+		Kind:             m.Kind,
+		Modules:          m.Modules,
+		RegistryRef:      m.Ref,
+		TargetedRegistry: m.Registry,
+		DryRun:           m.DryRun,
+		PurgeData:        m.PurgeData,
 	}
 }
 

@@ -23,7 +23,7 @@ type existingMigration struct {
 	value  LockedMigration
 }
 
-func planMigrations(ctx context.Context, root string, registryFS fs.FS, modules []Manifest, existing Lock, hasLock bool) (map[string][]LockedMigration, []Change, error) {
+func planMigrations(ctx context.Context, root string, registryFS fs.FS, modules []Manifest, existing Lock, hasLock bool, retained map[string]struct{}) (map[string][]LockedMigration, []Change, error) {
 	planned := make(map[string][]LockedMigration, len(modules))
 	selected := make(map[string]struct{}, len(modules))
 	authoredTargets := map[string]string{
@@ -69,6 +69,12 @@ func planMigrations(ctx context.Context, root string, registryFS fs.FS, modules 
 
 	payloads := make([]migrationPayload, 0)
 	for _, module := range modules {
+		// A retained module keeps the migration ledger it already has: its
+		// manifest is pinned, so there is no new payload to verify and the
+		// prior snapshot — not this one — owns its migration bytes.
+		if _, keep := retained[module.ID]; keep {
+			continue
+		}
 		for _, migration := range module.Migrations {
 			// Neutralization and teardown migrations are removal-time
 			// payloads: they are verified and materialized only when a

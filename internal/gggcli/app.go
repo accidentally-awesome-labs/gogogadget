@@ -226,6 +226,8 @@ func (a App) render(cc CommandContext, command string, result Result) error {
 		return renderCatalog(cc.Out, result.Payload)
 	case "info":
 		return renderInfo(cc.Out, result.Payload)
+	case "registry":
+		return renderRegistry(cc.Out, result)
 	case "diff":
 		return renderDiff(cc.Out, result.Payload)
 	default:
@@ -414,4 +416,65 @@ func stripAccessible(args []string) []string {
 		argv = append(argv, arg)
 	}
 	return argv
+}
+
+// renderRegistry prints the registry authoring flows' human output: the
+// payload facts each subcommand produces, one per line, then the envelope
+// tail when something needs attention.
+func renderRegistry(out io.Writer, result Result) error {
+	payload := result.Payload
+	stringList := func(key string) []string {
+		values, _ := payload[key].([]string)
+		return values
+	}
+	write := func(format string, args ...any) error {
+		_, err := fmt.Fprintf(out, format+"\n", args...)
+		return err
+	}
+	if value, ok := payload["fingerprint"].(string); ok {
+		if err := write("fingerprint %s", value); err != nil {
+			return err
+		}
+	}
+	if value, ok := payload["new_fingerprint"].(string); ok {
+		if err := write("new key %s activates %s", value, payload["not_before"]); err != nil {
+			return err
+		}
+	}
+	if value, ok := payload["digest"].(string); ok {
+		if err := write("snapshot sha256 %s", value); err != nil {
+			return err
+		}
+	}
+	if value, ok := payload["namespace"].(string); ok {
+		if err := write("namespace %s", value); err != nil {
+			return err
+		}
+	}
+	for _, path := range stringList("written") {
+		if err := write("wrote %s", path); err != nil {
+			return err
+		}
+	}
+	if modules, ok := payload["new_modules"].([]string); ok && len(modules) > 0 {
+		if err := write("modules introduced:"); err != nil {
+			return err
+		}
+		for _, id := range modules {
+			if err := write("  %s", id); err != nil {
+				return err
+			}
+		}
+	}
+	for _, dependency := range stringList("dependencies") {
+		if err := write("dependency %s", dependency); err != nil {
+			return err
+		}
+	}
+	for _, namespace := range stringList("moved") {
+		if err := write("moved %s", namespace); err != nil {
+			return err
+		}
+	}
+	return renderHuman(out, result.Envelope)
 }

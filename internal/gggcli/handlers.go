@@ -274,9 +274,20 @@ func runGraphMutation(kind modkit.OperationKind) CommandHandler {
 				}
 			}
 		case modkit.OpUpdate:
-			if len(parsed.positional) != 0 {
-				return Result{}, usageError(spec.Usage)
+			// Two exact forms: named modules advance, or exactly one
+			// registry's ref moves. The planner refuses any mixed intent.
+			targetedRegistry := parsed.value("registry", "")
+			if targetedRegistry != "" && ref == "" {
+				return Result{}, usageError("--registry requires --ref")
 			}
+			if targetedRegistry != "" && len(parsed.positional) != 0 {
+				return Result{}, usageError("update accepts either module operands or --registry with --ref, not both")
+			}
+			update := GraphMutation{
+				Kind: kind, Modules: parsed.positional, Ref: ref, Registry: targetedRegistry,
+				DryRun: parsed.Bool("dry-run"), PurgeData: purge,
+			}
+			return drivePlanMutation(ctx, cc, spec.Name, update, update.DryRun)
 		}
 
 		mutation := GraphMutation{
@@ -536,33 +547,48 @@ func runRegistry(ctx context.Context, cc CommandContext, args []string) (Result,
 		return Result{}, usageError(spec.Usage)
 	}
 	subcommand, rest := args[0], args[1:]
-	if subcommand != "build" && subcommand != "validate" {
-		return Result{}, usageError(fmt.Sprintf("unknown registry subcommand %q", subcommand))
-	}
 	parsed, err := parseArgv(spec, rest)
 	if err != nil {
 		return Result{}, err
 	}
-	if len(parsed.positional) != 0 {
-		return Result{}, usageError(spec.Usage)
-	}
-
-	if subcommand == "build" {
+	switch subcommand {
+	case "build":
+		if len(parsed.positional) != 0 {
+			return Result{}, usageError("ggg registry build")
+		}
 		if err := ctx.Err(); err != nil {
 			return Result{}, err
 		}
 		return cc.Controller.applyRegistryBuild()
+	case "validate":
+		if len(parsed.positional) != 0 {
+			return Result{}, usageError("ggg registry validate")
+		}
+		// Validation is a read: it exercises the example closures but
+		// mutates nothing in the project. Progress goes to the human stream
+		// even under --json... suppressed for JSON, which reads the
+		// envelope instead.
+		if cc.AsJSON {
+			ctx = WithProgressSink(ctx, io.Discard)
+		} else {
+			ctx = WithProgressSink(ctx, cc.Out)
+		}
+		return cc.Controller.Execute(ctx, RegistryReadRequest{Validate: true})
+	case "init":
+		return runRegistryInit(cc, parsed)
+	case "keygen":
+		return runRegistryKeygen(parsed)
+	case "sign":
+		return runRegistrySign(cc, parsed)
+	case "verify":
+		return runRegistryVerify(cc, parsed)
+	case "rotate":
+		return runRegistryRotate(cc, parsed)
+	case "add", "remove", "update":
+		return runRegistrySet(ctx, cc, subcommand, parsed)
+	default:
+		return Result{}, usageError(fmt.Sprintf("unknown registry subcommand %q", subcommand))
 	}
-
-	// Validation is a read: it exercises the example closures but mutates
-	// nothing in the project. Progress goes to the human stream even under
-	// --json... suppressed for JSON, which reads the envelope instead.
-	if cc.AsJSON {
-		ctx = WithProgressSink(ctx, io.Discard)
-	} else {
-		ctx = WithProgressSink(ctx, cc.Out)
-	}
-	return cc.Controller.Execute(ctx, RegistryReadRequest{Validate: true})
 }
 
 // applyIdentityLink resolves the selected identity adapter for the requested

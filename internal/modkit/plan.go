@@ -192,17 +192,45 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	desiredProject.Exclude = append([]string{}, currentProject.Exclude...)
 	desiredProject.Providers = maps.Clone(currentProject.Providers)
 	if op.Kind == OpUpdate {
-		if len(op.Modules) != 0 {
-			return Plan{}, fmt.Errorf("update does not accept module operands")
-		}
-		if op.RegistryRef != "" {
+		switch {
+		case len(op.Modules) != 0:
+			// Targeted form: `ggg update MODULES...` advances exactly the
+			// named modules plus their required closure. A ref change is the
+			// other exact form, and the two never combine.
+			if op.TargetedRegistry != "" || op.RegistryRef != "" {
+				return Plan{}, fmt.Errorf("update accepts either module operands or --registry with --ref, not both")
+			}
+		case op.TargetedRegistry != "":
+			// Ref-change form: exactly one registry moves, named by
+			// namespace, and no module operands are accepted.
+			if op.RegistryRef == "" {
+				return Plan{}, fmt.Errorf("update --registry requires --ref")
+			}
+			if err := setRegistryRef(desiredProject.Registries, op.TargetedRegistry, op.RegistryRef); err != nil {
+				return Plan{}, err
+			}
+		case op.RegistryRef != "":
 			if strings.TrimSpace(op.RegistryRef) == "" || op.RegistryRef != strings.TrimSpace(op.RegistryRef) {
 				return Plan{}, fmt.Errorf("operation registry ref must be non-empty and trimmed")
 			}
+			if len(desiredProject.Registries) != 1 {
+				return Plan{}, fmt.Errorf("update --ref requires exactly one configured registry; name the target with --registry")
+			}
 			desiredProject.Registries[0].Ref = op.RegistryRef
 		}
-	} else if op.RegistryRef != "" {
-		return Plan{}, fmt.Errorf("operation %q does not accept a registry ref", op.Kind)
+	} else {
+		if op.RegistryRef != "" {
+			return Plan{}, fmt.Errorf("operation %q does not accept a registry ref", op.Kind)
+		}
+		if op.TargetedRegistry != "" {
+			return Plan{}, fmt.Errorf("operation %q does not accept a targeted registry", op.Kind)
+		}
+	}
+	if op.SetRegistries != nil {
+		if op.Kind != OpSync {
+			return Plan{}, fmt.Errorf("operation %q does not accept a registry set", op.Kind)
+		}
+		desiredProject.Registries = append([]ProjectRegistry(nil), op.SetRegistries...)
 	}
 	previousDeployment := currentProject.Deployment
 	if op.SetProviders != nil {
@@ -243,9 +271,27 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 			return Plan{}, err
 		}
 	}
+	// A targeted update pins every module the closure does not advance:
+	// their manifests, file digests, and snapshot provenance carry forward
+	// from the lock even though the fresh snapshot re-publishes them.
+	retained := map[string]struct{}{}
+	var targeted targetedUpdate
+	if op.Kind == OpUpdate && len(op.Modules) != 0 {
+		closure, closureErr := planTargetedUpdate(ctx, existingLock, catalog, op.Modules)
+		if closureErr != nil {
+			return Plan{}, closureErr
+		}
+		targeted, retained = closure, closure.retained
+	}
 	graph, err := resolveSelectedGraph(ctx, desiredProject, catalog)
 	if err != nil {
 		return Plan{}, err
+	}
+	if op.Kind == OpUpdate && len(op.Modules) != 0 {
+		graph.modules, err = overlayTargetedGraph(graph.modules, existingLock, targeted)
+		if err != nil {
+			return Plan{}, err
+		}
 	}
 	if err := preflightNamespaces(ctx, graph.modules); err != nil {
 		return Plan{}, err
@@ -254,7 +300,17 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	if err != nil {
 		return Plan{}, err
 	}
-	payloads, err := readPlannedPayloadsFromCatalog(ctx, catalog, graph.modules, canonicalPrefixes(catalog), modulePath)
+	plannedModules := graph.modules
+	if len(retained) != 0 {
+		plannedModules = make([]Manifest, 0, len(graph.modules))
+		for _, module := range graph.modules {
+			if _, keep := retained[module.ID]; keep {
+				continue
+			}
+			plannedModules = append(plannedModules, module)
+		}
+	}
+	payloads, err := readPlannedPayloadsFromCatalog(ctx, catalog, plannedModules, canonicalPrefixes(catalog), modulePath)
 	if err != nil {
 		return Plan{}, err
 	}
@@ -310,7 +366,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		retiring[id] = struct{}{}
 	}
 	finalLock, changes, conflicts, staged, diagnostics, err := reconcilePlannedState(
-		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims, retiring,
+		ctx, canonicalRoot, snapshot, graph, payloads, existingLock, hasLock, claims, retiring, retained,
 	)
 	if err != nil {
 		return Plan{}, err
@@ -318,6 +374,11 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 	finalLock.RegistryCommit, finalLock.Registries, finalLock.Snapshots = registryProvenance(registrySources, catalog, graph.modules)
 	for i := range finalLock.Modules {
 		if finalLock.Modules[i].Pending != nil {
+			continue
+		}
+		if _, keep := retained[finalLock.Modules[i].ID]; keep {
+			// Retained modules keep the provenance of the snapshot they were
+			// installed from; reconcile already carried it forward verbatim.
 			continue
 		}
 		namespace := catalog.ModuleRegistries[finalLock.Modules[i].ID]
@@ -331,6 +392,13 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 				}
 			}
 		}
+	}
+	if op.Kind == OpUpdate && len(op.Modules) != 0 {
+		// The lock identity is the live per-module provenance: updated
+		// modules contribute the new snapshot digest, retained modules their
+		// prior one. Recomputing from the rows keeps the envelope commit and
+		// the lock honest about a mixed-snapshot tree.
+		finalLock.RegistryCommit = registryCommitForModules(finalLock.Modules)
 	}
 	finalLock.RuntimeOrders = runtimeOrders
 	finalLock.Providers = maps.Clone(desiredProject.Providers)

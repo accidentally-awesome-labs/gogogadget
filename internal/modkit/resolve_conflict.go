@@ -139,7 +139,7 @@ func (e *Engine) ResolveConflict(ctx context.Context, root, moduleID, targetPath
 		module.SourceCommit = pending.SourceCommit
 		module.Pending = nil
 		migrationFiles, migrationChanges, err := planMigrations(
-			ctx, canonicalRoot, targetFS, []Manifest{targetManifest}, currentLock, true,
+			ctx, canonicalRoot, targetFS, []Manifest{targetManifest}, currentLock, true, nil,
 		)
 		if err != nil {
 			return Plan{}, fmt.Errorf("plan resolved migrations: %w", err)
