@@ -1,18 +1,31 @@
 name: registry
 
-# The publisher gate. It runs the same five commands the framework's own
-# tests run against this template — build, sign, verify, then install into a
-# throwaway consumer and validate — so a registry that is green here is a
-# registry a consumer can add without a refusal.
+# The publisher gate. Every step here is a command that actually runs and
+# actually proves something; a green step that exercises nothing is worse than
+# no step, because it is a claim nobody will re-check.
 #
-# REGISTRY_SIGNING_KEY is the base64 Ed25519 private key from
-# `ggg registry keygen`, stored as a repository secret. It is passed as
-# GGG_REGISTRY_SIGNING_KEY so `ggg registry sign` never sees a key file: sign
-# accepts exactly one of --key-file or that variable, and CI always uses the
-# variable so the key never touches a disk.
+# What it proves, in order: the committed tree is exactly what `registry build`
+# produces, the snapshot signature verifies under the published key, and a real
+# consumer of the framework can install the module from this registry, select
+# it for its slot in every environment, compile, and pass the module's own
+# declared tests.
 #
-# REGISTRY_PUBLIC_KEY is the base64 public half. It is a repository variable,
-# not a secret: it is the string every consumer pins.
+# What it deliberately does NOT do is run `ggg registry validate` here.
+# That command exercises the closures a *configured* registry publishes, and
+# it finds them by looking for known registry roots inside the project it is
+# run from; in a scratch consumer it has none and would exit 0 having proven
+# nothing. The install/compile/test steps below are the same lifecycle claim,
+# made where it is actually observable. The framework repository additionally
+# runs `ggg registry validate` against this template on every change, which is
+# the full install → generate → compile → test → remove → byte-for-byte
+# restore proof.
+#
+# Secrets and variables:
+#   REGISTRY_SIGNING_KEY  (secret)   base64 Ed25519 private key from `ggg registry keygen`
+#   REGISTRY_PUBLIC_KEY   (variable) base64 public half — the string consumers pin
+#
+# GGG_REF pins the framework release this registry is tested against. Pin it;
+# `@latest` would make a green build depend on the day it ran.
 
 on:
   push:
@@ -24,66 +37,125 @@ on:
 permissions:
   contents: read
 
+env:
+  GGG_REF: v0.1.0
+  GGG_REPOSITORY: gogogadget/gogogadget
+  REGISTRY_NAMESPACE: gadgetworks
+  MODULE_ID: gadgetworks/system/audit-export-ledger
+  MODULE_PACKAGE: ./internal/gadgetworks/ledger
+
 jobs:
   registry:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: registry
 
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26"
 
       - name: Install ggg
-        run: go install github.com/gogogadget/gogogadget/cmd/ggg@latest
+        run: go install "github.com/${GGG_REPOSITORY}/cmd/ggg@${GGG_REF}"
 
       - name: Build the catalog
+        working-directory: registry
         run: ggg registry build --dir .
 
       - name: Refuse an unbuilt commit
         # `registry build` is deterministic, so a dirty tree here means the
         # committed digests, indexes, or snapshot do not match the payloads.
+        working-directory: registry
         run: git diff --exit-code
 
       - name: Sign the snapshot
+        # sign accepts exactly one of --key-file or GGG_REGISTRY_SIGNING_KEY,
+        # and refuses when both or neither are set. CI always uses the
+        # variable so the private key never touches a disk.
+        working-directory: registry
         env:
           GGG_REGISTRY_SIGNING_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
         run: ggg registry sign --dir .
 
       - name: Verify the signature and every payload digest
+        working-directory: registry
         run: ggg registry verify --dir . --public-key "${{ vars.REGISTRY_PUBLIC_KEY }}"
 
       - name: Create a throwaway consumer
         # A consumer is the only honest place to prove an install: it has the
-        # core catalog, a real Go module, and a lock.
+        # core catalog, a real Go module, and a lock. The core registry is a
+        # signed GitHub source pinned to a release; `new` embeds the core
+        # public key, so only the ref has to be named.
         run: |
-          ggg new /tmp/consumer \
+          ggg new "$RUNNER_TEMP/consumer" \
             --module example.com/consumer \
             --profile ggg/profile/minimal \
-            --deployment ggg/system/deploy-docker \
+            --registry "github:${GGG_REPOSITORY}" \
+            --ref "${GGG_REF}" \
             --non-interactive --json
 
+      - name: Install the pinned toolchain into the consumer
+        working-directory: ${{ runner.temp }}/consumer
+        run: ggg setup --json
+
       - name: Add this registry to the consumer
-        working-directory: /tmp/consumer
+        # A `directory` source must be project-contained, so the registry is
+        # copied into the consumer rather than referenced by absolute path.
+        # Only the published artifacts are copied: the root, the indexes and
+        # manifests, the snapshot and its signature.
+        working-directory: ${{ runner.temp }}/consumer
         run: |
-          ggg registry add "directory:$GITHUB_WORKSPACE" \
-            --namespace gadgetworks --json
+          mkdir -p "registries/${REGISTRY_NAMESPACE}"
+          cp -R \
+            "$GITHUB_WORKSPACE/registry/registry.json" \
+            "$GITHUB_WORKSPACE/registry/registry" \
+            "$GITHUB_WORKSPACE/registry/registry.snapshot.json" \
+            "$GITHUB_WORKSPACE/registry/registry.snapshot.sig" \
+            "registries/${REGISTRY_NAMESPACE}/"
+          bin/ggg registry add "directory:registries/${REGISTRY_NAMESPACE}" \
+            --namespace "${REGISTRY_NAMESPACE}" --json
 
       - name: Select the adapter for every environment
-        working-directory: /tmp/consumer
+        working-directory: ${{ runner.temp }}/consumer
         run: |
-          ggg provider set \
-            --provider ggg/audit-export:development=gadgetworks/system/audit-export-ledger@ledger-file \
-            --provider ggg/audit-export:test=gadgetworks/system/audit-export-ledger@ledger-file \
-            --provider ggg/audit-export:production=gadgetworks/system/audit-export-ledger@ledger-cloud \
+          bin/ggg provider set \
+            --provider "ggg/audit-export:development=${MODULE_ID}@ledger-file" \
+            --provider "ggg/audit-export:test=${MODULE_ID}@ledger-file" \
+            --provider "ggg/audit-export:production=${MODULE_ID}@ledger-cloud" \
             --json
 
-      - name: Validate the lifecycle
-        working-directory: /tmp/consumer
-        run: ggg registry validate --json
+      - name: Prove the install is settled
+        # A second reconcile must move nothing: if it does, the module is not
+        # idempotent and every consumer's `make generate` would churn.
+        working-directory: ${{ runner.temp }}/consumer
+        run: bin/ggg sync --check --json
 
-      - name: Compile and run the declared tests
-        working-directory: /tmp/consumer
+      - name: Compile the consumer and run the module's declared tests
+        working-directory: ${{ runner.temp }}/consumer
         run: |
+          bin/ggg generate --json
           go build ./...
-          go test -count=1 ./internal/gadgetworks/ledger
+          go test -count=1 "${MODULE_PACKAGE}"
+
+      - name: Prove the contributed command is wired
+        # The command exists only because the module is installed: installing
+        # it regenerated the project-local command registry, so bin/ggg has to
+        # be rebuilt from the consumer's own source before it knows the name.
+        # This step fails if the CLI contribution was not generated.
+        working-directory: ${{ runner.temp }}/consumer
+        run: |
+          go build -o bin/ggg ./cmd/ggg
+          bin/ggg ledger
+
+      - name: Prove removal is clean
+        working-directory: ${{ runner.temp }}/consumer
+        run: |
+          bin/ggg provider set \
+            --provider ggg/audit-export:development=ggg/system/audit-export-noop@noop \
+            --provider ggg/audit-export:test=ggg/system/audit-export-noop@noop \
+            --provider ggg/audit-export:production=ggg/system/audit-export-otlp@otlp \
+            --json
+          bin/ggg remove "${MODULE_ID}" --json
+          test ! -d internal/gadgetworks
+          go build ./...

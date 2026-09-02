@@ -325,3 +325,153 @@ not a local build product.
    example still shows `"schema": 1` and string `requires`. I left that alone:
    the full docs recast is a separate task and the brief said to keep this
    addition short.
+
+---
+
+# Fix round 1 — response to task-c-review-findings.md
+
+All six items fixed. `go run ./cmd/ggg registry validate` → `EXIT=0`, 11
+closures; the template closure now installs 4 files (the new constants-only
+package) and its declared tests still pass inside the derivative, which is
+what proves the config-struct-consuming constructor compiles and its refusals
+fire in a real project.
+
+## C1 — the CI workflow could not run
+
+Rewritten end to end (`templates/external-registry/.github/workflows/registry.yml`).
+The three refusals the reviewer traced are gone, and the workflow now proves
+what its step names claim:
+
+- **`ggg new` had no `--registry`.** It now passes
+  `--registry "github:${GGG_REPOSITORY}" --ref "${GGG_REF}"`, with `GGG_REF`
+  a pinned framework release used for both `go install …@${GGG_REF}` and the
+  registry ref. `parseNewRegistry` embeds the core public key for a GitHub
+  source, so only the ref has to be named, and a development build refusing
+  without an explicit ref is handled by pinning rather than hoped past.
+  `--module`, `--profile` and `--non-interactive` are asserted too.
+- **`registry add directory:$GITHUB_WORKSPACE` was absolute.** The checkout
+  moved to a `registry/` path, and the consumer step copies only the published
+  artifacts (`registry.json`, `registry/`, the snapshot, the signature) into
+  `registries/gadgetworks/` inside the consumer, then adds
+  `directory:registries/gadgetworks` — project-contained, no shell expansion.
+- **`ggg registry validate` in the scratch consumer was an always-green
+  no-op.** Removed, with a header comment stating why (it exercises the
+  closures a configured registry publishes and finds them by looking for known
+  registry roots inside the project it runs from; a scratch consumer has
+  none). Replaced with the steps that are actually observable there:
+  `ggg setup`, `registry add`, `provider set`, `sync --check` (a second
+  reconcile must move nothing), `generate`, `go build ./...`,
+  `go test -count=1` of the declared package, `bin/ggg ledger` after
+  rebuilding `bin/ggg` from the consumer's own regenerated source (which is
+  what proves the CLI contribution was generated), and finally a removal check
+  that restores the core adapters, removes the module, asserts
+  `internal/gadgetworks` is gone and the consumer still builds.
+
+## C2 — the guard could not have caught C1
+
+`assertTemplateWorkflowIsRunnable` replaces substring presence with the
+assertions that map to real refusals: the `ggg new` invocation must carry
+`--registry`, `--ref`, `--module`, `--profile` and `--non-interactive`; every
+`directory:` argument in the file must not begin with `/` or `$`; the workflow
+may only mention `ggg registry validate` if it also carries the comment
+explaining it is deliberately not run there; and it must contain the real
+`registry add` / `provider set` / `go build ./...` / `go test -count=1` steps,
+so deleting the honest proof and leaving a green no-op fails the test.
+
+## I1 — the exemplar selected its target by credential presence
+
+This was the `ResendConfigured` shape the plan ordered deleted, in the one file
+whose job is to be copied. Fixed by following `internal/mail/resend`:
+
+- `Deps` is now `struct{ Config *config.Config }` and the manifest declares
+  `needs: [{Config, config, *config.Config}]` plus the `internal/config` type
+  import, so the adapter reads the same declarations that produced
+  `.env.example` and the configuration reference instead of going behind the
+  parser with `host.Env`. `ggg/system/config` joined `requires`. The generated
+  config validation already enforces `required` per active target, so the
+  constructor's refusal is a second statement of the same key names, not the
+  only one.
+- Target selection is now `SelectedTarget(environment)`: the manifest lists the
+  two targets under **disjoint** `environments`, so the environment the runtime
+  booted into *is* the project's recorded selection. Nothing is inferred from
+  which credentials happen to be set.
+- A production selection with a missing endpoint or token returns a boot error
+  naming the key and the target, and returns a nil module — it can no longer
+  fall through to the file exporter.
+- `TestNewModulePrefersTheEndpointOverTheLocalFile` became
+  `TestSelectedTargetFollowsTheEnvironmentNotTheCredentials`, which asserts the
+  inverse of the old behaviour: a development run holding a full set of cloud
+  credentials still constructs the file target.
+  `TestNewModuleRefusesAnIncompleteManagedSelection` now covers both missing
+  keys and asserts the module is nil; two new tests cover the missing config
+  dependency and a complete production selection.
+- Both prose claims were re-aligned and now say *how* the guarantee holds
+  (disjoint environments + config struct), in `ledger.go.txt`'s package
+  comment and in the README.
+
+## I2 — the handler was one hop from an `*http.Client`
+
+New payload `meta.go.txt` → `internal/gadgetworks/ledger/meta/meta.go`, a
+constants-only package holding `ModuleID`, `Slot`, `TargetFile`,
+`TargetCloud`, the three env keys and `DefaultDir`. The handler imports `meta`;
+the adapter imports `meta`; the handler no longer imports the adapter. The
+package comment says exactly why, so a publisher copying the split knows it is
+load-bearing rather than cosmetic.
+
+`assertTemplateHandlerImportsAreCleanOneHop` extends the boundary test: it
+groups the module's payloads by claimed package, parses the handler's imports,
+resolves each one that lands inside **this module's own** packages, and checks
+that package's direct imports against `matchBannedImport`. Core packages under
+the same rewritten prefix are skipped (they are the framework's own, covered by
+the shipped direct scan, and the scan's general non-transitivity is explicitly
+out of scope). It fails if it reached nothing, so it cannot pass vacuously.
+
+## M1–M4
+
+- **M1** `exerciseProviderClosure` deleted; `exerciseExampleClosure` calls
+  `exerciseStandardClosure` directly with a comment saying there is one
+  exerciser and it derives the spec from the closure id.
+- **M2** `providerChoicesFromModules` now refuses two candidate targets
+  claiming one environment, naming both, so disjointness is enforced instead of
+  incidental.
+- **M3** `content/docs/extending.md` names the alternative before the
+  sequence: if you copied the template you already have a `registry.json` —
+  edit `namespace`/`canonical_module` and skip `registry init`.
+- **M4** README step 7 and the extending page now state what
+  `ggg registry validate` actually exercises, that this repository runs it
+  against the template, and give the scratch-consumer sequence a publisher
+  should run instead — the same one the workflow runs.
+
+## Commands run (fix round)
+
+```
+$ go run ./cmd/ggg registry build --dir templates/external-registry
+$ GGG_REGISTRY_SIGNING_KEY=… go run ./cmd/ggg registry sign --dir templates/external-registry
+snapshot sha256 fa788a44733b94f6b6942662eb0ce4d43efe279097153a7add99fca275ade988
+$ go run ./cmd/ggg registry verify --dir templates/external-registry --public-key ZKuGJ…
+snapshot sha256 fa788a44733b94f6b6942662eb0ce4d43efe279097153a7add99fca275ade988
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline
+registry 29e1d63da2f61a14a4873ceb2ef167c58ad6716f82108dc1bd35c1cea74fd92d
+$ go run ./cmd/ggg sync --check --offline
+registry 29e1d63d… (clean)
+$ go test ./internal/modkit ./internal/gggcli -count=1
+ok internal/modkit 7.077s / ok internal/gggcli 0.439s
+$ go vet ./internal/modkit ./internal/gggcli    -> VET_OK
+$ gofmt -l internal/modkit internal/gggcli content -> clean
+$ go run ./cmd/ggg registry validate
+gadgetworks/system/audit-export-ledger
+  registry gadgetworks verified at snapshot fa788a44…
+  installed 4 file(s); compiled; module tests passed in ./internal/gadgetworks/ledger
+  removed; 1891 tree entries restored byte for byte
+EXIT=0  (11 closures)
+```
+
+## Remaining honest caveat
+
+The workflow itself is still executed only by a publisher, not by this
+repository — a CI file that installs `ggg` from a release into a fresh
+consumer cannot run inside the framework repo. What changed is that every
+command in it is now one that would succeed: the three specific refusals are
+removed, and the guard test asserts the shapes that caused them rather than
+their names. `GGG_REF: v0.1.0` is a placeholder release tag a publisher pins
+to the framework version they tested against.

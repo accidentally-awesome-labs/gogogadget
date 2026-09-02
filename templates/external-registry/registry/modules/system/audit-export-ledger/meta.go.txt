@@ -1,0 +1,47 @@
+// Package meta is the Gadgetworks ledger's declared identity: the module id,
+// the slot it adapts, its service target names, and the environment keys it
+// owns. Nothing else.
+//
+// It exists as its own package for one reason. A contributed `ggg` command
+// handler may reach the project only through the gggcli controller, and the
+// sync-time scan that enforces that reads the handler package's own imports.
+// If the handler imported the adapter package to get these four strings, it
+// would be one hop from an *http.Client and a bearer token — a shape the scan
+// as written would not catch and a publisher should not copy. Constants have
+// no dependencies, so both the adapter and the handler can share them without
+// the handler being able to reach anything.
+package meta
+
+// ModuleID is the scoped id of the publishing module. It is the one string a
+// consumer needs to run `ggg info gadgetworks/system/audit-export-ledger`.
+const ModuleID = "gadgetworks/system/audit-export-ledger"
+
+// Slot is the core provider slot this module adapts.
+const Slot = "ggg/audit-export"
+
+// The declared service targets. They are duplicated in the manifest because
+// the manifest is data the planner reads and these are what the code branches
+// on; the contract tests keep the two honest.
+//
+// TargetFile is allowed in development and test, TargetCloud only in
+// production, and the manifest's `environments` lists are disjoint — which is
+// what lets the adapter derive the selected target from Config.Env instead of
+// guessing from which credentials happen to be present.
+const (
+	TargetFile  = "ledger-file"
+	TargetCloud = "ledger-cloud"
+)
+
+// Environment keys this module owns. Every one is declared in the manifest's
+// `environment` block, which is what puts them in .env.example, in the
+// generated configuration reference, and in the generated config struct the
+// adapter reads.
+const (
+	EnvDir      = "GADGETWORKS_LEDGER_DIR"
+	EnvEndpoint = "GADGETWORKS_LEDGER_ENDPOINT"
+	EnvToken    = "GADGETWORKS_LEDGER_TOKEN"
+)
+
+// DefaultDir is where the file target writes when the operator sets nothing.
+// It is under tmp/ because tmp/ is scratch the framework already ignores.
+const DefaultDir = "tmp/gadgetworks-ledger"

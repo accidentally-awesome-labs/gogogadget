@@ -6,8 +6,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"go/parser"
+	"go/token"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -280,6 +283,15 @@ func TestExternalRegistryTemplateHandlerRespectsTheCLIBoundary(t *testing.T) {
 		t.Fatalf("template handler violates the CLI boundary: %v", err)
 	}
 
+	// The shipped scan reads direct imports only. That is fine for the
+	// framework's own refusal, but an exemplar must not teach the shape that
+	// walks around it: a handler one hop from a package holding an
+	// *http.Client and a bearer token has not respected the boundary, it has
+	// routed around it. So this walks the handler's imports one hop inside
+	// the template's own packages and fails on a banned import reached that
+	// way. (The scan's general non-transitivity is out of scope here.)
+	assertTemplateHandlerImportsAreCleanOneHop(t, module, files)
+
 	// The handler must actually have been scanned, or a passing result means
 	// nothing. Its package holds exactly one payload and that payload must
 	// import the controller.
@@ -432,13 +444,72 @@ func TestExternalRegistryTemplateSignatureIsReproducible(t *testing.T) {
 			t.Fatalf("the template README does not document %s", step)
 		}
 	}
+	assertTemplateWorkflowIsRunnable(t)
+}
+
+// assertTemplateWorkflowIsRunnable checks the publisher gate against the
+// refusals it would actually hit. A workflow is the one deliverable nobody
+// here executes — a publisher does, in their repository — so substring
+// presence is not enough: the first version of this file called `ggg new`
+// with no registry answer and added a registry by absolute path, and both are
+// hard refusals in the commands they invoke.
+func assertTemplateWorkflowIsRunnable(t *testing.T) {
+	t.Helper()
 	workflow := string(mustReadTemplateFile(t, ".github/workflows/registry.yml"))
 	for _, step := range []string{
-		"ggg registry build", "ggg registry sign", "ggg registry verify", "ggg registry validate",
-		"GGG_REGISTRY_SIGNING_KEY",
+		"ggg registry build --dir", "ggg registry sign --dir", "ggg registry verify --dir",
+		"GGG_REGISTRY_SIGNING_KEY", "git diff --exit-code",
 	} {
 		if !strings.Contains(workflow, step) {
 			t.Fatalf("the template CI workflow does not run %s", step)
+		}
+	}
+
+	// `ggg new` refuses a noninteractive run with no registry answer
+	// (internal/gggcli/task8_handlers.go), and a GitHub source on a
+	// development build refuses without an explicit ref.
+	newIndex := strings.Index(workflow, "ggg new ")
+	if newIndex < 0 {
+		t.Fatal("the template CI workflow never creates a consumer")
+	}
+	newInvocation := workflow[newIndex:]
+	if end := strings.Index(newInvocation, "--json"); end >= 0 {
+		newInvocation = newInvocation[:end]
+	}
+	for _, flag := range []string{"--registry", "--ref", "--module", "--profile", "--non-interactive"} {
+		if !strings.Contains(newInvocation, flag) {
+			t.Fatalf("ggg new in the template CI workflow omits %s: %q", flag, newInvocation)
+		}
+	}
+
+	// A `directory` registry path must be project-contained: no absolute
+	// path and no shell expansion, both of which validateProjectRegistry
+	// refuses outright.
+	for _, line := range strings.Split(workflow, "\n") {
+		index := strings.Index(line, "directory:")
+		if index < 0 {
+			continue
+		}
+		argument := line[index+len("directory:"):]
+		argument = strings.TrimLeft(argument, "\"'")
+		if argument == "" {
+			t.Fatalf("empty directory registry argument in %q", strings.TrimSpace(line))
+		}
+		if argument[0] == '/' || argument[0] == '$' {
+			t.Fatalf("directory registry argument is not project-contained in %q", strings.TrimSpace(line))
+		}
+	}
+
+	// `ggg registry validate` in a scratch consumer finds no closures and
+	// exits 0 having proven nothing, so the workflow must not claim it as the
+	// lifecycle proof. The install/compile/test steps are the honest ones.
+	if strings.Contains(workflow, "ggg registry validate") &&
+		!strings.Contains(workflow, "does NOT do is run `ggg registry validate`") {
+		t.Fatal("the template CI workflow runs `ggg registry validate` where it has no closures to exercise")
+	}
+	for _, real := range []string{"go build ./...", "go test -count=1", "provider set", "registry add"} {
+		if !strings.Contains(workflow, real) {
+			t.Fatalf("the template CI workflow does not actually install and exercise the module: missing %s", real)
 		}
 	}
 }
@@ -532,6 +603,59 @@ func TestExternalRegistryTemplateTreeHasExactlyOneOwner(t *testing.T) {
 		})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+// assertTemplateHandlerImportsAreCleanOneHop resolves the handler package's
+// imports against the template's own claimed packages and checks each reached
+// package's direct imports against the same banned set.
+func assertTemplateHandlerImportsAreCleanOneHop(t *testing.T, module Manifest, files map[string][]byte) {
+	t.Helper()
+	const derivative = "example.com/consumer"
+	byPackage := map[string][][]byte{}
+	for target, content := range files {
+		pkg := path.Dir(filepath.ToSlash(target))
+		byPackage[pkg] = append(byPackage[pkg], content)
+	}
+	handler := module.Runtime.CLI[0].Package
+	reached := 0
+	for _, content := range byPackage[handler] {
+		parsed, err := parser.ParseFile(token.NewFileSet(), "handler.go", content, parser.ImportsOnly)
+		if err != nil {
+			t.Fatalf("parse handler: %v", err)
+		}
+		for _, imported := range parsed.Imports {
+			raw := strings.Trim(imported.Path.Value, `"`)
+			own, isOwn := strings.CutPrefix(raw, derivative+"/")
+			if !isOwn {
+				continue
+			}
+			sources, published := byPackage[own]
+			if !published {
+				// A core package under the same rewritten prefix — the
+				// controller, the envelope. Those are the framework's own,
+				// covered by the direct scan; only this module's graph is in
+				// scope here.
+				continue
+			}
+			reached++
+			for _, source := range sources {
+				nested, parseErr := parser.ParseFile(token.NewFileSet(), "reached.go", source, parser.ImportsOnly)
+				if parseErr != nil {
+					t.Fatalf("parse %s: %v", own, parseErr)
+				}
+				for _, nestedImport := range nested.Imports {
+					nestedPath := strings.Trim(nestedImport.Path.Value, `"`)
+					if banned, reason := matchBannedImport(nestedPath, map[string]string{}); reason != "" {
+						t.Fatalf("handler package %s reaches %s through %s, which imports the banned %s: %s",
+							handler, nestedPath, own, banned, reason)
+					}
+				}
+			}
+		}
+	}
+	if reached == 0 {
+		t.Fatal("the handler imports none of this module's own packages; the one-hop check proved nothing")
 	}
 }
 

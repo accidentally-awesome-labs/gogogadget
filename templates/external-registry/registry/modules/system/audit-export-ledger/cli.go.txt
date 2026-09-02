@@ -9,6 +9,12 @@
 // handler package by ValidateCLIHandlerPackages, so this boundary is checked
 // at sync time rather than trusted.
 //
+// Its imports are the point: the controller, the standard library, and this
+// module's constants-only `meta` package. It deliberately does NOT import the
+// adapter package, which holds an *http.Client and a bearer token — a handler
+// one hop from a provider client is a handler that has walked around the
+// boundary, even where the sync-time scan reads only direct imports.
+//
 // Installation executes nothing. This code runs only when an operator types
 // `ggg ledger`.
 package cli
@@ -18,7 +24,7 @@ import (
 	"fmt"
 	"sort"
 
-	"example.com/gadgetworks/ggg-registry/internal/gadgetworks/ledger"
+	"example.com/gadgetworks/ggg-registry/internal/gadgetworks/ledger/meta"
 	"github.com/gogogadget/gogogadget/internal/gggcli"
 	"github.com/gogogadget/gogogadget/internal/modkit"
 )
@@ -31,7 +37,7 @@ func Run(ctx context.Context, cc gggcli.CommandContext, args []string) (gggcli.R
 	if len(args) != 0 {
 		return gggcli.Result{}, fmt.Errorf("ggg ledger takes no operands")
 	}
-	result, err := cc.Controller.Execute(ctx, gggcli.InfoRequest{ModuleID: ledger.ModuleID})
+	result, err := cc.Controller.Execute(ctx, gggcli.InfoRequest{ModuleID: meta.ModuleID})
 	if err != nil {
 		return gggcli.Result{}, err
 	}
@@ -42,11 +48,11 @@ func Run(ctx context.Context, cc gggcli.CommandContext, args []string) (gggcli.R
 	}
 	verify := stringsFrom(result.Payload["verify"])
 
-	fmt.Fprintf(cc.Out, "%s\n", ledger.ModuleID)
-	fmt.Fprintf(cc.Out, "  slot     %s\n", ledger.Slot)
+	fmt.Fprintf(cc.Out, "%s\n", meta.ModuleID)
+	fmt.Fprintf(cc.Out, "  slot     %s\n", meta.Slot)
 	fmt.Fprintf(cc.Out, "  state    %s\n", state)
-	fmt.Fprintf(cc.Out, "  targets  %s (development, test), %s (production)\n", ledger.TargetFile, ledger.TargetCloud)
-	fmt.Fprintf(cc.Out, "  config   %s, %s, %s\n", ledger.EnvDir, ledger.EnvEndpoint, ledger.EnvToken)
+	fmt.Fprintf(cc.Out, "  targets  %s (development, test), %s (production)\n", meta.TargetFile, meta.TargetCloud)
+	fmt.Fprintf(cc.Out, "  config   %s, %s, %s\n", meta.EnvDir, meta.EnvEndpoint, meta.EnvToken)
 	for _, command := range verify {
 		fmt.Fprintf(cc.Out, "  verify   %s\n", command)
 	}
@@ -54,11 +60,11 @@ func Run(ctx context.Context, cc gggcli.CommandContext, args []string) (gggcli.R
 	return gggcli.Result{
 		Envelope: modkit.Envelope{
 			OK: true, Command: "ledger", Exit: modkit.ExitOK,
-			Resolved: []string{ledger.ModuleID, ledger.Slot, state},
+			Resolved: []string{meta.ModuleID, meta.Slot, state},
 		},
 		Payload: map[string]any{
-			"module": ledger.ModuleID, "slot": ledger.Slot, "state": state,
-			"targets": []string{ledger.TargetFile, ledger.TargetCloud},
+			"module": meta.ModuleID, "slot": meta.Slot, "state": state,
+			"targets": []string{meta.TargetFile, meta.TargetCloud},
 			"verify":  verify,
 		},
 	}, nil

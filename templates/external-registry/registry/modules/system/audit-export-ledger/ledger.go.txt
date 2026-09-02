@@ -7,12 +7,16 @@
 // service targets, the configuration surface, the lifecycle and the health
 // check — belongs to this module and is declared in its manifest.
 //
-// The two targets differ only in where the ledger lands, which is why one
-// implementation serves both: `ledger-file` appends newline-delimited JSON
-// under GADGETWORKS_LEDGER_DIR and needs no account, and `ledger-cloud`
-// POSTs the same records to GADGETWORKS_LEDGER_ENDPOINT with a bearer token.
-// An endpoint wins where one is configured, so a production selection can
-// never silently fall back to the local file.
+// The two targets differ only in where the ledger lands: `ledger-file`
+// appends newline-delimited JSON under GADGETWORKS_LEDGER_DIR and needs no
+// account, and `ledger-cloud` POSTs the same records to
+// GADGETWORKS_LEDGER_ENDPOINT with a bearer token. Which one is live is a
+// project decision recorded in gogogadget.json, and the manifest lists the
+// two targets under disjoint `environments` — so the constructor derives the
+// selected target from Config.Env and never from which credentials happen to
+// be present. A selection whose credentials are missing is a boot error
+// naming the key; it can never quietly degrade to writing a compliance
+// ledger into a local file.
 //
 // The transactional audit row is written by ggg/system/audit before this
 // exporter is ever called. An export failure is reported to the caller (the
@@ -31,42 +35,16 @@ import (
 	"sync"
 	"time"
 
+	"example.com/gadgetworks/ggg-registry/internal/gadgetworks/ledger/meta"
 	"github.com/gogogadget/gogogadget/internal/apphost"
 	"github.com/gogogadget/gogogadget/internal/audit"
+	"github.com/gogogadget/gogogadget/internal/config"
 )
-
-// ModuleID is the scoped id of the publishing module. It is the one string a
-// consumer needs to run `ggg info gadgetworks/system/audit-export-ledger`.
-const ModuleID = "gadgetworks/system/audit-export-ledger"
-
-// Slot is the core provider slot this module adapts.
-const Slot = "ggg/audit-export"
-
-// The declared service targets. They are duplicated in the manifest because
-// the manifest is data the planner reads and these are what the code
-// branches on; TestTargetsMatchManifest keeps the two honest.
-const (
-	TargetFile  = "ledger-file"
-	TargetCloud = "ledger-cloud"
-)
-
-// Environment keys this module owns. Every one is declared in the manifest's
-// `environment` block, which is what puts them in .env.example and the
-// generated configuration reference.
-const (
-	EnvDir      = "GADGETWORKS_LEDGER_DIR"
-	EnvEndpoint = "GADGETWORKS_LEDGER_ENDPOINT"
-	EnvToken    = "GADGETWORKS_LEDGER_TOKEN"
-)
-
-// DefaultDir is where the file target writes when the operator sets nothing.
-// It is under tmp/ because tmp/ is scratch the framework already ignores.
-const DefaultDir = "tmp/gadgetworks-ledger"
 
 // ledgerFile is the file the file target appends to.
 const ledgerFile = "ledger.ndjson"
 
-// Exporter is the audit.Exporter this module provides. Records are buffered
+// Exporter is the audit.Exporter this module provides. Records are written
 // under a mutex and flushed on every Export, so the process never holds an
 // unflushed entry across a request boundary; Close is what a shutdown waits
 // on, and it is idempotent because a lifecycle hook can run twice.
@@ -84,7 +62,7 @@ type Exporter struct {
 // NewFileExporter is the zero-account target: an appended NDJSON ledger.
 func NewFileExporter(dir string) *Exporter {
 	if dir == "" {
-		dir = DefaultDir
+		dir = meta.DefaultDir
 	}
 	return &Exporter{Dir: dir}
 }
@@ -99,16 +77,16 @@ func NewCloudExporter(endpoint, token string) *Exporter {
 }
 
 // Target reports which declared service target this exporter is configured
-// for. The CLI contribution prints it, and the contract test asserts that a
+// for. The CLI contribution prints it, and the contract tests assert that a
 // configuration cannot be ambiguous.
 func (e *Exporter) Target() string {
 	if e == nil {
 		return ""
 	}
 	if e.Endpoint != "" {
-		return TargetCloud
+		return meta.TargetCloud
 	}
-	return TargetFile
+	return meta.TargetFile
 }
 
 // record is the wire shape. It is this module's own contract with its own
@@ -144,7 +122,7 @@ func (e *Exporter) Export(ctx context.Context, entry audit.Entry) error {
 
 func (e *Exporter) post(ctx context.Context, payload []byte) error {
 	if e.Token == "" {
-		return fmt.Errorf("gadgetworks ledger: %s is required for %s", EnvToken, TargetCloud)
+		return fmt.Errorf("gadgetworks ledger: %s is required for %s", meta.EnvToken, meta.TargetCloud)
 	}
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, e.Endpoint, bytes.NewReader(payload))
 	if err != nil {
@@ -179,7 +157,7 @@ func (e *Exporter) append(payload []byte) error {
 	if e.file == nil {
 		dir := e.Dir
 		if dir == "" {
-			dir = DefaultDir
+			dir = meta.DefaultDir
 		}
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return fmt.Errorf("gadgetworks ledger: %w", err)
@@ -229,13 +207,13 @@ func (e *Exporter) Health(ctx context.Context) error {
 	}
 	if e.Endpoint != "" {
 		if e.Token == "" {
-			return fmt.Errorf("gadgetworks ledger: %s is required for %s", EnvToken, TargetCloud)
+			return fmt.Errorf("gadgetworks ledger: %s is required for %s", meta.EnvToken, meta.TargetCloud)
 		}
 		return nil
 	}
 	dir := e.Dir
 	if dir == "" {
-		dir = DefaultDir
+		dir = meta.DefaultDir
 	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("gadgetworks ledger: %w", err)
@@ -245,10 +223,11 @@ func (e *Exporter) Health(ctx context.Context) error {
 
 var _ audit.Exporter = (*Exporter)(nil)
 
-// Deps is the typed dependency set the generated bootstrap fills. This
-// adapter reads its configuration from the host rather than the generated
-// config struct, so it needs nothing from the graph.
-type Deps struct{}
+// Deps is the typed dependency set the generated bootstrap fills. An adapter
+// reads its own declared configuration off the generated config struct — the
+// same records that produced .env.example and the configuration reference —
+// rather than reaching into the process environment behind the parser's back.
+type Deps struct{ Config *config.Config }
 
 // Module is what the generated bootstrap constructs and holds. Value is the
 // slot capability; Stop and Health are the declared lifecycle and health
@@ -261,27 +240,44 @@ type Module struct {
 	closed    chan struct{}
 }
 
-// NewModule selects the configured target and refuses an incomplete managed
-// selection. There is no fallback: an operator who selected `ledger-cloud`
-// and forgot the token gets one boot error naming the key, never a local
-// file pretending to be an audit ledger.
-func NewModule(ctx context.Context, host apphost.Host, _ Deps) (*Module, error) {
+// SelectedTarget reports which declared target is live for an environment.
+// The manifest lists the two targets under disjoint `environments`, so the
+// environment the runtime booted into IS the selection — there is nothing to
+// infer from credentials, and a project that wants a different pairing edits
+// gogogadget.json rather than an env var.
+func SelectedTarget(environment string) string {
+	if environment == "production" {
+		return meta.TargetCloud
+	}
+	return meta.TargetFile
+}
+
+// NewModule constructs the selected target and refuses an incomplete managed
+// selection. There is no fallback: an operator who is running production and
+// forgot the endpoint or the token gets one boot error naming the key, never
+// a local file pretending to be an audit ledger.
+func NewModule(ctx context.Context, _ apphost.Host, d Deps) (*Module, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	endpoint, token, dir := "", "", ""
-	if host != nil {
-		endpoint = host.Env(EnvEndpoint)
-		token = host.Env(EnvToken)
-		dir = host.Env(EnvDir)
+	if d.Config == nil {
+		return nil, fmt.Errorf("gadgetworks ledger: config dependency is required")
 	}
-	if endpoint != "" {
-		if token == "" {
-			return nil, fmt.Errorf("gadgetworks ledger: %s is required when %s is set", EnvToken, EnvEndpoint)
+	switch target := SelectedTarget(d.Config.Env); target {
+	case meta.TargetCloud:
+		if d.Config.GadgetworksLedgerEndpoint == "" {
+			return nil, fmt.Errorf("gadgetworks ledger: %s is required for %s", meta.EnvEndpoint, target)
 		}
-		return &Module{Value: NewCloudExporter(endpoint, token), closed: make(chan struct{})}, nil
+		if d.Config.GadgetworksLedgerToken == "" {
+			return nil, fmt.Errorf("gadgetworks ledger: %s is required for %s", meta.EnvToken, target)
+		}
+		return &Module{
+			Value:  NewCloudExporter(d.Config.GadgetworksLedgerEndpoint, d.Config.GadgetworksLedgerToken),
+			closed: make(chan struct{}),
+		}, nil
+	default:
+		return &Module{Value: NewFileExporter(d.Config.GadgetworksLedgerDir), closed: make(chan struct{})}, nil
 	}
-	return &Module{Value: NewFileExporter(dir), closed: make(chan struct{})}, nil
 }
 
 // Stop closes the ledger within the caller's deadline. It is idempotent and

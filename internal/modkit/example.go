@@ -746,9 +746,10 @@ func applyDerivativeOperation(ctx context.Context, derivative string, op Operati
 func exerciseExampleClosure(
 	ctx context.Context, root, template, derivative string, closure exampleClosure, log io.Writer,
 ) (ExampleResult, error) {
-	if spec, ok := providerFixtureSpecFor(closure.root.ID); ok {
-		return exerciseProviderClosure(ctx, root, template, derivative, closure, spec, log)
-	}
+	// One exerciser. A provider permutation differs only in the steps
+	// exerciseStandardClosure already branches on, which it derives from the
+	// closure's own id; a wrapper that took the spec and threw it away was a
+	// second place to look for the same answer.
 	return exerciseStandardClosure(ctx, root, template, derivative, closure, log)
 }
 
@@ -776,6 +777,18 @@ func providerChoicesFromModules(spec providerFixtureSpec, modules []Manifest) (P
 		for _, target := range module.Runtime.System.Adapter.Targets {
 			for _, env := range target.Environments {
 				choice := ProviderSelection{Adapter: module.ID, Target: target.ID}
+				// Two candidate targets claiming one environment would make
+				// the permutation depend on iteration order, and the closure
+				// would silently exercise whichever happened to be last.
+				// Disjointness is the fixture's contract, so state it.
+				existing := map[string]ProviderSelection{
+					"development": choices.Development, "test": choices.Test, "production": choices.Production,
+				}[env]
+				if existing.Adapter != "" {
+					return ProviderSelections{}, fmt.Errorf(
+						"provider fixture %s has two %s candidates: %s@%s and %s@%s",
+						spec.slot, env, existing.Adapter, existing.Target, module.ID, target.ID)
+				}
 				switch env {
 				case "development":
 					choices.Development = choice
@@ -964,14 +977,6 @@ func expectProviderRefusals(ctx context.Context, root, slot string, selections m
 		return fmt.Errorf("provider fixture refusal selected adapter removal unexpectedly succeeded")
 	}
 	return nil
-}
-
-func exerciseProviderClosure(
-	ctx context.Context, root, template, derivative string, closure exampleClosure,
-	spec providerFixtureSpec, log io.Writer,
-) (ExampleResult, error) {
-	_ = spec
-	return exerciseStandardClosure(ctx, root, template, derivative, closure, log)
 }
 
 func exerciseStandardClosure(

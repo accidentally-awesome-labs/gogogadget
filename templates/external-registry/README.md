@@ -32,6 +32,7 @@ registry/modules/system/audit-export-ledger/
                               environment keys, lifecycle, health, tests
   ledger.go.txt               the adapter payload
   ledger_test.go.txt          its contract tests, class "test"
+  meta.go.txt                 constants-only identity: id, slot, targets, env keys
   cli.go.txt                  the `ggg ledger` command handler
 registry.snapshot.json        the deterministic signed catalog
 registry.snapshot.sig         base64 Ed25519 signature over those exact bytes
@@ -81,9 +82,14 @@ slot. It is the shape every adapter has:
   requirement is dropped again on removal if nothing else owns it;
 - `tests.go_packages`, so installing the module installs its proof.
 
-There is no fallback path. A project that selects `ledger-cloud` without a
-token fails at boot with the key named; it never quietly writes the audit
-ledger to a local file.
+There is no fallback path, and no credential sniffing. The manifest lists the
+two targets under **disjoint** `environments`, so the constructor derives the
+selected target from `Config.Env` — a development run with a full set of cloud
+credentials still writes the local file, and a production run without an
+endpoint or a token fails at boot with the key named. It never quietly writes
+a compliance ledger to a file in `tmp/`. The adapter reads those values off
+the generated config struct, which is the same declaration that produced
+`.env.example` and the configuration reference.
 
 ### The command
 
@@ -95,6 +101,12 @@ provider client, reach a deploy client, or shell out — `net/http`,
 `os/exec`, and the provider seams are refused inside a handler package at
 sync time. Built-in command names are reserved; a contributed name that
 collides is reported and skipped.
+
+The handler imports the constants-only `meta` package rather than the adapter
+package. That is deliberate: the adapter holds an `*http.Client` and a bearer
+token, and a handler one hop away from a provider client has routed around the
+boundary rather than respected it — even though the sync-time scan reads only
+direct imports. Copy that split.
 
 ## Publisher workflow
 
@@ -174,14 +186,37 @@ that an install will not refuse.
 
 ### 7. Validate
 
+`ggg registry validate` is the framework's lifecycle proof — install,
+generate, compile, run the module's declared tests, remove, compare the tree
+byte for byte — but it exercises the closures a *configured* registry
+publishes, and it finds them by looking for known registry roots inside the
+project it is run from. Run in your registry repository, or in a scratch
+consumer, it has nothing to exercise and exits 0 having proven nothing. The
+framework repository runs it against this template on every change; that is
+what keeps the template itself honest.
+
+What you run is the same claim, made where it is observable: install into a
+throwaway consumer and exercise it there.
+
 ```sh
-ggg registry validate
+ggg new /tmp/consumer --module example.com/consumer \
+  --profile ggg/profile/minimal \
+  --registry github:gogogadget/gogogadget --ref v0.1.0 \
+  --non-interactive --json
+cd /tmp/consumer && ggg setup
+
+# A directory source must be project-contained, so copy the registry in.
+mkdir -p registries/acme
+cp -R /path/to/registry/{registry.json,registry,registry.snapshot.json,registry.snapshot.sig} registries/acme/
+bin/ggg registry add directory:registries/acme --namespace acme --json
+
+bin/ggg provider set --provider ggg/audit-export:production=acme/system/audit-export-ledger@ledger-cloud …
+bin/ggg sync --check                 # a second reconcile must move nothing
+bin/ggg generate && go build ./...
+go test -count=1 ./internal/acme/ledger
 ```
 
-The lifecycle proof: install, generate, compile, run the module's declared
-tests, remove, and compare the tree byte for byte. Run it from a project that
-has your registry configured — a scratch consumer created with `ggg new` is
-the honest place, because that is what your users have.
+`.github/workflows/registry.yml` runs exactly this, plus a removal check.
 
 ### 8. Tag
 

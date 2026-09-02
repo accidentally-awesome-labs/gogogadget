@@ -4,7 +4,7 @@
     "id": "ggg/system/registry-template",
     "kind": "system",
     "name": "registry-template",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "External registry template",
     "description": "The maintained, signed registry a third party copies to publish modules against this framework.",
@@ -19,7 +19,7 @@
         "source": "templates/external-registry/.github/workflows/registry.yml",
         "target": "templates/external-registry/.github/workflows/registry.yml",
         "class": "asset",
-        "sha256": "5d7a544826f97babb998055a2e85423699ad7baf67fae13c530b02d79388de0a",
+        "sha256": "52c57675f29410982cf4239fea6591f629faeb10bb3627afb0b37c9a9974c513",
         "rewrite_module": false,
         "contract": false
       },
@@ -35,7 +35,7 @@
         "source": "templates/external-registry/README.md",
         "target": "templates/external-registry/README.md",
         "class": "docs",
-        "sha256": "de04b6056d8c7975f9b95c95669b8522fa60f1a8f801a131cd5580f2be3c7719",
+        "sha256": "aba59dcd33e1e58fdd92283c6e3e2e04831a39f87c063f8c017a44fe608c7ed2",
         "rewrite_module": false,
         "contract": false
       },
@@ -51,7 +51,7 @@
         "source": "templates/external-registry/registry.snapshot.json",
         "target": "templates/external-registry/registry.snapshot.json",
         "class": "asset",
-        "sha256": "ef2311d14c008ca7c65dc2b0486a3c2332afde70a6731581fb562d165c4afde3",
+        "sha256": "fa788a44733b94f6b6942662eb0ce4d43efe279097153a7add99fca275ade988",
         "rewrite_module": false,
         "contract": false
       },
@@ -59,7 +59,7 @@
         "source": "templates/external-registry/registry.snapshot.sig",
         "target": "templates/external-registry/registry.snapshot.sig",
         "class": "asset",
-        "sha256": "64357f801f25c16102dd8a5ab836df62a0acbc0507bf8b6791ca25ea97712ab4",
+        "sha256": "cb40c9a6090b2ee124c11236c6a00c8ee78f08e47ec48f6f8463b69a9660071f",
         "rewrite_module": false,
         "contract": false
       },
@@ -83,7 +83,7 @@
         "source": "templates/external-registry/registry/modules/system/audit-export-ledger/cli.go.txt",
         "target": "templates/external-registry/registry/modules/system/audit-export-ledger/cli.go.txt",
         "class": "asset",
-        "sha256": "e7ea655e47317ebbf4985f2667ce2fba118dc7e019c74406e7be5d28d38b2278",
+        "sha256": "6fc3a35b732218e702ab7ad72b8838231d9586492033b259b4e6b9f4422a8f4f",
         "rewrite_module": false,
         "contract": false
       },
@@ -91,7 +91,7 @@
         "source": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger.go.txt",
         "target": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger.go.txt",
         "class": "asset",
-        "sha256": "914ced884dcaf866cf2c93c8279f5318bf8f1ac8ebea076fdcd39fe0428c8176",
+        "sha256": "c684653e31d33ca98eaa4e1cb316b8e30b8b6f0aa14e098af3272e2d92e06c29",
         "rewrite_module": false,
         "contract": false
       },
@@ -99,7 +99,15 @@
         "source": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger_test.go.txt",
         "target": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger_test.go.txt",
         "class": "asset",
-        "sha256": "a6944ed91378ae46eb8b14f2f37a43695e00668fc0ca73b2fce0a0f5e6fb1f57",
+        "sha256": "ccc12b60ca04716e18582496972ba795735a589d0925100fcc344c16ef17331a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/modules/system/audit-export-ledger/meta.go.txt",
+        "target": "templates/external-registry/registry/modules/system/audit-export-ledger/meta.go.txt",
+        "class": "asset",
+        "sha256": "76ee89ff62f2f142e4769bb823cec34fd97cd8e853517cd68536b52016880629",
         "rewrite_module": false,
         "contract": false
       },
@@ -107,7 +115,7 @@
         "source": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
         "target": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
         "class": "asset",
-        "sha256": "8f3b51457cdbe2e09406d97be62e65dc25afbab8d1191b1413c8784e19e25ced",
+        "sha256": "48dad7f40ba9c8000df15407e8c30531cf9abe87be947950dfd077b7bb0403af",
         "rewrite_module": false,
         "contract": false
       },

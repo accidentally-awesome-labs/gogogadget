@@ -4,7 +4,7 @@
     "id": "gadgetworks/system/audit-export-ledger",
     "kind": "system",
     "name": "audit-export-ledger",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Gadgetworks audit ledger",
     "description": "External adapter for the ggg/audit-export slot, with a zero-account file target and a managed cloud target.",
@@ -18,6 +18,13 @@
       },
       {
         "id": "ggg/system/audit-export",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/config",
         "contract": {
           "min": 1,
           "max": 1
@@ -46,7 +53,7 @@
         "source": "registry/modules/system/audit-export-ledger/cli.go.txt",
         "target": "internal/gadgetworks/ledger/cli/cli.go",
         "class": "go",
-        "sha256": "e7ea655e47317ebbf4985f2667ce2fba118dc7e019c74406e7be5d28d38b2278",
+        "sha256": "6fc3a35b732218e702ab7ad72b8838231d9586492033b259b4e6b9f4422a8f4f",
         "rewrite_module": true,
         "contract": false
       },
@@ -54,7 +61,7 @@
         "source": "registry/modules/system/audit-export-ledger/ledger.go.txt",
         "target": "internal/gadgetworks/ledger/ledger.go",
         "class": "go",
-        "sha256": "914ced884dcaf866cf2c93c8279f5318bf8f1ac8ebea076fdcd39fe0428c8176",
+        "sha256": "c684653e31d33ca98eaa4e1cb316b8e30b8b6f0aa14e098af3272e2d92e06c29",
         "rewrite_module": true,
         "contract": true
       },
@@ -62,15 +69,24 @@
         "source": "registry/modules/system/audit-export-ledger/ledger_test.go.txt",
         "target": "internal/gadgetworks/ledger/ledger_test.go",
         "class": "test",
-        "sha256": "a6944ed91378ae46eb8b14f2f37a43695e00668fc0ca73b2fce0a0f5e6fb1f57",
+        "sha256": "ccc12b60ca04716e18582496972ba795735a589d0925100fcc344c16ef17331a",
         "rewrite_module": true,
         "contract": false
+      },
+      {
+        "source": "registry/modules/system/audit-export-ledger/meta.go.txt",
+        "target": "internal/gadgetworks/ledger/meta/meta.go",
+        "class": "go",
+        "sha256": "76ee89ff62f2f142e4769bb823cec34fd97cd8e853517cd68536b52016880629",
+        "rewrite_module": true,
+        "contract": true
       }
     ],
     "claims": {
       "packages": [
         "internal/gadgetworks/ledger",
-        "internal/gadgetworks/ledger/cli"
+        "internal/gadgetworks/ledger/cli",
+        "internal/gadgetworks/ledger/meta"
       ],
       "cli": [
         "ledger"
@@ -80,7 +96,14 @@
       "system": {
         "package": "internal/gadgetworks/ledger",
         "constructor": "NewModule",
-        "needs": [],
+        "needs": [
+          {
+            "field": "Config",
+            "capability": "config",
+            "type": "*config.Config",
+            "optional": false
+          }
+        ],
         "provides": [
           {
             "field": "Value",
@@ -89,7 +112,8 @@
           }
         ],
         "type_imports": [
-          "internal/audit"
+          "internal/audit",
+          "internal/config"
         ],
         "start": false,
         "stop": true,

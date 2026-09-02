@@ -247,15 +247,27 @@ contract tests shipped as `test`-class payloads, a `runtime.cli` contribution,
 a signed `registry.snapshot.json`, and a CI workflow that runs the publisher
 gate. Its `README.md` is the long form of what follows.
 
+If you copied the template you already have a `registry.json` — edit its
+`namespace` and `canonical_module` and skip `registry init`, which exists for
+starting from an empty directory and never overwrites an existing file.
+
 ```sh
 ggg registry init --namespace acme --canonical-module example.com/acme/ggg-registry
 ggg registry keygen --private registry-private-key.b64 --public registry-public-key.b64
 ggg registry build  --dir .          # refresh digests, rebuild indexes, write the snapshot
 ggg registry sign   --dir . --key-file registry-private-key.b64
 ggg registry verify --dir . --public-key "$(cat registry-public-key.b64)"
-ggg registry validate                # install, compile, test, remove, compare byte for byte
 git tag -a v1.0.0 -m "acme registry v1.0.0"
 ```
+
+`ggg registry validate` proves the full lifecycle — install, generate,
+compile, run the module's declared tests, remove, compare the tree byte for
+byte — but only for the registries the project it runs in has closures for.
+This repository runs it against `templates/external-registry` on every change.
+From your own repository, prove the same thing by installing into a scratch
+consumer: `ggg new`, `ggg registry add directory:…` with the registry copied
+in, `ggg provider set`, then `go build ./...` and the module's own
+`go test`. The template's CI workflow does exactly that.
 
 `sign` accepts **exactly one** of `--key-file` or the base64
 `GGG_REGISTRY_SIGNING_KEY` environment variable, and refuses when both or

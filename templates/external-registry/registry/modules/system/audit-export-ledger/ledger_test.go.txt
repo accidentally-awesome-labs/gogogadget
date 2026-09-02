@@ -12,8 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogogadget/gogogadget/internal/apphost"
+	"example.com/gadgetworks/ggg-registry/internal/gadgetworks/ledger/meta"
 	"github.com/gogogadget/gogogadget/internal/audit"
+	"github.com/gogogadget/gogogadget/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +34,7 @@ func TestFileTargetAppendsOneRecordPerEntry(t *testing.T) {
 	exporter := NewFileExporter(dir)
 	t.Cleanup(func() { _ = exporter.Close() })
 
-	assert.Equal(t, TargetFile, exporter.Target())
+	assert.Equal(t, meta.TargetFile, exporter.Target())
 	for _, action := range []string{"project.created", "project.deleted"} {
 		require.NoError(t, exporter.Export(context.Background(), audit.Entry{
 			ID: "aud_" + action, OrgID: "org_1", UserID: "usr_1", Action: action,
@@ -65,7 +66,7 @@ func TestCloudTargetPostsWithBearerToken(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	exporter := NewCloudExporter(server.URL, "tok_live")
-	assert.Equal(t, TargetCloud, exporter.Target())
+	assert.Equal(t, meta.TargetCloud, exporter.Target())
 	require.NoError(t, exporter.Export(context.Background(), audit.Entry{ID: "aud_1", Action: "org.updated"}))
 
 	assert.Equal(t, "Bearer tok_live", authorization)
@@ -81,7 +82,7 @@ func TestCloudTargetWithoutTokenRefuses(t *testing.T) {
 	err := (&Exporter{Endpoint: "https://ledger.gadgetworks.example/v1/events"}).
 		Export(context.Background(), audit.Entry{Action: "x"})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), EnvToken)
+	assert.Contains(t, err.Error(), meta.EnvToken)
 }
 
 func TestProviderErrorsPropagateToTheCaller(t *testing.T) {
@@ -112,10 +113,11 @@ func TestHealthReportsTheConfiguredTarget(t *testing.T) {
 // at most once and a second caller gets the same answer, because shutdown
 // paths reach Stop more than once.
 func TestModuleStopIsIdempotent(t *testing.T) {
-	host := apphost.Map(map[string]string{EnvDir: t.TempDir()}, time.Unix(0, 0).UTC(), "test")
-	module, err := NewModule(context.Background(), host, Deps{})
+	module, err := NewModule(context.Background(), nil, Deps{Config: &config.Config{
+		Env: "development", GadgetworksLedgerDir: t.TempDir(),
+	}})
 	require.NoError(t, err)
-	require.Equal(t, TargetFile, module.Value.Target())
+	require.Equal(t, meta.TargetFile, module.Value.Target())
 	require.NoError(t, module.Value.Export(context.Background(), audit.Entry{Action: "x"}))
 
 	require.NoError(t, module.Stop(context.Background()))
@@ -138,32 +140,71 @@ func TestModuleStopHonorsTheCallersDeadline(t *testing.T) {
 	require.ErrorIs(t, blocked.Stop(ctx), context.DeadlineExceeded)
 }
 
-// The managed selection is refused at boot, not at the first export: an
-// operator who chose ledger-cloud and forgot the token must be told during
-// startup, with the key named.
-func TestNewModuleRefusesAnIncompleteManagedSelection(t *testing.T) {
-	host := apphost.Map(map[string]string{EnvEndpoint: "https://ledger.gadgetworks.example"}, time.Unix(0, 0).UTC(), "test")
-	_, err := NewModule(context.Background(), host, Deps{})
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), EnvToken)
+// The selected target comes from the project's provider choice, expressed as
+// the environment the manifest allows each target in. It is never inferred
+// from which credentials happen to be set.
+func TestSelectedTargetFollowsTheEnvironmentNotTheCredentials(t *testing.T) {
+	assert.Equal(t, meta.TargetFile, SelectedTarget("development"))
+	assert.Equal(t, meta.TargetFile, SelectedTarget("test"))
+	assert.Equal(t, meta.TargetCloud, SelectedTarget("production"))
+
+	// A development run with a full set of cloud credentials still runs the
+	// file target: the selection is not a credential sniff.
+	module, err := NewModule(context.Background(), nil, Deps{Config: &config.Config{
+		Env:                       "development",
+		GadgetworksLedgerDir:      t.TempDir(),
+		GadgetworksLedgerEndpoint: "https://ledger.gadgetworks.example",
+		GadgetworksLedgerToken:    "tok_live",
+	}})
+	require.NoError(t, err)
+	assert.Equal(t, meta.TargetFile, module.Value.Target())
 }
 
-func TestNewModulePrefersTheEndpointOverTheLocalFile(t *testing.T) {
-	host := apphost.Map(map[string]string{
-		EnvDir:      t.TempDir(),
-		EnvEndpoint: "https://ledger.gadgetworks.example",
-		EnvToken:    "tok_live",
-	}, time.Unix(0, 0).UTC(), "test")
-	module, err := NewModule(context.Background(), host, Deps{})
+// The managed selection is refused at boot, not at the first export, and
+// never degrades to the local file: an operator running production who forgot
+// the endpoint or the token is told during startup, with the key named.
+func TestNewModuleRefusesAnIncompleteManagedSelection(t *testing.T) {
+	missingEndpoint, err := NewModule(context.Background(), nil, Deps{Config: &config.Config{
+		Env: "production", GadgetworksLedgerToken: "tok_live", GadgetworksLedgerDir: t.TempDir(),
+	}})
+	require.Error(t, err)
+	require.Nil(t, missingEndpoint)
+	assert.Contains(t, err.Error(), meta.EnvEndpoint)
+	assert.Contains(t, err.Error(), meta.TargetCloud)
+
+	missingToken, err := NewModule(context.Background(), nil, Deps{Config: &config.Config{
+		Env: "production", GadgetworksLedgerEndpoint: "https://ledger.gadgetworks.example",
+	}})
+	require.Error(t, err)
+	require.Nil(t, missingToken)
+	assert.Contains(t, err.Error(), meta.EnvToken)
+}
+
+func TestNewModuleRequiresTheConfigDependency(t *testing.T) {
+	_, err := NewModule(context.Background(), nil, Deps{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "config")
+}
+
+func TestProductionSelectionConstructsTheCloudTarget(t *testing.T) {
+	module, err := NewModule(context.Background(), nil, Deps{Config: &config.Config{
+		Env:                       "production",
+		GadgetworksLedgerEndpoint: "https://ledger.gadgetworks.example",
+		GadgetworksLedgerToken:    "tok_live",
+	}})
 	require.NoError(t, err)
-	assert.Equal(t, TargetCloud, module.Value.Target())
+	assert.Equal(t, meta.TargetCloud, module.Value.Target())
+	require.NoError(t, module.Health(context.Background()))
 }
 
 // The declared targets and slot are the manifest's, and code that branches
 // on a target name must use the declared spelling.
 func TestDeclaredIdentityIsStable(t *testing.T) {
-	assert.Equal(t, "gadgetworks/system/audit-export-ledger", ModuleID)
-	assert.Equal(t, "ggg/audit-export", Slot)
-	assert.Equal(t, "ledger-file", TargetFile)
-	assert.Equal(t, "ledger-cloud", TargetCloud)
+	assert.Equal(t, "gadgetworks/system/audit-export-ledger", meta.ModuleID)
+	assert.Equal(t, "ggg/audit-export", meta.Slot)
+	assert.Equal(t, "ledger-file", meta.TargetFile)
+	assert.Equal(t, "ledger-cloud", meta.TargetCloud)
+	assert.Equal(t, "GADGETWORKS_LEDGER_DIR", meta.EnvDir)
+	assert.Equal(t, "GADGETWORKS_LEDGER_ENDPOINT", meta.EnvEndpoint)
+	assert.Equal(t, "GADGETWORKS_LEDGER_TOKEN", meta.EnvToken)
 }

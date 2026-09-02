@@ -420,7 +420,7 @@
         "source": "internal/modkit/example.go",
         "target": "internal/modkit/example.go",
         "class": "go",
-        "sha256": "8d5e848d27cd24cec2bb432339b76a9a73f353d51438edb202a32c6e1289fc37",
+        "sha256": "58a4518a87ebde248f4722ebf916cfe9115dc3b86430a3c0691235fbf4080bb5",
         "rewrite_module": true,
         "contract": false
       },
@@ -444,7 +444,7 @@
         "source": "internal/modkit/external_template_test.go",
         "target": "internal/modkit/external_template_test.go",
         "class": "test",
-        "sha256": "0e2b146f3fb02e56920563bb1468c6c7baddc686aeea394e010c8a7be6cd0bcc",
+        "sha256": "5f557a4c7b1813ad52061419a4810d6adb49df38196258e5585097a9e5c26318",
         "rewrite_module": true,
         "contract": false
       },
