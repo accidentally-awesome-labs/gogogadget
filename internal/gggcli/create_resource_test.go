@@ -74,6 +74,27 @@ func requirementIDs(manifest modkit.Manifest) []string {
 	return out
 }
 
+// reachableResourceShape reports whether a flag combination is one the command
+// accepts. The two refused shapes are not oversights: an API token carries no
+// user, and the search index carries no platform tenant.
+func reachableResourceShape(mutation CreateMutation) bool {
+	if mutation.API && mutation.Scope == "user" {
+		return false
+	}
+	if mutation.Search && mutation.Scope == "platform" {
+		return false
+	}
+	if mutation.NoUI && mutation.Admin {
+		return false
+	}
+	return true
+}
+
+func payloadOf(t *testing.T, files map[string][]byte, base string) string {
+	t.Helper()
+	return payload(t, files, base)
+}
+
 func payload(t *testing.T, files map[string][]byte, base string) string {
 	t.Helper()
 	name := resourceFixtureRegistry + "/registry/modules/workflow/widget/payload/" + base
@@ -216,36 +237,57 @@ func TestCreateResourcePlainShapeIsAServableSlice(t *testing.T) {
 	}
 }
 
-// Locales must cover every key the template reads, in both catalogs, with
-// matching placeholders — generation refuses anything less, and a missing key
-// would render as its own name in the UI.
-func TestCreateResourceLocalesCoverEveryTemplateKey(t *testing.T) {
-	files, manifest := buildResource(t, CreateMutation{Name: "Widget", Scope: "org"})
-	body := string(files[resourceFixtureRegistry+"/registry/modules/workflow/widget/payload/widget.templ.txt"])
-
-	used := map[string]struct{}{}
+// templateKeys is every i18n key the emitted template reads.
+func templateKeys(body string) map[string]struct{} {
+	out := map[string]struct{}{}
 	for _, fragment := range strings.Split(body, `i18n.T(ctx, "`)[1:] {
-		used[fragment[:strings.Index(fragment, `"`)]] = struct{}{}
+		out[fragment[:strings.Index(fragment, `"`)]] = struct{}{}
 	}
-	if len(used) == 0 {
-		t.Fatal("the template reads no i18n keys")
-	}
-	for key := range used {
-		for _, locale := range []string{"en", "es"} {
-			if _, ok := manifest.Locales[locale][key]; !ok {
-				t.Fatalf("template key %q has no %s translation", key, locale)
+	return out
+}
+
+// Locales must cover every key something actually reads — the template and the
+// navigation label keys — in both catalogs, with matching placeholders, and
+// must declare nothing else. Generation refuses a missing key, and a key
+// nothing reads is dead weight that outlives the string it was written for.
+//
+// Run across the flag shapes rather than the plain one: --admin is what adds
+// the admin_title/admin_nav pair, and a check that only ever sees the default
+// shape never looks at them.
+func TestCreateResourceLocalesCoverEveryUsedKey(t *testing.T) {
+	for _, scope := range []string{"user", "org", "platform"} {
+		for _, flags := range []CreateMutation{
+			{}, {Admin: true}, {API: true}, {Search: true}, {API: true, Admin: true, Search: true},
+		} {
+			mutation := flags
+			mutation.Name, mutation.Scope = "Widget", scope
+			if !reachableResourceShape(mutation) {
+				continue
 			}
-		}
-	}
-	for key := range manifest.Locales["en"] {
-		if _, ok := used[key]; !ok && !strings.HasSuffix(key, ".nav") {
-			t.Fatalf("locale key %q is declared but nothing reads it", key)
-		}
-	}
-	for key, value := range manifest.Locales["en"] {
-		if strings.Count(value, "%") != strings.Count(manifest.Locales["es"][key], "%") {
-			t.Fatalf("key %q has mismatched placeholders: en %q, es %q",
-				key, value, manifest.Locales["es"][key])
+			files, manifest := buildResource(t, mutation)
+			used := templateKeys(payloadOf(t, files, "widget.templ.txt"))
+			if len(used) == 0 {
+				t.Fatalf("%s %+v: the template reads no i18n keys", scope, flags)
+			}
+			for _, entry := range manifest.Runtime.Navigation {
+				used[entry.LabelKey] = struct{}{}
+			}
+			for key := range used {
+				for _, locale := range []string{"en", "es"} {
+					if _, ok := manifest.Locales[locale][key]; !ok {
+						t.Fatalf("%s %+v: key %q has no %s translation", scope, flags, key, locale)
+					}
+				}
+			}
+			for key, value := range manifest.Locales["en"] {
+				if _, ok := used[key]; !ok {
+					t.Fatalf("%s %+v: locale key %q is declared but nothing reads it", scope, flags, key)
+				}
+				if strings.Count(value, "%") != strings.Count(manifest.Locales["es"][key], "%") {
+					t.Fatalf("%s %+v: key %q has mismatched placeholders: en %q, es %q",
+						scope, flags, key, value, manifest.Locales["es"][key])
+				}
+			}
 		}
 	}
 }
@@ -327,8 +369,8 @@ func TestCreateResourceAdminAddsTheStaffReadSurface(t *testing.T) {
 	if !strings.Contains(payload(t, files, "widget.templ.txt"), "templ AdminWidgetsPage(") {
 		t.Fatal("--admin emitted no admin page renderer")
 	}
-	if !strings.Contains(payload(t, files, "widget.templ.txt"), "ReadOnly   bool") {
-		t.Fatal("the read surface cannot distinguish the staff view")
+	if !strings.Contains(payload(t, files, "widget.templ.txt"), "Writable   bool") {
+		t.Fatal("the read surface cannot distinguish the write surface from the read-only one")
 	}
 
 	_, plain := buildResource(t, CreateMutation{Name: "Widget", Scope: "org"})
@@ -416,6 +458,112 @@ func TestCreateResourceRefusesAPIForUserScope(t *testing.T) {
 	}
 }
 
+// C1 regression. A platform table has no tenant column, so no query predicate
+// can scope a write to the caller, and the app middleware group is requireAuth
+// → requireNotDisabled → requireOrg → loadPlan with no requireStaff. An
+// app-scope POST or DELETE there would hand every authenticated member of every
+// organization create, rename and delete on global state. The mutations
+// therefore live in the admin group behind the write role, and the JSON
+// transport — which has no scope that could impose a staff check — is read-only.
+func TestCreateResourcePlatformScopeKeepsWritesOutOfTheAppGroup(t *testing.T) {
+	for _, flags := range []CreateMutation{{}, {API: true}, {Admin: true}} {
+		mutation := flags
+		mutation.Name, mutation.Scope = "Banner", "platform"
+		_, manifest := buildResource(t, mutation)
+
+		for _, route := range manifest.Runtime.Routes {
+			if route.Scope == modkit.RouteApp && route.Method != "GET" {
+				t.Fatalf("%+v: %s %s is an app-scope write on a table with no tenant predicate",
+					flags, route.Method, route.Pattern)
+			}
+			if route.Scope == modkit.RouteAPIWrite {
+				t.Fatalf("%+v: %s is a token-authenticated write on a table with no tenant and no staff check",
+					flags, route.ID)
+			}
+		}
+		for _, id := range []string{"banner.create", "banner.update", "banner.delete"} {
+			index := slices.Index(routeIDs(manifest), id)
+			if index < 0 {
+				t.Fatalf("%+v: platform scope dropped %s: %v", flags, id, routeIDs(manifest))
+			}
+			route := manifest.Runtime.Routes[index]
+			if route.Scope != modkit.RouteAdmin || !route.Policy.AdminWrite {
+				t.Fatalf("%+v: %s = scope %q admin_write %v, want admin scope with the write role",
+					flags, id, route.Scope, route.Policy.AdminWrite)
+			}
+			if !strings.HasPrefix(route.Pattern, "/admin/banners") {
+				t.Fatalf("%+v: %s pattern = %q, want /admin/banners", flags, id, route.Pattern)
+			}
+		}
+		// The staff page is where those mutations render, so it is not optional
+		// on a platform table however --admin was passed.
+		if !slices.Contains(routeIDs(manifest), "banner.admin") {
+			t.Fatalf("%+v: platform scope has no staff surface to write from: %v", flags, routeIDs(manifest))
+		}
+		if !slices.ContainsFunc(manifest.Runtime.Navigation, func(n modkit.NavigationContribution) bool {
+			return n.Area == modkit.NavAreaAdmin
+		}) {
+			t.Fatalf("%+v: platform scope has no admin navigation entry", flags)
+		}
+	}
+
+	// --api on a platform table documents and serves the read and nothing else.
+	_, withAPI := buildResource(t, CreateMutation{Name: "Banner", Scope: "platform", API: true})
+	if withAPI.OpenAPI == nil || len(withAPI.OpenAPI.Operations) != 1 ||
+		withAPI.OpenAPI.Operations[0].RouteID != "api.banner.list" {
+		t.Fatalf("platform --api operations = %+v, want only the list", withAPI.OpenAPI)
+	}
+
+	// A tenant-scoped table is unaffected: its owner writes it from the app
+	// group, guarded by the tenant predicate in every statement.
+	_, org := buildResource(t, CreateMutation{Name: "Widget", Scope: "org"})
+	create := org.Runtime.Routes[slices.Index(routeIDs(org), "widget.create")]
+	if create.Scope != modkit.RouteApp || create.Policy.AdminWrite {
+		t.Fatalf("org create = scope %q admin_write %v, want the app group", create.Scope, create.Policy.AdminWrite)
+	}
+}
+
+// C2 regression. search_documents.tenant_id has a foreign key to orgs, so the
+// document tenant is always an organization. A user-scoped row therefore has to
+// carry its owner as a filterable field or every private row becomes
+// discoverable organization-wide, and a platform row has no owning organization
+// at all.
+func TestCreateResourceSearchScopesUserRowsByOwner(t *testing.T) {
+	files, _ := buildResource(t, CreateMutation{Name: "Note", Scope: "user", Search: true})
+	transport := string(files[resourceFixtureRegistry+"/registry/modules/workflow/note/payload/workflow_note.go.txt"])
+
+	for _, want := range []string{
+		"func (s *Server) indexNote(ctx context.Context, tenantID, userID, id, name string) {",
+		`Fields: map[string]string{"user_id": userID},`,
+		"s.indexNote(ctx, org.OrgID, user.UserID, strconv.FormatInt(row.ID, 10), row.Name)",
+	} {
+		if !strings.Contains(transport, want) {
+			t.Fatalf("user-scoped search is missing %q:\n%s", want, transport)
+		}
+	}
+
+	// The org-scoped document needs no owner field: the tenant already is the
+	// owner, so adding one would be noise.
+	orgFiles, _ := buildResource(t, CreateMutation{Name: "Widget", Scope: "org", Search: true})
+	orgTransport := payload(t, orgFiles, "workflow_widget.go.txt")
+	if strings.Contains(orgTransport, `"user_id"`) {
+		t.Fatal("org-scoped search filed a user_id field it cannot mean")
+	}
+	if !strings.Contains(orgTransport, "func (s *Server) indexWidget(ctx context.Context, tenantID, id, name string) {") {
+		t.Fatalf("org-scoped search helper has the wrong shape:\n%s", orgTransport)
+	}
+}
+
+func TestCreateResourceRefusesSearchForPlatformScope(t *testing.T) {
+	err := buildResourceError(t, CreateMutation{Name: "Banner", Scope: "platform", Search: true})
+	if !strings.Contains(err.Error(), "--search requires --scope user or org") {
+		t.Fatalf("error = %v, want the platform search refusal", err)
+	}
+	if got := exitOf(t, err); got != exitUsage {
+		t.Fatalf("exit = %d, want the usage exit %d", got, exitUsage)
+	}
+}
+
 func TestCreateResourceRefusesUnknownScope(t *testing.T) {
 	err := buildResourceError(t, CreateMutation{Name: "Widget", Scope: "tenant"})
 	if !strings.Contains(err.Error(), "--scope must be user, org, or platform") {
@@ -440,7 +588,7 @@ func TestCreateResourceEmitsCanonicalGo(t *testing.T) {
 		} {
 			mutation := flags
 			mutation.Name, mutation.Scope = "Widget", scope
-			if mutation.API && scope == "user" {
+			if !reachableResourceShape(mutation) {
 				continue
 			}
 			files, _ := buildResource(t, mutation)

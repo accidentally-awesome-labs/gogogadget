@@ -96,7 +96,7 @@
         "source": "registry/modules/workflow/example-resource/payload/example-resource.templ.txt",
         "target": "internal/web/templates/example-resource.templ",
         "class": "templ",
-        "sha256": "5203ffade1729a2b4fe06ea4842239de8193c8a0b93b7316230db5f6279c46f3",
+        "sha256": "3f2c71f5f523fd9942719b13531b588f872486ff30f3df319944a8513b6150e4",
         "rewrite_module": true,
         "contract": true
       },
@@ -104,7 +104,7 @@
         "source": "registry/modules/workflow/example-resource/payload/workflow_example_resource.go.txt",
         "target": "internal/web/workflow_example_resource.go",
         "class": "go",
-        "sha256": "99793f912068eb153b0cdc492e40f9c7a5efc163ee9d50c169f4e83e55c43895",
+        "sha256": "dd7d9f2fa237aa59622d0d209e4909296d3ce1ed59293ad4dcd1773b8491f95d",
         "rewrite_module": true,
         "contract": true
       },

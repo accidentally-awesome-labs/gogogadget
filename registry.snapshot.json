@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "884dc08fc65dbd32e3455461e75dff9175a66952063844de5a2f4b73230de421"
+      "sha256": "f4a600c2ebd3f74050262d50b5755a29fb49c9a8d9938f04bd335f3bdf4c8dd9"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1468,11 +1468,11 @@
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/module.json",
-      "sha256": "c44a8769603134d2e42855a0f985f718c53556169872d24184c331279ead4473"
+      "sha256": "fe40c427d27ef7c1c158dacc0929d7f204af458498b0f587365c8046cc7890f9"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example-resource.templ.txt",
-      "sha256": "5203ffade1729a2b4fe06ea4842239de8193c8a0b93b7316230db5f6279c46f3"
+      "sha256": "3f2c71f5f523fd9942719b13531b588f872486ff30f3df319944a8513b6150e4"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example_resource.sql",
@@ -1484,7 +1484,7 @@
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/payload/workflow_example_resource.go.txt",
-      "sha256": "99793f912068eb153b0cdc492e40f9c7a5efc163ee9d50c169f4e83e55c43895"
+      "sha256": "dd7d9f2fa237aa59622d0d209e4909296d3ce1ed59293ad4dcd1773b8491f95d"
     },
     {
       "path": "registry/testdata/registry/modules/workflow/example-resource/payload/workflow_example_resource_test.go.txt",

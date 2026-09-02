@@ -59,6 +59,20 @@ Flag behavior (all four are currently dead):
 - `--no-ui` omits the app UI surface entirely: no templ file, no app routes, no navigation, no
   visual entry, no locales — queries, migration, data and (when asked) API only.
 - `--no-ui` with `--admin` is a usage error (admin IS a UI surface); refuse before any write.
+- `--api` with `--scope user` is a usage error. `RequireAPIToken` puts an organization in the
+  request context and nothing else (`internal/api/tokens.go`), so a user-scoped table has no
+  tenant on the JSON transport; emitting it would list every user's rows to any token holder.
+- `--api` with `--scope platform` emits the read route only. No route scope can impose a staff
+  check on a token-authenticated write, and a platform table has no tenant predicate that could
+  scope one, so its mutations stay in `/admin`.
+- `--search` with `--scope platform` is a usage error. `search_documents.tenant_id` has a foreign
+  key to `orgs`, so every document belongs to one organization and a platform row belongs to
+  none. A user-scoped row is indexed under the acting organization with its owner in
+  `search.Document.Fields` (`user_id`), which `search.Query.Filters` narrows on.
+- `--scope platform` puts the three mutations at `scope: "admin"` with `policy.admin_write`, and
+  renders them from the staff surface, which is therefore not optional there. The app middleware
+  group has no `requireStaff`, and a global table has no tenant predicate, so an app-scope write
+  would hand every authenticated member of every organization create/rename/delete on it.
 - Defaults stay as documented: table `snake(NAME)+"s"`, route `/app/<kebab(NAME)>s`, both
   overridable by `--table` / `--route`.
 

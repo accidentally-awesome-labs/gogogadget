@@ -28,7 +28,7 @@ type exampleResourceFormInput struct {
 	Name string `form:"name"`
 }
 
-// validateExampleResourceName is that shared rule: required,
+// validateExampleResourceName is the name rule every transport runs: required,
 // 80 characters or fewer after trimming. It returns the cleaned value and a
 // message, empty when valid.
 func validateExampleResourceName(name string) (string, string) {
@@ -45,9 +45,9 @@ func validateExampleResourceName(name string) (string, string) {
 
 // GET /app/example-resources
 //
-// The read surface: search, pagination, and the create/edit form on one page.
-// ?edit=<id> loads a row into that form, so editing needs neither a second
-// route nor a second template.
+// The app read surface. Search, pagination, and the create/edit form on
+// one page: ?edit=<id> loads a row into that form, so editing needs neither
+// a second route nor a second template.
 func (s *Server) handleExampleResources(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	org := identity.OrgFrom(ctx)
@@ -77,7 +77,10 @@ func (s *Server) handleExampleResources(w http.ResponseWriter, r *http.Request) 
 		Items: items, Query: query, Page: pageNumber,
 		TotalPages: max(int(math.Ceil(float64(total)/exampleResourcePageSize)), 1),
 		BaseURL:    "/app/example-resources",
+		Writable:   true,
+		Admin:      false,
 	}
+	data.Form.WriteURL = "/app/example-resources"
 	if raw := r.URL.Query().Get("edit"); raw != "" {
 		id, parseErr := strconv.ParseInt(raw, 10, 64)
 		if parseErr != nil {
@@ -95,7 +98,7 @@ func (s *Server) handleExampleResources(w http.ResponseWriter, r *http.Request) 
 			s.renderError(w, r, getErr.Error())
 			return
 		}
-		data.Form = templates.ExampleResourceFormData{ID: row.ID, Name: row.Name}
+		data.Form.ID, data.Form.Name = row.ID, row.Name
 	}
 	pageData := Page{Title: "Example resources", Layout: templates.LayoutApp}
 	if wantsFragment(r) {
@@ -105,10 +108,55 @@ func (s *Server) handleExampleResources(w http.ResponseWriter, r *http.Request) 
 	s.Render(w, r, pageData, templates.ExampleResourcesPage(data))
 }
 
+// GET /admin/example-resources
+//
+// The staff read surface. Read only: the mutations live on the other surface,
+// so this one renders the table without write controls.
+func (s *Server) handleAdminExampleResources(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+	total, err := s.q.CountAllExampleResources(ctx, query)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	rows, err := s.q.ListAllExampleResources(ctx, sqlc.ListAllExampleResourcesParams{Query: query, Lim: exampleResourcePageSize, Off: int32((pageNumber - 1) * exampleResourcePageSize)})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	// An explicit view row rather than the query row: the template package then
+	// depends on nothing generated, and adding a column cannot silently change
+	// what the table renders.
+	items := make([]templates.ExampleResourceItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, templates.ExampleResourceItem{ID: row.ID, Name: row.Name, CreatedAt: row.CreatedAt.Time})
+	}
+	data := templates.ExampleResourcesListData{
+		Items: items, Query: query, Page: pageNumber,
+		TotalPages: max(int(math.Ceil(float64(total)/exampleResourcePageSize)), 1),
+		BaseURL:    "/admin/example-resources",
+		Writable:   false,
+		Admin:      true,
+	}
+	pageData := Page{Title: "Example resources", Layout: templates.LayoutAdmin}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleResourcesTable(data))
+		return
+	}
+	s.Render(w, r, pageData, templates.AdminExampleResourcesPage(data))
+}
+
 // renderExampleResourceFormError re-renders the form with 422:
 // the fragment for htmx, which swaps it into #example-resource-form, and the standalone
-// form page otherwise.
+// form page otherwise. The write URL is set here rather than by four callers
+// that could each forget it.
 func (s *Server) renderExampleResourceFormError(w http.ResponseWriter, r *http.Request, form templates.ExampleResourceFormData) {
+	form.WriteURL = "/app/example-resources"
 	w.WriteHeader(http.StatusUnprocessableEntity)
 	pageData := Page{Title: "Example resources", Layout: templates.LayoutApp}
 	if wantsFragment(r) {
@@ -208,47 +256,6 @@ func (s *Server) handleExampleResourceDelete(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 }
 
-// GET /admin/example-resources
-//
-// The staff read surface. It renders the same table with ReadOnly set, so it
-// cannot become a second write path by accident.
-func (s *Server) handleAdminExampleResources(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	query := strings.TrimSpace(r.URL.Query().Get("q"))
-	pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
-	if pageNumber < 1 {
-		pageNumber = 1
-	}
-	total, err := s.q.CountAllExampleResources(ctx, query)
-	if err != nil {
-		s.renderError(w, r, err.Error())
-		return
-	}
-	rows, err := s.q.ListAllExampleResources(ctx, sqlc.ListAllExampleResourcesParams{Query: query, Lim: exampleResourcePageSize, Off: int32((pageNumber - 1) * exampleResourcePageSize)})
-	if err != nil {
-		s.renderError(w, r, err.Error())
-		return
-	}
-	// An explicit view row rather than the query row: the template package then
-	// depends on nothing generated, and adding a column cannot silently change
-	// what the table renders.
-	items := make([]templates.ExampleResourceItem, 0, len(rows))
-	for _, row := range rows {
-		items = append(items, templates.ExampleResourceItem{ID: row.ID, Name: row.Name, CreatedAt: row.CreatedAt.Time})
-	}
-	data := templates.ExampleResourcesListData{
-		Items: items, Query: query, Page: pageNumber,
-		TotalPages: max(int(math.Ceil(float64(total)/exampleResourcePageSize)), 1),
-		BaseURL:    "/admin/example-resources", ReadOnly: true,
-	}
-	pageData := Page{Title: "Example resources", Layout: templates.LayoutAdmin}
-	if wantsFragment(r) {
-		s.Render(w, r, pageData, templates.ExampleResourcesTable(data))
-		return
-	}
-	s.Render(w, r, pageData, templates.AdminExampleResourcesPage(data))
-}
-
 // exampleResourceResponse is the public shape of one row.
 // An explicit DTO, not the query row: pinning the fields here means adding a
 // column can never silently change the API.
@@ -265,10 +272,6 @@ func newExampleResourceResponse(id int64, name string, createdAt, updatedAt time
 		CreatedAt: createdAt.UTC().Format(time.RFC3339),
 		UpdatedAt: updatedAt.UTC().Format(time.RFC3339),
 	}
-}
-
-type exampleResourceAPIRequest struct {
-	Name string `json:"name"`
 }
 
 // GET /api/v1/example-resources (scope read).
@@ -296,6 +299,10 @@ func (s *Server) handleAPIListExampleResources(w http.ResponseWriter, r *http.Re
 		out = append(out, newExampleResourceResponse(row.ID, row.Name, row.CreatedAt.Time, row.UpdatedAt.Time))
 	}
 	api.WriteJSON(w, http.StatusOK, map[string]any{"items": out, "limit": limit, "offset": offset})
+}
+
+type exampleResourceAPIRequest struct {
+	Name string `json:"name"`
 }
 
 // POST /api/v1/example-resources (scope write).

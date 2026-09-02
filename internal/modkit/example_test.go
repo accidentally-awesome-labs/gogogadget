@@ -34,6 +34,36 @@ func loadExampleCatalog(t *testing.T) Catalog {
 	return catalog
 }
 
+// The validator regenerates the sqlc output package for a closure that
+// installs a query file, and restores it by path after removal. A sqlc.yaml
+// that stopped naming that path would make the restore a silent no-op, the
+// generated package would leak past removal, and the byte-for-byte claim would
+// stop being about it. So the duplicated path must fail loudly instead.
+func TestExampleValidatorRefusesAMovedSQLCOutput(t *testing.T) {
+	if err := assertSQLCOutputDir(exampleTestRoot(t)); err != nil {
+		t.Fatalf("this repository's %s should satisfy the check: %v", sqlcConfigFile, err)
+	}
+
+	moved := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(moved, sqlcConfigFile), []byte(
+		"version: \"2\"\nsql:\n  - queries: \"internal/db/queries\"\n"+
+			"    gen:\n      go:\n        out: \"internal/db/generated\"\n"), 0o644))
+	err := assertSQLCOutputDir(moved)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), sqlcOutputDir)
+
+	renamedQueries := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(renamedQueries, sqlcConfigFile), []byte(
+		"version: \"2\"\nsql:\n  - queries: \"internal/db/sql\"\n"+
+			"    gen:\n      go:\n        out: \"internal/db/sqlc\"\n"), 0o644))
+	err = assertSQLCOutputDir(renamedQueries)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "internal/db/queries")
+
+	missing := t.TempDir()
+	require.Error(t, assertSQLCOutputDir(missing))
+}
+
 // The example manifests are hand-authored, and `ggg registry build` deliberately
 // does not touch them: it scans registry/modules, which is the shipped catalog,
 // not this separate registry. So editing a payload without updating its digest

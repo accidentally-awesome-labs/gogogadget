@@ -848,6 +848,20 @@ func exerciseStandardClosure(
 	// handlers call query methods that do not exist as Go, and the closure
 	// could never be compile-proved.
 	if slices.ContainsFunc(result.Installed, isQueryPath) {
+		// The restore below is keyed on sqlcOutputDir, and a restore of a
+		// directory that no longer exists would put nothing back and report
+		// nothing wrong — the generated query package would then leak past
+		// removal and the byte-for-byte claim would quietly stop being about
+		// it. So the duplicated path is checked against sqlc.yaml here, where
+		// it is about to matter, rather than trusted.
+		if err := assertSQLCOutputDir(derivative); err != nil {
+			return result, err
+		}
+		if len(baselineQueryPackage) == 0 {
+			return result, fmt.Errorf(
+				"no generated query package captured at %s; a closure that installs a query file "+
+					"cannot be exercised without one", sqlcOutputDir)
+		}
 		if err := runGoTool(ctx, derivative, "tool", "sqlc", "generate"); err != nil {
 			return result, fmt.Errorf("sqlc generate: %w", err)
 		}
@@ -1018,14 +1032,41 @@ func restoreLegacyPayloads(template, derivative string, baseline Lock, ids []str
 	return nil
 }
 
-// sqlcOutputDir is the generated query package. It is tool output, not
-// distributed source, which is why the validator may regenerate and restore it
-// wholesale.
-const sqlcOutputDir = "internal/db/sqlc"
+// sqlcOutputDir and sqlcQueryDir are the generated query package and its input
+// directory. Both are tool paths configured in sqlc.yaml, which is why
+// assertSQLCOutputDir checks that this copy still agrees with that file rather
+// than leaving two truths to drift apart.
+const (
+	sqlcConfigFile = "sqlc.yaml"
+	sqlcOutputDir  = "internal/db/sqlc"
+	sqlcQueryDir   = "internal/db/queries/"
+)
+
+// assertSQLCOutputDir fails loudly when sqlc.yaml no longer generates into
+// sqlcOutputDir. Silence there is the dangerous answer: the restore after
+// removal would put nothing back and report success.
+func assertSQLCOutputDir(root string) error {
+	data, err := os.ReadFile(filepath.Join(root, sqlcConfigFile))
+	if err != nil {
+		return fmt.Errorf("read %s: %w", sqlcConfigFile, err)
+	}
+	if !bytes.Contains(data, []byte(`out: "`+sqlcOutputDir+`"`)) {
+		return fmt.Errorf(
+			"%s no longer generates into %s, so the example validator cannot restore it after removal; "+
+				"update sqlcOutputDir in internal/modkit/example.go to match", sqlcConfigFile, sqlcOutputDir)
+	}
+	if !bytes.Contains(data, []byte(`queries: "`+strings.TrimSuffix(sqlcQueryDir, "/")+`"`)) {
+		return fmt.Errorf(
+			"%s no longer reads queries from %s, so isQueryPath cannot recognise an sqlc input; "+
+				"update sqlcQueryDir in internal/modkit/example.go to match",
+			sqlcConfigFile, strings.TrimSuffix(sqlcQueryDir, "/"))
+	}
+	return nil
+}
 
 // isQueryPath reports whether an installed path is an sqlc input.
 func isQueryPath(path string) bool {
-	return strings.HasPrefix(path, "internal/db/queries/") && strings.HasSuffix(path, ".sql")
+	return strings.HasPrefix(path, sqlcQueryDir) && strings.HasSuffix(path, ".sql")
 }
 
 // readDirectorySnapshot captures every file under dir, keyed by its path

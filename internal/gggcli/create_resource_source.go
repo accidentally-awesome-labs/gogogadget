@@ -27,7 +27,7 @@ const (
 // formatGo runs the emitted Go through gofmt so the slice a project receives is
 // already canonical rather than merely compilable. Unparseable output is
 // returned untouched: the compiler's message against the real file is a far
-// better report than a formatter's, and TestCreateResourceEmitsParseableGo
+// better report than a formatter's, and TestCreateResourceEmitsCanonicalGo
 // fails on it first anyway.
 func formatGo(body string) string {
 	formatted, err := format.Source([]byte(body))
@@ -141,33 +141,42 @@ func (r resourceSpec) migrationSQL() string {
 	return r.expand(b.String())
 }
 
-// transportGo renders internal/web/workflow_<snake>.go: the app read page, the
-// four mutations, the optional admin read surface, the optional JSON transport
-// and the optional search wiring — all methods on *web.Server, all declared in
-// the manifest so the generated mux registers them.
+// transportGo renders internal/web/workflow_<snake>.go: the read surfaces, the
+// mutations at whichever scope owns them, the optional JSON transport and the
+// optional search wiring — all methods on *web.Server, all declared in the
+// manifest so the generated mux registers them.
 func (r resourceSpec) transportGo() string {
 	var b strings.Builder
 	b.WriteString("package web\n\n")
 	b.WriteString(r.transportImports())
-	if !r.noUI {
+	if r.uiRead() {
 		b.WriteString("\n// $low$PageSize is the rows-per-page of the read surfaces.\nconst $low$PageSize = " +
 			strconv.Itoa(resourcePageSize) + "\n")
 	}
-	if r.hasHandlers() {
+	if r.needsFormInput() {
+		b.WriteString(r.transportFormInput())
+	}
+	if r.needsValidator() {
 		b.WriteString(r.transportValidator())
 	}
-	if !r.noUI {
-		b.WriteString(r.transportReadPage())
+	if r.uiRead() {
+		b.WriteString(r.transportListSurface(false))
+	}
+	if r.admin {
+		b.WriteString(r.transportListSurface(true))
+	}
+	if r.uiWrite() {
 		b.WriteString(r.transportFormError())
 		b.WriteString(r.transportCreate())
 		b.WriteString(r.transportUpdate())
 		b.WriteString(r.transportDelete())
 	}
-	if r.admin {
-		b.WriteString(r.transportAdmin())
+	if r.apiRead() {
+		b.WriteString(r.transportAPITypes())
+		b.WriteString(r.transportAPIList())
 	}
-	if r.api {
-		b.WriteString(r.transportAPI())
+	if r.apiWrite() {
+		b.WriteString(r.transportAPIWrites())
 	}
 	if r.search {
 		b.WriteString(r.transportSearch())
@@ -177,44 +186,31 @@ func (r resourceSpec) transportGo() string {
 
 // transportImports emits exactly the imports the selected surfaces use. An
 // import the body never touches is a compile error, so this is derived from the
-// same flags the bodies are.
+// same predicates the bodies are.
 func (r resourceSpec) transportImports() string {
+	const prefix = "github.com/gogogadget/gogogadget/"
+	tenanted := r.tenantColumn != ""
 	var std, project []string
-	if r.search {
-		std = append(std, "context")
+	add := func(list *[]string, when bool, paths ...string) {
+		if when {
+			*list = append(*list, paths...)
+		}
 	}
-	if r.api {
-		std = append(std, "encoding/json")
-	}
-	if r.hasHandlers() {
-		std = append(std, "errors")
-	}
-	if !r.noUI {
-		std = append(std, "math")
-	}
-	if r.hasHandlers() {
-		std = append(std, "net/http", "strconv", "strings")
-	}
-	if r.api {
-		std = append(std, "time")
-	}
-	if r.api {
-		project = append(project, "github.com/gogogadget/gogogadget/internal/api")
-	}
-	if r.hasHandlers() {
-		project = append(project,
-			"github.com/gogogadget/gogogadget/internal/db/sqlc",
-			"github.com/gogogadget/gogogadget/internal/identity")
-	}
-	if r.search {
-		project = append(project, "github.com/gogogadget/gogogadget/internal/search")
-	}
-	if !r.noUI {
-		project = append(project, "github.com/gogogadget/gogogadget/internal/web/templates")
-	}
-	if r.hasHandlers() {
-		project = append(project, "github.com/jackc/pgx/v5")
-	}
+	add(&std, r.search, "context")
+	add(&std, r.apiWrite(), "encoding/json")
+	add(&std, r.needsRowLookup(), "errors")
+	add(&std, r.uiRead(), "math")
+	add(&std, r.hasHandlers(), "net/http", "strconv")
+	add(&std, r.uiRead() || r.needsValidator(), "strings")
+	add(&std, r.apiRead(), "time")
+
+	add(&project, r.apiRead(), prefix+"internal/api")
+	add(&project, r.hasHandlers(), prefix+"internal/db/sqlc")
+	add(&project, r.uiWrite() || r.apiWrite() || (r.apiRead() && tenanted), prefix+"internal/identity")
+	add(&project, r.search, prefix+"internal/search")
+	add(&project, r.uiRead(), prefix+"internal/web/templates")
+	add(&project, r.needsRowLookup(), "github.com/jackc/pgx/v5")
+
 	var b strings.Builder
 	b.WriteString("import (\n")
 	for _, path := range std {
@@ -230,8 +226,7 @@ func (r resourceSpec) transportImports() string {
 	return b.String()
 }
 
-func (r resourceSpec) transportValidator() string {
-	limit := strconv.Itoa(resourceNameLimit)
+func (r resourceSpec) transportFormInput() string {
 	return `
 // $low$FormInput is the HTML form body.
 // The JSON transport has its own request type; both run the same validator, so
@@ -239,8 +234,13 @@ func (r resourceSpec) transportValidator() string {
 type $low$FormInput struct {
 	Name string ` + "`form:\"name\"`" + `
 }
+`
+}
 
-// validate$Exp$Name is that shared rule: required,
+func (r resourceSpec) transportValidator() string {
+	limit := strconv.Itoa(resourceNameLimit)
+	return `
+// validate$Exp$Name is the name rule every transport runs: required,
 // ` + limit + ` characters or fewer after trimming. It returns the cleaned value and a
 // message, empty when valid.
 func validate$Exp$Name(name string) (string, string) {
@@ -285,8 +285,8 @@ func (r resourceSpec) tenantValue() string {
 
 // sqlc emits a Params struct only for a query with more than one parameter, so
 // a call whose tenant predicate is absent passes a bare value where a
-// tenant-filtered one passes a struct. These four builders are the only place
-// that distinction lives.
+// tenant-filtered one passes a struct. These builders are the only place that
+// distinction lives.
 func (r resourceSpec) listArgs(prefix, limit, offset, tenant string) string {
 	fields := "Query: query, Lim: " + limit + ", Off: " + offset
 	if tenant != "" {
@@ -359,21 +359,48 @@ func (r resourceSpec) listBody(countPrefix, listPrefix, tenant string) string {
 `
 }
 
-func (r resourceSpec) transportReadPage() string {
-	tenant := r.tenantValue()
-	return `
-// GET $route$
-//
-// The read surface: search, pagination, and the create/edit form on one page.
-// ?edit=<id> loads a row into that form, so editing needs neither a second
-// route nor a second template.
-func (s *Server) handle$Exps$(w http.ResponseWriter, r *http.Request) {
+// transportListSurface renders one read page. There are at most two: the app
+// page and the staff page. Exactly one of them is the write surface — the app
+// page for a tenant-scoped table, the staff page for a platform table, since a
+// global table has no owner to authorise the write — and only that one carries
+// the form and the ?edit=<id> lookup.
+func (r resourceSpec) transportListSurface(admin bool) string {
+	handler, template, layout, baseURL := "handle$Exps$", "$Exps$Page", "templates.LayoutApp", "$route$"
+	countPrefix, listPrefix, tenant := "Count", "List", r.tenantValue()
+	comment := "// GET $route$\n//\n// The app read surface."
+	if admin {
+		handler, template = "handleAdmin$Exps$", "Admin$Exps$Page"
+		layout, baseURL = "templates.LayoutAdmin", "/admin/$plural$"
+		tenant = ""
+		if r.adminUsesAllRows() {
+			countPrefix, listPrefix = "CountAll", "ListAll"
+		}
+		comment = "// GET /admin/$plural$\n//\n// The staff read surface."
+	}
+	// The write surface is the one whose scope owns the mutations.
+	writable := admin == (r.tenantColumn == "")
+	if writable {
+		comment += " Search, pagination, and the create/edit form on\n" +
+			"// one page: ?edit=<id> loads a row into that form, so editing needs neither\n" +
+			"// a second route nor a second template."
+	} else {
+		comment += " Read only: the mutations live on the other surface,\n" +
+			"// so this one renders the table without write controls."
+	}
+
+	body := "\n" + comment + "\nfunc (s *Server) " + handler + `(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-` + r.identityDeclarations(false, true) + r.listBody("Count", "List", tenant) + `	data := templates.$Exps$ListData{
+` + r.identityDeclarations(false, !admin) + r.listBody(countPrefix, listPrefix, tenant) +
+		`	data := templates.$Exps$ListData{
 		Items: items, Query: query, Page: pageNumber,
 		TotalPages: max(int(math.Ceil(float64(total)/$low$PageSize)), 1),
-		BaseURL:    "$route$",
+		BaseURL:    "` + baseURL + `",
+		Writable:   ` + strconv.FormatBool(writable) + `,
+		Admin:      ` + strconv.FormatBool(admin) + `,
 	}
+`
+	if writable {
+		body += `	data.Form.WriteURL = "$writeBase$"
 	if raw := r.URL.Query().Get("edit"); raw != "" {
 		id, parseErr := strconv.ParseInt(raw, 10, 64)
 		if parseErr != nil {
@@ -391,26 +418,31 @@ func (s *Server) handle$Exps$(w http.ResponseWriter, r *http.Request) {
 			s.renderError(w, r, getErr.Error())
 			return
 		}
-		data.Form = templates.$Exp$FormData{ID: row.ID, Name: row.Name}
+		data.Form.ID, data.Form.Name = row.ID, row.Name
 	}
-	pageData := Page{Title: "$HumanPlural$", Layout: templates.LayoutApp}
+`
+	}
+	body += `	pageData := Page{Title: "$HumanPlural$", Layout: ` + layout + `}
 	if wantsFragment(r) {
 		s.Render(w, r, pageData, templates.$Exps$Table(data))
 		return
 	}
-	s.Render(w, r, pageData, templates.$Exps$Page(data))
+	s.Render(w, r, pageData, templates.` + template + `(data))
 }
 `
+	return body
 }
 
 func (r resourceSpec) transportFormError() string {
 	return `
 // render$Exp$FormError re-renders the form with 422:
 // the fragment for htmx, which swaps it into #$slug$-form, and the standalone
-// form page otherwise.
+// form page otherwise. The write URL is set here rather than by four callers
+// that could each forget it.
 func (s *Server) render$Exp$FormError(w http.ResponseWriter, r *http.Request, form templates.$Exp$FormData) {
+	form.WriteURL = "$writeBase$"
 	w.WriteHeader(http.StatusUnprocessableEntity)
-	pageData := Page{Title: "$HumanPlural$", Layout: templates.LayoutApp}
+	pageData := Page{Title: "$HumanPlural$", Layout: ` + r.writeLayout() + `}
 	if wantsFragment(r) {
 		s.Render(w, r, pageData, templates.$Exp$Form(form))
 		return
@@ -422,7 +454,7 @@ func (s *Server) render$Exp$FormError(w http.ResponseWriter, r *http.Request, fo
 
 func (r resourceSpec) transportCreate() string {
 	return `
-// POST $route$
+// POST $writeBase$
 func (s *Server) handle$Exp$Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 ` + r.identityDeclarations(true, true) + `	var input $low$FormInput
@@ -442,14 +474,14 @@ func (s *Server) handle$Exp$Create(w http.ResponseWriter, r *http.Request) {
 	}
 	s.logAudit(ctx, org.OrgID, user.UserID, "$snake$.created", map[string]any{"id": row.ID, "name": row.Name})
 ` + r.indexCall("row.ID", "row.Name") + `	Toast(w, "success", "$HumanSingular$ created")
-	Navigate(w, r, "$route$")
+	Navigate(w, r, "$writeBase$")
 }
 `
 }
 
 func (r resourceSpec) transportUpdate() string {
 	return `
-// POST $route$/{id}
+// POST $writeBase$/{id}
 func (s *Server) handle$Exp$Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 ` + r.identityDeclarations(true, true) + `	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
@@ -480,14 +512,14 @@ func (s *Server) handle$Exp$Update(w http.ResponseWriter, r *http.Request) {
 	}
 	s.logAudit(ctx, org.OrgID, user.UserID, "$snake$.updated", map[string]any{"id": row.ID, "name": row.Name})
 ` + r.indexCall("row.ID", "row.Name") + `	Toast(w, "success", "$HumanSingular$ updated")
-	Navigate(w, r, "$route$")
+	Navigate(w, r, "$writeBase$")
 }
 `
 }
 
 func (r resourceSpec) transportDelete() string {
 	return `
-// DELETE $route$/{id}
+// DELETE $writeBase$/{id}
 //
 // Row swap: 200 with an empty body, and htmx removes the tr.
 func (s *Server) handle$Exp$Delete(w http.ResponseWriter, r *http.Request) {
@@ -513,41 +545,18 @@ func (s *Server) handle$Exp$Delete(w http.ResponseWriter, r *http.Request) {
 `
 }
 
-func (r resourceSpec) transportAdmin() string {
-	countPrefix, listPrefix, tenant := "Count", "List", ""
-	if r.adminUsesAllRows() {
-		countPrefix, listPrefix = "CountAll", "ListAll"
-	}
-	return `
-// GET /admin/$plural$
-//
-// The staff read surface. It renders the same table with ReadOnly set, so it
-// cannot become a second write path by accident.
-func (s *Server) handleAdmin$Exps$(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-` + r.listBody(countPrefix, listPrefix, tenant) + `	data := templates.$Exps$ListData{
-		Items: items, Query: query, Page: pageNumber,
-		TotalPages: max(int(math.Ceil(float64(total)/$low$PageSize)), 1),
-		BaseURL:    "/admin/$plural$", ReadOnly: true,
-	}
-	pageData := Page{Title: "$HumanPlural$", Layout: templates.LayoutAdmin}
-	if wantsFragment(r) {
-		s.Render(w, r, pageData, templates.$Exps$Table(data))
-		return
-	}
-	s.Render(w, r, pageData, templates.Admin$Exps$Page(data))
-}
-`
-}
-
 // indexCall emits the search upsert, or nothing when --search was not asked
-// for. The tenant is always the acting organization: the search index is
-// organization-scoped, so that is the only tenant it can accept.
+// for. A user-scoped row carries its owner as a filterable field; see
+// transportSearch for why the document tenant is always the organization.
 func (r resourceSpec) indexCall(id, name string) string {
 	if !r.search {
 		return ""
 	}
-	return "\ts.index$Exp$(ctx, org.OrgID, strconv.FormatInt(" + id + ", 10), " + name + ")\n"
+	owner := ""
+	if r.scope == "user" {
+		owner = "user.UserID, "
+	}
+	return "\ts.index$Exp$(ctx, org.OrgID, " + owner + "strconv.FormatInt(" + id + ", 10), " + name + ")\n"
 }
 
 func (r resourceSpec) deleteIndexCall(id string) string {
@@ -557,7 +566,42 @@ func (r resourceSpec) deleteIndexCall(id string) string {
 	return "\ts.delete$Exp$Index(ctx, org.OrgID, strconv.FormatInt(" + id + ", 10))\n"
 }
 
+// transportSearch emits the index maintenance for one row.
+//
+// The document tenant is the organization because search_documents.tenant_id
+// has a foreign key to orgs: an organization is the only tenant the index can
+// store. That is why a user-scoped row travels with its owner in Fields —
+// search.Query.Filters is what a caller uses to narrow a search back to one
+// user, so a private row is not discoverable organization-wide by default —
+// and why `--search` is refused outright for a platform table, which has no
+// owning organization at all.
 func (r resourceSpec) transportSearch() string {
+	if r.scope == "user" {
+		return `
+// index$Exp$ and delete$Exp$Index keep the search document
+// for one row in step with the table. Both are fire-and-forget: a search hiccup
+// must never fail the mutation that already succeeded.
+func (s *Server) index$Exp$(ctx context.Context, tenantID, userID, id, name string) {
+	if s.searchIndex == nil {
+		return
+	}
+	// The index is organization-scoped, so the owning user rides along as a
+	// filterable field rather than as the tenant. Narrow a query with
+	// search.Query{Filters: map[string]string{"user_id": …}}; without that
+	// filter a search returns every user's rows in the organization.
+	_ = s.searchIndex.Upsert(ctx, search.Document{
+		TenantID: tenantID, Collection: "$table$", ID: id, Text: name,
+		Fields: map[string]string{"user_id": userID},
+	})
+}
+
+func (s *Server) delete$Exp$Index(ctx context.Context, tenantID, id string) {
+	if s.searchIndex != nil {
+		_ = s.searchIndex.Delete(ctx, tenantID, "$table$", id)
+	}
+}
+`
+	}
 	return `
 // index$Exp$ and delete$Exp$Index keep the search document
 // for one row in step with the table. Both are fire-and-forget: a search hiccup
@@ -577,15 +621,8 @@ func (s *Server) delete$Exp$Index(ctx context.Context, tenantID, id string) {
 `
 }
 
-// transportAPI emits the /api/v1 JSON transport: the same authorization rules
-// as the UI, Bearer-token identity, and the api package's error envelope.
-func (r resourceSpec) transportAPI() string {
-	// An API token carries an organization and no user, so the tenant is always
-	// the token's organization rather than the UI's scope-dependent value.
-	tenant := ""
-	if r.tenantColumn != "" {
-		tenant = "org.OrgID"
-	}
+// transportAPITypes is the JSON transport's shared vocabulary.
+func (r resourceSpec) transportAPITypes() string {
 	return `
 // $low$Response is the public shape of one row.
 // An explicit DTO, not the query row: pinning the fields here means adding a
@@ -604,15 +641,29 @@ func new$Exp$Response(id int64, name string, createdAt, updatedAt time.Time) $lo
 		UpdatedAt: updatedAt.UTC().Format(time.RFC3339),
 	}
 }
-
-type $low$APIRequest struct {
-	Name string ` + "`json:\"name\"`" + `
+`
 }
 
+// apiTenant is the tenant expression inside an API handler. A token carries an
+// organization and no user, so it is always the token's organization — and a
+// platform table, which has none, gets no tenant predicate at all.
+func (r resourceSpec) apiTenant() string {
+	if r.tenantColumn == "" {
+		return ""
+	}
+	return "org.OrgID"
+}
+
+func (r resourceSpec) transportAPIList() string {
+	declaration := ""
+	if r.tenantColumn != "" {
+		declaration = "\torg := identity.OrgFrom(ctx)\n"
+	}
+	return `
 // GET /api/v1/$plural$ (scope read).
 func (s *Server) handleAPIList$Exps$(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-` + r.apiOrgDeclaration() + `	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+` + declaration + `	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	if limit <= 0 || limit > 100 {
 		limit = 50
 	}
@@ -623,7 +674,7 @@ func (s *Server) handleAPIList$Exps$(w http.ResponseWriter, r *http.Request) {
 	// The JSON transport does not expose the UI's free-text filter, so the
 	// shared query runs with an empty one, which matches every row.
 	query := ""
-	rows, err := s.q.List$Exps$(ctx, ` + r.listArgs("List", "int32(limit)", "int32(offset)", tenant) + `)
+	rows, err := s.q.List$Exps$(ctx, ` + r.listArgs("List", "int32(limit)", "int32(offset)", r.apiTenant()) + `)
 	if err != nil {
 		api.WriteError(w, http.StatusInternalServerError, "internal_error", "Could not list $humanPlural$.")
 		return
@@ -633,6 +684,18 @@ func (s *Server) handleAPIList$Exps$(w http.ResponseWriter, r *http.Request) {
 		out = append(out, new$Exp$Response(row.ID, row.Name, row.CreatedAt.Time, row.UpdatedAt.Time))
 	}
 	api.WriteJSON(w, http.StatusOK, map[string]any{"items": out, "limit": limit, "offset": offset})
+}
+`
+}
+
+// transportAPIWrites is emitted only for a tenant-scoped table. A platform
+// table's writes need a staff check, and no API scope can impose one, so its
+// JSON transport is read-only and the mutations stay in /admin.
+func (r resourceSpec) transportAPIWrites() string {
+	tenant := r.apiTenant()
+	return `
+type $low$APIRequest struct {
+	Name string ` + "`json:\"name\"`" + `
 }
 
 // POST /api/v1/$plural$ (scope write).
@@ -716,18 +779,14 @@ func (s *Server) handleAPIDelete$Exp$(w http.ResponseWriter, r *http.Request) {
 `
 }
 
-// apiOrgDeclaration declares the organization in the list handler only when
-// that body reads it. It is the tenant filter and nothing else there, so a
-// platform-scoped table declares nothing.
-func (r resourceSpec) apiOrgDeclaration() string {
-	if r.tenantColumn == "" {
+// The API has no user in context, so an indexed row filed from there carries
+// only the organization. --api is refused for --scope user, so the owner field
+// the browser path adds can never be missing here.
+func (r resourceSpec) apiIndexCall(id, name string) string {
+	if !r.search {
 		return ""
 	}
-	return "\torg := identity.OrgFrom(ctx)\n"
-}
-
-func (r resourceSpec) apiIndexCall(id, name string) string {
-	return r.indexCall(id, name)
+	return "\ts.index$Exp$(ctx, org.OrgID, strconv.FormatInt(" + id + ", 10), " + name + ")\n"
 }
 
 func (r resourceSpec) apiDeleteIndexCall(id string) string {
@@ -794,31 +853,53 @@ type $Exp$Item struct {
 
 // $Exps$ListData is the read surface state.
 // One page of rows, the search term, the pager position, the base URL every
-// control links back to, and the form that shares the page. ReadOnly drops the
-// row actions, which is what makes the admin surface a read surface rather than
-// a second write path.
+// control links back to, and the form that shares the page.
+//
+// Writable marks the surface whose route scope owns the mutations — the app
+// page for a tenant-scoped table, the staff page for a platform one — so the
+// other surface renders the same table with no write controls. Admin marks the
+// staff layout, where showing a control additionally requires the viewer's
+// write role.
 type $Exps$ListData struct {
 	Items      []$Exp$Item
 	Query      string
 	Page       int
 	TotalPages int
 	BaseURL    string
-	ReadOnly   bool
+	Writable   bool
+	Admin      bool
 	Form       $Exp$FormData
 }
 
-// $Exp$FormData is the create/edit form state. ID 0 is a create.
+// $Exp$FormData is the create/edit form state. ID 0 is a create, and WriteURL
+// is the prefix the form posts to, which is not always the page's own URL.
 type $Exp$FormData struct {
-	ID      int64
-	Name    string
-	NameErr string
+	ID       int64
+	Name     string
+	NameErr  string
+	WriteURL string
+}
+
+// $lows$Writable is the one place that decides whether write controls render.
+// Default deny: an unset context inside the admin layout renders read-only, so
+// a support-role viewer sees the table and not controls that would 403.
+func $lows$Writable(ctx context.Context, d $Exps$ListData) bool {
+	if !d.Writable {
+		return false
+	}
+	if d.Admin {
+		return AdminWrite(ctx)
+	}
+	return true
 }
 `
 
 const templResourceAppPage = `
 templ $Exps$Page(d $Exps$ListData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "$slug$.title")})
-	@$Exp$Form(d.Form)
+	if $lows$Writable(ctx, d) {
+		@$Exp$Form(d.Form)
+	}
 	// The search box stays OUTSIDE the swap target: it morphs the table
 	// container on every keystroke, and a control inside the box it replaces is
 	// re-created mid-word, which loses the caret.
@@ -832,10 +913,14 @@ templ $Exps$Page(d $Exps$ListData) {
 `
 
 const templResourceAdminPage = `
-// Admin$Exps$Page is the staff read surface.
-// Same table, ReadOnly set by the handler, so the rows carry no write controls.
+// Admin$Exps$Page is the staff surface. It is the write surface for a platform
+// table and a read surface for a tenant-scoped one; the handler says which by
+// setting Writable, and $lows$Writable adds the write-role check.
 templ Admin$Exps$Page(d $Exps$ListData) {
 	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "$slug$.admin_title")})
+	if $lows$Writable(ctx, d) {
+		@$Exp$Form(d.Form)
+	}
 	@ui.TableToolbar(ui.TableToolbarOpts{Label: i18n.T(ctx, "$slug$.toolbar_label")}) {
 		@$lows$Search(d)
 	}
@@ -866,7 +951,7 @@ templ $Exps$Table(d $Exps$ListData) {
 			<tr id={ fmt.Sprintf("$slug$-%d", item.ID) } data-testid="$slug$-row">
 				<td class="px-4 py-3 font-medium">{ item.Name }</td>
 				<td class="px-4 py-3 text-fg-muted">{ item.CreatedAt.Format("Jan 2, 2006") }</td>
-				if !d.ReadOnly {
+				if $lows$Writable(ctx, d) {
 					<td class="px-4 py-3">
 						<div class="card-actions">
 							@ui.ButtonLink(ui.ButtonLinkOpts{
@@ -912,7 +997,7 @@ func $lows$Table(ctx context.Context, d $Exps$ListData) ui.DataTableOpts {
 		{Key: "name", Label: i18n.T(ctx, "$slug$.col_name")},
 		{Key: "created", Label: i18n.T(ctx, "$slug$.col_created")},
 	}
-	if !d.ReadOnly {
+	if $lows$Writable(ctx, d) {
 		columns = append(columns, ui.Column{Key: "actions", Label: i18n.T(ctx, "$slug$.col_actions"), Align: ui.AlignEnd})
 	}
 	return ui.DataTableOpts{
@@ -998,7 +1083,7 @@ templ $Exp$Form(d $Exp$FormData) {
 				// shows, and the button keeps an accessible name that is only
 				// its label.
 				@ui.Spinner(ui.SpinnerOpts{})
-				@ui.ButtonLink(ui.ButtonLinkOpts{Label: i18n.T(ctx, "$slug$.cancel"), Href: "$route$"})
+				@ui.ButtonLink(ui.ButtonLinkOpts{Label: i18n.T(ctx, "$slug$.cancel"), Href: d.WriteURL})
 			}
 		}
 	</div>
@@ -1015,9 +1100,9 @@ templ $Exp$FormPage(d $Exp$FormData) {
 // the row for an edit, which is the contract the handlers implement.
 func $low$FormAction(d $Exp$FormData) string {
 	if d.ID == 0 {
-		return "$route$"
+		return d.WriteURL
 	}
-	return fmt.Sprintf("$route$/%d", d.ID)
+	return fmt.Sprintf("%s/%d", d.WriteURL, d.ID)
 }
 
 func $low$SubmitLabel(ctx context.Context, d $Exp$FormData) string {
@@ -1078,7 +1163,8 @@ func (r resourceSpec) locales() map[string]map[string]string {
 
 // openapi is the module's slice of the /api/v1 contract. Every declared API
 // route needs an operation or generation refuses, which is the point: an
-// endpoint cannot ship undocumented.
+// endpoint cannot ship undocumented. A platform table declares only the read,
+// because that is the only API route it is given.
 func (r resourceSpec) openapi() *modkit.OpenAPIContribution {
 	schema, tag := r.exported, r.plural
 	object := map[string]any{
@@ -1124,40 +1210,37 @@ func (r resourceSpec) openapi() *modkit.OpenAPIContribution {
 		}
 		return rawJSON(out)
 	}
-	return &modkit.OpenAPIContribution{
-		Tags: []modkit.OpenAPITag{{Name: tag, Description: "The project-local " + r.humanPlural + " collection."}},
-		Components: map[string]map[string]json.RawMessage{
-			"schemas": {schema: rawJSON(object)},
-		},
-		Operations: []modkit.OpenAPIOperation{
-			{
-				RouteID: "api." + r.slug + ".list", OperationID: "list" + r.exports,
-				Summary: "List " + r.humanPlural + ".", Tags: []string{tag},
-				Parameters: rawJSON([]any{
-					map[string]any{"name": "limit", "in": "query", "required": false,
-						"description": "Page size. Values outside 1-100 fall back to the default.",
-						"schema":      map[string]any{"type": "integer", "minimum": 1, "maximum": 100, "default": 50}},
-					map[string]any{"name": "offset", "in": "query", "required": false,
-						"description": "Rows to skip; negative values are treated as 0.",
-						"schema":      map[string]any{"type": "integer", "minimum": 0, "default": 0}},
-				}),
-				Responses: responses(map[string]any{
-					"200": map[string]any{
-						"description": "A page of " + r.humanPlural + ".",
-						"content": map[string]any{"application/json": map[string]any{"schema": map[string]any{
-							"type": "object",
-							"properties": map[string]any{
-								"items": map[string]any{"type": "array",
-									"items": map[string]any{"$ref": "#/components/schemas/" + schema}},
-								"limit":  map[string]any{"type": "integer"},
-								"offset": map[string]any{"type": "integer"},
-							},
-							"required": []string{"items", "limit", "offset"},
-						}}},
+
+	operations := []modkit.OpenAPIOperation{{
+		RouteID: "api." + r.slug + ".list", OperationID: "list" + r.exports,
+		Summary: "List " + r.humanPlural + ".", Tags: []string{tag},
+		Parameters: rawJSON([]any{
+			map[string]any{"name": "limit", "in": "query", "required": false,
+				"description": "Page size. Values outside 1-100 fall back to the default.",
+				"schema":      map[string]any{"type": "integer", "minimum": 1, "maximum": 100, "default": 50}},
+			map[string]any{"name": "offset", "in": "query", "required": false,
+				"description": "Rows to skip; negative values are treated as 0.",
+				"schema":      map[string]any{"type": "integer", "minimum": 0, "default": 0}},
+		}),
+		Responses: responses(map[string]any{
+			"200": map[string]any{
+				"description": "A page of " + r.humanPlural + ".",
+				"content": map[string]any{"application/json": map[string]any{"schema": map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"items": map[string]any{"type": "array",
+							"items": map[string]any{"$ref": "#/components/schemas/" + schema}},
+						"limit":  map[string]any{"type": "integer"},
+						"offset": map[string]any{"type": "integer"},
 					},
-				}),
+					"required": []string{"items", "limit", "offset"},
+				}}},
 			},
-			{
+		}),
+	}}
+	if r.apiWrite() {
+		operations = append(operations,
+			modkit.OpenAPIOperation{
 				RouteID: "api." + r.slug + ".create", OperationID: "create" + r.exported,
 				Summary: "Create one " + r.humanSingular + ".", Tags: []string{tag},
 				RequestBody: rawJSON(requestBody),
@@ -1167,7 +1250,7 @@ func (r resourceSpec) openapi() *modkit.OpenAPIContribution {
 					"422": map[string]any{"$ref": "#/components/responses/ValidationError"},
 				}),
 			},
-			{
+			modkit.OpenAPIOperation{
 				RouteID: "api." + r.slug + ".update", OperationID: "update" + r.exported,
 				Summary: "Update one " + r.humanSingular + ".", Tags: []string{tag},
 				Parameters:  rawJSON([]any{pathIDParameter()}),
@@ -1179,7 +1262,7 @@ func (r resourceSpec) openapi() *modkit.OpenAPIContribution {
 					"422": map[string]any{"$ref": "#/components/responses/ValidationError"},
 				}),
 			},
-			{
+			modkit.OpenAPIOperation{
 				RouteID: "api." + r.slug + ".delete", OperationID: "delete" + r.exported,
 				Summary: "Delete one " + r.humanSingular + ".", Tags: []string{tag},
 				Parameters: rawJSON([]any{pathIDParameter()}),
@@ -1188,7 +1271,14 @@ func (r resourceSpec) openapi() *modkit.OpenAPIContribution {
 					"404": notFound,
 				}),
 			},
+		)
+	}
+	return &modkit.OpenAPIContribution{
+		Tags: []modkit.OpenAPITag{{Name: tag, Description: "The project-local " + r.humanPlural + " collection."}},
+		Components: map[string]map[string]json.RawMessage{
+			"schemas": {schema: rawJSON(object)},
 		},
+		Operations: operations,
 	}
 }
 

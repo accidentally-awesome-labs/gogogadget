@@ -193,3 +193,172 @@ tree came back byte for byte after removal with only the immutable migration ret
 5. **`materializeManifest` now returns the completed manifest.** That fixed a real latent defect —
    `previewCreate` was validating a manifest with no files — but it changes what every `ggg create`
    kind reports in its plan, not just `resource`.
+
+
+---
+
+# Fix round 1 — response to `task-a-review-findings.md`
+
+Verdict was spec compliance WARN, task quality FAIL, with two Criticals in the *generated output*.
+Both were real. Every item is fixed: C1, C2, I1, I2, M1, M2. The "not in scope" pager locale gap
+was left alone.
+
+## C1 — `--scope platform` emitted unguarded app-scope writes
+
+**The finding was correct and it was the worse of the two holes I had reasoned about.** I refused
+`--api --scope user` for exactly this class of problem and then shipped the same problem on the
+browser transport: `POST`/`POST`/`DELETE` at `modkit.RouteApp`, no tenant predicate in the
+statements because a platform table has none, and no staff check because the app middleware group
+is `requireAuth → requireNotDisabled → requireOrg → loadPlan`. `ggg create resource Banner --scope
+platform` handed every authenticated member of every organization create, rename and delete on a
+global table.
+
+Fixed by moving a platform table's mutations into the group that can authorise them rather than by
+refusing the shape — a platform resource is a real thing (`announcements`, `feature_flags`,
+`content_entries` all are), it just is not tenant-owned, so its writes belong to staff:
+
+- New `resourceSpec.writeBase()` / `writeScope()` / `writePolicy()` / `writeLayout()`. For a
+  tenant-scoped table they are the app route, `RouteApp`, `RoutePolicy{}`; for a platform table
+  `/admin/<plural>`, `RouteAdmin`, `RoutePolicy{AdminWrite: true}`.
+- The staff page is no longer optional on a platform table — it is the write surface — so
+  `resolveResourceSpec` sets `spec.admin` for `platform && uiRead()`. `--no-ui --admin` still
+  refuses on the operator's own flags, so the implication cannot fire behind that check.
+- Exactly one surface owns the writes, and only that one carries the form and the `?edit=<id>`
+  lookup. `transportReadPage`/`transportAdmin` collapsed into one `transportListSurface(admin
+  bool)`; `writable := admin == (r.tenantColumn == "")`.
+- The view struct's `ReadOnly` became `Writable` + `Admin`, and the templ gained one predicate,
+  `<lows>Writable(ctx, d)`, that both pages and the table row actions use. Inside the admin layout
+  it additionally requires `templates.AdminWrite(ctx)` — the shipped idiom from
+  `admin_announcements.templ` / `admin_flags.templ` — so a support-role viewer gets the table and
+  not controls that would 403. Default deny: an unset context renders read-only.
+- `<Exp>FormData` gained `WriteURL`, set in one place (`render<Exp>FormError`, and the list
+  surface) so the form action and the cancel link follow the write scope instead of the page URL.
+
+**The same hole existed on the JSON transport and the review did not name it.** `api-write` is
+token-authenticated with no staff check and no scope that could add one, so a platform table's API
+writes were the identical unguarded global mutation. `--api --scope platform` now emits the read
+route only (`apiWrite() = api && tenantColumn != ""`), and its OpenAPI slice documents one
+operation. A global *read* is what "platform" means, so that stays.
+
+Observed for `--scope platform --api`:
+
+```
+GET    /api/v1/banners      scope=api-read  admin_write=false -> handleAPIListBanners
+GET    /app/banners         scope=app       admin_write=false -> handleBanners
+GET    /admin/banners       scope=admin     admin_write=false -> handleAdminBanners
+POST   /admin/banners       scope=admin     admin_write=true  -> handleBannerCreate
+POST   /admin/banners/{id}  scope=admin     admin_write=true  -> handleBannerUpdate
+DELETE /admin/banners/{id}  scope=admin     admin_write=true  -> handleBannerDelete
+```
+
+## C2 — `--search` filed documents under the acting organization for every scope
+
+Also correct, including that my comment claiming the seam forced it was false —
+`search.Document.Fields` and `search.Query.Filters` exist.
+
+- **user scope**: `index<Exp>(ctx, tenantID, userID, id, name)` sets
+  `Fields: map[string]string{"user_id": userID}`, and the call sites pass `user.UserID`. The tenant
+  stays the organization because `search_documents.tenant_id` has a foreign key to `orgs` — that is
+  the real constraint — and the owner is what a caller narrows on with `search.Query.Filters`.
+- **platform scope**: `--search` is refused. There is no correct tenant, and filing a global row
+  under whichever organization's staff member wrote it would both misattribute it and hide it from
+  every other organization.
+- The false comment is gone; `transportSearch`'s doc comment now states the FK, why the owner is a
+  field, and why platform is refused.
+
+## I1 — the refusal matrix is recorded, not just commented
+
+`task-a-brief.md`'s flag list now carries all four behaviours (`--no-ui --admin`, `--api --scope
+user`, `--api --scope platform` read-only, `--search --scope platform`) plus the platform
+write-scope rule, each with its one-line reason. The report's decision list already had the
+`--api --scope user` reasoning and now has the rest.
+
+## I2 — locale coverage across the flag shapes
+
+`TestCreateResourceLocalesCoverEveryTemplateKey` is replaced by
+`TestCreateResourceLocalesCoverEveryUsedKey`, which runs 5 flag shapes × 3 scopes (skipping the
+unreachable ones through a shared `reachableResourceShape` helper) and builds the used-key set as
+*template keys ∪ navigation label keys*. That removes the `HasSuffix(key, ".nav")` exemption that
+never matched `admin_nav`, so both `admin_title` and `admin_nav` are now checked in `en` and `es`,
+and the "declared but unread" direction is exact rather than approximate.
+
+## M1 — the form struct follows the form
+
+`needsFormInput()` (UI writes) is now separate from `needsValidator()` (UI writes or API writes),
+so `--no-ui --api` emits the shared validator both transports run and no `form:"name"` struct that
+nothing decodes.
+
+## M2 — the duplicated sqlc path fails loudly
+
+`assertSQLCOutputDir` reads `sqlc.yaml` and refuses when it no longer names `sqlcOutputDir`
+(`internal/db/sqlc`) or `sqlcQueryDir` (`internal/db/queries`), and the validator calls it — plus
+asserts the captured baseline is non-empty — before running sqlc for a query-owning closure. A
+moved output directory would otherwise have made the post-removal restore a silent no-op and let
+the generated package leak past removal. Covered by
+`TestExampleValidatorRefusesAMovedSQLCOutput`, which checks this repository passes and that a
+moved output, a renamed queries directory and a missing config each fail.
+
+## Tests added
+
+- `TestCreateResourcePlatformScopeKeepsWritesOutOfTheAppGroup` — for `{}`, `{API}`, `{Admin}` on
+  `--scope platform`: no `RouteApp` route has a non-GET method, no `RouteAPIWrite` route exists at
+  all, the three mutations are `RouteAdmin` + `AdminWrite` under `/admin/banners`, the staff page
+  and its nav entry exist however `--admin` was passed, `--api` documents only the list — and a
+  tenant-scoped table still keeps its create in the app group.
+- `TestCreateResourceSearchScopesUserRowsByOwner` — the user-scope helper signature, the `user_id`
+  field, the call site passing `user.UserID`; and that the org-scope helper files no `user_id` it
+  cannot mean.
+- `TestCreateResourceRefusesSearchForPlatformScope` — refusal text + exit 2.
+- `TestCreateResourceLocalesCoverEveryUsedKey` — as above.
+- `TestExampleValidatorRefusesAMovedSQLCOutput` — as above.
+
+`TestCreateResourceEmitsCanonicalGo` now skips through `reachableResourceShape`, so it covers
+8 shapes × 3 scopes minus the four refused combinations.
+
+## Commands run
+
+```
+# all three scopes compiled for real, not just parsed: emitted slice installed by hand,
+# sqlc + templ generated, built, vetted, design-system test run over the emitted templ
+$ go tool sqlc generate && go tool templ generate -f internal/web/templates/banner.templ
+$ go build ./internal/...            → BUILD_OK      (--scope platform --api)
+$ go vet ./internal/web/...          → VET_OK
+$ go test ./internal/web/templates   → ok            (design-system rules over the emitted templ)
+$ ... same for --scope user --search → BUILD_OK, ok
+# both reverted, sqlc regenerated, tree clean
+
+$ GGG_UPDATE_RESOURCE_FIXTURE=1 go test ./internal/gggcli -run TestCreateResourceMatchesExampleFixture
+ok      # org-scope output did change (Writable/Admin/WriteURL, search comment), so the fixture
+        # was regenerated; module.json changed in its two payload digests only — no org route moved
+
+$ go test ./internal/gggcli ./internal/modkit -count=1
+ok  github.com/gogogadget/gogogadget/internal/gggcli   0.439s
+ok  github.com/gogogadget/gogogadget/internal/modkit   7.765s
+$ go vet ./internal/gggcli ./internal/modkit           → clean
+$ gofmt -l internal/gggcli internal/modkit             → clean
+
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline && go run ./cmd/ggg sync --check --offline
+registry 98b29a3b1afa7358798a03ee83661658ba7c8fa2c5893b83522ffbdb59c8f76b   # no drift
+
+$ go run ./cmd/ggg registry validate
+  info  example_closure_verified workflow closure ggg/workflow/example-resource: installed 5 file(s),
+        regenerated 30, compiled, 1844 tree entries restored byte for byte,
+        retained migration(s) internal/db/migrations/0027_ggg_example_resource.sql
+  ... all 8 closures verified, exit 0
+```
+
+## Remaining concerns after this round
+
+1. **The compile proof still covers one shape through `registry validate`.** Platform and user
+   scope were compiled, vetted and design-system-tested by hand in this round (output above), which
+   is stronger than the parse-only coverage I reported last time, but it is not a standing gate. A
+   second example closure at `--scope platform` would make it one; it needs a second table and a
+   second migration in the fixture registry.
+2. **`--api --scope platform` now emits one route where the flag reads like four.** It is
+   documented in the brief, the generated comment and the openapi slice, and the alternative was
+   either an unguarded global write or refusing a useful read. Worth a line in the docs recast.
+3. **`--scope platform` implies `--admin`.** Passing `--admin` explicitly there is a no-op rather
+   than an error. Refusing it would be more pedantic than helpful, but it does mean the flag's
+   effect depends on the scope.
+4. Items 3–5 of the original concern list (visual baseline, no `content/docs` page for `ggg
+   create`, `materializeManifest` now returning the completed manifest) are unchanged.
