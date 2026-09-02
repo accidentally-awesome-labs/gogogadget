@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "8e8bc5457d43a19a1bddb3af0e9bdbd78f1b0d926e106f68730c36be373cf5f0"
+      "sha256": "2d9ee1eebac95d978bc545deb4335f3f1e9d752fd20d773b488f8ba320b35c0c"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",

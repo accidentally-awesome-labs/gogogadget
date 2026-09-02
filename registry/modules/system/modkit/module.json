@@ -532,7 +532,7 @@
         "source": "internal/modkit/ownership_test.go",
         "target": "internal/modkit/ownership_test.go",
         "class": "test",
-        "sha256": "1ecf87fc6d39e6c49557f264cf98bc51edc6ce984497e61c9879afbe54b27990",
+        "sha256": "9cb75634750871920134ad32a20f7c32e9a631e27d22f191a90d0e05f8737563",
         "rewrite_module": true,
         "contract": false
       },

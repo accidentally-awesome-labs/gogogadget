@@ -46,6 +46,7 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 	projectOwned := map[string]bool{
 		"go.mod": true, "go.sum": true,
 		"gogogadget.json": true, "gogogadget.lock.json": true,
+		".gitattributes": true, ".gitignore": true,
 	}
 
 	var orphans []string
