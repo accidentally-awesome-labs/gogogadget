@@ -1,0 +1,169 @@
+package ledger
+
+import (
+	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/audit"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+// The contract table an external adapter owes the slot it implements. It
+// installs with the module, so a consumer who adds this adapter also gets
+// the proof that it satisfies audit.Exporter — the same table the core
+// adapters are held to, run against a third party's code.
+
+func TestLedgerSatisfiesTheExporterContract(t *testing.T) {
+	var exporter audit.Exporter = NewFileExporter(t.TempDir())
+	require.NotNil(t, exporter)
+}
+
+func TestFileTargetAppendsOneRecordPerEntry(t *testing.T) {
+	dir := t.TempDir()
+	exporter := NewFileExporter(dir)
+	t.Cleanup(func() { _ = exporter.Close() })
+
+	assert.Equal(t, TargetFile, exporter.Target())
+	for _, action := range []string{"project.created", "project.deleted"} {
+		require.NoError(t, exporter.Export(context.Background(), audit.Entry{
+			ID: "aud_" + action, OrgID: "org_1", UserID: "usr_1", Action: action,
+			Metadata: map[string]any{"source": "contract-test"},
+		}))
+	}
+
+	raw, err := os.ReadFile(filepath.Join(dir, ledgerFile))
+	require.NoError(t, err)
+	lines := strings.Split(strings.TrimSpace(string(raw)), "\n")
+	require.Len(t, lines, 2)
+
+	var first record
+	require.NoError(t, json.Unmarshal([]byte(lines[0]), &first))
+	assert.Equal(t, "project.created", first.Action)
+	assert.Equal(t, "org_1", first.OrgID)
+	assert.Equal(t, "usr_1", first.UserID)
+	assert.Equal(t, "contract-test", first.Metadata["source"])
+}
+
+func TestCloudTargetPostsWithBearerToken(t *testing.T) {
+	var seen []byte
+	var authorization string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authorization = r.Header.Get("Authorization")
+		seen, _ = io.ReadAll(r.Body)
+		w.WriteHeader(http.StatusAccepted)
+	}))
+	t.Cleanup(server.Close)
+
+	exporter := NewCloudExporter(server.URL, "tok_live")
+	assert.Equal(t, TargetCloud, exporter.Target())
+	require.NoError(t, exporter.Export(context.Background(), audit.Entry{ID: "aud_1", Action: "org.updated"}))
+
+	assert.Equal(t, "Bearer tok_live", authorization)
+	var posted record
+	require.NoError(t, json.Unmarshal(seen, &posted))
+	assert.Equal(t, "org.updated", posted.Action)
+}
+
+// A managed target with no credential is an error the caller sees, never a
+// silent local fallback: the audit ledger a compliance reviewer reads must
+// not quietly become a file in tmp/.
+func TestCloudTargetWithoutTokenRefuses(t *testing.T) {
+	err := (&Exporter{Endpoint: "https://ledger.gadgetworks.example/v1/events"}).
+		Export(context.Background(), audit.Entry{Action: "x"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), EnvToken)
+}
+
+func TestProviderErrorsPropagateToTheCaller(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	t.Cleanup(server.Close)
+
+	err := NewCloudExporter(server.URL, "tok_live").Export(context.Background(), audit.Entry{Action: "x"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "500")
+}
+
+func TestExportHonorsACancelledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	err := NewFileExporter(t.TempDir()).Export(ctx, audit.Entry{Action: "x"})
+	require.ErrorIs(t, err, context.Canceled)
+}
+
+func TestHealthReportsTheConfiguredTarget(t *testing.T) {
+	require.NoError(t, NewFileExporter(filepath.Join(t.TempDir(), "nested")).Health(context.Background()))
+	require.NoError(t, NewCloudExporter("https://ledger.gadgetworks.example", "tok").Health(context.Background()))
+	require.Error(t, (&Exporter{Endpoint: "https://ledger.gadgetworks.example"}).Health(context.Background()))
+}
+
+// Half of the lifecycle contract every buffering adapter owes: the close runs
+// at most once and a second caller gets the same answer, because shutdown
+// paths reach Stop more than once.
+func TestModuleStopIsIdempotent(t *testing.T) {
+	host := apphost.Map(map[string]string{EnvDir: t.TempDir()}, time.Unix(0, 0).UTC(), "test")
+	module, err := NewModule(context.Background(), host, Deps{})
+	require.NoError(t, err)
+	require.Equal(t, TargetFile, module.Value.Target())
+	require.NoError(t, module.Value.Export(context.Background(), audit.Entry{Action: "x"}))
+
+	require.NoError(t, module.Stop(context.Background()))
+	require.NoError(t, module.Stop(context.Background()))
+
+	err = module.Value.Export(context.Background(), audit.Entry{Action: "after-close"})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "closed")
+}
+
+// The other half: a close that has not finished must not outlive the
+// caller's deadline. The once is consumed without ever closing the channel,
+// which is exactly the shape of a shutdown blocked on a stuck provider.
+func TestModuleStopHonorsTheCallersDeadline(t *testing.T) {
+	blocked := &Module{Value: NewFileExporter(t.TempDir()), closed: make(chan struct{})}
+	blocked.closeOnce.Do(func() {})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	t.Cleanup(cancel)
+	require.ErrorIs(t, blocked.Stop(ctx), context.DeadlineExceeded)
+}
+
+// The managed selection is refused at boot, not at the first export: an
+// operator who chose ledger-cloud and forgot the token must be told during
+// startup, with the key named.
+func TestNewModuleRefusesAnIncompleteManagedSelection(t *testing.T) {
+	host := apphost.Map(map[string]string{EnvEndpoint: "https://ledger.gadgetworks.example"}, time.Unix(0, 0).UTC(), "test")
+	_, err := NewModule(context.Background(), host, Deps{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), EnvToken)
+}
+
+func TestNewModulePrefersTheEndpointOverTheLocalFile(t *testing.T) {
+	host := apphost.Map(map[string]string{
+		EnvDir:      t.TempDir(),
+		EnvEndpoint: "https://ledger.gadgetworks.example",
+		EnvToken:    "tok_live",
+	}, time.Unix(0, 0).UTC(), "test")
+	module, err := NewModule(context.Background(), host, Deps{})
+	require.NoError(t, err)
+	assert.Equal(t, TargetCloud, module.Value.Target())
+}
+
+// The declared targets and slot are the manifest's, and code that branches
+// on a target name must use the declared spelling.
+func TestDeclaredIdentityIsStable(t *testing.T) {
+	assert.Equal(t, "gadgetworks/system/audit-export-ledger", ModuleID)
+	assert.Equal(t, "ggg/audit-export", Slot)
+	assert.Equal(t, "ledger-file", TargetFile)
+	assert.Equal(t, "ledger-cloud", TargetCloud)
+}

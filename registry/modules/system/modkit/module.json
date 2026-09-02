@@ -4,7 +4,7 @@
     "id": "ggg/system/modkit",
     "kind": "system",
     "name": "modkit",
-    "revision": 7,
+    "revision": 8,
     "contract": 2,
     "title": "Module registry engine",
     "description": "The registry engine and the ggg command line: catalog loading, dependency resolution, conflict-aware sync, pristine-only removal, transactional apply, and deterministic generation.",
@@ -124,7 +124,15 @@
         "source": "internal/gggcli/executors.go",
         "target": "internal/gggcli/executors.go",
         "class": "go",
-        "sha256": "ae9df44369339b5472074f005d1fed481e08138be410dbeec4052d25287b2b98",
+        "sha256": "090ca6557379d7b410268b8812c86351354c342d48316131bc3983a3769dc149",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "internal/gggcli/external_template_test.go",
+        "target": "internal/gggcli/external_template_test.go",
+        "class": "test",
+        "sha256": "7ec9b44e70bcf0aa41322e0861e68978c6ef8aecbfce48ce56637f2d2ae8018d",
         "rewrite_module": true,
         "contract": false
       },
@@ -140,7 +148,7 @@
         "source": "internal/gggcli/handlers.go",
         "target": "internal/gggcli/handlers.go",
         "class": "go",
-        "sha256": "57f2030d557d9e640d8374de06dbb46ef470a6dd725b43cedc36108fe185b79c",
+        "sha256": "6e7526835e484669e7010da853b2743d99ae591fe64885abd855f9fcf798762c",
         "rewrite_module": true,
         "contract": false
       },
@@ -172,7 +180,7 @@
         "source": "internal/gggcli/ported_test.go",
         "target": "internal/gggcli/ported_test.go",
         "class": "test",
-        "sha256": "c1e5d1740fd814270839470e751e1bf1a39bd8842c1a1efbe742e974530d3b72",
+        "sha256": "4df394f1f49b542dad10b54fd80d1ea10868e68e621c60b0c2d784f75a386c0c",
         "rewrite_module": true,
         "contract": false
       },
@@ -204,7 +212,7 @@
         "source": "internal/gggcli/registry_authors.go",
         "target": "internal/gggcli/registry_authors.go",
         "class": "go",
-        "sha256": "fa9174da44f06038d8f286a862a78ff59a9e111c2af42c9dc610944826caa615",
+        "sha256": "d1880a9b00447295f318073e88216a0ebfdc4f4b893b8444fc5cff0028564c1d",
         "rewrite_module": true,
         "contract": false
       },
@@ -412,7 +420,7 @@
         "source": "internal/modkit/example.go",
         "target": "internal/modkit/example.go",
         "class": "go",
-        "sha256": "597a79244ee8d3d455ba78c222430c152c1b0e232496b5c5ad718754f6feb297",
+        "sha256": "8d5e848d27cd24cec2bb432339b76a9a73f353d51438edb202a32c6e1289fc37",
         "rewrite_module": true,
         "contract": false
       },
@@ -420,7 +428,7 @@
         "source": "internal/modkit/example_test.go",
         "target": "internal/modkit/example_test.go",
         "class": "test",
-        "sha256": "db8afe76e8e35182767b9dc0896bb8b0507e1d4cae4c5e6feb79f9788bf52859",
+        "sha256": "d0e3ed088ae1ed30a42b130870b973040814faae307b7e38a44d26231cf3e387",
         "rewrite_module": true,
         "contract": false
       },
@@ -433,10 +441,18 @@
         "contract": false
       },
       {
+        "source": "internal/modkit/external_template_test.go",
+        "target": "internal/modkit/external_template_test.go",
+        "class": "test",
+        "sha256": "0e2b146f3fb02e56920563bb1468c6c7baddc686aeea394e010c8a7be6cd0bcc",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
         "source": "internal/modkit/generate.go",
         "target": "internal/modkit/generate.go",
         "class": "go",
-        "sha256": "dbec592a9f425809e2a78ed8949f6c9593080b5a08e5b3580550ca2047b2c242",
+        "sha256": "ce39cb3d25c26056362c1b62b41dcf597d45896349e5432592cb616ec48051e3",
         "rewrite_module": true,
         "contract": false
       },
@@ -444,7 +460,7 @@
         "source": "internal/modkit/generate_test.go",
         "target": "internal/modkit/generate_test.go",
         "class": "test",
-        "sha256": "ec4258d051abc15c81bfbfbe2a1785d21e5a93ee87666bcbfe17a09684e6f632",
+        "sha256": "a8bfe1f0b4ebeea883835bfa2b0ca8c7728115b4ff33e6f1af8213f4ffdaa7d5",
         "rewrite_module": true,
         "contract": false
       },

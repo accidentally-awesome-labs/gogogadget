@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -39,6 +40,24 @@ func (c *Controller) registryDirFlag(dir string) string {
 		return "."
 	}
 	return "."
+}
+
+// registryBuildDir resolves the registry tree `ggg registry build` rebuilds.
+// Absent --dir it is the project root, which is the self-hosting layout every
+// existing caller relies on. An explicit --dir is project-relative — a
+// publisher building a registry that is not the project root, and this
+// repository rebuilding the external-registry template it ships — and may not
+// escape the root, because build rewrites manifests and indexes in place.
+func (c *Controller) registryBuildDir(dir string) (string, error) {
+	root := c.rootDir()
+	trimmed := strings.TrimSpace(dir)
+	if trimmed == "" {
+		return root, nil
+	}
+	if filepath.IsAbs(trimmed) || trimmed != dir || strings.Contains(trimmed, "..") {
+		return "", usageError("registry build --dir must be a project-relative path")
+	}
+	return filepath.Join(root, filepath.FromSlash(trimmed)), nil
 }
 
 func runRegistryInit(cc CommandContext, parsed parsedArgs) (Result, error) {

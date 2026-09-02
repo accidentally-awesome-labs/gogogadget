@@ -1257,8 +1257,10 @@ func TestEnvExampleAndReferenceCoverEveryDeclaredKey(t *testing.T) {
 	if !strings.Contains(example, "APP_ENV=development") {
 		t.Fatalf(".env.example must carry non-secret defaults:\n%s", example)
 	}
-	// The reference states what production refuses to boot without.
-	if !strings.Contains(reference, "| `DATABASE_URL` | `ggg/system/example` | **production** |") {
+	// The reference states what production refuses to boot without, and names
+	// the registry the declaring module came from — this fixture's lock
+	// records no namespace, so the source cell is a stated absence.
+	if !strings.Contains(reference, "| `DATABASE_URL` | `ggg/system/example` | \u2014 | **production** |") {
 		t.Fatalf("reference must mark production-required keys:\n%s", reference)
 	}
 	// Bounds reach the reader rather than living only in the error message.

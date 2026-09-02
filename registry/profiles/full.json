@@ -246,6 +246,7 @@
       "ggg/system/realtime",
       "ggg/system/realtime-ably",
       "ggg/system/realtime-postgres",
+      "ggg/system/registry-template",
       "ggg/system/schedules",
       "ggg/system/search",
       "ggg/system/search-postgres",

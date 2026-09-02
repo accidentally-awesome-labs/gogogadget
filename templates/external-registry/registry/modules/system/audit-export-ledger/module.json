@@ -1,0 +1,208 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "gadgetworks/system/audit-export-ledger",
+    "kind": "system",
+    "name": "audit-export-ledger",
+    "revision": 1,
+    "contract": 1,
+    "title": "Gadgetworks audit ledger",
+    "description": "External adapter for the ggg/audit-export slot, with a zero-account file target and a managed cloud target.",
+    "requires": [
+      {
+        "id": "ggg/system/apphost",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/audit-export",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/modkit",
+        "contract": {
+          "min": 2,
+          "max": 2
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/stretchr/testify",
+          "version": "v1.11.1"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "registry/modules/system/audit-export-ledger/cli.go.txt",
+        "target": "internal/gadgetworks/ledger/cli/cli.go",
+        "class": "go",
+        "sha256": "e7ea655e47317ebbf4985f2667ce2fba118dc7e019c74406e7be5d28d38b2278",
+        "rewrite_module": true,
+        "contract": false
+      },
+      {
+        "source": "registry/modules/system/audit-export-ledger/ledger.go.txt",
+        "target": "internal/gadgetworks/ledger/ledger.go",
+        "class": "go",
+        "sha256": "914ced884dcaf866cf2c93c8279f5318bf8f1ac8ebea076fdcd39fe0428c8176",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/system/audit-export-ledger/ledger_test.go.txt",
+        "target": "internal/gadgetworks/ledger/ledger_test.go",
+        "class": "test",
+        "sha256": "a6944ed91378ae46eb8b14f2f37a43695e00668fc0ca73b2fce0a0f5e6fb1f57",
+        "rewrite_module": true,
+        "contract": false
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/gadgetworks/ledger",
+        "internal/gadgetworks/ledger/cli"
+      ],
+      "cli": [
+        "ledger"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/gadgetworks/ledger",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [
+          {
+            "field": "Value",
+            "capability": "audit.exporter",
+            "type": "audit.Exporter"
+          }
+        ],
+        "type_imports": [
+          "internal/audit"
+        ],
+        "start": false,
+        "stop": true,
+        "health": true,
+        "adapter": {
+          "slot": "ggg/audit-export",
+          "targets": [
+            {
+              "id": "ledger-cloud",
+              "title": "Gadgetworks Ledger Cloud",
+              "mode": "managed",
+              "environments": [
+                "production"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gadgetworks.example/docs/ledger",
+              "console_url": "https://app.gadgetworks.example/ledger",
+              "inputs": [
+                {
+                  "key": "endpoint",
+                  "env_key": "GADGETWORKS_LEDGER_ENDPOINT",
+                  "label": "Ledger ingest endpoint",
+                  "type": "url",
+                  "required": true,
+                  "secret": false
+                },
+                {
+                  "key": "token",
+                  "env_key": "GADGETWORKS_LEDGER_TOKEN",
+                  "label": "Ledger API token",
+                  "type": "string",
+                  "required": true,
+                  "secret": true
+                }
+              ]
+            },
+            {
+              "id": "ledger-file",
+              "title": "Gadgetworks Ledger file",
+              "mode": "development",
+              "environments": [
+                "development",
+                "test"
+              ],
+              "automation": "manual",
+              "docs_url": "https://gadgetworks.example/docs/ledger-file",
+              "inputs": [
+                {
+                  "key": "dir",
+                  "env_key": "GADGETWORKS_LEDGER_DIR",
+                  "label": "Ledger directory",
+                  "type": "string",
+                  "required": false,
+                  "secret": false
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "cli": [
+        {
+          "name": "ledger",
+          "summary": "Report the Gadgetworks ledger selection for this project",
+          "package": "internal/gadgetworks/ledger/cli",
+          "handler": "Run"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [
+      {
+        "key": "GADGETWORKS_LEDGER_DIR",
+        "field": "GadgetworksLedgerDir",
+        "type": "string",
+        "description": "Directory the Gadgetworks ledger file target appends to",
+        "default": "tmp/gadgetworks-ledger",
+        "targets": [
+          "gadgetworks/system/audit-export-ledger@ledger-file"
+        ]
+      },
+      {
+        "key": "GADGETWORKS_LEDGER_ENDPOINT",
+        "field": "GadgetworksLedgerEndpoint",
+        "type": "string",
+        "description": "Gadgetworks Ledger Cloud ingest endpoint",
+        "required": true,
+        "targets": [
+          "gadgetworks/system/audit-export-ledger@ledger-cloud"
+        ]
+      },
+      {
+        "key": "GADGETWORKS_LEDGER_TOKEN",
+        "field": "GadgetworksLedgerToken",
+        "type": "string",
+        "description": "Gadgetworks Ledger Cloud API token",
+        "required": true,
+        "secret": true,
+        "targets": [
+          "gadgetworks/system/audit-export-ledger@ledger-cloud"
+        ]
+      }
+    ],
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/gadgetworks/ledger"
+      ],
+      "capabilities": [
+        "audit.exporter"
+      ]
+    },
+    "data": [],
+    "removal_policy": "free"
+  }
+}

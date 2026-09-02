@@ -1,0 +1,83 @@
+// Package cli is the `ggg ledger` command this module contributes.
+//
+// It is the whole of the contributed-command boundary. A handler receives a
+// gggcli.CommandContext, and the only route it has back into the project is
+// cc.Controller: it can ask the controller to execute a read or preview a
+// mutation, and it can write to cc.Out. It never holds SecretValues, never
+// constructs a provider client, never reaches a deploy client, and never
+// shells out — net/http, os/exec, and the provider seams are refused in a
+// handler package by ValidateCLIHandlerPackages, so this boundary is checked
+// at sync time rather than trusted.
+//
+// Installation executes nothing. This code runs only when an operator types
+// `ggg ledger`.
+package cli
+
+import (
+	"context"
+	"fmt"
+	"sort"
+
+	"example.com/gadgetworks/ggg-registry/internal/gadgetworks/ledger"
+	"github.com/gogogadget/gogogadget/internal/gggcli"
+	"github.com/gogogadget/gogogadget/internal/modkit"
+)
+
+// Run reports how this project has selected the Gadgetworks ledger: the
+// adapter's install state, the environments it is chosen for, and the
+// commands that verify it. Every fact comes from the controller, so the
+// answer is the project's real resolved state and not this package's guess.
+func Run(ctx context.Context, cc gggcli.CommandContext, args []string) (gggcli.Result, error) {
+	if len(args) != 0 {
+		return gggcli.Result{}, fmt.Errorf("ggg ledger takes no operands")
+	}
+	result, err := cc.Controller.Execute(ctx, gggcli.InfoRequest{ModuleID: ledger.ModuleID})
+	if err != nil {
+		return gggcli.Result{}, err
+	}
+
+	state, _ := result.Payload["state"].(string)
+	if state == "" {
+		state = "unknown"
+	}
+	verify := stringsFrom(result.Payload["verify"])
+
+	fmt.Fprintf(cc.Out, "%s\n", ledger.ModuleID)
+	fmt.Fprintf(cc.Out, "  slot     %s\n", ledger.Slot)
+	fmt.Fprintf(cc.Out, "  state    %s\n", state)
+	fmt.Fprintf(cc.Out, "  targets  %s (development, test), %s (production)\n", ledger.TargetFile, ledger.TargetCloud)
+	fmt.Fprintf(cc.Out, "  config   %s, %s, %s\n", ledger.EnvDir, ledger.EnvEndpoint, ledger.EnvToken)
+	for _, command := range verify {
+		fmt.Fprintf(cc.Out, "  verify   %s\n", command)
+	}
+
+	return gggcli.Result{
+		Envelope: modkit.Envelope{
+			OK: true, Command: "ledger", Exit: modkit.ExitOK,
+			Resolved: []string{ledger.ModuleID, ledger.Slot, state},
+		},
+		Payload: map[string]any{
+			"module": ledger.ModuleID, "slot": ledger.Slot, "state": state,
+			"targets": []string{ledger.TargetFile, ledger.TargetCloud},
+			"verify":  verify,
+		},
+	}, nil
+}
+
+// stringsFrom normalizes a payload value the controller may hand back as
+// either a typed slice or a decoded JSON array.
+func stringsFrom(value any) []string {
+	out := []string{}
+	switch typed := value.(type) {
+	case []string:
+		out = append(out, typed...)
+	case []any:
+		for _, item := range typed {
+			if text, ok := item.(string); ok {
+				out = append(out, text)
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
+}

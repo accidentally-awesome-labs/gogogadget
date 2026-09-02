@@ -113,7 +113,7 @@ func TestSurfaceLinksAndVerificationCommandsAreDerived(t *testing.T) {
 	assert.Equal(t, []string{"/pricing"}, links["route"],
 		"a POST is an endpoint, not a place to look, and a pattern with a parameter is not a URL")
 
-	commands := verificationCommands(m)
+	commands := modkit.VerificationCommands(m)
 	assert.Contains(t, commands, "go test -count=1 ./internal/web/templates/ui")
 	assert.Contains(t, commands, "cd e2e && npx playwright test keyboard.spec.ts --reporter=line")
 	assert.Contains(t, commands, "./scripts/visual.sh",
@@ -125,7 +125,7 @@ func TestSurfaceLinksAreEmptyNotMissing(t *testing.T) {
 	links := surfaceLinks(modkit.Manifest{ID: "ggg/system/observability"})
 	assert.NotNil(t, links)
 	assert.Empty(t, links)
-	assert.Empty(t, verificationCommands(modkit.Manifest{ID: "ggg/system/observability"}))
+	assert.Empty(t, modkit.VerificationCommands(modkit.Manifest{ID: "ggg/system/observability"}))
 }
 
 // The CLI must actually carry both, or the derivation is unreachable.

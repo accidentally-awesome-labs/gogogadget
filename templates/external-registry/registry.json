@@ -1,0 +1,13 @@
+{
+  "schema": 2,
+  "namespace": "gadgetworks",
+  "canonical_module": "example.com/gadgetworks/ggg-registry",
+  "includes": [
+    "registry/elements.json",
+    "registry/components.json",
+    "registry/pages.json",
+    "registry/workflows.json",
+    "registry/systems.json",
+    "registry/profiles.json"
+  ]
+}

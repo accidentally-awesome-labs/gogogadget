@@ -1,0 +1,156 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/registry-template",
+    "kind": "system",
+    "name": "registry-template",
+    "revision": 1,
+    "contract": 1,
+    "title": "External registry template",
+    "description": "The maintained, signed registry a third party copies to publish modules against this framework.",
+    "requires": [],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "templates/external-registry/.github/workflows/registry.yml",
+        "target": "templates/external-registry/.github/workflows/registry.yml",
+        "class": "asset",
+        "sha256": "5d7a544826f97babb998055a2e85423699ad7baf67fae13c530b02d79388de0a",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/.gitignore",
+        "target": "templates/external-registry/.gitignore",
+        "class": "asset",
+        "sha256": "ee36f2315b24bf595847026a9ce95c74f3807dc394e25e0aa39b6c308a77d0d9",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/README.md",
+        "target": "templates/external-registry/README.md",
+        "class": "docs",
+        "sha256": "de04b6056d8c7975f9b95c95669b8522fa60f1a8f801a131cd5580f2be3c7719",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry.json",
+        "target": "templates/external-registry/registry.json",
+        "class": "asset",
+        "sha256": "a07757b14069619ba4953aaf846bec767c3dfd0530cc1ca85555bf6bf6395cae",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry.snapshot.json",
+        "target": "templates/external-registry/registry.snapshot.json",
+        "class": "asset",
+        "sha256": "ef2311d14c008ca7c65dc2b0486a3c2332afde70a6731581fb562d165c4afde3",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry.snapshot.sig",
+        "target": "templates/external-registry/registry.snapshot.sig",
+        "class": "asset",
+        "sha256": "64357f801f25c16102dd8a5ab836df62a0acbc0507bf8b6791ca25ea97712ab4",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/components.json",
+        "target": "templates/external-registry/registry/components.json",
+        "class": "asset",
+        "sha256": "aeaafb4f63182d39a9416bde80b05d82b3ca4af4b033496a9983b630eb8ec584",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/elements.json",
+        "target": "templates/external-registry/registry/elements.json",
+        "class": "asset",
+        "sha256": "36ffbb535a865834e9eff3fb05244c062546c93d851c8348e1e0796e7a1aaed3",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/modules/system/audit-export-ledger/cli.go.txt",
+        "target": "templates/external-registry/registry/modules/system/audit-export-ledger/cli.go.txt",
+        "class": "asset",
+        "sha256": "e7ea655e47317ebbf4985f2667ce2fba118dc7e019c74406e7be5d28d38b2278",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger.go.txt",
+        "target": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger.go.txt",
+        "class": "asset",
+        "sha256": "914ced884dcaf866cf2c93c8279f5318bf8f1ac8ebea076fdcd39fe0428c8176",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger_test.go.txt",
+        "target": "templates/external-registry/registry/modules/system/audit-export-ledger/ledger_test.go.txt",
+        "class": "asset",
+        "sha256": "a6944ed91378ae46eb8b14f2f37a43695e00668fc0ca73b2fce0a0f5e6fb1f57",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
+        "target": "templates/external-registry/registry/modules/system/audit-export-ledger/module.json",
+        "class": "asset",
+        "sha256": "8f3b51457cdbe2e09406d97be62e65dc25afbab8d1191b1413c8784e19e25ced",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/pages.json",
+        "target": "templates/external-registry/registry/pages.json",
+        "class": "asset",
+        "sha256": "cdf10ddfef317170b304da87e6150d1b70ec4792dbcee978e21c3c6d2b18b589",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/profiles.json",
+        "target": "templates/external-registry/registry/profiles.json",
+        "class": "asset",
+        "sha256": "a08417e52187ece15b35ee18f3400425ba548e07004be7a6018389b1f7fd698f",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/systems.json",
+        "target": "templates/external-registry/registry/systems.json",
+        "class": "asset",
+        "sha256": "1e299466f1a384225a55c18e843c0f0065bededa5ec14ecec30cc4abe77cd20c",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "templates/external-registry/registry/workflows.json",
+        "target": "templates/external-registry/registry/workflows.json",
+        "class": "asset",
+        "sha256": "e3a36ab2449bec812c8af599f252b6049f492e2124e2413f34783d199f85467a",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -16,6 +16,7 @@ Every renderer takes exactly one options struct and embeds `ui.Attrs` in it;
 see [UI foundations](/docs/ui-foundations) for the convention and
 [Component usage](/docs/components) for how to read an entry.
 
+**Source** is the registry namespace the owning module was resolved from.
 **Engine** names the third-party runtime a component lazily loads, empty for
 the ones that need none. **Alpine** names the CSP-safe controller it
 registers. **Fallback** marks a component that declares what it does with no
@@ -23,224 +24,224 @@ JavaScript at all; that declaration is a promise, and the a11y suite tests it.
 
 ## Foundations (12)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `avatar` | `templ Avatar(o AvatarOpts)` | `ggg/element/avatar` | — | — | — |
-| `avatar-group` | `templ AvatarGroup(o AvatarGroupOpts)` | `ggg/element/avatar-group` | — | — | — |
-| `code` | `templ Code(o CodeOpts)` | `ggg/element/code` | — | — | — |
-| `heading` | `templ Heading(o HeadingOpts)` | `ggg/element/heading` | — | — | — |
-| `icon` | `templ Icon(o IconOpts)` | `ggg/element/icon` | — | — | — |
-| `kbd` | `templ Kbd(o KbdOpts)` | `ggg/element/kbd` | — | — | — |
-| `prose` | `templ Prose(o ProseOpts)` | `ggg/element/prose` | — | — | — |
-| `separator` | `templ Separator(o SeparatorOpts)` | `ggg/element/separator` | — | — | — |
-| `spinner` | `templ Spinner(o SpinnerOpts)` | `ggg/element/spinner` | — | — | — |
-| `text` | `templ Text(o TextOpts)` | `ggg/element/text` | — | — | — |
-| `truncate` | `templ Truncate(o TruncateOpts)` | `ggg/element/truncate` | — | — | — |
-| `visually-hidden` | `templ VisuallyHidden(o VisuallyHiddenOpts)` | `ggg/element/visually-hidden` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `avatar` | `templ Avatar(o AvatarOpts)` | `ggg/element/avatar` | `ggg` | — | — | — |
+| `avatar-group` | `templ AvatarGroup(o AvatarGroupOpts)` | `ggg/element/avatar-group` | `ggg` | — | — | — |
+| `code` | `templ Code(o CodeOpts)` | `ggg/element/code` | `ggg` | — | — | — |
+| `heading` | `templ Heading(o HeadingOpts)` | `ggg/element/heading` | `ggg` | — | — | — |
+| `icon` | `templ Icon(o IconOpts)` | `ggg/element/icon` | `ggg` | — | — | — |
+| `kbd` | `templ Kbd(o KbdOpts)` | `ggg/element/kbd` | `ggg` | — | — | — |
+| `prose` | `templ Prose(o ProseOpts)` | `ggg/element/prose` | `ggg` | — | — | — |
+| `separator` | `templ Separator(o SeparatorOpts)` | `ggg/element/separator` | `ggg` | — | — | — |
+| `spinner` | `templ Spinner(o SpinnerOpts)` | `ggg/element/spinner` | `ggg` | — | — | — |
+| `text` | `templ Text(o TextOpts)` | `ggg/element/text` | `ggg` | — | — | — |
+| `truncate` | `templ Truncate(o TruncateOpts)` | `ggg/element/truncate` | `ggg` | — | — | — |
+| `visually-hidden` | `templ VisuallyHidden(o VisuallyHiddenOpts)` | `ggg/element/visually-hidden` | `ggg` | — | — | — |
 
 ## Actions (9)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `button` | `templ Button(o ButtonOpts)` | `ggg/element/button` | — | — | — |
-| `button-group` | `templ ButtonGroup(o ButtonGroupOpts)` | `ggg/element/button-group` | — | — | — |
-| `button-link` | `templ ButtonLink(o ButtonLinkOpts)` | `ggg/element/button-link` | — | — | — |
-| `copy-button` | `templ CopyButton(o CopyButtonOpts)` | `ggg/element/copy-button` | — | — | — |
-| `icon-button` | `templ IconButton(o IconButtonOpts)` | `ggg/element/icon-button` | — | — | — |
-| `link` | `templ Link(o LinkOpts)` | `ggg/element/link` | — | — | — |
-| `theme-toggle` | `templ ThemeToggle(o ThemeToggleOpts)` | `ggg/component/theme-toggle` | `alpine` | — | — |
-| `toggle-button` | `templ ToggleButton(o ToggleButtonOpts)` | `ggg/element/toggle-button` | — | — | — |
-| `toggle-group` | `templ ToggleGroup(o ToggleGroupOpts)` | `ggg/element/toggle-group` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `button` | `templ Button(o ButtonOpts)` | `ggg/element/button` | `ggg` | — | — | — |
+| `button-group` | `templ ButtonGroup(o ButtonGroupOpts)` | `ggg/element/button-group` | `ggg` | — | — | — |
+| `button-link` | `templ ButtonLink(o ButtonLinkOpts)` | `ggg/element/button-link` | `ggg` | — | — | — |
+| `copy-button` | `templ CopyButton(o CopyButtonOpts)` | `ggg/element/copy-button` | `ggg` | — | — | — |
+| `icon-button` | `templ IconButton(o IconButtonOpts)` | `ggg/element/icon-button` | `ggg` | — | — | — |
+| `link` | `templ Link(o LinkOpts)` | `ggg/element/link` | `ggg` | — | — | — |
+| `theme-toggle` | `templ ThemeToggle(o ThemeToggleOpts)` | `ggg/component/theme-toggle` | `ggg` | `alpine` | — | — |
+| `toggle-button` | `templ ToggleButton(o ToggleButtonOpts)` | `ggg/element/toggle-button` | `ggg` | — | — | — |
+| `toggle-group` | `templ ToggleGroup(o ToggleGroupOpts)` | `ggg/element/toggle-group` | `ggg` | — | — | — |
 
 ## Forms (33)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `char-counter` | `templ CharCounter(o CharCounterOpts)` | `ggg/component/char-counter` | `alpine` | `uiCharCounter` | yes |
-| `checkbox` | `templ Checkbox(o CheckboxOpts)` | `ggg/component/checkbox` | — | — | — |
-| `checkbox-group` | `templ CheckboxGroup(o CheckboxGroupOpts)` | `ggg/component/checkbox-group` | — | — | — |
-| `color-input` | `templ ColorInput(o ColorInputOpts)` | `ggg/component/color-input` | — | — | — |
-| `combobox` | `templ Combobox(o ComboboxOpts)` | `ggg/component/combobox` | — | — | — |
-| `date-field` | `templ DateField(o DateFieldOpts)` | `ggg/component/date-field` | — | — | — |
-| `date-range-field` | `templ DateRangeField(o DateRangeFieldOpts)` | `ggg/component/date-range-field` | `alpine` | `uiDateRange` | yes |
-| `date-time-field` | `templ DateTimeField(o DateTimeFieldOpts)` | `ggg/component/date-time-field` | — | — | — |
-| `field` | `templ Field(o FieldOpts)` | `ggg/component/field` | — | — | — |
-| `field-error` | `templ FieldError(o FieldErrorOpts)` | `ggg/component/field-error` | — | — | — |
-| `fieldset` | `templ Fieldset(o FieldsetOpts)` | `ggg/component/fieldset` | — | — | — |
-| `file-dropzone` | `templ FileDropzone(o FileDropzoneOpts)` | `ggg/component/file-dropzone` | `alpine` | `uiDropzone` | yes |
-| `file-input` | `templ FileInput(o FileInputOpts)` | `ggg/component/file-input` | — | — | — |
-| `form` | `templ Form(o FormOpts)` | `ggg/component/form` | — | — | — |
-| `form-actions` | `templ FormActions(o FormActionsOpts)` | `ggg/component/form-actions` | — | — | — |
-| `hint` | `templ Hint(o HintOpts)` | `ggg/component/hint` | — | — | — |
-| `input-addon` | `templ InputAddon(o InputAddonOpts)` | `ggg/component/input-addon` | — | — | — |
-| `input-group` | `templ InputGroup(o InputGroupOpts)` | `ggg/component/input-group` | — | — | — |
-| `label` | `templ Label(o LabelOpts)` | `ggg/component/label` | — | — | — |
-| `multi-select` | `templ MultiSelect(o MultiSelectOpts)` | `ggg/component/multi-select` | — | — | — |
-| `number-input` | `templ NumberInput(o NumberInputOpts)` | `ggg/component/number-input` | — | — | — |
-| `otp-input` | `templ OTPInput(o OTPInputOpts)` | `ggg/component/otp-input` | — | — | — |
-| `password-input` | `templ PasswordInput(o PasswordInputOpts)` | `ggg/component/password-input` | — | — | — |
-| `radio-group` | `templ RadioGroup(o RadioGroupOpts)` | `ggg/component/radio-group` | — | — | — |
-| `range-input` | `templ RangeInput(o RangeInputOpts)` | `ggg/component/range-input` | — | — | — |
-| `search-input` | `templ SearchInput(o SearchInputOpts)` | `ggg/component/search-input` | — | — | — |
-| `select` | `templ Select(o SelectOpts)` | `ggg/component/select` | — | — | — |
-| `slug-input` | `templ SlugInput(o SlugInputOpts)` | `ggg/component/slug-input` | `alpine` | `uiSlug` | yes |
-| `switch` | `templ Switch(o SwitchOpts)` | `ggg/component/switch` | — | — | — |
-| `tags-input` | `templ TagsInput(o TagsInputOpts)` | `ggg/component/tags-input` | `alpine` | `uiTags` | yes |
-| `text-input` | `templ TextInput(o TextInputOpts)` | `ggg/component/text-input` | — | — | — |
-| `textarea` | `templ Textarea(o TextareaOpts)` | `ggg/component/textarea` | — | — | — |
-| `time-field` | `templ TimeField(o TimeFieldOpts)` | `ggg/component/time-field` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `char-counter` | `templ CharCounter(o CharCounterOpts)` | `ggg/component/char-counter` | `ggg` | `alpine` | `uiCharCounter` | yes |
+| `checkbox` | `templ Checkbox(o CheckboxOpts)` | `ggg/component/checkbox` | `ggg` | — | — | — |
+| `checkbox-group` | `templ CheckboxGroup(o CheckboxGroupOpts)` | `ggg/component/checkbox-group` | `ggg` | — | — | — |
+| `color-input` | `templ ColorInput(o ColorInputOpts)` | `ggg/component/color-input` | `ggg` | — | — | — |
+| `combobox` | `templ Combobox(o ComboboxOpts)` | `ggg/component/combobox` | `ggg` | — | — | — |
+| `date-field` | `templ DateField(o DateFieldOpts)` | `ggg/component/date-field` | `ggg` | — | — | — |
+| `date-range-field` | `templ DateRangeField(o DateRangeFieldOpts)` | `ggg/component/date-range-field` | `ggg` | `alpine` | `uiDateRange` | yes |
+| `date-time-field` | `templ DateTimeField(o DateTimeFieldOpts)` | `ggg/component/date-time-field` | `ggg` | — | — | — |
+| `field` | `templ Field(o FieldOpts)` | `ggg/component/field` | `ggg` | — | — | — |
+| `field-error` | `templ FieldError(o FieldErrorOpts)` | `ggg/component/field-error` | `ggg` | — | — | — |
+| `fieldset` | `templ Fieldset(o FieldsetOpts)` | `ggg/component/fieldset` | `ggg` | — | — | — |
+| `file-dropzone` | `templ FileDropzone(o FileDropzoneOpts)` | `ggg/component/file-dropzone` | `ggg` | `alpine` | `uiDropzone` | yes |
+| `file-input` | `templ FileInput(o FileInputOpts)` | `ggg/component/file-input` | `ggg` | — | — | — |
+| `form` | `templ Form(o FormOpts)` | `ggg/component/form` | `ggg` | — | — | — |
+| `form-actions` | `templ FormActions(o FormActionsOpts)` | `ggg/component/form-actions` | `ggg` | — | — | — |
+| `hint` | `templ Hint(o HintOpts)` | `ggg/component/hint` | `ggg` | — | — | — |
+| `input-addon` | `templ InputAddon(o InputAddonOpts)` | `ggg/component/input-addon` | `ggg` | — | — | — |
+| `input-group` | `templ InputGroup(o InputGroupOpts)` | `ggg/component/input-group` | `ggg` | — | — | — |
+| `label` | `templ Label(o LabelOpts)` | `ggg/component/label` | `ggg` | — | — | — |
+| `multi-select` | `templ MultiSelect(o MultiSelectOpts)` | `ggg/component/multi-select` | `ggg` | — | — | — |
+| `number-input` | `templ NumberInput(o NumberInputOpts)` | `ggg/component/number-input` | `ggg` | — | — | — |
+| `otp-input` | `templ OTPInput(o OTPInputOpts)` | `ggg/component/otp-input` | `ggg` | — | — | — |
+| `password-input` | `templ PasswordInput(o PasswordInputOpts)` | `ggg/component/password-input` | `ggg` | — | — | — |
+| `radio-group` | `templ RadioGroup(o RadioGroupOpts)` | `ggg/component/radio-group` | `ggg` | — | — | — |
+| `range-input` | `templ RangeInput(o RangeInputOpts)` | `ggg/component/range-input` | `ggg` | — | — | — |
+| `search-input` | `templ SearchInput(o SearchInputOpts)` | `ggg/component/search-input` | `ggg` | — | — | — |
+| `select` | `templ Select(o SelectOpts)` | `ggg/component/select` | `ggg` | — | — | — |
+| `slug-input` | `templ SlugInput(o SlugInputOpts)` | `ggg/component/slug-input` | `ggg` | `alpine` | `uiSlug` | yes |
+| `switch` | `templ Switch(o SwitchOpts)` | `ggg/component/switch` | `ggg` | — | — | — |
+| `tags-input` | `templ TagsInput(o TagsInputOpts)` | `ggg/component/tags-input` | `ggg` | `alpine` | `uiTags` | yes |
+| `text-input` | `templ TextInput(o TextInputOpts)` | `ggg/component/text-input` | `ggg` | — | — | — |
+| `textarea` | `templ Textarea(o TextareaOpts)` | `ggg/component/textarea` | `ggg` | — | — | — |
+| `time-field` | `templ TimeField(o TimeFieldOpts)` | `ggg/component/time-field` | `ggg` | — | — | — |
 
 ## Navigation (15)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `accordion` | `templ Accordion(o AccordionOpts)` | `ggg/component/accordion` | — | — | — |
-| `back-link` | `templ BackLink(o BackLinkOpts)` | `ggg/component/back-link` | — | — | — |
-| `breadcrumbs` | `templ Breadcrumbs(o BreadcrumbsOpts)` | `ggg/component/breadcrumbs` | — | — | — |
-| `collapsible` | `templ Collapsible(o CollapsibleOpts)` | `ggg/component/collapsible` | — | — | — |
-| `cursor-pagination` | `templ CursorPagination(o CursorPaginationOpts)` | `ggg/component/cursor-pagination` | — | — | — |
-| `disclosure` | `templ Disclosure(o DisclosureOpts)` | `ggg/component/disclosure` | — | — | — |
-| `menubar` | `templ Menubar(o MenubarOpts)` | `ggg/component/menubar` | — | — | — |
-| `nav-tabs` | `templ NavTabs(o NavTabsOpts)` | `ggg/component/nav-tabs` | — | — | — |
-| `navigation-menu` | `templ NavigationMenu(o NavigationMenuOpts)` | `ggg/component/navigation-menu` | — | — | — |
-| `pagination` | `templ Pagination(o PaginationOpts)` | `ggg/component/pagination` | — | — | — |
-| `skip-link` | `templ SkipLink(o SkipLinkOpts)` | `ggg/component/skip-link` | — | — | — |
-| `steps` | `templ Steps(o StepsOpts)` | `ggg/component/steps` | — | — | — |
-| `tab-panels` | `templ TabPanels(o TabPanelsOpts)` | `ggg/component/tab-panels` | `alpine` | `uiTabs` | yes |
-| `table-of-contents` | `templ TableOfContents(o TableOfContentsOpts)` | `ggg/component/table-of-contents` | — | — | — |
-| `terminal-page` | `templ TerminalPage(o TerminalPageOpts)` | `ggg/component/terminal-page` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `accordion` | `templ Accordion(o AccordionOpts)` | `ggg/component/accordion` | `ggg` | — | — | — |
+| `back-link` | `templ BackLink(o BackLinkOpts)` | `ggg/component/back-link` | `ggg` | — | — | — |
+| `breadcrumbs` | `templ Breadcrumbs(o BreadcrumbsOpts)` | `ggg/component/breadcrumbs` | `ggg` | — | — | — |
+| `collapsible` | `templ Collapsible(o CollapsibleOpts)` | `ggg/component/collapsible` | `ggg` | — | — | — |
+| `cursor-pagination` | `templ CursorPagination(o CursorPaginationOpts)` | `ggg/component/cursor-pagination` | `ggg` | — | — | — |
+| `disclosure` | `templ Disclosure(o DisclosureOpts)` | `ggg/component/disclosure` | `ggg` | — | — | — |
+| `menubar` | `templ Menubar(o MenubarOpts)` | `ggg/component/menubar` | `ggg` | — | — | — |
+| `nav-tabs` | `templ NavTabs(o NavTabsOpts)` | `ggg/component/nav-tabs` | `ggg` | — | — | — |
+| `navigation-menu` | `templ NavigationMenu(o NavigationMenuOpts)` | `ggg/component/navigation-menu` | `ggg` | — | — | — |
+| `pagination` | `templ Pagination(o PaginationOpts)` | `ggg/component/pagination` | `ggg` | — | — | — |
+| `skip-link` | `templ SkipLink(o SkipLinkOpts)` | `ggg/component/skip-link` | `ggg` | — | — | — |
+| `steps` | `templ Steps(o StepsOpts)` | `ggg/component/steps` | `ggg` | — | — | — |
+| `tab-panels` | `templ TabPanels(o TabPanelsOpts)` | `ggg/component/tab-panels` | `ggg` | `alpine` | `uiTabs` | yes |
+| `table-of-contents` | `templ TableOfContents(o TableOfContentsOpts)` | `ggg/component/table-of-contents` | `ggg` | — | — | — |
+| `terminal-page` | `templ TerminalPage(o TerminalPageOpts)` | `ggg/component/terminal-page` | `ggg` | — | — | — |
 
 ## Feedback (13)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `badge` | `templ Badge(o BadgeOpts)` | `ggg/component/badge` | — | — | — |
-| `banner` | `templ Banner(o BannerOpts)` | `ggg/component/banner` | — | — | — |
-| `empty-state` | `templ EmptyState(o EmptyStateOpts)` | `ggg/component/empty-state` | — | — | — |
-| `error-state` | `templ ErrorState(o ErrorStateOpts)` | `ggg/component/error-state` | — | — | — |
-| `meter` | `templ Meter(o MeterOpts)` | `ggg/component/meter` | — | — | — |
-| `notice` | `templ Notice(o NoticeOpts)` | `ggg/component/notice` | — | — | — |
-| `progress-bar` | `templ ProgressBar(o ProgressBarOpts)` | `ggg/component/progress-bar` | — | — | — |
-| `progress-circle` | `templ ProgressCircle(o ProgressCircleOpts)` | `ggg/component/progress-circle` | — | — | — |
-| `secret-reveal` | `templ SecretReveal(o SecretRevealOpts)` | `ggg/component/secret-reveal` | — | — | — |
-| `skeleton` | `templ Skeleton(o SkeletonOpts)` | `ggg/component/skeleton` | — | — | — |
-| `status-dot` | `templ StatusDot(o StatusDotOpts)` | `ggg/component/status-dot` | — | — | — |
-| `toast` | `templ Toast(o ToastOpts)` | `ggg/component/toast` | — | — | — |
-| `toast-region` | `templ ToastRegion(o ToastRegionOpts)` | `ggg/component/toast-region` | `alpine` | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `badge` | `templ Badge(o BadgeOpts)` | `ggg/component/badge` | `ggg` | — | — | — |
+| `banner` | `templ Banner(o BannerOpts)` | `ggg/component/banner` | `ggg` | — | — | — |
+| `empty-state` | `templ EmptyState(o EmptyStateOpts)` | `ggg/component/empty-state` | `ggg` | — | — | — |
+| `error-state` | `templ ErrorState(o ErrorStateOpts)` | `ggg/component/error-state` | `ggg` | — | — | — |
+| `meter` | `templ Meter(o MeterOpts)` | `ggg/component/meter` | `ggg` | — | — | — |
+| `notice` | `templ Notice(o NoticeOpts)` | `ggg/component/notice` | `ggg` | — | — | — |
+| `progress-bar` | `templ ProgressBar(o ProgressBarOpts)` | `ggg/component/progress-bar` | `ggg` | — | — | — |
+| `progress-circle` | `templ ProgressCircle(o ProgressCircleOpts)` | `ggg/component/progress-circle` | `ggg` | — | — | — |
+| `secret-reveal` | `templ SecretReveal(o SecretRevealOpts)` | `ggg/component/secret-reveal` | `ggg` | — | — | — |
+| `skeleton` | `templ Skeleton(o SkeletonOpts)` | `ggg/component/skeleton` | `ggg` | — | — | — |
+| `status-dot` | `templ StatusDot(o StatusDotOpts)` | `ggg/component/status-dot` | `ggg` | — | — | — |
+| `toast` | `templ Toast(o ToastOpts)` | `ggg/component/toast` | `ggg` | — | — | — |
+| `toast-region` | `templ ToastRegion(o ToastRegionOpts)` | `ggg/component/toast-region` | `ggg` | `alpine` | — | — |
 
 ## Overlays (9)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `alert-dialog` | `templ AlertDialog(o AlertDialogOpts)` | `ggg/component/alert-dialog` | `alpine` | `uiDialog` | yes |
-| `confirm-action` | `templ ConfirmAction(o ConfirmActionOpts)` | `ggg/component/confirm-action` | `alpine` | `uiDialog` | yes |
-| `context-menu` | `templ ContextMenu(o ContextMenuOpts)` | `ggg/component/context-menu` | `alpine` | `uiContextMenu` | yes |
-| `dialog` | `templ Dialog(o DialogOpts)` | `ggg/component/dialog` | `alpine` | `uiDialog` | yes |
-| `drawer` | `templ Drawer(o DrawerOpts)` | `ggg/component/drawer` | — | — | — |
-| `dropdown-menu` | `templ DropdownMenu(o DropdownMenuOpts)` | `ggg/component/dropdown-menu` | `alpine` | `uiMenu` | yes |
-| `hover-card` | `templ HoverCard(o HoverCardOpts)` | `ggg/component/hover-card` | `alpine` | `uiHoverCard` | yes |
-| `popover` | `templ Popover(o PopoverOpts)` | `ggg/component/popover` | `alpine` | `uiMenu` | yes |
-| `tooltip` | `templ Tooltip(o TooltipOpts)` | `ggg/component/tooltip` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `alert-dialog` | `templ AlertDialog(o AlertDialogOpts)` | `ggg/component/alert-dialog` | `ggg` | `alpine` | `uiDialog` | yes |
+| `confirm-action` | `templ ConfirmAction(o ConfirmActionOpts)` | `ggg/component/confirm-action` | `ggg` | `alpine` | `uiDialog` | yes |
+| `context-menu` | `templ ContextMenu(o ContextMenuOpts)` | `ggg/component/context-menu` | `ggg` | `alpine` | `uiContextMenu` | yes |
+| `dialog` | `templ Dialog(o DialogOpts)` | `ggg/component/dialog` | `ggg` | `alpine` | `uiDialog` | yes |
+| `drawer` | `templ Drawer(o DrawerOpts)` | `ggg/component/drawer` | `ggg` | — | — | — |
+| `dropdown-menu` | `templ DropdownMenu(o DropdownMenuOpts)` | `ggg/component/dropdown-menu` | `ggg` | `alpine` | `uiMenu` | yes |
+| `hover-card` | `templ HoverCard(o HoverCardOpts)` | `ggg/component/hover-card` | `ggg` | `alpine` | `uiHoverCard` | yes |
+| `popover` | `templ Popover(o PopoverOpts)` | `ggg/component/popover` | `ggg` | `alpine` | `uiMenu` | yes |
+| `tooltip` | `templ Tooltip(o TooltipOpts)` | `ggg/component/tooltip` | `ggg` | — | — | — |
 
 ## Data (15)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `attachment` | `templ Attachment(o AttachmentOpts)` | `ggg/component/attachment` | — | — | — |
-| `column-header` | `templ ColumnHeader(o ColumnHeaderOpts)` | `ggg/component/column-header` | — | — | — |
-| `data-table` | `templ DataTable(o DataTableOpts)` | `ggg/component/data-table` | — | — | — |
-| `description-list` | `templ DescriptionList(o DescriptionListOpts)` | `ggg/component/description-list` | — | — | — |
-| `item` | `templ Item(o ItemOpts)` | `ggg/component/list` | — | — | — |
-| `key-value` | `templ KeyValue(o KeyValueOpts)` | `ggg/component/key-value` | — | — | — |
-| `list` | `templ List(o ListOpts)` | `ggg/component/list` | — | — | — |
-| `metric` | `templ Metric(o MetricOpts)` | `ggg/component/metric` | — | — | — |
-| `row-actions` | `templ RowActions(o RowActionsOpts)` | `ggg/component/row-actions` | — | — | — |
-| `selection-bar` | `templ SelectionBar(o SelectionBarOpts)` | `ggg/component/selection-bar` | — | — | — |
-| `stat-group` | `templ StatGroup(o StatGroupOpts)` | `ggg/component/stat-group` | — | — | — |
-| `table` | `templ Table(o TableOpts)` | `ggg/component/table` | — | — | — |
-| `table-card` | `templ TableCard(o TableCardOpts)` | `ggg/component/table-card` | — | — | — |
-| `table-toolbar` | `templ TableToolbar(o TableToolbarOpts)` | `ggg/component/table-toolbar` | — | — | — |
-| `tile` | `templ Tile(o TileOpts)` | `ggg/component/tile` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `attachment` | `templ Attachment(o AttachmentOpts)` | `ggg/component/attachment` | `ggg` | — | — | — |
+| `column-header` | `templ ColumnHeader(o ColumnHeaderOpts)` | `ggg/component/column-header` | `ggg` | — | — | — |
+| `data-table` | `templ DataTable(o DataTableOpts)` | `ggg/component/data-table` | `ggg` | — | — | — |
+| `description-list` | `templ DescriptionList(o DescriptionListOpts)` | `ggg/component/description-list` | `ggg` | — | — | — |
+| `item` | `templ Item(o ItemOpts)` | `ggg/component/list` | `ggg` | — | — | — |
+| `key-value` | `templ KeyValue(o KeyValueOpts)` | `ggg/component/key-value` | `ggg` | — | — | — |
+| `list` | `templ List(o ListOpts)` | `ggg/component/list` | `ggg` | — | — | — |
+| `metric` | `templ Metric(o MetricOpts)` | `ggg/component/metric` | `ggg` | — | — | — |
+| `row-actions` | `templ RowActions(o RowActionsOpts)` | `ggg/component/row-actions` | `ggg` | — | — | — |
+| `selection-bar` | `templ SelectionBar(o SelectionBarOpts)` | `ggg/component/selection-bar` | `ggg` | — | — | — |
+| `stat-group` | `templ StatGroup(o StatGroupOpts)` | `ggg/component/stat-group` | `ggg` | — | — | — |
+| `table` | `templ Table(o TableOpts)` | `ggg/component/table` | `ggg` | — | — | — |
+| `table-card` | `templ TableCard(o TableCardOpts)` | `ggg/component/table-card` | `ggg` | — | — | — |
+| `table-toolbar` | `templ TableToolbar(o TableToolbarOpts)` | `ggg/component/table-toolbar` | `ggg` | — | — | — |
+| `tile` | `templ Tile(o TileOpts)` | `ggg/component/tile` | `ggg` | — | — | — |
 
 ## Communication (15)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `activity-item` | `templ ActivityItem(o ActivityItemOpts)` | `ggg/component/activity-item` | — | — | — |
-| `chat-log` | `templ ChatLog(o ChatLogOpts)` | `ggg/component/chat-log` | — | — | — |
-| `chat-message` | `templ ChatMessage(o ChatMessageOpts)` | `ggg/component/chat-message` | — | — | — |
-| `comment` | `templ Comment(o CommentOpts)` | `ggg/component/comment` | — | — | — |
-| `comment-thread` | `templ CommentThread(o CommentThreadOpts)` | `ggg/component/comment-thread` | — | — | — |
-| `composer` | `templ Composer(o ComposerOpts)` | `ggg/component/composer` | — | — | — |
-| `delivery-status` | `templ DeliveryStatus(o DeliveryStatusOpts)` | `ggg/component/delivery-status` | — | — | — |
-| `member-item` | `templ MemberItem(o MemberItemOpts)` | `ggg/component/member-item` | — | — | — |
-| `mention-chip` | `templ MentionChip(o MentionChipOpts)` | `ggg/component/mention-chip` | — | — | — |
-| `notification-item` | `templ NotificationItem(o NotificationItemOpts)` | `ggg/component/notification-item` | — | — | — |
-| `onboarding-checklist` | `templ OnboardingChecklist(o OnboardingChecklistOpts)` | `ggg/component/onboarding-checklist` | — | — | — |
-| `plan-card` | `templ PlanCard(o PlanCardOpts)` | `ggg/component/plan-card` | — | — | — |
-| `settings-section` | `templ SettingsSection(o SettingsSectionOpts)` | `ggg/component/settings-section` | — | — | — |
-| `timeline` | `templ Timeline(o TimelineOpts)` | `ggg/component/timeline` | — | — | — |
-| `usage-card` | `templ UsageCard(o UsageCardOpts)` | `ggg/component/usage-card` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `activity-item` | `templ ActivityItem(o ActivityItemOpts)` | `ggg/component/activity-item` | `ggg` | — | — | — |
+| `chat-log` | `templ ChatLog(o ChatLogOpts)` | `ggg/component/chat-log` | `ggg` | — | — | — |
+| `chat-message` | `templ ChatMessage(o ChatMessageOpts)` | `ggg/component/chat-message` | `ggg` | — | — | — |
+| `comment` | `templ Comment(o CommentOpts)` | `ggg/component/comment` | `ggg` | — | — | — |
+| `comment-thread` | `templ CommentThread(o CommentThreadOpts)` | `ggg/component/comment-thread` | `ggg` | — | — | — |
+| `composer` | `templ Composer(o ComposerOpts)` | `ggg/component/composer` | `ggg` | — | — | — |
+| `delivery-status` | `templ DeliveryStatus(o DeliveryStatusOpts)` | `ggg/component/delivery-status` | `ggg` | — | — | — |
+| `member-item` | `templ MemberItem(o MemberItemOpts)` | `ggg/component/member-item` | `ggg` | — | — | — |
+| `mention-chip` | `templ MentionChip(o MentionChipOpts)` | `ggg/component/mention-chip` | `ggg` | — | — | — |
+| `notification-item` | `templ NotificationItem(o NotificationItemOpts)` | `ggg/component/notification-item` | `ggg` | — | — | — |
+| `onboarding-checklist` | `templ OnboardingChecklist(o OnboardingChecklistOpts)` | `ggg/component/onboarding-checklist` | `ggg` | — | — | — |
+| `plan-card` | `templ PlanCard(o PlanCardOpts)` | `ggg/component/plan-card` | `ggg` | — | — | — |
+| `settings-section` | `templ SettingsSection(o SettingsSectionOpts)` | `ggg/component/settings-section` | `ggg` | — | — | — |
+| `timeline` | `templ Timeline(o TimelineOpts)` | `ggg/component/timeline` | `ggg` | — | — | — |
+| `usage-card` | `templ UsageCard(o UsageCardOpts)` | `ggg/component/usage-card` | `ggg` | — | — | — |
 
 ## Layout (16)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `aspect-ratio` | `templ AspectRatio(o AspectRatioOpts)` | `ggg/component/aspect-ratio` | — | — | — |
-| `card` | `templ Card(o CardOpts)` | `ggg/component/card` | — | — | — |
-| `card-footer` | `templ CardFooter(o CardFooterOpts)` | `ggg/component/card` | — | — | — |
-| `card-header` | `templ CardHeader(o CardHeaderOpts)` | `ggg/component/card` | — | — | — |
-| `center` | `templ Center(o CenterOpts)` | `ggg/component/center` | — | — | — |
-| `container` | `templ Container(o ContainerOpts)` | `ggg/component/container` | — | — | — |
-| `grid` | `templ Grid(o GridOpts)` | `ggg/component/grid` | — | — | — |
-| `inline` | `templ Inline(o InlineOpts)` | `ggg/component/inline` | — | — | — |
-| `page-header` | `templ PageHeader(o PageHeaderOpts)` | `ggg/component/page-header` | — | — | — |
-| `scroll-area` | `templ ScrollArea(o ScrollAreaOpts)` | `ggg/component/scroll-area` | — | — | — |
-| `section` | `templ Section(o SectionOpts)` | `ggg/component/section` | — | — | — |
-| `section-header` | `templ SectionHeader(o SectionHeaderOpts)` | `ggg/component/section-header` | — | — | — |
-| `split` | `templ Split(o SplitOpts)` | `ggg/component/split` | — | — | — |
-| `stack` | `templ Stack(o StackOpts)` | `ggg/component/stack` | — | — | — |
-| `sticky-bar` | `templ StickyBar(o StickyBarOpts)` | `ggg/component/sticky-bar` | — | — | — |
-| `toolbar` | `templ Toolbar(o ToolbarOpts)` | `ggg/component/toolbar` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `aspect-ratio` | `templ AspectRatio(o AspectRatioOpts)` | `ggg/component/aspect-ratio` | `ggg` | — | — | — |
+| `card` | `templ Card(o CardOpts)` | `ggg/component/card` | `ggg` | — | — | — |
+| `card-footer` | `templ CardFooter(o CardFooterOpts)` | `ggg/component/card` | `ggg` | — | — | — |
+| `card-header` | `templ CardHeader(o CardHeaderOpts)` | `ggg/component/card` | `ggg` | — | — | — |
+| `center` | `templ Center(o CenterOpts)` | `ggg/component/center` | `ggg` | — | — | — |
+| `container` | `templ Container(o ContainerOpts)` | `ggg/component/container` | `ggg` | — | — | — |
+| `grid` | `templ Grid(o GridOpts)` | `ggg/component/grid` | `ggg` | — | — | — |
+| `inline` | `templ Inline(o InlineOpts)` | `ggg/component/inline` | `ggg` | — | — | — |
+| `page-header` | `templ PageHeader(o PageHeaderOpts)` | `ggg/component/page-header` | `ggg` | — | — | — |
+| `scroll-area` | `templ ScrollArea(o ScrollAreaOpts)` | `ggg/component/scroll-area` | `ggg` | — | — | — |
+| `section` | `templ Section(o SectionOpts)` | `ggg/component/section` | `ggg` | — | — | — |
+| `section-header` | `templ SectionHeader(o SectionHeaderOpts)` | `ggg/component/section-header` | `ggg` | — | — | — |
+| `split` | `templ Split(o SplitOpts)` | `ggg/component/split` | `ggg` | — | — | — |
+| `stack` | `templ Stack(o StackOpts)` | `ggg/component/stack` | `ggg` | — | — | — |
+| `sticky-bar` | `templ StickyBar(o StickyBarOpts)` | `ggg/component/sticky-bar` | `ggg` | — | — | — |
+| `toolbar` | `templ Toolbar(o ToolbarOpts)` | `ggg/component/toolbar` | `ggg` | — | — | — |
 
 ## Advanced (37)
 
-| Component | Signature | Module | Engine | Alpine | Fallback |
-|---|---|---|---|---|---|
-| `area-chart` | `templ AreaChart(o AreaChartOpts)` | `ggg/component/chart` | `chartjs` | `uiChart` | yes |
-| `availability-grid` | `templ AvailabilityGrid(o AvailabilityGridOpts)` | `ggg/component/calendar` | — | — | — |
-| `bar-chart` | `templ BarChart(o BarChartOpts)` | `ggg/component/chart` | `chartjs` | `uiChart` | yes |
-| `carousel` | `templ Carousel(o CarouselOpts)` | `ggg/component/carousel` | `alpine` | `uiCarousel` | — |
-| `carousel-dots` | `templ CarouselDots(o CarouselDotsOpts)` | `ggg/component/carousel` | — | — | — |
-| `carousel-slide` | `templ Slide(o SlideOpts)` | `ggg/component/carousel` | — | — | — |
-| `chart-legend` | `templ ChartLegend(o ChartLegendOpts)` | `ggg/component/chart` | — | — | — |
-| `column-picker` | `templ ColumnPicker(o ColumnPickerOpts)` | `ggg/component/data-grid` | `alpine` | `uiGrid` | — |
-| `command-group` | `templ CommandGroup(o CommandGroupOpts)` | `ggg/component/command` | — | — | — |
-| `command-item` | `templ CommandItem(o CommandItemOpts)` | `ggg/component/command` | — | — | — |
-| `command-palette` | `templ CommandPalette(o CommandPaletteOpts)` | `ggg/component/command` | `alpine` | `uiCommand` | — |
-| `data-grid` | `templ DataGrid(o DataGridOpts)` | `ggg/component/data-grid` | `alpine` | `uiGrid` | yes |
-| `date-picker` | `templ DatePicker(o DatePickerOpts)` | `ggg/component/calendar` | `cally` | `uiCalendar` | yes |
-| `date-range-picker` | `templ DateRangePicker(o DateRangePickerOpts)` | `ggg/component/calendar` | `cally` | `uiCalendar` | yes |
-| `date-time-picker` | `templ DateTimePicker(o DateTimePickerOpts)` | `ggg/component/calendar` | `cally` | `uiCalendar` | yes |
-| `donut-chart` | `templ DonutChart(o DonutChartOpts)` | `ggg/component/chart` | `chartjs` | `uiChart` | yes |
-| `editor-preview` | `templ EditorPreview(o EditorPreviewOpts)` | `ggg/component/markdown-editor` | — | — | — |
-| `editor-toolbar` | `templ EditorToolbar(o EditorToolbarOpts)` | `ggg/component/markdown-editor` | — | — | — |
-| `grid-toolbar` | `templ GridToolbar(o GridToolbarOpts)` | `ggg/component/data-grid` | — | — | — |
-| `kanban` | `templ Kanban(o KanbanOpts)` | `ggg/component/kanban` | `sortablejs` | `uiKanban` | yes |
-| `kanban-card` | `templ KanbanCard(o KanbanCardOpts)` | `ggg/component/kanban` | — | — | — |
-| `kanban-column` | `templ KanbanColumn(o KanbanColumnOpts)` | `ggg/component/kanban` | — | — | — |
-| `line-chart` | `templ LineChart(o LineChartOpts)` | `ggg/component/chart` | `chartjs` | `uiChart` | yes |
-| `markdown-editor` | `templ MarkdownEditor(o MarkdownEditorOpts)` | `ggg/component/markdown-editor` | `alpine` | `uiMarkdownEditor` | yes |
-| `media-picker` | `templ MediaPicker(o MediaPickerOpts)` | `ggg/component/markdown-editor` | — | — | — |
-| `month-grid` | `templ MonthGrid(o MonthGridOpts)` | `ggg/component/calendar` | — | — | — |
-| `panel` | `templ Panel(o PanelOpts)` | `ggg/component/panels` | — | — | — |
-| `panel-group` | `templ PanelGroup(o PanelGroupOpts)` | `ggg/component/panels` | `alpine` | `uiPanels` | — |
-| `panel-handle` | `templ PanelHandle(o PanelHandleOpts)` | `ggg/component/panels` | — | — | — |
-| `question` | `templ Question(o QuestionOpts)` | `ggg/component/questionnaire` | — | — | — |
-| `questionnaire` | `templ Questionnaire(o QuestionnaireOpts)` | `ggg/component/questionnaire` | — | — | — |
-| `scheduler` | `templ Scheduler(o SchedulerOpts)` | `ggg/component/calendar` | — | — | — |
-| `sparkline` | `templ Sparkline(o SparklineOpts)` | `ggg/component/chart` | `chartjs` | `uiChart` | yes |
-| `tree` | `templ Tree(o TreeOpts)` | `ggg/component/tree` | `alpine` | `uiTree` | — |
-| `tree-grid` | `templ TreeGrid(o TreeGridOpts)` | `ggg/component/tree` | `alpine` | `uiTree` | — |
-| `tree-node` | `templ TreeNode(o TreeNodeOpts)` | `ggg/component/tree` | — | — | — |
-| `wizard-actions` | `templ WizardActions(o WizardActionsOpts)` | `ggg/component/questionnaire` | — | — | — |
+| Component | Signature | Module | Source | Engine | Alpine | Fallback |
+|---|---|---|---|---|---|---|
+| `area-chart` | `templ AreaChart(o AreaChartOpts)` | `ggg/component/chart` | `ggg` | `chartjs` | `uiChart` | yes |
+| `availability-grid` | `templ AvailabilityGrid(o AvailabilityGridOpts)` | `ggg/component/calendar` | `ggg` | — | — | — |
+| `bar-chart` | `templ BarChart(o BarChartOpts)` | `ggg/component/chart` | `ggg` | `chartjs` | `uiChart` | yes |
+| `carousel` | `templ Carousel(o CarouselOpts)` | `ggg/component/carousel` | `ggg` | `alpine` | `uiCarousel` | — |
+| `carousel-dots` | `templ CarouselDots(o CarouselDotsOpts)` | `ggg/component/carousel` | `ggg` | — | — | — |
+| `carousel-slide` | `templ Slide(o SlideOpts)` | `ggg/component/carousel` | `ggg` | — | — | — |
+| `chart-legend` | `templ ChartLegend(o ChartLegendOpts)` | `ggg/component/chart` | `ggg` | — | — | — |
+| `column-picker` | `templ ColumnPicker(o ColumnPickerOpts)` | `ggg/component/data-grid` | `ggg` | `alpine` | `uiGrid` | — |
+| `command-group` | `templ CommandGroup(o CommandGroupOpts)` | `ggg/component/command` | `ggg` | — | — | — |
+| `command-item` | `templ CommandItem(o CommandItemOpts)` | `ggg/component/command` | `ggg` | — | — | — |
+| `command-palette` | `templ CommandPalette(o CommandPaletteOpts)` | `ggg/component/command` | `ggg` | `alpine` | `uiCommand` | — |
+| `data-grid` | `templ DataGrid(o DataGridOpts)` | `ggg/component/data-grid` | `ggg` | `alpine` | `uiGrid` | yes |
+| `date-picker` | `templ DatePicker(o DatePickerOpts)` | `ggg/component/calendar` | `ggg` | `cally` | `uiCalendar` | yes |
+| `date-range-picker` | `templ DateRangePicker(o DateRangePickerOpts)` | `ggg/component/calendar` | `ggg` | `cally` | `uiCalendar` | yes |
+| `date-time-picker` | `templ DateTimePicker(o DateTimePickerOpts)` | `ggg/component/calendar` | `ggg` | `cally` | `uiCalendar` | yes |
+| `donut-chart` | `templ DonutChart(o DonutChartOpts)` | `ggg/component/chart` | `ggg` | `chartjs` | `uiChart` | yes |
+| `editor-preview` | `templ EditorPreview(o EditorPreviewOpts)` | `ggg/component/markdown-editor` | `ggg` | — | — | — |
+| `editor-toolbar` | `templ EditorToolbar(o EditorToolbarOpts)` | `ggg/component/markdown-editor` | `ggg` | — | — | — |
+| `grid-toolbar` | `templ GridToolbar(o GridToolbarOpts)` | `ggg/component/data-grid` | `ggg` | — | — | — |
+| `kanban` | `templ Kanban(o KanbanOpts)` | `ggg/component/kanban` | `ggg` | `sortablejs` | `uiKanban` | yes |
+| `kanban-card` | `templ KanbanCard(o KanbanCardOpts)` | `ggg/component/kanban` | `ggg` | — | — | — |
+| `kanban-column` | `templ KanbanColumn(o KanbanColumnOpts)` | `ggg/component/kanban` | `ggg` | — | — | — |
+| `line-chart` | `templ LineChart(o LineChartOpts)` | `ggg/component/chart` | `ggg` | `chartjs` | `uiChart` | yes |
+| `markdown-editor` | `templ MarkdownEditor(o MarkdownEditorOpts)` | `ggg/component/markdown-editor` | `ggg` | `alpine` | `uiMarkdownEditor` | yes |
+| `media-picker` | `templ MediaPicker(o MediaPickerOpts)` | `ggg/component/markdown-editor` | `ggg` | — | — | — |
+| `month-grid` | `templ MonthGrid(o MonthGridOpts)` | `ggg/component/calendar` | `ggg` | — | — | — |
+| `panel` | `templ Panel(o PanelOpts)` | `ggg/component/panels` | `ggg` | — | — | — |
+| `panel-group` | `templ PanelGroup(o PanelGroupOpts)` | `ggg/component/panels` | `ggg` | `alpine` | `uiPanels` | — |
+| `panel-handle` | `templ PanelHandle(o PanelHandleOpts)` | `ggg/component/panels` | `ggg` | — | — | — |
+| `question` | `templ Question(o QuestionOpts)` | `ggg/component/questionnaire` | `ggg` | — | — | — |
+| `questionnaire` | `templ Questionnaire(o QuestionnaireOpts)` | `ggg/component/questionnaire` | `ggg` | — | — | — |
+| `scheduler` | `templ Scheduler(o SchedulerOpts)` | `ggg/component/calendar` | `ggg` | — | — | — |
+| `sparkline` | `templ Sparkline(o SparklineOpts)` | `ggg/component/chart` | `ggg` | `chartjs` | `uiChart` | yes |
+| `tree` | `templ Tree(o TreeOpts)` | `ggg/component/tree` | `ggg` | `alpine` | `uiTree` | — |
+| `tree-grid` | `templ TreeGrid(o TreeGridOpts)` | `ggg/component/tree` | `ggg` | `alpine` | `uiTree` | — |
+| `tree-node` | `templ TreeNode(o TreeNodeOpts)` | `ggg/component/tree` | `ggg` | — | — | — |
+| `wizard-actions` | `templ WizardActions(o WizardActionsOpts)` | `ggg/component/questionnaire` | `ggg` | — | — | — |

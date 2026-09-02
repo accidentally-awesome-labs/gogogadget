@@ -1,6 +1,6 @@
 ---
 title: Module reference
-description: Every installed module, its dependencies, and its removal policy, generated from the module manifests.
+description: Every installed module, its source registry, contract range, provider targets, dependencies, lifecycle, and verification commands, generated from the module manifests.
 section: Modules
 weight: 36
 ---
@@ -16,317 +16,755 @@ where to look at it, and the commands that verify it. See
 [Module anatomy and lifecycle](/docs/modules) for what each field means and
 [Module removal and data retention](/docs/module-removal) for the policies.
 
-**Requires** lists only direct dependencies; the installer expands the
-transitive closure itself.
+**Source** is the registry namespace the lock resolved the module from, so a
+module published by a third party is identifiable here rather than only in
+its id. **Contract** is the contract number this module publishes;
+**Requires** lists only direct dependencies with the inclusive contract range
+each one is accepted at, and the installer expands the transitive closure
+itself.
 
 ## Elements (21)
 
-| Module | Title | Requires | Removal |
-|---|---|---|---|
-| `ggg/element/avatar` | Avatar | `ggg/element/ui-core` | `free` |
-| `ggg/element/avatar-group` | AvatarGroup | `ggg/element/ui-core` | `free` |
-| `ggg/element/button` | Button | `ggg/element/ui-core` | `free` |
-| `ggg/element/button-group` | ButtonGroup | `ggg/element/ui-core` | `free` |
-| `ggg/element/button-link` | ButtonLink | `ggg/element/ui-core` | `free` |
-| `ggg/element/code` | Code | `ggg/element/ui-core` | `free` |
-| `ggg/element/copy-button` | CopyButton | `ggg/element/ui-core` | `free` |
-| `ggg/element/heading` | Heading | `ggg/element/ui-core` | `free` |
-| `ggg/element/icon` | Icon | `ggg/element/ui-core` | `free` |
-| `ggg/element/icon-button` | IconButton | `ggg/element/ui-core` | `free` |
-| `ggg/element/kbd` | Kbd | `ggg/element/ui-core` | `free` |
-| `ggg/element/link` | Link | `ggg/element/ui-core` | `free` |
-| `ggg/element/prose` | Prose | `ggg/element/ui-core` | `free` |
-| `ggg/element/separator` | Separator | `ggg/element/ui-core` | `free` |
-| `ggg/element/spinner` | Spinner | `ggg/element/ui-core` | `free` |
-| `ggg/element/text` | Text | `ggg/element/ui-core` | `free` |
-| `ggg/element/toggle-button` | ToggleButton | `ggg/element/ui-core` | `free` |
-| `ggg/element/toggle-group` | ToggleGroup | `ggg/element/ui-core` | `free` |
-| `ggg/element/truncate` | Truncate | `ggg/element/ui-core` | `free` |
-| `ggg/element/ui-core` | UI core | — | `replacement-required` |
-| `ggg/element/visually-hidden` | VisuallyHidden | `ggg/element/ui-core` | `free` |
+| Module | Source | Contract | Title | Requires | Removal |
+|---|---|---|---|---|---|
+| `ggg/element/avatar` | `ggg` | 1 | Avatar | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/avatar-group` | `ggg` | 1 | AvatarGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/button` | `ggg` | 1 | Button | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/button-group` | `ggg` | 1 | ButtonGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/button-link` | `ggg` | 1 | ButtonLink | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/code` | `ggg` | 1 | Code | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/copy-button` | `ggg` | 1 | CopyButton | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/heading` | `ggg` | 1 | Heading | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/icon` | `ggg` | 1 | Icon | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/icon-button` | `ggg` | 1 | IconButton | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/kbd` | `ggg` | 1 | Kbd | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/link` | `ggg` | 1 | Link | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/prose` | `ggg` | 1 | Prose | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/separator` | `ggg` | 1 | Separator | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/spinner` | `ggg` | 1 | Spinner | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/text` | `ggg` | 1 | Text | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/toggle-button` | `ggg` | 1 | ToggleButton | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/toggle-group` | `ggg` | 1 | ToggleGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/truncate` | `ggg` | 1 | Truncate | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/element/ui-core` | `ggg` | 1 | UI core | — | `replacement-required` |
+| `ggg/element/visually-hidden` | `ggg` | 1 | VisuallyHidden | `ggg/element/ui-core` [1,1] | `free` |
 
 ## Components (124)
 
-| Module | Title | Requires | Removal |
-|---|---|---|---|
-| `ggg/component/accordion` | Accordion | `ggg/element/ui-core` | `free` |
-| `ggg/component/activity-item` | ActivityItem | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/alert-dialog` | AlertDialog | `ggg/element/ui-core` | `free` |
-| `ggg/component/aspect-ratio` | AspectRatio | `ggg/element/ui-core` | `free` |
-| `ggg/component/attachment` | Attachment | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/back-link` | BackLink | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/badge` | Badge | `ggg/element/ui-core` | `free` |
-| `ggg/component/banner` | Banner | `ggg/element/ui-core` | `free` |
-| `ggg/component/breadcrumbs` | Breadcrumbs | `ggg/element/ui-core` | `free` |
-| `ggg/component/calendar` | Calendar and date pickers | `ggg/component/date-field` `ggg/component/date-range-field` `ggg/component/date-time-field` `ggg/component/status-dot` `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/card` | Card | `ggg/element/ui-core` | `free` |
-| `ggg/component/carousel` | Carousel | `ggg/element/ui-core` | `free` |
-| `ggg/component/center` | Center | `ggg/element/ui-core` | `free` |
-| `ggg/component/char-counter` | CharCounter | `ggg/element/ui-core` | `free` |
-| `ggg/component/chart` | Charts | `ggg/element/ui-core` | `free` |
-| `ggg/component/chat-log` | ChatLog | `ggg/element/ui-core` | `free` |
-| `ggg/component/chat-message` | ChatMessage | `ggg/element/ui-core` | `free` |
-| `ggg/component/checkbox` | Checkbox | `ggg/element/ui-core` | `free` |
-| `ggg/component/checkbox-group` | CheckboxGroup | `ggg/element/ui-core` | `free` |
-| `ggg/component/collapsible` | Collapsible | `ggg/element/ui-core` | `free` |
-| `ggg/component/color-input` | ColorInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/column-header` | ColumnHeader | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/combobox` | Combobox | `ggg/element/ui-core` | `free` |
-| `ggg/component/command` | Command palette | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/comment` | Comment | `ggg/element/avatar` `ggg/element/ui-core` | `free` |
-| `ggg/component/comment-thread` | CommentThread | `ggg/element/ui-core` | `free` |
-| `ggg/component/composer` | Composer | `ggg/component/field-error` `ggg/component/form-actions` `ggg/component/textarea` `ggg/element/button` `ggg/element/ui-core` | `free` |
-| `ggg/component/confirm-action` | ConfirmAction | `ggg/component/alert-dialog` `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/container` | Container | `ggg/element/ui-core` | `free` |
-| `ggg/component/context-menu` | ContextMenu | `ggg/component/dropdown-menu` `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/cursor-pagination` | CursorPagination | `ggg/element/ui-core` | `free` |
-| `ggg/component/data-grid` | Data grid | `ggg/component/column-header` `ggg/component/pagination` `ggg/component/search-input` `ggg/element/ui-core` | `free` |
-| `ggg/component/data-table` | DataTable | `ggg/component/column-header` `ggg/element/ui-core` | `free` |
-| `ggg/component/date-field` | DateField | `ggg/element/ui-core` | `free` |
-| `ggg/component/date-range-field` | DateRangeField | `ggg/element/ui-core` | `free` |
-| `ggg/component/date-time-field` | DateTimeField | `ggg/element/ui-core` | `free` |
-| `ggg/component/delivery-status` | DeliveryStatus | `ggg/component/status-dot` `ggg/element/ui-core` | `free` |
-| `ggg/component/description-list` | DescriptionList | `ggg/element/ui-core` | `free` |
-| `ggg/component/dialog` | Dialog | `ggg/element/ui-core` | `free` |
-| `ggg/component/disclosure` | Disclosure | `ggg/element/ui-core` | `free` |
-| `ggg/component/drawer` | Drawer | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/dropdown-menu` | DropdownMenu | `ggg/element/ui-core` | `free` |
-| `ggg/component/empty-state` | EmptyState | `ggg/element/ui-core` | `free` |
-| `ggg/component/error-state` | ErrorState | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/field` | Field | `ggg/element/ui-core` | `free` |
-| `ggg/component/field-error` | FieldError | `ggg/element/ui-core` | `free` |
-| `ggg/component/fieldset` | Fieldset | `ggg/element/ui-core` | `free` |
-| `ggg/component/file-dropzone` | FileDropzone | `ggg/element/ui-core` | `free` |
-| `ggg/component/file-input` | FileInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/form` | Form | `ggg/element/ui-core` | `free` |
-| `ggg/component/form-actions` | FormActions | `ggg/element/ui-core` | `free` |
-| `ggg/component/grid` | Grid | `ggg/element/ui-core` | `free` |
-| `ggg/component/hint` | Hint | `ggg/element/ui-core` | `free` |
-| `ggg/component/hover-card` | HoverCard | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/inline` | Inline | `ggg/element/ui-core` | `free` |
-| `ggg/component/input-addon` | InputAddon | `ggg/element/ui-core` | `free` |
-| `ggg/component/input-group` | InputGroup | `ggg/element/ui-core` | `free` |
-| `ggg/component/kanban` | Kanban board | `ggg/component/badge` `ggg/component/dropdown-menu` `ggg/component/notice` `ggg/element/avatar-group` `ggg/element/ui-core` | `free` |
-| `ggg/component/key-value` | KeyValue | `ggg/element/ui-core` | `free` |
-| `ggg/component/label` | Label | `ggg/element/ui-core` | `free` |
-| `ggg/component/list` | List | `ggg/element/ui-core` | `free` |
-| `ggg/component/markdown-editor` | Markdown editor | `ggg/component/char-counter` `ggg/component/field-error` `ggg/component/file-dropzone` `ggg/element/ui-core` | `free` |
-| `ggg/component/member-item` | MemberItem | `ggg/component/badge` `ggg/element/avatar` `ggg/element/ui-core` | `free` |
-| `ggg/component/mention-chip` | MentionChip | `ggg/element/ui-core` | `free` |
-| `ggg/component/menubar` | Menubar | `ggg/component/dropdown-menu` `ggg/element/ui-core` | `free` |
-| `ggg/component/meter` | Meter | `ggg/element/ui-core` | `free` |
-| `ggg/component/metric` | Metric | `ggg/element/ui-core` | `free` |
-| `ggg/component/multi-select` | MultiSelect | `ggg/element/ui-core` | `free` |
-| `ggg/component/nav-tabs` | NavTabs | `ggg/element/ui-core` | `free` |
-| `ggg/component/navigation-menu` | NavigationMenu | `ggg/element/ui-core` | `free` |
-| `ggg/component/notice` | Notice | `ggg/element/ui-core` | `free` |
-| `ggg/component/notification-item` | NotificationItem | `ggg/component/status-dot` `ggg/element/ui-core` | `free` |
-| `ggg/component/number-input` | NumberInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/onboarding-checklist` | OnboardingChecklist | `ggg/component/progress-bar` `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/otp-input` | OTPInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/page-header` | PageHeader | `ggg/element/ui-core` | `free` |
-| `ggg/component/pagination` | Pagination | `ggg/element/ui-core` | `free` |
-| `ggg/component/panels` | Resizable panels | `ggg/element/ui-core` | `free` |
-| `ggg/component/password-input` | PasswordInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/plan-card` | PlanCard | `ggg/element/ui-core` | `free` |
-| `ggg/component/popover` | Popover | `ggg/element/ui-core` | `free` |
-| `ggg/component/progress-bar` | ProgressBar | `ggg/element/ui-core` | `free` |
-| `ggg/component/progress-circle` | ProgressCircle | `ggg/element/ui-core` | `free` |
-| `ggg/component/questionnaire` | Questionnaire | `ggg/component/field` `ggg/component/select` `ggg/component/steps` `ggg/component/text-input` `ggg/component/textarea` `ggg/element/ui-core` | `free` |
-| `ggg/component/radio-group` | RadioGroup | `ggg/element/ui-core` | `free` |
-| `ggg/component/range-input` | RangeInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/row-actions` | RowActions | `ggg/component/dropdown-menu` `ggg/element/ui-core` | `free` |
-| `ggg/component/scroll-area` | ScrollArea | `ggg/element/ui-core` | `free` |
-| `ggg/component/search-input` | SearchInput | `ggg/element/button` `ggg/element/spinner` `ggg/element/ui-core` | `free` |
-| `ggg/component/secret-reveal` | SecretReveal | `ggg/element/ui-core` | `free` |
-| `ggg/component/section` | Section | `ggg/element/heading` `ggg/element/ui-core` | `free` |
-| `ggg/component/section-header` | SectionHeader | `ggg/element/ui-core` | `free` |
-| `ggg/component/select` | Select | `ggg/element/ui-core` | `free` |
-| `ggg/component/selection-bar` | SelectionBar | `ggg/element/ui-core` | `free` |
-| `ggg/component/settings-section` | SettingsSection | `ggg/element/ui-core` | `free` |
-| `ggg/component/skeleton` | Skeleton | `ggg/element/ui-core` | `free` |
-| `ggg/component/skip-link` | SkipLink | `ggg/element/ui-core` | `free` |
-| `ggg/component/slug-input` | SlugInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/split` | Split | `ggg/element/ui-core` | `free` |
-| `ggg/component/stack` | Stack | `ggg/element/ui-core` | `free` |
-| `ggg/component/stat-group` | StatGroup | `ggg/element/ui-core` | `free` |
-| `ggg/component/status-dot` | StatusDot | `ggg/element/ui-core` | `free` |
-| `ggg/component/steps` | Steps | `ggg/element/ui-core` | `free` |
-| `ggg/component/sticky-bar` | StickyBar | `ggg/element/ui-core` | `free` |
-| `ggg/component/switch` | Switch | `ggg/element/ui-core` | `free` |
-| `ggg/component/tab-panels` | TabPanels | `ggg/element/ui-core` | `free` |
-| `ggg/component/table` | Table | `ggg/element/ui-core` | `free` |
-| `ggg/component/table-card` | TableCard | `ggg/element/ui-core` | `free` |
-| `ggg/component/table-of-contents` | TableOfContents | `ggg/element/ui-core` | `free` |
-| `ggg/component/table-toolbar` | TableToolbar | `ggg/element/ui-core` | `free` |
-| `ggg/component/tags-input` | TagsInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/terminal-page` | TerminalPage | `ggg/element/ui-core` | `free` |
-| `ggg/component/text-input` | TextInput | `ggg/element/ui-core` | `free` |
-| `ggg/component/textarea` | Textarea | `ggg/element/ui-core` | `free` |
-| `ggg/component/theme-toggle` | Theme toggle | `ggg/element/button` `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/tile` | Tile | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/time-field` | TimeField | `ggg/element/ui-core` | `free` |
-| `ggg/component/timeline` | Timeline | `ggg/element/ui-core` | `free` |
-| `ggg/component/toast` | Toast | `ggg/element/icon` `ggg/element/icon-button` `ggg/element/ui-core` | `free` |
-| `ggg/component/toast-region` | Toast region | `ggg/component/toast` `ggg/element/ui-core` | `free` |
-| `ggg/component/toolbar` | Toolbar | `ggg/element/ui-core` | `free` |
-| `ggg/component/tooltip` | Tooltip | `ggg/element/ui-core` | `free` |
-| `ggg/component/tree` | Tree | `ggg/element/icon` `ggg/element/ui-core` | `free` |
-| `ggg/component/usage-card` | UsageCard | `ggg/component/meter` `ggg/element/ui-core` | `free` |
+| Module | Source | Contract | Title | Requires | Removal |
+|---|---|---|---|---|---|
+| `ggg/component/accordion` | `ggg` | 1 | Accordion | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/activity-item` | `ggg` | 1 | ActivityItem | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/alert-dialog` | `ggg` | 1 | AlertDialog | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/aspect-ratio` | `ggg` | 1 | AspectRatio | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/attachment` | `ggg` | 1 | Attachment | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/back-link` | `ggg` | 1 | BackLink | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/badge` | `ggg` | 1 | Badge | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/banner` | `ggg` | 1 | Banner | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/breadcrumbs` | `ggg` | 1 | Breadcrumbs | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/calendar` | `ggg` | 1 | Calendar and date pickers | `ggg/component/date-field` [1,1] `ggg/component/date-range-field` [1,1] `ggg/component/date-time-field` [1,1] `ggg/component/status-dot` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/card` | `ggg` | 1 | Card | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/carousel` | `ggg` | 1 | Carousel | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/center` | `ggg` | 1 | Center | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/char-counter` | `ggg` | 1 | CharCounter | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/chart` | `ggg` | 1 | Charts | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/chat-log` | `ggg` | 1 | ChatLog | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/chat-message` | `ggg` | 1 | ChatMessage | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/checkbox` | `ggg` | 1 | Checkbox | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/checkbox-group` | `ggg` | 1 | CheckboxGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/collapsible` | `ggg` | 1 | Collapsible | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/color-input` | `ggg` | 1 | ColorInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/column-header` | `ggg` | 1 | ColumnHeader | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/combobox` | `ggg` | 1 | Combobox | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/command` | `ggg` | 1 | Command palette | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/comment` | `ggg` | 1 | Comment | `ggg/element/avatar` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/comment-thread` | `ggg` | 1 | CommentThread | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/composer` | `ggg` | 1 | Composer | `ggg/component/field-error` [1,1] `ggg/component/form-actions` [1,1] `ggg/component/textarea` [1,1] `ggg/element/button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/confirm-action` | `ggg` | 1 | ConfirmAction | `ggg/component/alert-dialog` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/container` | `ggg` | 1 | Container | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/context-menu` | `ggg` | 1 | ContextMenu | `ggg/component/dropdown-menu` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/cursor-pagination` | `ggg` | 1 | CursorPagination | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/data-grid` | `ggg` | 1 | Data grid | `ggg/component/column-header` [1,1] `ggg/component/pagination` [1,1] `ggg/component/search-input` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/data-table` | `ggg` | 1 | DataTable | `ggg/component/column-header` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/date-field` | `ggg` | 1 | DateField | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/date-range-field` | `ggg` | 1 | DateRangeField | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/date-time-field` | `ggg` | 1 | DateTimeField | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/delivery-status` | `ggg` | 1 | DeliveryStatus | `ggg/component/status-dot` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/description-list` | `ggg` | 1 | DescriptionList | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/dialog` | `ggg` | 1 | Dialog | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/disclosure` | `ggg` | 1 | Disclosure | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/drawer` | `ggg` | 1 | Drawer | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/dropdown-menu` | `ggg` | 1 | DropdownMenu | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/empty-state` | `ggg` | 1 | EmptyState | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/error-state` | `ggg` | 1 | ErrorState | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/field` | `ggg` | 1 | Field | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/field-error` | `ggg` | 1 | FieldError | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/fieldset` | `ggg` | 1 | Fieldset | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/file-dropzone` | `ggg` | 1 | FileDropzone | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/file-input` | `ggg` | 1 | FileInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/form` | `ggg` | 1 | Form | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/form-actions` | `ggg` | 1 | FormActions | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/grid` | `ggg` | 1 | Grid | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/hint` | `ggg` | 1 | Hint | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/hover-card` | `ggg` | 1 | HoverCard | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/inline` | `ggg` | 1 | Inline | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/input-addon` | `ggg` | 1 | InputAddon | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/input-group` | `ggg` | 1 | InputGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/kanban` | `ggg` | 1 | Kanban board | `ggg/component/badge` [1,1] `ggg/component/dropdown-menu` [1,1] `ggg/component/notice` [1,1] `ggg/element/avatar-group` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/key-value` | `ggg` | 1 | KeyValue | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/label` | `ggg` | 1 | Label | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/list` | `ggg` | 1 | List | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/markdown-editor` | `ggg` | 1 | Markdown editor | `ggg/component/char-counter` [1,1] `ggg/component/field-error` [1,1] `ggg/component/file-dropzone` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/member-item` | `ggg` | 1 | MemberItem | `ggg/component/badge` [1,1] `ggg/element/avatar` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/mention-chip` | `ggg` | 1 | MentionChip | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/menubar` | `ggg` | 1 | Menubar | `ggg/component/dropdown-menu` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/meter` | `ggg` | 1 | Meter | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/metric` | `ggg` | 1 | Metric | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/multi-select` | `ggg` | 1 | MultiSelect | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/nav-tabs` | `ggg` | 1 | NavTabs | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/navigation-menu` | `ggg` | 1 | NavigationMenu | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/notice` | `ggg` | 1 | Notice | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/notification-item` | `ggg` | 1 | NotificationItem | `ggg/component/status-dot` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/number-input` | `ggg` | 1 | NumberInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/onboarding-checklist` | `ggg` | 1 | OnboardingChecklist | `ggg/component/progress-bar` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/otp-input` | `ggg` | 1 | OTPInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/page-header` | `ggg` | 1 | PageHeader | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/pagination` | `ggg` | 1 | Pagination | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/panels` | `ggg` | 1 | Resizable panels | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/password-input` | `ggg` | 1 | PasswordInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/plan-card` | `ggg` | 1 | PlanCard | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/popover` | `ggg` | 1 | Popover | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/progress-bar` | `ggg` | 1 | ProgressBar | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/progress-circle` | `ggg` | 1 | ProgressCircle | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/questionnaire` | `ggg` | 1 | Questionnaire | `ggg/component/field` [1,1] `ggg/component/select` [1,1] `ggg/component/steps` [1,1] `ggg/component/text-input` [1,1] `ggg/component/textarea` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/radio-group` | `ggg` | 1 | RadioGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/range-input` | `ggg` | 1 | RangeInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/row-actions` | `ggg` | 1 | RowActions | `ggg/component/dropdown-menu` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/scroll-area` | `ggg` | 1 | ScrollArea | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/search-input` | `ggg` | 1 | SearchInput | `ggg/element/button` [1,1] `ggg/element/spinner` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/secret-reveal` | `ggg` | 1 | SecretReveal | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/section` | `ggg` | 1 | Section | `ggg/element/heading` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/section-header` | `ggg` | 1 | SectionHeader | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/select` | `ggg` | 1 | Select | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/selection-bar` | `ggg` | 1 | SelectionBar | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/settings-section` | `ggg` | 1 | SettingsSection | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/skeleton` | `ggg` | 1 | Skeleton | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/skip-link` | `ggg` | 1 | SkipLink | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/slug-input` | `ggg` | 1 | SlugInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/split` | `ggg` | 1 | Split | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/stack` | `ggg` | 1 | Stack | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/stat-group` | `ggg` | 1 | StatGroup | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/status-dot` | `ggg` | 1 | StatusDot | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/steps` | `ggg` | 1 | Steps | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/sticky-bar` | `ggg` | 1 | StickyBar | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/switch` | `ggg` | 1 | Switch | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tab-panels` | `ggg` | 1 | TabPanels | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/table` | `ggg` | 1 | Table | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/table-card` | `ggg` | 1 | TableCard | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/table-of-contents` | `ggg` | 1 | TableOfContents | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/table-toolbar` | `ggg` | 1 | TableToolbar | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tags-input` | `ggg` | 1 | TagsInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/terminal-page` | `ggg` | 1 | TerminalPage | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/text-input` | `ggg` | 1 | TextInput | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/textarea` | `ggg` | 1 | Textarea | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/theme-toggle` | `ggg` | 1 | Theme toggle | `ggg/element/button` [1,1] `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tile` | `ggg` | 1 | Tile | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/time-field` | `ggg` | 1 | TimeField | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/timeline` | `ggg` | 1 | Timeline | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/toast` | `ggg` | 1 | Toast | `ggg/element/icon` [1,1] `ggg/element/icon-button` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/toast-region` | `ggg` | 1 | Toast region | `ggg/component/toast` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/toolbar` | `ggg` | 1 | Toolbar | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tooltip` | `ggg` | 1 | Tooltip | `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/tree` | `ggg` | 1 | Tree | `ggg/element/icon` [1,1] `ggg/element/ui-core` [1,1] | `free` |
+| `ggg/component/usage-card` | `ggg` | 1 | UsageCard | `ggg/component/meter` [1,1] `ggg/element/ui-core` [1,1] | `free` |
 
 ## Pages (36)
 
-| Module | Title | Requires | Removal |
-|---|---|---|---|
-| `ggg/page/activity` | Activity feed | `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-announcements` | Admin announcements list | `ggg/system/announcements` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-audit` | Admin audit log | `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-content` | Admin content list | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-content-editor` | Admin content editor | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` `ggg/workflow/admin-content` | `free` |
-| `ggg/page/admin-content-preview` | Admin content preview | `ggg/system/content` `ggg/system/security` `ggg/system/server` `ggg/workflow/admin-content` | `free` |
-| `ggg/page/admin-flag-detail` | Admin feature flag detail | `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-flags` | Admin feature flags list | `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-jobs` | Admin job queue | `ggg/system/e2e` `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-media` | Admin media library | `ggg/system/content` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-organizations` | Admin organizations list | `ggg/system/e2e` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-overview` | Admin overview | `ggg/system/billing` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-schedules` | Admin schedules list | `ggg/system/i18n` `ggg/system/jobs` `ggg/system/organizations` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/admin-users` | Admin users list | `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/blog` | Blog | `ggg/system/content` `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `retain-data` |
-| `ggg/page/changelog` | Changelog | `ggg/system/content` `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `retain-data` |
-| `ggg/page/dashboard` | App dashboard | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/dev-gallery` | Component gallery | `ggg/system/billing` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` `ggg/workflow/dev-session` | `free` |
-| `ggg/page/docs` | Documentation page | `ggg/page/docs-index` `ggg/system/content-assets` `ggg/system/server` | `free` |
-| `ggg/page/docs-index` | Documentation index | `ggg/system/content-assets` `ggg/system/i18n` `ggg/system/server` | `free` |
-| `ggg/page/docs-search` | Documentation search | `ggg/page/docs-index` `ggg/system/content-assets` `ggg/system/server` | `free` |
-| `ggg/page/files` | Files list | `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/home` | Home page | `ggg/system/i18n` `ggg/system/server` | `free` |
-| `ggg/page/notifications` | Notifications list | `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/pricing` | Pricing page | `ggg/system/i18n` `ggg/system/server` | `free` |
-| `ggg/page/privacy` | Privacy policy | `ggg/system/i18n` `ggg/system/server` | `free` |
-| `ggg/page/project-edit` | Edit project form | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/workflow/projects` | `free` |
-| `ggg/page/project-new` | New project form | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/projects` | Projects list | `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/settings-account` | Account settings | `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` | `free` |
-| `ggg/page/settings-api-tokens` | API token settings | `ggg/system/api` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/settings-billing` | Billing settings | `ggg/system/billing` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/usage` | `free` |
-| `ggg/page/settings-notifications` | Notification settings | `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/page/settings-organization` | Organization settings | `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` `ggg/workflow/organization-export` | `free` |
-| `ggg/page/settings-webhooks` | Webhook settings | `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
-| `ggg/page/terms` | Terms of service | `ggg/system/i18n` `ggg/system/server` | `free` |
+| Module | Source | Contract | Title | Requires | Removal |
+|---|---|---|---|---|---|
+| `ggg/page/activity` | `ggg` | 1 | Activity feed | `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-announcements` | `ggg` | 1 | Admin announcements list | `ggg/system/announcements` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-audit` | `ggg` | 1 | Admin audit log | `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-content` | `ggg` | 1 | Admin content list | `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-content-editor` | `ggg` | 1 | Admin content editor | `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/admin-content` [1,1] | `free` |
+| `ggg/page/admin-content-preview` | `ggg` | 1 | Admin content preview | `ggg/system/content` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/admin-content` [1,1] | `free` |
+| `ggg/page/admin-flag-detail` | `ggg` | 1 | Admin feature flag detail | `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-flags` | `ggg` | 1 | Admin feature flags list | `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-jobs` | `ggg` | 1 | Admin job queue | `ggg/system/e2e` [1,1] `ggg/system/jobs` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-media` | `ggg` | 1 | Admin media library | `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-organizations` | `ggg` | 1 | Admin organizations list | `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-overview` | `ggg` | 1 | Admin overview | `ggg/system/billing` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-schedules` | `ggg` | 1 | Admin schedules list | `ggg/system/i18n` [1,1] `ggg/system/jobs` [1,1] `ggg/system/organizations` [1,1] `ggg/system/schedules` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/admin-users` | `ggg` | 1 | Admin users list | `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/blog` | `ggg` | 1 | Blog | `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `retain-data` |
+| `ggg/page/changelog` | `ggg` | 1 | Changelog | `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `retain-data` |
+| `ggg/page/dashboard` | `ggg` | 1 | App dashboard | `ggg/system/audit` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/dev-gallery` | `ggg` | 1 | Component gallery | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/dev-session` [1,1] | `free` |
+| `ggg/page/docs` | `ggg` | 1 | Documentation page | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/docs-index` | `ggg` | 1 | Documentation index | `ggg/system/content-assets` [1,1] `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/docs-search` | `ggg` | 1 | Documentation search | `ggg/page/docs-index` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/files` | `ggg` | 1 | Files list | `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/home` | `ggg` | 1 | Home page | `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/notifications` | `ggg` | 1 | Notifications list | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/pricing` | `ggg` | 1 | Pricing page | `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/privacy` | `ggg` | 1 | Privacy policy | `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/project-edit` | `ggg` | 1 | Edit project form | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/projects` [1,1] | `free` |
+| `ggg/page/project-new` | `ggg` | 1 | New project form | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/projects` | `ggg` | 1 | Projects list | `ggg/system/database` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/settings-account` | `ggg` | 1 | Account settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/auth-session` [1,1] | `free` |
+| `ggg/page/settings-api-tokens` | `ggg` | 1 | API token settings | `ggg/system/api` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/settings-billing` | `ggg` | 1 | Billing settings | `ggg/system/billing` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/system/usage` [1,1] | `free` |
+| `ggg/page/settings-notifications` | `ggg` | 1 | Notification settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/page/settings-organization` | `ggg` | 1 | Organization settings | `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/auth-session` [1,1] `ggg/workflow/organization-export` [1,1] | `free` |
+| `ggg/page/settings-webhooks` | `ggg` | 1 | Webhook settings | `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/system/webhooks` [1,1] | `free` |
+| `ggg/page/terms` | `ggg` | 1 | Terms of service | `ggg/system/i18n` [1,1] `ggg/system/server` [1,1] | `free` |
 
 ## Workflows (28)
 
-| Module | Title | Requires | Removal |
-|---|---|---|---|
-| `ggg/workflow/account-delete` | Account deletion | `ggg/page/home` `ggg/page/settings-account` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/workflow/auth-session` | `free` |
-| `ggg/workflow/account-export` | Personal data export | `ggg/page/settings-account` `ggg/system/audit` `ggg/system/e2e` `ggg/system/identity` `ggg/system/notifications` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-announcements` | Admin announcement mutations | `ggg/page/admin-announcements` `ggg/page/dashboard` `ggg/system/announcements` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-content` | Admin content mutations | `ggg/page/admin-content` `ggg/page/blog` `ggg/system/audit` `ggg/system/content` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-flags` | Admin feature flag mutations | `ggg/page/admin-flags` `ggg/system/audit` `ggg/system/e2e` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-job-requeue` | Admin job requeue | `ggg/page/admin-jobs` `ggg/system/audit` `ggg/system/jobs` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-media` | Admin media mutations | `ggg/page/admin-media` `ggg/system/audit` `ggg/system/content` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` `ggg/workflow/admin-content` | `free` |
-| `ggg/workflow/admin-schedules` | Admin schedule mutations | `ggg/page/admin-schedules` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/jobs` `ggg/system/schedules` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/admin-user-governance` | Admin user governance | `ggg/page/admin-audit` `ggg/page/admin-flags` `ggg/page/admin-overview` `ggg/page/admin-users` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/api-ai-chat` | AI chat API | `ggg/system/api` `ggg/system/llm` `ggg/system/server` `ggg/workflow/openapi-contract` | `free` |
-| `ggg/workflow/api-projects` | Projects API | `ggg/system/api` `ggg/system/server` `ggg/workflow/openapi-contract` | `free` |
-| `ggg/workflow/api-token-lifecycle` | API token creation and revocation | `ggg/page/settings-api-tokens` `ggg/system/api` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `retain-data` |
-| `ggg/workflow/appearance` | Theme preference | `ggg/page/dashboard` `ggg/page/home` `ggg/page/pricing` `ggg/page/settings-account` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
-| `ggg/workflow/auth-session` | Sign-in, sign-up and sign-out | `ggg/page/dashboard` `ggg/page/projects` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `replacement-required` |
-| `ggg/workflow/billing-checkout` | Checkout and billing portal | `ggg/page/settings-billing` `ggg/system/billing` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/billing-webhook` | Billing provider webhook | `ggg/system/billing` `ggg/system/database` `ggg/system/organizations` `ggg/system/server` | `major-version-only` |
-| `ggg/workflow/dev-session` | Zero-account dev session | `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/files` | File upload, download and delete | `ggg/page/files` `ggg/system/audit` `ggg/system/database` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/security` `ggg/system/server` `ggg/system/storage` | `free` |
-| `ggg/workflow/identity-webhook-sync` | Identity provider sync | `ggg/system/identity` `ggg/system/organizations` `ggg/system/server` | `free` |
-| `ggg/workflow/impersonation` | Administrator impersonation | `ggg/page/admin-overview` `ggg/page/admin-users` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/impersonation` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/notification-inbox` | Notification inbox read state | `ggg/page/dashboard` `ggg/page/notifications` `ggg/page/projects` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/notification-preferences` | Notification preference saving | `ggg/page/settings-notifications` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/notifications` `ggg/system/security` `ggg/system/server` | `retain-data` |
-| `ggg/workflow/openapi-contract` | OpenAPI description | `ggg/system/api` `ggg/system/server` | `free` |
-| `ggg/workflow/organization-export` | Organization data export | `ggg/system/audit` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/outbound-webhooks` | Outbound webhook management | `ggg/page/settings-webhooks` `ggg/system/audit` `ggg/system/e2e` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `retain-data` |
-| `ggg/workflow/project-export` | Project CSV export | `ggg/page/files` `ggg/page/projects` `ggg/system/audit` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/jobs` `ggg/system/security` `ggg/system/server` | `free` |
-| `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/page/project-new` `ggg/page/projects` `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/e2e` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
-| `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
+| Module | Source | Contract | Title | Requires | Removal |
+|---|---|---|---|---|---|
+| `ggg/workflow/account-delete` | `ggg` | 1 | Account deletion | `ggg/page/home` [1,1] `ggg/page/settings-account` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/impersonation` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/workflow/auth-session` [1,1] | `free` |
+| `ggg/workflow/account-export` | `ggg` | 1 | Personal data export | `ggg/page/settings-account` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/identity` [1,1] `ggg/system/notifications` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/admin-announcements` | `ggg` | 1 | Admin announcement mutations | `ggg/page/admin-announcements` [1,1] `ggg/page/dashboard` [1,1] `ggg/system/announcements` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/admin-content` | `ggg` | 1 | Admin content mutations | `ggg/page/admin-content` [1,1] `ggg/page/blog` [1,1] `ggg/system/audit` [1,1] `ggg/system/content` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/admin-flags` | `ggg` | 1 | Admin feature flag mutations | `ggg/page/admin-flags` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/admin-job-requeue` | `ggg` | 1 | Admin job requeue | `ggg/page/admin-jobs` [1,1] `ggg/system/audit` [1,1] `ggg/system/jobs` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/admin-media` | `ggg` | 1 | Admin media mutations | `ggg/page/admin-media` [1,1] `ggg/system/audit` [1,1] `ggg/system/content` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/system/storage` [1,1] `ggg/workflow/admin-content` [1,1] | `free` |
+| `ggg/workflow/admin-schedules` | `ggg` | 1 | Admin schedule mutations | `ggg/page/admin-schedules` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/jobs` [1,1] `ggg/system/schedules` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/admin-user-governance` | `ggg` | 1 | Admin user governance | `ggg/page/admin-audit` [1,1] `ggg/page/admin-flags` [1,1] `ggg/page/admin-overview` [1,1] `ggg/page/admin-users` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/api-ai-chat` | `ggg` | 1 | AI chat API | `ggg/system/api` [1,1] `ggg/system/llm` [1,1] `ggg/system/server` [1,1] `ggg/workflow/openapi-contract` [1,1] | `free` |
+| `ggg/workflow/api-projects` | `ggg` | 1 | Projects API | `ggg/system/api` [1,1] `ggg/system/server` [1,1] `ggg/workflow/openapi-contract` [1,1] | `free` |
+| `ggg/workflow/api-token-lifecycle` | `ggg` | 1 | API token creation and revocation | `ggg/page/settings-api-tokens` [1,1] `ggg/system/api` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `retain-data` |
+| `ggg/workflow/appearance` | `ggg` | 1 | Theme preference | `ggg/page/dashboard` [1,1] `ggg/page/home` [1,1] `ggg/page/pricing` [1,1] `ggg/page/settings-account` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `replacement-required` |
+| `ggg/workflow/auth-session` | `ggg` | 1 | Sign-in, sign-up and sign-out | `ggg/page/dashboard` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `replacement-required` |
+| `ggg/workflow/billing-checkout` | `ggg` | 1 | Checkout and billing portal | `ggg/page/settings-billing` [1,1] `ggg/system/billing` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/billing-webhook` | `ggg` | 1 | Billing provider webhook | `ggg/system/billing` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] `ggg/system/server` [1,1] | `major-version-only` |
+| `ggg/workflow/dev-session` | `ggg` | 1 | Zero-account dev session | `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/files` | `ggg` | 1 | File upload, download and delete | `ggg/page/files` [1,1] `ggg/system/audit` [1,1] `ggg/system/database` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/system/storage` [1,1] | `free` |
+| `ggg/workflow/identity-webhook-sync` | `ggg` | 1 | Identity provider sync | `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/impersonation` | `ggg` | 1 | Administrator impersonation | `ggg/page/admin-overview` [1,1] `ggg/page/admin-users` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/impersonation` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/notification-inbox` | `ggg` | 1 | Notification inbox read state | `ggg/page/dashboard` [1,1] `ggg/page/notifications` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/notification-preferences` | `ggg` | 1 | Notification preference saving | `ggg/page/settings-notifications` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/notifications` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `retain-data` |
+| `ggg/workflow/openapi-contract` | `ggg` | 1 | OpenAPI description | `ggg/system/api` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/organization-export` | `ggg` | 1 | Organization data export | `ggg/system/audit` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/jobs` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/outbound-webhooks` | `ggg` | 1 | Outbound webhook management | `ggg/page/settings-webhooks` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/system/webhooks` [1,1] | `retain-data` |
+| `ggg/workflow/project-export` | `ggg` | 1 | Project CSV export | `ggg/page/files` [1,1] `ggg/page/projects` [1,1] `ggg/system/audit` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/jobs` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] | `free` |
+| `ggg/workflow/projects` | `ggg` | 1 | Project create, update, archive and delete | `ggg/page/project-new` [1,1] `ggg/page/projects` [1,1] `ggg/system/analytics` [1,1] `ggg/system/api` [1,1] `ggg/system/audit` [1,1] `ggg/system/database` [1,1] `ggg/system/e2e` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/security` [1,1] `ggg/system/server` [1,1] `ggg/system/webhooks` [1,1] | `free` |
+| `ggg/workflow/seo-discovery` | `ggg` | 1 | Search discovery surfaces | `ggg/system/content` [1,1] `ggg/system/seo` [1,1] `ggg/system/server` [1,1] | `free` |
 
-## Systems (78)
+## Systems (79)
 
-| Module | Title | Requires | Removal |
+| Module | Source | Contract | Title | Requires | Removal |
+|---|---|---|---|---|---|
+| `ggg/system/analytics` | `ggg` | 1 | Product analytics | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/analytics-noop` | `ggg` | 1 | analytics-noop | `ggg/system/analytics` [1,1] | `free` |
+| `ggg/system/analytics-posthog` | `ggg` | 1 | analytics-posthog | `ggg/system/analytics` [1,1] | `free` |
+| `ggg/system/announcements` | `ggg` | 1 | Product announcements | `ggg/system/database` [1,1] | `retain-data` |
+| `ggg/system/api` | `ggg` | 1 | JSON API | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] | `major-version-only` |
+| `ggg/system/apphost` | `ggg` | 1 | Application host seam | — | `replacement-required` |
+| `ggg/system/audit` | `ggg` | 1 | Audit log | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/audit-export` | `ggg` | 1 | Audit Export | — | `replacement-required` |
+| `ggg/system/audit-export-noop` | `ggg` | 1 | Audit Export Noop | `ggg/system/audit-export` [1,1] | `free` |
+| `ggg/system/audit-export-otlp` | `ggg` | 1 | Audit Export Otlp | `ggg/system/audit-export` [1,1] | `free` |
+| `ggg/system/billing` | `ggg` | 1 | Billing | `ggg/system/organizations` [1,1] | `major-version-only` |
+| `ggg/system/billing-local` | `ggg` | 1 | Local billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/billing-polar` | `ggg` | 1 | Polar billing | `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/cache` | `ggg` | 1 | Cache | — | `replacement-required` |
+| `ggg/system/cache-memory` | `ggg` | 1 | Cache Memory | `ggg/system/cache` [1,1] | `free` |
+| `ggg/system/cache-redis` | `ggg` | 1 | Cache Redis | `ggg/system/cache` [1,1] | `free` |
+| `ggg/system/ci-github` | `ggg` | 1 | Ci Github | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/cli-ui` | `ggg` | 1 | Interactive ggg console | `ggg/system/modkit` [2,2] | `free` |
+| `ggg/system/config` | `ggg` | 1 | Configuration | `ggg/system/apphost` [1,1] | `replacement-required` |
+| `ggg/system/content` | `ggg` | 1 | Content and CMS | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/content-assets` | `ggg` | 1 | Embedded content corpus | `ggg/system/content` [1,1] | `free` |
+| `ggg/system/database` | `ggg` | 1 | Database | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `replacement-required` |
+| `ggg/system/database-postgres` | `ggg` | 1 | Database Postgres | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/database` [1,1] | `free` |
+| `ggg/system/deploy-fly` | `ggg` | 1 | Deploy Fly | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/dev-tools` | `ggg` | 1 | Dev Tools | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/docker` | `ggg` | 1 | Docker | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/e2e` | `ggg` | 1 | E2E harness | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/e2e-sweeps` | `ggg` | 1 | E2E cross-cutting sweeps | `ggg/page/admin-jobs` [1,1] `ggg/page/admin-media` [1,1] `ggg/page/blog` [1,1] `ggg/page/changelog` [1,1] `ggg/page/dashboard` [1,1] `ggg/page/docs` [1,1] `ggg/page/docs-index` [1,1] `ggg/page/docs-search` [1,1] `ggg/page/home` [1,1] `ggg/page/pricing` [1,1] `ggg/page/projects` [1,1] `ggg/system/e2e` [1,1] `ggg/workflow/seo-discovery` [1,1] | `free` |
+| `ggg/system/feature-flags` | `ggg` | 1 | Feature flags | `ggg/system/apphost` [1,1] `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/feature-flags-postgres` | `ggg` | 1 | Feature Flags Postgres | `ggg/system/feature-flags` [1,1] | `free` |
+| `ggg/system/i18n` | `ggg` | 1 | Localization | `ggg/system/apphost` [1,1] | `replacement-required` |
+| `ggg/system/identity` | `ggg` | 1 | Identity | `ggg/system/organizations` [1,1] | `major-version-only` |
+| `ggg/system/identity-clerk` | `ggg` | 1 | Clerk identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/identity` [1,1] | `free` |
+| `ggg/system/identity-dev` | `ggg` | 1 | Development identity | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/identity` [1,1] | `free` |
+| `ggg/system/identity-session` | `ggg` | 1 | Identity sessions | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/database` [1,1] `ggg/system/identity` [1,1] | `free` |
+| `ggg/system/impersonation` | `ggg` | 1 | Support impersonation | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/jobs` | `ggg` | 1 | Background job queue | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/database` [1,1] `ggg/system/mail` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `drain-required` |
+| `ggg/system/llm` | `ggg` | 1 | Language model | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/llm-fake` | `ggg` | 1 | llm-fake | `ggg/system/llm` [1,1] | `free` |
+| `ggg/system/llm-openai-compatible` | `ggg` | 1 | llm-openai-compatible | `ggg/system/llm` [1,1] | `free` |
+| `ggg/system/mail` | `ggg` | 1 | Transactional mail seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/mail-dev` | `ggg` | 1 | Filesystem mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/mail` [1,1] | `free` |
+| `ggg/system/mail-resend` | `ggg` | 1 | Resend mail | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/mail` [1,1] | `free` |
+| `ggg/system/metrics` | `ggg` | 1 | Runtime metrics endpoint | `ggg/system/server` [1,1] | `free` |
+| `ggg/system/modkit` | `ggg` | 2 | Module registry engine | — | `replacement-required` |
+| `ggg/system/notifications` | `ggg` | 1 | In-app notifications | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/notifications-postgres` | `ggg` | 1 | Notifications Postgres | `ggg/system/notifications` [1,1] | `free` |
+| `ggg/system/observability` | `ggg` | 1 | Error reporting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `free` |
+| `ggg/system/observability-log` | `ggg` | 1 | observability-log | `ggg/system/observability` [1,1] | `free` |
+| `ggg/system/observability-sentry` | `ggg` | 1 | observability-sentry | `ggg/system/observability` [1,1] | `free` |
+| `ggg/system/organizations` | `ggg` | 1 | Users, organizations, and membership | `ggg/system/database` [1,1] | `replacement-required` |
+| `ggg/system/project-base` | `ggg` | 1 | Project Base | — | `free` |
+| `ggg/system/project-docs` | `ggg` | 1 | Project Docs | `ggg/system/project-base` [1,1] | `free` |
+| `ggg/system/rate-limit` | `ggg` | 1 | Request rate limiting | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `major-version-only` |
+| `ggg/system/rate-limit-memory` | `ggg` | 1 | Rate Limit Memory | `ggg/system/config` [1,1] `ggg/system/rate-limit` [1,1] | `free` |
+| `ggg/system/rate-limit-redis` | `ggg` | 1 | Rate Limit Redis | `ggg/system/rate-limit` [1,1] | `free` |
+| `ggg/system/realtime` | `ggg` | 1 | Realtime | — | `replacement-required` |
+| `ggg/system/realtime-ably` | `ggg` | 1 | Realtime Ably | `ggg/system/realtime` [1,1] | `free` |
+| `ggg/system/realtime-postgres` | `ggg` | 1 | Realtime Postgres | `ggg/system/database` [1,1] `ggg/system/realtime` [1,1] | `free` |
+| `ggg/system/registry-template` | `ggg` | 1 | External registry template | — | `free` |
+| `ggg/system/schedules` | `ggg` | 1 | Recurring work | `ggg/system/database` [1,1] | `retain-data` |
+| `ggg/system/search` | `ggg` | 1 | Search | — | `replacement-required` |
+| `ggg/system/search-postgres` | `ggg` | 1 | Search Postgres | `ggg/system/database` [1,1] `ggg/system/search` [1,1] | `free` |
+| `ggg/system/security` | `ggg` | 1 | Middleware and request security | `ggg/system/identity` [1,1] `ggg/system/organizations` [1,1] `ggg/system/rate-limit` [1,1] `ggg/system/server` [1,1] | `replacement-required` |
+| `ggg/system/seed` | `ggg` | 1 | Fixture loader | `ggg/system/database` [1,1] | `free` |
+| `ggg/system/seo` | `ggg` | 1 | Discovery surfaces | `ggg/system/server` [1,1] | `free` |
+| `ggg/system/server` | `ggg` | 1 | HTTP server core | `ggg/system/analytics` [1,1] `ggg/system/apphost` [1,1] `ggg/system/billing` [1,1] `ggg/system/config` [1,1] `ggg/system/content` [1,1] `ggg/system/content-assets` [1,1] `ggg/system/database` [1,1] `ggg/system/feature-flags` [1,1] `ggg/system/i18n` [1,1] `ggg/system/identity` [1,1] `ggg/system/llm` [1,1] `ggg/system/observability` [1,1] `ggg/system/storage` [1,1] | `replacement-required` |
+| `ggg/system/static` | `ggg` | 1 | Static asset serving | `ggg/system/server` [1,1] | `replacement-required` |
+| `ggg/system/storage` | `ggg` | 1 | Object storage seam | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] | `retain-data` |
+| `ggg/system/storage-filesystem` | `ggg` | 1 | Filesystem storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/storage` [1,1] | `free` |
+| `ggg/system/storage-s3` | `ggg` | 1 | S3-compatible storage | `ggg/system/apphost` [1,1] `ggg/system/config` [1,1] `ggg/system/storage` [1,1] | `retain-data` |
+| `ggg/system/telemetry` | `ggg` | 1 | Telemetry | — | `replacement-required` |
+| `ggg/system/telemetry-noop` | `ggg` | 1 | Telemetry Noop | `ggg/system/telemetry` [1,1] | `free` |
+| `ggg/system/telemetry-otlp` | `ggg` | 1 | Telemetry Otlp | `ggg/system/telemetry` [1,1] | `free` |
+| `ggg/system/testdb` | `ggg` | 1 | Per-package test databases | `ggg/system/database` [1,1] | `free` |
+| `ggg/system/usage` | `ggg` | 1 | Usage metering | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/usage-postgres` | `ggg` | 1 | Usage Postgres | `ggg/system/usage` [1,1] | `free` |
+| `ggg/system/webhooks` | `ggg` | 1 | Outbound webhooks | `ggg/system/database` [1,1] `ggg/system/organizations` [1,1] | `retain-data` |
+| `ggg/system/webhooks-postgres` | `ggg` | 1 | Webhooks Postgres | `ggg/system/webhooks` [1,1] | `free` |
+
+## Provider slots (18)
+
+Each slot is one project decision: pick an adapter and a service target for
+`development`, `test`, and `production`. A **critical** slot fails readiness
+when its selected adapter is unhealthy; every other failure is reported as
+degraded health and stays actionable through `ggg doctor --runtime`.
+
+| Slot | Declared by | Critical | Capabilities |
 |---|---|---|---|
-| `ggg/system/analytics` | Product analytics | `ggg/system/apphost` `ggg/system/config` | `free` |
-| `ggg/system/analytics-noop` | analytics-noop | `ggg/system/analytics` | `free` |
-| `ggg/system/analytics-posthog` | analytics-posthog | `ggg/system/analytics` | `free` |
-| `ggg/system/announcements` | Product announcements | `ggg/system/database` | `retain-data` |
-| `ggg/system/api` | JSON API | `ggg/system/database` `ggg/system/organizations` `ggg/system/rate-limit` | `major-version-only` |
-| `ggg/system/apphost` | Application host seam | — | `replacement-required` |
-| `ggg/system/audit` | Audit log | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/audit-export` | Audit Export | — | `replacement-required` |
-| `ggg/system/audit-export-noop` | Audit Export Noop | `ggg/system/audit-export` | `free` |
-| `ggg/system/audit-export-otlp` | Audit Export Otlp | `ggg/system/audit-export` | `free` |
-| `ggg/system/billing` | Billing | `ggg/system/organizations` | `major-version-only` |
-| `ggg/system/billing-local` | Local billing | `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` | `free` |
-| `ggg/system/billing-polar` | Polar billing | `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` | `free` |
-| `ggg/system/cache` | Cache | — | `replacement-required` |
-| `ggg/system/cache-memory` | Cache Memory | `ggg/system/cache` | `free` |
-| `ggg/system/cache-redis` | Cache Redis | `ggg/system/cache` | `free` |
-| `ggg/system/ci-github` | Ci Github | `ggg/system/project-base` | `free` |
-| `ggg/system/cli-ui` | Interactive ggg console | `ggg/system/modkit` | `free` |
-| `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
-| `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |
-| `ggg/system/database` | Database | `ggg/system/apphost` `ggg/system/config` | `replacement-required` |
-| `ggg/system/database-postgres` | Database Postgres | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` | `free` |
-| `ggg/system/deploy-fly` | Deploy Fly | `ggg/system/project-base` | `free` |
-| `ggg/system/dev-tools` | Dev Tools | `ggg/system/project-base` | `free` |
-| `ggg/system/docker` | Docker | `ggg/system/project-base` | `free` |
-| `ggg/system/e2e` | E2E harness | `ggg/system/project-base` | `free` |
-| `ggg/system/e2e-sweeps` | E2E cross-cutting sweeps | `ggg/page/admin-jobs` `ggg/page/admin-media` `ggg/page/blog` `ggg/page/changelog` `ggg/page/dashboard` `ggg/page/docs` `ggg/page/docs-index` `ggg/page/docs-search` `ggg/page/home` `ggg/page/pricing` `ggg/page/projects` `ggg/system/e2e` `ggg/workflow/seo-discovery` | `free` |
-| `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/feature-flags-postgres` | Feature Flags Postgres | `ggg/system/feature-flags` | `free` |
-| `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |
-| `ggg/system/identity` | Identity | `ggg/system/organizations` | `major-version-only` |
-| `ggg/system/identity-clerk` | Clerk identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
-| `ggg/system/identity-dev` | Development identity | `ggg/system/apphost` `ggg/system/config` `ggg/system/identity` | `free` |
-| `ggg/system/identity-session` | Identity sessions | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/identity` | `free` |
-| `ggg/system/impersonation` | Support impersonation | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/jobs` | Background job queue | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` `ggg/system/mail` `ggg/system/observability` `ggg/system/storage` | `drain-required` |
-| `ggg/system/llm` | Language model | `ggg/system/apphost` `ggg/system/config` | `free` |
-| `ggg/system/llm-fake` | llm-fake | `ggg/system/llm` | `free` |
-| `ggg/system/llm-openai-compatible` | llm-openai-compatible | `ggg/system/llm` | `free` |
-| `ggg/system/mail` | Transactional mail seam | `ggg/system/apphost` `ggg/system/config` | `free` |
-| `ggg/system/mail-dev` | Filesystem mail | `ggg/system/apphost` `ggg/system/config` `ggg/system/mail` | `free` |
-| `ggg/system/mail-resend` | Resend mail | `ggg/system/apphost` `ggg/system/config` `ggg/system/mail` | `free` |
-| `ggg/system/metrics` | Runtime metrics endpoint | `ggg/system/server` | `free` |
-| `ggg/system/modkit` | Module registry engine | — | `replacement-required` |
-| `ggg/system/notifications` | In-app notifications | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/notifications-postgres` | Notifications Postgres | `ggg/system/notifications` | `free` |
-| `ggg/system/observability` | Error reporting | `ggg/system/apphost` `ggg/system/config` | `free` |
-| `ggg/system/observability-log` | observability-log | `ggg/system/observability` | `free` |
-| `ggg/system/observability-sentry` | observability-sentry | `ggg/system/observability` | `free` |
-| `ggg/system/organizations` | Users, organizations, and membership | `ggg/system/database` | `replacement-required` |
-| `ggg/system/project-base` | Project Base | — | `free` |
-| `ggg/system/project-docs` | Project Docs | `ggg/system/project-base` | `free` |
-| `ggg/system/rate-limit` | Request rate limiting | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
-| `ggg/system/rate-limit-memory` | Rate Limit Memory | `ggg/system/config` `ggg/system/rate-limit` | `free` |
-| `ggg/system/rate-limit-redis` | Rate Limit Redis | `ggg/system/rate-limit` | `free` |
-| `ggg/system/realtime` | Realtime | — | `replacement-required` |
-| `ggg/system/realtime-ably` | Realtime Ably | `ggg/system/realtime` | `free` |
-| `ggg/system/realtime-postgres` | Realtime Postgres | `ggg/system/database` `ggg/system/realtime` | `free` |
-| `ggg/system/schedules` | Recurring work | `ggg/system/database` | `retain-data` |
-| `ggg/system/search` | Search | — | `replacement-required` |
-| `ggg/system/search-postgres` | Search Postgres | `ggg/system/database` `ggg/system/search` | `free` |
-| `ggg/system/security` | Middleware and request security | `ggg/system/identity` `ggg/system/organizations` `ggg/system/rate-limit` `ggg/system/server` | `replacement-required` |
-| `ggg/system/seed` | Fixture loader | `ggg/system/database` | `free` |
-| `ggg/system/seo` | Discovery surfaces | `ggg/system/server` | `free` |
-| `ggg/system/server` | HTTP server core | `ggg/system/analytics` `ggg/system/apphost` `ggg/system/billing` `ggg/system/config` `ggg/system/content` `ggg/system/content-assets` `ggg/system/database` `ggg/system/feature-flags` `ggg/system/i18n` `ggg/system/identity` `ggg/system/llm` `ggg/system/observability` `ggg/system/storage` | `replacement-required` |
-| `ggg/system/static` | Static asset serving | `ggg/system/server` | `replacement-required` |
-| `ggg/system/storage` | Object storage seam | `ggg/system/apphost` `ggg/system/config` | `retain-data` |
-| `ggg/system/storage-filesystem` | Filesystem storage | `ggg/system/apphost` `ggg/system/config` `ggg/system/storage` | `free` |
-| `ggg/system/storage-s3` | S3-compatible storage | `ggg/system/apphost` `ggg/system/config` `ggg/system/storage` | `retain-data` |
-| `ggg/system/telemetry` | Telemetry | — | `replacement-required` |
-| `ggg/system/telemetry-noop` | Telemetry Noop | `ggg/system/telemetry` | `free` |
-| `ggg/system/telemetry-otlp` | Telemetry Otlp | `ggg/system/telemetry` | `free` |
-| `ggg/system/testdb` | Per-package test databases | `ggg/system/database` | `free` |
-| `ggg/system/usage` | Usage metering | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/usage-postgres` | Usage Postgres | `ggg/system/usage` | `free` |
-| `ggg/system/webhooks` | Outbound webhooks | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
-| `ggg/system/webhooks-postgres` | Webhooks Postgres | `ggg/system/webhooks` | `free` |
+| `ggg/analytics` | `ggg/system/analytics` | — | `analytics.capturer` `analytics.Capturer` |
+| `ggg/audit-export` | `ggg/system/audit-export` | — | `audit.exporter` `audit.Exporter` |
+| `ggg/billing` | `ggg/system/billing` | yes | `billing.client` `billing.Client` `billing.catalog` `billing.PlanCatalog` `billing.webhook` `billing.BillingWebhook` |
+| `ggg/cache` | `ggg/system/cache` | — | `cache.store` `cache.Store` |
+| `ggg/database` | `ggg/system/database` | yes | `database.pool` `*pgxpool.Pool` `database.queries` `*sqlc.Queries` |
+| `ggg/feature-flags` | `ggg/system/feature-flags` | — | `flags.service` `flags.Service` |
+| `ggg/identity` | `ggg/system/identity` | yes | `identity.verifier` `identity.Verifier` `identity.fetcher` `identity.UserFetcher` `identity.deleter` `identity.Deleter` `identity.navigator` `identity.Navigator` `identity.webhook` `identity.Webhook` |
+| `ggg/llm` | `ggg/system/llm` | — | `llm.completer` `llm.Completer` |
+| `ggg/mail` | `ggg/system/mail` | — | `mail.sender` `mail.Sender` |
+| `ggg/notifications` | `ggg/system/notifications` | — | `notifications.notifier` `notifications.Notifier` |
+| `ggg/observability` | `ggg/system/observability` | — | `observability.reporter` `observability.Reporter` |
+| `ggg/rate-limit` | `ggg/system/rate-limit` | — | `rate_limit.limiter` `ratelimit.Limiter` |
+| `ggg/realtime` | `ggg/system/realtime` | — | `realtime.broker` `realtime.Broker` |
+| `ggg/search` | `ggg/system/search` | — | `search.index` `search.Index` |
+| `ggg/storage` | `ggg/system/storage` | — | `storage.store` `storage.Store` |
+| `ggg/telemetry` | `ggg/system/telemetry` | — | `telemetry.providers` `telemetry.Providers` |
+| `ggg/usage` | `ggg/system/usage` | — | `usage.recorder` `usage.Recorder` |
+| `ggg/webhooks` | `ggg/system/webhooks` | — | `webhooks.emitter` `webhooks.Emitter` |
+
+## Provider adapters (35)
+
+One row per selectable `ADAPTER@TARGET`. **Automation** is what
+`ggg provider provision` can do: `provision` creates the resource,
+`configure` validates supplied credentials, and `manual` returns a
+checklist and a console URL rather than executing anything.
+
+| Slot | Adapter | Target | Mode | Environments | Automation | Provisioner | Docs |
+|---|---|---|---|---|---|---|---|
+| `ggg/analytics` | `ggg/system/analytics-noop` | `local` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/analytics-noop) |
+| `ggg/analytics` | `ggg/system/analytics-posthog` | `posthog` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/analytics-posthog) |
+| `ggg/audit-export` | `ggg/system/audit-export-noop` | `noop` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/noop) |
+| `ggg/audit-export` | `ggg/system/audit-export-otlp` | `otlp` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/otlp) |
+| `ggg/billing` | `ggg/system/billing-local` | `local` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers) |
+| `ggg/billing` | `ggg/system/billing-polar` | `polar` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers) |
+| `ggg/cache` | `ggg/system/cache-memory` | `memory` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/memory) |
+| `ggg/cache` | `ggg/system/cache-redis` | `upstash` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/upstash) |
+| `ggg/cache` | `ggg/system/cache-redis` | `valkey` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/valkey) |
+| `ggg/database` | `ggg/system/database-postgres` | `docker-postgres` | `self-hosted` | development, test | `manual, db `docker_operator`` | — | [docs](https://gogogadget.dev/docs/providers/docker-postgres) |
+| `ggg/database` | `ggg/system/database-postgres` | `neon` | `managed` | production | `provision` | `neon_provisioner` | [docs](https://gogogadget.dev/docs/providers/neon) |
+| `ggg/feature-flags` | `ggg/system/feature-flags-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/identity` | `ggg/system/identity-clerk` | `clerk` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers) |
+| `ggg/identity` | `ggg/system/identity-dev` | `local` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers) |
+| `ggg/llm` | `ggg/system/llm-fake` | `fake` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/llm-fake) |
+| `ggg/llm` | `ggg/system/llm-openai-compatible` | `openai` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/llm-openai-compatible) |
+| `ggg/mail` | `ggg/system/mail-dev` | `filesystem` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/mail-filesystem) |
+| `ggg/mail` | `ggg/system/mail-resend` | `resend` | `managed` | production | `manual` | — | [docs](https://resend.com/docs) |
+| `ggg/notifications` | `ggg/system/notifications-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/observability` | `ggg/system/observability-log` | `log` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/observability-log) |
+| `ggg/observability` | `ggg/system/observability-sentry` | `sentry` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/observability-sentry) |
+| `ggg/rate-limit` | `ggg/system/rate-limit-memory` | `memory` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/memory) |
+| `ggg/rate-limit` | `ggg/system/rate-limit-redis` | `upstash` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/upstash) |
+| `ggg/rate-limit` | `ggg/system/rate-limit-redis` | `valkey` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/valkey) |
+| `ggg/realtime` | `ggg/system/realtime-ably` | `ably` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/ably) |
+| `ggg/realtime` | `ggg/system/realtime-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/search` | `ggg/system/search-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/storage` | `ggg/system/storage-filesystem` | `filesystem` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/storage-filesystem) |
+| `ggg/storage` | `ggg/system/storage-s3` | `minio` | `self-hosted` | development, test | `manual` | — | [docs](https://min.io/docs) |
+| `ggg/storage` | `ggg/system/storage-s3` | `r2` | `managed` | production | `manual` | — | [docs](https://developers.cloudflare.com/r2/) |
+| `ggg/telemetry` | `ggg/system/telemetry-noop` | `stdout` | `development` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/stdout) |
+| `ggg/telemetry` | `ggg/system/telemetry-otlp` | `collector` | `self-hosted` | development, test | `manual` | — | [docs](https://gogogadget.dev/docs/providers/collector) |
+| `ggg/telemetry` | `ggg/system/telemetry-otlp` | `otlp` | `managed` | production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/otlp) |
+| `ggg/usage` | `ggg/system/usage-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+| `ggg/webhooks` | `ggg/system/webhooks-postgres` | `postgres` | `self-hosted` | development, test, production | `manual` | — | [docs](https://gogogadget.dev/docs/providers/postgres) |
+
+## Dependencies (143)
+
+Declared, not discovered: an authored import the owning manifest does not
+declare is refused before `go.mod` is touched, and the last owner's removal
+drops the requirement again unless the project already had it.
+
+| Module | Go modules | Tools | Containers |
+|---|---|---|---|
+| `ggg/component/accordion` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/breadcrumbs` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/calendar` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/carousel` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/char-counter` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/chart` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/chat-log` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/checkbox-group` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/column-header` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/combobox` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/command` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/confirm-action` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/data-grid` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/dropdown-menu` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/empty-state` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/field` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/file-dropzone` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/form` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/form-actions` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/hover-card` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/input-addon` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/kanban` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/markdown-editor` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/notification-item` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/number-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/otp-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/pagination` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/panels` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/password-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/progress-bar` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/questionnaire` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/scroll-area` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/search-input` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/skeleton` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/skip-link` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/status-dot` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/steps` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/tab-panels` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/toast` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/component/tree` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/avatar` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/avatar-group` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/button` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/button-link` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/copy-button` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/heading` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/icon-button` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/kbd` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/link` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/separator` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/text` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/toggle-group` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/truncate` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/ui-core` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/element/visually-hidden` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/activity` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-announcements` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-content-editor` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-content-preview` | `github.com/a-h/templ v0.3.1020` | — | — |
+| `ggg/page/admin-flags` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-jobs` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-media` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-overview` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/admin-schedules` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/blog` | `github.com/a-h/templ v0.3.1020` | — | — |
+| `ggg/page/dev-gallery` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/docs` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/files` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/notifications` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/projects` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/settings-billing` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/settings-notifications` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/page/settings-webhooks` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/analytics` | `github.com/posthog/posthog-go v1.22.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/analytics-posthog` | `github.com/posthog/posthog-go v1.22.0` | — | — |
+| `ggg/system/api` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/audit` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/billing` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/billing-local` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/cli-ui` | `charm.land/bubbletea/v2 v2.0.0` `charm.land/bubbles/v2 v2.0.0` `charm.land/huh/v2 v2.0.0` `charm.land/lipgloss/v2 v2.0.0` | — | — |
+| `ggg/system/config` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/content` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `github.com/yuin/goldmark v1.8.5` `gopkg.in/yaml.v3 v3.0.1` | — | — |
+| `ggg/system/database` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/pressly/goose/v3 v3.27.3` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/database-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | `postgres` |
+| `ggg/system/dev-tools` | — | `github.com/a-h/templ/cmd/templ` `github.com/air-verse/air` `github.com/pressly/goose/v3/cmd/goose` `github.com/sqlc-dev/sqlc/cmd/sqlc` `golang.org/x/vuln/cmd/govulncheck` `darwin/arm64` `linux/amd64` | — |
+| `ggg/system/feature-flags` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/feature-flags-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/i18n` | `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
+| `ggg/system/identity` | `github.com/clerk/clerk-sdk-go/v2 v2.7.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` | — | — |
+| `ggg/system/identity-session` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/impersonation` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/jobs` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
+| `ggg/system/llm` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/mail` | `github.com/a-h/templ v0.3.1020` `github.com/stretchr/testify v1.11.1` `golang.org/x/text v0.40.0` | — | — |
+| `ggg/system/mail-dev` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/mail-resend` | `github.com/resendlabs/resend-go v1.7.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/metrics` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/modkit` | `github.com/santhosh-tekuri/jsonschema/v6 v6.0.2` `github.com/stretchr/testify v1.11.1` `golang.org/x/mod v0.38.0` `gopkg.in/yaml.v3 v3.0.1` | — | — |
+| `ggg/system/notifications` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/notifications-postgres` | `github.com/jackc/pgx/v5 v5.7.6` | — | — |
+| `ggg/system/observability` | `github.com/getsentry/sentry-go v0.48.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/observability-sentry` | `github.com/getsentry/sentry-go v0.48.0` | — | — |
+| `ggg/system/organizations` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/pressly/goose/v3 v3.27.3` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/rate-limit` | `github.com/stretchr/testify v1.11.1` `golang.org/x/time v0.15.0` | — | — |
+| `ggg/system/rate-limit-memory` | `golang.org/x/time v0.15.0` | — | — |
+| `ggg/system/realtime-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/schedules` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/search-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/security` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/seed` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/server` | `github.com/a-h/templ v0.3.1020` `github.com/go-playground/form/v4 v4.3.0` `github.com/jackc/pgx/v5 v5.10.0` `github.com/justinas/nosurf v1.2.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` `golang.org/x/text v0.40.0` | — | — |
+| `ggg/system/static` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/storage` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/storage-filesystem` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/storage-s3` | `github.com/aws/aws-sdk-go-v2/config v1.32.37` `github.com/aws/aws-sdk-go-v2/credentials v1.19.36` `github.com/aws/aws-sdk-go-v2/service/s3 v1.107.2` `github.com/stretchr/testify v1.11.1` | — | `minio` |
+| `ggg/system/telemetry` | `go.opentelemetry.io/otel v1.44.0` `go.opentelemetry.io/otel/metric v1.44.0` `go.opentelemetry.io/otel/trace v1.44.0` | — | — |
+| `ggg/system/telemetry-noop` | `go.opentelemetry.io/otel v1.44.0` `go.opentelemetry.io/otel/metric v1.44.0` `go.opentelemetry.io/otel/trace v1.44.0` | — | — |
+| `ggg/system/telemetry-otlp` | `go.opentelemetry.io/otel v1.44.0` `go.opentelemetry.io/otel/metric v1.44.0` `go.opentelemetry.io/otel/sdk v1.44.0` `go.opentelemetry.io/otel/sdk/metric v1.44.0` `go.opentelemetry.io/otel/trace v1.44.0` `go.opentelemetry.io/proto/otlp v1.8.0` `google.golang.org/protobuf v1.36.11` | — | — |
+| `ggg/system/testdb` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/usage` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/usage-postgres` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/system/webhooks` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/system/webhooks-postgres` | `github.com/jackc/pgx/v5 v5.7.6` | — | — |
+| `ggg/workflow/account-export` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/admin-content` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/admin-schedules` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/admin-user-governance` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/api-ai-chat` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/api-projects` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/api-token-lifecycle` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/appearance` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/auth-session` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/billing-checkout` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/billing-webhook` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` | — | — |
+| `ggg/workflow/dev-session` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/identity-webhook-sync` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` `github.com/svix/svix-webhooks v1.99.1` | — | — |
+| `ggg/workflow/impersonation` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/openapi-contract` | `github.com/stretchr/testify v1.11.1` `gopkg.in/yaml.v3 v3.0.1` | — | — |
+| `ggg/workflow/organization-export` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/outbound-webhooks` | `github.com/jackc/pgx/v5 v5.10.0` `github.com/standard-webhooks/standard-webhooks/libraries v0.0.1` `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/project-export` | `github.com/stretchr/testify v1.11.1` | — | — |
+| `ggg/workflow/projects` | `github.com/jackc/pgx/v5 v5.10.0` | — | — |
+| `ggg/workflow/seo-discovery` | `github.com/stretchr/testify v1.11.1` | — | — |
+
+## Lifecycle and health (25)
+
+A declared `Stop` must be idempotent and must return `ctx.Err()` when the
+caller's deadline expires, because shutdown can reach it twice and one
+stuck close must not block the process. A declared `Health` must return
+promptly and must fail rather than degrade silently.
+
+| Module | Capabilities | Start | Stop | Health |
+|---|---|---|---|---|
+| `ggg/system/analytics-noop` | `analytics.capturer` | — | — | yes |
+| `ggg/system/analytics-posthog` | `analytics.capturer` | — | yes | yes |
+| `ggg/system/audit-export-noop` | `audit.exporter` | — | — | yes |
+| `ggg/system/audit-export-otlp` | `audit.exporter` | — | — | yes |
+| `ggg/system/cache-memory` | `cache.store` | — | — | yes |
+| `ggg/system/cache-redis` | `cache.store` | — | — | yes |
+| `ggg/system/database-postgres` | `database.pool` `database.queries` | — | yes | yes |
+| `ggg/system/feature-flags-postgres` | `flags.service` | — | — | yes |
+| `ggg/system/jobs` | `jobs.worker` | yes | yes | — |
+| `ggg/system/llm-fake` | `llm.completer` | — | — | yes |
+| `ggg/system/llm-openai-compatible` | `llm.completer` | — | — | yes |
+| `ggg/system/mail-resend` | `mail.sender` | — | — | yes |
+| `ggg/system/notifications-postgres` | `notifications.notifier` | — | — | yes |
+| `ggg/system/observability-log` | `observability.reporter` | — | — | yes |
+| `ggg/system/observability-sentry` | `observability.reporter` | — | yes | yes |
+| `ggg/system/rate-limit-memory` | `rate_limit.limiter` | — | — | yes |
+| `ggg/system/rate-limit-redis` | `rate_limit.limiter` | — | — | yes |
+| `ggg/system/realtime-ably` | `realtime.broker` | — | — | yes |
+| `ggg/system/realtime-postgres` | `realtime.broker` | — | — | yes |
+| `ggg/system/search-postgres` | `search.index` | — | — | yes |
+| `ggg/system/storage-s3` | `storage.store` | — | — | yes |
+| `ggg/system/telemetry-noop` | `telemetry.providers` | — | — | yes |
+| `ggg/system/telemetry-otlp` | `telemetry.providers` | — | yes | yes |
+| `ggg/system/usage-postgres` | `usage.recorder` | — | — | yes |
+| `ggg/system/webhooks-postgres` | `webhooks.emitter` | — | — | yes |
+
+## Verification (165)
+
+The same commands `ggg info KIND/NAME` prints. **Capabilities** names the
+declared contracts a module's own suite covers.
+
+| Module | Commands | Capabilities |
+|---|---|---|
+| `ggg/component/accordion` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/breadcrumbs` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/calendar` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/char-counter` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/chart` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/chat-log` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/checkbox-group` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/column-header` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/combobox` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/confirm-action` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/dropdown-menu` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/empty-state` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/field` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/file-dropzone` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/form-actions` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/hover-card` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/input-addon` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/number-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/otp-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/pagination` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/password-input` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/progress-bar` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/scroll-area` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/skeleton` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/skip-link` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/status-dot` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/steps` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/tab-panels` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/component/toast` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/avatar` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/avatar-group` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/button` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/button-link` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/copy-button` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/heading` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/icon-button` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/kbd` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/separator` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/toggle-group` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/truncate` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/element/visually-hidden` | `go test -count=1 ./internal/web/templates/ui` | — |
+| `ggg/page/activity` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/activity.spec.ts --reporter=line` | — |
+| `ggg/page/admin-announcements` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-audit` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-audit.spec.ts --reporter=line` | — |
+| `ggg/page/admin-content` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-content-editor` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-content-preview` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-flag-detail` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-flags` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-jobs` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-jobs.spec.ts --reporter=line` | — |
+| `ggg/page/admin-media` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-organizations` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-organizations.spec.ts --reporter=line` | — |
+| `ggg/page/admin-overview` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-overview.spec.ts --reporter=line` | — |
+| `ggg/page/admin-schedules` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/admin-users` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-users.spec.ts --reporter=line` | — |
+| `ggg/page/blog` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/changelog` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/dashboard` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/dev-gallery` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/docs` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/docs-index` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/docs-search` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/files` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/home` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/notifications` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/pricing` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/privacy` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/project-edit` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/project-new` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/projects` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/settings-account` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/settings-api-tokens` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/settings-billing` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/settings-notifications` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/settings-organization` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/settings-webhooks` | `go test -count=1 ./internal/web` | — |
+| `ggg/page/terms` | `go test -count=1 ./internal/web` | — |
+| `ggg/system/analytics` | `go test -count=1 ./internal/analytics` | — |
+| `ggg/system/analytics-noop` | `go test -count=1 ./internal/analytics/noop` | — |
+| `ggg/system/analytics-posthog` | `go test -count=1 ./internal/analytics/posthog` | — |
+| `ggg/system/api` | `go test -count=1 ./internal/api` | — |
+| `ggg/system/apphost` | `go test -count=1 ./internal/apphost` | — |
+| `ggg/system/audit` | `go test -count=1 ./internal/audit` | — |
+| `ggg/system/audit-export-noop` | `go test -count=1 ./internal/audit_export/noop` | — |
+| `ggg/system/audit-export-otlp` | `go test -count=1 ./internal/audit_export/otlp` | — |
+| `ggg/system/billing` | `go test -count=1 ./internal/billing` | — |
+| `ggg/system/billing-local` | `go test -count=1 ./internal/billinglocal` | — |
+| `ggg/system/billing-polar` | `go test -count=1 ./internal/billing/polar` | — |
+| `ggg/system/cache-memory` | `go test -count=1 ./internal/cache/memory` | — |
+| `ggg/system/cache-redis` | `go test -count=1 ./internal/cache/redis` | — |
+| `ggg/system/cli-ui` | `go test -count=1 ./internal/gggcli/ui` | — |
+| `ggg/system/config` | `go test -count=1 ./internal/config` | — |
+| `ggg/system/content` | `go test -count=1 ./internal/content` | — |
+| `ggg/system/database` | `go test -count=1 ./internal/db` | — |
+| `ggg/system/database-postgres` | `go test -count=1 ./internal/database/postgres` | — |
+| `ggg/system/e2e-sweeps` | `cd e2e && npx playwright test e2e/a11y-states.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/a11y.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/csp.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/keyboard.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/loading.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/mobile.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/progressive.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/public.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/visual.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/a11y-states.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/a11y.spec.ts --reporter=line` `./scripts/visual.sh` | — |
+| `ggg/system/feature-flags` | `go test -count=1 ./internal/flags` | — |
+| `ggg/system/feature-flags-postgres` | `go test -count=1 ./internal/flags/postgres` | — |
+| `ggg/system/i18n` | `go test -count=1 ./internal/i18n` | — |
+| `ggg/system/identity` | `go test -count=1 ./internal/identity` | — |
+| `ggg/system/identity-clerk` | `go test -count=1 ./internal/identity/clerk` | — |
+| `ggg/system/identity-dev` | `go test -count=1 ./internal/identity/devadapter` | — |
+| `ggg/system/identity-session` | `go test -count=1 ./internal/identity/session` | — |
+| `ggg/system/jobs` | `go test -count=1 ./internal/jobs` | — |
+| `ggg/system/llm` | `go test -count=1 ./internal/llm` | — |
+| `ggg/system/llm-fake` | `go test -count=1 ./internal/llm/fake` | — |
+| `ggg/system/llm-openai-compatible` | `go test -count=1 ./internal/llm/openai` | — |
+| `ggg/system/mail` | `go test -count=1 ./internal/mail` | — |
+| `ggg/system/mail-dev` | `go test -count=1 ./internal/mail/dev` | — |
+| `ggg/system/mail-resend` | `go test -count=1 ./internal/mail/resend` | — |
+| `ggg/system/metrics` | `go test -count=1 ./internal/web` | — |
+| `ggg/system/modkit` | `go test -count=1 ./cmd/ggg ./internal/gggcli ./internal/modkit` | — |
+| `ggg/system/notifications` | `go test -count=1 ./internal/notify` | — |
+| `ggg/system/notifications-postgres` | `go test -count=1 ./internal/notifications/postgres` | — |
+| `ggg/system/observability` | `go test -count=1 ./internal/observability` | — |
+| `ggg/system/observability-log` | `go test -count=1 ./internal/observability/log` | — |
+| `ggg/system/observability-sentry` | `go test -count=1 ./internal/observability/sentryadapter` | — |
+| `ggg/system/rate-limit` | `go test -count=1 ./internal/ratelimit` | — |
+| `ggg/system/rate-limit-memory` | `go test -count=1 ./internal/ratelimit/memory` | — |
+| `ggg/system/rate-limit-redis` | `go test -count=1 ./internal/ratelimit/redis` | — |
+| `ggg/system/realtime-ably` | `go test -count=1 ./internal/realtime/ably` | — |
+| `ggg/system/realtime-postgres` | `go test -count=1 ./internal/realtime/postgres` | — |
+| `ggg/system/schedules` | `go test -count=1 ./internal/schedules` | — |
+| `ggg/system/search-postgres` | `go test -count=1 ./internal/search/postgres` | — |
+| `ggg/system/security` | `go test -count=1 ./internal/web` | — |
+| `ggg/system/seo` | `go test -count=1 ./internal/web` | — |
+| `ggg/system/server` | `go test -count=1 ./internal/web` | — |
+| `ggg/system/storage` | `go test -count=1 ./internal/storage` | — |
+| `ggg/system/storage-filesystem` | `go test -count=1 ./internal/storage/filesystem` | — |
+| `ggg/system/storage-s3` | `go test -count=1 ./internal/storage/s3` | — |
+| `ggg/system/telemetry-noop` | `go test -count=1 ./internal/telemetry/noop` | — |
+| `ggg/system/telemetry-otlp` | `go test -count=1 ./internal/telemetry/otlp` | — |
+| `ggg/system/testdb` | `go test -count=1 ./internal/db/testdb` | — |
+| `ggg/system/usage` | `go test -count=1 ./internal/usage` | — |
+| `ggg/system/usage-postgres` | `go test -count=1 ./internal/usage/postgres` | — |
+| `ggg/system/webhooks` | `go test -count=1 ./internal/webhooks` | — |
+| `ggg/system/webhooks-postgres` | `go test -count=1 ./internal/webhooks/postgres` | — |
+| `ggg/workflow/account-delete` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/account-delete.spec.ts --reporter=line` | — |
+| `ggg/workflow/account-export` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/account-export.spec.ts --reporter=line` | — |
+| `ggg/workflow/admin-announcements` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-announcements.spec.ts --reporter=line` | — |
+| `ggg/workflow/admin-content` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-content.spec.ts --reporter=line` | — |
+| `ggg/workflow/admin-flags` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-flags.spec.ts --reporter=line` | — |
+| `ggg/workflow/admin-job-requeue` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/admin-media` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/admin-schedules` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-schedules.spec.ts --reporter=line` | — |
+| `ggg/workflow/admin-user-governance` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/admin-user-governance.spec.ts --reporter=line` | — |
+| `ggg/workflow/api-ai-chat` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/api-projects` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/api-token-lifecycle` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/appearance` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/appearance.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/locale.spec.ts --reporter=line` | — |
+| `ggg/workflow/auth-session` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/auth.spec.ts --reporter=line` | — |
+| `ggg/workflow/billing-checkout` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/billing.spec.ts --reporter=line` | — |
+| `ggg/workflow/billing-webhook` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/dev-session` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/files` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/files.spec.ts --reporter=line` | — |
+| `ggg/workflow/identity-webhook-sync` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/impersonation` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/impersonation.spec.ts --reporter=line` | — |
+| `ggg/workflow/notification-inbox` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/notifications.spec.ts --reporter=line` | — |
+| `ggg/workflow/notification-preferences` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/notification-preferences.spec.ts --reporter=line` | — |
+| `ggg/workflow/openapi-contract` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/organization-export` | `go test -count=1 ./internal/web` | — |
+| `ggg/workflow/outbound-webhooks` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/webhooks.spec.ts --reporter=line` | — |
+| `ggg/workflow/project-export` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/export.spec.ts --reporter=line` | — |
+| `ggg/workflow/projects` | `go test -count=1 ./internal/web` `cd e2e && npx playwright test e2e/project-plan-limits.spec.ts --reporter=line` `cd e2e && npx playwright test e2e/projects.spec.ts --reporter=line` | — |
+| `ggg/workflow/seo-discovery` | `go test -count=1 ./internal/web` | — |

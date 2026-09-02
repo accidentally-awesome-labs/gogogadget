@@ -1,0 +1,89 @@
+name: registry
+
+# The publisher gate. It runs the same five commands the framework's own
+# tests run against this template — build, sign, verify, then install into a
+# throwaway consumer and validate — so a registry that is green here is a
+# registry a consumer can add without a refusal.
+#
+# REGISTRY_SIGNING_KEY is the base64 Ed25519 private key from
+# `ggg registry keygen`, stored as a repository secret. It is passed as
+# GGG_REGISTRY_SIGNING_KEY so `ggg registry sign` never sees a key file: sign
+# accepts exactly one of --key-file or that variable, and CI always uses the
+# variable so the key never touches a disk.
+#
+# REGISTRY_PUBLIC_KEY is the base64 public half. It is a repository variable,
+# not a secret: it is the string every consumer pins.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Install ggg
+        run: go install github.com/gogogadget/gogogadget/cmd/ggg@latest
+
+      - name: Build the catalog
+        run: ggg registry build --dir .
+
+      - name: Refuse an unbuilt commit
+        # `registry build` is deterministic, so a dirty tree here means the
+        # committed digests, indexes, or snapshot do not match the payloads.
+        run: git diff --exit-code
+
+      - name: Sign the snapshot
+        env:
+          GGG_REGISTRY_SIGNING_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
+        run: ggg registry sign --dir .
+
+      - name: Verify the signature and every payload digest
+        run: ggg registry verify --dir . --public-key "${{ vars.REGISTRY_PUBLIC_KEY }}"
+
+      - name: Create a throwaway consumer
+        # A consumer is the only honest place to prove an install: it has the
+        # core catalog, a real Go module, and a lock.
+        run: |
+          ggg new /tmp/consumer \
+            --module example.com/consumer \
+            --profile ggg/profile/minimal \
+            --deployment ggg/system/deploy-docker \
+            --non-interactive --json
+
+      - name: Add this registry to the consumer
+        working-directory: /tmp/consumer
+        run: |
+          ggg registry add "directory:$GITHUB_WORKSPACE" \
+            --namespace gadgetworks --json
+
+      - name: Select the adapter for every environment
+        working-directory: /tmp/consumer
+        run: |
+          ggg provider set \
+            --provider ggg/audit-export:development=gadgetworks/system/audit-export-ledger@ledger-file \
+            --provider ggg/audit-export:test=gadgetworks/system/audit-export-ledger@ledger-file \
+            --provider ggg/audit-export:production=gadgetworks/system/audit-export-ledger@ledger-cloud \
+            --json
+
+      - name: Validate the lifecycle
+        working-directory: /tmp/consumer
+        run: ggg registry validate --json
+
+      - name: Compile and run the declared tests
+        working-directory: /tmp/consumer
+        run: |
+          go build ./...
+          go test -count=1 ./internal/gadgetworks/ledger

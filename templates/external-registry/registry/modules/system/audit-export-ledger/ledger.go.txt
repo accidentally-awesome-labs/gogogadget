@@ -1,0 +1,315 @@
+// Package ledger is the Gadgetworks audit ledger: an external adapter for
+// GoGoGadget's ggg/audit-export provider slot.
+//
+// It is the shape every third-party adapter has. The seam it implements
+// (audit.Exporter) is owned by the core registry and imported through the
+// core canonical module path; everything else — the buffered writer, the two
+// service targets, the configuration surface, the lifecycle and the health
+// check — belongs to this module and is declared in its manifest.
+//
+// The two targets differ only in where the ledger lands, which is why one
+// implementation serves both: `ledger-file` appends newline-delimited JSON
+// under GADGETWORKS_LEDGER_DIR and needs no account, and `ledger-cloud`
+// POSTs the same records to GADGETWORKS_LEDGER_ENDPOINT with a bearer token.
+// An endpoint wins where one is configured, so a production selection can
+// never silently fall back to the local file.
+//
+// The transactional audit row is written by ggg/system/audit before this
+// exporter is ever called. An export failure is reported to the caller (the
+// audit outbox job retries it); it can never remove or replace the ledger
+// row in Postgres.
+package ledger
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"sync"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/apphost"
+	"github.com/gogogadget/gogogadget/internal/audit"
+)
+
+// ModuleID is the scoped id of the publishing module. It is the one string a
+// consumer needs to run `ggg info gadgetworks/system/audit-export-ledger`.
+const ModuleID = "gadgetworks/system/audit-export-ledger"
+
+// Slot is the core provider slot this module adapts.
+const Slot = "ggg/audit-export"
+
+// The declared service targets. They are duplicated in the manifest because
+// the manifest is data the planner reads and these are what the code
+// branches on; TestTargetsMatchManifest keeps the two honest.
+const (
+	TargetFile  = "ledger-file"
+	TargetCloud = "ledger-cloud"
+)
+
+// Environment keys this module owns. Every one is declared in the manifest's
+// `environment` block, which is what puts them in .env.example and the
+// generated configuration reference.
+const (
+	EnvDir      = "GADGETWORKS_LEDGER_DIR"
+	EnvEndpoint = "GADGETWORKS_LEDGER_ENDPOINT"
+	EnvToken    = "GADGETWORKS_LEDGER_TOKEN"
+)
+
+// DefaultDir is where the file target writes when the operator sets nothing.
+// It is under tmp/ because tmp/ is scratch the framework already ignores.
+const DefaultDir = "tmp/gadgetworks-ledger"
+
+// ledgerFile is the file the file target appends to.
+const ledgerFile = "ledger.ndjson"
+
+// Exporter is the audit.Exporter this module provides. Records are buffered
+// under a mutex and flushed on every Export, so the process never holds an
+// unflushed entry across a request boundary; Close is what a shutdown waits
+// on, and it is idempotent because a lifecycle hook can run twice.
+type Exporter struct {
+	Dir      string
+	Endpoint string
+	Token    string
+	Client   *http.Client
+
+	mu     sync.Mutex
+	file   *os.File
+	closed bool
+}
+
+// NewFileExporter is the zero-account target: an appended NDJSON ledger.
+func NewFileExporter(dir string) *Exporter {
+	if dir == "" {
+		dir = DefaultDir
+	}
+	return &Exporter{Dir: dir}
+}
+
+// NewCloudExporter is the managed target.
+func NewCloudExporter(endpoint, token string) *Exporter {
+	return &Exporter{
+		Endpoint: endpoint,
+		Token:    token,
+		Client:   &http.Client{Timeout: 5 * time.Second},
+	}
+}
+
+// Target reports which declared service target this exporter is configured
+// for. The CLI contribution prints it, and the contract test asserts that a
+// configuration cannot be ambiguous.
+func (e *Exporter) Target() string {
+	if e == nil {
+		return ""
+	}
+	if e.Endpoint != "" {
+		return TargetCloud
+	}
+	return TargetFile
+}
+
+// record is the wire shape. It is this module's own contract with its own
+// service, not the core seam's, so it lives here.
+type record struct {
+	ID       string         `json:"id"`
+	OrgID    string         `json:"org_id"`
+	UserID   string         `json:"user_id"`
+	Action   string         `json:"action"`
+	Metadata map[string]any `json:"metadata,omitempty"`
+}
+
+// Export writes one already-committed audit entry to the ledger.
+func (e *Exporter) Export(ctx context.Context, entry audit.Entry) error {
+	if e == nil {
+		return fmt.Errorf("gadgetworks ledger: exporter is required")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	payload, err := json.Marshal(record{
+		ID: entry.ID, OrgID: entry.OrgID, UserID: entry.UserID,
+		Action: entry.Action, Metadata: entry.Metadata,
+	})
+	if err != nil {
+		return fmt.Errorf("gadgetworks ledger: encode entry: %w", err)
+	}
+	if e.Endpoint != "" {
+		return e.post(ctx, payload)
+	}
+	return e.append(payload)
+}
+
+func (e *Exporter) post(ctx context.Context, payload []byte) error {
+	if e.Token == "" {
+		return fmt.Errorf("gadgetworks ledger: %s is required for %s", EnvToken, TargetCloud)
+	}
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, e.Endpoint, bytes.NewReader(payload))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+e.Token)
+	client := e.Client
+	if client == nil {
+		client = &http.Client{Timeout: 5 * time.Second}
+	}
+	response, err := client.Do(request)
+	if err != nil {
+		return fmt.Errorf("gadgetworks ledger: %w", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode >= 300 {
+		return fmt.Errorf("gadgetworks ledger: %s", response.Status)
+	}
+	return nil
+}
+
+// append writes one line to the open ledger, opening it on first use. The
+// handle is held so a burst of entries is one open file rather than one open
+// per entry, and every line is flushed to the OS before Export returns.
+func (e *Exporter) append(payload []byte) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.closed {
+		return fmt.Errorf("gadgetworks ledger: exporter is closed")
+	}
+	if e.file == nil {
+		dir := e.Dir
+		if dir == "" {
+			dir = DefaultDir
+		}
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return fmt.Errorf("gadgetworks ledger: %w", err)
+		}
+		file, err := os.OpenFile(filepath.Join(dir, ledgerFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+		if err != nil {
+			return fmt.Errorf("gadgetworks ledger: %w", err)
+		}
+		e.file = file
+	}
+	if _, err := e.file.Write(append(payload, '\n')); err != nil {
+		return fmt.Errorf("gadgetworks ledger: %w", err)
+	}
+	return e.file.Sync()
+}
+
+// Close releases the ledger handle. It is idempotent: a lifecycle hook that
+// runs twice, or a Stop after a failed boot, must not report an error and
+// must not close a handle twice.
+func (e *Exporter) Close() error {
+	if e == nil {
+		return nil
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.closed {
+		return nil
+	}
+	e.closed = true
+	if e.file == nil {
+		return nil
+	}
+	file := e.file
+	e.file = nil
+	return file.Close()
+}
+
+// Health is the readiness contract. A managed target with no credentials is
+// unhealthy rather than silently degraded; the file target proves it can
+// actually create its directory.
+func (e *Exporter) Health(ctx context.Context) error {
+	if e == nil {
+		return fmt.Errorf("gadgetworks ledger: exporter is required")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if e.Endpoint != "" {
+		if e.Token == "" {
+			return fmt.Errorf("gadgetworks ledger: %s is required for %s", EnvToken, TargetCloud)
+		}
+		return nil
+	}
+	dir := e.Dir
+	if dir == "" {
+		dir = DefaultDir
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("gadgetworks ledger: %w", err)
+	}
+	return nil
+}
+
+var _ audit.Exporter = (*Exporter)(nil)
+
+// Deps is the typed dependency set the generated bootstrap fills. This
+// adapter reads its configuration from the host rather than the generated
+// config struct, so it needs nothing from the graph.
+type Deps struct{}
+
+// Module is what the generated bootstrap constructs and holds. Value is the
+// slot capability; Stop and Health are the declared lifecycle and health
+// hooks.
+type Module struct {
+	Value *Exporter
+
+	closeOnce sync.Once
+	closeErr  error
+	closed    chan struct{}
+}
+
+// NewModule selects the configured target and refuses an incomplete managed
+// selection. There is no fallback: an operator who selected `ledger-cloud`
+// and forgot the token gets one boot error naming the key, never a local
+// file pretending to be an audit ledger.
+func NewModule(ctx context.Context, host apphost.Host, _ Deps) (*Module, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	endpoint, token, dir := "", "", ""
+	if host != nil {
+		endpoint = host.Env(EnvEndpoint)
+		token = host.Env(EnvToken)
+		dir = host.Env(EnvDir)
+	}
+	if endpoint != "" {
+		if token == "" {
+			return nil, fmt.Errorf("gadgetworks ledger: %s is required when %s is set", EnvToken, EnvEndpoint)
+		}
+		return &Module{Value: NewCloudExporter(endpoint, token), closed: make(chan struct{})}, nil
+	}
+	return &Module{Value: NewFileExporter(dir), closed: make(chan struct{})}, nil
+}
+
+// Stop closes the ledger within the caller's deadline. It is idempotent and
+// context-bounded: the close runs once, and a caller whose context expires
+// first gets that error rather than blocking shutdown.
+func (m *Module) Stop(ctx context.Context) error {
+	if m == nil || m.Value == nil {
+		return nil
+	}
+	m.closeOnce.Do(func() {
+		go func() {
+			m.closeErr = m.Value.Close()
+			close(m.closed)
+		}()
+	})
+	select {
+	case <-m.closed:
+		return m.closeErr
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// Health delegates to the exporter so the generated health report attributes
+// the result to this module's slot, adapter, and target.
+func (m *Module) Health(ctx context.Context) error {
+	if m == nil || m.Value == nil {
+		return fmt.Errorf("gadgetworks ledger: exporter is required")
+	}
+	return m.Value.Health(ctx)
+}

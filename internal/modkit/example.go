@@ -56,6 +56,32 @@ import (
 // unreachable from this project rather than merely flagged.
 const ExampleRegistryDir = "registry/testdata"
 
+// The maintained external-registry template. It is the tree a third-party
+// publisher copies, so it is exercised the same way the example closures are:
+// installed into a throwaway derivative from its own signed directory
+// registry, compiled, tested, removed, and compared byte for byte. Anything
+// less and "publishable" would be a claim in prose.
+//
+// Its identity is pinned here because the harness has to verify the signature
+// through the real path before it configures the registry, and a directory
+// source deliberately cannot carry a public key in gogogadget.json — an
+// unsigned directory registry is legal, a remote one is not. The key is the
+// template's published demonstration key, derived from a documented seed so
+// this repository can re-sign the tree and compare bytes; a real publisher
+// runs `ggg registry keygen`.
+const (
+	ExternalTemplateDir             = "templates/external-registry"
+	ExternalTemplateNamespace       = "gadgetworks"
+	ExternalTemplateCanonicalModule = "example.com/gadgetworks/ggg-registry"
+	ExternalTemplatePublicKey       = "ZKuGJnL3y0a1TwHe4Jax0T2pVD9eb7C0vEfgHAFGEsQ="
+)
+
+// externalTemplateSeedPhrase is the documented seed phrase of the template's
+// demonstration signing key: the private half is sha256 of this string. It is
+// published on purpose — the template's whole point is that its signature can
+// be reproduced and checked by anyone reading it.
+const externalTemplateSeedPhrase = "gogogadget external-registry template demonstration key"
+
 // ExampleResult is what one exercised closure proved. Every field is an
 // observation, not a claim: paths that were installed, generated, compiled,
 // tested, retained after removal, and the count of tree entries compared.
@@ -73,27 +99,50 @@ type ExampleResult struct {
 	ProviderSelections        map[string]ProviderSelection `json:"provider_selections,omitempty"`
 	ProviderConstructorCounts map[string]int               `json:"provider_constructor_counts,omitempty"`
 	ProviderSwitched          bool                         `json:"provider_switched,omitempty"`
-	Retained                  []string                     `json:"retained"`
-	LockIdentityOnly          []string                     `json:"lock_identity_only"`
-	Compared                  int                          `json:"compared"`
+	// Registry names the source registry namespace a closure was published
+	// from, and RegistrySnapshot is the verified snapshot digest. Both are
+	// empty for the example registry, which is this project's own catalog.
+	Registry         string   `json:"registry,omitempty"`
+	RegistrySnapshot string   `json:"registry_snapshot,omitempty"`
+	Retained         []string `json:"retained"`
+	LockIdentityOnly []string `json:"lock_identity_only"`
+	Compared         int      `json:"compared"`
 }
 
+// providerFixtureSpec is one slot permutation to exercise: the candidate
+// adapters whose declared targets fill development, test, and production
+// between them, and the adapters currently selected for that slot, which have
+// to come out first because an installed adapter no provider choice names is
+// refused by the resolver.
+//
+// Candidates are a list rather than a local/managed pair because one adapter
+// can legitimately cover every environment with two targets — which is
+// exactly the shape the external-registry template ships.
 type providerFixtureSpec struct {
-	slot, local, managed string
-	legacy               []string
+	slot       string
+	candidates []string
+	legacy     []string
 }
 
 func providerFixtureSpecFor(id string) (providerFixtureSpec, bool) {
 	switch id {
 	case "fixture/system/mail-providers":
 		return providerFixtureSpec{
-			slot: "ggg/mail", local: "fixture/system/mail-local", managed: "fixture/system/mail-managed",
-			legacy: []string{"ggg/system/mail-dev", "ggg/system/mail-resend"},
+			slot:       "ggg/mail",
+			candidates: []string{"fixture/system/mail-local", "fixture/system/mail-managed"},
+			legacy:     []string{"ggg/system/mail-dev", "ggg/system/mail-resend"},
 		}, true
 	case "fixture/system/storage-providers":
 		return providerFixtureSpec{
-			slot: "ggg/storage", local: "fixture/system/storage-local", managed: "fixture/system/storage-managed",
-			legacy: []string{"ggg/system/storage-filesystem", "ggg/system/storage-s3"},
+			slot:       "ggg/storage",
+			candidates: []string{"fixture/system/storage-local", "fixture/system/storage-managed"},
+			legacy:     []string{"ggg/system/storage-filesystem", "ggg/system/storage-s3"},
+		}, true
+	case externalTemplateAdapterID:
+		return providerFixtureSpec{
+			slot:       externalTemplateSlot,
+			candidates: []string{externalTemplateAdapterID},
+			legacy:     []string{"ggg/system/audit-export-noop", "ggg/system/audit-export-otlp"},
 		}, true
 	default:
 		return providerFixtureSpec{}, false
@@ -107,6 +156,17 @@ func providerFixtureSpecFor(id string) (providerFixtureSpec, bool) {
 type exampleClosure struct {
 	root    Manifest
 	modules []Manifest
+	// registry, when set, publishes this closure from a separate directory
+	// registry configured in the derivative's project file instead of being
+	// vendored into the derivative's own catalog. That is the difference
+	// between adopting a module and consuming a third party's registry, and
+	// only the second one proves the external path.
+	registry *externalRegistrySpec
+	// testRun narrows the closure's declared test packages to one name
+	// pattern. The example registry shares packages with the shipped suite,
+	// so it filters; a module whose packages are exclusively its own runs
+	// everything it declared.
+	testRun string
 }
 
 func (c exampleClosure) ids() []string {
@@ -159,6 +219,15 @@ func ValidateExamples(ctx context.Context, root string, log io.Writer) ([]Exampl
 	if err := assertExamplesUnreachable(canonicalRoot, catalog); err != nil {
 		return nil, err
 	}
+	// The external-registry template is exercised alongside the examples
+	// rather than in a command of its own: it is the same lifecycle claim
+	// about a different publisher, and a separate command would be a
+	// separate thing to forget to run.
+	external, err := externalTemplateClosures(canonicalRoot)
+	if err != nil {
+		return nil, err
+	}
+	closures = append(closures, external...)
 
 	work := exampleWorkDir(canonicalRoot)
 	template := filepath.Join(work, "template")
@@ -330,7 +399,7 @@ func exampleClosures(catalog Catalog) ([]exampleClosure, error) {
 			if err != nil {
 				return nil, fmt.Errorf("%s: %w", m.ID, err)
 			}
-			closures = append(closures, exampleClosure{root: m, modules: ordered})
+			closures = append(closures, exampleClosure{root: m, modules: ordered, testRun: exampleTestRunPattern})
 		}
 	}
 	return closures, nil
@@ -410,6 +479,168 @@ func assertExamplesUnreachable(root string, examples Catalog) error {
 		}
 	}
 	return nil
+}
+
+// externalTemplateSlot and externalTemplateAdapterID are what the shipped
+// template claims. They are asserted against the template's own manifest
+// rather than trusted, so renaming the module in the template without
+// updating the harness fails loudly instead of silently skipping.
+const (
+	externalTemplateSlot      = "ggg/audit-export"
+	externalTemplateAdapterID = "gadgetworks/system/audit-export-ledger"
+)
+
+// exampleTestRunPattern narrows the example registry's declared test packages
+// to the fixtures' own tests, because those packages are shared with the
+// shipped suite.
+const exampleTestRunPattern = "^TestExample"
+
+// externalRegistrySpec is one directory registry a closure is consumed from.
+type externalRegistrySpec struct {
+	namespace       string
+	path            string
+	publicKey       string
+	canonicalModule string
+}
+
+// externalTemplateClosures builds the closures published by the maintained
+// external-registry template. A project that vendored only what it selected
+// has no template and gets no closures, exactly as it gets no examples.
+//
+// The template is loaded through LoadCatalog and its declared identity is
+// checked against what this harness expects, so the closure that follows is
+// resolving a real third-party registry rather than a hardcoded description
+// of one.
+func externalTemplateClosures(root string) ([]exampleClosure, error) {
+	dir := filepath.Join(root, filepath.FromSlash(ExternalTemplateDir))
+	if _, err := os.Stat(filepath.Join(dir, "registry.json")); errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+	catalog, err := LoadCatalog(os.DirFS(dir))
+	if err != nil {
+		return nil, fmt.Errorf("load external registry template %s: %w", ExternalTemplateDir, err)
+	}
+	if catalog.Namespace != ExternalTemplateNamespace || catalog.CanonicalModule != ExternalTemplateCanonicalModule {
+		return nil, fmt.Errorf("external registry template declares %s/%s, want %s/%s",
+			catalog.Namespace, catalog.CanonicalModule, ExternalTemplateNamespace, ExternalTemplateCanonicalModule)
+	}
+	if len(catalog.Modules) == 0 {
+		return nil, fmt.Errorf("%s publishes no modules", ExternalTemplateDir)
+	}
+	if err := assertExternalTemplateUnreachable(root, catalog); err != nil {
+		return nil, err
+	}
+	spec := &externalRegistrySpec{
+		namespace: catalog.Namespace, path: ExternalTemplateDir,
+		publicKey: ExternalTemplatePublicKey, canonicalModule: catalog.CanonicalModule,
+	}
+	byID := make(map[string]Manifest, len(catalog.Modules))
+	for _, m := range catalog.Modules {
+		byID[m.ID] = m
+	}
+	closures := make([]exampleClosure, 0, len(catalog.Modules))
+	for _, kind := range moduleKindOrder {
+		for _, m := range catalog.Modules {
+			if m.Kind != kind {
+				continue
+			}
+			ordered, orderErr := exampleClosureOrder(m, byID, nil)
+			if orderErr != nil {
+				return nil, fmt.Errorf("%s: %w", m.ID, orderErr)
+			}
+			closures = append(closures, exampleClosure{root: m, modules: ordered, registry: spec})
+		}
+	}
+	return closures, nil
+}
+
+// assertExternalTemplateUnreachable is the template's isolation guard. The
+// template is installable by design, so what keeps it out of this project is
+// that nothing here names it: its namespace is not a configured registry
+// source, and no module it publishes appears in the committed lock. Without
+// that, the framework would ship a demonstration adapter wired into its own
+// boot graph under a demonstration signing key.
+func assertExternalTemplateUnreachable(root string, template Catalog) error {
+	projectData, err := os.ReadFile(filepath.Join(root, ProjectFileName))
+	if err != nil {
+		return fmt.Errorf("read %s: %w", ProjectFileName, err)
+	}
+	project, err := ParseProject(projectData)
+	if err != nil {
+		return err
+	}
+	for _, registry := range project.Registries {
+		if registry.Namespace == template.Namespace {
+			return fmt.Errorf(
+				"%s configures the template registry %q; the template must stay unreachable from this project",
+				ProjectFileName, template.Namespace)
+		}
+	}
+	ids := make(map[string]struct{}, len(template.Modules))
+	for _, m := range template.Modules {
+		ids[m.ID] = struct{}{}
+	}
+	lockData, err := os.ReadFile(filepath.Join(root, LockFileName))
+	if err != nil {
+		return fmt.Errorf("read %s: %w", LockFileName, err)
+	}
+	lock, err := ParseLock(lockData)
+	if err != nil {
+		return err
+	}
+	for _, module := range lock.Modules {
+		if _, isTemplate := ids[module.ID]; isTemplate {
+			return fmt.Errorf("committed lock installs template module %s", module.ID)
+		}
+	}
+	return nil
+}
+
+// attachExternalRegistry configures the template as a directory registry in
+// the derivative and returns the verified snapshot digest.
+//
+// The signature is checked here, through VerifyRegistrySnapshot, because a
+// directory source cannot carry a public key: gogogadget.json forbids one on
+// a directory registry, since the point of that source is consuming a tree
+// you already control. Resolution still verifies every payload digest and
+// refuses an unlisted file under registry/; what it cannot do on its own is
+// tell you the tree was signed by the publisher you think it was. So the
+// harness does what `ggg registry verify` does, and does it before writing
+// anything.
+func attachExternalRegistry(derivative string, spec externalRegistrySpec) (string, error) {
+	tree := filepath.Join(derivative, filepath.FromSlash(spec.path))
+	digest, err := VerifyRegistrySnapshot(tree, spec.publicKey)
+	if err != nil {
+		return "", fmt.Errorf("verify %s registry snapshot: %w", spec.namespace, err)
+	}
+	if digest == "" {
+		return "", fmt.Errorf("%s registry snapshot verified to an empty digest", spec.namespace)
+	}
+	data, err := os.ReadFile(filepath.Join(derivative, ProjectFileName))
+	if err != nil {
+		return "", err
+	}
+	project, err := ParseProject(data)
+	if err != nil {
+		return "", err
+	}
+	for _, existing := range project.Registries {
+		if existing.Namespace == spec.namespace {
+			return "", fmt.Errorf("derivative already configures registry %q", spec.namespace)
+		}
+	}
+	project.Registries = append(append([]ProjectRegistry{}, project.Registries...),
+		ProjectRegistry{Namespace: spec.namespace, Source: "directory", Path: spec.path})
+	updated, err := MarshalProject(project)
+	if err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(filepath.Join(derivative, ProjectFileName), updated, 0o644); err != nil {
+		return "", err
+	}
+	return digest, nil
 }
 
 // prepareTemplateDerivative copies the working tree, pins the project's module
@@ -531,7 +762,7 @@ func copyProviderSelections(values map[string]ProviderSelections) map[string]Pro
 
 func providerChoicesFromModules(spec providerFixtureSpec, modules []Manifest) (ProviderSelections, error) {
 	choices := ProviderSelections{}
-	for _, moduleID := range []string{spec.local, spec.managed} {
+	for _, moduleID := range spec.candidates {
 		var module *Manifest
 		for i := range modules {
 			if modules[i].ID == moduleID {
@@ -749,6 +980,9 @@ func exerciseStandardClosure(
 
 	ids := closure.ids()
 	result := ExampleResult{ID: closure.root.ID, Kind: string(closure.root.Kind), Modules: ids}
+	if closure.registry != nil {
+		result.Registry = closure.registry.namespace
+	}
 	fmt.Fprintf(log, "\n%s\n  closure: %s\n", closure.root.ID, strings.Join(ids, ", "))
 
 	if err := os.RemoveAll(derivative); err != nil {
@@ -781,7 +1015,8 @@ func exerciseStandardClosure(
 		return result, err
 	}
 	var baselineProject []byte
-	if _, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
+	_, isProviderFixture := providerFixtureSpecFor(closure.root.ID)
+	if isProviderFixture || closure.registry != nil {
 		baselineProject, err = os.ReadFile(filepath.Join(derivative, ProjectFileName))
 		if err != nil {
 			return result, err
@@ -801,7 +1036,14 @@ func exerciseStandardClosure(
 		}
 	}
 
-	if err := publishExamples(root, derivative, closure.modules); err != nil {
+	if closure.registry != nil {
+		digest, attachErr := attachExternalRegistry(derivative, *closure.registry)
+		if attachErr != nil {
+			return result, attachErr
+		}
+		result.RegistrySnapshot = digest
+		fmt.Fprintf(log, "  registry %s verified at snapshot %s\n", closure.registry.namespace, digest)
+	} else if err := publishExamples(root, derivative, closure.modules); err != nil {
 		return result, err
 	}
 	if _, err := WriteRegistrySnapshot(derivative); err != nil {
@@ -889,7 +1131,11 @@ func exerciseStandardClosure(
 	// so it is reported rather than silently worked around.
 	packages := exampleTestPackages(closure.modules)
 	if len(packages) != 0 {
-		args := append([]string{"test", "-count=1", "-run", "^TestExample"}, packages...)
+		args := []string{"test", "-count=1"}
+		if closure.testRun != "" {
+			args = append(args, "-run", closure.testRun)
+		}
+		args = append(args, packages...)
 		if err := runGoTool(ctx, derivative, args...); err != nil {
 			return result, fmt.Errorf("module tests: %w", err)
 		}
@@ -944,8 +1190,10 @@ func exerciseStandardClosure(
 	if _, err := WriteRegistrySnapshot(derivative); err != nil {
 		return result, fmt.Errorf("refresh derivative registry snapshot after removal: %w", err)
 	}
-	if err := unpublishExamples(derivative, closure.modules); err != nil {
-		return result, err
+	if closure.registry == nil {
+		if err := unpublishExamples(derivative, closure.modules); err != nil {
+			return result, err
+		}
 	}
 	if _, err := WriteRegistrySnapshot(derivative); err != nil {
 		return result, fmt.Errorf("refresh derivative registry snapshot after unpublish: %w", err)

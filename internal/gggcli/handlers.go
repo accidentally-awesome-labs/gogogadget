@@ -554,12 +554,16 @@ func runRegistry(ctx context.Context, cc CommandContext, args []string) (Result,
 	switch subcommand {
 	case "build":
 		if len(parsed.positional) != 0 {
-			return Result{}, usageError("ggg registry build")
+			return Result{}, usageError("ggg registry build [--dir DIR]")
 		}
 		if err := ctx.Err(); err != nil {
 			return Result{}, err
 		}
-		return cc.Controller.applyRegistryBuild()
+		dir, dirErr := cc.Controller.registryBuildDir(parsed.value("dir", ""))
+		if dirErr != nil {
+			return Result{}, dirErr
+		}
+		return cc.Controller.applyRegistryBuild(dir)
 	case "validate":
 		if len(parsed.positional) != 0 {
 			return Result{}, usageError("ggg registry validate")

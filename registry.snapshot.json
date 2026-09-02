@@ -888,7 +888,7 @@
     },
     {
       "path": "registry/modules/system/content-assets/module.json",
-      "sha256": "eaaa5061e3bdb8651637073bccbd6642dfb7bf5bc532024d0d223ff9e55eee2e"
+      "sha256": "ec2f66eb8ea4e9aee2e34f6dc7f967d3d06ab2afb1fcbc2b5016fea7488f0b39"
     },
     {
       "path": "registry/modules/system/content/module.json",
@@ -1000,7 +1000,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "4ebf3bfa3041ae49cd520431a27b4974897590cdfb9bb34eb0c3c05935035676"
+      "sha256": "5880fce83a197c60697a3a3a8f150227c3f0fee4bbcfad355058aa47dd6a70b9"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1032,7 +1032,7 @@
     },
     {
       "path": "registry/modules/system/project-base/module.json",
-      "sha256": "2e43253d5f7934813d84f373cc2606c631c436ef9f0e6ab4d53b100ed3971909"
+      "sha256": "0c7d9c614196331215abdcefc501224ad15ba00c2a1e5fc669be1fdab4c0ab38"
     },
     {
       "path": "registry/modules/system/project-docs/module.json",
@@ -1061,6 +1061,10 @@
     {
       "path": "registry/modules/system/realtime/module.json",
       "sha256": "7e5b4ef36b0dc122a4130945bd9843aba9102987fe609279615b37e4cf6fecc3"
+    },
+    {
+      "path": "registry/modules/system/registry-template/module.json",
+      "sha256": "f3e3f61a9caa5d0b704388498f8be8df79ff160469f6cc514fdb6fd24f999556"
     },
     {
       "path": "registry/modules/system/schedules/module.json",
@@ -1276,7 +1280,7 @@
     },
     {
       "path": "registry/profiles/full.json",
-      "sha256": "035535f695c936a2a839d2cbf5486cbb538e01c8b3cc4dc2077f9021cdd0f5fc"
+      "sha256": "81a35abf8389b77888e81402dc4d28a484ce1020d93c8583401689b1849837aa"
     },
     {
       "path": "registry/profiles/minimal.json",
@@ -1312,7 +1316,7 @@
     },
     {
       "path": "registry/systems.json",
-      "sha256": "fb847e6388015b1ea25e3967e9367c1dd224a5223d0da94f5f177ab1289f2132"
+      "sha256": "b53116852863b9458fc77ad5b3d5fc4d0227729aad8c920c336b992a615c09cd"
     },
     {
       "path": "registry/testdata/registry.json",

@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "registry": {
+    "schema": 2,
+    "namespace": "gadgetworks",
+    "canonical_module": "example.com/gadgetworks/ggg-registry",
+    "includes": [
+      "registry/elements.json",
+      "registry/components.json",
+      "registry/pages.json",
+      "registry/workflows.json",
+      "registry/systems.json",
+      "registry/profiles.json"
+    ]
+  },
+  "files": [
+    {
+      "path": "registry.json",
+      "sha256": "a07757b14069619ba4953aaf846bec767c3dfd0530cc1ca85555bf6bf6395cae"
+    },
+    {
+      "path": "registry/components.json",
+      "sha256": "aeaafb4f63182d39a9416bde80b05d82b3ca4af4b033496a9983b630eb8ec584"
+    },
+    {
+      "path": "registry/elements.json",
+      "sha256": "36ffbb535a865834e9eff3fb05244c062546c93d851c8348e1e0796e7a1aaed3"
+    },
+    {
+      "path": "registry/modules/system/audit-export-ledger/cli.go.txt",
+      "sha256": "e7ea655e47317ebbf4985f2667ce2fba118dc7e019c74406e7be5d28d38b2278"
+    },
+    {
+      "path": "registry/modules/system/audit-export-ledger/ledger.go.txt",
+      "sha256": "914ced884dcaf866cf2c93c8279f5318bf8f1ac8ebea076fdcd39fe0428c8176"
+    },
+    {
+      "path": "registry/modules/system/audit-export-ledger/ledger_test.go.txt",
+      "sha256": "a6944ed91378ae46eb8b14f2f37a43695e00668fc0ca73b2fce0a0f5e6fb1f57"
+    },
+    {
+      "path": "registry/modules/system/audit-export-ledger/module.json",
+      "sha256": "8f3b51457cdbe2e09406d97be62e65dc25afbab8d1191b1413c8784e19e25ced"
+    },
+    {
+      "path": "registry/pages.json",
+      "sha256": "cdf10ddfef317170b304da87e6150d1b70ec4792dbcee978e21c3c6d2b18b589"
+    },
+    {
+      "path": "registry/profiles.json",
+      "sha256": "a08417e52187ece15b35ee18f3400425ba548e07004be7a6018389b1f7fd698f"
+    },
+    {
+      "path": "registry/systems.json",
+      "sha256": "1e299466f1a384225a55c18e843c0f0065bededa5ec14ecec30cc4abe77cd20c"
+    },
+    {
+      "path": "registry/workflows.json",
+      "sha256": "e3a36ab2449bec812c8af599f252b6049f492e2124e2413f34783d199f85467a"
+    }
+  ]
+}

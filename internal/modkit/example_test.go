@@ -160,13 +160,16 @@ func TestProviderExampleClosuresDeclareEnvironmentSelections(t *testing.T) {
 		t.Fatalf("exampleClosures: %v", err)
 	}
 	want := map[string]struct {
-		slot, local, managed string
+		slot       string
+		candidates []string
 	}{
 		"fixture/system/mail-providers": {
-			slot: "ggg/mail", local: "fixture/system/mail-local", managed: "fixture/system/mail-managed",
+			slot:       "ggg/mail",
+			candidates: []string{"fixture/system/mail-local", "fixture/system/mail-managed"},
 		},
 		"fixture/system/storage-providers": {
-			slot: "ggg/storage", local: "fixture/system/storage-local", managed: "fixture/system/storage-managed",
+			slot:       "ggg/storage",
+			candidates: []string{"fixture/system/storage-local", "fixture/system/storage-managed"},
 		},
 	}
 	found := map[string]bool{}
@@ -180,7 +183,7 @@ func TestProviderExampleClosuresDeclareEnvironmentSelections(t *testing.T) {
 			t.Fatalf("unexpected provider fixture %s", closure.root.ID)
 		}
 		found[closure.root.ID] = true
-		if spec.slot != expected.slot || spec.local != expected.local || spec.managed != expected.managed {
+		if spec.slot != expected.slot || !slices.Equal(spec.candidates, expected.candidates) {
 			t.Fatalf("%s fixture spec = %#v, want %#v", closure.root.ID, spec, expected)
 		}
 		if len(closure.modules) != 3 {

@@ -210,7 +210,7 @@ func (c *Controller) executeInfo(ctx context.Context, request InfoRequest) (Resu
 		Payload: map[string]any{
 			"module": found, "state": state,
 			"links":  surfaceLinks(*found),
-			"verify": verificationCommands(*found),
+			"verify": modkit.VerificationCommands(*found),
 		},
 	}, nil
 }
@@ -374,6 +374,10 @@ func (c *Controller) executeRegistryValidate(ctx context.Context, request Regist
 			"%s closure %s: installed %d file(s), regenerated %d, compiled, %d tree entries restored byte for byte",
 			example.Kind, strings.Join(example.Modules, "+"),
 			len(example.Installed), len(example.Generated), example.Compared)
+		if example.Registry != "" {
+			message += fmt.Sprintf(", published by registry %s at signed snapshot %s",
+				example.Registry, example.RegistrySnapshot)
+		}
 		if len(example.Retained) != 0 {
 			message += ", retained migration(s) " + strings.Join(example.Retained, " ")
 		}
@@ -391,23 +395,25 @@ func (c *Controller) executeRegistryValidate(ctx context.Context, request Regist
 }
 
 // applyRegistryBuild refreshes manifest digests, rebuilds the indexes, writes
-// the snapshot, and verifies vendored bytes.
-func (c *Controller) applyRegistryBuild() (Result, error) {
-	refreshed, err := modkit.RefreshManifestDigests(c.rootDir())
+// the snapshot, and verifies vendored bytes. dir is the registry tree: the
+// project root for the self-hosting layout, or an explicit --dir for a
+// registry that lives beside the project rather than being it.
+func (c *Controller) applyRegistryBuild(dir string) (Result, error) {
+	refreshed, err := modkit.RefreshManifestDigests(dir)
 	if err != nil {
 		return failureEnvelope("registry build", runtimeError(err))
 	}
-	built, discovered, err := modkit.BuildRegistryIndexes(c.rootDir())
+	built, discovered, err := modkit.BuildRegistryIndexes(dir)
 	if err != nil {
 		return failureEnvelope("registry build", runtimeError(err))
 	}
-	if _, snapshotErr := modkit.WriteRegistrySnapshot(c.rootDir()); snapshotErr != nil {
+	if _, snapshotErr := modkit.WriteRegistrySnapshot(dir); snapshotErr != nil {
 		return failureEnvelope("registry build", runtimeError(snapshotErr))
 	}
 	built = append(built, modkit.RegistrySnapshotPath)
 	// Vendored bytes are verified here rather than in a separate audit, so
 	// a swapped third-party file fails the build instead of shipping.
-	if err := modkit.VerifyCatalogVendors(c.rootDir()); err != nil {
+	if err := modkit.VerifyCatalogVendors(dir); err != nil {
 		return failureEnvelope("registry build", runtimeError(err))
 	}
 	return Result{Envelope: normalizeEnvelope(modkit.Envelope{
@@ -525,30 +531,6 @@ func surfaceLinks(m modkit.Manifest) map[string][]string {
 		}
 	}
 	return links
-}
-
-// verificationCommands turns the declared test inventory into commands that
-// can be run as written.
-func verificationCommands(m modkit.Manifest) []string {
-	var commands []string
-	if packages := m.Tests.GoPackages; len(packages) > 0 {
-		commands = append(commands, "go test -count=1 ./"+strings.Join(packages, " ./"))
-	}
-	for _, spec := range m.Tests.E2E {
-		commands = append(commands, "cd e2e && npx playwright test "+spec+" --reporter=line")
-	}
-	for _, spec := range m.Tests.Accessibility {
-		commands = append(commands, "cd e2e && npx playwright test "+spec+" --reporter=line")
-	}
-	if len(m.Tests.Visual) > 0 {
-		// Visual is deliberately not a plain test invocation: baselines are
-		// font-rendering sensitive and only match inside the pinned container.
-		commands = append(commands, "./scripts/visual.sh")
-	}
-	for _, target := range m.Tests.Smoke {
-		commands = append(commands, "make smoke BASE_URL="+target)
-	}
-	return commands
 }
 
 // progressSinkKey carries an optional progress sink for long-running reads.

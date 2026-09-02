@@ -229,6 +229,67 @@ every vendored artifact against its declared byte count and SHA-256, and
 rejects `eval(`, `new Function(`, string-argument `setTimeout`/`setInterval`,
 and references to origins the manifest did not declare.
 
+## Publish your own registry
+
+Authoring a module in this tree makes it yours. Publishing one makes it
+everyone's, and it does not require forking the core catalog: a project can
+configure any number of registries, each with its own namespace and its own
+canonical Go module, and ids are globally scoped (`acme/system/…`) so nothing
+shadows anything.
+
+The maintained template is
+[`templates/external-registry/`](https://github.com/gogogadget/gogogadget/tree/main/templates/external-registry).
+Copy that directory to the root of a new repository and you have a complete,
+signed, publishable registry: the `registry.json` root and one index per kind,
+a seam adapter for the `ggg/audit-export` slot with two service targets, owned
+environment keys, a declared dependency set, lifecycle and health hooks, its
+contract tests shipped as `test`-class payloads, a `runtime.cli` contribution,
+a signed `registry.snapshot.json`, and a CI workflow that runs the publisher
+gate. Its `README.md` is the long form of what follows.
+
+```sh
+ggg registry init --namespace acme --canonical-module example.com/acme/ggg-registry
+ggg registry keygen --private registry-private-key.b64 --public registry-public-key.b64
+ggg registry build  --dir .          # refresh digests, rebuild indexes, write the snapshot
+ggg registry sign   --dir . --key-file registry-private-key.b64
+ggg registry verify --dir . --public-key "$(cat registry-public-key.b64)"
+ggg registry validate                # install, compile, test, remove, compare byte for byte
+git tag -a v1.0.0 -m "acme registry v1.0.0"
+```
+
+`sign` accepts **exactly one** of `--key-file` or the base64
+`GGG_REGISTRY_SIGNING_KEY` environment variable, and refuses when both or
+neither are set; CI uses the environment form so the private key never touches
+a disk. Publish the **public** key — it is the string consumers pin.
+
+A consumer adds the source, then selects the adapter per environment:
+
+```sh
+ggg registry add github:acme/ggg-registry --namespace acme --ref v1.0.0 \
+  --public-key "$(cat registry-public-key.b64)"
+ggg provider set --provider ggg/audit-export:production=acme/system/audit-export-ledger@ledger-cloud
+```
+
+Remote registries must be signed: an unsigned tree is consumable only as an
+explicitly configured project-relative `directory` source. `registry add`
+previews the namespace, key fingerprint, canonical module, modules and their
+dependencies before writing anything, and a tampered payload, a bad signature,
+a namespace that does not match what you pinned, a colliding canonical module
+prefix, and a dependency outside its declared contract range each refuse
+before the first byte is written.
+
+Rotate a signing key with `ggg registry rotate --old-key-file … --new-key-file
+… --not-before RFC3339`. That publishes `registry-key-rotation.json` plus
+detached signatures under both keys; a consumer honours the new key only once
+**both** verify and their clock reaches `not_before`, so a key can never be
+swapped out from under a pinned one.
+
+`revision` moves on any implementation change; `contract` moves only when a
+consumer must change code. What every module declares — source namespace,
+contract range, provider slot, targets, automation level, dependency set,
+lifecycle, health and verification commands — is listed in the generated
+[module reference](/docs/module-reference).
+
 ## Rules that prevent data loss
 
 Five rules, each with the reason it exists. They are enforced, not advisory.

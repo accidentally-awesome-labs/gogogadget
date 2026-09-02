@@ -65,6 +65,7 @@
     "registry/modules/system/realtime-ably/module.json",
     "registry/modules/system/realtime-postgres/module.json",
     "registry/modules/system/realtime/module.json",
+    "registry/modules/system/registry-template/module.json",
     "registry/modules/system/schedules/module.json",
     "registry/modules/system/search-postgres/module.json",
     "registry/modules/system/search-typesense/module.json",

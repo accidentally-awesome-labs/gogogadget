@@ -1,0 +1,4 @@
+# Registry signing keys never enter version control.
+*.key
+*.pem
+registry-private-key*
