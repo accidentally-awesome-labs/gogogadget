@@ -124,7 +124,7 @@ func assertCIJobIsARealGate(t *testing.T, name string, job ciJob, goVersion stri
 			hasCheckout = true
 		case strings.HasPrefix(step.Uses, "actions/setup-go@"):
 			setupGo = step
-		case strings.Contains(step.Run, "make setup"):
+		case isMakeSetupStep(step):
 			hasSetup = true
 		}
 	}
@@ -145,6 +145,19 @@ func assertCIJobIsARealGate(t *testing.T, name string, job ciJob, goVersion stri
 	}
 }
 
+// isMakeSetupStep reports whether the step runs `make setup` as a command
+// rather than merely mentioning it. A substring match accepts
+// `echo "make setup"`, which installs nothing and builds no bin/ggg, so the
+// check reads the step's command lines instead.
+func isMakeSetupStep(step ciStep) bool {
+	for line := range strings.SplitSeq(step.Run, "\n") {
+		if strings.TrimSpace(line) == "make setup" {
+			return true
+		}
+	}
+	return false
+}
+
 // assertCIJobValidates finds the one validate invocation in the job and checks
 // it is a bare command for the expected family. Bare is the point: a pipe, a
 // `|| true`, a `set +e` or an `if:` on the step would all leave a green job
@@ -154,7 +167,7 @@ func assertCIJobValidates(t *testing.T, name string, job ciJob, family ClosureFa
 	var invocations []ciStep
 	setupIndex, validateIndex := -1, -1
 	for index, step := range job.Steps {
-		if strings.Contains(step.Run, "make setup") {
+		if isMakeSetupStep(step) {
 			setupIndex = index
 		}
 		if strings.Contains(step.Run, "registry validate") {
@@ -229,8 +242,9 @@ func parseCIValidateFamily(command string) (ClosureFamily, error) {
 	return "", fmt.Errorf("no --closures selection in %q, so the job is not family-scoped", command)
 }
 
-// readCIWorkflow parses the workflow and returns the toolchain the test job
-// pins, so a Go bump stays a one-place edit in the workflow itself.
+// readCIWorkflow parses the workflow, checks it still runs on every change,
+// and returns the toolchain the test job pins, so a Go bump stays a one-place
+// edit in the workflow itself.
 func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 	t.Helper()
 	raw, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(ciWorkflowPath)))
@@ -241,6 +255,7 @@ func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 	if err := yaml.Unmarshal(raw, &workflow); err != nil {
 		t.Fatalf("parse %s: %v", ciWorkflowPath, err)
 	}
+	assertCIRunsOnEveryChange(t, workflow.On)
 	base, ok := workflow.Jobs["test"]
 	if !ok {
 		t.Fatalf("%s has no test job to take the pinned toolchain from", ciWorkflowPath)
@@ -257,7 +272,45 @@ func readCIWorkflow(t *testing.T, root string) (ciWorkflow, string) {
 	return workflow, goVersion
 }
 
+// assertCIRunsOnEveryChange checks the triggers. Every job in this file is
+// decoration if the workflow only runs on demand: narrowing `on:` to
+// workflow_dispatch leaves each job perfectly well-formed and never runs one.
+// Pull requests are where a change is reviewed and pushes to main are where it
+// lands, so both must fire.
+func assertCIRunsOnEveryChange(t *testing.T, on yaml.Node) {
+	t.Helper()
+	if on.Kind != yaml.MappingNode {
+		t.Fatalf("%s declares no trigger mapping, so nothing states when it runs", ciWorkflowPath)
+	}
+	triggers := map[string]*yaml.Node{}
+	names := make([]string, 0, len(on.Content)/2)
+	for index := 0; index+1 < len(on.Content); index += 2 {
+		triggers[on.Content[index].Value] = on.Content[index+1]
+		names = append(names, on.Content[index].Value)
+	}
+	push, ok := triggers["push"]
+	if !ok {
+		t.Fatalf("%s does not run on push; triggers are %v", ciWorkflowPath, names)
+	}
+	var pushTrigger struct {
+		Branches []string `yaml:"branches"`
+	}
+	if err := push.Decode(&pushTrigger); err != nil {
+		t.Fatalf("parse the push trigger of %s: %v", ciWorkflowPath, err)
+	}
+	if !slices.Contains(pushTrigger.Branches, "main") {
+		t.Fatalf("%s does not run on pushes to main; branches are %v", ciWorkflowPath, pushTrigger.Branches)
+	}
+	if _, ok := triggers["pull_request"]; !ok {
+		t.Fatalf("%s does not run on pull requests, so no change is gated before it lands; triggers are %v",
+			ciWorkflowPath, names)
+	}
+}
+
 type ciWorkflow struct {
+	// On is read as a node because `pull_request:` legitimately carries no
+	// value, and a nil-able struct cannot tell an absent key from a null one.
+	On   yaml.Node        `yaml:"on"`
 	Jobs map[string]ciJob `yaml:"jobs"`
 }
 

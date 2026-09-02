@@ -58,6 +58,51 @@ func TestRegistryBuildDiscoversNewModuleDocuments(t *testing.T) {
 	}
 }
 
+// `--closures` must survive the trip from argv into the engine, and the whole
+// point of the CI split is that it does.
+//
+// The failure mode is asymmetric, which is why this is an end-to-end test and
+// not a parse assertion: dropping the flag from the command table fails
+// loudly, but reading it under the wrong key silently yields the all family,
+// so both CI jobs would exercise every closure, exit 0, and stay green while
+// the split they were created for no longer exists.
+//
+// A project with no fixture registries makes that observable for free. A named
+// family that covers nothing is a refusal that names the family; the all
+// family is a clean run. So a flag that never arrived reads as exit 0 here,
+// and the test fails.
+func TestRegistryValidateCarriesTheClosureFamilyIntoTheEngine(t *testing.T) {
+	root := selfHostTree(t)
+
+	for _, argv := range [][]string{
+		{"registry", "validate", "--closures", "core"},
+		{"registry", "validate", "--closures=core"},
+		{"registry", "validate", "--closures", "external"},
+	} {
+		family := "core"
+		if argv[len(argv)-1] == "external" {
+			family = "external"
+		}
+		_, _, err := runApp(t, root, nil, argv...)
+		require.Errorf(t, err, "%v exercised nothing and reported success", argv)
+		assert.Equal(t, 3, exitOf(t, err), "a family with nothing to exercise is a refusal")
+		assert.Containsf(t, err.Error(), family,
+			"the refusal must name the requested family, or the flag never reached the engine: %v", err)
+	}
+
+	// Bare `registry validate` is every family, and in a project with no
+	// fixtures that is a clean run rather than a refusal.
+	if _, _, err := runApp(t, root, nil, "registry", "validate"); err != nil {
+		t.Fatalf("bare registry validate must still mean the all family: %v", err)
+	}
+
+	// An unknown family is a usage failure, before any work.
+	_, _, err := runApp(t, root, nil, "registry", "validate", "--closures", "bogus")
+	require.Error(t, err)
+	assert.Equal(t, 2, exitOf(t, err))
+	assert.Contains(t, err.Error(), "unknown closure family")
+}
+
 // Editing a module's own source stales its manifest; `registry build` is the
 // authoring step that refreshes payload digests.
 func TestRegistryBuildRefreshesPayloadDigests(t *testing.T) {

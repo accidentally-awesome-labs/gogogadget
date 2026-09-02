@@ -395,3 +395,119 @@ linters. Nothing pushed; no CI triggered.
    its coverage is as broad as the template is. Widening it is the template's
    slice, not this one — and the guard test will keep the job honest as the
    template grows.
+
+---
+
+## Review round 2 — I1, M1, M2 fixed; M3 recorded
+
+Review verdict: spec compliance OK, task quality WARN — one Important gap and
+two cheap guard hardenings. All three fixed; M3 recorded as a follow-up, not
+changed.
+
+### I1 — the flag was never exercised through the CLI
+
+The gap was real and the asymmetry is the point: deleting the `table.go`
+declaration fails loudly, but reading the flag under the wrong key
+(`parsed.value("closure", "")`) silently yields `ClosureFamilyAll`, so both CI
+jobs would run all 11 closures, exit 0, and stay green while the split I
+justified no longer existed.
+
+Fixed in `internal/gggcli/ported_test.go`:
+`TestRegistryValidateCarriesTheClosureFamilyIntoTheEngine`. It runs the real
+`App.Run` path against `selfHostTree(t)` — an on-disk project with a valid
+catalog and neither `registry/testdata` nor `templates/external-registry` —
+so the family is observable end to end for free:
+
+- `registry validate --closures core`, `--closures=core` and `--closures
+  external` each exit **3** and the refusal names the requested family (the
+  "named family that covers nothing" rule from round 1);
+- bare `registry validate` exits **0** (the `all` family, unchanged);
+- `--closures bogus` exits **2** with `unknown closure family`.
+
+I chose the observable-refusal route over a controller seam deliberately: it
+asserts the value that actually reached `modkit.ValidateExamples`, not a value
+intercepted one layer above it, and it needs no production test hook. It costs
+10ms — no derivative is built, because the refusal happens before any work.
+
+Mutation-tested against exactly the typo the review named:
+
+```
+$ sed -i '' 's|parsed.value("closures", "")|parsed.value("closure", "")|' internal/gggcli/handlers.go
+$ go test ./internal/gggcli -run TestRegistryValidateCarriesTheClosureFamilyIntoTheEngine -count=1
+    Error:    An error is expected but got nil.
+    Messages: [registry validate --closures core] exercised nothing and reported success
+FAIL
+```
+
+### M1 — the workflow's `on:` triggers were unchecked
+
+Correct, and it was the class my own doc comment named: narrowing `on:` to
+`workflow_dispatch` leaves all seven jobs perfectly well-formed and never runs
+one. `readCIWorkflow` now calls `assertCIRunsOnEveryChange`, which requires a
+`push` trigger whose `branches` contain `main` and the presence of a
+`pull_request` trigger. `On` is read as a `yaml.Node` because `pull_request:`
+legitimately carries no value and a nil-able struct cannot distinguish an
+absent key from a null one (`yaml.v3` keeps `on` as the string key `"on"`,
+verified before relying on it).
+
+### M2 — `hasSetup` was a substring match
+
+`isMakeSetupStep(step)` now splits the step's `run` into command lines and
+requires one to be exactly `make setup`; both the presence check and the
+step-order check use it, so they cannot disagree.
+
+### Mutation results for the hardenings
+
+```
+M1 on: -> workflow_dispatch    -> FAIL (caught) | .github/workflows/ci.yml does not run on push; triggers are [workflow_dispatch]
+M1 pull_request removed        -> FAIL (caught) | .github/workflows/ci.yml does not run on pull requests, so no change is gated before it lands; triggers are [push]
+M1 push branches -> release    -> FAIL (caught) | .github/workflows/ci.yml does not run on pushes to main; branches are [release]
+M2 make setup -> echo "…"      -> FAIL (caught) | job registry-core never runs make setup, so bin/ggg and the pinned tools are absent
+```
+
+`ci.yml` was restored byte-for-byte afterwards (`git diff` against HEAD is
+empty for that file).
+
+### M3 — recorded, not fixed: `ci-github` derivative portability
+
+`ggg/system/ci-github` ships `ci.yml` to every derivative, where both new jobs
+refuse: a derivative has no `registry/testdata` and no
+`templates/external-registry`, so `--closures core` and `--closures external`
+hit the round-1 "named family covers nothing" refusal by design. The same is
+true of `internal/modkit`'s repo-shape tests, which ship there too and
+`t.Fatalf` — including `TestCIExercisesEveryClosureFamilyForReal` itself, since
+it reads this repository's workflow and closure families.
+
+This is pre-existing rather than introduced here: `external_template_test.go`
+already hard-fails in a derivative, so the `test` job's `go test -race ./...`
+was already red there. Recorded as a **ci-github derivative-portability
+follow-up**: the shipped workflow and the shipped repo-shape tests both need a
+derivative-aware form (skip when the fixture roots are absent, or split the
+upstream-only jobs and tests into an upstream-only module). Deliberately not
+changed in this slice — it would rewrite what `ci-github` and `modkit` publish
+to every consumer, which is a decision of its own.
+
+### Verification after the fix round
+
+```
+$ gofmt -l internal/modkit internal/gggcli    -> clean
+$ go vet ./internal/modkit ./internal/gggcli  -> clean
+$ go test ./internal/modkit ./internal/gggcli -count=1
+ok  github.com/gogogadget/gogogadget/internal/modkit   9.561s
+ok  github.com/gogogadget/gogogadget/internal/gggcli   0.521s
+
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline \
+    && go run ./cmd/ggg sync --check --offline; echo "EXIT=$?"
+registry 88941a3f678f7668d2375064c33e17a706cd1aed98a6ba4590deaf0e69d18718
+  update    lock       gogogadget.lock.json
+registry 88941a3f678f7668d2375064c33e17a706cd1aed98a6ba4590deaf0e69d18718
+EXIT=0
+```
+
+The round-1 concern 3 (one-time `exit 4`) did not recur: this round's chained
+`registry build && sync --offline && sync --check --offline` settled in one
+pass, so it stays a one-off observation rather than a reproducible defect.
+
+Neither the CI jobs nor the validator behavior changed in this round — the
+fixes are one new CLI test and two additional assertions in the existing
+guard.
