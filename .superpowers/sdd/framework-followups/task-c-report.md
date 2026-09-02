@@ -579,4 +579,4 @@ because the core manifest pins those two files' digests as payloads.
 
 ## Commits (fix round 2)
 
-- `ff33724` — fix(registry): remove the adapter by deselection in the template's gate
+- `556ce74` — fix(registry): remove the adapter by deselection in the template's gate
