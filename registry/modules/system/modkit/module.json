@@ -92,7 +92,31 @@
         "source": "internal/gggcli/create.go",
         "target": "internal/gggcli/create.go",
         "class": "go",
-        "sha256": "6aaa62440ffa18b2a5c4eed4c363beab5cc09c20f3382b9b75d3fa8fcc02f701",
+        "sha256": "0acffc3af660b49f51bb11c7bfe946615189171289f49b48e441820a89dc0321",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/create_resource.go",
+        "target": "internal/gggcli/create_resource.go",
+        "class": "go",
+        "sha256": "94133a6e8e391a24e8afaaaffb92a0057e544d9abb63f0299b1fdfab30ade607",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/create_resource_source.go",
+        "target": "internal/gggcli/create_resource_source.go",
+        "class": "go",
+        "sha256": "c0b8bb40d712e8e8f772470a094f936380409f826d15d1f115a865c2c3e3cbd1",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "internal/gggcli/create_resource_test.go",
+        "target": "internal/gggcli/create_resource_test.go",
+        "class": "test",
+        "sha256": "882c7192b311f6d11a95814507cb061affa6eb1d886859a48cec23aaf6659db1",
         "rewrite_module": true,
         "contract": true
       },
@@ -380,7 +404,7 @@
         "source": "internal/modkit/example.go",
         "target": "internal/modkit/example.go",
         "class": "go",
-        "sha256": "2e0a78d528501652a97c7cf6c6e34ccd7720a993d538bcc69234a4bb766910ca",
+        "sha256": "81c400618568f33989a8a7d2d046f9dabb1a7325f60eb95a93ea06ccfb62b26a",
         "rewrite_module": true,
         "contract": false
       },
@@ -388,7 +412,7 @@
         "source": "internal/modkit/example_test.go",
         "target": "internal/modkit/example_test.go",
         "class": "test",
-        "sha256": "60d02336c0ab6ad6a4a4472fe55376591905995023036602b3b5b78bc692da99",
+        "sha256": "dbcab93d393ab835206718f82d3ea2f855df6270c89aba724c78b8f6f62b0f67",
         "rewrite_module": true,
         "contract": false
       },

@@ -108,7 +108,7 @@ func TestExampleClosuresCoverEveryKindInDependencyOrder(t *testing.T) {
 			installed = append(installed, module.ID)
 		}
 	}
-	want := []string{"element", "component", "page", "workflow", "system", "system", "system"}
+	want := []string{"element", "component", "page", "workflow", "workflow", "system", "system", "system"}
 	if !slices.Equal(kinds, want) {
 		t.Fatalf("closure kinds = %v, want exactly %v", kinds, want)
 	}

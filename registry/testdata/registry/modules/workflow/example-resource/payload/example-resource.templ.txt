@@ -1,0 +1,246 @@
+package templates
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/i18n"
+	"github.com/gogogadget/gogogadget/internal/web/templates/ui"
+)
+
+// ExampleResourceItem is the view row for example_resources.
+// The handler maps query rows onto it, so this package depends on nothing
+// generated and adding a column cannot silently change what the table renders.
+type ExampleResourceItem struct {
+	ID        int64
+	Name      string
+	CreatedAt time.Time
+}
+
+// ExampleResourcesListData is the read surface state.
+// One page of rows, the search term, the pager position, the base URL every
+// control links back to, and the form that shares the page. ReadOnly drops the
+// row actions, which is what makes the admin surface a read surface rather than
+// a second write path.
+type ExampleResourcesListData struct {
+	Items      []ExampleResourceItem
+	Query      string
+	Page       int
+	TotalPages int
+	BaseURL    string
+	ReadOnly   bool
+	Form       ExampleResourceFormData
+}
+
+// ExampleResourceFormData is the create/edit form state. ID 0 is a create.
+type ExampleResourceFormData struct {
+	ID      int64
+	Name    string
+	NameErr string
+}
+
+templ ExampleResourcesPage(d ExampleResourcesListData) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "example-resource.title")})
+	@ExampleResourceForm(d.Form)
+	// The search box stays OUTSIDE the swap target: it morphs the table
+	// container on every keystroke, and a control inside the box it replaces is
+	// re-created mid-word, which loses the caret.
+	@ui.TableToolbar(ui.TableToolbarOpts{Label: i18n.T(ctx, "example-resource.toolbar_label")}) {
+		@exampleResourcesSearch(d)
+	}
+	<div id="example-resource-table-container">
+		@ExampleResourcesTable(d)
+	</div>
+}
+
+// AdminExampleResourcesPage is the staff read surface.
+// Same table, ReadOnly set by the handler, so the rows carry no write controls.
+templ AdminExampleResourcesPage(d ExampleResourcesListData) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "example-resource.admin_title")})
+	@ui.TableToolbar(ui.TableToolbarOpts{Label: i18n.T(ctx, "example-resource.toolbar_label")}) {
+		@exampleResourcesSearch(d)
+	}
+	<div id="example-resource-table-container">
+		@ExampleResourcesTable(d)
+	</div>
+}
+
+templ exampleResourcesSearch(d ExampleResourcesListData) {
+	@ui.SearchInput(ui.SearchInputOpts{
+		Name: "q", Value: d.Query,
+		Placeholder: i18n.T(ctx, "example-resource.search_placeholder"),
+		AriaLabel:   i18n.T(ctx, "example-resource.search_label"),
+		GetURL:      d.BaseURL, Target: "#example-resource-table-container",
+		IndicatorID: "example-resource-search-indicator",
+	})
+}
+
+// ExampleResourcesTable is the search and pager fragment.
+// The CONTENTS of the table container, never the box itself: both controls swap
+// innerMorph, so a fragment repeating its own wrapper would leave a second
+// element carrying the same id.
+templ ExampleResourcesTable(d ExampleResourcesListData) {
+	@ui.DataTable(exampleResourcesTable(ctx, d)) {
+		for _, item := range d.Items {
+			<tr id={ fmt.Sprintf("example-resource-%d", item.ID) } data-testid="example-resource-row">
+				<td class="px-4 py-3 font-medium">{ item.Name }</td>
+				<td class="px-4 py-3 text-fg-muted">{ item.CreatedAt.Format("Jan 2, 2006") }</td>
+				if !d.ReadOnly {
+					<td class="px-4 py-3">
+						<div class="card-actions">
+							@ui.ButtonLink(ui.ButtonLinkOpts{
+								Label: i18n.T(ctx, "example-resource.edit"),
+								Href:  fmt.Sprintf("%s?edit=%d", d.BaseURL, item.ID),
+								Size:  ui.SizeXS,
+							})
+							// The request rides on the dialog's confirm control,
+							// so the delete contract (closest tr, outerHTML,
+							// 200-empty) is unchanged while the prompt stays
+							// translatable and assertable. hx-confirm calls
+							// window.confirm and can be neither.
+							@ui.ConfirmAction(ui.ConfirmActionOpts{
+								ID: fmt.Sprintf("example-resource-delete-%d", item.ID),
+								// The row's subject is in the trigger's name:
+								// forty controls all called "Delete" are
+								// indistinguishable to a screen reader.
+								TriggerLabel: i18n.T(ctx, "example-resource.delete_row", item.Name),
+								TriggerIcon:  ui.IconDelete,
+								Title:        i18n.T(ctx, "example-resource.delete_title"),
+								Message:      i18n.T(ctx, "example-resource.delete_confirm"),
+								ConfirmLabel: i18n.T(ctx, "example-resource.delete_action"),
+								CancelLabel:  i18n.T(ctx, "example-resource.cancel"),
+								Kind:         ui.KindDanger,
+								HX: ui.HX{
+									Delete: fmt.Sprintf("%s/%d", d.BaseURL, item.ID),
+									Target: "closest tr", Swap: "outerHTML",
+								},
+							})
+						</div>
+					</td>
+				}
+			</tr>
+		}
+	}
+}
+
+// exampleResourcesTable assembles the list and its slots.
+// Empty and Pagination are passed in every state: a caller that renders the
+// table only when rows exist takes the pager away with the rows.
+func exampleResourcesTable(ctx context.Context, d ExampleResourcesListData) ui.DataTableOpts {
+	columns := []ui.Column{
+		{Key: "name", Label: i18n.T(ctx, "example-resource.col_name")},
+		{Key: "created", Label: i18n.T(ctx, "example-resource.col_created")},
+	}
+	if !d.ReadOnly {
+		columns = append(columns, ui.Column{Key: "actions", Label: i18n.T(ctx, "example-resource.col_actions"), Align: ui.AlignEnd})
+	}
+	return ui.DataTableOpts{
+		Caption:       i18n.T(ctx, "example-resource.caption"),
+		HiddenCaption: true,
+		Columns:       columns,
+		RowCount:      len(d.Items),
+		Empty:         exampleResourcesEmpty(d),
+		Pagination:    exampleResourcesPager(d),
+		Attrs:         ui.Attrs{ID: "example-resource-table", TestID: "example-resource-table"},
+	}
+}
+
+// exampleResourcesEmpty separates "nothing exists yet" from
+// "your search matched nothing". Offering "add your first one" to somebody
+// whose query missed is the wrong answer to the wrong question.
+templ exampleResourcesEmpty(d ExampleResourcesListData) {
+	if d.Query != "" {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2, Variant: ui.EmptyInline, Filtered: true,
+			Title:      i18n.T(ctx, "example-resource.filtered_empty_title"),
+			Body:       i18n.T(ctx, "example-resource.filtered_empty_body", d.Query),
+			ClearURL:   d.BaseURL,
+			ClearLabel: i18n.T(ctx, "example-resource.clear_search"),
+			Target:     "#example-resource-table-container",
+		})
+	} else {
+		@ui.EmptyState(ui.EmptyStateOpts{
+			Level: 2, Variant: ui.EmptyInline,
+			Title: i18n.T(ctx, "example-resource.empty_title"),
+			Body:  i18n.T(ctx, "example-resource.empty_body"),
+		})
+	}
+}
+
+templ exampleResourcesPager(d ExampleResourcesListData) {
+	@ui.Pagination(ui.PaginationOpts{
+		Page: d.Page, TotalPages: d.TotalPages,
+		BaseURL: d.BaseURL + "?q=" + d.Query, Target: "#example-resource-table-container",
+		Numbered: true,
+		Labels:   exampleResourcesPagerLabels(ctx),
+	})
+}
+
+// exampleResourcesPagerLabels is the shared pager vocabulary plus
+// the per-number link name. Without it a screen reader hears only the digit,
+// which in a row of digits says nothing about what the control does.
+func exampleResourcesPagerLabels(ctx context.Context) ui.PagerLabels {
+	labels := pagerLabels(ctx)
+	labels.Page = func(page int) string { return i18n.T(ctx, "example-resource.pagination_page", page) }
+	return labels
+}
+
+templ ExampleResourceForm(d ExampleResourceFormData) {
+	<div id="example-resource-form">
+		if d.NameErr != "" {
+			@ui.Notice(ui.NoticeOpts{Kind: ui.KindDanger, Live: ui.LiveAssertive, Attrs: ui.Attrs{Class: "mb-4"}}) {
+				{ i18n.T(ctx, "example-resource.fix_error") }
+			}
+		}
+		@ui.Form(ui.FormOpts{
+			Target: "#example-resource-form", Swap: "innerHTML",
+			Attrs: ui.Attrs{
+				Class:  "card max-w-lg space-y-4",
+				TestID: "example-resource-form",
+				HX:     ui.HX{Post: exampleResourceFormAction(d), Disable: true},
+			},
+		}) {
+			@ui.Field(ui.FieldOpts{Name: "name", Label: i18n.T(ctx, "example-resource.field_name"), Error: d.NameErr, Required: true}) {
+				@ui.TextInput(ui.TextInputOpts{
+					Name: "name", Value: d.Name, Required: true, Error: d.NameErr,
+					Placeholder: i18n.T(ctx, "example-resource.field_placeholder"),
+				})
+			}
+			@ui.FormActions(ui.FormActionsOpts{Align: ui.AlignStart}) {
+				@ui.Button(ui.ButtonOpts{
+					Label: exampleResourceSubmitLabel(ctx, d), Type: ui.TypeSubmit, Action: ui.ActionPrimary,
+				})
+				// The indicator is a sibling, not a child of the button: htmx
+				// flags the requesting element, so any .htmx-indicator inside it
+				// shows, and the button keeps an accessible name that is only
+				// its label.
+				@ui.Spinner(ui.SpinnerOpts{})
+				@ui.ButtonLink(ui.ButtonLinkOpts{Label: i18n.T(ctx, "example-resource.cancel"), Href: "/app/example-resources"})
+			}
+		}
+	</div>
+}
+
+// ExampleResourceFormPage is the non-htmx 422 target: the form on its own
+// page, so a client without JavaScript still sees the validation message.
+templ ExampleResourceFormPage(d ExampleResourceFormData) {
+	@ui.PageHeader(ui.PageHeaderOpts{Title: i18n.T(ctx, "example-resource.title")})
+	@ExampleResourceForm(d)
+}
+
+// exampleResourceFormAction posts to the collection for a create and to
+// the row for an edit, which is the contract the handlers implement.
+func exampleResourceFormAction(d ExampleResourceFormData) string {
+	if d.ID == 0 {
+		return "/app/example-resources"
+	}
+	return fmt.Sprintf("/app/example-resources/%d", d.ID)
+}
+
+func exampleResourceSubmitLabel(ctx context.Context, d ExampleResourceFormData) string {
+	if d.ID == 0 {
+		return i18n.T(ctx, "example-resource.create")
+	}
+	return i18n.T(ctx, "example-resource.save")
+}

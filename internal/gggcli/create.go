@@ -149,33 +149,12 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 		payloads[target] = []byte("package ui\n\ntempl " + exported(name) + "() {\n\t<div class=\"" + slug + "\"></div>\n}\n")
 		manifest.Claims.Packages = []string{"internal/web/templates/ui"}
 	case "resource":
-		if mutation.Scope != "user" && mutation.Scope != "org" && mutation.Scope != "platform" {
-			return nil, nil, usageError("create resource --scope must be user, org, or platform")
+		resourceManifest, resourcePayloads, resourceMigrations, resourceErr :=
+			buildResourceModule(registry, moduleKind, name, mutation, manifest)
+		if resourceErr != nil {
+			return nil, nil, resourceErr
 		}
-		table := mutation.Table
-		if table == "" {
-			table = snake(name) + "s"
-		}
-		route := mutation.Route
-		if route == "" {
-			route = "/app/" + kebab(name) + "s"
-		}
-		base := "internal/" + packageName
-		payloads[base+"/resource.go"] = []byte("package " + packageName + "\n\n// Resource is one " + titleWords(name) + " row.\ntype Resource struct { ID string }\n\nconst Route = \"" + route + "\"\n")
-		// The migration enters the manifest ledger, not the file list: the
-		// allocator assigns its installed %04d_ sequence at sync, goose can
-		// parse it, and removal knows the schema payload belongs to this
-		// module.
-		migrationBody := []byte("-- +goose Up\nCREATE TABLE " + table + " (id text PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now());\n\n-- +goose Down\n-- forward-only migration\n")
-		migrationSum := sha256.Sum256(migrationBody)
-		migrationSource := "registry/modules/" + string(moduleKind) + "/" + slug + "/payload/" + snake(slug) + ".sql"
-		manifest.Migrations = append(manifest.Migrations, modkit.ManifestMigration{
-			ID: registry.Namespace + "." + snake(slug), Kind: modkit.MigrationImmutable,
-			Source: migrationSource, SHA256: hex.EncodeToString(migrationSum[:]),
-		})
-		migrationBodies[migrationSource] = migrationBody
-		manifest.Data = []modkit.DataDeclaration{{Table: table, Scope: modkit.DataScope(mutation.Scope), Export: true, AccountDelete: modkit.DeleteManual, OrganizationDelete: modkit.DeleteManual}}
-		manifest.Claims.Data = []string{table}
+		manifest, payloads, migrationBodies = resourceManifest, resourcePayloads, resourceMigrations
 	case "job":
 		if mutation.MaxAttempts == 0 {
 			mutation.MaxAttempts = 10
@@ -196,14 +175,16 @@ func (c *Controller) buildCreateFiles(ctx context.Context, registry modkit.Proje
 		payloads[target] = []byte("package " + packageName + "\n\n// Module is the project-local " + titleWords(name) + " capability.\ntype Module struct{}\n")
 		manifest.Claims.Packages = []string{"internal/" + packageName}
 	}
-	files, err := materializeManifest(registry.Path, manifest, payloads)
+	// materializeManifest is what appends the file records, so the manifest it
+	// returns — not the one handed to it — is the module the plan describes.
+	files, materialized, err := materializeManifest(registry.Path, manifest, payloads)
 	if err != nil {
 		return nil, nil, runtimeError(err)
 	}
 	for source, body := range migrationBodies {
 		files[filepath.ToSlash(filepath.Join(registry.Path, source))] = body
 	}
-	return files, &manifest, nil
+	return files, &materialized, nil
 }
 
 func (c *Controller) buildProviderManifest(ctx context.Context, registry modkit.ProjectRegistry, manifest modkit.Manifest, mutation CreateMutation) (modkit.Manifest, map[string][]byte, error) {
@@ -300,13 +281,22 @@ func (c *Controller) buildMigrationFiles(registry modkit.ProjectRegistry, regist
 	}, &document.Module, nil
 }
 
-func materializeManifest(registryPath string, manifest modkit.Manifest, payloads map[string][]byte) (map[string][]byte, error) {
+// materializeManifest turns the payload-by-target map into the registry files
+// a module is made of: one payload per source path plus the manifest that
+// declares them. It returns the completed manifest, because appending the file
+// records is its job and the caller's copy would otherwise describe a module
+// that owns nothing.
+func materializeManifest(
+	registryPath string, manifest modkit.Manifest, payloads map[string][]byte,
+) (map[string][]byte, modkit.Manifest, error) {
 	files := map[string][]byte{}
 	for target, data := range payloads {
 		source := filepath.ToSlash(filepath.Join("registry", "modules", string(manifest.Kind), manifest.Name, "payload", filepath.Base(target)+".txt"))
 		sum := sha256.Sum256(data)
 		class := modkit.FileClassGo
 		switch {
+		case strings.HasSuffix(target, "_test.go"):
+			class = modkit.FileClassTest
 		case strings.HasSuffix(target, ".templ"):
 			class = modkit.FileClassTempl
 		case strings.HasSuffix(target, ".sql") && strings.Contains(target, "/migrations/"):
@@ -314,12 +304,16 @@ func materializeManifest(registryPath string, manifest modkit.Manifest, payloads
 		case strings.HasSuffix(target, ".sql"):
 			class = modkit.FileClassQuery
 		}
-		manifest.Files = append(manifest.Files, modkit.ManifestFile{Source: source, Target: target, Class: class, SHA256: hex.EncodeToString(sum[:]), RewriteModule: class == modkit.FileClassGo || class == modkit.FileClassTempl, Contract: true})
+		// A Go, templ or test payload carries this repository's import paths;
+		// installing it into a derivative rewrites them to that project's
+		// module. A query or migration payload has none.
+		rewrite := class == modkit.FileClassGo || class == modkit.FileClassTempl || class == modkit.FileClassTest
+		manifest.Files = append(manifest.Files, modkit.ManifestFile{Source: source, Target: target, Class: class, SHA256: hex.EncodeToString(sum[:]), RewriteModule: rewrite, Contract: true})
 		files[filepath.ToSlash(filepath.Join(registryPath, source))] = data
 	}
 	sort.Slice(manifest.Files, func(i, j int) bool { return manifest.Files[i].Target < manifest.Files[j].Target })
 	if err := modkit.ValidateManifest(manifest); err != nil {
-		return nil, err
+		return nil, modkit.Manifest{}, err
 	}
 	document := struct {
 		Schema int             `json:"schema"`
@@ -327,11 +321,11 @@ func materializeManifest(registryPath string, manifest modkit.Manifest, payloads
 	}{Schema: 2, Module: manifest}
 	data, err := json.MarshalIndent(document, "", "  ")
 	if err != nil {
-		return nil, err
+		return nil, modkit.Manifest{}, err
 	}
 	manifestPath := filepath.ToSlash(filepath.Join(registryPath, "registry", "modules", string(manifest.Kind), manifest.Name, "module.json"))
 	files[manifestPath] = append(data, '\n')
-	return files, nil
+	return files, manifest, nil
 }
 
 func (c *Controller) applyCreate(_ context.Context, plan Plan) (Result, error) {

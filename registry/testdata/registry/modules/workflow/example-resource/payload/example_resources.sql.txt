@@ -1,0 +1,46 @@
+-- name: ListExampleResources :many
+-- The example-resource resource owns this file: one query file per table, and every
+-- UPDATE below sets updated_at = now().
+--
+-- Newest first, with an optional case-insensitive name filter. An empty filter
+-- matches every row, so one query serves the plain list and the search box
+-- instead of two that can drift apart. The id tiebreak makes the order total.
+SELECT * FROM example_resources
+WHERE org_id = sqlc.arg(tenant)
+  AND (sqlc.arg(query)::text = '' OR name ILIKE '%' || sqlc.arg(query) || '%')
+ORDER BY created_at DESC, id DESC
+LIMIT sqlc.arg(lim) OFFSET sqlc.arg(off);
+
+-- name: CountExampleResources :one
+SELECT count(*) FROM example_resources
+WHERE org_id = sqlc.arg(tenant)
+  AND (sqlc.arg(query)::text = '' OR name ILIKE '%' || sqlc.arg(query) || '%');
+
+-- name: ListAllExampleResources :many
+-- The admin read surface: every tenant's rows, same filter and order. A staff
+-- surface that showed only the operator's own tenant would not be an admin
+-- surface at all.
+SELECT * FROM example_resources
+WHERE (sqlc.arg(query)::text = '' OR name ILIKE '%' || sqlc.arg(query) || '%')
+ORDER BY created_at DESC, id DESC
+LIMIT sqlc.arg(lim) OFFSET sqlc.arg(off);
+
+-- name: CountAllExampleResources :one
+SELECT count(*) FROM example_resources
+WHERE (sqlc.arg(query)::text = '' OR name ILIKE '%' || sqlc.arg(query) || '%');
+
+-- name: GetExampleResourceByID :one
+SELECT * FROM example_resources WHERE id = sqlc.arg(id) AND org_id = sqlc.arg(tenant);
+
+-- name: CreateExampleResource :one
+INSERT INTO example_resources (org_id, name)
+VALUES (sqlc.arg(tenant), sqlc.arg(name))
+RETURNING *;
+
+-- name: UpdateExampleResource :one
+UPDATE example_resources SET name = sqlc.arg(name), updated_at = now()
+WHERE id = sqlc.arg(id) AND org_id = sqlc.arg(tenant)
+RETURNING *;
+
+-- name: DeleteExampleResource :execrows
+DELETE FROM example_resources WHERE id = sqlc.arg(id) AND org_id = sqlc.arg(tenant);

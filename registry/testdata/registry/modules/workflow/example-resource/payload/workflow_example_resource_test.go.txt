@@ -1,0 +1,18 @@
+package web
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestExampleResourceNameValidation(t *testing.T) {
+	if name, message := validateExampleResourceName("  Launch  "); name != "Launch" || message != "" {
+		t.Fatalf("validateExampleResourceName(padded) = (%q, %q), want (\"Launch\", \"\")", name, message)
+	}
+	if _, message := validateExampleResourceName("   "); message == "" {
+		t.Fatal("validateExampleResourceName accepted a blank name")
+	}
+	if _, message := validateExampleResourceName(strings.Repeat("x", 81)); message == "" {
+		t.Fatal("validateExampleResourceName accepted a name over the length limit")
+	}
+}

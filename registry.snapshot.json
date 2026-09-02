@@ -996,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "736c3a15ee27054ac6c5f3dd4e84f599e2d07e653485e4e99d1d916e077549ee"
+      "sha256": "884dc08fc65dbd32e3455461e75dff9175a66952063844de5a2f4b73230de421"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1467,6 +1467,30 @@
       "sha256": "d8c53592dec3f19e83243ae45d7d0c723c585d883deb4040f603de777e4ac103"
     },
     {
+      "path": "registry/testdata/registry/modules/workflow/example-resource/module.json",
+      "sha256": "c44a8769603134d2e42855a0f985f718c53556169872d24184c331279ead4473"
+    },
+    {
+      "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example-resource.templ.txt",
+      "sha256": "5203ffade1729a2b4fe06ea4842239de8193c8a0b93b7316230db5f6279c46f3"
+    },
+    {
+      "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example_resource.sql",
+      "sha256": "bb95b789c1b508a9b803a76966ed6af4e3b9b3239ad1a955caf8bfd3a511c17e"
+    },
+    {
+      "path": "registry/testdata/registry/modules/workflow/example-resource/payload/example_resources.sql.txt",
+      "sha256": "59f9cf5ecf7aaf9a072226cd952356845f5292ecacef6b48141f1725e6c1d23f"
+    },
+    {
+      "path": "registry/testdata/registry/modules/workflow/example-resource/payload/workflow_example_resource.go.txt",
+      "sha256": "99793f912068eb153b0cdc492e40f9c7a5efc163ee9d50c169f4e83e55c43895"
+    },
+    {
+      "path": "registry/testdata/registry/modules/workflow/example-resource/payload/workflow_example_resource_test.go.txt",
+      "sha256": "cf22853de8f4fa82e37bf8c11a88765df221700480a08515e2be480bdd3fdb8e"
+    },
+    {
       "path": "registry/testdata/registry/pages.json",
       "sha256": "41579cb1cbe7cdbe1e0937b2cfa9a227a262a7d2e6a14659597fa26b29c6c39d"
     },
@@ -1480,7 +1504,7 @@
     },
     {
       "path": "registry/testdata/registry/workflows.json",
-      "sha256": "cbdd0673190b60fcfa3bd827e4b02f72b5e4ece37ca8d7b54054ac9efaac2157"
+      "sha256": "852b8a35889739a57f19a9075843792bf0939f73da58533f064d37eddfe8139e"
     },
     {
       "path": "registry/workflows.json",

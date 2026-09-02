@@ -1,0 +1,397 @@
+package web
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"math"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/gogogadget/gogogadget/internal/api"
+	"github.com/gogogadget/gogogadget/internal/db/sqlc"
+	"github.com/gogogadget/gogogadget/internal/identity"
+	"github.com/gogogadget/gogogadget/internal/search"
+	"github.com/gogogadget/gogogadget/internal/web/templates"
+	"github.com/jackc/pgx/v5"
+)
+
+// exampleResourcePageSize is the rows-per-page of the read surfaces.
+const exampleResourcePageSize = 20
+
+// exampleResourceFormInput is the HTML form body.
+// The JSON transport has its own request type; both run the same validator, so
+// the two transports cannot disagree about what a valid name is.
+type exampleResourceFormInput struct {
+	Name string `form:"name"`
+}
+
+// validateExampleResourceName is that shared rule: required,
+// 80 characters or fewer after trimming. It returns the cleaned value and a
+// message, empty when valid.
+func validateExampleResourceName(name string) (string, string) {
+	name = strings.TrimSpace(name)
+	switch {
+	case name == "":
+		return name, "Name is required."
+	case len(name) > 80:
+		return name, "Name must be 80 characters or fewer."
+	default:
+		return name, ""
+	}
+}
+
+// GET /app/example-resources
+//
+// The read surface: search, pagination, and the create/edit form on one page.
+// ?edit=<id> loads a row into that form, so editing needs neither a second
+// route nor a second template.
+func (s *Server) handleExampleResources(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+	total, err := s.q.CountExampleResources(ctx, sqlc.CountExampleResourcesParams{Tenant: org.OrgID, Query: query})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	rows, err := s.q.ListExampleResources(ctx, sqlc.ListExampleResourcesParams{Tenant: org.OrgID, Query: query, Lim: exampleResourcePageSize, Off: int32((pageNumber - 1) * exampleResourcePageSize)})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	// An explicit view row rather than the query row: the template package then
+	// depends on nothing generated, and adding a column cannot silently change
+	// what the table renders.
+	items := make([]templates.ExampleResourceItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, templates.ExampleResourceItem{ID: row.ID, Name: row.Name, CreatedAt: row.CreatedAt.Time})
+	}
+	data := templates.ExampleResourcesListData{
+		Items: items, Query: query, Page: pageNumber,
+		TotalPages: max(int(math.Ceil(float64(total)/exampleResourcePageSize)), 1),
+		BaseURL:    "/app/example-resources",
+	}
+	if raw := r.URL.Query().Get("edit"); raw != "" {
+		id, parseErr := strconv.ParseInt(raw, 10, 64)
+		if parseErr != nil {
+			s.handleNotFound(w, r)
+			return
+		}
+		// A row outside the caller's tenant is a 404, never a 403: a 403 would
+		// confirm that the id exists.
+		row, getErr := s.q.GetExampleResourceByID(ctx, sqlc.GetExampleResourceByIDParams{ID: id, Tenant: org.OrgID})
+		if errors.Is(getErr, pgx.ErrNoRows) {
+			s.handleNotFound(w, r)
+			return
+		}
+		if getErr != nil {
+			s.renderError(w, r, getErr.Error())
+			return
+		}
+		data.Form = templates.ExampleResourceFormData{ID: row.ID, Name: row.Name}
+	}
+	pageData := Page{Title: "Example resources", Layout: templates.LayoutApp}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleResourcesTable(data))
+		return
+	}
+	s.Render(w, r, pageData, templates.ExampleResourcesPage(data))
+}
+
+// renderExampleResourceFormError re-renders the form with 422:
+// the fragment for htmx, which swaps it into #example-resource-form, and the standalone
+// form page otherwise.
+func (s *Server) renderExampleResourceFormError(w http.ResponseWriter, r *http.Request, form templates.ExampleResourceFormData) {
+	w.WriteHeader(http.StatusUnprocessableEntity)
+	pageData := Page{Title: "Example resources", Layout: templates.LayoutApp}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleResourceForm(form))
+		return
+	}
+	s.Render(w, r, pageData, templates.ExampleResourceFormPage(form))
+}
+
+// POST /app/example-resources
+func (s *Server) handleExampleResourceCreate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	user := identity.UserFrom(ctx)
+	var input exampleResourceFormInput
+	if err := decodeForm(r, &input); err != nil {
+		s.renderExampleResourceFormError(w, r, templates.ExampleResourceFormData{})
+		return
+	}
+	name, nameErr := validateExampleResourceName(input.Name)
+	if nameErr != "" {
+		s.renderExampleResourceFormError(w, r, templates.ExampleResourceFormData{Name: name, NameErr: nameErr})
+		return
+	}
+	row, err := s.q.CreateExampleResource(ctx, sqlc.CreateExampleResourceParams{Tenant: org.OrgID, Name: name})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	s.logAudit(ctx, org.OrgID, user.UserID, "example_resource.created", map[string]any{"id": row.ID, "name": row.Name})
+	s.indexExampleResource(ctx, org.OrgID, strconv.FormatInt(row.ID, 10), row.Name)
+	Toast(w, "success", "Example resource created")
+	Navigate(w, r, "/app/example-resources")
+}
+
+// POST /app/example-resources/{id}
+func (s *Server) handleExampleResourceUpdate(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	user := identity.UserFrom(ctx)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		s.handleNotFound(w, r)
+		return
+	}
+	var input exampleResourceFormInput
+	if decodeErr := decodeForm(r, &input); decodeErr != nil {
+		s.renderExampleResourceFormError(w, r, templates.ExampleResourceFormData{ID: id})
+		return
+	}
+	name, nameErr := validateExampleResourceName(input.Name)
+	if nameErr != "" {
+		s.renderExampleResourceFormError(w, r, templates.ExampleResourceFormData{ID: id, Name: name, NameErr: nameErr})
+		return
+	}
+	// The tenant predicate is in the UPDATE, so a cross-tenant id matches no
+	// row and arrives here as ErrNoRows: one round trip, no existence leak.
+	row, err := s.q.UpdateExampleResource(ctx, sqlc.UpdateExampleResourceParams{ID: id, Tenant: org.OrgID, Name: name})
+	if errors.Is(err, pgx.ErrNoRows) {
+		s.handleNotFound(w, r)
+		return
+	}
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	s.logAudit(ctx, org.OrgID, user.UserID, "example_resource.updated", map[string]any{"id": row.ID, "name": row.Name})
+	s.indexExampleResource(ctx, org.OrgID, strconv.FormatInt(row.ID, 10), row.Name)
+	Toast(w, "success", "Example resource updated")
+	Navigate(w, r, "/app/example-resources")
+}
+
+// DELETE /app/example-resources/{id}
+//
+// Row swap: 200 with an empty body, and htmx removes the tr.
+func (s *Server) handleExampleResourceDelete(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	user := identity.UserFrom(ctx)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		s.handleNotFound(w, r)
+		return
+	}
+	affected, err := s.q.DeleteExampleResource(ctx, sqlc.DeleteExampleResourceParams{ID: id, Tenant: org.OrgID})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	if affected == 0 {
+		s.handleNotFound(w, r)
+		return
+	}
+	s.logAudit(ctx, org.OrgID, user.UserID, "example_resource.deleted", map[string]any{"id": id})
+	s.deleteExampleResourceIndex(ctx, org.OrgID, strconv.FormatInt(id, 10))
+	Toast(w, "success", "Example resource deleted")
+	w.WriteHeader(http.StatusOK)
+}
+
+// GET /admin/example-resources
+//
+// The staff read surface. It renders the same table with ReadOnly set, so it
+// cannot become a second write path by accident.
+func (s *Server) handleAdminExampleResources(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
+	pageNumber, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+	total, err := s.q.CountAllExampleResources(ctx, query)
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	rows, err := s.q.ListAllExampleResources(ctx, sqlc.ListAllExampleResourcesParams{Query: query, Lim: exampleResourcePageSize, Off: int32((pageNumber - 1) * exampleResourcePageSize)})
+	if err != nil {
+		s.renderError(w, r, err.Error())
+		return
+	}
+	// An explicit view row rather than the query row: the template package then
+	// depends on nothing generated, and adding a column cannot silently change
+	// what the table renders.
+	items := make([]templates.ExampleResourceItem, 0, len(rows))
+	for _, row := range rows {
+		items = append(items, templates.ExampleResourceItem{ID: row.ID, Name: row.Name, CreatedAt: row.CreatedAt.Time})
+	}
+	data := templates.ExampleResourcesListData{
+		Items: items, Query: query, Page: pageNumber,
+		TotalPages: max(int(math.Ceil(float64(total)/exampleResourcePageSize)), 1),
+		BaseURL:    "/admin/example-resources", ReadOnly: true,
+	}
+	pageData := Page{Title: "Example resources", Layout: templates.LayoutAdmin}
+	if wantsFragment(r) {
+		s.Render(w, r, pageData, templates.ExampleResourcesTable(data))
+		return
+	}
+	s.Render(w, r, pageData, templates.AdminExampleResourcesPage(data))
+}
+
+// exampleResourceResponse is the public shape of one row.
+// An explicit DTO, not the query row: pinning the fields here means adding a
+// column can never silently change the API.
+type exampleResourceResponse struct {
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+func newExampleResourceResponse(id int64, name string, createdAt, updatedAt time.Time) exampleResourceResponse {
+	return exampleResourceResponse{
+		ID: id, Name: name,
+		CreatedAt: createdAt.UTC().Format(time.RFC3339),
+		UpdatedAt: updatedAt.UTC().Format(time.RFC3339),
+	}
+}
+
+type exampleResourceAPIRequest struct {
+	Name string `json:"name"`
+}
+
+// GET /api/v1/example-resources (scope read).
+func (s *Server) handleAPIListExampleResources(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+	if offset < 0 {
+		offset = 0
+	}
+	// The JSON transport does not expose the UI's free-text filter, so the
+	// shared query runs with an empty one, which matches every row.
+	query := ""
+	rows, err := s.q.ListExampleResources(ctx, sqlc.ListExampleResourcesParams{Tenant: org.OrgID, Query: query, Lim: int32(limit), Off: int32(offset)})
+	if err != nil {
+		api.WriteError(w, http.StatusInternalServerError, "internal_error", "Could not list example resources.")
+		return
+	}
+	out := make([]exampleResourceResponse, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, newExampleResourceResponse(row.ID, row.Name, row.CreatedAt.Time, row.UpdatedAt.Time))
+	}
+	api.WriteJSON(w, http.StatusOK, map[string]any{"items": out, "limit": limit, "offset": offset})
+}
+
+// POST /api/v1/example-resources (scope write).
+func (s *Server) handleAPICreateExampleResource(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	var request exampleResourceAPIRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		api.WriteError(w, http.StatusBadRequest, "invalid_json", `Request body must be JSON: {"name": "…"}.`)
+		return
+	}
+	name, nameErr := validateExampleResourceName(request.Name)
+	if nameErr != "" {
+		api.WriteError(w, http.StatusUnprocessableEntity, "validation_error", nameErr)
+		return
+	}
+	row, err := s.q.CreateExampleResource(ctx, sqlc.CreateExampleResourceParams{Tenant: org.OrgID, Name: name})
+	if err != nil {
+		api.WriteError(w, http.StatusInternalServerError, "internal_error", "Could not create the example resource.")
+		return
+	}
+	// The token carries an organization and no user, so the audit actor is the
+	// organization with an empty user rather than a guess.
+	s.logAudit(ctx, org.OrgID, "", "example_resource.created", map[string]any{"id": row.ID, "name": row.Name, "via": "api"})
+	s.indexExampleResource(ctx, org.OrgID, strconv.FormatInt(row.ID, 10), row.Name)
+	api.WriteJSON(w, http.StatusCreated, newExampleResourceResponse(row.ID, row.Name, row.CreatedAt.Time, row.UpdatedAt.Time))
+}
+
+// PATCH /api/v1/example-resources/{id} (scope write).
+func (s *Server) handleAPIUpdateExampleResource(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		api.WriteError(w, http.StatusNotFound, "not_found", "No such example resource.")
+		return
+	}
+	var request exampleResourceAPIRequest
+	if decodeErr := json.NewDecoder(r.Body).Decode(&request); decodeErr != nil {
+		api.WriteError(w, http.StatusBadRequest, "invalid_json", `Request body must be JSON: {"name": "…"}.`)
+		return
+	}
+	name, nameErr := validateExampleResourceName(request.Name)
+	if nameErr != "" {
+		api.WriteError(w, http.StatusUnprocessableEntity, "validation_error", nameErr)
+		return
+	}
+	row, err := s.q.UpdateExampleResource(ctx, sqlc.UpdateExampleResourceParams{ID: id, Tenant: org.OrgID, Name: name})
+	if errors.Is(err, pgx.ErrNoRows) {
+		api.WriteError(w, http.StatusNotFound, "not_found", "No such example resource.")
+		return
+	}
+	if err != nil {
+		api.WriteError(w, http.StatusInternalServerError, "internal_error", "Could not update the example resource.")
+		return
+	}
+	s.logAudit(ctx, org.OrgID, "", "example_resource.updated", map[string]any{"id": row.ID, "name": row.Name, "via": "api"})
+	s.indexExampleResource(ctx, org.OrgID, strconv.FormatInt(row.ID, 10), row.Name)
+	api.WriteJSON(w, http.StatusOK, newExampleResourceResponse(row.ID, row.Name, row.CreatedAt.Time, row.UpdatedAt.Time))
+}
+
+// DELETE /api/v1/example-resources/{id} (scope write).
+func (s *Server) handleAPIDeleteExampleResource(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	org := identity.OrgFrom(ctx)
+	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil {
+		api.WriteError(w, http.StatusNotFound, "not_found", "No such example resource.")
+		return
+	}
+	affected, err := s.q.DeleteExampleResource(ctx, sqlc.DeleteExampleResourceParams{ID: id, Tenant: org.OrgID})
+	if err != nil {
+		api.WriteError(w, http.StatusInternalServerError, "internal_error", "Could not delete the example resource.")
+		return
+	}
+	if affected == 0 {
+		api.WriteError(w, http.StatusNotFound, "not_found", "No such example resource.")
+		return
+	}
+	s.logAudit(ctx, org.OrgID, "", "example_resource.deleted", map[string]any{"id": id, "via": "api"})
+	s.deleteExampleResourceIndex(ctx, org.OrgID, strconv.FormatInt(id, 10))
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// indexExampleResource and deleteExampleResourceIndex keep the search document
+// for one row in step with the table. Both are fire-and-forget: a search hiccup
+// must never fail the mutation that already succeeded.
+func (s *Server) indexExampleResource(ctx context.Context, tenantID, id, name string) {
+	if s.searchIndex == nil {
+		return
+	}
+	_ = s.searchIndex.Upsert(ctx, search.Document{TenantID: tenantID, Collection: "example_resources", ID: id, Text: name})
+}
+
+func (s *Server) deleteExampleResourceIndex(ctx context.Context, tenantID, id string) {
+	if s.searchIndex != nil {
+		_ = s.searchIndex.Delete(ctx, tenantID, "example_resources", id)
+	}
+}

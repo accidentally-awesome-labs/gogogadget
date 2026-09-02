@@ -770,6 +770,16 @@ func exerciseStandardClosure(
 	if err != nil {
 		return result, err
 	}
+	// A module that publishes a query file only compiles once sqlc has turned
+	// that SQL into Go, and sqlc rewrites the whole generated package rather
+	// than one file. The bytes are captured here so removal can put them back:
+	// that output is tool product, so restoring it is the same thing the
+	// operator's `make generate` would do, and the byte-for-byte claim stays
+	// about authored source.
+	baselineQueryPackage, err := readDirectorySnapshot(derivative, sqlcOutputDir)
+	if err != nil {
+		return result, err
+	}
 	var baselineProject []byte
 	if _, isProviderFixture := providerFixtureSpecFor(closure.root.ID); isProviderFixture {
 		baselineProject, err = os.ReadFile(filepath.Join(derivative, ProjectFileName))
@@ -831,6 +841,19 @@ func exerciseStandardClosure(
 			return result, err
 		}
 		result.Generated = append(result.Generated, strings.TrimSuffix(path, ".templ")+"_templ.go")
+	}
+
+	// sqlc output is not distributed either, and a workflow module that owns a
+	// table publishes only the annotated SQL. Without this step the installed
+	// handlers call query methods that do not exist as Go, and the closure
+	// could never be compile-proved.
+	if slices.ContainsFunc(result.Installed, isQueryPath) {
+		if err := runGoTool(ctx, derivative, "tool", "sqlc", "generate"); err != nil {
+			return result, fmt.Errorf("sqlc generate: %w", err)
+		}
+		for _, path := range exampleGeneratedDelta(before, derivative) {
+			result.Generated = append(result.Generated, path)
+		}
 	}
 	sort.Strings(result.Generated)
 	result.Generated = dedupeSorted(result.Generated)
@@ -941,6 +964,14 @@ func exerciseStandardClosure(
 			change.Path, change.Kind, change.Class)
 	}
 
+	// The query file is gone, so its generated Go must go with it. Restoring
+	// the captured bytes is what `make generate` would produce against the
+	// removed schema, and it keeps the tree comparison below a statement about
+	// authored source rather than about sqlc.
+	if err := restoreDirectorySnapshot(derivative, sqlcOutputDir, baselineQueryPackage); err != nil {
+		return result, fmt.Errorf("restore generated query package: %w", err)
+	}
+
 	retained := retainedMigrations(installedLock, ids)
 	result.Retained = make([]string, 0, len(retained))
 	for _, migration := range retained {
@@ -982,6 +1013,79 @@ func restoreLegacyPayloads(template, derivative string, baseline Lock, ids []str
 			if err := os.WriteFile(target, data, 0o644); err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+// sqlcOutputDir is the generated query package. It is tool output, not
+// distributed source, which is why the validator may regenerate and restore it
+// wholesale.
+const sqlcOutputDir = "internal/db/sqlc"
+
+// isQueryPath reports whether an installed path is an sqlc input.
+func isQueryPath(path string) bool {
+	return strings.HasPrefix(path, "internal/db/queries/") && strings.HasSuffix(path, ".sql")
+}
+
+// readDirectorySnapshot captures every file under dir, keyed by its path
+// relative to root. A missing directory is an empty snapshot rather than an
+// error: a derivative that ships no generated query package has nothing to
+// restore.
+func readDirectorySnapshot(root, dir string) (map[string][]byte, error) {
+	full := filepath.Join(root, filepath.FromSlash(dir))
+	if _, err := os.Stat(full); errors.Is(err, fs.ErrNotExist) {
+		return map[string][]byte{}, nil
+	} else if err != nil {
+		return nil, err
+	}
+	out := map[string][]byte{}
+	err := filepath.WalkDir(full, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil || entry.IsDir() {
+			return walkErr
+		}
+		relative, relErr := filepath.Rel(root, path)
+		if relErr != nil {
+			return relErr
+		}
+		content, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		out[filepath.ToSlash(relative)] = content
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("snapshot %s: %w", dir, err)
+	}
+	return out, nil
+}
+
+// restoreDirectorySnapshot puts dir back exactly as the snapshot found it:
+// captured files rewritten, files that appeared since removed.
+func restoreDirectorySnapshot(root, dir string, snapshot map[string][]byte) error {
+	current, err := readDirectorySnapshot(root, dir)
+	if err != nil {
+		return err
+	}
+	for path := range current {
+		if _, kept := snapshot[path]; kept {
+			continue
+		}
+		if err := os.Remove(filepath.Join(root, filepath.FromSlash(path))); err != nil {
+			return err
+		}
+	}
+	for path, content := range snapshot {
+		if bytes.Equal(current[path], content) {
+			continue
+		}
+		full := filepath.Join(root, filepath.FromSlash(path))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(full, content, 0o644); err != nil {
+			return err
 		}
 	}
 	return nil

@@ -1,0 +1,755 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/workflow/example-resource",
+    "kind": "workflow",
+    "name": "example-resource",
+    "revision": 1,
+    "contract": 1,
+    "title": "Example resources",
+    "description": "The project-local example resource slice: the example_resources table with its queries, migration, transport, templates and declarations.",
+    "requires": [
+      {
+        "id": "ggg/system/api",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/database",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/i18n",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/identity",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/organizations",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/search",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/security",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/system/server",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "id": "ggg/workflow/openapi-contract",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [
+        {
+          "module": "github.com/jackc/pgx/v5",
+          "version": "v5.10.0"
+        }
+      ],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "registry/modules/workflow/example-resource/payload/example_resources.sql.txt",
+        "target": "internal/db/queries/example_resources.sql",
+        "class": "query",
+        "sha256": "59f9cf5ecf7aaf9a072226cd952356845f5292ecacef6b48141f1725e6c1d23f",
+        "rewrite_module": false,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-resource/payload/example-resource.templ.txt",
+        "target": "internal/web/templates/example-resource.templ",
+        "class": "templ",
+        "sha256": "5203ffade1729a2b4fe06ea4842239de8193c8a0b93b7316230db5f6279c46f3",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-resource/payload/workflow_example_resource.go.txt",
+        "target": "internal/web/workflow_example_resource.go",
+        "class": "go",
+        "sha256": "99793f912068eb153b0cdc492e40f9c7a5efc163ee9d50c169f4e83e55c43895",
+        "rewrite_module": true,
+        "contract": true
+      },
+      {
+        "source": "registry/modules/workflow/example-resource/payload/workflow_example_resource_test.go.txt",
+        "target": "internal/web/workflow_example_resource_test.go",
+        "class": "test",
+        "sha256": "cf22853de8f4fa82e37bf8c11a88765df221700480a08515e2be480bdd3fdb8e",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "routes": [
+        "api.example-resource.create",
+        "api.example-resource.delete",
+        "api.example-resource.list",
+        "api.example-resource.update",
+        "example-resource.admin",
+        "example-resource.create",
+        "example-resource.delete",
+        "example-resource.index",
+        "example-resource.update"
+      ],
+      "queries": [
+        "CountAllExampleResources",
+        "CountExampleResources",
+        "CreateExampleResource",
+        "DeleteExampleResource",
+        "GetExampleResourceByID",
+        "ListAllExampleResources",
+        "ListExampleResources",
+        "UpdateExampleResource"
+      ],
+      "data": [
+        "example_resources"
+      ]
+    },
+    "runtime": {
+      "routes": [
+        {
+          "id": "api.example-resource.create",
+          "method": "POST",
+          "pattern": "/api/v1/example-resources",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPICreateExampleResource"
+        },
+        {
+          "id": "api.example-resource.delete",
+          "method": "DELETE",
+          "pattern": "/api/v1/example-resources/{id}",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIDeleteExampleResource"
+        },
+        {
+          "id": "api.example-resource.list",
+          "method": "GET",
+          "pattern": "/api/v1/example-resources",
+          "scope": "api-read",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIListExampleResources"
+        },
+        {
+          "id": "api.example-resource.update",
+          "method": "PATCH",
+          "pattern": "/api/v1/example-resources/{id}",
+          "scope": "api-write",
+          "policy": {
+            "csrf_exempt": true,
+            "csrf_reason": "cookieless transport: authenticated by Bearer token, not a browser session",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 65536,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAPIUpdateExampleResource"
+        },
+        {
+          "id": "example-resource.admin",
+          "method": "GET",
+          "pattern": "/admin/example-resources",
+          "scope": "admin",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleAdminExampleResources"
+        },
+        {
+          "id": "example-resource.create",
+          "method": "POST",
+          "pattern": "/app/example-resources",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExampleResourceCreate"
+        },
+        {
+          "id": "example-resource.delete",
+          "method": "DELETE",
+          "pattern": "/app/example-resources/{id}",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExampleResourceDelete"
+        },
+        {
+          "id": "example-resource.index",
+          "method": "GET",
+          "pattern": "/app/example-resources",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExampleResources"
+        },
+        {
+          "id": "example-resource.update",
+          "method": "POST",
+          "pattern": "/app/example-resources/{id}",
+          "scope": "app",
+          "policy": {
+            "csrf_exempt": false,
+            "csrf_reason": "",
+            "rate_exempt": false,
+            "maintenance_exempt": false,
+            "max_body_bytes": 0,
+            "idempotent": false,
+            "admin_write": false
+          },
+          "package": "internal/web",
+          "handler": "handleExampleResourceUpdate"
+        }
+      ],
+      "queries": [
+        {
+          "name": "CountAllExampleResources",
+          "table": "example_resources"
+        },
+        {
+          "name": "CountExampleResources",
+          "table": "example_resources"
+        },
+        {
+          "name": "CreateExampleResource",
+          "table": "example_resources"
+        },
+        {
+          "name": "DeleteExampleResource",
+          "table": "example_resources"
+        },
+        {
+          "name": "GetExampleResourceByID",
+          "table": "example_resources"
+        },
+        {
+          "name": "ListAllExampleResources",
+          "table": "example_resources"
+        },
+        {
+          "name": "ListExampleResources",
+          "table": "example_resources"
+        },
+        {
+          "name": "UpdateExampleResource",
+          "table": "example_resources"
+        }
+      ],
+      "navigation": [
+        {
+          "id": "nav.admin.example-resource",
+          "area": "admin",
+          "route_id": "example-resource.admin",
+          "label_key": "example-resource.admin_nav"
+        },
+        {
+          "id": "nav.app.example-resource",
+          "area": "app",
+          "route_id": "example-resource.index",
+          "label_key": "example-resource.nav"
+        }
+      ],
+      "visual": [
+        {
+          "id": "example-resource",
+          "path": "/app/example-resources",
+          "persona": "pro",
+          "viewports": [
+            "desktop",
+            "tablet",
+            "mobile"
+          ],
+          "masks": [
+            "[data-testid=\"relative-time\"]"
+          ]
+        }
+      ]
+    },
+    "migrations": [
+      {
+        "id": "ggg.example_resource",
+        "kind": "immutable",
+        "source": "registry/modules/workflow/example-resource/payload/example_resource.sql",
+        "sha256": "bb95b789c1b508a9b803a76966ed6af4e3b9b3239ad1a955caf8bfd3a511c17e"
+      }
+    ],
+    "environment": [],
+    "locales": {
+      "en": {
+        "example-resource.admin_nav": "Example resources",
+        "example-resource.admin_title": "Example resources (all organizations)",
+        "example-resource.cancel": "Cancel",
+        "example-resource.caption": "Example resources",
+        "example-resource.clear_search": "Clear search",
+        "example-resource.col_actions": "Actions",
+        "example-resource.col_created": "Created",
+        "example-resource.col_name": "Name",
+        "example-resource.create": "Create example resource",
+        "example-resource.delete_action": "Delete permanently",
+        "example-resource.delete_confirm": "Delete this example resource? This cannot be undone.",
+        "example-resource.delete_row": "Delete %s",
+        "example-resource.delete_title": "Delete example resource",
+        "example-resource.edit": "Edit",
+        "example-resource.empty_body": "Add your first example resource with the form above.",
+        "example-resource.empty_title": "No example resources yet",
+        "example-resource.field_name": "Name",
+        "example-resource.field_placeholder": "Name",
+        "example-resource.filtered_empty_body": "No example resource matches “%s”.",
+        "example-resource.filtered_empty_title": "No matches",
+        "example-resource.fix_error": "Please fix the error below.",
+        "example-resource.nav": "Example resources",
+        "example-resource.pagination_page": "Page %d",
+        "example-resource.save": "Save changes",
+        "example-resource.search_label": "Search example resources",
+        "example-resource.search_placeholder": "Search example resources…",
+        "example-resource.title": "Example resources",
+        "example-resource.toolbar_label": "Example resource list controls"
+      },
+      "es": {
+        "example-resource.admin_nav": "Example resources",
+        "example-resource.admin_title": "Example resources (todas las organizaciones)",
+        "example-resource.cancel": "Cancelar",
+        "example-resource.caption": "Example resources",
+        "example-resource.clear_search": "Borrar la búsqueda",
+        "example-resource.col_actions": "Acciones",
+        "example-resource.col_created": "Creado",
+        "example-resource.col_name": "Nombre",
+        "example-resource.create": "Crear example resource",
+        "example-resource.delete_action": "Eliminar definitivamente",
+        "example-resource.delete_confirm": "¿Eliminar este example resource? Esta acción no se puede deshacer.",
+        "example-resource.delete_row": "Eliminar %s",
+        "example-resource.delete_title": "Eliminar example resource",
+        "example-resource.edit": "Editar",
+        "example-resource.empty_body": "Añade tu primer example resource con el formulario de arriba.",
+        "example-resource.empty_title": "Todavía no hay example resources",
+        "example-resource.field_name": "Nombre",
+        "example-resource.field_placeholder": "Nombre",
+        "example-resource.filtered_empty_body": "Ningún example resource coincide con «%s».",
+        "example-resource.filtered_empty_title": "Sin coincidencias",
+        "example-resource.fix_error": "Corrige el error que aparece a continuación.",
+        "example-resource.nav": "Example resources",
+        "example-resource.pagination_page": "Página %d",
+        "example-resource.save": "Guardar cambios",
+        "example-resource.search_label": "Buscar example resources",
+        "example-resource.search_placeholder": "Buscar example resources…",
+        "example-resource.title": "Example resources",
+        "example-resource.toolbar_label": "Controles de la lista de example resources"
+      }
+    },
+    "openapi": {
+      "tags": [
+        {
+          "name": "example-resources",
+          "description": "The project-local example resources collection."
+        }
+      ],
+      "components": {
+        "schemas": {
+          "ExampleResource": {
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "updated_at": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "created_at",
+              "updated_at"
+            ],
+            "type": "object"
+          }
+        }
+      },
+      "operations": [
+        {
+          "route_id": "api.example-resource.list",
+          "operation_id": "listExampleResources",
+          "summary": "List example resources.",
+          "tags": [
+            "example-resources"
+          ],
+          "parameters": [
+            {
+              "description": "Page size. Values outside 1-100 fall back to the default.",
+              "in": "query",
+              "name": "limit",
+              "required": false,
+              "schema": {
+                "default": 50,
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            {
+              "description": "Rows to skip; negative values are treated as 0.",
+              "in": "query",
+              "name": "offset",
+              "required": false,
+              "schema": {
+                "default": 0,
+                "minimum": 0,
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "items": {
+                        "items": {
+                          "$ref": "#/components/schemas/ExampleResource"
+                        },
+                        "type": "array"
+                      },
+                      "limit": {
+                        "type": "integer"
+                      },
+                      "offset": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "items",
+                      "limit",
+                      "offset"
+                    ],
+                    "type": "object"
+                  }
+                }
+              },
+              "description": "A page of example resources."
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          }
+        },
+        {
+          "route_id": "api.example-resource.create",
+          "operation_id": "createExampleResource",
+          "summary": "Create one example resource.",
+          "tags": [
+            "example-resources"
+          ],
+          "request_body": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "name": {
+                      "description": "Trimmed; required after trimming.",
+                      "maxLength": 80,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ExampleResource"
+                  }
+                }
+              },
+              "description": "The new example resource."
+            },
+            "400": {
+              "$ref": "#/components/responses/InvalidJSON"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "422": {
+              "$ref": "#/components/responses/ValidationError"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          }
+        },
+        {
+          "route_id": "api.example-resource.update",
+          "operation_id": "updateExampleResource",
+          "summary": "Update one example resource.",
+          "tags": [
+            "example-resources"
+          ],
+          "parameters": [
+            {
+              "description": "The row id.",
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "format": "int64",
+                "type": "integer"
+              }
+            }
+          ],
+          "request_body": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "name": {
+                      "description": "Trimmed; required after trimming.",
+                      "maxLength": 80,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ExampleResource"
+                  }
+                }
+              },
+              "description": "The updated example resource."
+            },
+            "400": {
+              "$ref": "#/components/responses/InvalidJSON"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "No such example resource."
+            },
+            "422": {
+              "$ref": "#/components/responses/ValidationError"
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          }
+        },
+        {
+          "route_id": "api.example-resource.delete",
+          "operation_id": "deleteExampleResource",
+          "summary": "Delete one example resource.",
+          "tags": [
+            "example-resources"
+          ],
+          "parameters": [
+            {
+              "description": "The row id.",
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "format": "int64",
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "The example resource is gone."
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Error"
+                  }
+                }
+              },
+              "description": "No such example resource."
+            },
+            "429": {
+              "$ref": "#/components/responses/RateLimited"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalError"
+            }
+          }
+        }
+      ]
+    },
+    "docs": [],
+    "tests": {
+      "go_packages": [
+        "internal/web"
+      ]
+    },
+    "data": [
+      {
+        "table": "example_resources",
+        "scope": "org",
+        "export": false,
+        "account_delete": "cascade",
+        "organization_delete": "cascade"
+      }
+    ],
+    "removal_policy": "free"
+  }
+}
