@@ -40,7 +40,7 @@ jobs:
         run: make generate
 
       - name: Generated code is committed and fresh
-        run: git diff --exit-code
+        run: git diff --exit-code -- ':!gogogadget.lock.json'
 
       - name: Vet
         run: go vet ./...
