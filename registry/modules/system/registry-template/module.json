@@ -19,7 +19,7 @@
         "source": "templates/external-registry/.github/workflows/registry.yml",
         "target": "templates/external-registry/.github/workflows/registry.yml",
         "class": "asset",
-        "sha256": "52c57675f29410982cf4239fea6591f629faeb10bb3627afb0b37c9a9974c513",
+        "sha256": "d01f2fc0a41645b6523c7e108633b17ba28306f1eddaaa22170fed0cdee6553a",
         "rewrite_module": false,
         "contract": false
       },
@@ -35,7 +35,7 @@
         "source": "templates/external-registry/README.md",
         "target": "templates/external-registry/README.md",
         "class": "docs",
-        "sha256": "aba59dcd33e1e58fdd92283c6e3e2e04831a39f87c063f8c017a44fe608c7ed2",
+        "sha256": "3e17bcf2f6b57b9df096af12bb3115030d662003ce157826757af1c83c3873d8",
         "rewrite_module": false,
         "contract": false
       },

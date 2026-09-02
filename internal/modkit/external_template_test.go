@@ -444,7 +444,7 @@ func TestExternalRegistryTemplateSignatureIsReproducible(t *testing.T) {
 			t.Fatalf("the template README does not document %s", step)
 		}
 	}
-	assertTemplateWorkflowIsRunnable(t)
+	assertTemplateWorkflowIsRunnable(t, externalTemplateModule(t))
 }
 
 // assertTemplateWorkflowIsRunnable checks the publisher gate against the
@@ -453,7 +453,7 @@ func TestExternalRegistryTemplateSignatureIsReproducible(t *testing.T) {
 // presence is not enough: the first version of this file called `ggg new`
 // with no registry answer and added a registry by absolute path, and both are
 // hard refusals in the commands they invoke.
-func assertTemplateWorkflowIsRunnable(t *testing.T) {
+func assertTemplateWorkflowIsRunnable(t *testing.T, module Manifest) {
 	t.Helper()
 	workflow := string(mustReadTemplateFile(t, ".github/workflows/registry.yml"))
 	for _, step := range []string{
@@ -510,6 +510,46 @@ func assertTemplateWorkflowIsRunnable(t *testing.T) {
 	for _, real := range []string{"go build ./...", "go test -count=1", "provider set", "registry add"} {
 		if !strings.Contains(workflow, real) {
 			t.Fatalf("the template CI workflow does not actually install and exercise the module: missing %s", real)
+		}
+	}
+
+	// An adapter is never an explicit module, so `ggg remove` cannot be its
+	// removal check: while it is selected removal is a designed refusal, and
+	// once it is deselected the retirement already folded its files out and
+	// the lock no longer lists it. Deselection is the removal.
+	names := []string{module.ID, "${MODULE_ID}", "$MODULE_ID"}
+	for _, line := range strings.Split(workflow, "\n") {
+		command := strings.TrimSpace(line)
+		if !strings.Contains(command, "ggg remove") {
+			continue
+		}
+		for _, name := range names {
+			if strings.Contains(command, name) {
+				t.Fatalf("the template CI workflow removes the adapter with `ggg remove` in %q; "+
+					"an adapter leaves by deselection", command)
+			}
+		}
+	}
+
+	// Apply deletes the files it installed; the directories they lived in
+	// survive. An assertion on a directory therefore fails after a correct
+	// removal, which is worse than no assertion.
+	installedDirs := map[string]struct{}{}
+	for _, file := range module.Files {
+		for dir := path.Dir(filepath.ToSlash(file.Target)); dir != "." && dir != "/"; dir = path.Dir(dir) {
+			installedDirs[dir] = struct{}{}
+		}
+	}
+	for _, line := range strings.Split(workflow, "\n") {
+		command := strings.TrimSpace(line)
+		rest, isDirTest := strings.CutPrefix(command, "test ! -d ")
+		if !isDirTest {
+			continue
+		}
+		argument := strings.Trim(strings.Fields(rest)[0], `"'`)
+		if _, installed := installedDirs[strings.TrimSuffix(argument, "/")]; installed {
+			t.Fatalf("the template CI workflow asserts %q, but apply removes files and leaves the "+
+				"directory behind; assert on the installed files", command)
 		}
 	}
 }

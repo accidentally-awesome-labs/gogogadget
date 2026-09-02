@@ -444,7 +444,7 @@
         "source": "internal/modkit/external_template_test.go",
         "target": "internal/modkit/external_template_test.go",
         "class": "test",
-        "sha256": "5f557a4c7b1813ad52061419a4810d6adb49df38196258e5585097a9e5c26318",
+        "sha256": "66ac3ad20fd04a630674444100763ddd043168fd4a52d9b44371c40c2bd89785",
         "rewrite_module": true,
         "contract": false
       },

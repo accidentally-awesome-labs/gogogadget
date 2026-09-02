@@ -216,7 +216,18 @@ bin/ggg generate && go build ./...
 go test -count=1 ./internal/acme/ledger
 ```
 
-`.github/workflows/registry.yml` runs exactly this, plus a removal check.
+`.github/workflows/registry.yml` runs exactly this, then proves the reverse.
+Note what "the reverse" is for an adapter: it is **deselection**, not
+`ggg remove`. `registry add` only edits the registry list, so your module
+never enters `modules` in `gogogadget.json` — it is in the graph solely
+because a provider choice names it. Selecting a different adapter retires
+yours in the same transaction that installs the replacement, so its files
+leave with the selection. `ggg remove` would refuse in either ordering:
+while your adapter is still selected, removing it is a designed refusal
+naming `ggg provider set`; once it is deselected, the lock no longer lists it.
+Assert on the installed **files** rather than their directories — apply
+deletes files and leaves the empty directories behind. The registry source
+itself comes out with `ggg registry remove NAMESPACE`.
 
 ### 8. Tag
 

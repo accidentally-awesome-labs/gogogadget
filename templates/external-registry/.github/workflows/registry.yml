@@ -148,7 +148,19 @@ jobs:
           go build -o bin/ggg ./cmd/ggg
           bin/ggg ledger
 
-      - name: Prove removal is clean
+      - name: Prove deselection removes the adapter
+        # For an adapter, deselection IS the removal. `registry add` only
+        # edits the registry list, so the module never enters
+        # Project.Modules: it is in the graph solely because a provider
+        # choice names it. Selecting something else retires it in the same
+        # transaction that installs the replacement, so its files leave with
+        # the selection rather than after it. `ggg remove` cannot be the
+        # check here in either ordering — while the adapter is still selected
+        # removal is a designed refusal, and once it is deselected the lock
+        # no longer lists the module to remove.
+        #
+        # The assertions are on files, not directories: Apply deletes the
+        # files it installed and leaves the now-empty directories behind.
         working-directory: ${{ runner.temp }}/consumer
         run: |
           bin/ggg provider set \
@@ -156,6 +168,14 @@ jobs:
             --provider ggg/audit-export:test=ggg/system/audit-export-noop@noop \
             --provider ggg/audit-export:production=ggg/system/audit-export-otlp@otlp \
             --json
-          bin/ggg remove "${MODULE_ID}" --json
-          test ! -d internal/gadgetworks
+          test ! -f internal/gadgetworks/ledger/ledger.go
+          test ! -f internal/gadgetworks/ledger/ledger_test.go
+          test ! -f internal/gadgetworks/ledger/meta/meta.go
+          test ! -f internal/gadgetworks/ledger/cli/cli.go
           go build ./...
+
+      - name: Prove the registry source can be dropped
+        working-directory: ${{ runner.temp }}/consumer
+        run: |
+          bin/ggg registry remove "${REGISTRY_NAMESPACE}" --json
+          bin/ggg sync --check --json

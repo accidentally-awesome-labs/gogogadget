@@ -479,3 +479,104 @@ command in it is now one that would succeed: the three specific refusals are
 removed, and the guard test asserts the shapes that caused them rather than
 their names. `GGG_REF: v0.1.0` is a placeholder release tag a publisher pins
 to the framework version they tested against.
+
+---
+
+# Fix round 2 — response to the re-review blockers
+
+All three blockers were inside the removal check I added in round 1 to replace
+the deleted no-op. Every one of them was the same mistake in a new place:
+asserting a shape I had not traced through the engine.
+
+## B1 — `ggg remove` can never remove an adapter
+
+`bin/ggg remove "${MODULE_ID}"` was unrunnable in both orderings, and the
+reason is structural rather than incidental. `registry add` edits
+`Project.Registries` only, so the module never enters `Project.Modules`: it is
+in the graph solely because a provider choice names it (`resolve.go` gives it
+reason `provider`). So:
+
+- **Before deselection** — removing a still-selected adapter is a designed
+  refusal (`resolve.go:308-309`), which this repository's own harness asserts
+  in `expectProviderRefusals` (`example.go:976-978`).
+- **After deselection** — `retiredAdapters` (`plan.go:581-609`) already folded
+  the replaced adapter's files out in the same transaction as the new
+  selection, so the lock no longer lists the module and `OpRemove` refuses
+  "not installed".
+
+Deselection *is* the removal. The step is now "Prove deselection removes the
+adapter": the `provider set` back to the core adapters, then assertions that
+the installed files are gone and `go build ./...` is still green. Dropping the
+registry source is its own step (`ggg registry remove ${REGISTRY_NAMESPACE}`
+followed by `sync --check`), which is a different operation on a different
+object and does succeed. The step comment states the two refusals so a
+publisher copying it does not re-add the line.
+
+`README.md`'s "plus a removal check" claim is replaced with the explanation:
+deselection is the reverse for an adapter, `ggg remove` refuses in either
+ordering, assert on files, and the source comes out with
+`ggg registry remove NAMESPACE`.
+
+## B2 — `test ! -d` fails after a correct removal
+
+`Engine.Apply` deletes files (`apply.go:228-232`); directory pruning exists
+only in the rollback closure (`apply.go:143-164`). So
+`internal/gadgetworks/`, `.../ledger/`, `.../ledger/meta/` and
+`.../ledger/cli/` all survive a correct removal, and the assertion would have
+failed on success. Replaced with four `test ! -f` assertions naming the exact
+installed payload targets.
+
+## B3 — the guard was presence-shaped, which is why B1 and B2 landed under it
+
+`assertTemplateWorkflowIsRunnable` now takes the module manifest and adds two
+assertions in the same style as the round-1 ones:
+
+- No line invoking `ggg remove` may name the adapter (by id, `${MODULE_ID}` or
+  `$MODULE_ID`); the failure message says an adapter leaves by deselection.
+  `registry remove`, a different command on a different object, is not matched.
+- No `test ! -d` may name a directory derived from the module's installed
+  file targets — the set is computed from `module.Files`, walking each target's
+  parents, so adding a payload extends the guard automatically. The failure
+  message says apply removes files and leaves the directory behind.
+
+Both were verified to fail on the exact lines that landed, by re-adding them
+to the workflow and running the test:
+
+```
+external_template_test.go:447: the template CI workflow removes the adapter with
+  `ggg remove` in "bin/ggg remove \"${MODULE_ID}\" --json"; an adapter leaves by deselection
+external_template_test.go:447: the template CI workflow asserts
+  "test ! -d internal/gadgetworks/ledger", but apply removes files and leaves the
+  directory behind; assert on the installed files
+```
+
+## Commands run (fix round 2)
+
+```
+$ go run ./cmd/ggg registry build --dir templates/external-registry
+$ GGG_REGISTRY_SIGNING_KEY=… go run ./cmd/ggg registry sign --dir templates/external-registry
+snapshot sha256 fa788a44733b94f6b6942662eb0ce4d43efe279097153a7add99fca275ade988
+$ go run ./cmd/ggg registry verify --dir templates/external-registry --public-key ZKuGJ…
+snapshot sha256 fa788a44733b94f6b6942662eb0ce4d43efe279097153a7add99fca275ade988
+$ go run ./cmd/ggg registry build && go run ./cmd/ggg sync --offline
+registry 6836234c0e309f93887c7f96baff5c4c58c26f10d857ff96d3752b49558d735b
+$ go run ./cmd/ggg sync --check --offline
+registry 6836234c… (clean)
+$ go test ./internal/modkit ./internal/gggcli -count=1
+ok internal/modkit 7.500s / ok internal/gggcli 0.449s
+$ go vet ./internal/modkit ./internal/gggcli    -> VET_OK
+$ gofmt -l internal/modkit internal/gggcli content -> clean
+$ go run ./cmd/ggg registry validate
+EXIT=0, 11 closures; gadgetworks/system/audit-export-ledger: installed 4 file(s),
+regenerated 30, compiled, 1891 tree entries restored byte for byte, published by
+registry gadgetworks at signed snapshot fa788a44…
+```
+
+The template's signed snapshot digest is unchanged (`fa788a44…`) because the
+workflow and the README are not part of it — `BuildRegistrySnapshot` lists
+`registry.json` and `registry/**` only. The core registry commit did move,
+because the core manifest pins those two files' digests as payloads.
+
+## Commits (fix round 2)
+
+- `ff33724` — fix(registry): remove the adapter by deselection in the template's gate
