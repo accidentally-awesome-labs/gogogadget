@@ -288,7 +288,7 @@ func TestExternalFixtureDependencyInstallAndOwnerOnlyRemoval(t *testing.T) {
 	if !strings.Contains(string(installed), "github.com/stretchr/testify v1.11.1") {
 		t.Fatalf("installed go.mod does not contain fixture dependency: %s", installed)
 	}
-	if _, err := reconcileGoMod(context.Background(), root, next, nil, nil); err != nil {
+	if _, err := reconcileGoMod(context.Background(), root, next, nil, nil, nil); err != nil {
 		t.Fatalf("remove dependency: %v", err)
 	}
 	restored, err := os.ReadFile(filepath.Join(root, "go.mod"))

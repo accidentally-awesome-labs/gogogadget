@@ -4,7 +4,7 @@
     "id": "ggg/system/database-postgres",
     "kind": "system",
     "name": "database-postgres",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "Database Postgres",
     "description": "database-postgres infrastructure capability.",
@@ -39,7 +39,12 @@
         }
       ],
       "tools": [],
-      "containers": []
+      "containers": [
+        {
+          "name": "postgres",
+          "image": "postgres@sha256:16bc17c64a573ef34162af9298258d1aec548232985b33ed7b1eac33ba35c229"
+        }
+      ]
     },
     "files": [
       {
@@ -116,7 +121,41 @@
               ],
               "automation": "manual",
               "docs_url": "https://gogogadget.dev/docs/providers/docker-postgres",
-              "inputs": []
+              "inputs": [],
+              "local_service": {
+                "container": "postgres@sha256:16bc17c64a573ef34162af9298258d1aec548232985b33ed7b1eac33ba35c229",
+                "ports": [
+                  {
+                    "name": "postgres",
+                    "container": 5432,
+                    "default_host": 5432
+                  }
+                ],
+                "environment": [
+                  {
+                    "key": "POSTGRES_USER",
+                    "value": "postgres"
+                  },
+                  {
+                    "key": "POSTGRES_PASSWORD",
+                    "value": "postgres"
+                  },
+                  {
+                    "key": "POSTGRES_DB",
+                    "value": "gogogadget"
+                  }
+                ],
+                "volumes": [
+                  {
+                    "name": "data",
+                    "target": "/var/lib/postgresql/data"
+                  }
+                ],
+                "health": {
+                  "kind": "tcp",
+                  "port": 5432
+                }
+              }
             },
             {
               "id": "neon",

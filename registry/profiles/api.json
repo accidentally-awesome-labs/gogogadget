@@ -1,0 +1,339 @@
+{
+  "schema": 2,
+  "profile": {
+    "id": "ggg/profile/api",
+    "kind": "profile",
+    "name": "api",
+    "revision": 1,
+    "contract": 1,
+    "title": "Api GoGoGadget",
+    "description": "Web plus identity and the JSON API transport.",
+    "members": [
+      "ggg/component/accordion",
+      "ggg/component/activity-item",
+      "ggg/component/alert-dialog",
+      "ggg/component/aspect-ratio",
+      "ggg/component/attachment",
+      "ggg/component/back-link",
+      "ggg/component/badge",
+      "ggg/component/banner",
+      "ggg/component/breadcrumbs",
+      "ggg/component/calendar",
+      "ggg/component/card",
+      "ggg/component/carousel",
+      "ggg/component/center",
+      "ggg/component/char-counter",
+      "ggg/component/chart",
+      "ggg/component/chat-log",
+      "ggg/component/chat-message",
+      "ggg/component/checkbox",
+      "ggg/component/checkbox-group",
+      "ggg/component/collapsible",
+      "ggg/component/color-input",
+      "ggg/component/column-header",
+      "ggg/component/combobox",
+      "ggg/component/command",
+      "ggg/component/comment",
+      "ggg/component/comment-thread",
+      "ggg/component/composer",
+      "ggg/component/confirm-action",
+      "ggg/component/container",
+      "ggg/component/context-menu",
+      "ggg/component/cursor-pagination",
+      "ggg/component/data-grid",
+      "ggg/component/data-table",
+      "ggg/component/date-field",
+      "ggg/component/date-range-field",
+      "ggg/component/date-time-field",
+      "ggg/component/delivery-status",
+      "ggg/component/description-list",
+      "ggg/component/dialog",
+      "ggg/component/disclosure",
+      "ggg/component/drawer",
+      "ggg/component/dropdown-menu",
+      "ggg/component/empty-state",
+      "ggg/component/error-state",
+      "ggg/component/field",
+      "ggg/component/field-error",
+      "ggg/component/fieldset",
+      "ggg/component/file-dropzone",
+      "ggg/component/file-input",
+      "ggg/component/form",
+      "ggg/component/form-actions",
+      "ggg/component/grid",
+      "ggg/component/hint",
+      "ggg/component/hover-card",
+      "ggg/component/inline",
+      "ggg/component/input-addon",
+      "ggg/component/input-group",
+      "ggg/component/kanban",
+      "ggg/component/key-value",
+      "ggg/component/label",
+      "ggg/component/list",
+      "ggg/component/markdown-editor",
+      "ggg/component/member-item",
+      "ggg/component/mention-chip",
+      "ggg/component/menubar",
+      "ggg/component/meter",
+      "ggg/component/metric",
+      "ggg/component/multi-select",
+      "ggg/component/nav-tabs",
+      "ggg/component/navigation-menu",
+      "ggg/component/notice",
+      "ggg/component/notification-item",
+      "ggg/component/number-input",
+      "ggg/component/onboarding-checklist",
+      "ggg/component/otp-input",
+      "ggg/component/page-header",
+      "ggg/component/pagination",
+      "ggg/component/panels",
+      "ggg/component/password-input",
+      "ggg/component/plan-card",
+      "ggg/component/popover",
+      "ggg/component/progress-bar",
+      "ggg/component/progress-circle",
+      "ggg/component/questionnaire",
+      "ggg/component/radio-group",
+      "ggg/component/range-input",
+      "ggg/component/row-actions",
+      "ggg/component/scroll-area",
+      "ggg/component/search-input",
+      "ggg/component/secret-reveal",
+      "ggg/component/section",
+      "ggg/component/section-header",
+      "ggg/component/select",
+      "ggg/component/selection-bar",
+      "ggg/component/settings-section",
+      "ggg/component/skeleton",
+      "ggg/component/skip-link",
+      "ggg/component/slug-input",
+      "ggg/component/split",
+      "ggg/component/stack",
+      "ggg/component/stat-group",
+      "ggg/component/status-dot",
+      "ggg/component/steps",
+      "ggg/component/sticky-bar",
+      "ggg/component/switch",
+      "ggg/component/tab-panels",
+      "ggg/component/table",
+      "ggg/component/table-card",
+      "ggg/component/table-empty",
+      "ggg/component/table-of-contents",
+      "ggg/component/table-toolbar",
+      "ggg/component/tags-input",
+      "ggg/component/terminal-page",
+      "ggg/component/text-input",
+      "ggg/component/textarea",
+      "ggg/component/theme-toggle",
+      "ggg/component/tile",
+      "ggg/component/time-field",
+      "ggg/component/timeline",
+      "ggg/component/toast",
+      "ggg/component/toast-region",
+      "ggg/component/toolbar",
+      "ggg/component/tooltip",
+      "ggg/component/tree",
+      "ggg/component/usage-card",
+      "ggg/element/avatar",
+      "ggg/element/avatar-group",
+      "ggg/element/button",
+      "ggg/element/button-group",
+      "ggg/element/button-link",
+      "ggg/element/code",
+      "ggg/element/copy-button",
+      "ggg/element/divider",
+      "ggg/element/heading",
+      "ggg/element/icon",
+      "ggg/element/icon-button",
+      "ggg/element/kbd",
+      "ggg/element/link",
+      "ggg/element/prose",
+      "ggg/element/separator",
+      "ggg/element/spinner",
+      "ggg/element/text",
+      "ggg/element/toggle-button",
+      "ggg/element/toggle-group",
+      "ggg/element/truncate",
+      "ggg/element/ui-core",
+      "ggg/element/visually-hidden",
+      "ggg/system/api",
+      "ggg/system/apphost",
+      "ggg/system/ci-github",
+      "ggg/system/cli-ui",
+      "ggg/system/config",
+      "ggg/system/content",
+      "ggg/system/content-assets",
+      "ggg/system/database",
+      "ggg/system/dev-tools",
+      "ggg/system/docker",
+      "ggg/system/feature-flags",
+      "ggg/system/i18n",
+      "ggg/system/identity",
+      "ggg/system/identity-session",
+      "ggg/system/mail",
+      "ggg/system/modkit",
+      "ggg/system/observability",
+      "ggg/system/project-base",
+      "ggg/system/project-docs",
+      "ggg/system/seo",
+      "ggg/system/server",
+      "ggg/system/static",
+      "ggg/system/storage"
+    ],
+    "required_provider_slots": [
+      "ggg/analytics",
+      "ggg/billing",
+      "ggg/database",
+      "ggg/feature-flags",
+      "ggg/identity",
+      "ggg/llm",
+      "ggg/mail",
+      "ggg/observability",
+      "ggg/rate-limit",
+      "ggg/storage"
+    ],
+    "provider_defaults": {
+      "ggg/analytics": {
+        "development": {
+          "adapter": "ggg/system/analytics-noop",
+          "target": "local"
+        },
+        "test": {
+          "adapter": "ggg/system/analytics-noop",
+          "target": "local"
+        },
+        "production": {
+          "adapter": "ggg/system/analytics-posthog",
+          "target": "posthog"
+        }
+      },
+      "ggg/billing": {
+        "development": {
+          "adapter": "ggg/system/billing-local",
+          "target": "local"
+        },
+        "test": {
+          "adapter": "ggg/system/billing-local",
+          "target": "local"
+        },
+        "production": {
+          "adapter": "ggg/system/billing-polar",
+          "target": "polar"
+        }
+      },
+      "ggg/database": {
+        "development": {
+          "adapter": "ggg/system/database-postgres",
+          "target": "docker-postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/database-postgres",
+          "target": "docker-postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/database-postgres",
+          "target": "neon"
+        }
+      },
+      "ggg/feature-flags": {
+        "development": {
+          "adapter": "ggg/system/feature-flags-postgres",
+          "target": "postgres"
+        },
+        "test": {
+          "adapter": "ggg/system/feature-flags-postgres",
+          "target": "postgres"
+        },
+        "production": {
+          "adapter": "ggg/system/feature-flags-postgres",
+          "target": "postgres"
+        }
+      },
+      "ggg/identity": {
+        "development": {
+          "adapter": "ggg/system/identity-dev",
+          "target": "local"
+        },
+        "test": {
+          "adapter": "ggg/system/identity-dev",
+          "target": "local"
+        },
+        "production": {
+          "adapter": "ggg/system/identity-clerk",
+          "target": "clerk"
+        }
+      },
+      "ggg/llm": {
+        "development": {
+          "adapter": "ggg/system/llm-fake",
+          "target": "fake"
+        },
+        "test": {
+          "adapter": "ggg/system/llm-fake",
+          "target": "fake"
+        },
+        "production": {
+          "adapter": "ggg/system/llm-openai-compatible",
+          "target": "openai"
+        }
+      },
+      "ggg/mail": {
+        "development": {
+          "adapter": "ggg/system/mail-dev",
+          "target": "filesystem"
+        },
+        "test": {
+          "adapter": "ggg/system/mail-dev",
+          "target": "filesystem"
+        },
+        "production": {
+          "adapter": "ggg/system/mail-resend",
+          "target": "resend"
+        }
+      },
+      "ggg/observability": {
+        "development": {
+          "adapter": "ggg/system/observability-log",
+          "target": "log"
+        },
+        "test": {
+          "adapter": "ggg/system/observability-log",
+          "target": "log"
+        },
+        "production": {
+          "adapter": "ggg/system/observability-sentry",
+          "target": "sentry"
+        }
+      },
+      "ggg/rate-limit": {
+        "development": {
+          "adapter": "ggg/system/rate-limit-memory",
+          "target": "memory"
+        },
+        "test": {
+          "adapter": "ggg/system/rate-limit-memory",
+          "target": "memory"
+        },
+        "production": {
+          "adapter": "ggg/system/rate-limit-redis",
+          "target": "upstash"
+        }
+      },
+      "ggg/storage": {
+        "development": {
+          "adapter": "ggg/system/storage-filesystem",
+          "target": "filesystem"
+        },
+        "test": {
+          "adapter": "ggg/system/storage-filesystem",
+          "target": "filesystem"
+        },
+        "production": {
+          "adapter": "ggg/system/storage-s3",
+          "target": "r2"
+        }
+      }
+    },
+    "default_deployment": "ggg/system/deploy-docker"
+  }
+}

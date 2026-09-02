@@ -1,33 +1,27 @@
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: gogogadget
-    ports:
-      # Host port is overridable for machines where 5432 is taken by another
-      # Postgres: set DB_PORT (e.g. 5433) in .env and match DATABASE_URL.
-      - "${DB_PORT:-5432}:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d gogogadget"]
-      interval: 2s
-      timeout: 3s
-      retries: 20
-
-  app:
-    build: .
-    env_file: .env
-    environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/gogogadget?sslmode=disable
-      APP_URL: ${APP_URL:-http://localhost:8080}
-    ports:
-      - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-
+    app:
+        build: .
+        env_file:
+            - .ggg/env/development.env
+        depends_on:
+            ggg-system-database-postgres-docker-postgres:
+                condition: service_healthy
+    ggg-system-database-postgres-docker-postgres:
+        image: postgres@sha256:16bc17c64a573ef34162af9298258d1aec548232985b33ed7b1eac33ba35c229
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: gogogadget
+        volumes:
+            - ggg-system-database-postgres-docker-postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test:
+                - CMD-SHELL
+                - nc -z 127.0.0.1 5432
+            interval: 2s
+            timeout: 2s
+            retries: 30
 volumes:
-  pgdata:
+    ggg-system-database-postgres-docker-postgres-data: {}

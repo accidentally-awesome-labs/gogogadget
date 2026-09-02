@@ -18,11 +18,12 @@ const DefaultRegistryRepository = "gogogadget/gogogadget"
 // the only engine holder: presentation layers — flags, guided forms, and the
 // TUI — reach the project exclusively through Execute, Preview, and Apply.
 type Controller struct {
-	root      string
-	version   string
-	injected  *modkit.Engine
-	writeFile func(path string, data []byte, mode os.FileMode) error
-	redactor  *Redactor
+	root       string
+	version    string
+	injected   *modkit.Engine
+	writeFile  func(path string, data []byte, mode os.FileMode) error
+	taskRunner TaskRunner
+	redactor   *Redactor
 	// table is the full command table this invocation serves: built-ins plus
 	// the contributed commands. Help and completions render from it, so the
 	// sealed HelpRequest/CompletionRequest and the `help`/`completion`
@@ -41,6 +42,8 @@ type ControllerOptions struct {
 	Engine *modkit.Engine
 	// WriteFile replaces direct file writes (test hook for rollback paths).
 	WriteFile func(path string, data []byte, mode os.FileMode) error
+	// TaskRunner executes only argv selected by trusted task handlers.
+	TaskRunner TaskRunner
 	// Table is the assembled command table — built-ins plus contributed
 	// commands. Help and completion requests render from it.
 	Table []CommandSpec
@@ -49,11 +52,12 @@ type ControllerOptions struct {
 // NewController constructs the command platform's single controller.
 func NewController(opts ControllerOptions) *Controller {
 	return &Controller{
-		root:      opts.Root,
-		version:   opts.Version,
-		injected:  opts.Engine,
-		writeFile: opts.WriteFile,
-		table:     opts.Table,
+		root:       opts.Root,
+		version:    opts.Version,
+		injected:   opts.Engine,
+		writeFile:  opts.WriteFile,
+		taskRunner: opts.TaskRunner,
+		table:      opts.Table,
 	}
 }
 
@@ -81,32 +85,20 @@ func (c *Controller) engine(offline bool) (*modkit.Engine, error) {
 	if c.injected != nil {
 		return c.injected, nil
 	}
-	// A tree that carries its own registry.json is a self-hosting registry: the
-	// upstream repository, or a derivative that vendors the catalog. Resolving
-	// from the tree keeps `make check` working in a fresh clone with no network
-	// and no credentials.
-	if _, statErr := os.Stat(filepath.Join(c.rootDir(), "registry.json")); statErr == nil {
-		return modkit.New(modkit.Options{
-			Source:     modkit.DirectorySource{Root: c.rootDir()},
-			Generator:  modkit.RegistryGenerator{},
-			ToolRunner: modkit.OSCommandRunner{},
-		}), nil
-	} else if !errors.Is(statErr, fs.ErrNotExist) {
-		return nil, runtimeError(statErr)
-	}
-
 	cache, err := os.UserCacheDir()
 	if err != nil {
 		return nil, runtimeError(fmt.Errorf("locate registry cache: %w", err))
 	}
-	return modkit.New(modkit.Options{
-		Source: modkit.GitHubSource{
+	source := modkit.ProjectSource{
+		Root: c.rootDir(),
+		GitHub: modkit.GitHubSource{
 			CacheDir: filepath.Join(cache, "ggg", "registry"),
 			Offline:  offline,
 			Token:    os.Getenv("GITHUB_TOKEN"),
 		},
-		Generator:  modkit.RegistryGenerator{},
-		ToolRunner: modkit.OSCommandRunner{},
+	}
+	return modkit.New(modkit.Options{
+		Source: source, Generator: modkit.RegistryGenerator{}, ToolRunner: modkit.OSCommandRunner{},
 	}), nil
 }
 
@@ -252,10 +244,10 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 		if err := c.previewTask(mutation); err != nil {
 			return Plan{}, err
 		}
-		return Plan{Command: "task " + mutation.Task}, nil
+		return Plan{Command: "task " + mutation.Task, mutation: mutation}, nil
 
 	case NewMutation:
-		return Plan{}, errNotAvailable("project creation", "it ships with the project-creation slice")
+		return c.previewNew(ctx, mutation)
 
 	case ProviderSetMutation:
 		return Plan{}, errNotAvailable("provider selection", "it ships with the provider provisioning slice")
@@ -264,7 +256,7 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 		return Plan{}, errNotAvailable("deployment selection", "it ships with the deployment slice")
 
 	case CreateMutation:
-		return Plan{}, errNotAvailable("module creation", "it ships with the project-creation slice")
+		return c.previewCreate(ctx, mutation)
 
 	case ProviderRemoteMutation:
 		return Plan{}, errNotAvailable("provider provisioning", "it ships with the provider provisioning slice")
@@ -287,6 +279,24 @@ func (c *Controller) Preview(ctx context.Context, mut Mutation) (Plan, error) {
 // commands, and the trusted tasks — which are fixed operations with their own
 // journals, never a second planning engine. The plan must come from Preview.
 func (c *Controller) Apply(ctx context.Context, plan Plan) (Result, error) {
+	if plan.newProject != nil {
+		return c.applyNew(ctx, plan)
+	}
+	if plan.create != nil {
+		return c.applyCreate(ctx, plan)
+	}
+	if mutation, ok := plan.mutation.(TaskMutation); ok {
+		switch mutation.Task {
+		case "setup", "generate", "services", "dev", "db", "check", "test", "build":
+			return c.applyTrustedTask(ctx, mutation)
+		case "identity-link":
+			return c.applyIdentityLink(ctx, mutation)
+		case "migrate-schema-1":
+			return c.applyMigrateSchema1()
+		case "cache-prune":
+			return c.applyCachePrune()
+		}
+	}
 	if plan.Local != nil {
 		engine, err := c.engine(operationOffline(plan))
 		if err != nil {

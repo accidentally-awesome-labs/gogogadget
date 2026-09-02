@@ -90,6 +90,9 @@ func marshalLockJSON(t *testing.T, lock Lock) []byte {
 	if lock.Dependencies == nil {
 		lock.Dependencies = []LockedDependency{}
 	}
+	if lock.GoTools == nil {
+		lock.GoTools = []string{}
+	}
 	if lock.RuntimeOrders.Development == nil {
 		lock.RuntimeOrders.Development = append([]string{}, lock.Order...)
 	}

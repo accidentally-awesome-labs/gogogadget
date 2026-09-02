@@ -2,6 +2,10 @@
   "schema": 2,
   "kind": "profile",
   "items": [
-    "registry/profiles/full.json"
+    "registry/profiles/api.json",
+    "registry/profiles/full.json",
+    "registry/profiles/minimal.json",
+    "registry/profiles/saas.json",
+    "registry/profiles/web.json"
   ]
 }

@@ -262,7 +262,11 @@ type ContractBounds struct {
 }
 
 type Dependencies struct {
-	Go         []GoDependency        `json:"go"`
+	Go []GoDependency `json:"go"`
+	// GoTools names the module-path tools the project runs through `go tool`
+	// (templ, sqlc, goose, ...). Sync keeps the derivative go.mod tool block
+	// in step with the union, so `go tool` needs no network and no guesswork.
+	GoTools    []string              `json:"go_tools,omitempty"`
 	Tools      []ToolArtifact        `json:"tools"`
 	Containers []ContainerDependency `json:"containers"`
 }
@@ -836,6 +840,7 @@ type Lock struct {
 	// navigation, and shell registries) deterministic without consulting mutable
 	// intent at generation time.
 	Providers    map[string]ProviderSelections `json:"providers,omitempty"`
+	GoTools      []string                      `json:"go_tools,omitempty"`
 	Dependencies []LockedDependency            `json:"dependencies"`
 	Modules      []LockedModule                `json:"modules"`
 }

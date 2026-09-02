@@ -1,0 +1,75 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/deploy-fly",
+    "kind": "system",
+    "name": "deploy-fly",
+    "revision": 1,
+    "contract": 1,
+    "title": "Deploy Fly",
+    "description": "Project scaffold ownership for deploy-fly.",
+    "requires": [
+      {
+        "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "fly.toml",
+        "target": "fly.toml",
+        "class": "asset",
+        "sha256": "871541519f8f293e5006064f648ef6c595d5d40f7e22ccbeaae257aa0466a780",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "internal/deploy/fly/target.go",
+        "target": "internal/deploy/fly/target.go",
+        "class": "go",
+        "sha256": "0fe70475d50e72f394ff39bdbac2f41b60582376adcb2c42e99a8875c4bc3884",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/deploy/fly"
+      ],
+      "deploy": [
+        "fly"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/deploy/fly",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [],
+        "start": false,
+        "stop": false
+      },
+      "deploy": [
+        {
+          "id": "fly",
+          "package": "internal/deploy/fly",
+          "constructor": "NewModule"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -106,6 +106,16 @@ func parseArgv(spec CommandSpec, args []string) (parsedArgs, error) {
 func builtInHandlers() map[string]CommandHandler {
 	return map[string]CommandHandler{
 		"version":    runVersion,
+		"new":        runNew,
+		"create":     runCreate,
+		"setup":      runSetup,
+		"generate":   runGenerate,
+		"services":   runServices,
+		"dev":        runDev,
+		"db":         runDB,
+		"check":      runCheck,
+		"test":       runTest,
+		"build":      runBuild,
 		"init":       runInit,
 		"catalog":    runCatalog,
 		"info":       runInfo,
@@ -316,10 +326,10 @@ func drivePlanMutation(ctx context.Context, cc CommandContext, command string, m
 	env := result.Envelope
 	env.Command = command
 	if len(env.Conflicts) > 0 && command != "resolve" {
-		return Result{Envelope: normalizeEnvelope(env)},
+		return Result{Envelope: normalizeEnvelope(env), Payload: result.Payload},
 			conflictExit(fmt.Errorf("%s: %d staged conflict(s) remain; run `ggg resolve`", command, len(env.Conflicts)))
 	}
-	return Result{Envelope: normalizeEnvelope(env)}, nil
+	return Result{Envelope: normalizeEnvelope(env), Payload: result.Payload}, nil
 }
 
 func runInit(ctx context.Context, cc CommandContext, args []string) (Result, error) {
@@ -330,6 +340,31 @@ func runInit(ctx context.Context, cc CommandContext, args []string) (Result, err
 	}
 	if len(parsed.positional) != 0 {
 		return Result{}, usageError(spec.Usage)
+	}
+	if _, statErr := os.Stat(filepath.Join(cc.Controller.Root(), "go.mod")); os.IsNotExist(statErr) {
+		modulePath := parsed.value("module", "")
+		if modulePath == "" && cc.Interactive && !cc.AsJSON {
+			modulePath, err = readLine(cc, "Go module path: ")
+			if err != nil {
+				return Result{}, ErrCancelled
+			}
+		}
+		if modulePath == "" {
+			return Result{}, usageError("ggg init without go.mod requires --module")
+		}
+		registry := "github:" + parsed.value("repository", DefaultRegistryRepository)
+		if _, registryErr := os.Stat(filepath.Join(cc.Controller.Root(), "registry.json")); registryErr == nil {
+			registry = "directory:."
+		}
+		mutation := NewMutation{
+			Dir: cc.Controller.Root(), Name: filepath.Base(filepath.Clean(cc.Controller.Root())),
+			ModulePath: modulePath, Profile: "ggg/profile/minimal",
+			Providers: map[string]modkit.ProviderSelections{}, Deployment: "",
+			Registry: registry, Ref: parsed.value("ref", "main"), InPlace: true,
+		}
+		return drivePlanMutation(ctx, cc, "init", mutation, false)
+	} else if statErr != nil {
+		return Result{}, runtimeError(statErr)
 	}
 	mutation := InitMutation{
 		Ref:        parsed.value("ref", "main"),

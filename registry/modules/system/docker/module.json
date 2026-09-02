@@ -1,0 +1,60 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/docker",
+    "kind": "system",
+    "name": "docker",
+    "revision": 1,
+    "contract": 1,
+    "title": "Docker",
+    "description": "Project scaffold ownership for docker.",
+    "requires": [
+      {
+        "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "fb45a2fc71e68a1bc931aa0f7d21d0e2354978b75d994907897204c92706b536",
+        "source": "Dockerfile",
+        "target": "Dockerfile"
+      },
+      {
+        "class": "generated",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "",
+        "source": "compose.test.yaml",
+        "target": "compose.test.yaml"
+      },
+      {
+        "class": "generated",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "",
+        "source": "compose.yaml",
+        "target": "compose.yaml"
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

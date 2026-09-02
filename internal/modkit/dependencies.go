@@ -47,9 +47,11 @@ func (OSCommandRunner) Run(ctx context.Context, root string, argv []string) erro
 func EffectiveDependencies(modules []Manifest) (Dependencies, error) {
 	var out Dependencies
 	out.Go = []GoDependency{}
+	out.GoTools = []string{}
 	out.Tools = []ToolArtifact{}
 	out.Containers = []ContainerDependency{}
 	goVersions := map[string]string{}
+	goTools := map[string]struct{}{}
 	for _, m := range modules {
 		for _, d := range m.Dependencies.Go {
 			if err := module.CheckPath(d.Module); err != nil {
@@ -65,9 +67,16 @@ func EffectiveDependencies(modules []Manifest) (Dependencies, error) {
 				goVersions[d.Module] = d.Version
 			}
 		}
+		for _, toolPath := range m.Dependencies.GoTools {
+			goTools[toolPath] = struct{}{}
+		}
 		out.Tools = append(out.Tools, m.Dependencies.Tools...)
 		out.Containers = append(out.Containers, m.Dependencies.Containers...)
 	}
+	for toolPath := range goTools {
+		out.GoTools = append(out.GoTools, toolPath)
+	}
+	sort.Strings(out.GoTools)
 	for p, v := range goVersions {
 		out.Go = append(out.Go, GoDependency{Module: p, Version: v})
 	}
@@ -83,10 +92,11 @@ func EffectiveDependencies(modules []Manifest) (Dependencies, error) {
 func mergeTools(all []ToolArtifact) error {
 	seen := map[string]ToolArtifact{}
 	for _, t := range all {
-		if old, ok := seen[t.InstallPath]; ok && old != t {
+		key := t.InstallPath + "\x00" + t.OS + "/" + t.Arch
+		if old, ok := seen[key]; ok && old != t {
 			return fmt.Errorf("conflicting tool artifact %q", t.InstallPath)
 		}
-		seen[t.InstallPath] = t
+		seen[key] = t
 	}
 	return nil
 }
@@ -106,10 +116,10 @@ func mergeContainers(all []ContainerDependency) error {
 // preexisting dependencies and are never removed unless their recorded managed
 // version is still current.
 func UpdateGoMod(ctx context.Context, root string, deps []LockedDependency, runner ToolRunner) ([]LockedDependency, error) {
-	return reconcileGoMod(ctx, root, nil, deps, runner)
+	return reconcileGoMod(ctx, root, nil, deps, nil, runner)
 }
 
-func reconcileGoMod(ctx context.Context, root string, previous, desired []LockedDependency, runner ToolRunner) ([]LockedDependency, error) {
+func reconcileGoMod(ctx context.Context, root string, previous, desired []LockedDependency, goTools []string, runner ToolRunner) ([]LockedDependency, error) {
 	modPath := filepath.Join(root, "go.mod")
 	sumPath := filepath.Join(root, "go.sum")
 	oldMod, err := os.ReadFile(modPath)
@@ -161,6 +171,20 @@ func reconcileGoMod(ctx context.Context, root string, previous, desired []Locked
 	for _, dep := range desired {
 		desiredBy[dep.Module] = struct{}{}
 	}
+	// The tool block is the union across installed modules; directives are
+	// added but never silently removed, matching require ownership rules.
+	existingTools := make(map[string]struct{}, len(file.Tool))
+	for _, tool := range file.Tool {
+		existingTools[tool.Path] = struct{}{}
+	}
+	for _, toolPath := range goTools {
+		if _, ok := existingTools[toolPath]; ok {
+			continue
+		}
+		if err := file.AddTool(toolPath); err != nil {
+			return nil, err
+		}
+	}
 	for _, prior := range previous {
 		if _, keep := desiredBy[prior.Module]; keep {
 			continue
@@ -188,7 +212,11 @@ func reconcileGoMod(ctx context.Context, root string, previous, desired []Locked
 		return nil, err
 	}
 	if runner != nil {
-		if err := runner.Run(ctx, root, []string{"go", "mod", "download"}); err != nil {
+		// `download all` records module hash lines for the whole graph, not
+		// just go.mod hashes. A fresh genesis has packages that do not yet
+		// load (sqlc output is generated later), and the narrow download then
+		// writes a go.sum that cannot build the project it belongs to.
+		if err := runner.Run(ctx, root, []string{"go", "mod", "download", "all"}); err != nil {
 			_ = os.WriteFile(modPath, oldMod, 0o644)
 			if sumErr == nil {
 				_ = os.WriteFile(sumPath, oldSum, 0o644)
@@ -396,6 +424,6 @@ func hasDependencyPrefix(path string, allowed map[string]bool) bool {
 // ReconcileManagedDependencies applies owner-removal rules to go.mod. A
 // requirement changed after the previous sync is user-owned and is never
 // lowered or removed by module removal.
-func ReconcileManagedDependencies(ctx context.Context, root string, previous, desired []LockedDependency, runner ToolRunner) ([]LockedDependency, error) {
-	return reconcileGoMod(ctx, root, previous, desired, runner)
+func ReconcileManagedDependencies(ctx context.Context, root string, previous, desired []LockedDependency, goTools []string, runner ToolRunner) ([]LockedDependency, error) {
+	return reconcileGoMod(ctx, root, previous, desired, goTools, runner)
 }

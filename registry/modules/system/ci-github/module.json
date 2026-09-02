@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/ci-github",
+    "kind": "system",
+    "name": "ci-github",
+    "revision": 1,
+    "contract": 1,
+    "title": "Ci Github",
+    "description": "Project scaffold ownership for ci-github.",
+    "requires": [
+      {
+        "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "d0c9b938e550fc301fdfdc9bcbcd85a1608fddda45db43b24c18d51e9c83a39e",
+        "source": ".github/dependabot.yml",
+        "target": ".github/dependabot.yml"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "6735de8f058f9be8287fea33c81b486ca8a6ff78d33565688105642d82433fbd",
+        "source": ".github/workflows/ci.yml",
+        "target": ".github/workflows/ci.yml"
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

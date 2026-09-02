@@ -248,7 +248,7 @@ transitive closure itself.
 | `ggg/workflow/projects` | Project create, update, archive and delete | `ggg/system/analytics` `ggg/system/api` `ggg/system/audit` `ggg/system/database` `ggg/system/i18n` `ggg/system/identity` `ggg/system/organizations` `ggg/system/security` `ggg/system/server` `ggg/system/webhooks` | `free` |
 | `ggg/workflow/seo-discovery` | Search discovery surfaces | `ggg/system/content` `ggg/system/seo` `ggg/system/server` | `free` |
 
-## Systems (70)
+## Systems (77)
 
 | Module | Title | Requires | Removal |
 |---|---|---|---|
@@ -268,12 +268,17 @@ transitive closure itself.
 | `ggg/system/cache` | Cache | — | `replacement-required` |
 | `ggg/system/cache-memory` | Cache Memory | `ggg/system/cache` | `free` |
 | `ggg/system/cache-redis` | Cache Redis | `ggg/system/cache` | `free` |
+| `ggg/system/ci-github` | Ci Github | `ggg/system/project-base` | `free` |
 | `ggg/system/cli-ui` | Interactive ggg console | `ggg/system/modkit` | `free` |
 | `ggg/system/config` | Configuration | `ggg/system/apphost` | `replacement-required` |
 | `ggg/system/content` | Content and CMS | `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/content-assets` | Embedded content corpus | `ggg/system/content` | `free` |
 | `ggg/system/database` | Database | `ggg/system/apphost` `ggg/system/config` | `replacement-required` |
 | `ggg/system/database-postgres` | Database Postgres | `ggg/system/apphost` `ggg/system/config` `ggg/system/database` | `free` |
+| `ggg/system/deploy-fly` | Deploy Fly | `ggg/system/project-base` | `free` |
+| `ggg/system/dev-tools` | Dev Tools | `ggg/system/project-base` | `free` |
+| `ggg/system/docker` | Docker | `ggg/system/project-base` | `free` |
+| `ggg/system/e2e` | E2E | `ggg/system/project-base` | `free` |
 | `ggg/system/feature-flags` | Feature flags | `ggg/system/apphost` `ggg/system/database` `ggg/system/organizations` | `retain-data` |
 | `ggg/system/feature-flags-postgres` | Feature Flags Postgres | `ggg/system/feature-flags` | `free` |
 | `ggg/system/i18n` | Localization | `ggg/system/apphost` | `replacement-required` |
@@ -297,6 +302,8 @@ transitive closure itself.
 | `ggg/system/observability-log` | observability-log | `ggg/system/observability` | `free` |
 | `ggg/system/observability-sentry` | observability-sentry | `ggg/system/observability` | `free` |
 | `ggg/system/organizations` | Users, organizations, and membership | `ggg/system/database` | `replacement-required` |
+| `ggg/system/project-base` | Project Base | — | `free` |
+| `ggg/system/project-docs` | Project Docs | `ggg/system/project-base` | `free` |
 | `ggg/system/rate-limit` | Request rate limiting | `ggg/system/apphost` `ggg/system/config` | `major-version-only` |
 | `ggg/system/rate-limit-memory` | Rate Limit Memory | `ggg/system/config` `ggg/system/rate-limit` | `free` |
 | `ggg/system/rate-limit-redis` | Rate Limit Redis | `ggg/system/rate-limit` | `free` |

@@ -875,6 +875,10 @@
       "sha256": "ee10a67c9586c2a99bec628d9b61a49f6a7974e4983f36e5f619ea8da017cf3b"
     },
     {
+      "path": "registry/modules/system/ci-github/module.json",
+      "sha256": "be6e39018d7b1a61387324d98e7a8f35f1b2e71d9b2c96bea000123829022fef"
+    },
+    {
       "path": "registry/modules/system/cli-ui/module.json",
       "sha256": "0e1456f10bce3335b05e810e5aa53edb791f3e7a45ce3d3cdf838b1a2161f6d9"
     },
@@ -892,11 +896,31 @@
     },
     {
       "path": "registry/modules/system/database-postgres/module.json",
-      "sha256": "b9eb26b0f0ef4081ae8593e89b7212f478bc12da2722fd7e9467fa321ea83ce2"
+      "sha256": "59274a15949d2872ecf7675b41dedb0a2b53c38011634a981fa243f6bca638b1"
     },
     {
       "path": "registry/modules/system/database/module.json",
       "sha256": "3cdaefdb8612dc512a455625e5b09d6d7d5ed2775805f38c5deba3aff6c785c9"
+    },
+    {
+      "path": "registry/modules/system/deploy-docker/module.json",
+      "sha256": "64db61867d1c35e7d3f92d824d29d66449bbcd03d4ad6a2efeb025d7dca2c4d3"
+    },
+    {
+      "path": "registry/modules/system/deploy-fly/module.json",
+      "sha256": "ce7abdae767a72fe7b4b8ef7ae659c09f0f2635a94f54b5cfda15dd1f463a831"
+    },
+    {
+      "path": "registry/modules/system/dev-tools/module.json",
+      "sha256": "cc7a4c171c67c57ea6f61aa47e19039791168882681085ed8c8ef794cc918379"
+    },
+    {
+      "path": "registry/modules/system/docker/module.json",
+      "sha256": "8a1aa5d5c357201309e58bb3c79a083e83d505ef305a576b59c0e65b65b7ac79"
+    },
+    {
+      "path": "registry/modules/system/e2e/module.json",
+      "sha256": "95c2a6b480270f870c7a893b02ac2cee06c18181cc7d95c446c8f8bc3630a189"
     },
     {
       "path": "registry/modules/system/feature-flags-launchdarkly/module.json",
@@ -960,7 +984,7 @@
     },
     {
       "path": "registry/modules/system/mail-smtp/module.json",
-      "sha256": "f75688b6628003d32a80f7a226205488268f985ef2c64b5d57e65badf96f31fa"
+      "sha256": "eea5cf1cffc95cb1117ab82e9bc6b898dc0900d88cb529d3f4ba00b7a89fbe64"
     },
     {
       "path": "registry/modules/system/mail/module.json",
@@ -972,7 +996,7 @@
     },
     {
       "path": "registry/modules/system/modkit/module.json",
-      "sha256": "743813e69e4af37c9429e38e4f3a50e3b7851b8006761ffe52369e644baca967"
+      "sha256": "1d99ad096812a0351e196315120f3fa0c1d9129b1bcf8e22531fd1e83982f55f"
     },
     {
       "path": "registry/modules/system/notifications-knock/module.json",
@@ -1001,6 +1025,14 @@
     {
       "path": "registry/modules/system/organizations/module.json",
       "sha256": "6b860db8c9b5ccfa303027b8f8066f7adb32e31773f42887b95120d05c87c836"
+    },
+    {
+      "path": "registry/modules/system/project-base/module.json",
+      "sha256": "d5bf44bd22358e741a2ffd3190615cd6f44a33e140401a7f33f40724531c7f2c"
+    },
+    {
+      "path": "registry/modules/system/project-docs/module.json",
+      "sha256": "16d6863735f56391809822132321690d00305d47d70db6b6b1dc79a76c611118"
     },
     {
       "path": "registry/modules/system/rate-limit-memory/module.json",
@@ -1068,7 +1100,7 @@
     },
     {
       "path": "registry/modules/system/storage-s3/module.json",
-      "sha256": "01a22373b230aa76c89774976b2f71d002e8c73130d38cab0b76cc6c32f6a0de"
+      "sha256": "0b29ca094fbda2de8ebbb042327422158aa1f7d68885ea4d10e801594cb06852"
     },
     {
       "path": "registry/modules/system/storage/module.json",
@@ -1232,19 +1264,35 @@
     },
     {
       "path": "registry/profiles.json",
-      "sha256": "98abc64d8fc12b2c8401abcb30306b9fd5ee85208994ebbd4b782c1d5a028f19"
+      "sha256": "7b4db695f3b908188bfd4ab59055c94da573717d6f9a3ad8d308117ce0b933e3"
+    },
+    {
+      "path": "registry/profiles/api.json",
+      "sha256": "2c2763cc38e283f0c688c07613496a9d1445ad03a75e9aadc9bf112ccbf0d604"
     },
     {
       "path": "registry/profiles/full.json",
-      "sha256": "b6d2fac71729227940021de0a11cd666e265887b2053071adea2b47490255518"
+      "sha256": "c9f97471a26827db712f12d71db9f7fab347f44e0fe870a066d52b942cc3feb2"
+    },
+    {
+      "path": "registry/profiles/minimal.json",
+      "sha256": "a825b75a89dc6d065edb45879c413459f87479fe42094a15fea611b0af3ee81a"
+    },
+    {
+      "path": "registry/profiles/saas.json",
+      "sha256": "b2f603125680fdb1b912177d205da67da68cc273bc768f936f0cd1e912409d58"
+    },
+    {
+      "path": "registry/profiles/web.json",
+      "sha256": "6aed670cb7df48b07725ba4743b6aba6b6118c11a14c2c61514426d3bece6137"
     },
     {
       "path": "registry/schema/lock.schema.json",
-      "sha256": "afb0b94835d434055690c7e6df7ec20eff7a93231cf03bc2bfb574e438fda4bb"
+      "sha256": "7a4bee62a9be0df03a7ff56b7f9d493f74b9c9cb807681b6cfc474422b5a38ec"
     },
     {
       "path": "registry/schema/module.schema.json",
-      "sha256": "f51b4026ab28f664ac6e6166339883bb22df18568147ed3da61dc1924ad1d9fa"
+      "sha256": "a37c7a85aa1162ab83a442edfd4e2bd4a4095ed15fcec9d7d9592ccea8f2527a"
     },
     {
       "path": "registry/schema/project.schema.json",
@@ -1260,7 +1308,7 @@
     },
     {
       "path": "registry/systems.json",
-      "sha256": "faeebf6a8fb036aacf60deb453962a8e93d8704ea45295a5b24e8f2c1b7c837e"
+      "sha256": "9e4e0e737f10572f7f15422d43111cbbee700b1eaed2abdd789e5177ca89b1d5"
     },
     {
       "path": "registry/testdata/registry.json",

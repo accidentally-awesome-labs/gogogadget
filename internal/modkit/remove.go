@@ -410,6 +410,7 @@ func (e *Engine) planRemove(
 		Registries: append([]LockedRegistry{}, currentLock.Registries...),
 		Snapshots:  append([]LockedSnapshot{}, currentLock.Snapshots...),
 		Order:      order, RuntimeOrders: currentLock.RuntimeOrders,
+		GoTools:      append([]string{}, currentLock.GoTools...),
 		Dependencies: append([]LockedDependency{}, currentLock.Dependencies...),
 		Modules:      modules,
 	}

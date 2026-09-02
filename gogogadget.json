@@ -12,7 +12,8 @@
   ],
   "exclude": [
     "ggg/component/table-empty",
-    "ggg/element/divider"
+    "ggg/element/divider",
+    "ggg/system/deploy-docker"
   ],
   "providers": {
     "ggg/billing": {
@@ -268,5 +269,5 @@
       }
     }
   },
-  "deployment": ""
+  "deployment": "ggg/system/deploy-fly"
 }

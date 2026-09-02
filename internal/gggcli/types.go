@@ -91,16 +91,18 @@ type (
 
 // Sealed mutations.
 type (
-	// NewMutation creates a new project. Shipping with the project-creation
-	// slice.
+	// NewMutation creates a project through the same preview/apply boundary
+	// used by every other state change.
 	NewMutation struct {
+		Dir        string
 		Name       string
 		ModulePath string
 		Profile    string
-		Providers  map[string]string
+		Providers  map[string]modkit.ProviderSelections
 		Deployment string
 		Registry   string
 		Ref        string
+		InPlace    bool
 	}
 
 	// InitMutation writes the initial project intent, optionally adopting the
@@ -153,11 +155,26 @@ type (
 		Module string
 	}
 
-	// CreateMutation writes complete local-registry module source. Shipping
-	// with the project-creation slice.
+	// CreateMutation writes one complete project-local registry module.
 	CreateMutation struct {
-		Kind string
-		Name string
+		Kind        string
+		Name        string
+		Scope       string
+		Table       string
+		Route       string
+		API         bool
+		Admin       bool
+		Search      bool
+		NoUI        bool
+		Family      string
+		Owner       string
+		Migration   string
+		Schedulable bool
+		MaxAttempts int
+		Slot        string
+		Package     string
+		Constructor string
+		Definition  string
 	}
 
 	// ProviderRemoteMutation plans/applies provider provisioning. Shipping
@@ -192,16 +209,15 @@ type (
 		Build bool
 	}
 
-	// TaskMutation is one trusted task command: a fixed operation the CLI
-	// executes on the operator's behalf with no planning surface of its own.
-	// Tasks are enumerated, not scripted.
+	// TaskMutation is one trusted task command. Task and Action are closed
+	// enumerations; Arguments never carry an executable or a shell fragment.
 	TaskMutation struct {
-		// Task is the trusted task name: "migrate-schema-1", "cache-prune",
-		// or "identity-link".
-		Task string
-		// Environment, Provider, Subject, UserID, and OrgID carry the
-		// identity-link task operands. Unused tasks leave them empty.
+		Task        string
+		Action      string
 		Environment string
+		Mode        string
+		Volumes     bool
+		Yes         bool
 		Provider    string
 		Subject     string
 		UserID      string
@@ -247,6 +263,11 @@ type Plan struct {
 	// offline remembers the source mode Preview resolved with, so Apply
 	// rebuilds the identical engine. Unexported: it is transport, not data.
 	offline bool
+	// mutation and slice-specific state are private transport from Preview to
+	// Apply. They cannot leak into JSON or become a second dispatch path.
+	mutation   Mutation
+	newProject *newProjectPlan
+	create     *createPlan
 }
 
 // RemotePlan is one provider or deployment change set. The detail it can carry

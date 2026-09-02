@@ -4,7 +4,7 @@
     "id": "ggg/system/mail-smtp",
     "kind": "system",
     "name": "mail-smtp",
-    "revision": 1,
+    "revision": 2,
     "contract": 1,
     "title": "SMTP mail",
     "description": "Self-hosted SMTP delivery, with Mailpit for local development.",
@@ -39,7 +39,12 @@
         }
       ],
       "tools": [],
-      "containers": []
+      "containers": [
+        {
+          "name": "mailpit",
+          "image": "axllent/mailpit@sha256:81370195cd4a0eab9604d17c2617a7525b0486f9365555253b6c5376c6350f1a"
+        }
+      ]
     },
     "files": [
       {
@@ -111,7 +116,7 @@
               "docs_url": "https://github.com/axllent/mailpit",
               "inputs": [],
               "local_service": {
-                "container": "axllent/mailpit:v1.21.8",
+                "container": "axllent/mailpit@sha256:81370195cd4a0eab9604d17c2617a7525b0486f9365555253b6c5376c6350f1a",
                 "ports": [
                   {
                     "name": "smtp",

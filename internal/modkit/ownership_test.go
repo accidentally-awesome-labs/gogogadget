@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -39,28 +40,32 @@ func TestEveryTrackedSourceFileHasAnOwner(t *testing.T) {
 	}
 	require.NotEmpty(t, owned)
 	catalogOwned := registryPayloadTargets(t, root)
-	// Project-owned scaffolding: build, deploy, and tooling files a derivative
-	// edits freely, plus the project's own registry state.
+	// Only dependency metadata and intent/lock state are project-owned. Every
+	// distributable scaffold is a module payload; .ggg is ignored and therefore
+	// never appears in the tracked-file inventory.
 	projectOwned := map[string]bool{
-		".air.toml": true, ".gitignore": true, ".vscode/extensions.json": true,
-		"Dockerfile": true, "LICENSE": true, "Makefile": true, "compose.yaml": true,
-		"fly.toml": true, "go.mod": true, "go.sum": true,
+		"go.mod": true, "go.sum": true,
 		"gogogadget.json": true, "gogogadget.lock.json": true,
-		".env.example": true, "registry.json": true, "registry.snapshot.json": true, "registry.snapshot.sig": true,
-		"internal/modkit/task2_followup_test.go": true,
 	}
 
 	var orphans []string
 	for _, path := range trackedFiles(t, root) {
+		if _, err := os.Lstat(filepath.Join(root, filepath.FromSlash(path))); errors.Is(err, os.ErrNotExist) {
+			continue
+		}
 		switch {
 		case owned[path], projectOwned[path], catalogOwned[path]:
 			continue
 		case modkit.IsGeneratedOutputPath(path):
 			continue
-		case strings.HasPrefix(path, "registry/"), strings.HasPrefix(path, "content/"),
-			strings.HasPrefix(path, "e2e/"), strings.HasPrefix(path, "docs/"),
-			strings.HasPrefix(path, ".github/"), strings.HasPrefix(path, "scripts/"),
-			strings.HasSuffix(path, ".md"):
+		case path == "registry.json", path == "registry.snapshot.json", path == "registry.snapshot.sig",
+			strings.HasPrefix(path, "registry/"):
+			// Registry authoring metadata is the catalog plane, not installed
+			// scaffold. Payload targets inside it are covered by catalogOwned.
+			continue
+		case strings.HasPrefix(path, ".superpowers/"):
+			// Execution reports are orchestration state, not distributable
+			// project source.
 			continue
 		}
 		orphans = append(orphans, path)

@@ -89,11 +89,15 @@ func planMigrations(ctx context.Context, root string, registryFS fs.FS, modules 
 			payloads = append(payloads, migrationPayload{module: module.ID, migration: migration, content: append([]byte(nil), content...)})
 		}
 	}
+	// Allocation follows migration IDs, whose leading number is the schema
+	// sequence the payload was authored under — sorting by owner module would
+	// renumber a fresh genesis into a schema order that never existed (an
+	// announcements ALTER before the init CREATE).
 	sort.Slice(payloads, func(i, j int) bool {
-		if payloads[i].module != payloads[j].module {
-			return payloads[i].module < payloads[j].module
+		if payloads[i].migration.ID != payloads[j].migration.ID {
+			return payloads[i].migration.ID < payloads[j].migration.ID
 		}
-		return payloads[i].migration.ID < payloads[j].migration.ID
+		return payloads[i].module < payloads[j].module
 	})
 
 	adoptedMigrations, err := scanAdoptableMigrations(root)
@@ -276,9 +280,10 @@ func IsRegistryOwnedOutputPath(path string) bool {
 		return true
 	}
 	switch path {
-	case "static/ui-components.js", "static/ui-engines.js",
+	case "compose.yaml", "compose.test.yaml",
+		"static/ui-components.js", "static/ui-engines.js",
 		".env.example", "content/docs/configuration-reference.md", "content/docs/module-reference.md", "content/docs/component-reference.md",
-		"e2e/generated/personas.ts", "e2e/generated/surfaces.ts",
+		"e2e/generated/inventory.ts", "e2e/generated/personas.ts", "e2e/generated/surfaces.ts",
 		"internal/web/templates/scenarios_gen.go",
 		"internal/web/templates/ui/reference_gen.go":
 		return true

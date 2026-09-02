@@ -200,10 +200,19 @@ func validateDependencies(deps Dependencies) error {
 			!validSafeInstallPath(tool.InstallPath) || !validSafeArchivePath(tool.BinaryPath) {
 			return fmt.Errorf("manifest dependency tool %q is invalid", tool.InstallPath)
 		}
-		if _, ok := seenTools[tool.InstallPath]; ok {
+		// One logical tool declares one artifact per platform; the same
+		// install path repeated with a different platform is the supported
+		// multi-platform form, not a duplicate.
+		toolKey := tool.InstallPath + "\x00" + tool.OS + "/" + tool.Arch
+		if _, ok := seenTools[toolKey]; ok {
 			return fmt.Errorf("duplicate tool dependency %q", tool.InstallPath)
 		}
-		seenTools[tool.InstallPath] = struct{}{}
+		seenTools[toolKey] = struct{}{}
+	}
+	for _, goTool := range deps.GoTools {
+		if !validPackagePath(goTool) {
+			return fmt.Errorf("manifest dependency go tool %q is invalid", goTool)
+		}
 	}
 	for _, container := range deps.Containers {
 		if strings.TrimSpace(container.Name) == "" || !strings.Contains(container.Image, "@sha256:") {

@@ -1,0 +1,86 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/dev-tools",
+    "kind": "system",
+    "name": "dev-tools",
+    "revision": 3,
+    "contract": 1,
+    "title": "Dev Tools",
+    "description": "Project scaffold ownership for dev-tools.",
+    "requires": [
+      {
+        "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "go_tools": [
+        "github.com/a-h/templ/cmd/templ",
+        "github.com/air-verse/air",
+        "github.com/pressly/goose/v3/cmd/goose",
+        "github.com/sqlc-dev/sqlc/cmd/sqlc",
+        "golang.org/x/vuln/cmd/govulncheck"
+      ],
+      "tools": [
+        {
+          "os": "darwin",
+          "arch": "arm64",
+          "url": "https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-macos-arm64",
+          "sha256": "cdf646702987a743464dff4d9c60fd4480d1c1e73dd819a9a67f1078815dce9d",
+          "format": "raw",
+          "binary_path": "tailwindcss",
+          "install_path": "bin/tailwindcss"
+        },
+        {
+          "os": "linux",
+          "arch": "amd64",
+          "url": "https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.3/tailwindcss-linux-x64",
+          "sha256": "dc61b3ac6b8c9ca874c0cc4c57b2409791a64c5540404ca5f5367360babc313a",
+          "format": "raw",
+          "binary_path": "tailwindcss",
+          "install_path": "bin/tailwindcss"
+        }
+      ],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": ".air.toml",
+        "target": ".air.toml",
+        "class": "asset",
+        "sha256": "8deea72ae335311e19a8f91c64ccacf40214ff62bc57da287747791928b7cb09",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "scripts/setup-tools.sh",
+        "target": "scripts/setup-tools.sh",
+        "class": "asset",
+        "sha256": "bf021274b16fe867b3a18e6fe2d15947f3be52df8d7d54220feec7f1f940eaa5",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "scripts/vendor-frontend.sh",
+        "target": "scripts/vendor-frontend.sh",
+        "class": "asset",
+        "sha256": "ac3622848100c0a3a8ca6ea95634c1dd37a1be15e7f4f8d15829868b6c2bb950",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

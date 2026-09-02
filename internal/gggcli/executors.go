@@ -131,7 +131,7 @@ func (c *Controller) previewTask(mutation TaskMutation) error {
 		}
 		return nil
 	default:
-		return usageError(fmt.Sprintf("unknown task %q", mutation.Task))
+		return c.previewTrustedTask(mutation)
 	}
 }
 

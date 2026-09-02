@@ -719,7 +719,7 @@ func buildReconciledLock(commit string, graph selectedGraph, states map[string]r
 	return Lock{Schema: 2, RegistryCommit: commit, Registries: []LockedRegistry{}, Snapshots: []LockedSnapshot{},
 		Order: append([]string{}, graph.order...), RuntimeOrders: RuntimeOrders{
 			Development: append([]string{}, graph.order...), Test: append([]string{}, graph.order...), Production: append([]string{}, graph.order...),
-		}, Dependencies: []LockedDependency{}, Modules: locked}
+		}, GoTools: []string{}, Dependencies: []LockedDependency{}, Modules: locked}
 }
 
 func sortPlanOutputs(changes []Change, conflicts []Conflict, staged []StagedFile) {

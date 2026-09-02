@@ -71,7 +71,7 @@ func TestReconcileManagedDependenciesPreservesUserChange(t *testing.T) {
 		t.Fatal(err)
 	}
 	previous := []LockedDependency{{Module: "example.com/provider", ManagedVersion: "v1.2.0", Owners: []string{"ggg/system/provider"}}}
-	if _, err := ReconcileManagedDependencies(context.Background(), root, previous, nil, nil); err != nil {
+	if _, err := ReconcileManagedDependencies(context.Background(), root, previous, nil, nil, nil); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join(root, "go.mod"))

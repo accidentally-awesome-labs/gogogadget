@@ -1,10 +1,13 @@
 {
+  "schema": 2,
   "profile": {
-    "contract": 1,
-    "default_deployment": "",
-    "description": "Every module the GoGoGadget catalog publishes. A project selects this and lists removable modules under exclude.",
     "id": "ggg/profile/full",
     "kind": "profile",
+    "name": "full",
+    "revision": 1,
+    "contract": 1,
+    "title": "Full GoGoGadget",
+    "description": "Every module the GoGoGadget catalog publishes.",
     "members": [
       "ggg/component/accordion",
       "ggg/component/activity-item",
@@ -201,12 +204,18 @@
       "ggg/system/cache",
       "ggg/system/cache-memory",
       "ggg/system/cache-redis",
+      "ggg/system/ci-github",
       "ggg/system/cli-ui",
       "ggg/system/config",
       "ggg/system/content",
       "ggg/system/content-assets",
       "ggg/system/database",
       "ggg/system/database-postgres",
+      "ggg/system/deploy-docker",
+      "ggg/system/deploy-fly",
+      "ggg/system/dev-tools",
+      "ggg/system/docker",
+      "ggg/system/e2e",
       "ggg/system/feature-flags",
       "ggg/system/feature-flags-launchdarkly",
       "ggg/system/feature-flags-postgres",
@@ -228,6 +237,8 @@
       "ggg/system/observability-log",
       "ggg/system/observability-sentry",
       "ggg/system/organizations",
+      "ggg/system/project-base",
+      "ggg/system/project-docs",
       "ggg/system/rate-limit",
       "ggg/system/rate-limit-memory",
       "ggg/system/rate-limit-redis",
@@ -283,7 +294,26 @@
       "ggg/workflow/projects",
       "ggg/workflow/seo-discovery"
     ],
-    "name": "full",
+    "required_provider_slots": [
+      "ggg/analytics",
+      "ggg/audit-export",
+      "ggg/billing",
+      "ggg/cache",
+      "ggg/database",
+      "ggg/feature-flags",
+      "ggg/identity",
+      "ggg/llm",
+      "ggg/mail",
+      "ggg/notifications",
+      "ggg/observability",
+      "ggg/rate-limit",
+      "ggg/realtime",
+      "ggg/search",
+      "ggg/storage",
+      "ggg/telemetry",
+      "ggg/usage",
+      "ggg/webhooks"
+    ],
     "provider_defaults": {
       "ggg/mail": {
         "development": {
@@ -538,28 +568,6 @@
         }
       }
     },
-    "required_provider_slots": [
-      "ggg/analytics",
-      "ggg/audit-export",
-      "ggg/billing",
-      "ggg/cache",
-      "ggg/database",
-      "ggg/feature-flags",
-      "ggg/identity",
-      "ggg/llm",
-      "ggg/mail",
-      "ggg/notifications",
-      "ggg/observability",
-      "ggg/rate-limit",
-      "ggg/realtime",
-      "ggg/search",
-      "ggg/storage",
-      "ggg/telemetry",
-      "ggg/usage",
-      "ggg/webhooks"
-    ],
-    "revision": 1,
-    "title": "Full GoGoGadget"
-  },
-  "schema": 2
+    "default_deployment": "ggg/system/deploy-docker"
+  }
 }

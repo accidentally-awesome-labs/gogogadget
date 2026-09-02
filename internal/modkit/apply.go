@@ -204,7 +204,7 @@ func (e *Engine) Apply(ctx context.Context, plan Plan) (Result, error) {
 		if _, err := snapshot("go.sum"); err != nil {
 			return Result{}, err
 		}
-		if _, err := ReconcileManagedDependencies(ctx, plan.Root, plan.previousDependencies, plan.Lock.Dependencies, e.toolRunner); err != nil {
+		if _, err := ReconcileManagedDependencies(ctx, plan.Root, plan.previousDependencies, plan.Lock.Dependencies, plan.Lock.GoTools, e.toolRunner); err != nil {
 			return failed(fmt.Errorf("update dependencies: %w", err))
 		}
 	}

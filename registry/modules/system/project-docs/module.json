@@ -1,0 +1,68 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/project-docs",
+    "kind": "system",
+    "name": "project-docs",
+    "revision": 1,
+    "contract": 1,
+    "title": "Project Docs",
+    "description": "Project scaffold ownership for project-docs.",
+    "requires": [
+      {
+        "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "class": "docs",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "1a30a761c15b6ae924c3bbf5b8ae0b3b19212609379d3127642de42e77c2570e",
+        "source": "AGENTS.md",
+        "target": "AGENTS.md"
+      },
+      {
+        "class": "docs",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
+        "source": "CLAUDE.md",
+        "target": "CLAUDE.md"
+      },
+      {
+        "class": "asset",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "3623d35e0c9fce179b448ccffc6505b0300f7e8daf0a1bc3f62afd782feeab1d",
+        "source": "LICENSE",
+        "target": "LICENSE"
+      },
+      {
+        "class": "docs",
+        "contract": false,
+        "rewrite_module": false,
+        "sha256": "cc0546ae66cfa565f924905dee9b0b174089d44e2f99920191963dc5196a3c0a",
+        "source": "README.md",
+        "target": "README.md"
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/project-base",
+    "kind": "system",
+    "name": "project-base",
+    "revision": 1,
+    "contract": 1,
+    "title": "Project Base",
+    "description": "Project scaffold ownership for project-base.",
+    "requires": [],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": ".gitignore",
+        "target": ".gitignore",
+        "class": "asset",
+        "sha256": "c3b78076742265b60bbb0080a256fd4dee6ffd58be4caafa9470cae74622d290",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": ".vscode/extensions.json",
+        "target": ".vscode/extensions.json",
+        "class": "asset",
+        "sha256": "9ccf06f3c9667c74387fe60f11c6e6cc278e34f0e836b489b4f13bbca14ff4b0",
+        "rewrite_module": false,
+        "contract": false
+      },
+      {
+        "source": "Makefile",
+        "target": "Makefile",
+        "class": "asset",
+        "sha256": "ebdad5f3d3cd61b4c40b86222cda669edfa9a7e423e1948dd99ad0a3f21ae348",
+        "rewrite_module": false,
+        "contract": false
+      }
+    ],
+    "claims": {},
+    "runtime": {},
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

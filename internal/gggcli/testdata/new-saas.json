@@ -1,0 +1,100 @@
+{
+  "Name": "ggg-saas-smoke",
+  "Module": "example.com/ggg-saas-smoke",
+  "Profile": "ggg/profile/saas",
+  "Providers": {
+    "ggg/database": {
+      "development": {"adapter": "ggg/system/database-postgres", "target": "docker-postgres"},
+      "test": {"adapter": "ggg/system/database-postgres", "target": "docker-postgres"},
+      "production": {"adapter": "ggg/system/database-postgres", "target": "neon"}
+    },
+    "ggg/identity": {
+      "development": {"adapter": "ggg/system/identity-dev", "target": "local"},
+      "test": {"adapter": "ggg/system/identity-dev", "target": "local"},
+      "production": {"adapter": "ggg/system/identity-clerk", "target": "clerk"}
+    },
+    "ggg/billing": {
+      "development": {"adapter": "ggg/system/billing-local", "target": "local"},
+      "test": {"adapter": "ggg/system/billing-local", "target": "local"},
+      "production": {"adapter": "ggg/system/billing-polar", "target": "polar"}
+    },
+    "ggg/mail": {
+      "development": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
+      "test": {"adapter": "ggg/system/mail-dev", "target": "filesystem"},
+      "production": {"adapter": "ggg/system/mail-resend", "target": "resend"}
+    },
+    "ggg/storage": {
+      "development": {"adapter": "ggg/system/storage-filesystem", "target": "filesystem"},
+      "test": {"adapter": "ggg/system/storage-filesystem", "target": "filesystem"},
+      "production": {"adapter": "ggg/system/storage-s3", "target": "r2"}
+    },
+    "ggg/analytics": {
+      "development": {"adapter": "ggg/system/analytics-noop", "target": "local"},
+      "test": {"adapter": "ggg/system/analytics-noop", "target": "local"},
+      "production": {"adapter": "ggg/system/analytics-posthog", "target": "posthog"}
+    },
+    "ggg/observability": {
+      "development": {"adapter": "ggg/system/observability-log", "target": "log"},
+      "test": {"adapter": "ggg/system/observability-log", "target": "log"},
+      "production": {"adapter": "ggg/system/observability-sentry", "target": "sentry"}
+    },
+    "ggg/llm": {
+      "development": {"adapter": "ggg/system/llm-fake", "target": "fake"},
+      "test": {"adapter": "ggg/system/llm-fake", "target": "fake"},
+      "production": {"adapter": "ggg/system/llm-openai-compatible", "target": "openai"}
+    },
+    "ggg/rate-limit": {
+      "development": {"adapter": "ggg/system/rate-limit-memory", "target": "memory"},
+      "test": {"adapter": "ggg/system/rate-limit-memory", "target": "memory"},
+      "production": {"adapter": "ggg/system/rate-limit-redis", "target": "upstash"}
+    },
+    "ggg/cache": {
+      "development": {"adapter": "ggg/system/cache-memory", "target": "memory"},
+      "test": {"adapter": "ggg/system/cache-memory", "target": "memory"},
+      "production": {"adapter": "ggg/system/cache-redis", "target": "upstash"}
+    },
+    "ggg/search": {
+      "development": {"adapter": "ggg/system/search-postgres", "target": "postgres"},
+      "test": {"adapter": "ggg/system/search-postgres", "target": "postgres"},
+      "production": {"adapter": "ggg/system/search-postgres", "target": "postgres"}
+    },
+    "ggg/realtime": {
+      "development": {"adapter": "ggg/system/realtime-postgres", "target": "postgres"},
+      "test": {"adapter": "ggg/system/realtime-postgres", "target": "postgres"},
+      "production": {"adapter": "ggg/system/realtime-ably", "target": "ably"}
+    },
+    "ggg/telemetry": {
+      "development": {"adapter": "ggg/system/telemetry-noop", "target": "stdout"},
+      "test": {"adapter": "ggg/system/telemetry-noop", "target": "stdout"},
+      "production": {"adapter": "ggg/system/telemetry-otlp", "target": "otlp"}
+    },
+    "ggg/feature-flags": {
+      "development": {"adapter": "ggg/system/feature-flags-postgres", "target": "postgres"},
+      "test": {"adapter": "ggg/system/feature-flags-postgres", "target": "postgres"},
+      "production": {"adapter": "ggg/system/feature-flags-postgres", "target": "postgres"}
+    },
+    "ggg/notifications": {
+      "development": {"adapter": "ggg/system/notifications-postgres", "target": "postgres"},
+      "test": {"adapter": "ggg/system/notifications-postgres", "target": "postgres"},
+      "production": {"adapter": "ggg/system/notifications-postgres", "target": "postgres"}
+    },
+    "ggg/usage": {
+      "development": {"adapter": "ggg/system/usage-postgres", "target": "postgres"},
+      "test": {"adapter": "ggg/system/usage-postgres", "target": "postgres"},
+      "production": {"adapter": "ggg/system/usage-postgres", "target": "postgres"}
+    },
+    "ggg/webhooks": {
+      "development": {"adapter": "ggg/system/webhooks-postgres", "target": "postgres"},
+      "test": {"adapter": "ggg/system/webhooks-postgres", "target": "postgres"},
+      "production": {"adapter": "ggg/system/webhooks-postgres", "target": "postgres"}
+    },
+    "ggg/audit-export": {
+      "development": {"adapter": "ggg/system/audit-export-noop", "target": "noop"},
+      "test": {"adapter": "ggg/system/audit-export-noop", "target": "noop"},
+      "production": {"adapter": "ggg/system/audit-export-otlp", "target": "otlp"}
+    }
+  },
+  "Deployment": "ggg/system/deploy-fly",
+  "Registry": "directory:.",
+  "Ref": ""
+}

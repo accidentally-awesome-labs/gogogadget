@@ -1,0 +1,67 @@
+{
+  "schema": 2,
+  "module": {
+    "id": "ggg/system/deploy-docker",
+    "kind": "system",
+    "name": "deploy-docker",
+    "revision": 1,
+    "contract": 1,
+    "title": "Deploy Docker",
+    "description": "Project scaffold ownership for deploy-docker.",
+    "requires": [
+      {
+        "id": "ggg/system/project-base",
+        "contract": {
+          "min": 1,
+          "max": 1
+        }
+      }
+    ],
+    "dependencies": {
+      "go": [],
+      "tools": [],
+      "containers": []
+    },
+    "files": [
+      {
+        "source": "internal/deploy/docker/target.go",
+        "target": "internal/deploy/docker/target.go",
+        "class": "go",
+        "sha256": "c4e300a3b0a1815898e91e78343c92ac02a3f9cce81fee0a8104dae54eee9e92",
+        "rewrite_module": true,
+        "contract": true
+      }
+    ],
+    "claims": {
+      "packages": [
+        "internal/deploy/docker"
+      ],
+      "deploy": [
+        "docker"
+      ]
+    },
+    "runtime": {
+      "system": {
+        "package": "internal/deploy/docker",
+        "constructor": "NewModule",
+        "needs": [],
+        "provides": [],
+        "start": false,
+        "stop": false
+      },
+      "deploy": [
+        {
+          "id": "docker",
+          "package": "internal/deploy/docker",
+          "constructor": "NewModule"
+        }
+      ]
+    },
+    "migrations": [],
+    "environment": [],
+    "docs": [],
+    "tests": {},
+    "data": [],
+    "removal_policy": "free"
+  }
+}

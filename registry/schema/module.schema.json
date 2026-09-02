@@ -2103,6 +2103,13 @@
             "$ref": "#/$defs/GoDependency"
           }
         },
+        "go_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
         "tools": {
           "type": "array",
           "items": {

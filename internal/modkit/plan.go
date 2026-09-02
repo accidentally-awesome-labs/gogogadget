@@ -285,6 +285,7 @@ func (e *Engine) Plan(ctx context.Context, root string, op Operation) (Plan, err
 		return Plan{}, fmt.Errorf("resolve dependencies: %w", err)
 	}
 	finalLock.Dependencies = plannedDependencies(canonicalRoot, existingLock.Dependencies, graph.modules, effective.Go)
+	finalLock.GoTools = effective.GoTools
 	if e.generator != nil {
 		preview := Plan{Operation: op, Root: canonicalRoot, RegistryCommit: finalLock.RegistryCommit, ModulePath: modulePath,
 			Project: desiredProject, Lock: finalLock, Resolved: append([]string{}, graph.order...)}
@@ -375,7 +376,7 @@ func buildPlannedLock(commit string, graph selectedGraph, files map[string][]Loc
 		Schema: 2, RegistryCommit: commit, Registries: []LockedRegistry{},
 		Snapshots: []LockedSnapshot{}, Order: append([]string{}, graph.order...),
 		RuntimeOrders: RuntimeOrders{Development: append([]string{}, graph.order...), Test: append([]string{}, graph.order...), Production: append([]string{}, graph.order...)},
-		Dependencies:  []LockedDependency{}, Modules: locked,
+		Dependencies:  []LockedDependency{}, GoTools: []string{}, Modules: locked,
 	}
 }
 
