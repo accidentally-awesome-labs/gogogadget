@@ -1028,7 +1028,7 @@
     },
     {
       "path": "registry/modules/system/project-base/module.json",
-      "sha256": "1e3099369b0ac1c507a68323a88d55b355ad470c8a53fc1287d841b98cc2bd12"
+      "sha256": "2e43253d5f7934813d84f373cc2606c631c436ef9f0e6ab4d53b100ed3971909"
     },
     {
       "path": "registry/modules/system/project-docs/module.json",

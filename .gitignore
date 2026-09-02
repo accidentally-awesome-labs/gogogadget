@@ -12,3 +12,5 @@ e2e/test-results/
 
 # CLI-managed local state: env values, provider state, journals
 .ggg/
+# Registry snapshot signature (local build artifact)
+registry.snapshot.sig
