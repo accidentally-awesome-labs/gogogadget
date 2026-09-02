@@ -226,6 +226,11 @@ $ cd e2e && npx playwright test --project=chromium --reporter=line \
 (The third run covers the reassigned-but-unsplit specs; not required by the brief,
 run for confidence.)
 
+## Commit
+
+`55a4c20` — `test(registry): give every e2e spec a feature-module owner and enforce the no-orphan rule`
+(78 paths; branch `framework-followups`, on top of `afc4dcd`).
+
 ## Concerns / notes for the parent
 
 1. **Ownership transfer needed a two-phase sync.** `classifyAuthoredTarget`
